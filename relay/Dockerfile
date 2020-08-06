@@ -8,6 +8,9 @@ SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
+    opendkim \
+    opendkim-tools \
+    openssl \
     postfix \
     postfix-mysql \
     supervisor \
@@ -18,7 +21,15 @@ RUN sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/
 
 COPY conf/postfix/* /etc/postfix/
 COPY conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+COPY conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+COPY conf/opendkim/SigningTable /etc/opendkim/SigningTable
+COPY conf/opendkim/KeyTable /etc/opendkim/KeyTable
+COPY conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
+
+VOLUME /etc/opendkim
+VOLUME /tmp/keys
 
 EXPOSE 25/tcp
 

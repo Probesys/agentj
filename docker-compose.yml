@@ -30,7 +30,7 @@ services:
         networks:
           - ajnet
 
-    web:
+     web:
         image: prob6/agentj_web:latest
         restart: always
         depends_on:
@@ -116,12 +116,12 @@ services:
           - logs:/var/log/syslogng
 
 volumes:
-    public:
-    db:
-    redisdb:
     clamdb:
-    quarantine:
+    db:
     logs:
+    public:
+    quarantine:
+    redisdb:
 
 networks:
     ajnet:
