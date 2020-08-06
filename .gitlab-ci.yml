@@ -26,7 +26,7 @@ app_build:
    - docker push hub.probesys.com/agentj_app:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - app/*
       - app/**/*
@@ -39,7 +39,7 @@ amavis_build:
    - docker push hub.probesys.com/agentj_amavis:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - amavis/*
       - amavis/**/*
@@ -52,7 +52,7 @@ relay_build:
    - docker push hub.probesys.com/agentj_relay:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - relay/*
       - relay/**/*
@@ -65,7 +65,7 @@ smtp_build:
    - docker push hub.probesys.com/agentj_smtp:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - smtp/*
       - smtp/**/*
@@ -78,7 +78,7 @@ syslogng_build:
    - docker push hub.probesys.com/agentj_syslogng:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - syslogng/*
       - syslogng/**/*
@@ -91,7 +91,7 @@ web_build:
    - docker push hub.probesys.com/agentj_web:latest
   only:
     refs:
-      - dev
+      - master
     changes:
       - web/*
       - web/**/*
