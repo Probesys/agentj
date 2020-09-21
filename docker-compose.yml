@@ -30,6 +30,17 @@ services:
         networks:
           - ajnet
 
+    opendkim:
+        image: prob6/agentj_opendkim:latest
+        restart: always
+        volumes:
+            - opendkim_conf:/etc/opendkim
+            - opendkim_keys:/tmp/keys
+        networks:
+          - ajnet
+        ports:
+          - 127.0.0.1:8891:8891
+
     web:
         image: prob6/agentj_web:latest
         restart: always
@@ -116,12 +127,14 @@ services:
           - logs:/var/log/syslogng
 
 volumes:
-    public:
-    db:
-    redisdb:
     clamdb:
-    quarantine:
+    db:
     logs:
+    opendkim_conf:
+    opendkim_keys:
+    public:
+    quarantine:
+    redisdb:
 
 networks:
     ajnet:
