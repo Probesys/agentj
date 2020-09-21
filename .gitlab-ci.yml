@@ -44,6 +44,19 @@ amavis_build:
       - amavis/*
       - amavis/**/*
 
+opendkim_build:
+  stage: build
+  script:
+   - cd $CI_PROJECT_DIR/opendkim && docker build -t hub.probesys.com/agentj_opendkim .
+   - echo "$P6HUB_PASSWORD" | docker login -u "$P6HUB_USER" --password-stdin hub.probesys.com
+   - docker push hub.probesys.com/agentj_opendkim:latest
+  only:
+    refs:
+      - master
+    changes:
+      - opendkim/*
+      - opendkim/**/*
+
 relay_build:
   stage: build
   script:
