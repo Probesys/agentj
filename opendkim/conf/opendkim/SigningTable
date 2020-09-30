@@ -1,1 +1,1 @@
-*@probesys.com mail._domainkey.probesys.com
+*@$MAIL_DOMAINNAME mail._domainkey.$MAIL_DOMAINNAME

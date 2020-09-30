@@ -13,6 +13,9 @@ RUN apt-get update -q --fix-missing && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+COPY ./conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+COPY ./conf/opendkim/SigningTable /etc/opendkim/SigningTable
+COPY ./conf/opendkim/KeyTable /etc/opendkim/KeyTable
 COPY ./conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 COPY ./entrypoint.sh /entrypoint.sh
 
@@ -22,4 +25,4 @@ VOLUME /tmp/keys
 EXPOSE 8891
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" 
+CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]

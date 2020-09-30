@@ -1,1 +1,1 @@
-mail._domainkey.probesys.com probesys.com:mail:/etc/opendkim/keys/probesys.com/mail.private
+mail._domainkey.$MAIL_DOMAINNAME $MAIL_DOMAINNAME:mail:/etc/opendkim/keys/$MAIL_DOMAINNAME/mail.private
