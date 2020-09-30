@@ -17,7 +17,7 @@ services:
           - ajnet
 
     app:
-        image: prob6/agentj_app:latest
+        image: hub.probesys.com/agentj_app:latest
         restart: always
         depends_on:
           - db
@@ -31,18 +31,18 @@ services:
           - ajnet
 
     opendkim:
-        image: prob6/agentj_opendkim:latest
+        image: hub.probesys.com/agentj_opendkim:latest
         restart: always
         volumes:
             - opendkim_conf:/etc/opendkim
             - opendkim_keys:/tmp/keys
+        env_file:
+          - .env
         networks:
           - ajnet
-        ports:
-          - 127.0.0.1:8891:8891
 
     web:
-        image: prob6/agentj_web:latest
+        image: hub.probesys.com/agentj_web:latest
         restart: always
         depends_on:
           - app
@@ -56,7 +56,7 @@ services:
           - 127.0.0.1:8080:80
 
     smtp:
-        image: prob6/agentj_smtp:latest
+        image: hub.probesys.com/agentj_smtp:latest
         restart: always
         env_file:
           - .env
@@ -71,7 +71,7 @@ services:
             ipv4_address: ${ipv4_network:-172.42.42}.250
 
     relay:
-        image: prob6/agentj_relay:latest
+        image: hub.probesys.com/agentj_relay:latest
         restart: always
         env_file:
           - .env
@@ -82,7 +82,7 @@ services:
             ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
     amavis:
-        image: prob6/agentj_amavis:latest
+        image: hub.probesys.com/agentj_amavis:latest
         restart: always
         environment:
           - TZ=${TZ}
@@ -115,7 +115,7 @@ services:
         - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
     syslogng:
-        image: prob6/agentj_syslogng:latest
+        image: hub.probesys.com/agentj_syslogng:latest
         restart: always
         environment:
           - TZ=${TZ}
