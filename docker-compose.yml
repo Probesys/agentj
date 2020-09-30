@@ -30,18 +30,7 @@ services:
         networks:
           - ajnet
 
-    opendkim:
-        image: hub.probesys.com/agentj_opendkim:latest
-        restart: always
-        volumes:
-            - opendkim_conf:/etc/opendkim
-            - opendkim_keys:/tmp/keys
-        env_file:
-          - .env
-        networks:
-          - ajnet
-
-    web:
+     web:
         image: hub.probesys.com/agentj_web:latest
         restart: always
         depends_on:
@@ -130,8 +119,6 @@ volumes:
     clamdb:
     db:
     logs:
-    opendkim_conf:
-    opendkim_keys:
     public:
     quarantine:
     redisdb:
