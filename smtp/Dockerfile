@@ -22,6 +22,8 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
+VOLUME /var/spool/postfix
+
 ENTRYPOINT [ "/entrypoint.sh" ] 
 HEALTHCHECK --start-period=60s CMD postfix status || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
