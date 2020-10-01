@@ -47,7 +47,7 @@ RUN mkdir /var/run/clamav && \
     && adduser amavis clamav \
     && chown -R clamav:clamav /var/run/clamav
 
-VOLUME [ "/var/lib/amavis/virusmails/" ]
+VOLUME [ "/var/lib/amavis/" ]
 VOLUME [ "/var/lib/clamav/" ]
 
 EXPOSE 10024/tcp

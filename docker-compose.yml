@@ -17,7 +17,7 @@ services:
           - ajnet
 
     app:
-        image: prob6/agentj_app:latest
+        image: hub.probesys.com/agentj_app:latest
         restart: always
         depends_on:
           - db
@@ -45,7 +45,7 @@ services:
           - 127.0.0.1:8080:80
 
     smtp:
-        image: prob6/agentj_smtp:latest
+        image: hub.probesys.com/agentj_smtp:latest
         restart: always
         env_file:
           - .env
@@ -53,6 +53,8 @@ services:
           - db
         environment:
           - TZ=${TZ}
+        volumes:
+          - postqueue:/var/spool/postfix
         ports:
           - 0.0.0.0:25:25
         networks:
@@ -60,7 +62,7 @@ services:
             ipv4_address: ${ipv4_network:-172.42.42}.250
 
     relay:
-        image: prob6/agentj_relay:latest
+        image: hub.probesys.com/agentj_relay:latest
         restart: always
         env_file:
           - .env
@@ -71,7 +73,7 @@ services:
             ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
     amavis:
-        image: prob6/agentj_amavis:latest
+        image: hub.probesys.com/agentj_amavis:latest
         restart: always
         environment:
           - TZ=${TZ}
@@ -81,7 +83,7 @@ services:
           - ajnet
         volumes:
           - clamdb:/var/lib/clamav
-          - quarantine:/var/lib/amavis/virusmails
+          - amavis:/var/lib/amavis
 
     redis:
         image: redis
@@ -104,7 +106,7 @@ services:
         - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
     syslogng:
-        image: prob6/agentj_syslogng:latest
+        image: hub.probesys.com/agentj_syslogng:latest
         restart: always
         environment:
           - TZ=${TZ}
@@ -116,11 +118,12 @@ services:
           - logs:/var/log/syslogng
 
 volumes:
+    amavis:
     clamdb:
     db:
     logs:
+    postqueue:
     public:
-    quarantine:
     redisdb:
 
 networks:
