@@ -53,6 +53,8 @@ services:
           - db
         environment:
           - TZ=${TZ}
+        volumes:
+          - postqueue:/var/spool/postfix
         ports:
           - 0.0.0.0:25:25
         networks:
@@ -81,7 +83,7 @@ services:
           - ajnet
         volumes:
           - clamdb:/var/lib/clamav
-          - quarantine:/var/lib/amavis/virusmails
+          - amavis:/var/lib/amavis
 
     redis:
         image: redis
@@ -116,11 +118,12 @@ services:
           - logs:/var/log/syslogng
 
 volumes:
+    amavis:
     clamdb:
     db:
     logs:
+    postqueue:
     public:
-    quarantine:
     redisdb:
 
 networks:
