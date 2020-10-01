@@ -22,7 +22,12 @@ $sql_select_white_black_list =
   'SELECT wb'.
   ' FROM wblist JOIN mailaddr ON wblist.sid=mailaddr.id'.
   ' WHERE wblist.rid=? AND mailaddr.email IN (%k)'.
-  ' ORDER BY mailaddr.priority ASC, wblist.priority DESC LIMIT 1';
+  ' ORDER BY wblist.priority DESC , mailaddr.priority DESC LIMIT 1';
+
+$sql_select_policy =
+  'SELECT *,users.id'.
+  ' FROM users LEFT JOIN policy ON users.policy_id=policy.id'.
+  ' WHERE users.email IN (%k) ORDER BY users.priority DESC';
 
 # AgentJ conf: you must set up here one more server than in the 'feed' parameter of master.cf (needed for release)
 $max_servers = 3;
