@@ -33,7 +33,7 @@ RUN apt-get update -q --fix-missing && \
     yarn \
     zip \
     && rm -rf /var/lib/apt/lists/* \
-    && git clone git@github.com:Probesys/agentj-app.git agentj \
+    && git clone https://github.com/Probesys/agentj-docker.git agentj \
     && cd agentj \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
