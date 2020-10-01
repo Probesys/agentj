@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+sed -i "s/\$MYAPPSECRET/$MYAPPSECRET/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_NAME/$DB_NAME/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_USER/$DB_USER/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /var/www/html/agentj/.env
