@@ -1,0 +1,8 @@
+hosts = db
+user = $DB_USER
+password = $DB_PASSWORD
+dbname = $DB_NAME
+table = domain
+select_field = domain
+where_field = domain
+additional_conditions = and active = 1
