@@ -56,6 +56,7 @@ services:
       - TZ=${TZ}
     volumes:
       - postqueue:/var/spool/postfix
+      - smtpconfig:/etc/postfix
     ports:
       - 0.0.0.0:25:25
     networks:
@@ -133,6 +134,7 @@ volumes:
   postqueue:
   public:
   redisdb:
+  smtpconfig:
 
 networks:
   ajnet:
