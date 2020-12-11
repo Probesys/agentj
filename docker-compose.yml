@@ -16,7 +16,7 @@ services:
       - ajnet
 
   app:
-    image: prob6/agentj_app:latest
+    image: probesys38/agentj_app:latest
     restart: always
     depends_on:
       - db
@@ -32,7 +32,7 @@ services:
       - ajnet
 
   web:
-    image: prob6/agentj_web:latest
+    image: probesys38/agentj_web:latest
     restart: always
     depends_on:
       - app
@@ -46,7 +46,7 @@ services:
       - 127.0.0.1:8080:80
 
   smtp:
-    image: prob6/agentj_smtp:latest
+    image: probesys38/agentj_smtp:latest
     restart: always
     env_file:
       - .env
@@ -64,7 +64,7 @@ services:
         ipv4_address: ${ipv4_network:-172.42.42}.250
 
   relay:
-    image: prob6/agentj_relay:latest
+    image: probesys38/agentj_relay:latest
     restart: always
     env_file:
       - .env
@@ -77,7 +77,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   amavis:
-    image: prob6/agentj_amavis:latest
+    image: probesys38/agentj_amavis:latest
     restart: always
     environment:
       - TZ=${TZ}
@@ -113,7 +113,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   syslogng:
-    image: prob6/agentj_syslogng:latest
+    image: probesys38/agentj_syslogng:latest
     restart: always
     environment:
       - TZ=${TZ}
