@@ -27,10 +27,10 @@ groupadd -g 103 amavis && usermod -aG 103 www-data && chmod -R g+w /tmp/amavis/v
 
 echo "Installing crontabs"
 mkdir /var/log/agentj && chown -R www-data /var/log/agentj
-echo "* * * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:msgs-send-mail-token >>/var/log/agentj/cron.log 2>&1" > /etc/cron.d/agentj
-echo "0 3 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:truncate-message-since-day 30 >/var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
-echo "5 3 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:truncate-virus-queue >/var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
-echo "0 7 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:report-send-mail > /var/log/agentj/send.log 2>&" >> /etc/cron.d/agentj
+echo "* * * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:msgs-send-mail-token >> /var/log/agentj/cron.log 2>&1" > /etc/cron.d/agentj
+echo "0 3 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:truncate-message-since-day 30 >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
+echo "5 3 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:truncate-virus-queue >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
+echo "0 7 * * * cd /var/www/html/agentj && sudo -u www-data php bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1" >> /etc/cron.d/agentj
 cron && crontab /etc/cron.d/agentj
 
 exec "$@"
