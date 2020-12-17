@@ -20,6 +20,7 @@ stages:
 
 before_script:
   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  - apk add --no-cache docker-compose
 
 amavis_build:
   stage: build
