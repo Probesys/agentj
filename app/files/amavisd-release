@@ -1,0 +1,312 @@
+#!/usr/bin/perl -T
+
+#------------------------------------------------------------------------------
+# This is amavisd-release, an EXAMPLE quarantine release utility program.
+# It uses AM.PDP protocol to send a request to amavisd daemon to release
+# a quarantined mail message.
+#
+# Author: Mark Martinec <Mark.Martinec@ijs.si>
+#
+# Copyright (c) 2005-2014, Mark Martinec
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of the Jozef Stefan Institute.
+
+# (the above license is the 2-clause BSD license, also known as
+#  a "Simplified BSD License", and pertains to this program only)
+#
+# Patches and problem reports are welcome.
+# The latest version of this program is available at:
+#   http://www.ijs.si/software/amavisd/
+#------------------------------------------------------------------------------
+
+# Usage:
+#   amavisd-release mail_file secret_id [alt_recip1 alt_recip2 ..]
+#
+# To be placed in amavisd.conf:
+#   $interface_policy{'SOCK'} = 'AM.PDP';
+#   $policy_bank{'AM.PDP'} = { protocol=>'AM.PDP' };
+#   $unix_socketname = '/var/amavis/amavisd.sock';
+# or:
+#   $interface_policy{'9998'} = 'AM.PDP';
+#   $policy_bank{'AM.PDP'} = { protocol=>'AM.PDP' };
+#   $inet_socket_port = [10024,9998];
+#
+# To obtain secret_id and quar_type belonging to some mail_id:
+# $ mysql mail_log -e \
+#   'select secret_id,quar_type,content from msgs where mail_id="W+7uJyXUjw32"'
+#
+# If secret_id is not available, administrator may choose to skip checking
+# of secret_id in the amavisd daemon by setting a configuration variable
+# $auth_required_release to false (it defaults to true). If the release
+# client program specifies a nonempty secret_id in the request, the secret_id
+# will be validated and a request will fail if not valid, regardless of the
+# setting of $auth_required_release. Turning off a requirement for a valid
+# secret_id widens the right to release to anyone who can connect to amavisd
+# socket (Unix or inet). Access to the socket therefore needs to be restricted
+# using socket protection (unix socket) or @inet_acl (for inet socket).
+
+
+use warnings;
+use warnings FATAL => 'utf8';
+no  warnings 'uninitialized';
+use strict;
+use re 'taint';
+use IO::Socket;
+use Time::HiRes ();
+
+use vars qw($VERSION);  $VERSION = 2.002;
+use vars qw($log_level $socketname $have_inet4 $have_inet6 $have_socket_ip);
+
+BEGIN {
+### USER CONFIGURABLE:
+
+  $log_level = 1;
+  $socketname = 'amavis:9998';
+
+### END OF USER CONFIGURABLE
+}
+
+BEGIN {
+  # no need to load INET/INET6 modules when a socket is a Unix socket
+  return if $socketname =~ m{^/};
+
+  # prefer using IO::Socket::IP if it exists, otherwise
+  # fall back to IO::Socket::INET6 or IO::Socket::INET as appropriate
+  #
+  $have_socket_ip = eval {
+    require IO::Socket::IP;
+  };
+
+  $have_inet4 =  # can we make a PF_INET socket?
+    $have_socket_ip ? eval {
+      my $sock = IO::Socket::IP->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+      $sock->close or die "error closing inet6 socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    } : eval {
+      require IO::Socket::INET;
+      my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+      $sock->close or die "error closing inet socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
+
+  $have_inet6 =  # can we make a PF_INET6 socket?
+    $have_socket_ip ? eval {
+      my $sock = IO::Socket::IP->new(LocalAddr => '::', Proto => 'udp');
+      $sock->close or die "error closing inet6 socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    } : eval {
+      require IO::Socket::INET6;
+      my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
+      $sock->close or die "error closing inet6 socket: $!"  if $sock;
+      $sock ? 1 : undef;
+    };
+
+  1;
+} # end BEGIN
+
+sub sanitize_str {
+  my($str, $keep_eol) = @_;
+  my(%map) = ("\r" => '\\r', "\n" => '\\n', "\f" => '\\f', "\t" => '\\t',
+              "\b" => '\\b', "\e" => '\\e', "\\" => '\\\\');
+  if ($keep_eol) {
+    $str =~ s/([^\012\040-\133\135-\176])/  # and \240-\376 ?
+              exists($map{$1}) ? $map{$1} :
+                     sprintf(ord($1)>255 ? '\\x{%04x}' : '\\%03o', ord($1))/eg;
+  } else {
+    $str =~ s/([^\040-\133\135-\176])/      # and \240-\376 ?
+              exists($map{$1}) ? $map{$1} :
+                     sprintf(ord($1)>255 ? '\\x{%04x}' : '\\%03o', ord($1))/eg;
+  }
+  $str;
+}
+
+sub ll($) {
+  my($level) = @_;
+  $level <= $log_level;
+}
+
+sub do_log($$;@) {
+  my($level, $errmsg, @args) = @_;
+  if ($level <= $log_level) {
+    $errmsg = sprintf($errmsg,@args)  if @args;
+    print STDERR sanitize_str($errmsg)."\n";  # ignoring I/O status
+  }
+}
+
+sub proto_decode($) {
+  my($str) = @_;
+  $str =~ s/%([0-9a-fA-F]{2})/pack("C",hex($1))/eg;
+  $str;
+}
+
+sub proto_encode($@) {
+  my($attribute_name,@strings) = @_; local($1);
+  $attribute_name =~    # encode all but alfanumerics, '_' and '-'
+    s/([^0-9a-zA-Z_-])/sprintf("%%%02x",ord($1))/eg;
+  for (@strings) {      # encode % and nonprintables
+    s/([^\041-\044\046-\176])/sprintf("%%%02x",ord($1))/eg;
+  }
+  $attribute_name . '=' . join(' ',@strings);
+}
+
+sub ask_amavisd($$) {
+  my($sock,$query_ref) = @_;
+  my(@encoded_query) =
+    map { /^([^=]+)=(.*)\z/s; proto_encode($1,$2) } @$query_ref;
+  do_log(2,'> '.$_)  for @encoded_query;
+  $sock->print( map { $_."\015\012" } (@encoded_query,'') )
+    or die "Can't write response to socket: $!";
+  $sock->flush or die "Can't flush on socket: $!";
+  my(%attr); local($1,$2,$3);
+  local($/) = "\015\012";    # set line terminator to CRLF
+  # must not use \r and \n, which may not be \015 and \012 on certain platforms
+  do_log(2,"waiting for response");
+  while(<$sock>) {
+    last  if /^\015\012\z/;  # end of response
+    if (/^ ([^=\000\012]*?) (=|:[ \t]*) ([^\012]*?) \015\012 \z/xsi) {
+      my $attr_name = proto_decode($1);
+      my $attr_val  = proto_decode($3);
+      if (!exists $attr{$attr_name}) { $attr{$attr_name} = [] }
+      push(@{$attr{$attr_name}}, $attr_val);
+    }
+  }
+  if (!defined($_) && $! != 0) { die "read from socket failed: $!" }
+  \%attr;
+}
+
+sub release_file($$$@) {
+  my($sock,$mail_file,$secret_id,@alt_recips) = @_;
+  my($fn_path,$fn_prefix,$mail_id,$fn_suffix,$part_tag); local($1,$2,$3,$4);
+  $part_tag = $1  if $mail_file =~ s/ \[ ( [^\]]* ) \] \z//xs;
+  if ($mail_file =~ m{^ ([^/].*/)? ([A-Z0-9][A-Z0-9._-]*[_-])?
+                        ([A-Z0-9][A-Z0-9_+-]{10,14}[A-Z0-9]) (\.gz)? \z}xsi) {
+    ($fn_path,$fn_prefix,$mail_id,$fn_suffix) = ($1,$2,$3,$4);
+  } elsif ($mail_file =~ m{^ ([^/].*/)? () ([A-Za-z0-9$._=+-]+?) (\.gz)?\z}xs){
+    ($fn_path,$fn_prefix,$mail_id,$fn_suffix) = ($1,$2,$3,$4);  # old style
+  } else {
+    usage("Invalid quarantine ID: $mail_file");
+  }
+  my $quar_type = $fn_suffix eq '.gz' ? 'Z' : $fn_path ne '' ? 'F' : '';
+  my $request_type = $0 =~ /\breport\z/i  ? 'report'
+                   : $0 =~ /\brequeue\z/i ? 'requeue' : 'release';
+  my(@query);
+  push(@query, "request=$request_type");
+  push(@query, "mail_id=$mail_id");
+  push(@query, "quar_type=$quar_type")  if $quar_type ne '';
+  push(@query, "secret_id=$secret_id")  if $secret_id ne '';
+  push(@query, "mail_file=$mail_file");  # ignored with an SQL quarantine
+  push(@query, "partition_tag=$part_tag") if $part_tag ne '';
+  if (@alt_recips) {  # override original recipients if list is nonempty
+    push(@query, map {"recipient=$_"} @alt_recips);
+  }
+  my $attr_ref = ask_amavisd($sock,\@query);
+  $attr_ref && %$attr_ref  or die "Invalid response received";
+  if (ll(2)) {
+    for my $attr_name (keys %$attr_ref) {
+      for my $attr_val (@{$attr_ref->{$attr_name}}) {
+        do_log(2,"< %s=%s", $attr_name,$attr_val);
+      }
+    }
+  }
+  do_log(0,$_)  for (@{$attr_ref->{'setreply'}});
+  # may do another release request on the same session if needed ...
+}
+
+sub usage(;$) {
+  my($msg) = @_;
+  print STDERR $msg,"\n\n"  if $msg ne '';
+  my $prog = $0;  $prog =~ s{^.*/(?=[^/]+\z)}{};
+  print STDERR "$prog version $VERSION\n";
+  die "Usage:  \$ $prog mail_file [secret_id [alt_recip1 alt_recip2 ...]]\n".
+      "  or to read request lines from stdin:  \$ $prog -\n";
+}
+
+# Main program starts here
+
+  my($sock,$mail_file,$secret_id);
+  @ARGV >= 1 or usage("Not enough arguments");
+  $mail_file = shift(@ARGV);   # quarantine file id or '-'
+  if ($mail_file eq '-') { @ARGV==0 or usage("Extra arguments after '-'") }
+
+  my($peeraddress, $peerport, $is_inet); local($1,$2,$3);
+  if ($socketname =~ m{^/}) {  # simpleminded: unix vs. inet
+    $is_inet = 0;
+  } elsif ($socketname =~ /^(?: \[ ([^\]]*) \] | ([^:]*) ) : ([^:]*)/sx) {
+    $peeraddress = defined $1 ? $1 : $2;  $peerport = $3;  $is_inet = 1;
+  } elsif ($socketname =~ /^(?: \[ ([^\]]*) \] | ([0-9a-fA-F.:]+) ) \z/sx) {
+    $peeraddress = defined $1 ? $1 : $2;  $is_inet = 1;
+  } else {  # probably a syntax error, but let's assume it is a Unix socket
+    $is_inet = 0;
+  }
+  if (!$is_inet) {  # unix socket
+    do_log(3,"connecting to a UNIX socket %s", $socketname);
+    $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM);
+    $sock or die "Can't create UNIX socket: $!";
+    $sock->connect( pack_sockaddr_un($socketname) )
+      or die "Can't connect to UNIX socket $socketname: $!";
+  } else {  # inet socket
+    $peerport or die "port number not specified in \$socketname: $socketname\n";
+    my $module = $have_socket_ip ? 'IO::Socket::IP'
+               : $have_inet4 && (!$have_inet6 ||
+                   $peeraddress=~/^\d+\.\d+\.\d+\.\d+\z/) ? 'IO::Socket::INET'
+               : 'IO::Socket::INET6';
+    my(%args) = (Type => SOCK_STREAM, Proto => 'tcp',
+                 PeerAddr => $peeraddress, PeerPort => $peerport);
+    do_log(3,"connecting using %s to [%s]:%s",
+              $module, $peeraddress, $peerport);
+    if ($have_socket_ip) {  # $module eq 'IO::Socket::IP'
+      # inet or inet6 socket, let IO::Socket::IP handle dirty details
+      $sock = IO::Socket::IP->new(%args);
+      # note: the IO::Socket::IP constructor provides error message in $@
+      $sock or die "Can't connect to socket $socketname using $module: $@\n";
+    } elsif ($module eq 'IO::Socket::INET') {  # inet socket (IPv4)
+      $sock = IO::Socket::INET->new(%args);
+      $sock or die "Can't connect to socket $socketname using $module: $!\n";
+    } else {  # inet6 socket: no inet or IPv6 or unknown addr family
+      $sock = IO::Socket::INET6->new(%args);
+      $sock or die "Can't connect to socket $socketname using $module: $!\n";
+    }
+  }
+
+  if ($mail_file eq '-') {
+    undef $!;
+    while (<>) {  # read from STDIN: mail_file [secret_id [alt_recips...]]
+      chomp;
+      next  if /^[ \t]*(#.*)?$/;  # skip empty lines or comments
+      my($mail_file, $secret_id, @alt_recips) = split(' ');
+      release_file($sock,$mail_file,$secret_id,@alt_recips);
+    }
+    $!==0 or die "Error reading from STDIN: $!";
+  } else {
+    # assume empty secret_id if the second arg looks like an e-mail addr
+    $secret_id = $ARGV[0]=~/\@/ ? '' : shift(@ARGV);
+    release_file($sock,$mail_file,$secret_id,@ARGV);
+  }
+  $sock->close  or die "Error closing socket: $!";
+  close(STDIN)  or die "Error closing STDIN: $!";
+  close(STDOUT) or die "Error closing STDOUT: $!";
+  close(STDERR) or die "Error closing STDERR: $!";

@@ -1,0 +1,5 @@
+hosts = db
+user = $DB_USER
+password = $DB_PASSWORD
+dbname = $DB_NAME
+query = SELECT transport FROM domain WHERE domain = '%s'
