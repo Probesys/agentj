@@ -1,0 +1,147 @@
+version: '3'
+services:
+  db:
+    image: mariadb
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - TZ=${TZ}
+    networks:
+      - ajnet
+
+  app:
+    image: hub.probesys.com/agentj_app:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - public:/var/www/html/agentj
+      - amavis:/tmp/amavis
+      - applogs:/var/log/agentj
+    env_file:
+      - .env
+    networks:
+      - ajnet
+
+  web:
+    image: hub.probesys.com/agentj_web:latest
+    restart: always
+    depends_on:
+      - app
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - public:/var/www/html/agentj
+    networks:
+      - ajnet
+    ports:
+      - 127.0.0.1:8080:80
+
+  smtp:
+    image: hub.probesys.com/agentj_smtp:latest
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - postqueue:/var/spool/postfix
+      - smtpconfig:/etc/postfix
+    ports:
+      - 0.0.0.0:25:25
+    networks:
+      ajnet:
+        ipv4_address: ${ipv4_network:-172.42.42}.250
+
+  relay:
+    image: hub.probesys.com/agentj_relay:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - opendkim:/etc/opendkim/
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
+
+  amavis:
+    image: hub.probesys.com/agentj_amavis:latest
+    restart: always
+    environment:
+      - TZ=${TZ}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - ajnet
+    volumes:
+      - clamdb:/var/lib/clamav
+      - amavis:/var/lib/amavis
+
+  redis:
+    image: redis
+    restart: always
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    volumes:
+      - redisdb:/data
+
+  logspout:
+    image: gliderlabs/logspout:latest
+    restart: always
+    command: syslog+udp://syslogng:514?filter.name=agentj*
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  syslogng:
+    image: hub.probesys.com/agentj_syslogng:latest
+    restart: always
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    ports:
+      - 514:514/udp
+    volumes:
+      - logs:/var/log/syslogng
+
+volumes:
+  amavis:
+  applogs:
+  clamdb:
+  db:
+  logs:
+  opendkim:
+  postqueue:
+  public:
+  redisdb:
+  smtpconfig:
+
+networks:
+  ajnet:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-agentj
+    ipam:
+      driver: default
+      config:
+        - subnet: ${IPV4_NETWORK:-172.42.42}.0/24

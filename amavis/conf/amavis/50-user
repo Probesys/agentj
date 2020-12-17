@@ -1,0 +1,103 @@
+use strict;
+
+#
+# Place your configuration directives here.  They will override those in
+# earlier files.
+#
+# See /usr/share/doc/amavisd-new/ for documentation and examples of
+# the directives you can use in this file
+#
+$DO_SYSLOG = 1;
+#$log_level = 5;
+
+$LOGFILE = "/var/log/amavis.log";
+
+@lookup_sql_dsn =
+  ( ['DBI:mysql:database=$DB_NAME;host=db;port=3306', '$DB_USER', '$DB_PASSWORD']);
+
+@storage_sql_dsn = @lookup_sql_dsn;
+
+# Apply policies by priority: user, group, domain
+$sql_select_white_black_list =
+  'SELECT wb'.
+  ' FROM wblist JOIN mailaddr ON wblist.sid=mailaddr.id'.
+  ' WHERE wblist.rid=? AND mailaddr.email IN (%k)'.
+  ' ORDER BY wblist.priority DESC , mailaddr.priority DESC LIMIT 1';
+
+$sql_select_policy =
+  'SELECT *,users.id'.
+  ' FROM users LEFT JOIN policy ON users.policy_id=policy.id'.
+  ' WHERE users.email IN (%k) ORDER BY users.priority DESC';
+
+# AgentJ conf: you must set up here one more server than in the 'feed' parameter of master.cf (needed for release)
+$max_servers = 3;
+
+# Default antivirus checking mode
+@bypass_spam_checks_maps = (
+   \%bypass_spam_checks, \@bypass_spam_checks_acl, \$bypass_spam_checks_re);
+# Default SPAM checking mode
+@bypass_virus_checks_maps = (
+   \%bypass_virus_checks, \@bypass_virus_checks_acl, \$bypass_virus_checks_re);
+
+$sa_spam_subject_tag = '***SPAM*** ';
+$sa_tag_level_deflt  = -20;  # add spam info headers if at, or above that level
+$sa_tag2_level_deflt = -15; # add 'spam detected' headers at that level
+$sa_kill_level_deflt = -10.9999999; # triggers spam evasive actions
+$sa_dsn_cutoff_level = -10;   # spam level beyond which a DSN is not sent
+
+## Mail Forwarding
+$forward_method = 'smtp:[172.42.42.250]:10025';
+$requeue_method = 'smtp:[172.42.42.250]:10025';
+$notify_method = 'smtp:[172.42.42.250]:10025';
+
+## Quarantine settings
+##
+#
+$final_virus_destiny = D_BOUNCE;
+$final_spam_destiny = D_DISCARD;
+$final_banned_destiny = D_BOUNCE;
+$final_bad_header_destiny = D_PASS;
+
+
+#
+## Disable spam and virus notifications for the admin user.
+## Can be overridden by the policies in mysql
+##
+
+$virus_admin = undef;
+$spam_admin = undef;
+
+@av_scanners = (
+  ['ClamAV-clamd',
+   \&ask_daemon, ["CONTSCAN {}\n", "/var/run/clamav/clamd.ctl"],
+   qr/\bOK$/m, qr/\bFOUND$/m,
+   qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],  
+);
+
+
+# Do not store non-quarantined messages info
+# You can set it to 1 (the default) to test if Amavis is filling correctly the tables maddr, msgs, and msgcrpt
+#$sql_store_info_for_all_msgs = 0;
+
+
+$enable_dkim_verification = 1;
+$enable_dkim_signing = 1; # load DKIM signing code
+$signed_header_fields{'received'} = 0;  # turn off signing of Received
+@dkim_signature_options_bysender_maps = (
+{ '.' => { ttl => 21*24*3600, c => 'relaxed/simple' } } );
+
+
+$inet_socket_port = [10024,9998];
+$inet_socket_bind = undef;
+$interface_policy{'10024'} = 'MYNET';
+$policy_bank{'MYNET'} = {
+     inet_acl => [qw(  [::1] 172.42.42.0/24)],
+};
+$interface_policy{'9998'} = 'AM.PDP-INET';
+$policy_bank{'AM.PDP-INET'} = {
+  protocol => 'AM.PDP',  # select Amavis policy delegation protocol
+  inet_acl => [qw(  [::1] 127.0.0.1 172.42.42.0/24 )],  # restrict access to these IP addresses
+ auth_required_release => 1,  # don't require secret_id for amavisd-release
+ };
+#------------ Do not modify anything below this line -------------
+1;  # ensure a defined return

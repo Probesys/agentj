@@ -1,0 +1,90 @@
+---
+
+# -*- coding: utf-8 -*-
+image: docker:latest
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_IMAGE_TAG: $CI_PIPELINE_ID
+
+services:
+  - docker:dind
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+
+stages:
+  - build
+  - deploy
+
+amavis_build:
+  stage: build
+  variables:
+    IMG: amavis
+  script:
+   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
+   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+  only:
+    changes:
+      - amavis/*
+      - amavis/**/*
+
+relay_build:
+  stage: build
+  script:
+   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
+   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+  only:
+    changes:
+      - relay/*
+      - relay/**/*
+
+smtp_build:
+  stage: build
+  script:
+   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
+   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+  only:
+    changes:
+      - smtp/*
+      - smtp/**/*
+
+syslogng_build:
+  stage: build
+  script:
+   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
+   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+  only:
+    changes:
+      - syslogng/*
+      - syslogng/**/*
+
+web_build:
+  stage: build
+  script:
+   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
+   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+  only:
+    changes:
+      - web/*
+      - web/**/*
+
+deploy-dev:
+  stage: deploy
+  cache: {}
+  environment:
+    name: dev
+  variables:
+    DEPLOY_USER: docker
+    DOCKER_IMAGE_TAG: latest
+  script:
+    - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}"
+    - docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml down
+    - docker image rm $(docker image ls -q -f reference=*/*agentj_*)
+    - docker volume rm agentj-docker_public
+    - docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml up -d
+  only: [ master ]
+
