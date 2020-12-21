@@ -54,6 +54,7 @@ RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     cron \
     mariadb-client \
+    openssl \
     perl \
     php7.3 \
     php7.3-bz2 \
