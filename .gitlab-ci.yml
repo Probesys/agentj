@@ -19,16 +19,27 @@ stages:
   - deploy
 
 before_script:
-  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-  - apk add --no-cache docker-compose
+  - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin $REGISTRY
+
+app_build:
+  stage: build
+  variables:
+    IMG: app
+  script:
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
+  only:
+    changes:
+      - app/*
+      - app/**/*
 
 amavis_build:
   stage: build
   variables:
     IMG: amavis
   script:
-   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
-   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
   only:
     changes:
       - amavis/*
@@ -36,9 +47,11 @@ amavis_build:
 
 relay_build:
   stage: build
+  variables:
+    IMG: relay
   script:
-   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
-   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
   only:
     changes:
       - relay/*
@@ -46,9 +59,11 @@ relay_build:
 
 smtp_build:
   stage: build
+  variables:
+    IMG: smtp
   script:
-   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
-   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
   only:
     changes:
       - smtp/*
@@ -56,9 +71,11 @@ smtp_build:
 
 syslogng_build:
   stage: build
+  variables:
+    IMG: syslogng
   script:
-   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
-   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
   only:
     changes:
       - syslogng/*
@@ -66,9 +83,11 @@ syslogng_build:
 
 web_build:
   stage: build
+  variables:
+    IMG: web
   script:
-   - cd $CI_PROJECT_DIR/${IMG} && docker build -t ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG .
-   - docker push ${CI_REGISTRY_IMAGE}-${IMG}:$DOCKER_IMAGE_TAG
+    - cd $CI_PROJECT_DIR/$IMG && docker build -t $REGISTRY/agentj_$IMG .
+    - docker push $REGISTRY/agentj_$IMG:latest
   only:
     changes:
       - web/*
@@ -82,13 +101,18 @@ deploy-dev:
   variables:
     DEPLOY_USER: docker
     DOCKER_IMAGE_TAG: latest
+  before_script:
+    - apk add --no-cache docker-compose
   script:
+    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}"
-    - docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml down
+    - DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}" docker-compose --project-directory /home/$DEPLOY_USER/agentj-docker down
+      # - ssh -T $DEPLOY_USER@$DEPLOY_HOST "docker-compose -f /home/docker/agentj-docker/docker-compose.yml down"
     - docker image rm $(docker image ls -q -f reference=*/*agentj_*)
     - docker volume rm agentj-docker_public
-    - docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml up -d
-  only: [ master ]
+      # - ssh -T $DEPLOY_USER@$DEPLOY_HOST "docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml up -d"
+    - DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}" docker-compose up -d
+      # only: [ master ]
 
