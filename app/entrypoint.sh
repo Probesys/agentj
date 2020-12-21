@@ -3,8 +3,13 @@ set -e
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+# Generate token for encryption
+MY_TOKEN_ENC_IV=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+MY_TOKEN_ENC_SALT=$(openssl rand -base64 32)
 
 sed -i "s/\$MYAPPSECRET/$MYAPPSECRET/g" /var/www/html/agentj/.env
+sed -i "s/\$MY_TOKEN_ENC_IV/$MY_TOKEN_ENC_IV/g" /var/www/html/agentj/.env
+sed -i "s/\$MY_TOKEN_ENC_SALT/$MY_TOKEN_ENC_SALT/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_NAME/$DB_NAME/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_USER/$DB_USER/g" /var/www/html/agentj/.env
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /var/www/html/agentj/.env
