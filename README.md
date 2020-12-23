@@ -1,6 +1,8 @@
 # AgentJ dockerized repository
 
-This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
+ [![pipeline status](https://gitlab.probesys.com/agentj/agentj-app/badges/master/pipeline.svg)](https://gitlab.probesys.com/agentj/agentj-app/-/commits/master)  [![coverage report](https://gitlab.probesys.com/agentj/agentj-app/badges/master/coverage.svg)](https://gitlab.probesys.com/agentj/agentj-app/-/commits/master)
+
+ This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
 
 ## Introduction
 
@@ -41,6 +43,7 @@ The following runtime variables must be configured:
 | MAIL_HOSTNAME    | aj.example.com | the mailname used in postfix configuration  |
 | MAIL_DOMAINNAME  | example.com    | the domain name used in relay configuration |
 | TZ               | Europe/Paris   | the containers default timezone             |
+| PROXY_PORT       | 8090           | default listening port for Nginx web proxy  |
 
 ### Network
 
@@ -53,7 +56,7 @@ After you have set the above variables, you can start the stack with following c
 
     docker-compose up -d
 
-The Web UI will be available at http://hostname:8080.
+The Web UI will be available at http://hostname:8090.
 The default login is `admin` and the default password is `lutte antispam` (yes, this is a space between the two words).
 
 ## Details
@@ -80,16 +83,16 @@ When started, the AgentJ stack will create the following volumes:
 | relay 25/tcp)           | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
 | stmp (25/tcp 10025/tcp) | ? → 10024/tcp | -            | ? → 3306/tcp | -     | ? → 25/tcp | ? → 514/udp   | -           | -   |
 | syslogng (514/udp)      | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
-| web (8080/tcp)          | -             | ? → 9000/tcp | -            | -     | -          | -             | ? → 514/udp | -   |
+| web (8090/tcp)          | -             | ? → 9000/tcp | -            | -     | -          | -             | ? → 514/udp | -   |
 
 ## Upgrade
 
 In order to upgrade the AgentJ dockerized stack, you must stop the running containers, pull (or build locally if you prefer) the updated images, remove the `public` volume and start the updated stack:
 
     docker-compose down
-    # Delete and update only app image
+    # To upgrade only the webapp, delete and update its image
     docker image rm $(docker image ls -q -f reference=*/*agentj_app)
-    # Delete and update all images
+    # To upgrade all the stack, delete and update all images
     docker image rm $(docker image ls -q -f reference=*/*agentj_*)
     docker volume rm agentj-docker_public
     docker-compose up -d
