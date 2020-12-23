@@ -34,7 +34,7 @@ RUN apt-get update -q --fix-missing && \
     yarn \
     zip \
     && rm -rf /var/lib/apt/lists/* \
-    && git clone --single-branch --branch master https://github.com/Probesys/agentj-app.git agentj \
+    && git clone --single-branch --branch master https://github.com/Probesys/agentj.git agentj \
     && cd agentj \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \

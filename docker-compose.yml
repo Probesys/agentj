@@ -38,12 +38,14 @@ services:
       - app
     environment:
       - TZ=${TZ}
+    env_file:
+      - .env
     volumes:
       - public:/var/www/html/agentj
     networks:
       - ajnet
     ports:
-      - 127.0.0.1:8080:80
+      - 127.0.0.1:${PROXY_PORT:-8090}:80
 
   smtp:
     image: hub.probesys.com/agentj_smtp:latest
@@ -61,7 +63,7 @@ services:
       - 0.0.0.0:25:25
     networks:
       ajnet:
-        ipv4_address: ${ipv4_network:-172.42.42}.250
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
   relay:
     image: hub.probesys.com/agentj_relay:latest
