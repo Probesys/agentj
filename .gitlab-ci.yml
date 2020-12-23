@@ -108,11 +108,12 @@ deploy-dev:
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}"
-    - DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}" docker-compose --project-directory /home/$DEPLOY_USER/agentj-docker down
-      # - ssh -T $DEPLOY_USER@$DEPLOY_HOST "docker-compose -f /home/docker/agentj-docker/docker-compose.yml down"
+    - scp -v -C docker-compose.yml $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/agentj-docker/docker-compose.yml
+    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd /home/$DEPLOY_USER/agentj-docker/ && docker-compose down"
     - docker image rm $(docker image ls -q -f reference=*/*agentj_*)
     - docker volume rm agentj-docker_public
-      # - ssh -T $DEPLOY_USER@$DEPLOY_HOST "docker-compose -f /home/$DEPLOY_USER/agentj-docker/docker-compose.yml up -d"
-    - DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}" docker-compose up -d
-      # only: [ master ]
+    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd /home/$DEPLOY_USER/agentj-docker/ && docker-compose up -d"
+  except:
+    refs:
+      - master
 
