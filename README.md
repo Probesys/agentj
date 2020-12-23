@@ -1,7 +1,5 @@
 # AgentJ dockerized repository
 
-[![pipeline status](https://gitlab.probesys.com/agentj/agentj-docker/badges/master/pipeline.svg)](https://gitlab.probesys.com/agentj/agentj-docker/-/commits/master)
-
  This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
 
 ## Introduction
