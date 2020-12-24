@@ -1,6 +1,6 @@
 # AgentJ dockerized repository
 
- This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
+This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
 
 ## Introduction
 
