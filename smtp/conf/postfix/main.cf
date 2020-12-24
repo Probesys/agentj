@@ -4,6 +4,7 @@ append_dot_mydomain = no
 readme_directory = no
 compatibility_level = 2
 smtp_host_lookup = native
+recipient_delimiter = +
 
 myhostname = $MAIL_HOSTNAME
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK.0/24

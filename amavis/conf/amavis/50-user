@@ -39,6 +39,7 @@ $max_servers = 3;
 @bypass_virus_checks_maps = (
    \%bypass_virus_checks, \@bypass_virus_checks_acl, \$bypass_virus_checks_re);
 
+$recipient_delimiter = '+';
 $sa_spam_subject_tag = '***SPAM*** ';
 $sa_tag_level_deflt  = -20;  # add spam info headers if at, or above that level
 $sa_tag2_level_deflt = -15; # add 'spam detected' headers at that level
