@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ domain }} : {{ 'Entities.Domain.actions.editDomainRule'|trans() }}{% endblock %}
+
+{% block body %}
+{#  {{ dump(wbList.getRid().domain) }}#}
+    <h1>{{ domain }} : {{ 'Entities.Domain.actions.editDomainRule'|trans() }}</h1>
+
+    {{ include('domain/_formWblist.html.twig') }}
+
+{% endblock %}

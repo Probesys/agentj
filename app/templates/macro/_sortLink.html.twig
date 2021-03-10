@@ -1,0 +1,25 @@
+{% macro sortLink(title, sortField) %}
+  {%  set sortDirection = 'asc' %}
+  {% if app.request.get('sortDirection') == 'asc' and sortField == app.request.get('sortField')%}
+    {%  set sortDirection = 'desc' %}
+  {% elseif app.request.get('sortDirection') == 'desc' and sortField == app.request.get('sortField')%}
+    {%  set sortDirection = 'asc' %}    
+  {% elseif sortField != app.request.get('sortField')%}
+    {%  set sortDirection = 'asc' %}      
+  {% endif %}
+
+  {% if app.request.get('_route_params')['type']|length>0 %}
+    {% set url = app.request.getBaseURL() ~ '/' ~ app.request.get('_route') ~ '/' ~ app.request.get('_route_params')['type'] %}
+  {% else %}
+    {% set url = app.request.getBaseURL() ~ '/' ~ app.request.get('_route')  %}
+  {% endif %}
+
+  {% set searchSegment="" %}
+  {% if app.request.get('search') is defined %}
+    {% set searchSegment = "&search=" ~ app.request.get('search') %}
+{#    {{ searchSegment }}#}
+  {% endif %}
+
+  <a href="{{ url}}/?sortField={{ sortField }}&sortDirection={{ sortDirection }}{{ searchSegment }}">{{ title }}</a>
+
+{% endmacro %}

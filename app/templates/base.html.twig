@@ -1,0 +1,149 @@
+<!doctype html>
+<html  lang="{{ app.request.locale }}">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    {% block head_css %}
+      <!-- Bootstrap Core CSS -->
+      <link href="{{ asset('css/bootstrap/bootstrap.css')}}" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,400;0,500;1,800&display=swap" rel="stylesheet"> 
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+      <!--        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/cr-1.5.0/fc-3.2.5/fh-3.1.4/kt-2.5.0/r-2.2.2/rg-1.1.0/rr-1.2.4/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
+      -->
+      {#      <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/yeti/bootstrap.min.css" rel="stylesheet" integrity="sha384-bWm7zrSUE5E+21rA9qdH5frkMpXvqjQm/WJw4L5PYQLNHrywI5zs5saEjIcCdGu1" crossorigin="anonymous"><link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/yeti/bootstrap.min.css" rel="stylesheet" integrity="sha384-bWm7zrSUE5E+21rA9qdH5frkMpXvqjQm/WJw4L5PYQLNHrywI5zs5saEjIcCdGu1" crossorigin="anonymous">#}
+      <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+
+      <link rel="stylesheet" href="{{ asset('css/jquery-ui.css') }}">
+      <link href="{{ asset('lib/select2/select2.min.css')}}" rel="stylesheet" type="text/css">
+      <link href="{{ asset('css/jquery.mCustomScrollbar.min.css')}}" rel="stylesheet" type="text/css">
+      {#      <link rel="stylesheet" href="{{ asset('css/sb-admin.css') }}">#}
+      <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+      <link rel="stylesheet" href="{{ asset('css/nav.css') }}">
+      <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" />
+    {% endblock %}
+
+
+    {% block head_js %}
+      <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('js/Chart.js') }}"></script>
+    {% endblock %}
+
+
+    <title>{% block title %}{% endblock %} | {{ 'Navigation.mainSubTitle'|trans }}</title>
+  </head>
+  <script type="text/javascript">
+    var _paq = window._paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function () {
+      var u = "https://stats.probesys.com/";
+      _paq.push(['setTrackerUrl', u + 'piwik.php']);
+      _paq.push(['setSiteId', '37']);
+      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+      g.type = 'text/javascript';
+      g.async = true;
+      g.defer = true;
+      g.src = u + 'piwik.js';
+      s.parentNode.insertBefore(g, s);
+    })();
+  </script>
+  {% set bodyClass="" %}
+  {%  if app.request.get('_route') == 'app_login' %}
+    {% set bodyClass="not-auth" %}
+  {% elseif app.request.get('_route') == 'check_message' %}
+    {% set bodyClass="validate-address" %}
+  {% endif %}
+
+  <body id="page-top" data-base-path="{{ app.request.basePath }}" class="{{ bodyClass }}">
+    {% block topnav %}
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {#      {% include 'header.html.twig' %}#}
+        {{ render(controller(
+                      'App\\Controller\\MenuController::renderHeader'                   
+                  )) }}    
+      {% endif %}
+    {% endblock %}
+    <div class="page-wrapper default-theme sidebar-bg bg1 {% if is_granted('IS_AUTHENTICATED_FULLY') %}toggled{% endif %}">
+      {% block leftnav %}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+          {{ render(controller(
+                    'App\\Controller\\MenuController::renderSlideMenu',{'route':app.request.get('_route'),'route_params':app.request.get('_route_params')}                   
+                )) }}              
+        {% endif %}
+      {% endblock %}   
+      <main class="page-content">
+        <div id="overlay" class="overlay"></div>         
+
+        <div class="container-fluid mb-5 mt-5">
+          {% include 'alerts.html.twig' %}
+          {% block body %}
+
+          {% endblock %}
+        </div>
+        {#          </main>#}
+
+      </main>
+      {% block footer %}
+        <footer class="sticky-footer w-100">
+          <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+
+              <span>Agent-J {{ agentjVersion }} - Copyright © <a href="https://www.probesys.com" target="_blank">Probesys</a> {{ "now"|date('Y') }}</span>
+            </div>
+          </div>
+        </footer>
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+          <a class="scroll-to-top" href="#page-top" style="display: inline;">
+            <i class="fas fa-sort-up"></i>
+          </a>          
+        {% endif %}
+      {% endblock %}        
+    </div>
+
+    {#  </div>
+    </div>#}
+
+
+    {% block bottom_js %}
+      <script type="text/javascript" src="{{ asset('lib/bootstrap4/js/bootstrap.bundle.min.js') }}"></script>
+
+      <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/cr-1.5.0/fc-3.2.5/fh-3.1.4/kt-2.5.0/r-2.2.2/rg-1.1.0/rr-1.2.4/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
+
+
+
+      <script type="text/javascript" src="{{ asset('js/jquery-ui/jquery-ui.js') }}"></script>
+
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
+        <script src="{{ url('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"}) }}"></script>
+        <script src="{{ asset('js/translations/config.js') }}"></script>              
+        <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
+      {% endif %}
+
+      <script type="text/javascript" src="{{ asset('lib/select2/select2.full.min.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script>
+      {#      <script type="text/javascript" src="{{ asset('js/node_modules/push.js/bin/push.min.js') }}"></script>#}
+      {{ encore_entry_script_tags('agentj') }}
+
+
+      <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+      <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+      <script type="text/javascript" src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>
+
+
+    {% endblock %}
+    {% include '_toast.html.twig' %}
+    <div id="dialog-confirm" title="" style="display:none;">
+      <div id="dialog-content"></div>
+    </div>  
+
+
+    <div id="empModal" class="modal" tabindex="-1" role="dialog">
+
+    </div>
+  </body>
+</html>

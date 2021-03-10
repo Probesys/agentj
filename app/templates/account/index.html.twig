@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Navigation.user_profil'|trans() }}{% endblock %}
+
+{% block body %}
+  {% set _title = 'Navigation.user_profil'|trans() %}
+  {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+  {% endembed %}   
+  <div class="col bg-white p-2">
+    <div class="col-md-12">
+      <ul class="nav nav-tabs" id="accountTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="account-infos-tab" data-toggle="tab" href="#account-infos" role="tab" aria-controls="account-infos" aria-selected="true">Informations</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="account-rules-tab" data-toggle="tab" href="#account-rules" role="tab" aria-controls="account-rules" aria-selected="false">Règles de filtrage</a>
+        </li>
+      </ul>
+      <div class="tab-content p-3" id="accountTabContent">
+        <div class="tab-pane fade show active" id="account-infos" role="tabpanel" aria-labelledby="account-infos-tab">
+          {{ form_start(form) }}
+          <div class="row">
+            <div class="col-md-2">
+              Nom :  
+            </div>
+            <div class="col-md-10">
+              {{ app.user.fullName }}
+            </div>          
+            <div class="col-md-2">
+              Email : 
+            </div>
+            <div class="col-md-10">
+              {{ app.user.getEmailFromRessource() }}
+            </div>     
+            <div class="col-md-2">
+              Groupe :  
+            </div>
+            <div class="col-md-10">
+              {{ app.user.groups }}
+            </div>            
+            <div class="col-md-2">
+              {{ 'Entities.User.fields.report'|trans() }}
+              {#              {{ form_label(form.report) }}#}
+            </div>
+            <div class="col-md-10">
+              {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
+              {{ form_widget(form.report) }}
+            </div>           
+            <div class="col-md-2">
+              {{ 'Entities.User.fields.bypassHumanAuth'|trans() }}
+              {#              {{ form_label(form.report) }}#}
+            </div>
+            <div class="col-md-10">
+              {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
+              {{ form_widget(form.bypassHumanAuth) }}
+            </div>               
+          </div>
+
+
+          <div class="d-flex justify-content-center">
+            <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
+            <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+          </div>            
+          {{ form_end(form) }}            
+        </div>
+        <div class="tab-pane fade" id="account-rules" role="tabpanel" aria-labelledby="account-rules-tab">
+          <div class="row">
+            <div class="col-md-4">
+              Paramètre par défaut du domaine
+            </div>
+            <div class="col-md-8">
+              {{ domainDefaulWb }}
+            </div>
+          </div>
+          {% if app.user.groups and groupDefaulWb is not null %}
+          <div class="row">
+            <div class="col-md-4">
+              Paramètre par défaut du groupe
+            </div>
+            <div class="col-md-8">
+              {{ groupDefaulWb }}
+            </div>
+          </div>
+          {% endif %}
+
+
+        </div>
+      </div>    
+    </div>
+
+
+  </div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% import 'macro/_sortLink.html.twig' as sortLinkMacro %}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{title}}{% endblock %}
+
+
+{% block body %}
+
+
+  {% set _title = title ~ ' : ' ~  totalItemFound %}
+  {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+    {% block content_button_actions %} 
+      {%  if app.request.get('_route_params')['type'] == 'W' and is_granted('ROLE_ADMIN')%}
+        <a href="#" data-url-modal-content="{{ path('import_wblist') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6"><i class="fas fa-plus"></i>&nbsp;Importer depuis un fichier</a>
+      {% endif %}
+    {% endblock %}          
+
+  {% endembed %} 
+
+  {% include 'common/blocActionsAndSearch.html.twig'  %}
+  {{ form_start(filter_form, {'attr': {'id': 'massive-actions-form'}}) }}
+
+  <section id="no-more-tables">
+    <table id="table_wblist" class="table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" class="cb" id='checkAll' data-target-checkall-class="selected-msg">
+            <label class="for-cb" for="checkAll"></label>
+          </th>
+          {% if is_granted('ROLE_ADMIN') %}
+            <th>{{ sortLinkMacro.sortLink('Message.Recipient'|trans,'emailuser') }}</th>
+            {% endif %}
+          <th>{{ 'Entities.WBList.fields.type'|trans() }}</th>          
+          <th>{{ sortLinkMacro.sortLink('Message.Sender'|trans,'email') }}</th>
+          <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'datemod') }}</th>
+          <th>{{ 'Message.Actions.list'|trans() }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wb in wblist %}
+          {% set keyPairMessage =  [wb.rid, wb.sid] %}
+          <tr>  
+            <td>
+              <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
+              <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
+            </td>
+            {% if is_granted('ROLE_ADMIN') %}
+              <td data-title="{{ 'Entities.WBList.fields.user'|trans() }}">{{wb.fullname}}<br />{{wb.emailuser}} </td>
+              {% endif %}
+              {% if  wb.type is empty %}
+                {% set wb = wb|merge({'type': '3'}) %}
+              {% endif %}
+              {% set typeLabel = 'Entities.WBList.fields.typeLabel.'~wb.type %}
+
+            <td data-title="{{ 'Entities.WBList.fields.type'|trans() }}">{{  typeLabel | trans}} </td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod}}</td>
+            <td>
+              <ul class="list-inline list-unstyled">
+                <li class="list-inline-item">
+                  <a href="{{path('wblist_delete',{'rid':wb.rid,'sid':wb.sid})}}?_token={{ csrf_token('delete_wblist' ~ wb.rid ~ wb.sid)}}" class='btn btn-sm btn-danger confirmModal' 
+                     data-dialog-title='{{ 'Message.Dialogs.confirmDeleteSenderTitle'|trans }}' 
+                     data-dialog-content='{{ 'Message.Dialogs.confirmDeleteSenderContent'|trans }}'                   
+                     title="{{ 'Entities.WBList.actions.deleteSender'|trans() }}">
+                    <i class="fas fa-trash-alt  d-md-block d-lg-none"></i>                           
+                    <span class="d-md-none d-lg-block">{{ 'Entities.WBList.actions.deleteSender'|trans() }}</span>                                
+                  </a>
+                </li>
+              </ul>    
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {{ form_end(filter_form) }}
+  <div class="navigation text-center">
+    {{ knp_pagination_render(wblist) }}
+  </div>   
+  {% include 'alertsPopup.html.twig' %}         
+
+{% endblock %}

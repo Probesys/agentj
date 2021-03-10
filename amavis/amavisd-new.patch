@@ -1,0 +1,33 @@
+--- "amavisd-new (copie)"	2021-02-05 12:00:49.272903000 +0100
++++ amavisd-new	2021-02-17 15:39:44.116826097 +0100
+@@ -1427,8 +1427,8 @@
+       'INSERT INTO maddr (partition_tag, email, domain) VALUES (?,?,?)',
+     'ins_msg' =>
+       'INSERT INTO msgs (partition_tag, mail_id, secret_id, am_id,'.
+-      ' time_num, time_iso, sid, policy, client_addr, size, host)'.
+-      ' VALUES (?,?,?,?,?,?,?,?,?,?,?)',
++      ' time_num, time_iso, sid, policy, client_addr, size, host,is_mlist)'.
++      ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+     'upd_msg' =>
+       'UPDATE msgs SET content=?, quar_type=?, quar_loc=?, dsn_sent=?,'.
+       ' spam_level=?, message_id=?, from_addr=?, subject=?, client_addr=?,'.
+@@ -26735,14 +26735,16 @@
+       # when data type of msgs.time_iso is TIMESTAMP (instead of a string)
+       my $time_iso = $timestamp_fmt_mysql && $conn_h->driver_name eq 'mysql'
+                        ? iso8601_utc_timestamp($msginfo->rx_time,1,'')
+-                       : iso8601_utc_timestamp($msginfo->rx_time);
++                       : iso8601_utc_timestamp($msginfo->rx_time);      
++      my $is_mlist = length($msginfo->is_mlist) > 0 ? 1 : 0;
+       # insert a placeholder msgs record with sender information
+       $conn_h->execute($ins_msg,
+         $partition_tag, $msginfo->mail_id, $msginfo->secret_id,
+         $msginfo->log_id, int($msginfo->rx_time), $time_iso,
+         untaint($sid), c('policy_bank_path'), untaint($msginfo->client_addr),
+         0+untaint($msginfo->msg_size),
+-        untaint(substr(idn_to_utf8(c('myhostname')),0,255)));
++        untaint(substr(idn_to_utf8(c('myhostname')),0,255)),
++        $is_mlist);
+       $conn_h->commit;  1;
+     } or do {
+       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+

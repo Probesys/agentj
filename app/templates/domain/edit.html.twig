@@ -1,0 +1,11 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.Domain.edit'|trans() }} <strong>{{domain.domain}}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('domain/_form.html.twig') }}
+{% endblock %}
+

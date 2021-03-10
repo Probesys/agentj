@@ -1,0 +1,84 @@
+<ul class="nav nav-tabs" id="policyTab" role="tablist">
+   <li class="nav-item">
+      <a class="nav-link active" id="policy-tab" data-toggle="tab" href="#policy" role="tab" aria-controls="policy" aria-selected="true">{{ 'Entities.Policy.tabs.policy'|trans() }}</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="quarantine-tab" data-toggle="tab" href="#quarantine" role="tab" aria-controls="quarantine" aria-selected="false">{{ 'Entities.Policy.tabs.quarantine'|trans() }}</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="tagLevel-tab" data-toggle="tab" href="#tagLevel" role="tab" aria-controls="tagLevel" aria-selected="false">{{ 'Entities.Policy.tabs.tagLevel'|trans() }}</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="other-tab" data-toggle="tab" href="#other" role="tab" aria-controls="other" aria-selected="false">{{ 'Entities.Policy.tabs.other'|trans() }}</a>
+   </li>
+</ul>
+
+{{ form_start(form) }}
+<div class="tab-content" id="policyTabContent">
+   <div class="tab-pane fade show active" id="policy" role="tabpanel" aria-labelledby="policy-tab">
+      <p>
+         {{ form_row(form.policyName) }}
+         {{ form_row(form.virusLover) }}
+         {{ form_row(form.spamLover) }}
+         {{ form_row(form.bannedFilesLover) }}
+         {{ form_row(form.badHeaderLover) }}
+         {{ form_row(form.bypassVirusChecks) }}
+         {{ form_row(form.bypassBannedChecks) }}
+         {{ form_row(form.bypassHeaderChecks) }}
+         {{ form_row(form.bypassSpamChecks) }}
+      </p>
+   </div>
+   <div class="tab-pane fade" id="quarantine" role="tabpanel" aria-labelledby="quarantine-tab">
+      <p>
+         {{ form_row(form.virusQuarantineTo) }}
+         {{ form_row(form.spamQuarantineTo) }}
+         {{ form_row(form.virusQuarantineTo) }}
+         {{ form_row(form.bannedQuarantineTo) }}
+         {{ form_row(form.uncheckedQuarantineTo) }}
+         {{ form_row(form.cleanQuarantineTo) }}
+         {{ form_row(form.archiveQuarantineTo) }}
+      </p>
+   </div>
+   <div class="tab-pane fade" id="tagLevel" role="tabpanel" aria-labelledby="tagLevel-tab">
+      <p>
+         {{ form_row(form.spamTagLevel) }}
+         {{ form_row(form.spamTag2Level) }}
+         {{ form_row(form.spamTag3Level) }}
+         {{ form_row(form.spamKillLevel) }}
+         {{ form_row(form.spamDsnCutoffLevel) }}
+         {{ form_row(form.spamQuarantineCutoffLevel) }}
+         {{ form_row(form.spamSubjectTag) }}
+         {{ form_row(form.spamSubjectTag2) }}
+         {{ form_row(form.spamSubjectTag3) }}
+      </p>
+   </div>
+   <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab">
+      <p>
+         {{ form_row(form.addrExtensionVirus) }}
+         {{ form_row(form.addrExtensionSpam) }}
+         {{ form_row(form.addrExtensionBanned) }}
+         {{ form_row(form.addrExtensionBadHeader) }}
+         {{ form_row(form.warnvirusrecip) }}
+         {{ form_row(form.warnbannedrecip) }}
+         {{ form_row(form.warnbadhrecip) }}
+         {{ form_row(form.newvirusAdmin) }}
+         {{ form_row(form.virusAdmin) }}
+         {{ form_row(form.bannedAdmin) }}
+         {{ form_row(form.badHeaderAdmin) }}
+         {{ form_row(form.spamAdmin) }}
+         {{ form_row(form.messageSizeLimit) }}
+         {{ form_row(form.bannedRulenames) }}
+         {{ form_row(form.disclaimerOptions) }}
+         {{ form_row(form.forwardMethod) }}
+         {{ form_row(form.saUserconf) }}
+         {{ form_row(form.saUsername) }}
+         {{ form_row(form.uncheckedLover) }}
+      </p>
+   </div>
+</div>
+{{ form_rest(form) }}
+<div class="d-flex justify-content-center">
+   <input type="submit" class="btn btn-primary" value="{{ 'Generics.actions.save'|trans() }}" >&nbsp;
+   <a class="btn btn-outline-secondary" href="{{ path('policy_index') }}">{{ 'Generics.actions.backToTheList'|trans() }}</a>
+</div>
+{{ form_end(form) }}

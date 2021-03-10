@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Generics.actions.edit'|trans() }} {{ 'Entities.Policy.label'|trans() }} {{policy}}{% endblock %}
+
+{% block body %}
+  {% set _title = 'Generics.actions.edit'|trans ~ ' : ' ~ ' ' ~ 'Entities.Policy.label'|trans() ~ ' "' ~ policy ~ '"'%}
+  {% embed 'common/blockTitleAndButtons.html.twig' %}
+  {% endembed %}  
+
+  <div class="col bg-white">
+    <div class="row">
+      <div class="col-md-12">
+        {{ include('policy/_form.html.twig', {'button_label': 'Update'}) }}      
+      </div>
+    </div>
+
+  </div>
+
+
+
+{% endblock %}

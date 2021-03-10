@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Entities.Group.labels.usersGroup'|trans() }} "{{group.name}}"{% endblock %}
+
+{% block body %}
+
+  {% set _title = 'Entities.Group.labels.usersGroup'|trans ~ ' : ' ~ group.name %}
+  {% embed 'common/blockTitleAndButtons.html.twig' %}
+         
+
+  {% endembed %}    
+
+
+
+  <section id="no-more-tables">
+    <table id ="table_users_group"  class="table datatable">
+      <thead>
+        <tr>
+          {#        <th><input type="checkbox" id='checkAll'></th>#}
+          <th>{{ 'Entities.Group.Name'|trans() }}</th>
+          <th>{{ 'Entities.User.fields.email'|trans() }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>  
+            {#          <td><input type="checkbox"></td>#}
+            <td data-title="{{'Entities.Group.Name'|trans }}">{{user.fullname}}</td>
+            <td data-title="{{'Entities.User.fields.email'|trans }}">
+              {{user.getEmailFromRessource}}
+              {% if user.getOriginalUser  %}
+                <span class="badge badge-info">Alias</span>
+              {% endif %}
+            </td>
+            <td>
+              <ul class="list-inline list-unstyled">
+                <li class="list-inline-item">
+                  <a href="{{ path('group_remove_user',{'id' : group.id,'user' : user.id}) }}?_token={{ csrf_token('removeUser' ~ user.id) }}" class='btn btn-sm btn-danger confirmModal' 
+                     data-dialog-title='{{ 'Message.Dialogs.confirmRemoveUserFromGroupTitle'|trans }}' 
+                     data-dialog-content='{{ 'Message.Dialogs.confirmRemoveUserFromGroupContent'|trans }}'                   
+                     title="{{ 'Message.Dialogs.confirmRemoveUserFormGroupTitle'|trans() }}">
+                    <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                    <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Delete'|trans() }}</span>
+                  </a>
+                </li>
+              </ul>    
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <div class="d-flex justify-content-center">
+    <a class="btn btn-outline-secondary"  href="{{ path('groups_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
+  </div>  
+  {#  {% include 'alertsPopup.html.twig' %}        #}
+
+
+
+{% endblock %}

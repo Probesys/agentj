@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.User.indexAlias'|trans}}{% endblock %}
+
+{% block body %}
+    {% set _title = 'Entities.User.indexAlias'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+        {% block content_button_actions %} 
+            <a href="#"  data-url-modal-content="{{ path('new_user_email_alias') }}"   class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new_alias'|trans() }}</a>
+        {% endblock %}          
+
+    {% endembed %}   
+
+
+
+    <form id="massive-actions-form" action="{{ path('user_email_batch_delete') }}" method="post">
+        <section id="no-more-tables">
+            <table id="table_users" class="table  datatable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="cb" id='checkAll' data-target-checkall-class="selected-msg">
+                            <label class="for-cb" for="checkAll"></label>
+                        </th>
+                        <th>{{ 'Entities.User.fields.alias'|trans }}</th>
+                        <th>{{ 'Entities.User.fields.email'|trans }}</th>
+                        <th>actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="id[]" value="{{ user.id }}" id="{{ user.id }}" class="cb selected-msg">
+                                <label class="for-cb" for="{{ user.id }}"></label>
+                            </td>
+                            <td  data-title="{{'Entities.User.fields.alias'|trans }}">{{ user.alias }}</td>
+                            <td  data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email }}</td>
+                            <td>
+                                <ul class="list-inline list-unstyled">
+                                    <li class="list-inline-item">
+                                        <a href="#" data-url-modal-content="{{ path('user_email_alias_edit', {'id': user.id}) }}"    class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                            <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                        </a>
+
+                                        <a href="{{ path('user_email_delete', {'id': user.id}) }}?_token={{ csrf_token('delete' ~ user.id) }}" 
+                                           class='btn btn-sm btn-danger confirmModal' 
+                                           data-dialog-title='{{ 'Message.Dialogs.confirmDeleteUserTitle'|trans }}' 
+                                           data-dialog-content='{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}'
+                                           title="{{ 'Generics.actions.delete'|trans() }}">
+                                            <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                        </a>       
+                                        <a href="{{ path('homepage', {'_switch_user': user.email}) }}" 
+                                           class='btn btn-sm btn-danger' 
+                                           title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
+                                            <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
+                                        </a>  
+                                        <a href="{{ path('homepage', {'_switch_user': user.alias}) }}" 
+                                           class='btn btn-sm btn-primary' 
+                                           title="{{ 'Generics.actions.connectAs'|trans() ~ user.alias}} ">
+                                            <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
+                                        </a>                   
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </form>
+{% endblock %}
