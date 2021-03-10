@@ -1,0 +1,11 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.Domain.actions.add_new'|trans }}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('domain/_form.html.twig') }}
+{% endblock %}
+

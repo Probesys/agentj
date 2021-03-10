@@ -1,0 +1,27 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    form_themes:
+          - bootstrap_4_horizontal_layout.html.twig
+          - '@TetranzSelect2Entity/Form/fields.html.twig'
+          - 'forms/form_layout.html.twig'
+    globals:
+        agentjVersion: '%app.agentj-version%'
+        domain_mail_authentification_sender: '%app.domain_mail_authentification_sender%'
+        locales:
+            - fr
+            - en      
+        domainMessages_availableFields:
+            'Entities.Domain.labels.dynamicsVariables.URL_CAPTCHA' : 'URL_CAPTCHA'
+            'Entities.Domain.labels.dynamicsVariables.EMAIL_DEST' : 'EMAIL_DEST'
+            'Entities.Domain.labels.dynamicsVariables.URL_MSGS' : 'URL_MSGS'
+            'Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES' : 'NB_UNTREATED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES' : 'NB_AUTHORIZED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES' : 'NB_SPAMMED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.NB_BANNED_MESSAGES' : 'NB_BANNED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES' : 'NB_DELETED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES' : 'NB_RESTORED_MESSAGES'
+            'Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS' : 'LIST_MAIL_MSGS'
+                
+           

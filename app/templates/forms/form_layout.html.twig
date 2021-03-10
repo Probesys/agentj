@@ -1,0 +1,19 @@
+{% use "bootstrap_4_horizontal_layout.html.twig" %}
+
+{# Override form_widget_simple block to render bootstrap input-groups #}
+{% block form_widget_simple -%}
+
+   {%- if attr is defined and attr['input_addon'] is defined -%}
+      {% set aria_describedby = 'addon-' ~ random() %}
+      {%- set attr = attr|merge({'aria-describedby': aria_describedby}) -%}
+      <div class="input-group">
+      {%- endif -%}
+      {{- parent() -}}
+      {%- if attr is defined and attr['input_addon'] is defined -%}
+         <div class="input-group-append">
+            <span class="input-group-text" id="{{ aria_describedby }}">{{ attr['input_addon']|trans() }}</span>
+         </div>
+      </div>
+   {%- endif -%}
+{%- endblock form_widget_simple %}
+

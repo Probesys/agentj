@@ -1,0 +1,23 @@
+{
+  "name": "AgentJ",
+  "short_name": "AgentJ",
+  "description": "Lutte antispam by Probesys",
+  "icons": [
+      {
+        "src": "img/favicon.ico",
+        "sizes": "16x16",
+        "type": "image/png"
+      },
+        {
+          "src": "img/logo-512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }   
+      ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#9C73CD",
+  "theme_color": "#9C73CD"
+}
+

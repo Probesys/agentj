@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Policy{% endblock %}
+
+{% block body %}
+    <h1>Policy</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ policy.id }}</td>
+            </tr>
+            <tr>
+                <th>PolicyName</th>
+                <td>{{ policy.policyName }}</td>
+            </tr>
+            <tr>
+                <th>VirusLover</th>
+                <td>{{ policy.virusLover }}</td>
+            </tr>
+            <tr>
+                <th>SpamLover</th>
+                <td>{{ policy.spamLover }}</td>
+            </tr>
+            <tr>
+                <th>UncheckedLover</th>
+                <td>{{ policy.uncheckedLover }}</td>
+            </tr>
+            <tr>
+                <th>BannedFilesLover</th>
+                <td>{{ policy.bannedFilesLover }}</td>
+            </tr>
+            <tr>
+                <th>BadHeaderLover</th>
+                <td>{{ policy.badHeaderLover }}</td>
+            </tr>
+            <tr>
+                <th>BypassVirusChecks</th>
+                <td>{{ policy.bypassVirusChecks }}</td>
+            </tr>
+            <tr>
+                <th>BypassSpamChecks</th>
+                <td>{{ policy.bypassSpamChecks }}</td>
+            </tr>
+            <tr>
+                <th>BypassBannedChecks</th>
+                <td>{{ policy.bypassBannedChecks }}</td>
+            </tr>
+            <tr>
+                <th>BypassHeaderChecks</th>
+                <td>{{ policy.bypassHeaderChecks }}</td>
+            </tr>
+            <tr>
+                <th>VirusQuarantineTo</th>
+                <td>{{ policy.virusQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>SpamQuarantineTo</th>
+                <td>{{ policy.spamQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>BannedQuarantineTo</th>
+                <td>{{ policy.bannedQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>UncheckedQuarantineTo</th>
+                <td>{{ policy.uncheckedQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>BadHeaderQuarantineTo</th>
+                <td>{{ policy.badHeaderQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>CleanQuarantineTo</th>
+                <td>{{ policy.cleanQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>ArchiveQuarantineTo</th>
+                <td>{{ policy.archiveQuarantineTo }}</td>
+            </tr>
+            <tr>
+                <th>SpamTagLevel</th>
+                <td>{{ policy.spamTagLevel }}</td>
+            </tr>
+            <tr>
+                <th>SpamTag2Level</th>
+                <td>{{ policy.spamTag2Level }}</td>
+            </tr>
+            <tr>
+                <th>SpamTag3Level</th>
+                <td>{{ policy.spamTag3Level }}</td>
+            </tr>
+            <tr>
+                <th>SpamKillLevel</th>
+                <td>{{ policy.spamKillLevel }}</td>
+            </tr>
+            <tr>
+                <th>SpamDsnCutoffLevel</th>
+                <td>{{ policy.spamDsnCutoffLevel }}</td>
+            </tr>
+            <tr>
+                <th>SpamQuarantineCutoffLevel</th>
+                <td>{{ policy.spamQuarantineCutoffLevel }}</td>
+            </tr>
+            <tr>
+                <th>AddrExtensionVirus</th>
+                <td>{{ policy.addrExtensionVirus }}</td>
+            </tr>
+            <tr>
+                <th>AddrExtensionSpam</th>
+                <td>{{ policy.addrExtensionSpam }}</td>
+            </tr>
+            <tr>
+                <th>AddrExtensionBanned</th>
+                <td>{{ policy.addrExtensionBanned }}</td>
+            </tr>
+            <tr>
+                <th>AddrExtensionBadHeader</th>
+                <td>{{ policy.addrExtensionBadHeader }}</td>
+            </tr>
+            <tr>
+                <th>Warnvirusrecip</th>
+                <td>{{ policy.warnvirusrecip }}</td>
+            </tr>
+            <tr>
+                <th>Warnbannedrecip</th>
+                <td>{{ policy.warnbannedrecip }}</td>
+            </tr>
+            <tr>
+                <th>Warnbadhrecip</th>
+                <td>{{ policy.warnbadhrecip }}</td>
+            </tr>
+            <tr>
+                <th>NewvirusAdmin</th>
+                <td>{{ policy.newvirusAdmin }}</td>
+            </tr>
+            <tr>
+                <th>VirusAdmin</th>
+                <td>{{ policy.virusAdmin }}</td>
+            </tr>
+            <tr>
+                <th>BannedAdmin</th>
+                <td>{{ policy.bannedAdmin }}</td>
+            </tr>
+            <tr>
+                <th>BadHeaderAdmin</th>
+                <td>{{ policy.badHeaderAdmin }}</td>
+            </tr>
+            <tr>
+                <th>SpamAdmin</th>
+                <td>{{ policy.spamAdmin }}</td>
+            </tr>
+            <tr>
+                <th>SpamSubjectTag</th>
+                <td>{{ policy.spamSubjectTag }}</td>
+            </tr>
+            <tr>
+                <th>SpamSubjectTag2</th>
+                <td>{{ policy.spamSubjectTag2 }}</td>
+            </tr>
+            <tr>
+                <th>SpamSubjectTag3</th>
+                <td>{{ policy.spamSubjectTag3 }}</td>
+            </tr>
+            <tr>
+                <th>MessageSizeLimit</th>
+                <td>{{ policy.messageSizeLimit }}</td>
+            </tr>
+            <tr>
+                <th>BannedRulenames</th>
+                <td>{{ policy.bannedRulenames }}</td>
+            </tr>
+            <tr>
+                <th>DisclaimerOptions</th>
+                <td>{{ policy.disclaimerOptions }}</td>
+            </tr>
+            <tr>
+                <th>ForwardMethod</th>
+                <td>{{ policy.forwardMethod }}</td>
+            </tr>
+            <tr>
+                <th>SaUserconf</th>
+                <td>{{ policy.saUserconf }}</td>
+            </tr>
+            <tr>
+                <th>SaUsername</th>
+                <td>{{ policy.saUsername }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('policy_index') }}">back to list</a>
+
+    <a href="{{ path('policy_edit', {'id': policy.id}) }}">edit</a>
+
+    {{ include('policy/_delete_form.html.twig') }}
+{% endblock %}

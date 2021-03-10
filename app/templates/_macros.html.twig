@@ -1,0 +1,11 @@
+{# empty Twig template #}
+{% macro listLabelFromInitial(initial) %}
+  {% if initial=='W' %}
+    {{ 'Entities.WBList.fields.white'|trans }}
+  {% elseif (initial=='B') %}
+    {{ 'Entities.WBList.fields.black'|trans }}  
+  {% else %}
+    {{ initial }}
+  {% endif %}
+
+{% endmacro %}

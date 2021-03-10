@@ -1,0 +1,11 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.User.actions.edit'|trans() }}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('user/_form.html.twig', {'button_label': 'Generics.actions.save'|trans}) }}
+{% endblock %}
+

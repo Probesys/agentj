@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.User.indexLocal'|trans}}{% endblock %}
+
+{% block body %}
+
+    {% set _title = 'Entities.User.indexLocal'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+        {% block content_button_actions %} 
+            <a data-url-modal-content="{{ path('user_local_new') }}"  href="#" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new'|trans() }}</a>
+        {% endblock %}          
+
+    {% endembed %}   
+
+
+
+    <section id="no-more-tables">
+        <table class="table datatable">
+            <thead>
+                <tr>
+                    <th>{{ 'Entities.User.fields.userName'|trans }}</th>
+                    <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
+                    <th>{{ 'Entities.User.fields.roles'|trans }}</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for user in users %}
+                    <tr>
+                        <td data-title="{{'Entities.User.fields.userName'|trans }}">{{ user.username }}</td>
+                        <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
+                        <td data-title="{{'Entities.User.fields.roles'|trans }}">
+                            {{ user.roles }}
+                            {% for role in user.roles %}
+                                {{ role }}
+                            {% endfor %}
+                            {# user.roles #}</td>
+                        <td>
+                            <ul class="list-inline list-unstyled">
+                                <li class="list-inline-item">
+                                    <a href="#" data-url-modal-content="{{ path('user_local_edit', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                    </a>
+
+                                    <a href="#" data-url-modal-content="{{ path('user_local_change_password', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-warning' title="{{ 'Generics.actions.changePassword'|trans() }}">
+                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.changePassword'|trans() }}</span>
+                                    </a>
+
+                                    <a href="{{ path('user_local_delete', {'id': user.id}) }}?_token={{ csrf_token('delete' ~ user.id) }}" 
+                                       class='btn btn-sm btn-danger confirmModal' 
+                                       data-dialog-title='{{ 'Message.Dialogs.confirmDeleteUserTitle'|trans }}' 
+                                       data-dialog-content='{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}'
+                                       title="{{ 'Generics.actions.delete'|trans() }}">
+                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                    </a>   
+                                    <a href="{{ path('homepage', {'_switch_user': user.username}) }}" 
+                                       class='btn btn-sm btn-primary' 
+                                       title="{{ 'Generics.actions.connectAs'|trans() ~ user.username}} ">
+                                        <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
+                                    </a>                            
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}

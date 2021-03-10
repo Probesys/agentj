@@ -1,0 +1,34 @@
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="h-100 ">
+      <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+      {% if confirm is empty %}
+        <div class="">
+          {{ content|raw }}<br />
+        </div>
+        <div class="d-flex justify-content-center">
+
+          {{ form_start(form) }}
+          {{ form_widget(form) }}
+          <input type="submit" name="validate" class="btn btn-info" value="{{ button_label|default('Valider') }}"/>
+          {{ form_end(form) }}
+        </div>
+      {% else %}
+        <div class="d-flex justify-content-center">
+          {{confirm|raw}}
+        </div>
+      {% endif %}
+      </div>
+  </div>
+          
+
+{% endblock %}
+
+
+
+
+
+
+

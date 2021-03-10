@@ -1,6 +1,7 @@
 FROM debian:stable-slim AS build
 
 WORKDIR /var/www/html
+COPY . /var/www/html/
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
@@ -34,8 +35,6 @@ RUN apt-get update -q --fix-missing && \
     yarn \
     zip \
     && rm -rf /var/lib/apt/lists/* \
-    && git clone --single-branch --branch master https://github.com/Probesys/agentj.git agentj \
-    && cd agentj \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
     && yarn add @symfony/webpack-encore \
@@ -47,7 +46,7 @@ LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "AgentJ web app"
 LABEL description = "AgentJ frontend to manage mails and senders white/black lists"
 
-COPY --chown=www-data:www-data --from=build /var/www/html/agentj /var/www/html/agentj
+COPY --chown=www-data:www-data --from=build /var/www/html/ /var/www/html/agentj
 WORKDIR /var/www/html/agentj
 
 RUN apt-get update -q --fix-missing && \
@@ -78,12 +77,12 @@ RUN apt-get update -q --fix-missing && \
     && mkdir -p /var/run/php/ && touch /var/run/php/php7.3-fpm.pid \
     && rm -rf node_modules
 
-COPY conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
-COPY conf/supervisord.conf /etc/supervisor/supervisord.conf
-COPY files/.env /var/www/html/agentj/.env
-COPY files/amavisd-release /usr/local/bin/amavisd-release
-COPY db_init.sh /db_init.sh
-COPY entrypoint.sh /entrypoint.sh
+COPY docker/conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
+COPY docker/conf/supervisord.conf /etc/supervisor/supervisord.conf
+COPY docker/files/.env /var/www/html/agentj/.env
+COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
+COPY docker/db_init.sh /db_init.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 
 EXPOSE 9000
 

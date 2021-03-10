@@ -1,0 +1,17 @@
+{% set values = [10, 25, 50, 100, 200, 500,1000,3000] %}
+
+<label class="col-form-label">{{'Generics.labels.item_per_page'|trans}}</label>
+
+<select class="form-control form-control-sm" name="per_page" id="resultsPerPage">
+   {% if (per_page_global is defined) %}
+      {% if not(per_page_global in values) %}
+         {% set values = values|merge([per_page_global]) %}
+      {% endif %}
+   {% endif %}
+   {% set per_page = app.request.get('per_page') ? app.request.get('per_page') : per_page_global %}
+   {% for value in values|sort %}
+      <option value="value" {% if value == per_page %} selected="seleted" {% endif %} >{{value}}</option>
+   {% endfor %}
+</select>
+
+

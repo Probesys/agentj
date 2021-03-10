@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title%} {{ 'Config.title'|trans }} {% endblock %}
+
+
+{% block body %}
+  <h1>{{ 'Config.title'|trans }}</h1>
+  <div class="form-group row">
+    <label class="col-form-label col-sm-2">{{ 'Config.labels.logo'|trans }} ({{ 'Config.labels.logoMimetype'|trans }}) - {{ 'Config.labels.logoSize'|trans }}<br/></label>
+    <div class="col-sm-10">
+      <div id="dropzone-logo" class="dropzone-area logo" data-dropzone-action="{{ oneup_uploader_endpoint('gallery') }}">
+        {% if logoUploaded %}
+          <span id="delete-logo"class="fa fa-times-circle fa-2x text-success float-right"></span>
+          <img src="{{ asset('files/upload/')}}logo.png">
+        {%endif%}
+      </div>      
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}{{ 'Entities.Domain.labels.domainMessages'|trans }} {{domain}} {% endblock %}
+
+{% block body %}
+    {% set _title = 'Entities.Domain.labels.domainMessages'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+    {% endembed %}  
+
+  {{ include('domain/_formMessage.html.twig', {'button_label': 'Update'}) }}
+
+  <script type="text/javascript" src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
+
+  <script>CKEDITOR.replace('domain_message[message]');</script>
+
+  <script>CKEDITOR.replace('domain_message[mailmessage]');</script>
+  <script>CKEDITOR.replace('domain_message[confirmCaptchaMessage]');</script>
+  <script>CKEDITOR.replace('domain_message[message_alert]');</script>
+  <script>
+
+    // Permet à une div de suivre le scroll vertical
+    (function ($) {
+      var element = $('#container-variables'),
+              originalY = element.offset().top;
+
+      // Space between element and top of screen (when scrolling)
+      var topMargin = 75;
+
+      // Should probably be set in CSS; but here just for emphasis
+      element.css('position', 'relative');
+
+      $(window).on('scroll', function (event) {
+        var scrollTop = $(window).scrollTop();
+
+        element.stop(false, false).animate({
+          top: scrollTop < originalY
+                  ? 0
+                  : scrollTop - originalY + topMargin
+        }, 50);
+      });
+    })(jQuery);
+
+    var currentCKeditor = null;
+    CKEDITOR.on('instanceReady', function (event) {
+      event.editor.on('focus', function () {
+        console.log('focused', this);
+        currentCKeditor = this;
+      });
+    });
+
+    $('a.insertToBody').on('click', function (e)
+    {
+      e.preventDefault();
+      // pour ckeditor
+      if (typeof CKEDITOR != 'undefined' && currentCKeditor) {
+        myValue = $(this).data("variable-name");
+        if (myValue == '[URL_CAPTCHA]' || myValue == '[URL_MSGS]') {
+          currentCKeditor.insertHtml('<a href="' + myValue + '">' + myValue + '</a>');
+        } else {
+          currentCKeditor.insertHtml(myValue);
+        }
+
+      }
+    });
+  </script>
+
+{% endblock %}
