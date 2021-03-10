@@ -1,0 +1,10 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.Group.Actions.updateGroup'|trans }}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('groups/_form.html.twig') }}
+{% endblock %}

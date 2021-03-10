@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.Domain.index'|trans()}}{% endblock %}
+
+{% block body %}
+
+    {% set _title = 'Entities.Domain.index'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+        {% block content_button_actions %} 
+            {% if is_granted('ROLE_SUPER_ADMIN') %}
+                <div class="p-2 flex-fill">
+                    <a href="#" data-url-modal-content="{{ path('domain_new') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new'|trans() }}</a>
+                </div>
+            {%  endif %}              
+        {% endblock %}          
+
+    {% endembed %}  
+   
+
+    <section id="no-more-tables">
+        <table id ="table_msgs"  class="table  datatable">
+            <thead>
+                <tr>
+                    <th>{{ 'Generics.fields.name'|trans }}</th>
+                    <th>{{ 'Generics.fields.datemod'|trans }}</th>
+                    <th>{{ 'Generics.fields.active'|trans }}</th>
+                    <th>{{ 'Generics.labels.actions'|trans() }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for domain in domains %}
+                    <tr>
+                        <td data-title="{{'Generics.fields.name'|trans }}">{{ domain.domain }}</td>
+                        <td data-title="{{'Generics.fields.datemod'|trans }}">{{ domain.datemod ? domain.datemod|date('Y-m-d H:i:s') : '' }}</td>
+                        <td data-title="{{'Generics.fields.active'|trans }}">{{ domain.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
+                        <td>
+                            <ul class="list-inline list-unstyled">
+                                <li class="list-inline-item">
+                                    <a href="#" data-url-modal-content="{{ path('domain_edit', {'id': domain.id}) }}" class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                    </a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a href="{{ path('domain_wblist',{'id':domain.id}) }}" class='btn btn-sm btn-dark ' title="{{ 'Entities.Domain.actions.WBList'|trans() }}" >
+                                        <i class="fas fa-ruler d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Domain.labels.rules'|trans() }}</span>                         
+                                    </a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a href="{{ path('domain_messages',{'id':domain.id}) }}" class='btn btn-sm btn-secondary ' title="{{ 'Domain.Actions.messages'|trans() }}">
+                                        <i class="fas fa-comments d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Domain.actions.messages'|trans() }}</span>
+                                    </a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a href="{{ path('domain_delete', {'id': domain.id}) }}?_token={{ csrf_token('delete' ~ domain.id) }}" 
+                                       class='btn btn-sm btn-danger confirmModal' 
+                                       data-dialog-title='{{ 'Message.Dialogs.confirmDeleteDomainTitle'|trans }}' 
+                                       data-dialog-content='{{ 'Message.Dialogs.confirmDeleteDomainContent'|trans }}'
+                                       title="{{ 'Generics.actions.delete'|trans() }}">
+                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}

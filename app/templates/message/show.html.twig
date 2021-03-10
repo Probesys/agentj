@@ -1,0 +1,116 @@
+{% extends 'modalTemplate.html.twig' %}
+{% set msgDeferredStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
+{% block modalTitle %}
+  {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
+  Informations sur le message
+{% endblock %}
+
+{% block modalContent %}
+  <div class="row">
+    <div class="col-md-4">
+      Date
+    </div>
+    <div class="col-md-8">
+      {{ msg.timeiso| date('Y-m-d H:i:s', "Europe/Paris") }}
+    </div>      
+    <div class="col-md-4">
+      Expéditeur
+    </div>
+    <div class="col-md-8">
+      {{ msg.sid.getEmailClear }}
+      {% if msgRcpt.wl == 'Y' %}
+        <br><span class="font-weight-bold text-success">Liste blanche</span>
+      {% endif %}
+      {% if msgRcpt.bl == 'Y' %}
+        <br><span class="font-weight-bold text-danger">Liste noire</span>
+      {% endif %}        
+    </div>
+    <div class="col-md-4">
+      Destinataire
+    </div>
+    <div class="col-md-8">
+      {{ msgRcpt.rid.getEmailClear }}
+    </div>    
+    <div class="col-md-4">
+      Note de spam
+    </div>
+    <div class="col-md-8">
+      {{ msgRcpt.bspamLevel }}
+    </div>    
+    
+    {% if msgRcpt.sendCaptcha > 0 %}
+    <div class="col-md-4">
+      Demande d'authentification envoyée : 
+    </div>
+    <div class="col-md-8">
+       {{ msgRcpt.sendCaptcha|date("m/d/Y") }}
+    </div>   
+    {% endif %}
+    
+    <div class="col-md-4">
+      Mailing liste : 
+    </div>
+    <div class="col-md-8">
+       {%  if msg.isMlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
+    </div>    
+    <div class="col-md-4">
+      Status
+    </div>
+    <div class="col-md-8">
+      {# If the message as an agentJ status #}
+      {% if msgRcpt.status is not null %}
+        {#   authorized or restored status     #}
+        {% set msgsStatus = msgRcpt.status.name %}
+        {% set response = msgRcpt.amavisOutput %}
+        {% if msgRcpt.status.id == 2 or msgRcpt.status.id == 5  %}
+          {% set deferredSatusClass = 'text-success' %}
+        {% else %}
+          {% set deferredSatusClass = 'text-danger' %}
+        {% endif %}        
+      {% else %}
+        {% set msgsStatus = msgDeferredStatus[msgRcpt.ds] %}
+        {% set response = msgRcpt.smtpResp %}
+        {% if msgRcpt.ds == 'P' %}
+          {% set deferredSatusClass = 'text-success' %}
+        {% else %}
+          {% set deferredSatusClass = 'text-danger' %}
+        {% endif %}
+      {% endif %}
+
+      <span class="{{ deferredSatusClass }}">{{ msgsStatus }}</span><br>
+      <em>{{ response }}</em>
+    </div>
+    <div class="col-md-12">
+      Règle appliquée
+    </div>
+    <div class="col-md-12">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>dest</th>
+            <th>Adresse</th>
+            <th>Liste</th>
+            <th>Priorité</th>
+            <th>Groupe</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        {% for wb in wblistInfo %}
+          {% set classTr = "" %}
+          {% if loop.index == 1 %}
+            {% set classTr = "bg-success text-white" %}
+          {% endif %}
+          <tr class="{{ classTr }} ">
+            <td>{{ wb.recipient.getEmailFromRessource }}</td>
+            <td>{{ wb.sender.email }}</td>
+            <td>{{ wb.wb }}</td>
+            <td>{{ wb.priority }}</td>
+            <td>{{ wb.group }}</td>
+            <td>{{ wb.datemod| date('Y-m-d H:i:s') }}</td>
+          </tr>
+        {% endfor %}        
+      </table>
+    </div>      
+  </div>
+
+{% endblock %}

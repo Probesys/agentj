@@ -1,0 +1,151 @@
+version: '3.8'
+
+x-common-variables: &common
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_NAME: ${DB_NAME:-agentj}
+      DB_USER: ${DB_USER:-agentj}
+      DB_PASSWORD: ${DB_PASSWORD}
+      IPV4_NETWORK: 172.42.42
+      MAIL_HOSTNAME: ${MAIL_HOSTNAME}
+      MAIL_DOMAINNAME: ${MAIL_DOMAINNAME}
+      TZ: ${TZ:-Europe/Paris}
+      
+services:
+  db:
+    image: mariadb
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - TZ=${TZ}
+    networks:
+      - ajnet
+
+  app:
+    image: $CI_REGISTRY_IMAGE/app-dev
+    depends_on:
+      - db
+    environment:
+      <<: *common
+      PROXY_PORT: ${PROXY_PORT}
+    volumes:
+      - public:/var/www/html/agentj
+      - amavis:/tmp/amavis
+      - applogs:/var/log/agentj
+    networks:
+      - ajnet
+
+  web:
+    image: $CI_REGISTRY_IMAGE/web-dev
+    depends_on:
+      - app
+    environment:
+      <<: *common
+    volumes:
+      - public:/var/www/html/agentj
+    networks:
+      - ajnet
+      - public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=public"
+        - "traefik.http.routers.${ROUTER}.rule=Host(`${MAIL_HOSTNAME}`)"
+        - "traefik.http.services.${ROUTER}.loadbalancer.server.port=${PROXY_PORT}"
+        - "traefik.http.routers.${ROUTER}.entrypoints=websecure"
+        - "traefik.http.routers.${ROUTER}.tls.certresolver=le"
+        - "traefik.http.routers.${ROUTER}.tls=true"
+
+  smtp:
+    image: $CI_REGISTRY_IMAGE/smtp-dev
+    depends_on:
+      - db
+    environment:
+      <<: *common
+    volumes:
+      - postqueue:/var/spool/postfix
+      - smtpconfig:/etc/postfix
+    ports:
+      - target: 25
+        published: 25
+        mode: host
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
+
+  relay:
+    image: $CI_REGISTRY_IMAGE/relay-dev
+    environment:
+      <<: *common
+    volumes:
+      - opendkim:/etc/opendkim/
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
+
+  amavis:
+    image: $CI_REGISTRY_IMAGE/amavis-dev
+    depends_on:
+      - db
+    environment:
+      <<: *common
+    networks:
+      - ajnet
+    volumes:
+      - clamdb:/var/lib/clamav
+      - amavis:/var/lib/amavis
+
+  redis:
+    image: redis
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    volumes:
+      - redisdb:/data
+
+  logspout:
+    image: gliderlabs/logspout:latest
+    command: syslog+udp://syslogng:514?filter.name=agentj*
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  syslogng:
+    image: $CI_REGISTRY_IMAGE/syslogng-dev
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ajnet
+    ports:
+      - 514:514/udp
+    volumes:
+      - logs:/var/log/syslogng
+
+volumes:
+  amavis:
+  applogs:
+  clamdb:
+  db:
+  logs:
+  opendkim:
+  postqueue:
+  public:
+  redisdb:
+  smtpconfig:
+
+networks:
+  ajnet:
+    external: false
+    ipam:
+      config:
+        - subnet: ${IPV4_NETWORK:-172.42.42}.0/24
+  public:
+    external: true

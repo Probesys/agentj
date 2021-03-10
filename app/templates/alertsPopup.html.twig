@@ -1,0 +1,42 @@
+{% if messagesPopup is defined %} 
+
+{# Popups confirm action with javascript use data-target to choose your confirmation and the class confirmModal #}
+    {% for key,messagePopup in messagesPopup %}
+        <div id="dialog-confirm-{{key}}" title="{{messagePopup.title}}" style="display:none;">
+            <p>
+                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+                {{messagePopup.content}}
+            </p>
+        </div>            
+
+        <script type="text/javascript">
+            var thelink;
+            var thetarget;            
+            $(document).ready(function () {
+                $('#dialog-confirm-{{key}}').dialog({
+                    resizable: false,
+                    height: 160,
+                    width: 500,
+                    autoOpen: false,
+                    modal: true,
+                    buttons: {
+                        "Oui": function () {
+                            $(this).dialog("close");
+                            window.location.href = thelink;
+                        },
+                        "Annuler": function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+            $("a.confirmModal").click(function (e) {
+                e.preventDefault();
+                thelink = $(this).attr("href");
+                thetarget = $(this).attr("data-target");
+                console.log(thetarget);
+                $("#dialog-confirm-"+thetarget).dialog("open");
+            });
+        </script>
+    {% endfor %}   
+{% endif %}    

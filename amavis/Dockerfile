@@ -24,6 +24,7 @@ RUN apt-get update -q --fix-missing &&\
     libdbd-mysql-perl \
     libdbi-perl \
     nomarch \
+    patch \
     pax \
     spamassassin \
     spamc \
@@ -38,6 +39,7 @@ COPY conf/amavis/50-user /etc/amavis/conf.d/50-user
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
+COPY amavisd-new.patch /root/amavisd-new.patch
 
 RUN mkdir /var/run/clamav && \
     chown clamav:clamav /var/run/clamav && \

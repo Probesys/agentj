@@ -1,0 +1,7 @@
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+<div class="d-flex justify-content-center">
+  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
+  <a class="btn btn-outline-secondary" href="{{ path('groups_wblist_index',{'groupId' : group.id}) }}">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div> 
+{{ form_end(form) }}

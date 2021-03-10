@@ -1,0 +1,15 @@
+{% block content_title_and_actions %}
+    <div class="col bg-white">
+        <div class="row pt-3 pb-3">
+            <div class="col-md-6">
+              <h2>{{ _title|raw }}</h2>          
+            </div>
+            <div class="col-md-6 ">
+                    {% block content_button_actions %}
+                        
+                    {% endblock %}          
+
+            </div>
+        </div>
+    </div> 
+{% endblock %}

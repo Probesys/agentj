@@ -1,0 +1,26 @@
+{{ form_start(form) }}
+{#    {{ form_widget(form) }}#}
+{{ form_row(form.domain) }}
+{{ form_row(form.srvSmtp) }}
+{{ form_row(form.srvImap) }}
+{{ form_row(form.imap_port) }}
+{{ form_row(form.imap_flag) }}
+{{ form_row(form.imapNoValidateCert) }}
+{{ form_row(form.rules) }}
+{{ form_row(form.policy) }}
+{{ form_row(form.active) }}
+<div class="form-group row">
+  <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }} : <span id="domain-spam-level">{{ domainSpamLevel }}</span></label>
+  <div class="col-sm-12">{{ form_widget(form.level) }}</div>
+</div>
+<div class="form-group row">
+  <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
+  <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+</div>
+{{ form_row(form.mailAuthenticationSender) }}
+{{ form_row(form.logoFile) }}
+<div class="d-flex justify-content-center">
+  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
+<a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>   
+{{ form_end(form) }}

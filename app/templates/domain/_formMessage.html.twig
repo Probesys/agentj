@@ -1,0 +1,48 @@
+{{ form_start(form, {'attr': {'class': 'bg-white'}}) }}
+
+<div class="d-flex ">
+  <div class="col-9">
+    {{ form_row(form.mailmessage) }}
+  </div>
+  <div id="container-variables"  class="col-3">
+    <div class="card border-right-primary  h-100 card-vars">
+      <div class="card-header">
+        <i class="fas fa-puzzle-piece"></i>&nbsp;<strong>{{'Variables'|trans}}</strong>
+      </div>
+      <div class="card-body">
+        <ul class="card-text list-group list-group-flush">
+          {% for key, value in domainMessages_availableFields %}
+            <li>
+              <div class="var">
+                <div class="pull-left">
+                  <a data-variable-name="[{{value}}]" href="javascript:void(0);" class="btn-outline-secondary insertToBody" ><i class="far fa-caret-square-left"></i></a>
+                  <small class="name">{{key|trans}}</small>
+                </div>
+              </div>
+            </li>
+          {%  endfor %}           
+        </ul>
+      </div>
+    </div> 
+  </div>
+</div>
+<div class="d-flex ">
+  <div class="col-9">
+    {{ form_row(form.message) }}
+  </div>
+</div>
+<div class="d-flex ">
+  <div class="col-9">
+    {{ form_row(form.confirmCaptchaMessage) }}
+  </div>
+</div>
+<div class="d-flex ">
+  <div class="col-9">
+    {{ form_row(form.message_alert) }}
+  </div>
+</div><div class="d-flex justify-content-center">
+  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
+  <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.backToTheList'|trans() }}</a>
+</div>    
+{#    <button class="btn">{{ button_label|default('Save') }}</button>#}
+{{ form_end(form) }}

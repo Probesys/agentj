@@ -1,0 +1,10 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ domain }} : {{ 'Entities.Domain.actions.add_new_rule'|trans() }}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('domain/_formWblist.html.twig') }}
+{% endblock %}
