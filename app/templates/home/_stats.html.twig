@@ -1,0 +1,90 @@
+{# empty Twig template #}
+<style>
+  canvas{
+
+    {#  width:1000px !important;#}
+    {#  height:calc(100%- 250px)!important;#}
+
+  }
+</style>
+
+<canvas id="statsChart" style="height:calc(100%- 300px)"></canvas>
+<script>
+  $(document).ready(function (e) {
+    var ctx = document.getElementById('statsChart').getContext('2d');
+    var myLineChart = new Chart(ctx, {
+      type: 'line',
+      responsive: true,
+      data: {
+        labels: [
+  {% for day in listDay %}
+            '{{day| date('Y-m-d')}}',
+  {% endfor %}
+          ],
+          // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+          datasets: [{
+              label: 'Mails non traités',
+              data: [
+  {% for day in nbUntreadtedMsgByDay %}
+                '{{day.nb_result}}',
+  {% endfor %}
+              ],
+              borderColor: 'blue',
+              borderWidth: 1
+            },
+            {
+              label: 'Mail autorisés',
+              data: [
+  {% for day in nbAutorizeMsgByDay %}
+                '{{day.nb_result}}',
+  {% endfor %}                
+              ],
+              borderColor: 'green',
+              borderWidth: 1
+            },            
+            {
+              label: 'Mail bannis',
+              data: [
+  {% for day in nbBannedMsgByDay %}
+                '{{day.nb_result}}',
+  {% endfor %}                
+              ],
+              borderColor: 'red',
+              borderWidth: 1
+            },
+            {
+              label: 'Mail supprimés',
+              data: [
+  {% for day in nbDeletedMsgByDay %}
+                '{{day.nb_result}}',
+  {% endfor %}                
+              ],
+              borderColor: 'orange',
+              borderWidth: 1
+            },
+            {
+              label: 'Mail restaurés',
+              data: [
+  {% for day in nbRestoredMsgByDay %}
+                '{{day.nb_result}}',
+  {% endfor %}                
+              ],
+              borderColor: 'green',
+              borderWidth: 1
+            }             
+          ]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+          }
+        },
+      });
+    });
+
+
+</script>

@@ -1,0 +1,10 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.User.actions.add_new_alias'|trans() }}
+{% endblock %}
+
+{% block modalContent %}
+
+  {{ include('user/_form.html.twig') }}
+{% endblock %}

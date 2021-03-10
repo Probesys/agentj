@@ -1,0 +1,13 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.Group.Actions.addRuleToGroup'|trans }} : {{group.name}} 
+{% endblock %}
+
+{% block modalContent %}
+
+{#    <h1>{{ 'Entities.Group.Actions.addRuleToGroup'|trans }} : {{group.name}}</h1>#}
+
+    {{ include('groups_wblist/_form.html.twig') }}
+{% endblock %}
+

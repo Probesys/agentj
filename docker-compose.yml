@@ -8,10 +8,10 @@ services:
       - db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
+      - MYSQL_DATABASE=${DB_NAME:-agent}
+      - MYSQL_USER=${DB_USER:-agent}
       - MYSQL_PASSWORD=${DB_PASSWORD}
-      - TZ=${TZ}
+      - TZ=${TZ:-Europe/Paris}
     networks:
       - ajnet
 
@@ -20,8 +20,6 @@ services:
     restart: always
     depends_on:
       - db
-    environment:
-      - TZ=${TZ}
     volumes:
       - public:/var/www/html/agentj
       - amavis:/tmp/amavis
@@ -36,8 +34,6 @@ services:
     restart: always
     depends_on:
       - app
-    environment:
-      - TZ=${TZ}
     env_file:
       - .env
     volumes:
@@ -54,8 +50,6 @@ services:
       - .env
     depends_on:
       - db
-    environment:
-      - TZ=${TZ}
     volumes:
       - postqueue:/var/spool/postfix
       - smtpconfig:/etc/postfix
@@ -70,8 +64,6 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      - TZ=${TZ}
     volumes:
       - opendkim:/etc/opendkim/
     networks:
@@ -81,8 +73,6 @@ services:
   amavis:
     image: probesys38/agentj_amavis:latest
     restart: always
-    environment:
-      - TZ=${TZ}
     env_file:
       - .env
     depends_on:
@@ -117,8 +107,6 @@ services:
   syslogng:
     image: probesys38/agentj_syslogng:latest
     restart: always
-    environment:
-      - TZ=${TZ}
     networks:
       - ajnet
     ports:

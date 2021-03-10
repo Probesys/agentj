@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.Report.title'|trans()}}{% endblock %}
+
+{% block body %}
+    <div class="flex-lg-column">
+    <h1 >{{'Entities.Report.title'|trans()}}</h1>
+    {% if reportMsgs.day is not empty %}
+        <h2 >{{'Entities.Report.titleDay'|trans()}}</h2>
+        <table class='table table-hover'>
+            <thead>
+                <tr>
+                    <th>{{'Entities.Report.stateMessage'|trans()}}</th>
+                    <th>{{'Entities.Report.typeMessage'|trans()}}</th>
+                    <th>{{'Entities.Report.numberMessage'|trans()}}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% set typeLabel = 'Entities.Report.typeLabel.auto' %}
+                {% for reportMsg in reportMsgs.day %}
+                    {% if reportMsg.name %}
+                        {% set typeLabel = 'Entities.Report.typeLabel.'~reportMsg.name %}
+                    {% endif %}
+                    {% set typeState = 'Entities.Report.typeState.'~reportMsg.content %}
+                    <tr>
+                        <td>{{ typeLabel|trans }}</td>
+                        <td>{{ typeState|trans }}</td>
+                        <td>{{ reportMsg.nb }}</td>
+                    {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if reportMsgs.month is not empty %}
+        <h2>{{'Entities.Report.titleMonth'|trans()}}</h2>
+        <table class='table table-hover'>
+            <thead>
+                <tr>
+                    <th>{{'Entities.Report.stateMessage'|trans()}}</th>
+                    <th>{{'Entities.Report.typeMessage'|trans()}}</th>
+                    <th>{{'Entities.Report.numberMessage'|trans()}}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% set typeLabel = 'Entities.Report.typeLabel.auto' %}
+                {% for reportMsg in reportMsgs.month %}
+                    {% if reportMsg.name %}
+                        {% set typeLabel = 'Entities.Report.typeLabel.'~reportMsg.name %}
+                    {% endif %}
+                    {% set typeState = 'Entities.Report.typeState.'~reportMsg.content %}
+                    <tr>
+                        <td>{{ typeLabel|trans }}</td>
+                        <td>{{ typeState|trans }}</td>
+                        <td>{{ reportMsg.nb }}</td>
+                    {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    </div>    
+    
+{% endblock %}

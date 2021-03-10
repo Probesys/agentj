@@ -1,0 +1,37 @@
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<div class="d-flex justify-content-center">
+  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
+  {#  <a class="btn btn-outline-secondary" href="{{ path('groups_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>#}
+  <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>       
+
+{{ form_end(form) }}
+<script>
+  $(document).ready(function () {
+    $("#groups_users").select2({
+      minimumInputLength: 3,
+      ajax: {
+        url: "{{ path('load_user_domain') }}",
+        type: "post",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term, // search term,
+            domain: $('#groups_domain').val()
+          };
+        },
+        processResults: function (response) {
+          return {
+            results: response.items
+          };
+        },
+        cache: true
+      }
+    });
+
+  });
+
+
+</script>

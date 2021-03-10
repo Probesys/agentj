@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Entities.Group.Title'|trans() }}{% endblock %}
+
+{% block body %}
+    {% set _title = 'Entities.Group.Title'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+        {% block content_button_actions %} 
+            <a href="#" data-url-modal-content="{{ path('groups_new') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.New'|trans() }}</a>
+        {% endblock %}          
+
+    {% endembed %}   
+
+    
+
+    <section id="no-more-tables">
+        <table id ="table_groups"  class="table datatable">
+            <thead>
+                <tr>
+                    {#        <th><input type="checkbox" id='checkAll'></th>#}
+                    <th>{{ 'Entities.Group.Name'|trans() }}</th>
+                    <th>{{ 'Entities.Domain.Name'|trans() }}</th>
+                    <th>{{ 'Generics.fields.active'|trans() }}</th>
+                    <th>{{ 'Entities.Group.Updated'|trans() }}</th>
+                    <th>{{ 'Entities.Group.Actions.list'|trans() }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in groups %}
+                    <tr>  
+                        {#          <td><input type="checkbox"></td>#}
+                        <td data-title="{{'Entities.Group.Name'|trans }}">{{group.name}}</td>
+                        <td data-title="{{'Entities.Domain.Name'|trans }}">{{group.domain.domain}}</td>
+                        <td data-title="{{'Entities.Group.Active'|trans }}">{{ group.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
+                        <td data-title="{{'Entities.Group.Updated'|trans }}">{{group.datemod|date('Y-m-d H:i:s')}}</td>            
+                        <td>
+                            <ul class="list-inline list-unstyled">
+                                <li class="list-inline-item">
+                                    <a href="#" data-url-modal-content="{{ path('groups_edit',{'id':group.id}) }}" class='btn-open-modal btn btn-sm btn-success' data-target='authorized' title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}">
+                                        <i class="fas fa-edit  d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Updated'|trans() }}</span>
+                                    </a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a href="{{ path('groups_wblist_index',{'groupId':group.id}) }}" class='btn btn-sm btn-dark ' data-target='authorized' title="{{ 'Entities.Group.labels.grouprules'|trans() }}">
+                                        <i class="fas fa-ruler d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Group.labels.rules'|trans() }}</span>
+                                    </a>
+                                </li>                                
+                                <li class="list-inline-item">
+                                    <a href="{{ path('groups_list_users',{'id':group.id}) }}" class='btn btn-sm btn-secondary' data-target='authorized' title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}">
+                                        <i class="fas fa-edit  d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Group.labels.usersGroup'|trans() }}</span>
+                                    </a>
+                                </li>              
+                                <li class="list-inline-item">
+                                    <a href="{{ path('groups_delete',{'id' : group.id}) }}?_token={{ csrf_token('delete' ~ group.id) }}" class='btn btn-sm btn-danger confirmModal' 
+                                       data-dialog-title='{{ 'Message.Dialogs.confirmDeleteGroupTitle'|trans }}' 
+                                       data-dialog-content='{{ 'Message.Dialogs.confirmDeleteGroupContent'|trans }}'                   
+                                       title="{{ 'Group.Actions.Delete'|trans() }}">
+                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Delete'|trans() }}</span>
+                                    </a>
+                                </li>
+                            </ul>    
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% include 'alertsPopup.html.twig' %}        
+
+
+
+{% endblock %}

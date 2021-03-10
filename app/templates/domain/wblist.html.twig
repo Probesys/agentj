@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.Domain.labels.domainrules'|trans}} {{domain.domain}}{% endblock %}
+
+{% block body %}
+
+
+  {% if domain.active %}
+    {% set _title = 'Entities.Domain.labels.domainrules'|trans ~ ' : ' ~ domain.domain ~ " <span class='badge badge-success'>" ~ 'Generics.fields.active'| trans ~ "</span>" %}
+  {% else %}
+    {% set _title = 'Entities.Domain.labels.domainrules'|trans ~ ' : ' ~ domain.domain ~ " <span class='badge badge-success'>" ~ 'Generics.fields.inactive'| trans ~ "</span>" %}
+  {% endif %}
+  {% embed 'common/blockTitleAndButtons.html.twig' %}
+
+    {% block content_button_actions %} 
+      <a href="#" data-url-modal-content="{{ path('domain_wblist_new',{'domainId':domain.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new_rule'|trans() }}</a>              
+    {% endblock %}          
+
+  {% endembed %}  
+
+  <section id="no-more-tables">
+    <table class="table  datatable">
+      <thead>
+        <tr>
+          {#        <th><input type="checkbox" id='checkAll'></th>#}
+          <th>{{ 'Generics.fields.sender'|trans() }}</th>
+          <th>{{ 'Entities.Domain.labels.rules'|trans() }}</th>
+          <th>{{ 'Generics.labels.actions'|trans() }}</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for wb in wblist %}
+          {% set mail = wb.getSid().email %}
+          {% if mail != "@." %}
+            <tr>  
+              {#            <td><input type="checkbox"></td>#}
+              <td  data-title="{{'Generics.fields.sender'|trans }}">{{mail}}</td>
+              <td data-title="{{'Entities.Domain.labels.rules'|trans }}">
+                {% set libelle = 'Entities.Domain.rulesValues.'~wb.getWb() %}
+                {{ libelle|trans }}
+              </td>
+              <td>
+                <ul class="list-inline list-unstyled">
+                  <li class="list-inline-item">
+                    <a href="{{ path('domain_wblist_delete',{'rid' : wb.getRid().id, 'sid' : wb.getSid().id}) }}" class="btn btn-sm btn-danger confirmModal" 
+                       data-target="delete"  
+                       data-dialog-title='{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}' 
+                       data-dialog-content='{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}'                         
+                       title="{{ 'Entities.Domain.actions.deleteRule'|trans }}">
+                      <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                      <span class="d-md-none d-lg-block">{{ 'Entities.Domain.actions.deleteRule'|trans }}</span>
+                    </a>
+                  </li>                 
+                </ul>   
+
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <div class="d-flex justify-content-center">
+    <a class="btn btn-outline-secondary"  href="{{ path('domain_index') }}">{{ 'Entities.Domain.actions.backToDomainList'|trans() }}</a>
+
+  </div>  
+  {% include 'alertsPopup.html.twig' %}        
+
+
+{% endblock %}

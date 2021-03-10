@@ -1,0 +1,20 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+    {{'Entities.Import.Wbliste.title'|trans}}
+{% endblock %}
+
+
+{% block modalContent %}
+    {{ form_start(form) }}
+    <h5>{{ 'Form.ImportFile'|trans() }}  </h5>
+    <span class="text-info">
+        {{ 'Entities.Import.Wbliste.description'|trans()| raw }}
+    </span>          
+    {{ form_widget(form) }}
+    <div class="d-flex justify-content-center">
+        <button class="btn btn-primary mr-2">{{'Entities.Import.actions.import'|trans}}</button>
+        <button class="btn btn-outline-secondary btn-close-modal">{{'Generics.actions.cancel'|trans}}</button>  
+    </div>    
+    {{ form_end(form) }}
+{% endblock %}

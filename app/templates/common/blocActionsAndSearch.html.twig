@@ -1,0 +1,29 @@
+{% set values = [10, 25, 50, 100, 200, 500,1000,3000] %}
+<div class="col mb-3 bg-white pb-3">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row ">
+                <div class="col-md-6 col-sm-12">
+                    <label class="col-form-label">{{'Generics.actions.display'|trans}}</label>
+                    {{ form_widget(filter_form.per_page) }}
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    {% if filter_form.actions is defined %}
+                        <label class="col-form-label">Actions</label>
+                        {{ form_widget(filter_form.actions) }}
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+            <div class="col-md-6 ">
+                <form class="form-inline float-right mt-4">
+                    <label for="search" class="mr-2 col-form-label">&nbsp</label><br/>
+                    <input type="text" placeholder="{{'Generics.actions.search'|trans}}" class="form-control form-control input-sm" autocomplete="off" id="search" name="search"  value="">
+                    <button type="submit" class="ml-1 btn btn-danger ">Ok</button>
+                </form>
+            </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{'Entities.Policy.actions.add_new'|trans()}}{% endblock %}
+
+{% block body %}
+   <h2>{{'Entities.Policy.actions.add_new'|trans()}}</h2>
+  <div class="col bg-white">
+    <div class="row">
+      <div class="col-md-12">
+        {{ include('policy/_form.html.twig', {'button_label': 'Update'}) }}      
+      </div>
+    </div>
+
+  </div>
+
+{#   {{ include('policy/_form.html.twig') }}#}
+
+{% endblock %}

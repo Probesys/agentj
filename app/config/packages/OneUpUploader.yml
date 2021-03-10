@@ -1,0 +1,7 @@
+oneup_uploader:
+    mappings:
+        gallery:
+            namer: App.doc_namer
+            frontend: dropzone
+            storage:
+                directory: "%kernel.root_dir%/../public/files/upload/"
