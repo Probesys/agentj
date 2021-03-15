@@ -350,10 +350,11 @@ class MessageController extends AbstractController {
    */
   public function msgsToWblist($partitionTag, $mailId, $wb, $status, $type = 0, $rid = null) {
     $state = false;
-    $successReleasedMsgs = [];
+//    $successReleasedMsgs = [];
     $em = $this->getDoctrine()->getManager();
 
     //select msgs and msgcpt
+    /*@var $msgs Msgs */
     $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
     if (!$msgs) {
       throw $this->createNotFoundException('The message does not exist.');
@@ -367,12 +368,22 @@ class MessageController extends AbstractController {
 
     //check if sender exists in the database
     $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
+     //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
+    
+    preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msgs->getFromAddr(), $matches);
+    if (isset($matches[0][0]) && filter_var($matches[0][0], FILTER_VALIDATE_EMAIL)) {
+      $fromAddr = filter_var($matches[0][0], FILTER_VALIDATE_EMAIL);
+      $emailSenderToWb = $emailSender != $fromAddr ? $fromAddr : $emailSender;
+    }      
+
+    
      
-    $mailaddrSender = $em->getRepository(Mailaddr::class)->findOneBy(['email' => $emailSender]);
+    $mailaddrSender = $em->getRepository(Mailaddr::class)->findOneBy(['email' => $emailSenderToWb]);
+ 
     //if notwe create email in Mailaddr
     if (!$mailaddrSender) {
       $mailaddrSender = new Mailaddr();
-      $mailaddrSender->setEmail($emailSender);
+      $mailaddrSender->setEmail($emailSenderToWb);
       $mailaddrSender->setPriority(6);
       $em->persist($mailaddrSender);
     }
@@ -396,11 +407,11 @@ class MessageController extends AbstractController {
       foreach ($userAndAliases as $user) {
         //add white liste
 
-        $sid = $mailaddrSender->getId();
+//        $sid = $mailaddrSender->getId();
         $rid = $user->getId();
         //if the msgs is authorized we release all msgs of the same sender
         //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
-        $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user]);
+        $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $emailSenderToWb, 'rid' => $user]);
         if (!$wblist) {
           $wblist = new Wblist($user, $mailaddrSender);
         }
@@ -500,16 +511,24 @@ class MessageController extends AbstractController {
     $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
     $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
+    
+    preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msgs->getFromAddr(), $matches);
+    if (isset($matches[0][0]) && filter_var($matches[0][0], FILTER_VALIDATE_EMAIL)) {
+      $fromAddr = filter_var($matches[0][0], FILTER_VALIDATE_EMAIL);
+      $emailSenderToWb = $emailSender != $fromAddr ? $fromAddr : $emailSender;
+    }  
+
+    
     $emailRecipient = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
     $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
 
     $userDomain = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
     //todo check right of user connected admin of domain access
-    $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSender]));
+    $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSenderToWb]));
 
     if (!$mailaddr) {
       $mailaddr = new Mailaddr();
-      $mailaddr->setEmail($emailSender);
+      $mailaddr->setEmail($emailSenderToWb);
       $mailaddr->setPriority('6'); //priority for email by default
       $em->persist($mailaddr);
     } else {
