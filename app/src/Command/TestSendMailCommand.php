@@ -40,13 +40,12 @@ class TestSendMailCommand extends ContainerAwareCommand {
       $destMail = $io->ask('To ');
       $userMail = $io->ask('From ');
       $useSameReturnPath = $io->ask('Use Same return_path ? (y/n)');
-      if ($useSameReturnPath=='y' || empty($useSameReturnPath)){
+      if ($useSameReturnPath == 'y' || empty($useSameReturnPath)) {
         $returnPath = $userMail;
-      }
-      else{
+      } else {
         $returnPath = uniqid() . "-" . $userMail;
       }
-     
+
 
       $body = 'Message.Captcha.defaultMailContent';
 
@@ -67,23 +66,24 @@ class TestSendMailCommand extends ContainerAwareCommand {
       $subject = 'Re : MEssage test';
 
       //$transport = new Swift_SmtpTransport($this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport'));
-      $transport = new Swift_SmtpTransport("2.56.156.246");
+      $transport = new Swift_SmtpTransport("192.168.19.221");
       $mailer = new Swift_Mailer($transport);
       $mailFrom = $container->getParameter('app.domain_mail_authentification_sender');
-      
+$recipients = explode(',', $destMail);
       $message = (new Swift_Message($subject))
               ->setContentType("text/html")
-              ->setTo($destMail)
+              ->setTo($recipients)
               ->setFrom($userMail, "tester")
               ->setReturnPath($returnPath)
               ->setBody($body)
               ->addPart($bodyTextPlain, 'text/plain');
 
+
       $isMlist = $io->ask('Add List-id in header ? (y/n)');
-      if ($isMlist == 'y'){
-        $message->getHeaders()->addTextHeader('List-unsubscribe', 'List <' . $returnPath . '>');  
+      if ($isMlist == 'y') {
+        $message->getHeaders()->addTextHeader('List-unsubscribe', 'List <' . $returnPath . '>');
       }
-      
+
       try {
 //        dump($mailer);
         $mailer->send($message, $failedRecipients);
