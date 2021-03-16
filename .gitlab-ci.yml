@@ -58,7 +58,7 @@ amavis_build:
     IMG: amavis
   script:
     - docker pull $REGISTRY/agentj_amavis || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
 #  only:
 #    changes:
@@ -71,7 +71,7 @@ relay_build:
     IMG: relay
   script:
     - docker pull $REGISTRY/agentj_relay || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
 #  only:
 #    changes:
@@ -84,7 +84,7 @@ smtp_build:
     IMG: smtp
   script:
     - docker pull $REGISTRY/agentj_smtp || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
 #  only:
 #    changes:
@@ -110,7 +110,7 @@ web_build:
     IMG: web
   script:
     - docker pull $REGISTRY/agentj_web || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
 #  only:
 #    changes:
@@ -124,18 +124,31 @@ deploy-dev:
     name: dev
   variables:
     DEPLOY_USER: docker
+    DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
   before_script:
     - apk add --no-cache rsync
+    - |-
+          if [[ ! -z $CI_COMMIT_TAG ]] ; then
+              TAG=$CI_COMMIT_TAG
+          elif [[ $CI_COMMIT_BRANCH == "master" ]] ; then
+              TAG="latest"
+          else
+              TAG=$CI_COMMIT_BRANCH
+          fi
+          echo $TAG
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}"
-    - rsync -arv ./ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/agentj-docker/
-    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd /home/$DEPLOY_USER/agentj-docker/ && docker-compose down"
+    - sed -i "s/latest/$TAG/g" docker-compose.yml
+    - echo $DEPLOY_DIR
+    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DIR/
+    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd /home/$DEPLOY_USER/agentj-docker/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     refs:
       - master
