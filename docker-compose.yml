@@ -94,7 +94,7 @@ services:
       - redisdb:/data
 
   logspout:
-    image: gliderlabs/logspout:latest
+    image: gliderlabs/logspout
     restart: always
     command: syslog+udp://syslogng:514?filter.name=agentj*
     environment:
