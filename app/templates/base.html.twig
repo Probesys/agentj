@@ -118,7 +118,7 @@
 
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
-        <script src="{{ url('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"}) }}"></script>
+        <script src="{{ url('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})|replace({'http':'https'}) }}"></script>
         <script src="{{ asset('js/translations/config.js') }}"></script>              
         <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
       {% endif %}
