@@ -150,5 +150,5 @@ deploy-dev:
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
-    refs:
-      - master
+    - merge_requests
+    - master
