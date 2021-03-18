@@ -47,10 +47,10 @@ app_build:
     - docker pull $REGISTRY/agentj_$IMG:$TAG || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - app/*
-#      - app/**/*
+  only:
+    changes:
+      - app/*
+      - app/**/*
 
 amavis_build:
   stage: build
@@ -60,10 +60,10 @@ amavis_build:
     - docker pull $REGISTRY/agentj_amavis || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - amavis/*
-#      - amavis/**/*
+  only:
+    changes:
+      - amavis/*
+      - amavis/**/*
 
 relay_build:
   stage: build
@@ -73,10 +73,10 @@ relay_build:
     - docker pull $REGISTRY/agentj_relay || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - relay/*
-#      - relay/**/*
+  only:
+    changes:
+      - relay/*
+      - relay/**/*
 
 smtp_build:
   stage: build
@@ -86,10 +86,10 @@ smtp_build:
     - docker pull $REGISTRY/agentj_smtp || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - smtp/*
-#      - smtp/**/*
+  only:
+    changes:
+      - smtp/*
+      - smtp/**/*
 
 syslogng_build:
   stage: build
@@ -99,10 +99,10 @@ syslogng_build:
     - docker pull $REGISTRY/agentj_syslogng || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - syslogng/*
-#      - syslogng/**/*
+  only:
+    changes:
+      - syslogng/*
+      - syslogng/**/*
 
 web_build:
   stage: build
@@ -112,10 +112,10 @@ web_build:
     - docker pull $REGISTRY/agentj_web || true
     - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - web/*
-#      - web/**/*
+  only:
+    changes:
+      - web/*
+      - web/**/*
 
 deploy-dev:
   stage: deploy
