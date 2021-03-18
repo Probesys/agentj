@@ -9,9 +9,6 @@ echo "$MAIL_HOSTNAME" > /etc/mailname
 sed -i "12i\$myhostname = \"$MAIL_HOSTNAME\";" /etc/amavis/conf.d/05-node_id
 chmod 644 /etc/amavis/conf.d/*
 
-# Patch Amavis
-patch -p1 /usr/sbin/amavisd-new < /root/amavisd-new.patch
-
 # Initialize AV database
 if [ ! -f /var/lib/clamav/main.cvd ]
 then
