@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-set -e
 
 SQL_SCRIPT="/var/www/html/agentj/setup/agentj.sql"
 
 # Wait until db server has initialized itself
-sleep 30
+while ! /usr/bin/mysql -h db -u root -p$DB_ROOT_PASSWORD 
+do
+    sleep 10
+    echo "AGENTJ: Waiting for database to become available"
+done
 if /usr/bin/mysql -h db -u root -p$DB_ROOT_PASSWORD -e "USE agentj; SELECT * FROM domain"
 then
-    echo "Database already initialized"
+    echo "AGENTJ: Database already initialized"
     exit
 elif [ -f "$SQL_SCRIPT" ]
 then
