@@ -41,6 +41,8 @@ COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY amavisd-new.patch /root/amavisd-new.patch
 
+RUN patch -p1 /usr/sbin/amavisd-new < /root/amavisd-new.patch
+
 RUN mkdir /var/run/clamav && \
     chown clamav:clamav /var/run/clamav && \
     chmod 755 /var/run/clamav && \
