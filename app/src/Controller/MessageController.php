@@ -411,7 +411,7 @@ class MessageController extends AbstractController {
         $rid = $user->getId();
         //if the msgs is authorized we release all msgs of the same sender
         //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
-        $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $emailSenderToWb, 'rid' => $user]);
+        $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user]);
         if (!$wblist) {
           $wblist = new Wblist($user, $mailaddrSender);
         }
