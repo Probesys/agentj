@@ -7,16 +7,16 @@ MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 MY_TOKEN_ENC_IV=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 MY_TOKEN_ENC_SALT=$(openssl rand -base64 32)
 
-sed -i "s/\$MYAPPSECRET/$MYAPPSECRET/g" /var/www/html/agentj/.env
-sed -i "s/\$MY_TOKEN_ENC_IV/$MY_TOKEN_ENC_IV/g" /var/www/html/agentj/.env
-sed -i "s/\$MY_TOKEN_ENC_SALT/$MY_TOKEN_ENC_SALT/g" /var/www/html/agentj/.env
-sed -i "s/\$DB_NAME/$DB_NAME/g" /var/www/html/agentj/.env
-sed -i "s/\$DB_USER/$DB_USER/g" /var/www/html/agentj/.env
-sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /var/www/html/agentj/.env
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /var/www/html/agentj/.env
-sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /var/www/html/agentj/.env
-sed -i "s/\$DB_NAME/$DB_NAME/g" /db_init.sh
-sed -i "s/\$DB_ROOT_PASSWORD/$DB_ROOT_PASSWORD/g" /db_init.sh
+sed -i "s|\$MYAPPSECRET|$MYAPPSECRET|g" /var/www/html/agentj/.env
+sed -i "s|\$MY_TOKEN_ENC_IV|$MY_TOKEN_ENC_IV|g" /var/www/html/agentj/.env
+sed -i "s|\$MY_TOKEN_ENC_SALT|$MY_TOKEN_ENC_SALT|g" /var/www/html/agentj/.env
+sed -i "s|\$DB_NAME|$DB_NAME|g" /var/www/html/agentj/.env
+sed -i "s|\$DB_USER|$DB_USER|g" /var/www/html/agentj/.env
+sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/html/agentj/.env
+sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/html/agentj/.env
+sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/html/agentj/.env
+sed -i "s|\$DB_NAME|$DB_NAME|g" /db_init.sh
+sed -i "s|\$DB_ROOT_PASSWORD|$DB_ROOT_PASSWORD|g" /db_init.sh
 /bin/bash /db_init.sh
 
 echo "Installing assets"
