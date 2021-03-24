@@ -11,7 +11,7 @@
             <strong>{{ msg.from_addr }}</strong><br>
             {{ msg.subject }}
           </td>
-          <td style="text-align: right;min-width: 180px;">
+          <td width="180" style="text-align: right;min-width: 180px;">
 <a href="{{url ~ path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
    title="Autoriser l'expéditeur" style="font-size:16px;
                            -moz-border-radius: 5px;
@@ -28,6 +28,8 @@
                            ">
   Autoriser
 </a>
+</td>
+<td>
 <a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title="Récupérer le mail" style="font-size:16px;   
                            -moz-border-radius: 5px;
                            -webkit-border-radius: 5px;
