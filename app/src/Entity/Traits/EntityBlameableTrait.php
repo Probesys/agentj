@@ -17,7 +17,6 @@ trait EntityBlameableTrait
     /**
      * Set createdBy.
      *
-     * @param \App\Entity\User $createdBy
      *
      */
     public function setCreatedBy(\App\Entity\User $createdBy = null)
@@ -36,5 +35,4 @@ trait EntityBlameableTrait
     {
         return $this->createdBy;
     }
-
 }

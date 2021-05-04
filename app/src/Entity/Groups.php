@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+//use Gedmo\
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
@@ -82,20 +83,20 @@ class Groups
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $active;
-  
-    public function __toString(){
+
+    public function __toString()
+    {
         return $this->name;
     }
-    
-    
+
+
     public function __construct()
     {
         $this->datemod = new \DateTime();
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
+    }
 
-    }    
-    
     public function getId(): ?int
     {
         return $this->id;
@@ -127,8 +128,8 @@ class Groups
         return $this;
     }
 
- 
-    
+
+
     /**
      * @return Collection|Rights[]
      */
@@ -136,7 +137,7 @@ class Groups
     {
         return $this->rights;
     }
-    
+
 
     public function addRight(Rights $right): self
     {
@@ -261,6 +262,4 @@ class Groups
 
         return $this;
     }
-
-
 }

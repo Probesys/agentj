@@ -15,23 +15,25 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Tetranz\Select2EntityBundle\Form\Type\Select2EntityType;
 
-class UserPreferencesType extends AbstractType {
+class UserPreferencesType extends AbstractType
+{
 
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
         $builder
             ->add('report', null, [
                 'label' => false,
-            ])      
+            ])
             ->add('bypassHumanAuth', null, [
                 'label' => false,
-            ])                   
+            ])
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver)
+    {
         $resolver->setDefaults([
             'data_class' => User::class,
         ]);
     }
-
 }

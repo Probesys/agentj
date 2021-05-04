@@ -43,8 +43,8 @@ class Msgrcpt
     * @ORM\ManyToOne(targetEntity="App\Entity\Maddr")
     * @ORM\JoinColumn(name="rid", nullable=true)
     */
-    private $rid;         
-    
+    private $rid;
+
     /**
      * @var string
      *
@@ -274,6 +274,4 @@ class Msgrcpt
 
         return $this;
     }
-
-
 }
