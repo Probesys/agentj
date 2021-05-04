@@ -15,26 +15,28 @@ use App\Entity\Wblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Controller\Traits\ControllerWBListTrait;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/admin/import")
  */
-class ImportController extends AbstractController {
-
+class ImportController extends AbstractController
+{
     use ControllerCommonTrait;
     use ControllerWBListTrait;
 
     private $translator;
 
-    public function __construct(TranslatorInterface $translator) {
+    public function __construct(TranslatorInterface $translator)
+    {
         $this->translator = $translator;
     }
 
     /**
      * @Route("/users", name="import_user_email", options={"expose"=true})
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $translator = $this->translator;
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_user_email'),
@@ -77,12 +79,12 @@ class ImportController extends AbstractController {
     }
 
     /*
-     * 
+     *
      * Import user from file csv columns : email , LastName, FirstName, Group */
 
-    function import($pathfile) {
+    function import($pathfile)
+    {
         $split = ';';
-        $nbUser = 0;
         $nbUser = count(file($pathfile)) - 1;
 
         $row = 0;
@@ -95,8 +97,8 @@ class ImportController extends AbstractController {
         $groups = [];
         $groupWbUpdate = [];
         $domains = [];
-        if (($handle = fopen($pathfile, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 1024, $split)) !== FALSE) {
+        if (($handle = fopen($pathfile, "r")) !== false) {
+            while (($data = fgetcsv($handle, 1024, $split)) !== false) {
               //check line nulber of columns
                 if ((count($data) < 2)) {
                     $errors[] = $row + 1;
@@ -118,7 +120,7 @@ class ImportController extends AbstractController {
                             if (!isset($groups[$slugGroup])) {
                                 $group = $em->getRepository(Groups::class)->findOneBy(['slug' => $slugGroup]);
                                 if (!$group) {
-                                    //get rules of domain 
+                                    //get rules of domain
                                     if (!isset($domains[$domainEmail]['wb'])) {
                                         $wb = $em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domainEmail);
                                         $domains[$domainEmail]['wb'] = $wb['wb'];
@@ -169,9 +171,7 @@ class ImportController extends AbstractController {
                             }
                         }
                     } else {
-                      
                         //Todo add to $error[]
-                        
                     }
                     if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
                         $em->flush();
@@ -188,5 +188,4 @@ class ImportController extends AbstractController {
         }
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
     }
-
 }

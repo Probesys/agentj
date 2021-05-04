@@ -40,7 +40,7 @@ class Maddr
      *
      * @ORM\Column(name="is_invalid", type="boolean", nullable=true)
      */
-    private $isInvalid;    
+    private $isInvalid;
 
     /**
      * @var string
@@ -70,12 +70,12 @@ class Maddr
     {
         return $this->email;
     }
-    
+
 
     public function getEmailClear()
     {
         return stream_get_contents($this->email, -1, 0);
-    }    
+    }
 
     public function setEmail($email): self
     {
@@ -107,6 +107,4 @@ class Maddr
 
         return $this;
     }
-
-
 }

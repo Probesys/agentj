@@ -72,14 +72,14 @@ class Domain
      *
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
-    private $active;    
+    private $active;
 
     /**
      * @var string
      *
      * @ORM\Column(name="transport", type="string", length=255, nullable=false)
      */
-    private $transport;    
+    private $transport;
 
     /**
      * @var text
@@ -104,25 +104,20 @@ class Domain
      *
      */
     private $message_alert;
-    
+
     /**
      * @var string
      *
      * @ORM\Column(name="level", type="float", nullable=true)
      */
-    private $level = 20;    
-    
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Captcha")
-    * @ORM\JoinColumn(name="captcha_id", nullable=true)
-    */
-    private $captcha;    
-    
+    private $level = 20;
+
+
     /**
     * @ORM\ManyToOne(targetEntity="App\Entity\Policy")
     * @ORM\JoinColumn(name="policy_id", nullable=true)
     */
-    private $policy;     
+    private $policy;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\User", mappedBy="domains")
@@ -154,8 +149,8 @@ class Domain
      */
     private $imapNoValidateCert;
 
-  
-    
+
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -163,10 +158,11 @@ class Domain
         $this->groups = new ArrayCollection();
     }
 
-    public function __toString(){
+    public function __toString()
+    {
         return $this->domain;
     }
-    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -280,17 +276,6 @@ class Domain
         return $this;
     }
 
-    public function getCaptcha(): ?Captcha
-    {
-        return $this->captcha;
-    }
-
-    public function setCaptcha(?Captcha $captcha): self
-    {
-        $this->captcha = $captcha;
-
-        return $this;
-    }
 
     public function getMailmessage(): ?string
     {
@@ -446,6 +431,4 @@ class Domain
 
         return $this;
     }
-
-
 }
