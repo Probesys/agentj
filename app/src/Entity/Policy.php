@@ -332,8 +332,8 @@ class Policy
     public function __toString(): ?string
     {
         return $this->policyName;
-    }    
-    
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -866,6 +866,4 @@ class Policy
 
         return $this;
     }
-
-
 }

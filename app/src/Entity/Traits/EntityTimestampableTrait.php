@@ -28,5 +28,4 @@ trait EntityTimestampableTrait
 
         return $this;
     }
-
 }

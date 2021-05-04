@@ -13,32 +13,33 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 //use Symfony\Component\String\Slugger\SluggerInterface;
 
-class FileUploader {
+class FileUploader
+{
 
 
 
     private $targetDirectory;
 
-    public function __construct($targetDirectory, EntityManager $em) {
+    public function __construct($targetDirectory)
+    {
 
         $this->targetDirectory = $targetDirectory;
-
     }
 
-    public function upload(UploadedFile $file) {
+    public function upload(UploadedFile $file)
+    {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        try {          
-            $file->move($this->targetDirectory , $originalFilename);   
+        try {
+            $file->move($this->targetDirectory, $originalFilename);
             return $originalFilename;
         } catch (FileException $e) {
             return "";
         }
-       
-    }
-    
-    public function setTargetDirectory($dirname) {
-        $this->targetDirectory = $this->targetDirectory.$dirname;
-        return $this;
     }
 
+    public function setTargetDirectory($dirname)
+    {
+        $this->targetDirectory = $this->targetDirectory . $dirname;
+        return $this;
+    }
 }
