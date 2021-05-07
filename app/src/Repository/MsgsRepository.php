@@ -303,7 +303,7 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id '
             . ' LEFT JOIN maddr ms ON ms.id = m.sid '//sid is sender
             . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
-            . ' WHERE m.content != "C" AND msr.content != "C" AND msr.status_id IS NULL AND mr.email = "' . $emailRecipient . '" AND ms.email =  "' . $emailSender . '"';
+            . ' WHERE m.content != "C" AND msr.content != "C" AND mr.email = "' . $emailRecipient . '" AND ms.email =  "' . $emailSender . '"';
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
