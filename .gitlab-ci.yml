@@ -153,6 +153,7 @@ deploy-devel:
   before_script:
     - apk add --no-cache rsync
     - echo $TAG 
+    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEVEL >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
@@ -170,7 +171,6 @@ deploy-devel:
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
-    - staging
   only:
     - master
 
