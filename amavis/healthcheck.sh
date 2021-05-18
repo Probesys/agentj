@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 _APP="AMAVISD"
 _PORT=10024
