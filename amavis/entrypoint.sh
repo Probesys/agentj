@@ -1,13 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
 # Initialize Amavis conf with variables
-sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/amavis/conf.d/50-user
-sed -i "s/\$DB_USER/$DB_USER/g" /etc/amavis/conf.d/50-user
-sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/amavis/conf.d/50-user
+sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/amavisd.conf
+sed -i "s/\$DB_USER/$DB_USER/g" /etc/amavisd.conf
+sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/amavisd.conf
 echo "$MAIL_HOSTNAME" > /etc/mailname
-sed -i "12i\$myhostname = \"$MAIL_HOSTNAME\";" /etc/amavis/conf.d/05-node_id
-chmod 644 /etc/amavis/conf.d/*
+sed -i "12i\$myhostname = \"$MAIL_HOSTNAME\";" /etc/amavisd.conf
+chmod 644 /etc/amavisd.conf
 
 # Initialize AV database
 if [ ! -f /var/lib/clamav/main.cvd ]
@@ -17,5 +17,8 @@ fi
 
 # Start the AV database daemon
 /usr/bin/freshclam -d -c 3
+
+# Refresh SA rules
+/usr/bin/sa-update
 
 exec "$@"

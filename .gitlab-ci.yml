@@ -7,29 +7,39 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
   DOCKER_IMAGE_TAG: $CI_PIPELINE_ID
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
 
 services:
   - docker:dind
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - node_modules/
-    - vendor/
 
 stages:
   - build
   - deploy
 
 before_script:
-  - docker login --username $HUB_USER -p $HUB_TOKEN
   - |-
         if [[ ! -z $CI_COMMIT_TAG ]] ; then
             TAG=$CI_COMMIT_TAG
         elif [[ $CI_COMMIT_BRANCH == "master" ]] ; then
-            TAG="latest"
+            TAG="devel"
+            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        elif [[ $CI_COMMIT_BRANCH == "preprod" ]] ; then
+            TAG="preprod"
+            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        elif [[ $CI_COMMIT_BRANCH == "prod" ]] ; then
+            TAG=$CI_COMMIT_TAG
+            REGISTRY=$REGISTRY
+            docker login --username $HUB_USER -p $HUB_TOKEN
         else
             TAG=$CI_COMMIT_BRANCH
+            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         fi
         echo $TAG
 
@@ -37,15 +47,17 @@ app_build:
   stage: build
   cache:
     key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - vendor/
   variables:
     IMG: app
   script:
-    - apk add --no-cache nodejs yarn composer php7
-    - docker pull $REGISTRY/agentj_$IMG:$TAG || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --target base
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:base .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
     changes:
@@ -57,21 +69,25 @@ amavis_build:
   variables:
     IMG: amavis
   script:
-    - docker pull $REGISTRY/agentj_amavis || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
-    changes:
-      - amavis/*
-      - amavis/**/*
+      changes:
+        - amavis/*
+        - amavis/**/*
 
 relay_build:
   stage: build
   variables:
     IMG: relay
   script:
-    - docker pull $REGISTRY/agentj_relay || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
     changes:
@@ -83,8 +99,10 @@ smtp_build:
   variables:
     IMG: smtp
   script:
-    - docker pull $REGISTRY/agentj_smtp || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
     changes:
@@ -96,8 +114,10 @@ syslogng_build:
   variables:
     IMG: syslogng
   script:
-    - docker pull $REGISTRY/agentj_syslogng || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
     changes:
@@ -109,46 +129,73 @@ web_build:
   variables:
     IMG: web
   script:
-    - docker pull $REGISTRY/agentj_web || true
-    - cd $CI_PROJECT_DIR/$IMG && docker build --cache-from $REGISTRY/agentj_$IMG:$TAG -t $REGISTRY/agentj_$IMG:$TAG .
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
   only:
     changes:
       - web/*
       - web/**/*
 
-deploy-dev:
+deploy-devel:
   stage: deploy
   cache: {}
   environment:
-    name: dev
+    name: devel
+    url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
   before_script:
     - apk add --no-cache rsync
-    - |-
-          if [[ ! -z $CI_COMMIT_TAG ]] ; then
-              TAG=$CI_COMMIT_TAG
-          elif [[ $CI_COMMIT_BRANCH == "master" ]] ; then
-              TAG="latest"
-          else
-              TAG=$CI_COMMIT_BRANCH
-          fi
-          echo $TAG
+    - TAG="devel"
   script:
-    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
+    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEVEL >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_HOST:-$1}"
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_DEVEL:-$1}"
     - sed -i "s/latest/$TAG/g" docker-compose.yml
     - echo $DEPLOY_DIR
-    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
-    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEVEL:$DEPLOY_DIR/
+    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
+    - staging
+  only:
     - master
+
+deploy-preprod:
+  stage: deploy
+  cache: {}
+  environment:
+    name: preprod
+    url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
+  variables:
+    DEPLOY_USER: docker
+    DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
+  before_script:
+    - apk add --no-cache rsync
+    - TAG="preprod"
+  script:
+    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
+    - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD:-$1}"
+    - sed -i "s/latest/$TAG/g" docker-compose.yml
+    - echo $DEPLOY_DIR
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker volume rm agentj-docker_public || true
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+  except:
+    - merge_requests
+  only:
+    - preprod
