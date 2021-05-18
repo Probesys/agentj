@@ -151,14 +151,14 @@ deploy-devel:
   before_script:
     - apk add --no-cache rsync
     - TAG="devel"
-    - REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEVEL >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_DEVEL:-$1}"
-    - sed -i "s/probesys38/$REGISTRY/g" docker-compose.yml
-    - sed -i "s/latest/$TAG/g" docker-compose.yml
+    - sed -i 's/probesys38/"$REGISTRY"/g' docker-compose.yml
+    - sed -i 's/latest/$TAG/g' docker-compose.yml
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEVEL:$DEPLOY_DIR/
@@ -184,14 +184,14 @@ deploy-preprod:
   before_script:
     - apk add --no-cache rsync
     - TAG="preprod"
-    - REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD:-$1}"
-    - sed -i "s/probesys38/$REGISTRY/g" docker-compose.yml
-    - sed -i "s/latest/$TAG/g" docker-compose.yml
+    - sed -i 's/probesys38/"$REGISTRY"/g' docker-compose.yml
+    - sed -i 's/latest/$TAG/g' docker-compose.yml
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
