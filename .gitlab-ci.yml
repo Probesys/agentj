@@ -59,10 +59,10 @@ app_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - app/*
-      - app/**/*
+#  only:
+#    changes:
+#      - app/*
+#      - app/**/*
 
 amavis_build:
   stage: build
@@ -74,10 +74,10 @@ amavis_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-      changes:
-        - amavis/*
-        - amavis/**/*
+#  only:
+#      changes:
+#        - amavis/*
+#        - amavis/**/*
 
 relay_build:
   stage: build
@@ -89,10 +89,10 @@ relay_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - relay/*
-      - relay/**/*
+  # only:
+  #   changes:
+  #     - relay/*
+  #     - relay/**/*
 
 smtp_build:
   stage: build
@@ -104,10 +104,10 @@ smtp_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - smtp/*
-      - smtp/**/*
+  # only:
+  #   changes:
+  #     - smtp/*
+  #     - smtp/**/*
 
 syslogng_build:
   stage: build
@@ -119,10 +119,10 @@ syslogng_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - syslogng/*
-      - syslogng/**/*
+  # only:
+  #   changes:
+  #     - syslogng/*
+  #     - syslogng/**/*
 
 web_build:
   stage: build
@@ -134,10 +134,10 @@ web_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - web/*
-      - web/**/*
+  # only:
+  #   changes:
+  #     - web/*
+  #     - web/**/*
 
 deploy-devel:
   stage: deploy
@@ -149,7 +149,6 @@ deploy-devel:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
     TAG: "devel"
-    REGISTRY: "$CI_REGISTRY/$CI_PROJECT_PATH"
   before_script:
     - apk add --no-cache rsync
     - echo $TAG 
@@ -184,10 +183,10 @@ deploy-preprod:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
     TAG: "preprod"
-    REGISTRY: "$CI_REGISTRY/$CI_PROJECT_PATH"
   before_script:
     - apk add --no-cache rsync
     - echo $TAG 
+    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
