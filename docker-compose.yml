@@ -15,13 +15,27 @@ services:
     networks:
       - ajnet
 
+  amavis:
+    image: probesys38/agentj_amavis:latest
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - ajnet
+    volumes:
+      - clamdb:/var/lib/clamav
+      - amavis:/var/amavis
+
   app:
     image: probesys38/agentj_app:latest
     restart: always
     depends_on:
+      - amavis
       - db
     volumes:
-      - public:/var/www/html/agentj
+      - public:/var/www/agentj
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
     env_file:
@@ -29,19 +43,16 @@ services:
     networks:
       - ajnet
 
-  web:
-    image: probesys38/agentj_web:latest
+  relay:
+    image: probesys38/agentj_relay:latest
     restart: always
-    depends_on:
-      - app
     env_file:
       - .env
     volumes:
-      - public:/var/www/html/agentj
+      - opendkim:/etc/opendkim/
     networks:
-      - ajnet
-    ports:
-      - 127.0.0.1:${PROXY_PORT:-8090}:80
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   smtp:
     image: probesys38/agentj_smtp:latest
@@ -59,29 +70,42 @@ services:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
-  relay:
-    image: probesys38/agentj_relay:latest
+  syslogng:
+    image: probesys38/agentj_syslogng:latest
     restart: always
+    networks:
+      - ajnet
+    ports:
+      - 514:514/udp
+    volumes:
+      - logs:/var/log/syslogng
+
+  web:
+    image: probesys38/agentj_web:latest
+    restart: always
+    depends_on:
+      - app
     env_file:
       - .env
     volumes:
-      - opendkim:/etc/opendkim/
+      - public:/var/www/agentj
     networks:
-      ajnet:
-        ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
+      - ajnet
+    ports:
+      - 127.0.0.1:${PROXY_PORT:-8090}:80
 
-  amavis:
-    image: probesys38/agentj_amavis:latest
+  logspout:
+    image: gliderlabs/logspout
     restart: always
-    env_file:
-      - .env
     depends_on:
-      - db
+      - syslogng
+    command: syslog+udp://syslogng:514?filter.name=agentj*
+    environment:
+      - TZ=${TZ}
     networks:
       - ajnet
     volumes:
-      - clamdb:/var/lib/clamav
-      - amavis:/var/lib/amavis
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   redis:
     image: redis
@@ -93,26 +117,11 @@ services:
     volumes:
       - redisdb:/data
 
-  logspout:
-    image: gliderlabs/logspout
-    restart: always
-    command: syslog+udp://syslogng:514?filter.name=agentj*
-    environment:
-      - TZ=${TZ}
-    networks:
-      - ajnet
+  watchtower:
+    image: containrrr/watchtower
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
-  syslogng:
-    image: probesys38/agentj_syslogng:latest
-    restart: always
-    networks:
-      - ajnet
-    ports:
-      - 514:514/udp
-    volumes:
-      - logs:/var/log/syslogng
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: agentj_*
 
 volumes:
   amavis:
