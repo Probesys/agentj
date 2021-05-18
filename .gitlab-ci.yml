@@ -148,10 +148,10 @@ deploy-devel:
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
+    TAG: "devel"
+    REGISTRY: "$CI_REGISTRY/$CI_PROJECT_PATH"
   before_script:
     - apk add --no-cache rsync
-    - TAG="devel"
-    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEVEL >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
@@ -181,10 +181,10 @@ deploy-preprod:
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
+    TAG: "preprod"
+    REGISTRY: "$CI_REGISTRY/$CI_PROJECT_PATH"
   before_script:
     - apk add --no-cache rsync
-    - TAG="preprod"
-    - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
