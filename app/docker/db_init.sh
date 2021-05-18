@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-SQL_SCRIPT="/var/www/html/agentj/setup/agentj.sql"
+SQL_SCRIPT="/var/www/agentj/setup/agentj.sql"
 
 # Wait until db server has initialized itself
-while ! /usr/bin/mysql -h db -u root -p$DB_ROOT_PASSWORD 
+while ! /usr/bin/mysql -h db -u root -p$DB_ROOT_PASSWORD -e "quit"
 do
     sleep 10
     echo "AGENTJ: Waiting for database to become available"
