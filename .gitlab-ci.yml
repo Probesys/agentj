@@ -165,7 +165,7 @@ deploy-devel:
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEVEL:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
@@ -199,7 +199,7 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
