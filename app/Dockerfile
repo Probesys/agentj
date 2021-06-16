@@ -69,7 +69,6 @@ RUN apk --update add \
     php7-openssl \
     php7-session \
     php7-simplexml \
-    php7-sodium \
     php7-sysvsem \
     php7-tokenizer \
     php7-xml \
