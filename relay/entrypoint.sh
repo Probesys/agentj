@@ -28,4 +28,7 @@ do
     fi
 done
 
+# Fix file permissions
+find /etc/postfix/ -type f -exec chmod 644 {} \;
+
 exec "$@"
