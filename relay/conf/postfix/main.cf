@@ -5,12 +5,6 @@ readme_directory = no
 compatibility_level = 2
 smtp_host_lookup = native
 
-smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
-smtpd_tls_security_level = may
-smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
-smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-
 myhostname = relay.$MAIL_DOMAINNAME
 myorigin = /etc/mailname
 alias_maps = hash:/etc/postfix/aliases
