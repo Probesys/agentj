@@ -63,7 +63,6 @@ services:
       - db
     volumes:
       - postqueue:/var/spool/postfix
-      - smtpconfig:/etc/postfix
     ports:
       - 0.0.0.0:25:25
     networks:
@@ -108,7 +107,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   redis:
-    image: redis
+    image: redis:6.2-alpine
     restart: always
     environment:
       - TZ=${TZ}
@@ -133,7 +132,6 @@ volumes:
   postqueue:
   public:
   redisdb:
-  smtpconfig:
 
 networks:
   ajnet:
