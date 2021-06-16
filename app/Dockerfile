@@ -49,6 +49,7 @@ WORKDIR /var/www/agentj
 RUN apk --update add \
     dcron \
     mariadb-client \
+    libssl1.1 \
     openssl \
     perl \
     php7 \
