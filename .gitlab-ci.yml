@@ -22,9 +22,7 @@ stages:
 
 before_script:
   - |-
-        if [[ ! -z $CI_COMMIT_TAG ]] ; then
-            TAG=$CI_COMMIT_TAG
-        elif [[ $CI_COMMIT_BRANCH == "master" ]] ; then
+        if [[ $CI_COMMIT_BRANCH == "master" ]] ; then
             TAG="devel"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -37,7 +35,9 @@ before_script:
             REGISTRY=$REGISTRY
             docker login --username $HUB_USER -p $HUB_TOKEN
         else
-            TAG=$CI_COMMIT_BRANCH
+            if [[ -z $CI_COMMIT_TAG ]] ; then
+                TAG=$CI_COMMIT_BRANCH
+            fi
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         fi
@@ -59,10 +59,10 @@ app_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - app/*
-#      - app/**/*
+  only:
+    changes:
+      - app/*
+      - app/**/*
 
 amavis_build:
   stage: build
@@ -74,10 +74,10 @@ amavis_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#      changes:
-#        - amavis/*
-#        - amavis/**/*
+  only:
+      changes:
+        - amavis/*
+        - amavis/**/*
 
 relay_build:
   stage: build
@@ -89,10 +89,10 @@ relay_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - relay/*
-  #     - relay/**/*
+  only:
+    changes:
+      - relay/*
+      - relay/**/*
 
 smtp_build:
   stage: build
@@ -104,10 +104,10 @@ smtp_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - smtp/*
-  #     - smtp/**/*
+  only:
+    changes:
+      - smtp/*
+      - smtp/**/*
 
 syslogng_build:
   stage: build
@@ -119,10 +119,10 @@ syslogng_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - syslogng/*
-  #     - syslogng/**/*
+  only:
+    changes:
+      - syslogng/*
+      - syslogng/**/*
 
 web_build:
   stage: build
@@ -134,10 +134,10 @@ web_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - web/*
-  #     - web/**/*
+  only:
+    changes:
+      - web/*
+      - web/**/*
 
 deploy-devel:
   stage: deploy
@@ -165,7 +165,7 @@ deploy-devel:
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEVEL:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
@@ -199,7 +199,7 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:

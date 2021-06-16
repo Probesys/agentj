@@ -21,7 +21,7 @@ class CryptEncrypt
     public function encryptUrl($url) {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
-        $crypt = openssl_encrypt($url, 'seed', $salt, 0, $iv);
+        $crypt = openssl_encrypt($url, 'aes-256-cbc', $salt, 0, $iv);
         //durée de validité du lien
         $date = time() + 7 * 24 * 3600;
         return base64_encode($date . $crypt);
@@ -39,7 +39,7 @@ class CryptEncrypt
         $iv = $this->params->get('iv');
         $cryptdate = substr(base64_decode($token), 0, 10);
         $crypt = substr_replace(base64_decode($token), '', 0, 10);
-        $decrypted = openssl_decrypt($crypt, 'seed', $salt, 0, $iv);
+        $decrypted = openssl_decrypt($crypt, 'aes-256-cbc', $salt, 0, $iv);
         return array($cryptdate, $decrypted);
     }
     
