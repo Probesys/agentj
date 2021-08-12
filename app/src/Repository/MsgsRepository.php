@@ -183,15 +183,9 @@ class MsgsRepository extends ServiceEntityRepository
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id ';
         }
-<<<<<<< HEAD
 
         $stmt = $conn->prepare($sql);
 
-=======
-
-        $stmt = $conn->prepare($sql);
-
->>>>>>> 910fcfab043d90ef11112643f8c7af4501bd4d03
         $stmt->execute();
         $conn->close();
         $return = $stmt->fetchAll();
