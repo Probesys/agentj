@@ -83,7 +83,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
                 if ($domain->getImapNoValidateCert()) {
                     $conStr .= '/novalidate-cert';
                 }
+                
+                $conStr = '{' . $conStr . '}';
+                $mbox = @imap_open($conStr, $loginImap, $credentials['password']);
                 if (!imap_errors()) {
+                    
                     $user = $this->entityManager->getRepository('App:User')->findOneBy(['email' => strtolower($credentials['username'])]);
                     if (!$user) {
                         throw new CustomUserMessageAuthenticationException('Authentication failed.');
