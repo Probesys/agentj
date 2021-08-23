@@ -57,13 +57,11 @@ class Mailaddr
         return stream_get_contents($this->email, -1, 0);
     }
 
-    
+
     public function setEmail($email): self
     {
         $this->email = $email;
 
         return $this;
     }
-
-
 }

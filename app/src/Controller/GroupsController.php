@@ -20,168 +20,172 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups")
  */
-class GroupsController extends AbstractController {
+class GroupsController extends AbstractController
+{
+    use ControllerWBListTrait;
 
-  use ControllerWBListTrait;
-
-  private function checkAccess($group) {
-    if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-
-      if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
-        throw new AccessDeniedException();
-      }
+    private function checkAccess($group)
+    {
+        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+            if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
+                throw new AccessDeniedException();
+            }
+        }
     }
-  }
 
   /**
    * @Route("/", name="groups_index", methods="GET")
    */
-  public function index(): Response {
-    $groups = $this->getDoctrine()
+    public function index(): Response
+    {
+        $groups = $this->getDoctrine()
             ->getRepository(Groups::class)
             ->findByDomain($this->getUser()->getDomains());
 
-    return $this->render('groups/index.html.twig', ['groups' => $groups]);
-  }
+        return $this->render('groups/index.html.twig', ['groups' => $groups]);
+    }
 
   /**
    * @Route("/new", name="groups_new", methods="GET|POST")
    */
-  public function new(Request $request): Response {
-    $group = new Groups();
-    if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-      $form = $this->createForm(GroupsType::class, $group, [
-          'actions' => $this->wBListUserActions,
-          'action' => $this->generateUrl('groups_new'),
-      ]);
-    } else {
-      $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->wBListUserActions, 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
-    }
-    $form->handleRequest($request);
+    public function new(Request $request): Response
+    {
+        $group = new Groups();
+        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+            $form = $this->createForm(GroupsType::class, $group, [
+            'actions' => $this->wBListUserActions,
+            'action' => $this->generateUrl('groups_new'),
+            ]);
+        } else {
+            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->wBListUserActions, 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
+        }
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($group);
 
-      $em = $this->getDoctrine()->getManager();
-      $em->persist($group);
+            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            if (!$mailaddr) {
+                $mailaddr = new Mailaddr();
+                $mailaddr->setEmail('@.');
+                $em->persist($mailaddr);
+            }
+            $groupsWblist = new GroupsWblist();
+            $groupsWblist->setMailaddr($mailaddr);
+            $groupsWblist->setGroups($group);
+            $groupsWblist->setWb($group->getWb());
+            $em->persist($groupsWblist);
 
-      $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
-      if (!$mailaddr) {
-        $mailaddr = new Mailaddr();
-        $mailaddr->setEmail('@.');
-        $em->persist($mailaddr);
-      }
-      $groupsWblist = new GroupsWblist();
-      $groupsWblist->setMailaddr($mailaddr);
-      $groupsWblist->setGroups($group);
-      $groupsWblist->setWb($group->getWb());
-      $em->persist($groupsWblist);
+            $em->flush();
+            return $this->redirectToRoute('groups_index');
+        }
 
-      $em->flush();
-      return $this->redirectToRoute('groups_index');
-    }
-
-    return $this->render('groups/new.html.twig', [
+        return $this->render('groups/new.html.twig', [
                 'group' => $group,
                 'form' => $form->createView(),
-    ]);
-  }
+        ]);
+    }
 
   /**
    * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
    */
-  public function edit(Request $request, Groups $group): Response {
-    $this->checkAccess($group);
-    if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-      $form = $this->createForm(GroupsType::class, $group, [
-          'actions' => $this->wBListUserActions,
-          'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
-      ]);
-    } else {
-      $form = $this->createForm(GroupsType::class, $group, [
-          'actions' => $this->wBListUserActions,
-          'user' => $this->getUser(),
-          'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
-      ]);
-    }
+    public function edit(Request $request, Groups $group): Response
+    {
+        $this->checkAccess($group);
+        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+            $form = $this->createForm(GroupsType::class, $group, [
+            'actions' => $this->wBListUserActions,
+            'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+            ]);
+        } else {
+            $form = $this->createForm(GroupsType::class, $group, [
+            'actions' => $this->wBListUserActions,
+            'user' => $this->getUser(),
+            'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+            ]);
+        }
 
-    $form->handleRequest($request);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-      $em = $this->getDoctrine()->getManager();
-      $em->persist($group);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($group);
 
-      $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
 
-      $groupsWblist = $this->getDoctrine()->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
-      if ($groupsWblist) {
-        $groupsWblist->setGroups($group);
-        $groupsWblist->setWb($group->getWb());
-        $em->persist($groupsWblist);
-      }
+            $groupsWblist = $this->getDoctrine()->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
+            if ($groupsWblist) {
+                $groupsWblist->setGroups($group);
+                $groupsWblist->setWb($group->getWb());
+                $em->persist($groupsWblist);
+            }
 
 
-      $em->flush();
+            $em->flush();
 
-      $this->updatedWBListFromGroup($group->getId());
+            $this->updatedWBListFromGroup($group->getId());
 
-      return $this->redirectToRoute('groups_index', ['id' => $group->getId()]);
-    }
+            return $this->redirectToRoute('groups_index', ['id' => $group->getId()]);
+        }
 
-    return $this->render('groups/edit.html.twig', [
+        return $this->render('groups/edit.html.twig', [
                 'group' => $group,
                 'form' => $form->createView(),
-    ]);
-  }
+        ]);
+    }
 
   /**
    * @Route("/{id}/users", name="groups_list_users", methods="GET|POST")
    */
-  public function listUsers(Request $request, Groups $group) {
-    $this->checkAccess($group);
-    $users = $group->getUsers();
-    return $this->render('groups/group_users.html.twig', [
+    public function listUsers(Request $request, Groups $group)
+    {
+        $this->checkAccess($group);
+        $users = $group->getUsers();
+        return $this->render('groups/group_users.html.twig', [
                 'group' => $group,
                 'users' => $users
-    ]);
-  }
+        ]);
+    }
 
   /**
    * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
    */
-  public function removeUser(Request $request, Groups $group, User $user): Response {
-    if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-      $em = $this->getDoctrine()->getManager();
-      //check if alias
-      if ($user->getOriginalUser()) {
-        $user = $user->getOriginalUser();
-      }
-      $domainPolicy = $user->getDomain()->getPolicy();
-      $userAliases = $this->getDoctrine()->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-      array_unshift($userAliases, $user);
+    public function removeUser(Request $request, Groups $group, User $user): Response
+    {
+        if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
+            $em = $this->getDoctrine()->getManager();
+          //check if alias
+            if ($user->getOriginalUser()) {
+                $user = $user->getOriginalUser();
+            }
+            $domainPolicy = $user->getDomain()->getPolicy();
+            $userAliases = $this->getDoctrine()->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+            array_unshift($userAliases, $user);
 
-      foreach ($userAliases as $userAlias) {
-        $userAlias->setGroups(null);
-        $userAlias->setPolicy($domainPolicy);
-      }
-      $em->flush();
-      $this->updatedWBListFromGroup($group->getId());
+            foreach ($userAliases as $userAlias) {
+                $userAlias->setGroups(null);
+                $userAlias->setPolicy($domainPolicy);
+            }
+            $em->flush();
+            $this->updatedWBListFromGroup($group->getId());
+        }
+
+        return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
     }
-
-    return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
-  }
 
   /**
    * @Route("/{id}/delete", name="groups_delete", methods="GET")
    */
-  public function delete(Request $request, Groups $group): Response {
-    if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-      $em = $this->getDoctrine()->getManager();
-      $this->getDoctrine()->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
-      $em->remove($group);
-      $em->flush();
+    public function delete(Request $request, Groups $group): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
+            $em = $this->getDoctrine()->getManager();
+            $this->getDoctrine()->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
+            $em->remove($group);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('groups_index');
     }
-
-    return $this->redirectToRoute('groups_index');
-  }
-
 }

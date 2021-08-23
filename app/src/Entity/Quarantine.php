@@ -72,6 +72,4 @@ class Quarantine
 
         return $this;
     }
-
-
 }
