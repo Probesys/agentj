@@ -17,7 +17,7 @@
   <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
   <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
 </div>
-{{ form_row(form.mailAuthenticationSender) }}
+{#{{ form_row(form.mailAuthenticationSender) }}#}
 {{ form_row(form.logoFile) }}
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
