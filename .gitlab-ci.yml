@@ -26,16 +26,16 @@ before_script:
             TAG="devel"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [[ $CI_COMMIT_BRANCH == "preprod" ]] ; then
+        elif [ $CI_COMMIT_BRANCH == "preprod" ] ; then
             TAG="preprod"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [[ $CI_COMMIT_BRANCH == "prod" ]] ; then
+        elif [ $CI_COMMIT_BRANCH == "prod" ] ; then
             TAG=$CI_COMMIT_TAG
             REGISTRY=$REGISTRY
             docker login --username $HUB_USER -p $HUB_TOKEN
         else
-            if [[ -z $CI_COMMIT_TAG ]] ; then
+            if [ -z $CI_COMMIT_TAG ] ; then
                 TAG=$CI_COMMIT_BRANCH
             fi
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
