@@ -31,7 +31,6 @@ RUN apk --update add \
     spamassassin \
     spamassassin-client \
     supervisor \
-    unrar \
     unzip \
     zip \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*
