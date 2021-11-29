@@ -50,6 +50,7 @@ services:
       - .env
     volumes:
       - opendkim:/etc/opendkim/
+      - postfix_relay:/etc/postfix/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
@@ -132,6 +133,7 @@ volumes:
   postqueue:
   public:
   redisdb:
+  postfix_relay:
 
 networks:
   ajnet:
