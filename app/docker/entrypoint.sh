@@ -32,13 +32,15 @@ addgroup -g 101 amavis && adduser www-data amavis && chmod -R g+w /tmp/amavis/qu
 
 echo "Installing crontabs"
 if [ ! -d /var/log/agentj ]
-then 
-	mkdir /var/log/agentj && chown -R www-data /var/log/agentj
+then
+    mkdir /var/log/agentj && chown -R www-data /var/log/agentj
 fi
 echo "* * * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:msgs-send-mail-token >> /var/log/agentj/cron.log 2>&1" > /etc/cron.d/agentj
 echo "0 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-message-since-day 30 >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
 echo "5 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-virus-queue >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
 echo "0 7 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1" >> /etc/cron.d/agentj
 crond && crontab /etc/cron.d/agentj
+
+chmod -R 777 /var/www/agentj/var/cache
 
 exec "$@"
