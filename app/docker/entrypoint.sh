@@ -41,6 +41,10 @@ echo "5 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:tr
 echo "0 7 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1" >> /etc/cron.d/agentj
 crond && crontab /etc/cron.d/agentj
 
-chmod -R 777 /var/www/agentj/var/cache
+if [ ! -d /var/www/agentj/var/cache ]
+then
+    mkdir /var/www/agentj/var/cache
+    chmod -R 777 /var/www/agentj/var/cache
+fi
 
 exec "$@"
