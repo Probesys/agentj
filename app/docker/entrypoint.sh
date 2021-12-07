@@ -27,6 +27,7 @@ cd /var/www/agentj && sudo -u www-data php bin/console doctrine:schema:update --
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
 chown -R www-data:www-data /var/www/agentj/var
+find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 # Allow web server user to purge old virus and spam mails
 addgroup -g 101 amavis && adduser www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 
@@ -40,11 +41,5 @@ echo "0 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:tr
 echo "5 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-virus-queue >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
 echo "0 7 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1" >> /etc/cron.d/agentj
 crond && crontab /etc/cron.d/agentj
-
-if [ ! -d /var/www/agentj/var/cache ]
-then
-    mkdir /var/www/agentj/var/cache
-    chmod -R 777 /var/www/agentj/var/cache
-fi
 
 exec "$@"
