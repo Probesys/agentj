@@ -25,6 +25,7 @@ RUN apk --update add \
     perl-db \
     perl-dbd-mysql \
     perl-dbi \
+    perl-io-socket-ssl \
     patch \
     pax-utils \
     rsyslog \
