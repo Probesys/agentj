@@ -20,6 +20,7 @@ RUN apk --update add \
     cpio \
     file \
     freshclam \
+    gpg-agent \
     gzip \
     iproute2 \
     perl-db \
