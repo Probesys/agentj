@@ -16,5 +16,5 @@ elif [ -f "$SQL_SCRIPT" ]
 then
     /usr/bin/mysql -h db -u root -p$DB_ROOT_PASSWORD $DB_NAME < "$SQL_SCRIPT" \
     && echo -e "AGENTJ: Database successfully initialized"
-    rm "$SQL_SCRIPT"
+    # rm "$SQL_SCRIPT"
 fi
