@@ -20,9 +20,9 @@ sed -i "s|\$DB_ROOT_PASSWORD|$DB_ROOT_PASSWORD|g" /db_init.sh
 /bin/sh /db_init.sh
 
 echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php bin/console assets:install
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
 echo "Updating SQL schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:schema:update --force
+# cd /var/www/agentj && sudo -u www-data php bin/console doctrine:schema:update --force
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
