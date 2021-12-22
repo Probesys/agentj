@@ -74,7 +74,7 @@ class ReportSendMailCommand extends Command {
                 if ($domain && !empty($domain->getMessageAlert())) {
                     $body = $domain->getMessageAlert();
                 } else {
-                    $body = $translator->trans('Message.Report.defaultAlertMailContent');
+                    $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
                 }
 
                 $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
