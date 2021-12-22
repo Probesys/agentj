@@ -1,4 +1,7 @@
 security:
+    password_hashers:
+         App\Entity\User:
+             algorithm: 'auto'  
     encoders:
         App\Entity\User: bcrypt
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
