@@ -15,14 +15,17 @@ sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
-sed -i "s|\$DB_NAME|$DB_NAME|g" /db_init.sh
-sed -i "s|\$DB_ROOT_PASSWORD|$DB_ROOT_PASSWORD|g" /db_init.sh
-/bin/sh /db_init.sh
+
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php bin/console assets:install
-echo "Updating SQL schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:schema:update --force
+
+echo "Create database if not exists and update schemas"
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
+
+echo "Create or update super admin user"
+cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
