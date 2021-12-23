@@ -2,72 +2,72 @@
 
 namespace App\Command;
 
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use App\Entity\User;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
+
 
 class CreateSuperAdminCommand extends Command
 {
 
     private $passwordEncoder;
-
-    private const DEFAULT_USERNAME = 'admin';
+    private $em;
+    
 
     protected static $defaultName = 'agentj:create-super-admin';
 
-    public function __construct(UserPasswordEncoderInterface $encoder)
+    public function __construct(UserPasswordHasherInterface $encoder, EntityManagerInterface $em)
     {
         parent::__construct();
         $this->passwordEncoder = $encoder;
+        $this->em = $em;
     }
 
     protected function configure()
     {
         $this->setDescription('Create the first super administrator for the application. If user exist the password will be updated');
+        $this->addArgument('userName', InputArgument::REQUIRED, 'Super admin login')
+            ->addArgument('password', InputArgument::REQUIRED, 'Super admin password');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $em = $this->getApplication()->getKernel()->getContainer()->get('doctrine')->getManager();
         $isNewUser = false;
-        $user = $em->getRepository(User::class)->findOneBy(['username' => self::DEFAULT_USERNAME]);
+        $userName = $input->getArgument('userName');
+        $password = $input->getArgument('password');
+        
+        $user = $this->em->getRepository(User::class)->findOneBy(['username' => $userName]);
         if (!$user) {
             $user = new User();
             $user->setRoles('["ROLE_SUPER_ADMIN"]');
 
-            $user->setUsername(self::DEFAULT_USERNAME);
-            $io->note('User ' . self::DEFAULT_USERNAME . ' will be created');
+            $user->setUsername($userName);
+            $io->note('User ' . $userName . ' will be created');
             $isNewUser = true;
         } else {
-            $io->note("User " . self::DEFAULT_USERNAME . " will be  updated");
+            $io->note("User " . $userName . " will be  updated");
         }
 
-        $em->persist($user);
+        $this->em->persist($user);
 
-
-        $passWordMatch = false;
-        while (!$passWordMatch) {
-            $clearPass1 = $io->askHidden("Please provide a password for the user \"" . self::DEFAULT_USERNAME . "\"");
-            $clearPass2 = $io->askHidden("Please confirm this password");
-            if ($clearPass1 != $clearPass2) {
-                $io->error("The passwords don't match. Try again please ");
-            } else {
-                $passWordMatch = true;
-            }
-        }
-        $encoded = $this->passwordEncoder->encodePassword($user, $clearPass1);
+        $encoded = $this->passwordEncoder->hashPassword($user, $input->getArgument('password'));
 
         $user->setPassword($encoded);
 
-        $em->flush();
+        $this->em->flush();
         if ($isNewUser) {
-            $io->success("The user " . self::DEFAULT_USERNAME . " has been successfully created");
+            $io->success("The user " . $userName . " has been successfully created");
         } else {
-            $io->success("The user " . self::DEFAULT_USERNAME . " has been successfully updated");
+            $io->success("The user " . $userName . " has been successfully updated");
         }
+        
+        return Command::SUCCESS;
     }
 }
