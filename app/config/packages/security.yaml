@@ -1,15 +1,23 @@
 security:
+    # encoders:
+    #     App\Entity\User: bcrypt  
     password_hashers:
-         App\Entity\User:
-             algorithm: 'auto'  
-    encoders:
-        App\Entity\User: bcrypt
+        # use your user class name here
+        App\Entity\User:
+            # Use native password hasher, which auto-selects the best
+            # possible hashing algorithm (starting from Symfony 5.3 this is "bcrypt")
+            algorithm: bcrypt        
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
-    providers:
-        #in_memory: { memory: ~ }
-        database_users:
-            entity: { class: App\Entity\User, property: username }
-
+    # providers:
+    #     #in_memory: { memory: ~ }
+    #     database_users:
+    #         entity: { class: App\Entity\User, property: username }
+    enable_authenticator_manager: true
+    providers:            
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: username
     role_hierarchy:
         ROLE_USER: [ROLE_ALLOWED_TO_SWITCH]
         ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
@@ -25,33 +33,18 @@ security:
             pattern: ^/captcha-handler
             security:  false
         main:
-            http_basic: ~
-            # La connexion n'est pas requise sur toutes les pages
-            # par exemple la page d'accueil
-            anonymous: ~
-            # les urls auxquels s'appliquent ce firewall, dans ce cas, ce sont toutes les urls
-            pattern: ^/
-            form_login:
-                # Le nom de la route de la page de connexion
-                check_path: app_login
-                # Le nom de la route où se trouve le formulaire de connexion
-                # Si un utilisateur tente d'acceder à une page protégée sans en avoir les droits
-                # il sera redirigé sur cette page
-                login_path: app_login
-                # Securisation des formulaires
-                csrf_token_generator: security.csrf.token_manager
-                # La page par defaut apres une connexion reussie
-                #default_target_path: admin
+            lazy: true
+#            provider: users_in_memory
+            custom_authenticator: App\Security\LoginFormAuthenticator
+#            entry_point: security_login
+            logout:
+                path: app_logout
             remember_me:
                 secret:   '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
-            logout:
-                # La route où se trouve le process de deconnexion
-                path: app_logout
-            guard:
-                authenticators:
-                    - App\Security\LoginFormAuthenticator
-            switch_user: true
+                path:     /
+                always_remember_me: true                
+            switch_user: { role: ROLE_ALLOWED_TO_SWITCH }
             context: agentj
 
             # activate different ways to authenticate
