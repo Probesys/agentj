@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Groups;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Captcha|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,34 +12,38 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Captcha[]    findAll()
  * @method Captcha[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class GroupsRepository extends ServiceEntityRepository {
+class GroupsRepository extends ServiceEntityRepository
+{
 
-  public function __construct(RegistryInterface $registry) {
-    parent::__construct($registry, Groups::class);
-  }
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Groups::class);
+    }
 
   /**
    * Return the groups associated to one or more domains
    * @param type $domains
    * @return type
    */
-  public function findByDomain($domains) {
-    $dql = $this->createQueryBuilder('g');
-    
-    if (is_array($domains->toArray())) {
-        $domainsID = array_map(function ($entity) {
-            return $entity->getId();
-        }, $domains->toArray());
-    } else {
-        $domainsID = [];
+    public function findByDomain($domains)
+    {
+        $dql = $this->createQueryBuilder('g');
+
+        if (is_array($domains->toArray())) {
+            $domainsID = array_map(function ($entity) {
+                return $entity->getId();
+            }, $domains->toArray());
+        } else {
+            $domainsID = [];
+        }
+
+        if ($domainsID) {
+            $dql->where('g.domain in (' . implode(',', $domainsID) . ')');
+        }
+        $query = $this->_em->createQuery($dql);
+
+        return $query->getResult();
     }
-        
-    if ($domainsID)
-      $dql->where('g.domain in (' . implode(',', $domainsID) . ')');
-    $query = $this->_em->createQuery($dql);
-    
-    return $query->getResult();
-  }
 
   // /**
   //  * @return Captcha[] Returns an array of Captcha objects

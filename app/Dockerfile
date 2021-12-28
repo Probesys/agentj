@@ -84,7 +84,6 @@ COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
 COPY docker/conf/supervisord.conf /etc/supervisord.conf
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
-COPY docker/db_init.sh /db_init.sh
 COPY docker/entrypoint.sh /entrypoint.sh
 
 EXPOSE 9000

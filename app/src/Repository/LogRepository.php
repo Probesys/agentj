@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Log;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Log|null find($id, $lockMode = null, $lockVersion = null)
@@ -12,11 +12,13 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Log[]    findAll()
  * @method Log[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LogRepository extends ServiceEntityRepository {
+class LogRepository extends ServiceEntityRepository
+{
 
-  public function __construct(RegistryInterface $registry) {
-    parent::__construct($registry, Log::class);
-  }
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Log::class);
+    }
 
   // /**
   //  * @return Log[] Returns an array of Log objects
@@ -51,14 +53,14 @@ class LogRepository extends ServiceEntityRepository {
    * Truncate entries older than $nbDays from the the log table
    * @param type $nbDays
    */
-  public function truncateOlder($nbDays=null) {
-    if (!is_null($nbDays)) {
-      $conn = $this->getEntityManager()->getConnection();
+    public function truncateOlder($nbDays = null)
+    {
+        if (!is_null($nbDays)) {
+            $conn = $this->getEntityManager()->getConnection();
 
-      $sql = ' delete  from log where DATEDIFF(now(),log.created)> ' . $nbDays;
-      $stmt = $conn->prepare($sql);
-      $stmt->execute();
+            $sql = ' delete  from log where DATEDIFF(now(),log.created)> ' . $nbDays;
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+        }
     }
-  }
-
 }
