@@ -1,4 +1,7 @@
 security:
+    password_hashers:
+         App\Entity\User:
+             algorithm: 'auto'  
     encoders:
         App\Entity\User: bcrypt
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
@@ -50,15 +53,12 @@ security:
                     - App\Security\LoginFormAuthenticator
             switch_user: true
             context: agentj
-                # La route sur laquelle doit etre rediriger l'utilisateur apres une deconnexion
-                #target: index
+
             # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
 
-            # http_basic: true
-            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
-
-            # form_login: true
-            # https://symfony.com/doc/current/security/form_login_setup.html
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
@@ -68,6 +68,3 @@ security:
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
          - { path: ^/, roles: ROLE_USER }
-        # Les regles de securité
-        # Là dans ce cas seul les utilisateurs ayant le rôle ROLE_ADMIN
-        # peuvent acceder à toutes les pages commençant par /admin

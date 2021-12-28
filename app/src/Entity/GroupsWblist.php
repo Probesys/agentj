@@ -18,15 +18,15 @@ class GroupsWblist
     * @ORM\JoinColumn(name="group_id", nullable=true, onDelete="CASCADE")
     * @ORM\Id
     */
-    private $groups;      
-    
+    private $groups;
+
 
     /**
     * @ORM\ManyToOne(targetEntity="App\Entity\Mailaddr", fetch="EAGER")
     * @ORM\JoinColumn(name="sid", nullable=true)
     * @ORM\Id
     */
-    private $mailaddr;      
+    private $mailaddr;
 
     /**
      * @var string
@@ -71,5 +71,4 @@ class GroupsWblist
 
         return $this;
     }
-
 }

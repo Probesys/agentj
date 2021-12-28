@@ -159,8 +159,8 @@ class Msgs
     * @ORM\ManyToOne(targetEntity="App\Entity\MessageStatus")
     * @ORM\JoinColumn(name="status_id", nullable=true)
     */
-    private $status;      
-    
+    private $status;
+
     /**
      * @var \Maddr
      *
@@ -170,13 +170,13 @@ class Msgs
      * })
      */
     private $sid;
-    
+
     /**
      * @var int
      *
      * @ORM\Column(name="send_captcha", type="integer", nullable=false, options={"unsigned"=true,"default":0})
      */
-    private $sendCaptcha = 0;    
+    private $sendCaptcha = 0;
 
     /**
      * @var text
@@ -190,7 +190,7 @@ class Msgs
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $isMlist;
-    
+
 
     public function getPartitionTag(): ?int
     {
@@ -477,6 +477,4 @@ class Msgs
 
         return $this;
     }
-
-
 }
