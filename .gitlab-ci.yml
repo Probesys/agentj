@@ -22,22 +22,20 @@ stages:
 
 before_script:
   - |-
-        if [[ ! -z $CI_COMMIT_TAG ]] ; then
-            TAG=$CI_COMMIT_TAG
-        elif [[ $CI_COMMIT_BRANCH == "master" ]] ; then
-            TAG="devel"
+        if [ $CI_COMMIT_BRANCH == "master" ] ; then
+            TAG="dev"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [[ $CI_COMMIT_BRANCH == "preprod" ]] ; then
+        elif [ $CI_COMMIT_BRANCH == "preprod" ] ; then
             TAG="preprod"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [[ $CI_COMMIT_BRANCH == "prod" ]] ; then
+        elif [ $CI_COMMIT_BRANCH == "prod" ] ; then
             TAG=$CI_COMMIT_TAG
-            REGISTRY=$REGISTRY
+            REGISTRY=$REGISTRY/$CI_PROJECT_PATH
             docker login --username $HUB_USER -p $HUB_TOKEN
         else
-            TAG=$CI_COMMIT_BRANCH
+            TAG=$CI_COMMIT_REF_NAME
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         fi
@@ -59,10 +57,10 @@ app_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#    changes:
-#      - app/*
-#      - app/**/*
+  only:
+    changes:
+      - app/*
+      - app/**/*
 
 amavis_build:
   stage: build
@@ -74,10 +72,10 @@ amavis_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-#  only:
-#      changes:
-#        - amavis/*
-#        - amavis/**/*
+  only:
+      changes:
+        - amavis/*
+        - amavis/**/*
 
 relay_build:
   stage: build
@@ -89,10 +87,10 @@ relay_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - relay/*
-  #     - relay/**/*
+  only:
+    changes:
+      - relay/*
+      - relay/**/*
 
 smtp_build:
   stage: build
@@ -104,10 +102,10 @@ smtp_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - smtp/*
-  #     - smtp/**/*
+  only:
+    changes:
+      - smtp/*
+      - smtp/**/*
 
 syslogng_build:
   stage: build
@@ -119,10 +117,10 @@ syslogng_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - syslogng/*
-  #     - syslogng/**/*
+  only:
+    changes:
+      - syslogng/*
+      - syslogng/**/*
 
 web_build:
   stage: build
@@ -134,40 +132,40 @@ web_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  # only:
-  #   changes:
-  #     - web/*
-  #     - web/**/*
+  only:
+    changes:
+      - web/*
+      - web/**/*
 
-deploy-devel:
+deploy-dev:
   stage: deploy
   cache: {}
   environment:
-    name: devel
+    name: dev
     url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
-    TAG: "devel"
+    TAG: "dev"
   before_script:
     - apk add --no-cache rsync
-    - echo $TAG 
+    - echo $TAG
     - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
   script:
-    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEVEL >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
+    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEV >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_DEVEL:-$1}"
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_DEV:-$1}"
     - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - sed -i "s|latest|$TAG|g" docker-compose.yml
     - echo $DEPLOY_DIR
-    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
-    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEVEL:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEV:$DEPLOY_DIR/
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_DEVEL -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
   only:
@@ -199,7 +197,7 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
-    - docker image rm $(docker image ls -q -f reference=*/*agentj_*) || true
+    - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:

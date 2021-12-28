@@ -8,6 +8,11 @@ sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/amavisd.conf
 echo "$MAIL_HOSTNAME" > /etc/mailname
 sed -i "12i\$myhostname = \"$MAIL_HOSTNAME\";" /etc/amavisd.conf
 chmod 644 /etc/amavisd.conf
+if [ ! -d /var/run/amavis ]
+then
+    mkdir /var/run/amavis
+fi
+chown -R amavis:amavis /var/run/amavis
 
 # Initialize AV database
 if [ ! -f /var/lib/clamav/main.cvd ]
