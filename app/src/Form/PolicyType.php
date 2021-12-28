@@ -13,7 +13,7 @@ class PolicyType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
+        $choicesYesNo = ['Generics.labels.no' => "N", 'Generics.labels.yes' => "Y"];
         $builder
             ->add('policyName', null, ['label' => 'Generics.fields.name'])
             ->add('virusLover', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.virusLover'])
