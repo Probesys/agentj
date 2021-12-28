@@ -10,19 +10,20 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ImportType extends AbstractType {
+class ImportType extends AbstractType
+{
 
-  public function buildForm(FormBuilderInterface $builder, array $options) {
-    $user = $options['user'];
-    $builder
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
             ->add('attachment', FileType::class, ['label' => false]);
-  }
+    }
 
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults([
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
         'data_class' => null,
         'user' => null
-    ]);
-  }
-
+        ]);
+    }
 }

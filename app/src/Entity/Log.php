@@ -13,6 +13,7 @@ class Log
 {
     use EntityBlameableTrait;
     use EntityTimestampableTrait;
+
     /**
      * @var int
      *

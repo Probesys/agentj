@@ -1,24 +1,27 @@
 <?php
+
 namespace App\Service;
+
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class CryptEncrypt
 {
 
   //  private $params;
-    
+
     public function __construct(ParameterBagInterface $params)
     {
         $this->params = $params;
     }
-    
+
 
     /**
      * Encrypt URL for password reinitialization
      * @param type $url
      * @return type
      */
-    public function encryptUrl($url) {
+    public function encryptUrl($url)
+    {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
         $crypt = openssl_encrypt($url, 'aes-256-cbc', $salt, 0, $iv);
@@ -34,7 +37,8 @@ class CryptEncrypt
      * @param type $token
      * @return type
      */
-    public function decryptUrl($token) {
+    public function decryptUrl($token)
+    {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
         $cryptdate = substr(base64_decode($token), 0, 10);
@@ -42,5 +46,4 @@ class CryptEncrypt
         $decrypted = openssl_decrypt($crypt, 'aes-256-cbc', $salt, 0, $iv);
         return array($cryptdate, $decrypted);
     }
-    
 }
