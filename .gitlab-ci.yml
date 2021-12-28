@@ -57,10 +57,10 @@ app_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #    changes:
-      #      - app/*
-      #      - app/**/*
+  only:
+    changes:
+      - app/*
+      - app/**/*
 
 amavis_build:
   stage: build
@@ -72,10 +72,10 @@ amavis_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #      changes:
-      #        - amavis/*
-      #        - amavis/**/*
+  only:
+      changes:
+        - amavis/*
+        - amavis/**/*
 
 relay_build:
   stage: build
@@ -87,10 +87,10 @@ relay_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #    changes:
-      #      - relay/*
-      #      - relay/**/*
+  only:
+    changes:
+      - relay/*
+      - relay/**/*
 
 smtp_build:
   stage: build
@@ -102,10 +102,10 @@ smtp_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #    changes:
-      #      - smtp/*
-      #      - smtp/**/*
+  only:
+    changes:
+      - smtp/*
+      - smtp/**/*
 
 syslogng_build:
   stage: build
@@ -117,10 +117,10 @@ syslogng_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #    changes:
-      #      - syslogng/*
-      #      - syslogng/**/*
+  only:
+    changes:
+      - syslogng/*
+      - syslogng/**/*
 
 web_build:
   stage: build
@@ -132,10 +132,10 @@ web_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-      #  only:
-      #    changes:
-      #      - web/*
-      #      - web/**/*
+  only:
+    changes:
+      - web/*
+      - web/**/*
 
 deploy-dev:
   stage: deploy
