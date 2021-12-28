@@ -12,18 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 class AdminController extends AbstractController
 {
 
-  /**
-   * @Route("/", name="admin_account")
-   */
-    public function index()
-    {
-
-        $logoUploaded = file_exists($this->getParameter('app.upload_directory') . 'logo.png');
-        return $this->render('admin/index.html.twig', [
-                'controller_name' => 'AdminController',
-                'logoUploaded' => $logoUploaded
-        ]);
-    }
 
   /**
    * @Route("/delete-logo", name="delete_logo",  methods="GET", options={"expose"=true})
