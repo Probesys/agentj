@@ -54,10 +54,6 @@
             {% endfor %}
             <div class="dropdown-divider"></div>
           {% endif %}          
-          {% if is_granted('ROLE_ADMIN') %}
-            <a class="dropdown-item" href="{{path('admin_account')}}"><i class="fas fa-cog"></i> {{'Navigation.settings'|trans}}</a>
-            <div class="dropdown-divider"></div>
-          {% endif %}
           <a class="dropdown-item"  href="{{path('app_logout')}}"><i class="fas fa-sign-out-alt fa-fw"></i> {{'Navigation.logout'|trans}}</a>
         </div>
       </li>
