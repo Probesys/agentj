@@ -1,12 +1,14 @@
 <?php
+
 namespace App\Service;
+
 use Doctrine\ORM\EntityManager;
 use App\Entity\Log;
 
 class LogService
 {
     private $em;
-    
+
     public function __construct(EntityManager $em)
     {
         $this->em = $em;
@@ -19,7 +21,7 @@ class LogService
      * @param type $details
      * @return boolean
      */
-    public function addLog($action, $mailId='',$details='')
+    public function addLog($action, $mailId = '', $details = '')
     {
         $log = new Log();
         $log->setAction($action);
@@ -29,5 +31,4 @@ class LogService
         $this->em->flush();
         return true;
     }
-    
 }

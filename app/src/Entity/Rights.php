@@ -39,11 +39,12 @@ class Rights
     {
         $this->groups = new ArrayCollection();
     }
-    
-    public function __toString() {
+
+    public function __toString()
+    {
         return $this->name;
     }
-    
+
 
     public function getId(): ?int
     {

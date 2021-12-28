@@ -8,19 +8,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
 /**
  * @Route("/policy")
  */
 class PolicyController extends AbstractController
 {
-  
-  
-  private $translator;
 
-  public function __construct(TranslatorInterface $translator) {    
-    $this->translator = $translator;
-  }  
+
+    private $translator;
+
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
     /**
      * @Route("/", name="policy_index", methods="GET")
      */
@@ -89,11 +91,11 @@ class PolicyController extends AbstractController
      */
     public function delete(Policy $policy): Response
     {
-        
+
         $em = $this->getDoctrine()->getManager();
         $em->remove($policy);
-        $em->flush();        
+        $em->flush();
 
-        return new Response('success',  200);
+        return new Response('success', 200);
     }
 }
