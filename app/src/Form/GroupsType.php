@@ -17,25 +17,21 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 
-class GroupsType extends AbstractType {
+class GroupsType extends AbstractType
+{
 
-  private $em;
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $actions = $options['actions'];
+        $user = $options['user'];
 
-  public function __construct(EntityManagerInterface $em) {
-    $this->em = $em;
-  }
-
-  public function buildForm(FormBuilderInterface $builder, array $options) {
-    $actions = $options['actions'];
-    $user = $options['user'];
-    
-    $builder
+        $builder
             ->add('name', null, [
                 'label' => 'Entities.Group.fields.name'
             ])
             ->add('overrideUser', null, [
                 'label' => 'Entities.Group.fields.overrideUser'
-            ])            
+            ])
             ->add('policy', null, [
                 'label' => 'Entities.Group.fields.policy',
                 'required' => true,
@@ -43,7 +39,7 @@ class GroupsType extends AbstractType {
                 'placeholder' => 'Select a policy'
             ])
             ->add('wb', ChoiceType::class, [
-                'choices' => $actions, 
+                'choices' => $actions,
                 'label' => 'Form.PolicyDomain',
                 'required' => false
                 ])
@@ -51,35 +47,35 @@ class GroupsType extends AbstractType {
                 'label' => 'Entities.Group.fields.domain',
                 'class' => Domain::class,
                 'multiple' => false,
-                'attr' => array('class' => 'select2'),
+                'attr' => ['class' => 'select2'],
                 'placeholder' => 'Select Domain',
                 'required' => true,
-                'query_builder' => function (DomainRepository $rep) use($user) {
-                 $builder= $rep->createQueryBuilder('d')
-                  ->leftJoin('d.users', 'u')
-                  ->where('d.active = 1 ');
-                  if ($user) {
-                    $builder->where('u.id =' . $user->getId());
-                  }
-                  return $builder;
+                'query_builder' => function (DomainRepository $rep) use ($user) {
+                    $builder = $rep->createQueryBuilder('d')
+                    ->leftJoin('d.users', 'u')
+                    ->where('d.active = 1 ');
+                    if ($user) {
+                        $builder->where('u.id =' . $user->getId());
+                    }
+                    return $builder;
 
-                  ;
+                    ;
                 },
             ])
             ->add('active', null, [
                 'label' => 'Generics.fields.active'
-            ])                           
+            ])
 
 
-    ;
-  }
+        ;
+    }
 
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults([
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
         'data_class' => Groups::class,
         'actions' => null,
         'user' => null
-    ]);
-  }
-
+        ]);
+    }
 }

@@ -13,12 +13,14 @@ use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class DomainType extends AbstractType {
+class DomainType extends AbstractType
+{
 
-  public function buildForm(FormBuilderInterface $builder, array $options) {
-    $actions = $options['actions'];
-    
-    $builder
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $actions = $options['actions'];
+
+        $builder
             ->add('domain', null, [
                 'label' => 'Entities.Domain.fields.domain'
             ])
@@ -43,7 +45,7 @@ class DomainType extends AbstractType {
             ])
             ->add('imapNoValidateCert', null, [
                 'label' => 'Entities.Domain.fields.imapNoValidateCert'
-            ])            
+            ])
             ->add('active', null, [
                 'label' => 'Entities.Domain.fields.active'
             ])
@@ -55,7 +57,7 @@ class DomainType extends AbstractType {
             ->add('policy', null, [
                 'label' => 'Entities.Domain.fields.policy',
                 'required' => true,
-//                'data' => 5, //Normal policy
+  //                'data' => 5, //Normal policy
                 'placeholder' => ''
             ])
             ->add('level', RangeType::class, [
@@ -67,24 +69,24 @@ class DomainType extends AbstractType {
                 ]
             ])
             ->add('mailAuthenticationSender', null, [
-                'label' => 'Entities.Domain.fields.mailAuthenticationSender',                
+                'label' => 'Entities.Domain.fields.mailAuthenticationSender',
                 'required' => false,
-            ])            
+            ])
             ->add('logoFile', FileType::class, [
                 'label' => 'Logo',
                 'mapped' => false,
                 'required' => false,
             ])
-    ;
-  }
+        ;
+    }
 
-  public function configureOptions(OptionsResolver $resolver) {
-    $resolver->setDefaults([
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
         'data_class' => Domain::class,
         'minSpamLevel' => null,
         'maxSpamLevel' => null,
         'actions' => null,
-    ]);
-  }
-
+        ]);
+    }
 }

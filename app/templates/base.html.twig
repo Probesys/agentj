@@ -33,23 +33,7 @@
 
     <title>{% block title %}{% endblock %} | {{ 'Navigation.mainSubTitle'|trans }}</title>
   </head>
-  <script type="text/javascript">
-    var _paq = window._paq || [];
-    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function () {
-      var u = "https://stats.probesys.com/";
-      _paq.push(['setTrackerUrl', u + 'piwik.php']);
-      _paq.push(['setSiteId', '37']);
-      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-      g.type = 'text/javascript';
-      g.async = true;
-      g.defer = true;
-      g.src = u + 'piwik.js';
-      s.parentNode.insertBefore(g, s);
-    })();
-  </script>
+
   {% set bodyClass="" %}
   {%  if app.request.get('_route') == 'app_login' %}
     {% set bodyClass="not-auth" %}
@@ -118,7 +102,7 @@
 
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
-        <script src="{{ url('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
+        <script src="{{ path('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
         <script src="{{ asset('js/translations/config.js') }}"></script>              
         <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
       {% endif %}
@@ -131,8 +115,8 @@
 
       <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
-      <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
-      <script type="text/javascript" src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>
+{#      <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>#}
+{#      <script type="text/javascript" src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>#}
 
 
     {% endblock %}

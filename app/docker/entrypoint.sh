@@ -15,25 +15,29 @@ sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
-sed -i "s|\$DB_NAME|$DB_NAME|g" /db_init.sh
-sed -i "s|\$DB_ROOT_PASSWORD|$DB_ROOT_PASSWORD|g" /db_init.sh
-/bin/sh /db_init.sh
+
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php bin/console assets:install
-echo "Updating SQL schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:schema:update --force
+
+echo "Create database if not exists and update schemas"
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
+
+echo "Create or update super admin user"
+cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
 chown -R www-data:www-data /var/www/agentj/var
+find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 # Allow web server user to purge old virus and spam mails
 addgroup -g 101 amavis && adduser www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 
 echo "Installing crontabs"
 if [ ! -d /var/log/agentj ]
-then 
-	mkdir /var/log/agentj && chown -R www-data /var/log/agentj
+then
+    mkdir /var/log/agentj && chown -R www-data /var/log/agentj
 fi
 echo "* * * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:msgs-send-mail-token >> /var/log/agentj/cron.log 2>&1" > /etc/cron.d/agentj
 echo "0 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-message-since-day 30 >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj

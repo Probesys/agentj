@@ -15,14 +15,16 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Tetranz\Select2EntityBundle\Form\Type\Select2EntityType;
 
-class UserType extends AbstractType {
+class UserType extends AbstractType
+{
 
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
         $labelEmail = 'Entities.User.fields.email';
         if ($options['alias']) {
             $labelEmail = 'Entities.User.fields.alias';
         }
-        $allowedomainIds=$options['allowedomainIds'];
+        $allowedomainIds = $options['allowedomainIds'];
         $builder
                 ->add('email', EmailType::class, [
                     'label' => $labelEmail,
@@ -43,7 +45,7 @@ class UserType extends AbstractType {
                 ->add('roles', ChoiceType::class, [
                     'label' => 'Entities.User.fields.roles',
                     'attr' => ['class' => 'select2'],
-                    'choices' => array('Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'),
+                    'choices' => ['Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'],
                     'mapped' => false
                 ])
                 ->add('password', RepeatedType::class, [
@@ -59,21 +61,19 @@ class UserType extends AbstractType {
 //                'label' => 'Entities.Group.fields.domain',
                     'class' => Groups::class,
                     'multiple' => false,
-                    'attr' => array('class' => 'select2'),
+                    'attr' => ['class' => 'select2'],
                     'placeholder' => ' ',
                     'required' => false,
-                    'choice_label' => function($group, $key, $index) {
-                        /** @var Category $category */
+                    'choice_label' => function ($group, $key, $index) {
                         return $group->getName() . ' (' . $group->getDomain() . ')';
                     },
                     'query_builder' => function (GroupsRepository $rep) use ($allowedomainIds) {
                         $retRepo = $rep->createQueryBuilder('g')
                                 ->leftJoin('g.domain', 'd');
-                        if ($allowedomainIds){
+                        if ($allowedomainIds) {
                             $retRepo->where('d.id in (' . implode(',', $allowedomainIds) . ')');
                         }
                         return $retRepo;
-
                     },
                 ])
                 ->add('domains', null, [
@@ -82,7 +82,7 @@ class UserType extends AbstractType {
                 ])
                 ->add('report', null, [
                     'label' => 'Entities.User.fields.report',
-                ])                            
+                ])
                 ->add('originalUser', Select2EntityType::class, [
                     'multiple' => false,
                     'placeholder' => '',
@@ -100,16 +100,16 @@ class UserType extends AbstractType {
                     'primary_key' => 'id',
                     'remote_route' => 'autocomplete_user',
                     'required' => false,
-                ])                            
+                ])
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver)
+    {
         $resolver->setDefaults([
             'data_class' => User::class,
             'alias' => false,
             'allowedomainIds' => []
         ]);
     }
-
 }

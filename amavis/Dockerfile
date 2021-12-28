@@ -20,18 +20,19 @@ RUN apk --update add \
     cpio \
     file \
     freshclam \
+    gpg-agent \
     gzip \
     iproute2 \
     perl-db \
     perl-dbd-mysql \
     perl-dbi \
+    perl-io-socket-ssl \
     patch \
     pax-utils \
     rsyslog \
     spamassassin \
     spamassassin-client \
     supervisor \
-    unrar \
     unzip \
     zip \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*

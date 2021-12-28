@@ -4,124 +4,132 @@ namespace App\Command;
 
 use App\Entity\Msgs;
 use App\Entity\User;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
-class ReportSendMailCommand extends ContainerAwareCommand {
+class ReportSendMailCommand extends Command {
 
-  protected static $defaultName = 'agentj:report-send-mail';
-  private $twig;
+    protected static $defaultName = 'agentj:report-send-mail';
+    private $twig;
+    private $doctrine;
+    private $translator;
 
-  public function __construct(Environment $twig) {
-    // Inject it in the constructor and update the value on the class
-    $this->twig = $twig;
+    public function __construct(Environment $twig, ManagerRegistry $doctrine, TranslatorInterface $translator) {
+        // Inject it in the constructor and update the value on the class
+        $this->twig = $twig;
+        $this->doctrine = $doctrine;
+        $this->translator = $translator;
+        parent::__construct();
+    }
 
-    parent::__construct();
-  }
+    protected function configure() {
+        $this->setDescription('Send report email ');
+    }
 
-  protected function configure() {
-    $this->setDescription('Send report email ');
-  }
+    protected function execute(InputInterface $input, OutputInterface $output) {
+//        $translator = $this->getContainer()->get('translator');
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
-    $translator = $this->getContainer()->get('translator');
+        $io = new SymfonyStyle($input, $output);
 
-    $io = new SymfonyStyle($input, $output);
+        $em = $this->doctrine->getManager();
 
-    $em = $this->getApplication()->getKernel()->getContainer()->get('doctrine')->getManager();
-    $container = $this->getApplication()->getKernel()->getContainer();
-    $domain = $container->getParameter('domain');
-    $scheme = $container->getParameter('scheme');
-    $failedRecipients = [];
+        $container = $this->getApplication()->getKernel()->getContainer();
+        $domain = $container->getParameter('domain');
+        $scheme = $container->getParameter('scheme');
+        $failedRecipients = [];
 
-    $url = $scheme . "://" . $domain;
-    $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
-    $i = 0;
+        $url = $scheme . "://" . $domain;
+        $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
+        $i = 0;
 
-    // Get users to send report
-    $allUsers = $em->getRepository(User::class)->activeUsers();
+        // Get users to send report
+        $allUsers = $em->getRepository(User::class)->activeUsers();
 
-    foreach ($allUsers as $userId) {
-      /* @var $user User */
-      $user = $em->getRepository(User::class)->find($userId);
-      if ($user && $user->getReport()) {
+        foreach ($allUsers as $userId) {
+            /* @var $user User */
+            $user = $em->getRepository(User::class)->find($userId);
+            if ($user && $user->getReport()) {
 
-        /**
-         * Récupérer les liste des messages non traités depuis le dernier envoie du rapport
-         * N'envoyer le rapport que si ce nombre est > 0
-         */
-        $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user]);
-        $untreatedMsgs = $em->getRepository(Msgs::class)->search($user, null, $alias, null, null, $user->getDateLastReport());
-        if (count($untreatedMsgs) == 0) {
-          continue;
+                /**
+                 * Récupérer les liste des messages non traités depuis le dernier envoie du rapport
+                 * N'envoyer le rapport que si ce nombre est > 0
+                 */
+                $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user]);
+                $untreatedMsgs = $em->getRepository(Msgs::class)->search($user, null, $alias, null, null, $user->getDateLastReport());
+                if (count($untreatedMsgs) == 0) {
+                    continue;
+                }
+                $nbAuthorized = $em->getRepository(Msgs::class)->countByType($user, 2, $alias);
+                $nbBanned = $em->getRepository(Msgs::class)->countByType($user, 1, $alias);
+                $nbDeleted = $em->getRepository(Msgs::class)->countByType($user, 3, $alias);
+                $nbRestored = $em->getRepository(Msgs::class)->countByType($user, 5, $alias);
+                $nbSpammed = $em->getRepository(Msgs::class)->countByType($user, 6, $alias);
+                $domain = $user->getDomain();
+
+                if ($domain && !empty($domain->getMessageAlert())) {
+                    $body = $domain->getMessageAlert();
+                } else {
+                    $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
+                }
+
+                $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
+                $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
+
+                $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs, 'url' => $url]);
+                //        $tableMsgs = $this->renderView('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs]);
+
+                $body = str_replace('[USERNAME]', $user->getFullname(), $body);
+                $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
+                $body = str_replace('[NB_AUTHORIZED_MESSAGES]', $nbAuthorized, $body);
+                $body = str_replace('[NB_SPAMMED_MESSAGES]', $nbSpammed, $body);
+                $body = str_replace('[NB_BANNED_MESSAGES]', $nbBanned, $body);
+                $body = str_replace('[NB_RESTORED_MESSAGES]', $nbRestored, $body);
+                $body = str_replace('[NB_DELETED_MESSAGES]', $nbDeleted, $body);
+                $body = str_replace('[URL_MSGS]', $url, $body);
+                //$mailFrom = 'no-reply@' . $domain->getDomain();
+
+                $mailFrom = $this->getApplication()->getKernel()->getContainer()->getParameter('app.domain_mail_authentification_sender');
+                $fromName = $this->translator->trans('Entities.Report.mailFromName');
+                $mailTo = stream_get_contents($user->getEmail(), -1, 0);
+                $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
+                $bodyTextPlain = strip_tags($bodyTextPlain);
+                $message = (new \Swift_Message($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo))
+                        ->setFrom($mailFrom, $fromName)
+                        ->setContentType("text/html")
+                        ->setTo($mailTo)
+                        ->setBody($body)
+                        ->addPart(strip_tags($bodyTextPlain), 'text/plain');
+                try {
+                    $transport = new \Swift_SmtpTransport($transport_server);
+                    $mailer = new \Swift_Mailer($transport);
+
+                    $mailer->send($message, $failedRecipients);
+                    $user->setDateLastReport(time());
+                    $em->persist($user);
+                    $em->flush();
+
+                    $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
+                    $i++;
+                } catch (\Swift_TransportException $e) {
+                    //catch error and save this in msgs + change status to error
+                    $messageError = $e->getMessage();
+                    $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
+                     return Command::FAILURE;
+                }
+            }
         }
-        $nbAuthorized = $em->getRepository(Msgs::class)->countByType($user, 2, $alias);
-        $nbBanned = $em->getRepository(Msgs::class)->countByType($user, 1, $alias);
-        $nbDeleted = $em->getRepository(Msgs::class)->countByType($user, 3, $alias);
-        $nbRestored = $em->getRepository(Msgs::class)->countByType($user, 5, $alias);
-        $nbSpammed = $em->getRepository(Msgs::class)->countByType($user, 6, $alias);
-        $domain = $user->getDomain();
 
-        if ($domain && !empty($domain->getMessageAlert())) {
-          $body = $domain->getMessageAlert();
+        if ($i == 0) {
+            $io->success(' No message send.');
         } else {
-          $body = $translator->trans('Message.Report.defaultAlertMailContent');
+            $io->success($i . ' messages sent.');
         }
-
-        $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
-        $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
-
-        $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs,'url' => $url]);
-//        $tableMsgs = $this->renderView('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs]);        
-
-        $body = str_replace('[USERNAME]', $user->getFullname(), $body);
-        $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
-        $body = str_replace('[NB_AUTHORIZED_MESSAGES]', $nbAuthorized, $body);
-        $body = str_replace('[NB_SPAMMED_MESSAGES]', $nbSpammed, $body);
-        $body = str_replace('[NB_BANNED_MESSAGES]', $nbBanned, $body);
-        $body = str_replace('[NB_RESTORED_MESSAGES]', $nbRestored, $body);
-        $body = str_replace('[NB_DELETED_MESSAGES]', $nbDeleted, $body);
-        $body = str_replace('[URL_MSGS]', $url, $body);
-        //$mailFrom = 'no-reply@' . $domain->getDomain();
-
-        $mailFrom = $this->getApplication()->getKernel()->getContainer()->getParameter('app.domain_mail_authentification_sender');
-        $fromName = $translator->trans('Entities.Report.mailFromName');
-        $mailTo = stream_get_contents($user->getEmail(), -1, 0);
-        $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
-        $bodyTextPlain = strip_tags($bodyTextPlain);
-        $message = (new \Swift_Message($translator->trans('Message.Report.defaultMailSubject') . $mailTo))
-                ->setFrom($mailFrom, $fromName)
-                ->setContentType("text/html")
-                ->setTo($mailTo)                
-                ->setBody($body)
-                ->addPart(strip_tags($bodyTextPlain), 'text/plain');
-        try {
-          $transport = new \Swift_SmtpTransport($transport_server);
-          $mailer = new \Swift_Mailer($transport);
-
-          $mailer->send($message, $failedRecipients);
-          $user->setDateLastReport(time());
-          $em->persist($user);
-          $em->flush();
-
-          $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
-          $i++;
-        } catch (\Swift_TransportException $e) {
-          //catch error and save this in msgs + change status to error
-          $messageError = $e->getMessage();
-          $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
-        }
-      }
+        return Command::SUCCESS;
     }
-
-    if ($i == 0) {
-      $io->success(' No message send.');
-    } else {
-      $io->success($i . ' messages sent.');
-    }
-  }
 
 }

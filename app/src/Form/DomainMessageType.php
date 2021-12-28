@@ -12,16 +12,16 @@ class DomainMessageType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-                ->add('mailmessage',null,[
+                ->add('mailmessage', null, [
                     'label' => 'Entities.Domain.fields.mailMessage'
                 ])
-            ->add('message',null,[
+            ->add('message', null, [
                 'label' => 'Entities.Domain.fields.captachaMessage'
             ])
-            ->add('confirmCaptchaMessage',null,[
+            ->add('confirmCaptchaMessage', null, [
                 'label' => 'Entities.Domain.fields.successCaptchaMessage'
             ])
-            ->add('message_alert',null,[
+            ->add('message_alert', null, [
                 'label' => 'Entities.Domain.fields.messageAlert'
             ])
         ;

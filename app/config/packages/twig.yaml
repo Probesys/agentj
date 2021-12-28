@@ -23,5 +23,3 @@ twig:
             'Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES' : 'NB_DELETED_MESSAGES'
             'Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES' : 'NB_RESTORED_MESSAGES'
             'Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS' : 'LIST_MAIL_MSGS'
-                
-           

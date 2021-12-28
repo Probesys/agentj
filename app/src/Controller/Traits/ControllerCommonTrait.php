@@ -2,11 +2,13 @@
 
 namespace App\Controller\Traits;
 
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-trait ControllerCommonTrait {
+trait ControllerCommonTrait
+{
 
-    public function slugify($text) {
+    public function slugify($text)
+    {
         $text = preg_replace('#[^\\pL\d]+#u', '-', $text);
         $text = trim($text, '-');
         if (function_exists('iconv')) {
@@ -20,5 +22,4 @@ trait ControllerCommonTrait {
         }
         return $text;
     }
-
 }
