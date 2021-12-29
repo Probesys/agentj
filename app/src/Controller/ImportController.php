@@ -20,23 +20,21 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @Route("/admin/import")
  */
-class ImportController extends AbstractController
-{
+class ImportController extends AbstractController {
+
     use ControllerCommonTrait;
     use ControllerWBListTrait;
 
     private $translator;
 
-    public function __construct(TranslatorInterface $translator)
-    {
+    public function __construct(TranslatorInterface $translator) {
         $this->translator = $translator;
     }
 
     /**
      * @Route("/users", name="import_user_email", options={"expose"=true})
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $translator = $this->translator;
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_user_email'),
@@ -63,7 +61,7 @@ class ImportController extends AbstractController
                     $this->addFlash('warning', 'Generics.flash.NoImport');
                 }
                 if ($result['user_already_exist'] > 0) {
-                  //TODO
+                    //TODO
                 }
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
@@ -82,8 +80,7 @@ class ImportController extends AbstractController
      *
      * Import user from file csv columns : email , LastName, FirstName, Group */
 
-    function import($pathfile)
-    {
+    function import($pathfile) {
         $split = ';';
         $nbUser = count(file($pathfile)) - 1;
 
@@ -95,11 +92,12 @@ class ImportController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $groups = [];
+        $emails = [];
         $groupWbUpdate = [];
         $domains = [];
         if (($handle = fopen($pathfile, "r")) !== false) {
             while (($data = fgetcsv($handle, 1024, $split)) !== false) {
-              //check line nulber of columns
+                //check line nulber of columns
                 if ((count($data) < 2)) {
                     $errors[] = $row + 1;
                     continue;
@@ -144,30 +142,32 @@ class ImportController extends AbstractController
                                 $group = $groups[$slugGroup];
                             }
                         }
-                        $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
-                        if (!$user) {
-                            $user = new User();
-                        }
-                        $user->setEmail($data[0]);
-                        $user->setUsername($data[0]);
-                        if (isset($data[1]) && isset($data[2])) {
-                            $user->setFullname(trim($data[1] . " " . $data[2]));
-                        }
-                        $import++;
-                        $user->setRoles("['ROLE_USER']");
-                        $domainEmail = strtolower(substr($data[0], strpos($data[0], '@') + 1));
-                        $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
-                        $user->setDomain($domain);
-                        $em->persist($user);
+                        if (!isset($emails[$email])) {
+                            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+                            if (!$user) {
+                                $user = new User();
+                            }
+                            $user->setEmail($data[0]);
+                            $user->setUsername($data[0]);
+                            if (isset($data[1]) && isset($data[2])) {
+                                $user->setFullname(trim($data[1] . " " . $data[2]));
+                            }
+                            $import++;
+                            $user->setRoles("['ROLE_USER']");
+                            $domainEmail = strtolower(substr($data[0], strpos($data[0], '@') + 1));
+                            $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
+                            $user->setDomain($domain);
+                            $em->persist($user);
+                            $emails[$user->getEmail()] = $user->getEmail();
+                            if ($group) {
+                                $group->addUser($user);
+                                $em->persist($group);
 
-                        if ($group) {
-                            $group->addUser($user);
-                            $em->persist($group);
-
-                            $groupWbUpdate[$group->getid()] = $group->getid();
-                        } else {
-                            if ($domains[$domainEmail]['entity']->getPolicy()) {
-                                $user->setPolicy($domains[$domainEmail]['entity']->getPolicy());
+                                $groupWbUpdate[$group->getid()] = $group->getid();
+                            } else {
+                                if ($domains[$domainEmail]['entity']->getPolicy()) {
+                                    $user->setPolicy($domains[$domainEmail]['entity']->getPolicy());
+                                }
                             }
                         }
                     } else {
@@ -188,4 +188,5 @@ class ImportController extends AbstractController
         }
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
     }
+
 }
