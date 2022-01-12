@@ -46,19 +46,11 @@ COPY amavisd.patch /root/amavisd.patch
 
 RUN patch -p1 /usr/sbin/amavisd < /root/amavisd.patch
 
-RUN mkdir /run/clamav && \
-    chown clamav:clamav /run/clamav && \
-    chmod 755 /run/clamav && \
-    chmod 644 /etc/amavisd.conf && \
-    adduser clamav amavis \
-    && adduser amavis clamav \
-    && chown -R clamav:clamav /run/clamav
-
 VOLUME [ "/var/lib/amavis/" ]
 VOLUME [ "/var/lib/clamav/" ]
 
 EXPOSE 10024/tcp
 
-ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
 HEALTHCHECK --start-period=60s CMD [ "/healthcheck.sh" ]
