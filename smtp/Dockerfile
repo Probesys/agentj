@@ -21,6 +21,7 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
+VOLUME /etc/postfix
 VOLUME /var/spool/postfix
 
 ENTRYPOINT [ "/entrypoint.sh" ] 
