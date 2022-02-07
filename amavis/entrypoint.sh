@@ -14,6 +14,17 @@ then
 fi
 chown -R amavis:amavis /var/run/amavis
 
+# Make sure Clamd environment exists
+if [ ! -d /run/clamav ]
+then
+    mkdir /run/clamav
+    chmod 755 /run/clamav
+    touch /run/clamav/clamd.ctl
+    chmod 644 /etc/amavisd.conf
+    adduser clamav amavis && adduser amavis clamav
+    chown -R clamav:clamav /run/clamav
+fi
+
 # Initialize AV database
 if [ ! -f /var/lib/clamav/main.cvd ]
 then
