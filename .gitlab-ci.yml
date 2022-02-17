@@ -146,7 +146,7 @@ mass_build:
         --cache-from $REGISTRY/agentj_$IMG:dev
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:dev . ;
-        docker push $REGISTRY/agentj_$IMG:dev ;
+        docker push $REGISTRY/agentj_$DIR:dev ;
         done
   when: manual
 
