@@ -24,6 +24,6 @@ EXPOSE 10025/tcp
 VOLUME /etc/postfix
 VOLUME /var/spool/postfix
 
-ENTRYPOINT [ "/entrypoint.sh" ] 
-HEALTHCHECK --start-period=60s CMD postfix status || exit 1
+ENTRYPOINT [ "/entrypoint.sh" ]
+HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
