@@ -156,7 +156,7 @@ class DefaultController extends AbstractController
     public function setLocaleAction(Request $request, $language = null)
     {
         if (null != $language) {
-            $this->get('session')->set('_locale', $language);
+            $request->getSession()->set('_locale', $language);
         }
 
         $url = $request->headers->get('referer');

@@ -26,8 +26,6 @@ class MenuController extends AbstractController
         $msgs['spammed'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
         unset($alias);
 
-      //Store number of untreated messages in session
-        $this->get('session')->set('nbUntreatedMessages', $msgs['untreated']);
         return $this->render(
             'navigation.html.twig',
             ['msgs' => $msgs, 'route' => $route, 'route_params' => $route_params]
