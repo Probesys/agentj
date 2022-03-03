@@ -24,6 +24,7 @@ RUN apk --update add \
     php7-xml \
     php7-xmlrpc \
     php7-zip \
+    tzdata \
     yarn \
     zip \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
