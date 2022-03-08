@@ -25,16 +25,12 @@ then
     chown -R clamav:clamav /run/clamav
 fi
 
-# Initialize AV database
-if [ ! -f /var/lib/clamav/main.cvd ]
+echo "0 14 * * * /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf" >> /etc/cron.d/agentj-amavis
+echo "10 14 * * * /usr/bin/sa-update" >> /etc/cron.d/agentj-amavis
+
+if [ ! -f /var/amavis/.initdone ]
 then
-    /usr/bin/freshclam
+    ./init.sh && rm ./init.sh
 fi
-
-# Start the AV database daemon
-/usr/bin/freshclam -d -c 3
-
-# Refresh SA rules
-/usr/bin/sa-update
 
 exec "$@"

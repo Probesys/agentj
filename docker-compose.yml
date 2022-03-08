@@ -25,8 +25,12 @@ services:
     networks:
       - ajnet
     volumes:
-      - clamdb:/var/lib/clamav
-      - amavis:/var/amavis
+      - amavis:/var/amavis/
+      - clamav:/var/lib/clamav/
+      - spamassassin:/var/lib/spamassassin/
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.252
 
   app:
     image: probesys38/agentj_app:latest
@@ -127,7 +131,7 @@ services:
 volumes:
   amavis:
   applogs:
-  clamdb:
+  clamav:
   db:
   logs:
   opendkim:
@@ -136,6 +140,7 @@ volumes:
   public:
   redisdb:
   smtpconfig:
+  spamassassin:
 
 networks:
   ajnet:
