@@ -31,5 +31,5 @@ VOLUME /etc/opendkim
 EXPOSE 25/tcp
 
 ENTRYPOINT [ "/entrypoint.sh" ] 
-HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
+HEALTHCHECK --start-period=60s CMD postfix status > /dev/null 2>&1 || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
