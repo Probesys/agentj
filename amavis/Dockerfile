@@ -18,6 +18,7 @@ RUN apk --update add \
     clamav-milter \
     clamav-scanner \
     cpio \
+    dcron \
     file \
     freshclam \
     gpg-agent \
@@ -33,6 +34,7 @@ RUN apk --update add \
     spamassassin \
     spamassassin-client \
     supervisor \
+    tzdata \
     unzip \
     zip \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*
@@ -40,14 +42,16 @@ RUN apk --update add \
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
+COPY init.sh /init.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY amavisd.patch /root/amavisd.patch
 
 RUN patch -p1 /usr/sbin/amavisd < /root/amavisd.patch
 
-VOLUME [ "/var/lib/amavis/" ]
-VOLUME [ "/var/lib/clamav/" ]
+VOLUME [ "/var/amavis" ]
+VOLUME [ "/var/lib/clamav" ]
+VOLUME [ "/var/lib/spamassassin" ]
 
 EXPOSE 10024/tcp
 

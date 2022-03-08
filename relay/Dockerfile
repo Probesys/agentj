@@ -14,6 +14,7 @@ RUN apk --update add \
     postfix-mysql \
     supervisor \
     rsyslog \
+    tzdata \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 

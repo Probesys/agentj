@@ -11,6 +11,7 @@ RUN apk --update add \
     syslog-ng-scl \
     syslog-ng-sql \
     syslog-ng-tags-parser \
+    tzdata \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*
 
 COPY conf/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
