@@ -47,7 +47,7 @@ Generics:
         no_records_found: Aucun résultat trouvé
         confirmationDeleteMessageQuestion: Etes vous certain de vouloir supprimer cet élément ?
         welcome: Bienvenue
-        welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>Agent-J</span>,<br> veuillez vous authentifier"
+        welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br> veuillez vous authentifier"
         formNotComplete: Veuillez renseigner les informations obligatoire
         emergency_consult: Urgence !
         emergency_consult_title: La situation de l'animal présente un caractère d'urgence !
@@ -104,8 +104,8 @@ Generics:
       bytes: Bytes
 
 Navigation:
-    mainTitle: Agent-J
-    mainSubTitle: Solution antispam Agent-J
+    mainTitle: AgentJ
+    mainSubTitle: Solution antispam AgentJ
     login: Connexion
     logout: Se déconnecter
     user_profil: Mon compte
@@ -219,10 +219,10 @@ Message:
       defaultTitle: Information
       newUntreatedMessage: nouveau(x) messages non traités
     Report:
-      defaultMailSubject: "Messages en attente sur Agent-J pour "
+      defaultMailSubject: "Messages en attente sur AgentJ pour "
       defaultAlertMailContent: "Bonjour,<br />
                           Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attentes de validation.<br /><br />
-                          Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à Agent-J. <br /><br />
+                          Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à AgentJ. <br /><br />
                           Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br />
                           Merci et bonne journée.
                           "
@@ -448,7 +448,7 @@ Entities:
      titleMonth: Sur le dernier mois
      stateMessage: Etat
      typeMessage: Type
-     mailFromName: Rapport Agent-J
+     mailFromName: Rapport AgentJ
      numberMessage: Nombre
      typeState: 
        C: Passé
