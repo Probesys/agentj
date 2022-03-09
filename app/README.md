@@ -1,7 +1,7 @@
 
-# Agent-J -Antispam with human authentification
+# AgentJ -Antispam with human authentification
 
-Agent-J is an open source web application,written inPHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
+AgentJ is an open source web application,written inPHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
 
 Amavisd-new is an interface between an MTA (Mail Trasnport Agent such as PostFix) and various content filter (antivirus, antispam,..) such as SpamAssassin an ClamAV
 
@@ -70,9 +70,9 @@ You also need to add cront tack
 
 ### Licence  
 
-# Agent-J -Antispam with human authentification
+# AgentJ -Antispam with human authentification
 
-Agent-J is an open source web application,written inPHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
+AgentJ is an open source web application,written inPHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
 
 Amavisd-new is an interface between an MTA (Mail Trasnport Agent such as PostFix) and various content filter (antivirus, antispam,..) such as SpamAssassin an ClamAV
 
@@ -146,4 +146,4 @@ This application is under the GNU AFFERO GENERAL PUBLIC LICENSE v3.0
 
 This application is under the GNU AFFERO GENERAL PUBLIC LICENSE v3.0
 ### About  
-Agent-J is a [Probesys](https://www.probesys.com) project.
+AgentJ is a [Probesys](https://www.probesys.com) project.
