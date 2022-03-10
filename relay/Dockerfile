@@ -7,8 +7,6 @@ LABEL description = "Postfix server to relay good emails to their final server"
 SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
 
 RUN apk --update add \
-    opendkim \
-    opendkim-utils \
     openssl \
     postfix \
     postfix-mysql \
@@ -19,14 +17,8 @@ RUN apk --update add \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
 COPY conf/postfix/* /etc/postfix/
-COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
-COPY conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
-COPY conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
-COPY conf/opendkim/SigningTable /etc/opendkim/SigningTable
-COPY conf/opendkim/KeyTable /etc/opendkim/KeyTable
 COPY entrypoint.sh /entrypoint.sh
-
-VOLUME /etc/opendkim
+COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 25/tcp
 
