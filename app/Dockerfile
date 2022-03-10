@@ -51,6 +51,8 @@ RUN apk --update add \
     dcron \
     mariadb-client \
     libssl1.1 \
+    opendkim \
+    opendkim-utils \
     openssl \
     perl \
     php7 \
@@ -75,19 +77,29 @@ RUN apk --update add \
     php7-xml \
     php7-xmlrpc \
     php7-zip \
+    rsyslog \
     sudo \
     supervisor \
+    tzdata \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && mkdir -p /var/run/php/ && touch /var/run/php/php7-fpm.pid \
     && rm -rf node_modules
 
-COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
+COPY docker/conf/opendkim/KeyTable /etc/opendkim/KeyTable
+COPY docker/conf/opendkim/SigningTable /etc/opendkim/SigningTable
+COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+COPY docker/conf/opendkim/gendomainkey.sh /usr/local/bin/gendomainkey.sh
 COPY docker/conf/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
+COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
-COPY docker/entrypoint.sh /entrypoint.sh
+
+VOLUME /etc/opendkim
 
 EXPOSE 9000
+EXPOSE 8891
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
