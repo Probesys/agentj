@@ -65,6 +65,7 @@ class WblistController extends AbstractController
         return $this->render('wb_list/index.html.twig', [
                 'controller_name' => 'WBListController',
                 'wblist' => $wblist2Show,
+                'wbTypeList' => $type,
                 'title' => $title,
                 'totalItemFound' => $totalItemFound,
                 'filter_form' => $filterForm->createView()

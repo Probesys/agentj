@@ -41,7 +41,7 @@
     {{ form_row(form.message_alert) }}
   </div>
 </div><div class="d-flex justify-content-center">
-  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
+  <input type="submit" class="btn btn-primary" value="{{ 'Generics.actions.save'|trans }}" >&nbsp;
   <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.backToTheList'|trans() }}</a>
 </div>    
 {#    <button class="btn">{{ button_label|default('Save') }}</button>#}

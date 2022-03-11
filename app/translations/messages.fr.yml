@@ -179,8 +179,10 @@ Message:
         confirmBannedDomainMsgContent: Êtes-vous sur de bannir l'expéditeur pour tous les utilisateurs ?
         confirmRestoreMsgtitle: Récupérer le message
         confirmRestoreMsgContent: Êtes-vous sur de vouloir récupérer le message ? 
-        confirmDeleteSenderTitle: Supprimer cet expéditeur ?
-        confirmDeleteSenderContent: Êtes-vous sûr de vouloir supprimer cet expéditeur ?
+        confirmDeleteSenderTitleW: Supprimer cet expéditeur ?
+        confirmDeleteSenderTitleB: Débloquer cet expéditeur ?
+        confirmDeleteSenderContentW: Êtes-vous sûr de vouloir supprimer cet expéditeur ?
+        confirmDeleteSenderContentB: Êtes-vous sûr de vouloir débloquer cet expéditeur ?
         confirmDeleteGroupTitle: Supprimer ce groupe ?
         confirmDeleteGroupContent: Êtes-vous sûr de vouloir supprimer ce groupe ?       
         confirmRemoveUserFromGroupTitle: Supprimer du groupe ?
@@ -417,16 +419,23 @@ Entities:
    WBList:
      fields:
       user: Utilisateur
-      type: Type de validation
+      typeB: Type de validation
+      typeW: Type de blocage
       white: Liste blanche
       black: Liste noire
-      typeLabel:
+      typeLabelW:
         0: Validé par vous
         1: Validé par captcha
         2: Validé par le groupe
         3: Validé par l'administrateur
+      typeLabelB:
+        0: Bloqué par vous
+        1: Bloqué par captcha
+        2: Bloqué par le groupe
+        3: Bloqué par l'administrateur        
      actions:
-       deleteSender: Supprimer l'expéditeur
+       deleteSenderW: Supprimer l'expéditeur
+       deleteSenderB: Débloquer l'expéditeur
    Import:
      Wbliste:
        title: "Liste blanche : importer une liste"
