@@ -46,14 +46,7 @@
         </div>
       </main>
       {% block footer %}
-        <footer class="sticky-footer w-100">
-          <div class="container my-auto">
-            <div class="copyright text-center my-auto">
-
-              <span>AgentJ {{ agentjVersion }} - Copyright © <a href="https://www.probesys.com" target="_blank">Probesys</a> {{ "now"|date('Y') }}</span>
-            </div>
-          </div>
-        </footer>
+        {% include '_footer.html.twig' %}
       {% endblock %}        
     </div>
 
