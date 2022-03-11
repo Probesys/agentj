@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_security.html.twig' %}
 
 {% block title %}{{'Navigation.login'|trans}}{% endblock %}
 
@@ -26,6 +26,12 @@
           <button class="btn btn-lg btn-primary" type="submit" name="loginBtn" id="loginBtn">
             {{ 'Generics.actions.impersonate'|trans }}
           </button>
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember_me" name="_remember_me" checked>
+              <label for="remember_me">
+                {{ 'Generics.actions.rememberme'|trans }}
+              </label>
+            </div>          
         </form>
       </div>
   </div>

@@ -19,6 +19,7 @@ Generics:
         exitImpersonation: Revenir à 
         search: Rechercher
         display: Afficher
+        rememberme: Se souvenir de moi
     fields:
         name: Intitulé
         helpMessage: Message d'aide
