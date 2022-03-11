@@ -43,9 +43,9 @@ security:
                 secret:   '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
                 path:     /
-                always_remember_me: true                
+                always_remember_me: true            
             switch_user: { role: ROLE_ALLOWED_TO_SWITCH }
-            context: agentj
+#            context: agentj
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication

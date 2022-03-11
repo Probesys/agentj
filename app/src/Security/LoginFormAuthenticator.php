@@ -17,6 +17,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -71,6 +72,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
                     new PasswordCredentials($password),
                     [
                 new CsrfTokenBadge('authenticate', $csrf_token),
+                new RememberMeBadge(),
                     ]
             );
         }
@@ -89,9 +91,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         $loginImap = $this->getLoginImap($user, $password);
         if (!$loginImap) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
-        }        
-        return new SelfValidatingPassport(new UserBadge($username), []);
-
+        }
+        return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
     }
 
     private function getUserDomainAuth(String $username) {
@@ -123,14 +124,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return false;
     }
 
-
     private function getLocalUser(String $userName) {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
         if ($user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()))) {
             return $user;
         }
         return false;
-        
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
@@ -140,7 +139,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
-         return new RedirectResponse($this->urlGenerator->generate('message'));
+        return new RedirectResponse($this->urlGenerator->generate('message'));
     }
 
     protected function getLoginUrl(Request $request): string {
