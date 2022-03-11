@@ -88,19 +88,6 @@ class WblistRepository extends ServiceEntityRepository
         return $stmt->fetch();
     }
 
-  /**
-   * delete WBlist
-   * @param type $type
-   * @return type
-   */
-    public function deleteMessage($rid, $sid)
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = 'DELETE FROM wblist  WHERE rid = "' . $rid . '" AND sid = "' . $sid . '"';
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-    }
 
   /**
    * delete query

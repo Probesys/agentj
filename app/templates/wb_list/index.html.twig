@@ -43,8 +43,10 @@
           {% set keyPairMessage =  [wb.rid, wb.sid] %}
           <tr>  
             <td>
+              {% if wb.type != 2 %}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
               <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
+              {% endif %}
             </td>
             {% if is_granted('ROLE_ADMIN') %}
               <td data-title="{{ 'Entities.WBList.fields.user'|trans() }}">{{wb.fullname}}<br />{{wb.emailuser}} </td>

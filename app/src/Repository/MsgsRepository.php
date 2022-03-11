@@ -37,7 +37,7 @@ class MsgsRepository extends ServiceEntityRepository
                 return $entity->getId();
             }, $user->getDomains()->toArray());
 
-            $sqlWhere .= ' AND u.domain_id in (' . implode($domainsIds, ',') . ') and bspam_level <= d.level ';
+            $sqlWhere .= ' AND u.domain_id in (' . implode($domainsIds, ',') . ') ';
         }
 
         if ($type) {
