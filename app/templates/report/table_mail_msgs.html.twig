@@ -6,8 +6,8 @@
         <tr>
           <td>
             <div>
-            <strong>{{ msg.from_addr }}</strong><br>
-            <p style="font-size: 10px">{{ msg.subject }}</p>              
+              <strong>{{ msg.from_addr }}</strong><br>
+              <p style="font-size: 10px">{{ msg.subject }}</p>              
             </div>
 
           </td>
@@ -49,6 +49,13 @@
 
           </td>
 
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div style="text-align:center">
+              <a href="{{ url }}">{{ url }}</a>
+            </div>
+          </td>
         </tr>
       {% endfor %}
 
