@@ -10,6 +10,7 @@ use App\Entity\Msgs;
 use App\Entity\User;
 use App\Form\CaptchaFormType;
 use App\Service\CryptEncrypt;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -153,7 +154,7 @@ class DefaultController extends AbstractController
      * @param string  $language
      * @return Response
      */
-    public function setLocaleAction(Request $request, $language = null)
+    public function setLocaleAction(Request $request, $language = null, EntityManagerInterface $em)
     {
         if (null != $language) {
             $request->getSession()->set('_locale', $language);
@@ -164,6 +165,12 @@ class DefaultController extends AbstractController
             $url = $this->container->get('router')->generate('index');
         }
 
+        $user = $this->getUser()->setPreferedLang($language);
+        $em->persist($user);
+        $em->flush();
+        
+
+        
         return new RedirectResponse($url);
     }
 }
