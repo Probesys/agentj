@@ -1,25 +1,25 @@
 Generics:
     actions:
-        create: Ajouter
-        delete: Supprimer
-        cancel: Annuler
-        show: Voir
-        edit: Éditer
-        remove: Supprimer
-        save: Enregistrer
-        clean: Effacer
-        filter: Filtrer
-        close: Fermer
-        backToTheList: Retour à la liste
-        createAndContinue: Créer et continuer
-        confirmDelete: Etes vous certain de vouloir réaliser cette suppression ?
-        changePassword: Changer de mot de passe
-        impersonate: Se connecter
-        connectAs: Se connecter en tant que
+        create: Add
+        delete: Delete
+        cancel: Cancel
+        show: Show
+        edit: Edit
+        remove: Remove
+        save: Save
+        clean: Clear
+        filter: Filter
+        close: Close
+        backToTheList: Back to list
+        createAndContinue: Create and continue
+        confirmDelete: Are you sure you want to delete ?
+        changePassword: Cahnge password
+        impersonate: Connect
+        connectAs: Connect as
         exitImpersonation: Revenir à 
-        search: Rechercher
-        display: Afficher
-        rememberme: Se souvenir de moi
+        search: Search
+        display: Display
+        rememberme: Rember me
     fields:
         name: Intitulé
         helpMessage: Message d'aide
@@ -348,7 +348,6 @@ Entities:
         level: Seuil de spam
         mailAuthenticationSender: Adresse mail qui envoie les demandes d'authentification
         imapNoValidateCert: Ne pas valider les certificats
-        defaultLang: Langue par défaut
       labels:
         rules: Règles
         domainrules: Règles du domaine
@@ -421,8 +420,8 @@ Entities:
    WBList:
      fields:
       user: Utilisateur
-      typeB: Type de blocage
-      typeW: Type de validation
+      typeB: Type de validation
+      typeW: Type de blocage
       white: Liste blanche
       black: Liste noire
       typeLabelW:

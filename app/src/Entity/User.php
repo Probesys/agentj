@@ -151,6 +151,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
    */
     private $bypassHumanAuth;
 
+    /**
+     * @ORM\Column(type="string", length=5, nullable=true)
+     */
+    private $preferedLang;
+
     public function __construct()
     {
 
@@ -490,6 +495,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBypassHumanAuth(?bool $bypassHumanAuth): self
     {
         $this->bypassHumanAuth = $bypassHumanAuth;
+
+        return $this;
+    }
+
+    public function getPreferedLang(): ?string
+    {
+        return $this->preferedLang;
+    }
+
+    public function setPreferedLang(?string $preferedLang): self
+    {
+        $this->preferedLang = $preferedLang;
 
         return $this;
     }

@@ -149,6 +149,11 @@ class Domain
      */
     private $imapNoValidateCert;
 
+    /**
+     * @ORM\Column(type="string", length=5, nullable=true)
+     */
+    private $defaultLang;
+
 
 
     public function __construct()
@@ -428,6 +433,18 @@ class Domain
     public function setImapNoValidateCert(?bool $imapNoValidateCert): self
     {
         $this->imapNoValidateCert = $imapNoValidateCert;
+
+        return $this;
+    }
+
+    public function getDefaultLang(): ?string
+    {
+        return $this->defaultLang;
+    }
+
+    public function setDefaultLang(?string $defaultLang): self
+    {
+        $this->defaultLang = $defaultLang;
 
         return $this;
     }

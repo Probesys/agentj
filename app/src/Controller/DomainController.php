@@ -12,6 +12,7 @@ use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,7 +67,7 @@ class DomainController extends AbstractController
   /**
    * @Route("/new", name="domain_new", methods="GET|POST")
    */
-    public function new(Request $request, FileUploader $fileUploader): Response
+    public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response
     {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
@@ -78,6 +79,7 @@ class DomainController extends AbstractController
         'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
+        $form->get('defaultLang')->setData($params->get('locale'));
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
