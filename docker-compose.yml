@@ -104,7 +104,7 @@ services:
     restart: always
     depends_on:
       - syslogng
-    command: syslog+udp://syslogng:514?filter.name=agentj*
+    command: syslog+udp://syslogng:514?filter.name=agentj-${COMPOSE_PROJECT_NAME}*
     environment:
       - TZ=${TZ}
     networks:
