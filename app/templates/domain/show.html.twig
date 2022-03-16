@@ -25,7 +25,7 @@
             </tr>
             <tr>
                 <th>Datemod</th>
-                <td>{{ domain.datemod ? domain.datemod|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ domain.datemod ? domain.datemod | localizeddate('short', 'short') : '' }}</td>
             </tr>
             <tr>
                 <th>Imap_port</th>

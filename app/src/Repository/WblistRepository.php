@@ -213,7 +213,7 @@ class WblistRepository extends ServiceEntityRepository
         $sql_select_policy = 'SELECT *,users.id' .
             ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
             ' WHERE users.email IN (' . $r_str . ') ORDER BY users.priority DESC ';
-
+//dd($sql_select_policy);
         $stmt = $conn->prepare($sql_select_policy);
         $stmt->execute();
         $result = $stmt->fetchAll();
@@ -238,18 +238,9 @@ class WblistRepository extends ServiceEntityRepository
 
 
                 $seconds = 0;
-              //filter the rules on date before date message
-                if ($dateMsg) {
-                    $dateWb = new \DateTime($row1['datemod']);
-                    $interval = $dateMsg->diff($dateWb);
-                    $seconds = $interval->format('%r%d') * 24 * 60 * 60;
-                    $seconds += $interval->format('%r%h') * 60 * 60;
-                    $seconds += $interval->format('%r%i') * 60;
-                    $seconds += $interval->format('%r%s');
-                }
 
 
-                if ($seconds <= 0) {
+
                     $infos[] = [
                     'id' => $id,
                     'wb' => $row1['wb'],
@@ -259,10 +250,9 @@ class WblistRepository extends ServiceEntityRepository
                     'recipient' => $recipient,
                     'datemod' => $row1['datemod']
                     ];
-                }
+
             }
         }
-
 
 
         return $infos;

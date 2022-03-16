@@ -83,7 +83,11 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $domain->setTransport("smtp:[" . $domain->getSrvSmtp() . "]");
+            $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
+            if ($domain->getSmtpPort()){
+                $strTransport .= ":" . $domain->getSmtpPort();
+            }
+            $domain->setTransport($strTransport);
           //Default messages
           //captcha page
             $messageConfig = $this->getDoctrine()->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
@@ -182,7 +186,13 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $domain->setTransport("smtp:[" . $domain->getSrvSmtp() . "]");
+            
+            $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
+            if ($domain->getSmtpPort()){
+                $strTransport .= ":" . $domain->getSmtpPort();
+            }
+            $domain->setTransport($strTransport);
+            
             $policy = $form->get('policy')->getData();
             $userDomain = $this->getDoctrine()->getRepository(User::class)->findOneBy((['email' => '@' . $domain->getDomain()]));
             if (!$userDomain) {
