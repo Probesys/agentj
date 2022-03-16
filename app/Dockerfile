@@ -17,6 +17,7 @@ RUN apk --update add \
     php7-fpm \
     php7-gd \
     php7-imap \
+    php7-intl \
     php7-json \
     php7-mbstring \
     php7-mysqli \
@@ -63,6 +64,7 @@ RUN apk --update add \
     php7-gd \
     php7-iconv \
     php7-imap \
+    php7-intl \
     php7-json \
     php7-mbstring \
     php7-pdo_mysql \
