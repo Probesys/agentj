@@ -92,7 +92,7 @@
                                 <span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
                             {% endif %}
                         </td>            
-                        <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | localizeddate('medium', 'none') }}">{{msg.time_num | date('Y-m-d H:i:s')}}</span> </td>
+                        <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | localizeddate('short', 'short') }}">{{msg.time_num | localizeddate('short', 'short')}}</span> </td>
                         
                             <td>{{ msg.bspam_level }}</td>
                             <td>

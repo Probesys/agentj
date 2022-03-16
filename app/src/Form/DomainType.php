@@ -12,6 +12,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -53,6 +54,9 @@ class DomainType extends AbstractType {
                     'multiple' => false,
                     'expanded' => false,
                 ])
+                ->add('smtpPort', TextType::class, [
+                    'label' => 'Entities.Domain.fields.smtp_port',
+                ])                
 //                ->add('imap_port', null, [
 //                    'empty_data' => '143',
 //                    'label' => 'Entities.Domain.fields.imap_port'

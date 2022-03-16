@@ -154,6 +154,11 @@ class Domain
      */
     private $defaultLang;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $smtpPort;
+
 
 
     public function __construct()
@@ -445,6 +450,18 @@ class Domain
     public function setDefaultLang(?string $defaultLang): self
     {
         $this->defaultLang = $defaultLang;
+
+        return $this;
+    }
+
+    public function getSmtpPort(): ?int
+    {
+        return $this->smtpPort;
+    }
+
+    public function setSmtpPort(?int $smtpPort): self
+    {
+        $this->smtpPort = $smtpPort;
 
         return $this;
     }

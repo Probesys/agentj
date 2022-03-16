@@ -44,6 +44,8 @@ Generics:
         type: Type
         active: Actif
         inactive: Inactif
+        priority: "Priorité"
+        list: "Liste"
     messages:
         no_records_found: Aucun résultat trouvé
         confirmationDeleteMessageQuestion: Etes vous certain de vouloir supprimer cet élément ?
@@ -342,6 +344,7 @@ Entities:
         srvSmtp: Serveur SMTP
         srvImap: Serveur IMAP
         imap_port: Port IMAP
+        smtp_port: Port SMTP
         imap_flag: "Sécurisation IMAP"
         active: Domaine actif
         policy: Stratégie pour le domaine
@@ -418,6 +421,15 @@ Entities:
       spammedDetect: spammés détectés automatiquement
       informationMessage: Les messages seront automatiquement effacés au bout de 30 jours.
       spamLevel : Note
+      dateAuthRequestAt: "Demande d'authentification envoyée le"
+      isMailingList: "Mailing liste ? "
+   Msgrcpt:
+      labels:
+        infos: "Informations sur le message"
+        appliedRule: "Informations sur le message"
+      fields:
+        bspamLevel: "Note de spam"
+
    WBList:
      fields:
       user: Utilisateur
