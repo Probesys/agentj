@@ -16,6 +16,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -24,66 +26,63 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @Route("/domain")
  */
-class DomainController extends AbstractController
-{
+class DomainController extends AbstractController {
+
     use ControllerWBListTrait;
 
 //  private $wBListDomainActions;
     private $translator;
 
-    private function checkAccess($domain)
-    {
+    private function checkAccess($domain) {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $allowedomains = $this->getDoctrine()
-              ->getRepository(Domain::class)
-              ->getListByUserId($this->getUser()->getId());
+                    ->getRepository(Domain::class)
+                    ->getListByUserId($this->getUser()->getId());
             if (!in_array($domain, $allowedomains)) {
                 throw new AccessDeniedException();
             }
         }
     }
 
-  /**
-   * @Route("/", name="domain_index", methods="GET")
-   */
-    public function index(): Response
-    {
+    /**
+     * @Route("/", name="domain_index", methods="GET")
+     */
+    public function index(): Response {
 
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $domains = $this->getDoctrine()
-              ->getRepository(Domain::class)
-              ->findAll();
+                    ->getRepository(Domain::class)
+                    ->findAll();
         } else {
             $domains = $this->getDoctrine()
-              ->getRepository(Domain::class)
-              ->getListByUserId($this->getUser()->getId());
+                    ->getRepository(Domain::class)
+                    ->getListByUserId($this->getUser()->getId());
         }
 
 
         return $this->render('domain/index.html.twig', ['domains' => $domains]);
     }
 
-  /**
-   * @Route("/new", name="domain_new", methods="GET|POST")
-   */
-    public function new(Request $request, FileUploader $fileUploader): Response
-    {
+    /**
+     * @Route("/new", name="domain_new", methods="GET|POST")
+     */
+    public function new(Request $request, FileUploader $fileUploader): Response {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
-        'action' => $this->generateUrl('domain_new'),
-        'actions' => $this->wBListDomainActions,
-        'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
-        'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
+            'action' => $this->generateUrl('domain_new'),
+            'actions' => $this->wBListDomainActions,
+            'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
+            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $domain->setTransport("smtp:[" . $domain->getSrvSmtp() . "]");
-          //Default messages
-          //captcha page
+            //Default messages
+            //captcha page
             $messageConfig = $this->getDoctrine()->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
             if ($messageConfig) {
                 $domain->setMessage($this->getDoctrine()->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
@@ -100,7 +99,7 @@ class DomainController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($domain);
 
-          //add domain to users
+            //add domain to users
             $user = new User();
             $user->setEmail('@' . $domain->getDomain());
             $user->setFullname('Domaine ' . $domain->getDomain());
@@ -111,7 +110,7 @@ class DomainController extends AbstractController
 
             $rules = $form->get("rules")->getData();
 
-          //for all domain @.
+            //for all domain @.
             $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
@@ -133,6 +132,8 @@ class DomainController extends AbstractController
             }
 
             $em->flush();
+
+            $this->generateOpenDkim($domain->getSrvSmtp());
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_index');
         } elseif ($form->isSubmitted()) {
@@ -148,32 +149,30 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/new.html.twig', [
-                'domain' => $domain,
-                'form' => $form->createView(),
-                'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
+                    'domain' => $domain,
+                    'form' => $form->createView(),
+                    'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
         ]);
     }
 
-  /**
-   * @Route("/{id}", name="domain_show", methods="GET")
-   */
-    public function show(Domain $domain): Response
-    {
+    /**
+     * @Route("/{id}", name="domain_show", methods="GET")
+     */
+    public function show(Domain $domain): Response {
         return $this->render('domain/show.html.twig', ['domain' => $domain]);
     }
 
-  /**
-   * @Route("/{id}/edit", name="domain_edit", methods="GET|POST")
-   */
-    public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response
-    {
+    /**
+     * @Route("/{id}/edit", name="domain_edit", methods="GET|POST")
+     */
+    public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response {
 
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
-        'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-        'actions' => $this->wBListDomainActions,
-        'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
-        'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
+            'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
+            'actions' => $this->wBListDomainActions,
+            'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
+            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
         $wblistArray = $this->getDoctrine()->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
         $form->get('rules')->setData($wblistArray['wb']);
@@ -222,17 +221,16 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/edit.html.twig', [
-                'domain' => $domain,
-                'form' => $form->createView(),
-                'domainSpamLevel' => $domain->getLevel()
+                    'domain' => $domain,
+                    'form' => $form->createView(),
+                    'domainSpamLevel' => $domain->getLevel()
         ]);
     }
 
-  /**
-   * @Route("/{id}/delete", name="domain_delete", methods="GET")
-   */
-    public function delete(Request $request, Domain $domain): Response
-    {
+    /**
+     * @Route("/{id}/delete", name="domain_delete", methods="GET")
+     */
+    public function delete(Request $request, Domain $domain): Response {
         $this->checkAccess($domain);
         if ($this->isCsrfTokenValid('delete' . $domain->getId(), $request->query->get('_token'))) {
             $em = $this->getDoctrine()->getManager();
@@ -243,11 +241,10 @@ class DomainController extends AbstractController
         return $this->redirectToRoute('domain_index');
     }
 
-  /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-   * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
-   */
-    public function deleteWblist($rid, $sid, Request $request): Response
-    {
+    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
+     * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
+     */
+    public function deleteWblist($rid, $sid, Request $request): Response {
         $wbList = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
         $this->checkAccess($domain);
@@ -260,11 +257,10 @@ class DomainController extends AbstractController
         return $this->redirectToRoute('domain_index');
     }
 
-  /**
-   * @Route("/{id}/wblist", name="domain_wblist", methods="GET")
-   */
-    public function domainwblist(Domain $domain): Response
-    {
+    /**
+     * @Route("/{id}/wblist", name="domain_wblist", methods="GET")
+     */
+    public function domainwblist(Domain $domain): Response {
         $this->checkAccess($domain);
         $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $wblist = $this->getDoctrine()->getRepository(Wblist::class)->findBy(['rid' => $user]);
@@ -275,11 +271,10 @@ class DomainController extends AbstractController
         return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
     }
 
-  /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-   * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
-   */
-    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response
-    {
+    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
+     * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
+     */
+    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response {
         $em = $this->getDoctrine()->getManager();
         $domain = $this->getDoctrine()->getRepository(Domain::class)->find($domainId);
         if (!$domain) {
@@ -288,14 +283,13 @@ class DomainController extends AbstractController
         $this->checkAccess($domain);
         $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
-        'action' => $this->generateUrl('domain_wblist_new', ['domainId' => $domainId]),
+            'action' => $this->generateUrl('domain_wblist_new', ['domainId' => $domainId]),
         ]);
         $formBuilder->add('email', TextType::class);
         $actions = $this->wBListUserActions;
 
-
         $formBuilder->add('wb', ChoiceType::class, [
-        'choices' => $actions,
+            'choices' => $actions,
         ]);
 
         $form = $formBuilder->getForm();
@@ -331,16 +325,15 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/newwblist.html.twig', [
-                'domain' => $domain,
-                'form' => $form->createView(),
+                    'domain' => $domain,
+                    'form' => $form->createView(),
         ]);
     }
 
-  /**
-   * @Route("/{id}/messages", name="domain_messages", methods="GET|POST")
-   */
-    public function domainMessages(Request $request, Domain $domain): Response
-    {
+    /**
+     * @Route("/{id}/messages", name="domain_messages", methods="GET|POST")
+     */
+    public function domainMessages(Request $request, Domain $domain): Response {
         $this->checkAccess($domain);
         $form = $this->createForm(DomainMessageType::class, $domain);
         $form->handleRequest($request);
@@ -352,21 +345,20 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/messages.html.twig', [
-                'domain' => $domain,
-                'form' => $form->createView(),
+                    'domain' => $domain,
+                    'form' => $form->createView(),
         ]);
     }
 
-  /**
-   *
-   * @param type $email
-   * @return int
-   */
-    private function computeMailAddrPriority($email = "")
-    {
+    /**
+     *
+     * @param type $email
+     * @return int
+     */
+    private function computeMailAddrPriority($email = "") {
 
         $priority = 5; //default priority for email
-      //in case domain
+        //in case domain
         if (substr(trim($email), 0, 1) == '@') {
             $domain = substr($email, 1);
             if ($domain == '.') {
@@ -391,8 +383,27 @@ class DomainController extends AbstractController
                 }
             }
         } else {
-          //todo user (priority 6) / user+foo (priority 7) / user@sub.example.com (priority 8) / user+foo@sub.example.com (priority 9)
+            //todo user (priority 6) / user+foo (priority 7) / user@sub.example.com (priority 8) / user+foo@sub.example.com (priority 9)
         }
         return $priority;
     }
+
+    private function generateOpenDkim(string $smtpServer): bool {
+        $process = new Process(['/usr/local/bin/gendomainkey.sh', $smtpServer]);
+        $process->run();
+        ;
+
+        try {
+            $process->mustRun();
+
+        $this->addFlash('info', $smtpServer . ' : ' . $process->getOutput());
+        return true;
+        } catch (ProcessFailedException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+            return false;
+        }
+
+
+    }
+
 }
