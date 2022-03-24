@@ -50,8 +50,9 @@ class MessageController extends AbstractController
                 case 'spam':
                     $subTitle = 'Entities.Message.spammedDetect';
                     $messageActions = [
-                      'Message.Actions.Delete' => 'delete',
+                      'Message.Actions.Restore' => 'restore',                      
                       'Message.Actions.Autorized' => 'authorized',
+                      'Message.Actions.Delete' => 'delete',
                     ];
                     $type = MessageStatus::SPAMMED;
                     break;

@@ -35,28 +35,22 @@
   </head>
 
   {% set bodyClass="" %}
-  {%  if app.request.get('_route') == 'app_login' %}
-    {% set bodyClass="not-auth" %}
-  {% elseif app.request.get('_route') == 'check_message' %}
+  {%  if app.request.get('_route') == 'check_message' %}
     {% set bodyClass="validate-address" %}
   {% endif %}
 
   <body id="page-top" data-base-path="{{ app.request.basePath }}" class="{{ bodyClass }}">
     {% block topnav %}
-      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        {#      {% include 'header.html.twig' %}#}
+
         {{ render(controller(
                       'App\\Controller\\MenuController::renderHeader'                   
                   )) }}    
-      {% endif %}
     {% endblock %}
-    <div class="page-wrapper default-theme sidebar-bg bg1 {% if is_granted('IS_AUTHENTICATED_FULLY') %}toggled{% endif %}">
+    <div class="page-wrapper default-theme sidebar-bg bg1 toggled">
       {% block leftnav %}
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
           {{ render(controller(
                     'App\\Controller\\MenuController::renderSlideMenu',{'route':app.request.get('_route'),'route_params':app.request.get('_route_params')}                   
                 )) }}              
-        {% endif %}
       {% endblock %}   
       <main class="page-content">
         <div id="overlay" class="overlay"></div>         
@@ -71,19 +65,10 @@
 
       </main>
       {% block footer %}
-        <footer class="sticky-footer w-100">
-          <div class="container my-auto">
-            <div class="copyright text-center my-auto">
-
-              <span>Agent-J {{ agentjVersion }} - Copyright © <a href="https://www.probesys.com" target="_blank">Probesys</a> {{ "now"|date('Y') }}</span>
-            </div>
-          </div>
-        </footer>
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {% include '_footer.html.twig' %}
           <a class="scroll-to-top" href="#page-top" style="display: inline;">
             <i class="fas fa-sort-up"></i>
           </a>          
-        {% endif %}
       {% endblock %}        
     </div>
 
@@ -100,12 +85,10 @@
 
       <script type="text/javascript" src="{{ asset('js/jquery-ui/jquery-ui.js') }}"></script>
 
-      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
         <script src="{{ path('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
         <script src="{{ asset('js/translations/config.js') }}"></script>              
         <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
-      {% endif %}
 
       <script type="text/javascript" src="{{ asset('lib/select2/select2.full.min.js') }}"></script>
       <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script>

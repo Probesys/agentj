@@ -58,7 +58,7 @@ class UserType extends AbstractType
                     'mapped' => false,
                 ])
                 ->add('groups', EntityType::class, [
-//                'label' => 'Entities.Group.fields.domain',
+                    'label' => 'Entities.User.fields.groups',
                     'class' => Groups::class,
                     'multiple' => false,
                     'attr' => ['class' => 'select2'],

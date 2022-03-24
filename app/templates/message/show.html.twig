@@ -2,37 +2,31 @@
 {% set msgDeferredStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
 {% block modalTitle %}
   {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
-  Informations sur le message
+  {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
 
 {% block modalContent %}
   <div class="row">
     <div class="col-md-4">
-      Date
+      {{ 'Generics.fields.date' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msg.timeiso| date('Y-m-d H:i:s', "Europe/Paris") }}
+      {{ msg.timeiso | localizeddate('short', 'short') }}
     </div>      
     <div class="col-md-4">
-      Expéditeur
+       {{ 'Generics.fields.sender' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msg.sid.getEmailClear }}
-      {% if msgRcpt.wl == 'Y' %}
-        <br><span class="font-weight-bold text-success">Liste blanche</span>
-      {% endif %}
-      {% if msgRcpt.bl == 'Y' %}
-        <br><span class="font-weight-bold text-danger">Liste noire</span>
-      {% endif %}        
+      {{ msg.sid.getEmailClear }}    
     </div>
     <div class="col-md-4">
-      Destinataire
+      {{ 'Generics.fields.recipient' | trans }}
     </div>
     <div class="col-md-8">
       {{ msgRcpt.rid.getEmailClear }}
     </div>    
     <div class="col-md-4">
-      Note de spam
+     {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
     </div>
     <div class="col-md-8">
       {{ msgRcpt.bspamLevel }}
@@ -40,21 +34,21 @@
     
     {% if msgRcpt.sendCaptcha > 0 %}
     <div class="col-md-4">
-      Demande d'authentification envoyée : 
+      {{ 'Entities.Message.dateAuthRequestAt' | trans }} : 
     </div>
     <div class="col-md-8">
-       {{ msgRcpt.sendCaptcha|date("m/d/Y") }}
+       {{ msgRcpt.sendCaptcha | localizeddate('short', 'short') }}
     </div>   
     {% endif %}
     
     <div class="col-md-4">
-      Mailing liste : 
+      {{ 'Entities.Message.isMailingList' | trans }}
     </div>
     <div class="col-md-8">
        {%  if msg.isMlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
     </div>    
     <div class="col-md-4">
-      Status
+      {{ 'Message.status' | trans }}
     </div>
     <div class="col-md-8">
       {# If the message as an agentJ status #}
@@ -81,18 +75,17 @@
       <em>{{ response }}</em>
     </div>
     <div class="col-md-12">
-      Règle appliquée
+       {{ 'Entities.Msgrcpt.labels.appliedRule' | trans }}
     </div>
     <div class="col-md-12">
       <table class="table table-sm">
         <thead>
           <tr>
-            <th>dest</th>
-            <th>Adresse</th>
-            <th>Liste</th>
-            <th>Priorité</th>
-            <th>Groupe</th>
-            <th>Date</th>
+            <th>{{ 'Generics.fields.recipient' | trans }}</th>
+            <th>{{ 'Generics.fields.sender' | trans }}</th>
+            <th>{{ 'Generics.fields.list' | trans }}</th>
+            <th>{{ 'Generics.fields.priority' | trans }}</th>
+            <th>{{ 'Entities.User.fields.groups' | trans }}</th>
           </tr>
         </thead>
         {% for wb in wblistInfo %}
@@ -106,7 +99,6 @@
             <td>{{ wb.wb }}</td>
             <td>{{ wb.priority }}</td>
             <td>{{ wb.group }}</td>
-            <td>{{ wb.datemod| date('Y-m-d H:i:s') }}</td>
           </tr>
         {% endfor %}        
       </table>
