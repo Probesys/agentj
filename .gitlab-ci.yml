@@ -132,10 +132,10 @@ web_build:
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - web/*
-      - web/**/*
+  #only:
+  #  changes:
+  #    - web/*
+  #    - web/**/*
 
 # This task is manually triggered only
 mass_build:
