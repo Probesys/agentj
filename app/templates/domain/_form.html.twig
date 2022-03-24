@@ -2,6 +2,7 @@
 {#    {{ form_widget(form) }}#}
 {{ form_row(form.domain) }}
 {{ form_row(form.srvSmtp) }}
+{{ form_row(form.smtpPort) }}
 {{ form_row(form.srvImap) }}
 {{ form_row(form.imap_port) }}
 {{ form_row(form.imap_flag) }}
@@ -17,8 +18,10 @@
   <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
   <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
 </div>
+
 {#{{ form_row(form.mailAuthenticationSender) }}#}
 {{ form_row(form.logoFile) }}
+  {{ form_row(form.defaultLang) }}
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
 <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>

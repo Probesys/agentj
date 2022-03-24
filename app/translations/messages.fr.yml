@@ -19,6 +19,7 @@ Generics:
         exitImpersonation: Revenir à 
         search: Rechercher
         display: Afficher
+        rememberme: Se souvenir de moi
     fields:
         name: Intitulé
         helpMessage: Message d'aide
@@ -43,11 +44,13 @@ Generics:
         type: Type
         active: Actif
         inactive: Inactif
+        priority: "Priorité"
+        list: "Liste"
     messages:
         no_records_found: Aucun résultat trouvé
         confirmationDeleteMessageQuestion: Etes vous certain de vouloir supprimer cet élément ?
         welcome: Bienvenue
-        welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>Agent-J</span>,<br> veuillez vous authentifier"
+        welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br> veuillez vous authentifier"
         formNotComplete: Veuillez renseigner les informations obligatoire
         emergency_consult: Urgence !
         emergency_consult_title: La situation de l'animal présente un caractère d'urgence !
@@ -104,8 +107,8 @@ Generics:
       bytes: Bytes
 
 Navigation:
-    mainTitle: Agent-J
-    mainSubTitle: Solution antispam Agent-J
+    mainTitle: AgentJ
+    mainSubTitle: Solution antispam AgentJ
     login: Connexion
     logout: Se déconnecter
     user_profil: Mon compte
@@ -179,8 +182,10 @@ Message:
         confirmBannedDomainMsgContent: Êtes-vous sur de bannir l'expéditeur pour tous les utilisateurs ?
         confirmRestoreMsgtitle: Récupérer le message
         confirmRestoreMsgContent: Êtes-vous sur de vouloir récupérer le message ? 
-        confirmDeleteSenderTitle: Supprimer cet expéditeur ?
-        confirmDeleteSenderContent: Êtes-vous sûr de vouloir supprimer cet expéditeur ?
+        confirmDeleteSenderTitleW: Supprimer cet expéditeur ?
+        confirmDeleteSenderTitleB: Débloquer cet expéditeur ?
+        confirmDeleteSenderContentW: Êtes-vous sûr de vouloir supprimer cet expéditeur ?
+        confirmDeleteSenderContentB: Êtes-vous sûr de vouloir débloquer cet expéditeur ?
         confirmDeleteGroupTitle: Supprimer ce groupe ?
         confirmDeleteGroupContent: Êtes-vous sûr de vouloir supprimer ce groupe ?       
         confirmRemoveUserFromGroupTitle: Supprimer du groupe ?
@@ -219,10 +224,10 @@ Message:
       defaultTitle: Information
       newUntreatedMessage: nouveau(x) messages non traités
     Report:
-      defaultMailSubject: "Messages en attente sur Agent-J pour "
+      defaultMailSubject: "Messages en attente sur AgentJ pour "
       defaultAlertMailContent: "Bonjour,<br />
                           Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attentes de validation.<br /><br />
-                          Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à Agent-J. <br /><br />
+                          Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à AgentJ. <br /><br />
                           Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br />
                           Merci et bonne journée.
                           "
@@ -339,12 +344,14 @@ Entities:
         srvSmtp: Serveur SMTP
         srvImap: Serveur IMAP
         imap_port: Port IMAP
+        smtp_port: Port SMTP
         imap_flag: "Sécurisation IMAP"
         active: Domaine actif
         policy: Stratégie pour le domaine
         level: Seuil de spam
         mailAuthenticationSender: Adresse mail qui envoie les demandes d'authentification
         imapNoValidateCert: Ne pas valider les certificats
+        defaultLang: Langue par défaut
       labels:
         rules: Règles
         domainrules: Règles du domaine
@@ -414,19 +421,35 @@ Entities:
       spammedDetect: spammés détectés automatiquement
       informationMessage: Les messages seront automatiquement effacés au bout de 30 jours.
       spamLevel : Note
+      dateAuthRequestAt: "Demande d'authentification envoyée le"
+      isMailingList: "Mailing liste ? "
+   Msgrcpt:
+      labels:
+        infos: "Informations sur le message"
+        appliedRule: "Informations sur le message"
+      fields:
+        bspamLevel: "Note de spam"
+
    WBList:
      fields:
       user: Utilisateur
-      type: Type de validation
+      typeB: Type de blocage
+      typeW: Type de validation
       white: Liste blanche
       black: Liste noire
-      typeLabel:
+      typeLabelW:
         0: Validé par vous
         1: Validé par captcha
         2: Validé par le groupe
         3: Validé par l'administrateur
+      typeLabelB:
+        0: Bloqué par vous
+        1: Bloqué par captcha
+        2: Bloqué par le groupe
+        3: Bloqué par l'administrateur        
      actions:
-       deleteSender: Supprimer l'expéditeur
+       deleteSenderW: Supprimer l'expéditeur
+       deleteSenderB: Débloquer l'expéditeur
    Import:
      Wbliste:
        title: "Liste blanche : importer une liste"
@@ -448,7 +471,7 @@ Entities:
      titleMonth: Sur le dernier mois
      stateMessage: Etat
      typeMessage: Type
-     mailFromName: Rapport Agent-J
+     mailFromName: Rapport AgentJ
      numberMessage: Nombre
      typeState: 
        C: Passé

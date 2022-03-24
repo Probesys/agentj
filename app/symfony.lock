@@ -160,6 +160,9 @@
     "phpstan/phpstan-phpunit": {
         "version": "0.12.18"
     },
+    "predis/predis": {
+        "version": "v1.1.10"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -213,6 +216,15 @@
         "files": [
             "config/packages/sensio_framework_extra.yaml"
         ]
+    },
+    "snc/redis-bundle": {
+        "version": "2.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "2.0",
+            "ref": "36b3d9ab65be62de4e085a25e6ca899efa96b1f3"
+        }
     },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",
