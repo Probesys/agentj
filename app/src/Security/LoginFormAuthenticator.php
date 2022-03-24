@@ -2,131 +2,157 @@
 
 namespace App\Security;
 
+use App\Entity\Domain;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
-{
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
+
     use TargetPathTrait;
 
-    private $entityManager;
-    private $router;
+    private $urlGenerator;
+    private $params;
     private $csrfTokenManager;
-    private $passwordEncoder;
+    private $entityManager;
+    private $translator;
 
-    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
-    {
-        $this->entityManager = $entityManager;
-        $this->router = $router;
+    public const LOGIN_ROUTE = 'app_login';
+
+    public function __construct(
+            UrlGeneratorInterface $urlGenerator,
+            ParameterBagInterface $params,
+            CsrfTokenManagerInterface $csrfTokenManager,
+            EntityManagerInterface $entityManager,
+            TranslatorInterface $translator
+    ) {
+        $this->urlGenerator = $urlGenerator;
+        $this->params = $params;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->entityManager = $entityManager;
+        $this->translator = $translator;
     }
 
-    public function supports(Request $request)
-    {
-        return 'app_login' === $request->attributes->get('_route') && $request->isMethod('POST');
-    }
+    public function authenticate(Request $request): PassportInterface {
 
-    public function getCredentials(Request $request)
-    {
-        $credentials = [
-        'username' => $request->request->get('username'),
-        'password' => $request->request->get('password'),
-        'csrf_token' => $request->request->get('_csrf_token'),
-        ];
-        $request->getSession()->set(
-            Security::LAST_USERNAME,
-            $credentials['username']
-        );
+        $username = $request->request->get('username', '');
+        $csrf_token = $request->request->get('_csrf_token', '');
+        $password = $request->request->get('password', '');
 
-        return $credentials;
-    }
-
-    public function getUser($credentials, UserProviderInterface $userProvider)
-    {
-        $token = new CsrfToken('authenticate', $credentials['csrf_token']);
+        $token = new CsrfToken('authenticate', $csrf_token);
         if (!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
         }
 
-      //check mail format
-        $mail = explode('@', $credentials['username']);
-        if (isset($mail[1])) {
-          //only domain
-            $domain = $this->entityManager->getRepository('App:Domain')->findOneBy(['domain' => strtolower($mail[1]), 'active' => 1]);
-            if ($domain) {
-                $user = $this->entityManager->getRepository('App:User')->findOneBy(['email' => strtolower($credentials['username'])]);
-                $loginImap = $credentials['username'];
-              //search imap login
-                if ($user && $user->getImapLogin()) {
-                    //replace login for identification
-                    $loginImap = $user->getImapLogin();
-                }
-              //on met à null le user afin de vérifier le mot de passe
-                $user = null;
 
-                $conStr = $domain->getSrvImap() . ":" . $domain->getImapPort() . $domain->getImapFlag();
-                if ($domain->getImapNoValidateCert()) {
-                    $conStr .= '/novalidate-cert';
-                }
-                
-                $conStr = '{' . $conStr . '}';
-                $mbox = @imap_open($conStr, $loginImap, $credentials['password']);
-                if (!imap_errors()) {
-                    
-                    $user = $this->entityManager->getRepository('App:User')->findOneBy(['email' => strtolower($credentials['username'])]);
-                    if (!$user) {
-                        throw new CustomUserMessageAuthenticationException('Authentication failed.');
-                    }
-                } else {
-                    throw new CustomUserMessageAuthenticationException('Authentication failed.');
-                }
-            } else {
-                throw new CustomUserMessageAuthenticationException('Authentication failed.');
-            }
-        } else {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($credentials['username'])]);
-            if (!$user) {
-              // fail authentication with a custom error
-                throw new CustomUserMessageAuthenticationException('Authentication failed.');
-            }
+        // check if a local user exists
+        $localUser = $this->getLocalUser($username);
+        if ($localUser) {
+            return new Passport(
+                    new UserBadge($username),
+                    new PasswordCredentials($password),
+                    [
+                new CsrfTokenBadge('authenticate', $csrf_token),
+                new RememberMeBadge(),
+                    ]
+            );
         }
 
-        return $user;
+        // check if a domain exists and if it's active
+        $domain = $this->getUserDomainAuth($username);
+        if (!$domain) {
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+        }
+//        dd($domain);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => strtolower($username)]);
+        if (!$user) {
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+        }
+
+        $loginImap = $this->getLoginImap($user, $password);
+        if (!$loginImap) {
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+        }
+        return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
-    {
-      //if user have not password, don't check credential, the user (mail) is check with open_imap
-        return (!$user->getPassword()) || ($this->passwordEncoder->isPasswordValid($user, $credentials['password']));
+    private function getUserDomainAuth(String $username) {
+        $mail = explode('@', $username);
+        if (!isset($mail[1])) {
+            return false;
+        }
+        /* @var $domain Domain */
+        $domain = $this->entityManager->getRepository(Domain::class)->findOneBy(['domain' => strtolower($mail[1]), 'active' => 1]);
+        if (!$domain) {
+            return false;
+        }
+
+        return $domain;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
-    {
+    private function getLoginImap(User $user, String $password) {
+        $domain = $user->getDomain();
+        $conStr = $domain->getSrvImap() . ":" . $domain->getImapPort() . $domain->getImapFlag();
+        if ($domain->getImapNoValidateCert()) {
+            $conStr .= '/novalidate-cert';
+        }
+
+        $conStr = '{' . $conStr . '}';
+        $mbox = @imap_open($conStr, $user->getEmailFromRessource(), $password);
+        if (!imap_errors() && $mbox) {
+            return true;
+        }
+        return false;
+    }
+
+    private function getLocalUser(String $userName) {
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
+        if ($user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()))) {
+            return $user;
+        }
+        return false;
+    }
+
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
+
         $request->getSession()->set('originalUser', $token->getUser()->getUsername());
-        $request->getSession()->set('_locale', 'fr');
-        if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
+        
+        if ($token->getUser()->getDomain() && $token->getUser()->getDomain()->getDefaultLang()){
+            $request->getSession()->set('_locale',  $token->getUser()->getDomain()->getDefaultLang());
+        }
+        
+        
+        if ($token->getUser()->getPreferedLang()){
+            $request->getSession()->set('_locale', $token->getUser()->getPreferedLang());
+        }
+        
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
-        return new RedirectResponse($this->router->generate('message'));
+        return new RedirectResponse($this->urlGenerator->generate('message'));
     }
 
-    protected function getLoginUrl()
-    {
-        return $this->router->generate('app_login');
+    protected function getLoginUrl(Request $request): string {
+        return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
+
 }

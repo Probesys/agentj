@@ -31,17 +31,18 @@ then, `cd` to the cloned repository to configure a few variables:
 
 The following runtime variables must be configured:
 
-| Variable         | Default        | Use                                         |
-|------------------|----------------|---------------------------------------------|
-| DB_ROOT_PASSWORD | secret         | the MariaDB instance root password          |
-| DB_NAME          | agentj         | the AgentJ database name                    |
-| DB_USER          | agentj         | the AgentJ database user name               |
-| DB_PASSWORD      | secret         | the AgentJ database password                |
-| IPV4_NETWORK     | 172.42.42      | the AgentJ Docker default network           |
-| MAIL_HOSTNAME    | aj.example.com | the mailname used in postfix configuration  |
-| MAIL_DOMAINNAME  | example.com    | the domain name used in relay configuration |
-| TZ               | Europe/Paris   | the containers default timezone             |
-| PROXY_PORT       | 8090           | default listening port for Nginx web proxy  |
+| Variable             | Default        | Use                                         |
+|----------------------|----------------|---------------------------------------------|
+| COMPOSE_PROJECT_NAME | local          | this AgentJ instance name                   |
+| DB_ROOT_PASSWORD     | secret         | the MariaDB instance root password          |
+| DB_NAME              | agentj         | the AgentJ database name                    |
+| DB_USER              | agentj         | the AgentJ database user name               |
+| DB_PASSWORD          | secret         | the AgentJ database password                |
+| IPV4_NETWORK         | 172.42.42      | the AgentJ Docker default network           |
+| MAIL_HOSTNAME        | aj.example.com | the mailname used in postfix configuration  |
+| MAIL_DOMAINNAME      | example.com    | the domain name used in relay configuration |
+| TZ                   | Europe/Paris   | the containers default timezone             |
+| PROXY_PORT           | 8090           | default listening port for Nginx web proxy  |
 
 ### Network
 

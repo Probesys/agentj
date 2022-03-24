@@ -1,1 +1,16 @@
-initial commit
+# v1.2.3
+
+* clamav: improve start process, move it to entrypoint
+* amavis: update clamav run dir
+* syslogng: improve log format, add rotation cron
+* app: remove duplicate cron entries
+
+# v1.2.1
+
+* fix csv import emails
+
+# v1.2.0
+
+* upgrade to Symfony 5
+* upgrade Alpine base
+* database initialisation process improvement

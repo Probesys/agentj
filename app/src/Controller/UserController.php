@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
-use App\Entity\Groups;
-use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserType;
@@ -15,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -69,7 +68,7 @@ class UserController extends AbstractController
   /**
    * @Route("/local/new", name="user_local_new", methods="GET|POST")
    */
-    public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -79,6 +78,8 @@ class UserController extends AbstractController
         $form->remove('groups');
         $form->remove('email');
         $form->remove('originalUser');
+        $form->remove('report');
+        $form->remove('sharedWith');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -97,7 +98,7 @@ class UserController extends AbstractController
                 ];
             } elseif ($form->isValid()) {
                 $role = $request->request->get('user')['roles'];
-                $encoded = $passwordEncoder->encodePassword($user, $request->request->get('user')['password']['first']);
+                $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
                 $user->setPassword($encoded);
                 $user->setRoles($role);
 
@@ -134,7 +135,8 @@ class UserController extends AbstractController
         $form->remove('email');
         $form->remove('password');
         $form->remove('originalUser');
-
+        $form->remove('report');
+        $form->remove('sharedWith');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -169,7 +171,7 @@ class UserController extends AbstractController
    * @Route("/local/{id}/changePassword", name="user_local_change_password", methods="GET|POST")
    *
    */
-    public function changePassword(Request $request, User $user, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
     {
         $form = $this->createForm(UserType::class, $user, [
         'action' => $this->generateUrl('user_local_change_password', ['id' => $user->getId()]),
@@ -185,7 +187,7 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $encoded = $passwordEncoder->encodePassword($user, $request->request->get('user')['password']['first']);
+            $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
             $user->setPassword($encoded);
             $this->getDoctrine()->getManager()->flush();
 
@@ -297,8 +299,6 @@ class UserController extends AbstractController
                 $user->setDomain($newDomain);
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
-
-
 
                 $em = $this->getDoctrine()->getManager();
 
