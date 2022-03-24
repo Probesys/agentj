@@ -1,52 +1,61 @@
     
-
 {% if untreatedMsgs is not empty %}
-
-
   <table style="width:100%;background-color: #fff;">
     <tbody>
       {% for msg in  untreatedMsgs%}
         <tr>
           <td>
-            <strong>{{ msg.from_addr }}</strong><br>
-            {{ msg.subject }}
+            <div>
+              <strong>{{ msg.from_addr }}</strong><br>
+              <p style="font-size: 10px">{{ msg.subject }}</p>              
+            </div>
+
           </td>
-          <td width="180" style="text-align: right;min-width: 180px;">
-<a href="{{url ~ path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-   title="Autoriser l'expéditeur" style="font-size:16px;
-                           -moz-border-radius: 5px;
-                           -webkit-border-radius: 5px;
-                           border-radius: 5px;
-                           line-height: 16px;
-                           background-color: #6DE7DA;
-                           text-align: center;
-                           width: 190px;
-                           padding: 5px;
-                           margin-right: 5px;
-                           color: #fff;
-                           text-decoration: none;
-                           ">
-  Autoriser
-</a>
-</td>
-<td>
-<a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title="Récupérer le mail" style="font-size:16px;   
-                           -moz-border-radius: 5px;
-                           -webkit-border-radius: 5px;
-                           border-radius: 5px;
-                           line-height: 16px;
-                           background-color: #31B1BF;
-                           text-align: center;
-                           width: 190px;
-                           padding: 5px;
-                           color: #fff;
-                           text-decoration: none;
-                           ">
-  
-Récupérer</a>
-            
+          <td width="100" style="min-width: 100px;">
+            <div style="width: 100px;">
+              <a href="{{url ~ path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                 title="Autoriser l'expéditeur" style="font-size:16px;
+                 -moz-border-radius: 5px;
+                 -webkit-border-radius: 5px;
+                 border-radius: 5px;
+                 line-height: 16px;
+                 background-color: #6DE7DA;
+                 padding: 5px;
+                 margin-right: 5px;
+                 color: #fff;
+                 text-decoration: none;
+                 ">
+                Autoriser
+              </a>              
+            </div>
+
           </td>
-         
+          <td width="100" style="min-width: 100px;">
+            <div style="width: 100px;">
+              <a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title="Récupérer le mail" style="font-size:16px;
+                 -moz-border-radius: 5px;
+                 -webkit-border-radius: 5px;
+                 border-radius: 5px;
+                 line-height: 16px;
+                 background-color: #31B1BF;
+                 padding: 5px;
+                 color: #fff;
+                 text-decoration: none;
+                 ">
+
+                Récupérer</a>              
+            </div>  
+
+
+          </td>
+
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div style="text-align:center">
+              <a href="{{ url }}">{{ url }}</a>
+            </div>
+          </td>
         </tr>
       {% endfor %}
 

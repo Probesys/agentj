@@ -5,8 +5,9 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Users
@@ -18,7 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     ignoreNull=true,
  * )
  */
-class User implements UserInterface, \Serializable
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
   /**
@@ -95,32 +96,32 @@ class User implements UserInterface, \Serializable
 
 
   /**
-   * @ORM\ManyToOne(targetEntity="App\Entity\Policy")
+   * @ORM\ManyToOne(targetEntity="Policy")
    * @ORM\JoinColumn(name="policy_id", nullable=true)
    */
     private $policy;
 
 
   /**
-   * @ORM\ManyToMany(targetEntity="App\Entity\Domain", inversedBy="users")
+   * @ORM\ManyToMany(targetEntity="Domain", inversedBy="users")
    * @ORM\JoinTable(name="users_domains")
    */
     private $domains;
 
   /**
-   * @ORM\ManyToOne(targetEntity="App\Entity\Domain")
+   * @ORM\ManyToOne(targetEntity="Domain")
    * @ORM\JoinColumn(name="domain_id", nullable=true, onDelete="CASCADE")
    */
     private $domain;
 
   /**
-   * @ORM\ManyToOne(targetEntity="App\Entity\Groups", inversedBy="users")
+   * @ORM\ManyToOne(targetEntity="Groups", inversedBy="users")
    * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
    */
     private $groups;
 
   /**
-   * @ORM\ManyToOne(targetEntity="App\Entity\User")
+   * @ORM\ManyToOne(targetEntity="User")
    * @ORM\JoinColumn(name="original_user_id", nullable=true, onDelete="CASCADE")
    */
     private $originalUser;
@@ -150,6 +151,11 @@ class User implements UserInterface, \Serializable
    */
     private $bypassHumanAuth;
 
+    /**
+     * @ORM\Column(type="string", length=5, nullable=true)
+     */
+    private $preferedLang;
+
     public function __construct()
     {
 
@@ -167,6 +173,16 @@ class User implements UserInterface, \Serializable
     {
         return $this->id;
     }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->username;
+    }    
 
     public function getPriority(): ?int
     {
@@ -344,43 +360,6 @@ class User implements UserInterface, \Serializable
         return $this;
     }
 
-  /** @see \Serializable::serialize() */
-    public function serialize()
-    {
-        return serialize([
-            $this->id,
-  //            $this->priority,
-            $this->email,
-            $this->password,
-            $this->fullname,
-  //            $this->local,
-  //            $this->roles,
-            $this->username,
-  //  //          $this->policy,
-  //            $this->domain,
-  //            $this->groups,
-  ////            $this->emailRecovery,
-        ]);
-    }
-
-  /** @see \Serializable::unserialize() */
-    public function unserialize($serialized)
-    {
-        list (
-            $this->id,
-  //            $this->priority,
-            $this->email,
-            $this->password,
-            $this->fullname,
-  //            $this->local,
-  //            $this->roles,
-            $this->username,
-  //  //          $this->policy,
-  //            $this->domain,
-  //            $this->groups,
-  ////            $this->emailRecovery,
-            ) = unserialize($serialized);
-    }
 
     public function getGroups(): ?Groups
     {
@@ -516,6 +495,18 @@ class User implements UserInterface, \Serializable
     public function setBypassHumanAuth(?bool $bypassHumanAuth): self
     {
         $this->bypassHumanAuth = $bypassHumanAuth;
+
+        return $this;
+    }
+
+    public function getPreferedLang(): ?string
+    {
+        return $this->preferedLang;
+    }
+
+    public function setPreferedLang(?string $preferedLang): self
+    {
+        $this->preferedLang = $preferedLang;
 
         return $this;
     }

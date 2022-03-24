@@ -14,6 +14,7 @@ RUN apk --update add \
     postfix-mysql \
     supervisor \
     rsyslog \
+    tzdata \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
@@ -30,5 +31,5 @@ VOLUME /etc/opendkim
 EXPOSE 25/tcp
 
 ENTRYPOINT [ "/entrypoint.sh" ] 
-HEALTHCHECK --start-period=60s CMD postfix status || exit 1 
+HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]

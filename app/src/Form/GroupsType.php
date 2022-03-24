@@ -53,7 +53,8 @@ class GroupsType extends AbstractType
                 'query_builder' => function (DomainRepository $rep) use ($user) {
                     $builder = $rep->createQueryBuilder('d')
                     ->leftJoin('d.users', 'u')
-                    ->where('d.active = 1 ');
+                    ->where('d.active = 1 ')
+                    ->orderBy('d.domain', 'asc');
                     if ($user) {
                         $builder->where('u.id =' . $user->getId());
                     }

@@ -65,6 +65,7 @@ class WblistController extends AbstractController
         return $this->render('wb_list/index.html.twig', [
                 'controller_name' => 'WBListController',
                 'wblist' => $wblist2Show,
+                'wbTypeList' => $type,
                 'title' => $title,
                 'totalItemFound' => $totalItemFound,
                 'filter_form' => $filterForm->createView()
@@ -110,7 +111,7 @@ class WblistController extends AbstractController
         }
 
         foreach ($userAndAliases as $user) {
-            $WblistRepository->deleteMessage($user->getId(), $sid);
+            $WblistRepository->delete($user->getId(), $sid);
         }
     }
 
@@ -122,9 +123,10 @@ class WblistController extends AbstractController
     public function batchDeleteAction(Request $request, MsgsRepository $msgRepository)
     {
         $em = $this->getDoctrine()->getManager();
+        
         foreach ($request->request->get('id') as $obj) {
             $mailInfo = json_decode($obj);
-            $em->getRepository(Wblist::class)->deleteMessage($mailInfo[0], $mailInfo[1]);
+            $em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1]);
         }
 
         $referer = $request->headers->get('referer');

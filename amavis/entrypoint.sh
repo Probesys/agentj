@@ -5,6 +5,7 @@ set -e
 sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/amavisd.conf
 sed -i "s/\$DB_USER/$DB_USER/g" /etc/amavisd.conf
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/amavisd.conf
+sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/amavisd.conf
 echo "$MAIL_HOSTNAME" > /etc/mailname
 sed -i "12i\$myhostname = \"$MAIL_HOSTNAME\";" /etc/amavisd.conf
 chmod 644 /etc/amavisd.conf
@@ -25,16 +26,12 @@ then
     chown -R clamav:clamav /run/clamav
 fi
 
-# Initialize AV database
-if [ ! -f /var/lib/clamav/main.cvd ]
+echo "0 14 * * * /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf" >> /etc/cron.d/agentj-amavis
+echo "10 14 * * * /usr/bin/sa-update" >> /etc/cron.d/agentj-amavis
+
+if [ ! -f /var/amavis/.initdone ]
 then
-    /usr/bin/freshclam
+    ./init.sh && rm ./init.sh
 fi
-
-# Start the AV database daemon
-/usr/bin/freshclam -d -c 3
-
-# Refresh SA rules
-/usr/bin/sa-update
 
 exec "$@"

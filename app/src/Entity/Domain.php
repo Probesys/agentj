@@ -149,6 +149,16 @@ class Domain
      */
     private $imapNoValidateCert;
 
+    /**
+     * @ORM\Column(type="string", length=5, nullable=true)
+     */
+    private $defaultLang;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $smtpPort;
+
 
 
     public function __construct()
@@ -428,6 +438,30 @@ class Domain
     public function setImapNoValidateCert(?bool $imapNoValidateCert): self
     {
         $this->imapNoValidateCert = $imapNoValidateCert;
+
+        return $this;
+    }
+
+    public function getDefaultLang(): ?string
+    {
+        return $this->defaultLang;
+    }
+
+    public function setDefaultLang(?string $defaultLang): self
+    {
+        $this->defaultLang = $defaultLang;
+
+        return $this;
+    }
+
+    public function getSmtpPort(): ?int
+    {
+        return $this->smtpPort;
+    }
+
+    public function setSmtpPort(?int $smtpPort): self
+    {
+        $this->smtpPort = $smtpPort;
 
         return $this;
     }
