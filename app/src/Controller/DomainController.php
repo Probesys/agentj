@@ -133,7 +133,7 @@ class DomainController extends AbstractController {
 
             $em->flush();
 
-            $this->generateOpenDkim($domain->getSrvSmtp());
+            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_index');
         } elseif ($form->isSubmitted()) {
@@ -204,6 +204,7 @@ class DomainController extends AbstractController {
                 }
             }
 
+            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -388,22 +389,19 @@ class DomainController extends AbstractController {
         return $priority;
     }
 
-    private function generateOpenDkim(string $smtpServer): bool {
-        $process = new Process(['/usr/local/bin/gendomainkey.sh', $smtpServer]);
+    private function generateOpenDkim(string $smtpServer, string $domainName): bool {
+        $process = new Process([$this->getParameter('app.dkim_generator'), $domainName, $smtpServer]);
         $process->run();
-        ;
 
         try {
             $process->mustRun();
 
-        $this->addFlash('info', $smtpServer . ' : ' . $process->getOutput());
-        return true;
+            $this->addFlash('dkim : ', $smtpServer . ' : ' . $process->getOutput());
+            return true;
         } catch (ProcessFailedException $exception) {
             $this->addFlash('error', $exception->getMessage());
             return false;
         }
-
-
     }
 
 }
