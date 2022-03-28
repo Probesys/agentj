@@ -6,6 +6,12 @@ sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/opendkim/TrustedHosts
 sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/opendkim/TrustedHosts
 sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/opendkim/SigningTable
 sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/opendkim/KeyTable
+addgroup www-data opendkim
+mkdir /etc/opendkim/keys
+chgrp -R opendkim /etc/opendkim
+chmod -R g+w /etc/opendkim
+echo "Cmnd_Alias      CHMODDKIM = /bin/chown -R opendkim\:opendkim /etc/opendkim" >> /etc/sudoers.d/opendkim
+echo "www-data ALL=(ALL) NOPASSWD: CHMODDKIM" >> /etc/sudoers.d/opendkim
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
