@@ -15,7 +15,7 @@ else
     mkdir -p /etc/opendkim/keys/"$_DOMAIN"
     cd /etc/opendkim/keys/"$_DOMAIN" || exit
     opendkim-genkey -s agentj -d "$_DOMAIN"
-    sudo chown -R opendkim:opendkim /etc/opendkim
+    sudo /bin/chown -R opendkim:opendkim /etc/opendkim
 fi
 
 exit $?
