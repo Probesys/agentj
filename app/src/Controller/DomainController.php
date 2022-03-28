@@ -391,12 +391,12 @@ class DomainController extends AbstractController {
 
     private function generateOpenDkim(string $smtpServer, string $domainName): bool {
         $process = new Process([$this->getParameter('app.dkim_generator'), $domainName, $smtpServer]);
-        $process->run();
+//        $process->run();
 
         try {
-            $process->mustRun();
+            $process->run();
 
-            $this->addFlash('dkim : ', $smtpServer . ' : ' . $process->getOutput());
+            $this->addFlash('info', $smtpServer . ' : ' . $process->getOutput());
             return true;
         } catch (ProcessFailedException $exception) {
             $this->addFlash('error', $exception->getMessage());
