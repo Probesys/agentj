@@ -1,7 +1,7 @@
 #!/bin/sh
 
-_MX="$1"
-_DOMAIN="${1#*.}"
+_DOMAIN="$1"
+_MX="$2"
 
 echo "$_DOMAIN" >> /etc/opendkim/DomainsList
 echo "$_MX" >> /etc/opendkim/TrustedHosts
@@ -15,7 +15,7 @@ else
     mkdir -p /etc/opendkim/keys/"$_DOMAIN"
     cd /etc/opendkim/keys/"$_DOMAIN" || exit
     opendkim-genkey -s mail -d "$_DOMAIN"
-    chown -R opendkim:opendkim /etc/opendkim/keys
+    sudo chown -R opendkim:opendkim /etc/opendkim
 fi
 
 exit $?
