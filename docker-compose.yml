@@ -42,6 +42,7 @@ services:
       - public:/var/www/agentj
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
+      - opendkim:/etc/opendkim
     env_file:
       - .env
     networks:
@@ -53,7 +54,6 @@ services:
     env_file:
       - .env
     volumes:
-      - opendkim:/etc/opendkim/
       - postfix_relay:/etc/postfix/
     networks:
       ajnet:
