@@ -27,6 +27,7 @@ fi
 
 echo "0 14 * * * /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf" >> /etc/cron.d/agentj-amavis
 echo "10 14 * * * /usr/bin/sa-update" >> /etc/cron.d/agentj-amavis
+crond
 
 if [ ! -f /var/amavis/.initdone ]
 then
