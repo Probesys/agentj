@@ -4,7 +4,6 @@ set -e
 # Configure opendkim
 sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/opendkim/TrustedHosts
 sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/opendkim/TrustedHosts
-sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/opendkim/SigningTable
 sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/opendkim/KeyTable
 touch /etc/opendkim/DomainsList
 addgroup www-data opendkim

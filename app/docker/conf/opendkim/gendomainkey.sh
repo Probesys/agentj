@@ -6,7 +6,7 @@ _MX="$2"
 echo "$_DOMAIN" >> /etc/opendkim/DomainsList
 echo "$_MX" >> /etc/opendkim/TrustedHosts
 echo "*@$_DOMAIN agentj._domainkey.$_DOMAIN" >> /etc/opendkim/SigningTable
-echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/etc/opendkim/keys/$_DOMAIN/mail.private" >> /etc/opendkim/KeyTable
+echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/etc/opendkim/keys/$_DOMAIN/agentj.private" >> /etc/opendkim/KeyTable
 
 if [ -d /etc/opendkim/keys/"$_DOMAIN" ]; then
     echo "This domain already has DKIM keys. Nothing to do."
