@@ -80,8 +80,6 @@ services:
     restart: always
     networks:
       - ajnet
-    ports:
-      - 514:514/udp
     volumes:
       - logs:/var/log/syslogng
 
