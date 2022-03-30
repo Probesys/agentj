@@ -8,7 +8,7 @@
 
         {% block content_button_actions %} 
                 {% if is_granted('ROLE_ADMIN') %}
-                    <a href="#"  data-url-modal-content="{{ path('import_user_email') }}" class="btn-open-modal btn btn-success float-right ml-2  col-sm-12 col-md-4 mb-1"><i class="fas fa-plus"></i>&nbsp;Importer depuis un fichier</a>
+                    <a href="#"  data-url-modal-content="{{ path('import_user_email') }}" class="btn-open-modal btn btn-success float-right ml-2  col-sm-12 col-md-4 mb-1"><i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}</a>
                 {% endif %}
                 <a href="#" data-url-modal-content="{{ path('user_email_new') }}"  class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 "><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new'|trans() }}</a>
 
