@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Bienvenue!{% endblock %}
+{% block title %}{{ 'Generics.messages.welcome'|trans }} !{% endblock %}
 
 {% block body %}
-   <h1>Bienvenue sur AgentJ</h1>
+   <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
 {#   {% if is_granted('ROLE_ADMIN') %}#}
   {% include '/home/_stats.html.twig' %}
 {#  {% endif %}#}
