@@ -51,7 +51,7 @@ Generics:
         no_records_found: 'No results found'
         confirmationDeleteMessageQuestion: 'Are you sure you want to delete this item?'
         welcome: Welcome
-        welcomeAgentJ: Welcome on AgentJ.
+        welcomeAgentJ: Welcome on AgentJ
         welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/> please authenticate'
         formNotComplete: 'Please provide mandatory information'
         emergency_consult: Emergency!
@@ -116,7 +116,7 @@ Navigation:
     settings: Configuration
     spammed: 'Spam detected'
     virus: Virus
-    banned: Bannis
+    banned: Banned
     clean: Clean
     error: Errors
     all: All
@@ -132,7 +132,7 @@ Navigation:
         emailAliasUsers: Alias
     grouplist: Groups
     domainlist: Domains
-    untreated: 'No treaties'
+    untreated: 'Untreated'
     authorized: Authorized
     policy: Strategies
     hello: Hello.
@@ -442,6 +442,6 @@ Entities:
             S: Blocked
         typeLabel:
             authorized: 'Authorized by the user'
-            banned: 'Bannis by user'
+            banned: 'Banned by user'
             deleted: 'Deleted by user'
             auto: Automatic
