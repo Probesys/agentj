@@ -20,6 +20,7 @@ Generics:
         search: Search
         display: Display
         rememberme: 'Remember me'
+        importFile: "Import from file"
     fields:
         name: Title
         helpMessage: 'Help message'
@@ -34,11 +35,11 @@ Generics:
         frequency: frequency
         stop: stop
         comments: Comments
-        sender: Shipper
+        sender: Sender
         date: Date
         datemod: 'date of change'
         object: Subject
-        recipient: 'To be held'
+        recipient: 'Recipient'
         user: User
         userName: Username
         type: Type
@@ -49,7 +50,8 @@ Generics:
     messages:
         no_records_found: 'No results found'
         confirmationDeleteMessageQuestion: 'Are you sure you want to delete this item?'
-        welcome: Welcome.
+        welcome: Welcome
+        welcomeAgentJ: Welcome on AgentJ
         welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/> please authenticate'
         formNotComplete: 'Please provide mandatory information'
         emergency_consult: Emergency!
@@ -114,7 +116,7 @@ Navigation:
     settings: Configuration
     spammed: 'Spam detected'
     virus: Virus
-    banned: Bannis
+    banned: Banned
     clean: Clean
     error: Errors
     all: All
@@ -122,15 +124,15 @@ Navigation:
     mailBlocked: 'Mail blocked'
     blacklist: 'Blocked senders'
     whitelist: 'Authorized senders'
-    MessageRestored: Retrieves
+    MessageRestored: Restored
     userlist:
         title: Users
-        localUsers: Premises
+        localUsers: Local
         emailUsers: 'Email accounts'
         emailAliasUsers: Alias
     grouplist: Groups
-    domainlist: Areas
-    untreated: 'No treaties'
+    domainlist: Domains
+    untreated: 'Untreated'
     authorized: Authorized
     policy: Strategies
     hello: Hello.
@@ -146,8 +148,8 @@ Config:
         logoSize: 170x45px
 Message:
     Object: Subject
-    Sender: Shipper
-    Recipient: 'To be held'
+    Sender: Sender
+    Recipient: 'Recipient'
     Status: Status
     Date: Date
     ErrorSendCaptcha: 'Error email verification'
@@ -156,9 +158,9 @@ Message:
         Autorized: Authorize
         AutorizedSender: 'Authorize the sender'
         AutorizedDomain: 'Authorize the sender to all users'
-        Banned: Bannir
-        BannedSender: 'Bannir the shipper'
-        BannedDomain: 'Bannir sender to all users'
+        Banned: Ban
+        BannedSender: 'Ban the sender'
+        BannedDomain: 'Ban sender for all users'
         Delete: Delete
         DeleteMessage: 'Delete the message'
         Restore: Recover
@@ -175,14 +177,14 @@ Message:
         confirmAuthorizedDomainMsgtitle: 'Authorize sender for all users'
         confirmAuthorizedMsgContent: 'Are you sure you''re authorizing the sender?'
         confirmAuthorizedDomainMsgContent: 'Are you sure to authorize the sender for all users?'
-        confirmBannedMsgtitle: 'Bannir the shipper'
-        confirmBannedMsgContent: 'Are you sure you''re banging the shipper?'
-        confirmBannedDomainMsgtitle: 'Bannir sender for all users'
+        confirmBannedMsgtitle: 'Ban the sender'
+        confirmBannedMsgContent: 'Are you sure you''re banging the sender?'
+        confirmBannedDomainMsgtitle: 'Ban sender for all users'
         confirmBannedDomainMsgContent: 'Are you sure to ban the sender for all users?'
         confirmRestoreMsgtitle: 'Recover the message'
         confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
         confirmDeleteSenderTitleW: 'Delete this sender?'
-        confirmDeleteSenderTitleB: 'Unlock this shipper?'
+        confirmDeleteSenderTitleB: 'Unlock this sender?'
         confirmDeleteSenderContentW: 'Are you sure you want to delete this sender?'
         confirmDeleteSenderContentB: 'Are you sure you want to unlock this sender?'
         confirmDeleteGroupTitle: 'Delete this group?'
@@ -198,9 +200,9 @@ Message:
         missingRuleForDomain: 'A first rule must first be created in this field'
         ruleExistForDomain: 'A similar rule already exists in this area'
         domainRuleCreated: 'The domain rule was created with success'
-        domainRuleUpdated: 'The domain rule has been amended with success'
+        domainRuleUpdated: 'The domain rule has been updated with success'
         newRuleCreated: 'New rule created!'
-        ruleUpdated: 'Amended rule!'
+        ruleUpdated: 'Rule has been updated!'
         ruleExists: 'This rule already exists!'
         messageDeleted: 'Message deleted successfully'
         messageRestored: 'Message successfully recovered'
@@ -239,15 +241,15 @@ Entities:
         Actions:
             list: Actions
             New: 'Create a group'
-            Updated: Amend
+            Updated: Edit
             updateGroup: 'Modify the group'
             Delete: Delete
             manageList: 'Manage consignors'
             addRule: 'Add a rule'
             addRuleToGroup: 'Add a rule to the group'
             deleteRule: 'Delete rule'
-            editRule: 'Amend the rule'
-            editRuleGroup: 'Amend the group rule'
+            editRule: 'Edit the rule'
+            editRuleGroup: 'Edit the group rule'
             backToGroupList: 'Return to group list'
         labels:
             rules: Rules
@@ -255,27 +257,27 @@ Entities:
             users: Users
             usersGroup: 'Users of the group'
         fields:
-            policy: Strategy
+            policy: Policy
             name: 'Group name'
             rights: rights
             users: users
-            domain: 'Associated areas'
+            domain: 'Associated domains'
             overrideUser: 'Supplante user choices'
     Policy:
-        label: Strategy
-        index: 'List of strategies'
+        label: Policy
+        index: 'List of policies'
         fields:
             virusLover: 'Love viruses'
             spamLover: 'Love the spam'
             bannedFilesLover: 'Likes banned files'
             badHeaderLover: 'Love the bad headers'
-            bypassVirusChecks: 'Contouring virus verification'
-            bypassBannedChecks: 'Contouring the banning check'
-            bypassHeaderChecks: 'Contouring the header check'
-            bypassSpamChecks: 'Contouring the spam check'
+            bypassVirusChecks: 'Bypass virus verification'
+            bypassBannedChecks: 'Bypass the ban check'
+            bypassHeaderChecks: 'Bypass the header check'
+            bypassSpamChecks: 'Bypass the spam check'
             virusQuarantineTo: 'Follow viruses to email'
             spamQuarantineTo: 'Follow the spam to the mail'
-            bannedQuarantineTo: 'Follow the bannis to the mail'
+            bannedQuarantineTo: 'Follow the banned to the mail'
             badHeaderQuarantineTo: 'Follow the wrong headers to the mail'
             uncheckedQuarantineTo: 'Follow spams not checked to mail'
             cleanQuarantineTo: 'Follow the spams cleaned to the mail'
@@ -317,8 +319,8 @@ Entities:
             add_new: 'Add a new strategy'
     Domain:
         Name: Area
-        index: 'List of areas'
-        edit: 'Edition du domaine'
+        index: 'List of domains'
+        edit: 'Edit domain'
         fields:
             mailMessage: 'Text of the email validation mail with the link captcha'
             captachaMessage: 'Text of presentation on captcha page'
@@ -353,7 +355,7 @@ Entities:
             allowAllMails: 'Allow all emails'
             allowWithSpamFilter: 'Allow with spam filter'
             allowWithLightFilter: 'Allow with flexible filter'
-            backToDomainList: 'Return to the list of areas'
+            backToDomainList: 'Return to the list of domains'
         rulesValues:
             10: 'Block all mails'
             B: 'Block all mails'
@@ -361,7 +363,7 @@ Entities:
             0: 'Allow with spam filter'
             2: 'Allow with flexible filter'
     User:
-        indexLocal: 'List of Professional staff'
+        indexLocal: 'List of administrators'
         indexEmail: 'List of email accounts'
         indexAlias: 'List of alias emails'
         actions:
@@ -389,9 +391,9 @@ Entities:
         index: 'List of messages'
         untreated: 'No treaties'
         authorized: Authorized
-        banned: Bannis
+        banned: Banned
         delete: Deleted
-        restored: Retrieves
+        restored: Restored
         spammedDetect: 'spammed detected automatically'
         informationMessage: 'The messages will be automatically deleted after 30 days.'
         spamLevel: Note
@@ -440,6 +442,6 @@ Entities:
             S: Blocked
         typeLabel:
             authorized: 'Authorized by the user'
-            banned: 'Bannis by user'
+            banned: 'Banned by user'
             deleted: 'Deleted by user'
             auto: Automatic

@@ -20,6 +20,7 @@ Generics:
         search: Rechercher
         display: Afficher
         rememberme: Se souvenir de moi
+        importFile: "Importer depuis un fichier"
     fields:
         name: Intitulé
         helpMessage: Message d'aide
@@ -50,6 +51,7 @@ Generics:
         no_records_found: Aucun résultat trouvé
         confirmationDeleteMessageQuestion: Etes vous certain de vouloir supprimer cet élément ?
         welcome: Bienvenue
+        welcomeAgentJ: Bienvenue sur AgentJ
         welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br> veuillez vous authentifier"
         formNotComplete: Veuillez renseigner les informations obligatoire
         emergency_consult: Urgence !
