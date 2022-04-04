@@ -32,7 +32,7 @@ before_script:
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         elif [ $CI_COMMIT_BRANCH == "prod" ] ; then
             TAG="prod"
-            REGISTRY=$REGISTRY/$CI_PROJECT_NAME
+            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         else
             TAG=$CI_COMMIT_REF_NAME
