@@ -13,11 +13,6 @@ then
 fi
 chgrp -R opendkim /etc/opendkim
 chmod -R g+w /etc/opendkim
-if [ ! -f /etc/sudoers.d/opendkim ]
-then
-    echo "Cmnd_Alias      CHMODDKIM = /bin/chown -R opendkim\:opendkim /etc/opendkim" >> /etc/sudoers.d/opendkim
-    echo "www-data ALL=(ALL) NOPASSWD: CHMODDKIM" >> /etc/sudoers.d/opendkim
-fi
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)

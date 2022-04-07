@@ -89,11 +89,13 @@ COPY docker/conf/opendkim/KeyTable /etc/opendkim/KeyTable
 COPY docker/conf/opendkim/SigningTable /etc/opendkim/SigningTable
 COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
-COPY docker/conf/opendkim/gendomainkey.sh /usr/local/bin/gendomainkey.sh
-COPY docker/conf/supervisord.conf /etc/supervisord.conf
-COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
+COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
+COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/php-fpm/www.conf /etc/php7/php-fpm.d/www.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/files/.env /var/www/agentj/.env
+COPY docker/files/gendomainkey.sh /usr/local/bin/gendomainkey.sh
+COPY docker/files/deldomainkey.sh /usr/local/bin/deldomainkey.sh
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 
 VOLUME /etc/opendkim
