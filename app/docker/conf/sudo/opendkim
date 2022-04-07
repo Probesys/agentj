@@ -1,0 +1,2 @@
+Cmnd_Alias      CHMODDKIM = /bin/chown -R opendkim\:opendkim /etc/opendkim
+www-data ALL=(ALL) NOPASSWD: CHMODDKIM
