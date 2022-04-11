@@ -79,6 +79,7 @@ RUN apk --update add \
     php7-zip \
     sudo \
     supervisor \
+    tzdata \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && mkdir -p /var/run/php/ && touch /var/run/php/php7-fpm.pid \
     && rm -rf node_modules
