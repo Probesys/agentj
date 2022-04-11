@@ -237,6 +237,14 @@ class DomainController extends AbstractController {
             $em = $this->getDoctrine()->getManager();
             $em->remove($domain);
             $em->flush();
+
+            //Delete dkim key of the domain
+            $process = new Process([$this->getParameter('app.dkim_removal'), $domain->getDomain(), $domain->getSrvSmtp()]);
+            try {
+                $process->run();
+            } catch (ProcessFailedException $exception) {
+                $this->addFlash('error deleting dkim', $exception->getMessage());
+            }
         }
 
         return $this->redirectToRoute('domain_index');
