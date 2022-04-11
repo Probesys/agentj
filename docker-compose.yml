@@ -35,6 +35,8 @@ services:
   app:
     image: probesys38/agentj_app:latest
     restart: always
+    env_file:
+      - .env
     depends_on:
       - amavis
       - db
@@ -42,8 +44,6 @@ services:
       - public:/var/www/agentj
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-    env_file:
-      - .env
     networks:
       - ajnet
 
@@ -78,6 +78,8 @@ services:
   syslogng:
     image: probesys38/agentj_syslogng:latest
     restart: always
+    env_file:
+      - .env
     networks:
       - ajnet
     volumes:
@@ -86,10 +88,10 @@ services:
   web:
     image: probesys38/agentj_web:latest
     restart: always
+    environment:
+      - TZ=${TZ}
     depends_on:
       - app
-    env_file:
-      - .env
     volumes:
       - public:/var/www/agentj
     networks:
@@ -100,11 +102,11 @@ services:
   logspout:
     image: gliderlabs/logspout
     restart: always
+    environment:
+      - TZ=${TZ}
     depends_on:
       - syslogng
     command: syslog+udp://syslogng:514?filter.name=agentj-${COMPOSE_PROJECT_NAME}*
-    environment:
-      - TZ=${TZ}
     networks:
       - ajnet
     volumes:
@@ -122,6 +124,8 @@ services:
 
   watchtower:
     image: containrrr/watchtower
+    environment:
+      - TZ=${TZ}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: agentj_*
