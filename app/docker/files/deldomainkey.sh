@@ -46,7 +46,8 @@ else
     sed -i "/$_MX/d" /etc/opendkim/TrustedHosts                                                                                  
     sed -i "/*@$_DOMAIN agentj._domainkey.$_DOMAIN/d" /etc/opendkim/SigningTable                                                 
     sed -i "/agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:\/etc\/opendkim\/keys\/$_DOMAIN\/agentj.private/d" /etc/opendkim/KeyTable
-    rm -rf /etc/opendkim/keys/"$_DOMAIN"                   
+    sudo /bin/rm -rf /etc/opendkim/keys/"$_DOMAIN"                   
+    sudo /bin/chown -R opendkim:opendkim /etc/opendkim
 fi                                                     
                                                        
 exit $?

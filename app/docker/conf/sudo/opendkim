@@ -1,2 +1,4 @@
 Cmnd_Alias      CHMODDKIM = /bin/chown -R opendkim\:opendkim /etc/opendkim
+Cmnd_Alias      RMDKIMKEYS = /bin/rm -rf /etc/opendkim/keys/*
 www-data ALL=(ALL) NOPASSWD: CHMODDKIM
+www-data ALL=(ALL) NOPASSWD: RMDKIMKEYS
