@@ -85,8 +85,6 @@ RUN apk --update add \
     && mkdir -p /var/run/php/ && touch /var/run/php/php7-fpm.pid \
     && rm -rf node_modules
 
-COPY docker/conf/opendkim/KeyTable /etc/opendkim/KeyTable
-COPY docker/conf/opendkim/SigningTable /etc/opendkim/SigningTable
 COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim

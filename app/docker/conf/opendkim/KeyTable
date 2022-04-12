@@ -1,1 +1,0 @@
-agentj._domainkey.$MAIL_DOMAINNAME $MAIL_DOMAINNAME:agentj:/etc/opendkim/keys/$MAIL_DOMAINNAME/agentj.private
