@@ -60,6 +60,7 @@ Generics:
     UserExist: 'The user already exists in the database'
     EmailDoesNotExist: 'The email account does not exist in the database'
     BadColumnsFile: 'The number of columns is incorrect. Check your file.'
+    incorrectCredential: Invalid credentials
   labels:
     filters: Filters
     item_per_page: 'Number of items per page (sur %totalItemFound% found)'
