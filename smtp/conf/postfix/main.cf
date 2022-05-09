@@ -25,7 +25,7 @@ relay_domains = proxy:mysql:/etc/postfix/mysql-virtual_domains.cf
 relay_recipient_maps = mysql:/etc/postfix/mysql-virtual_recipient_maps.cf
 transport_maps = proxy:mysql:/etc/postfix/mysql-transport_map.cf
 relayhost =
-soft_bounce = yes
+soft_bounce = no
 
 content_filter=amavisfeed:[amavis]:10024
 mailbox_size_limit = 0
