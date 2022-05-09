@@ -7,6 +7,7 @@ LABEL description = "Postfix server to relay good emails to their final server"
 SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
 
 RUN apk --update add \
+    bind-tools \
     opendkim \
     opendkim-utils \
     openssl \
