@@ -7,6 +7,7 @@ LABEL description = "Postfix server to relay incoming mails to anti-spam stack"
 SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
 
 RUN apk --update add \
+    bind-tools \
     postfix \
     postfix-mysql \
     supervisor \
