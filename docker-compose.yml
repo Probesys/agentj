@@ -147,8 +147,6 @@ volumes:
 networks:
   ajnet:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: br-${COMPOSE_PROJECT_NAME}
     ipam:
       driver: default
       config:
