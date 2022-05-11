@@ -6,7 +6,7 @@ LABEL description = "Postfix server to relay good emails to their final server"
 
 SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
 
-RUN apk --update add \
+RUN apk --no-cache add \
     bind-tools \
     opendkim \
     opendkim-utils \
@@ -16,7 +16,6 @@ RUN apk --update add \
     supervisor \
     rsyslog \
     tzdata \
-    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
 COPY conf/postfix/* /etc/postfix/

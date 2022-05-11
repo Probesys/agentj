@@ -4,7 +4,7 @@ LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Amavis & ClamAV dockerized for AgentJ"
 LABEL description = "Starts Amavis with DB connection, uses local ClamAV as AV scanner"
 
-RUN apk --update add \
+RUN apk --no-cache add \
     amavis \
     unarj \
     bzip2 \
@@ -36,8 +36,7 @@ RUN apk --update add \
     supervisor \
     tzdata \
     unzip \
-    zip \
-    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*
+    zip
 
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
