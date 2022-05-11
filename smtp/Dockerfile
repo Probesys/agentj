@@ -4,7 +4,7 @@ LABEL maintainer="Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Postfix incoming smtp for AgentJ"
 LABEL description = "Postfix server to relay incoming mails to anti-spam stack"
 
-SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
+SHELL [ "/bin/sh", "-e", "-c" ]
 
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
