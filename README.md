@@ -41,8 +41,11 @@ The following runtime variables must be configured:
 | IPV4_NETWORK         | 172.42.42      | the AgentJ Docker default network           |
 | MAIL_HOSTNAME        | aj.example.com | the mailname used in postfix configuration  |
 | MAIL_DOMAINNAME      | example.com    | the domain name used in relay configuration |
+| SUPER_ADMIN_USERNAME | admin          | default super admin login                   |
+| SUPER_ADMIN_password | Sup3rZECR37    | default super admin password                |
 | TZ                   | Europe/Paris   | the containers default timezone             |
 | PROXY_PORT           | 8090           | default listening port for Nginx web proxy  |
+
 
 ### Network
 
@@ -56,7 +59,7 @@ After you have set the above variables, you can start the stack with following c
     docker-compose up -d
 
 The Web UI will be available at http://hostname:8090.
-The default login is `admin` and the default password is `lutte antispam` (yes, this is a space between the two words).
+The default login is `admin` and the default password is `Sup3rZECR37` (yes, this is a space between the two words).
 
 ## Details
 
