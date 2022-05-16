@@ -2,7 +2,7 @@ smtpd_banner = Agent-J
 biff = no
 append_dot_mydomain = no
 readme_directory = no
-compatibility_level = 3.6
+compatibility_level = 2
 smtp_host_lookup = dns, native
 
 myhostname = $MAIL_HOSTNAME
