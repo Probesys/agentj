@@ -41,6 +41,7 @@ RUN apk --no-cache add \
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
+COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
 COPY init.sh /init.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh

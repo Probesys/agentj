@@ -1,0 +1,2 @@
+0 14 * * * /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf
+10 14 * * * /usr/bin/sa-update
