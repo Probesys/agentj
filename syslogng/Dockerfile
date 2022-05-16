@@ -14,6 +14,7 @@ RUN apk --no-cache add \
     tzdata
 
 COPY conf/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+COPY conf/cron/syslogng-rotate /etc/cron.d/syslogng-rotate
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 514/udp
