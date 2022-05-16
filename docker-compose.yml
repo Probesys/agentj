@@ -34,7 +34,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2048m 
+          memory: 2048m
 
   app:
     image: probesys38/agentj_app:1.3.1
