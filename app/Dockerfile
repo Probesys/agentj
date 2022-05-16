@@ -84,6 +84,7 @@ RUN apk --no-cache add \
 
 COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
 COPY docker/conf/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/entrypoint.sh /entrypoint.sh
