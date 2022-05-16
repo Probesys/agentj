@@ -16,7 +16,7 @@ services:
       - ajnet
 
   amavis:
-    image: probesys38/agentj_amavis:1.3.1
+    image: probesys38/agentj_amavis:dev
     restart: always
     env_file:
       - .env
@@ -37,7 +37,7 @@ services:
           memory: 2048m
 
   app:
-    image: probesys38/agentj_app:1.3.1
+    image: probesys38/agentj_app:dev
     restart: always
     env_file:
       - .env
@@ -52,7 +52,7 @@ services:
       - ajnet
 
   relay:
-    image: probesys38/agentj_relay:1.3.1
+    image: probesys38/agentj_relay:dev
     restart: always
     env_file:
       - .env
@@ -64,7 +64,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   smtp:
-    image: probesys38/agentj_smtp:1.3.1
+    image: probesys38/agentj_smtp:dev
     restart: always
     env_file:
       - .env
@@ -80,7 +80,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
   syslogng:
-    image: probesys38/agentj_syslogng:1.3.1
+    image: probesys38/agentj_syslogng:dev
     restart: always
     env_file:
       - .env
@@ -90,7 +90,7 @@ services:
       - logs:/var/log/syslogng
 
   web:
-    image: probesys38/agentj_web:1.3.1
+    image: probesys38/agentj_web:dev
     restart: always
     environment:
       - TZ=${TZ}
