@@ -3,7 +3,7 @@ FROM alpine:latest AS base
 WORKDIR /var/www/
 COPY . /var/www/
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
-RUN apk --update add \
+RUN apk --no-cache add \
     ca-certificates \
     curl \
     gnupg \
@@ -28,7 +28,6 @@ RUN apk --update add \
     tzdata \
     yarn \
     zip \
-    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
     && yarn add @symfony/webpack-encore \
@@ -48,7 +47,7 @@ RUN set -x ; \
 COPY --chown=www-data:www-data --from=base /var/www/ /var/www/agentj
 WORKDIR /var/www/agentj
 
-RUN apk --update add \
+RUN apk --no-cache add \
     dcron \
     mariadb-client \
     libssl1.1 \
@@ -80,12 +79,12 @@ RUN apk --update add \
     sudo \
     supervisor \
     tzdata \
-    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_* \
     && mkdir -p /var/run/php/ && touch /var/run/php/php7-fpm.pid \
     && rm -rf node_modules
 
 COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
 COPY docker/conf/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/entrypoint.sh /entrypoint.sh

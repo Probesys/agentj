@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   db:
     image: mariadb:10.7.3
@@ -31,6 +31,10 @@ services:
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.252
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
 
   app:
     image: probesys38/agentj_app:1.3.1
@@ -147,8 +151,6 @@ volumes:
 networks:
   ajnet:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: br-${COMPOSE_PROJECT_NAME}
     ipam:
       driver: default
       config:
