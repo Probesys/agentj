@@ -9,16 +9,15 @@ use App\Entity\Msgs;
 use App\Entity\User;
 use App\Service\LogService;
 use Doctrine\Persistence\ManagerRegistry;
-use Swift_Mailer;
-use Swift_Message;
-use Swift_RfcComplianceException;
-use Swift_SmtpTransport;
-use Swift_TransportException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 //use App\Service\CryptEncrypt;
@@ -135,7 +134,7 @@ class MsgsSendMailTokenCommand extends Command
                         } else {
                             $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
                             if ($msgObj) {
-                                          $msgObj->setMessageError(sprintf('Unable to create Swift_Message ', $msg['from_addr']));
+                                          $msgObj->setMessageError(sprintf('Unable to create Message ', $msg['from_addr']));
                                           $msgObj->setStatus($this->messageStatusError);
                                           $this->em->persist($msgObj);
                                           $this->em->flush();
@@ -217,7 +216,7 @@ class MsgsSendMailTokenCommand extends Command
      * create message instance
      * @param type $fromName
      * @param String $body
-     * @return Swift_Message
+     * @return Email
      */
     private function createAuthMessage(Msgs $msgObj, string $mailFrom, string $fromName, array $body)
     {
@@ -233,13 +232,13 @@ class MsgsSendMailTokenCommand extends Command
             }
             $subject = $this->getSubject($msgObj);
 
-            $message = (new Swift_Message($subject))
-              ->setContentType("text/html")
-              ->setTo($mailTo)
-              ->setFrom($mailFrom, $fromName)
-              ->setBody($body['html_body'])
-              ->addPart($body['plain_body'], 'text/plain');
-        } catch (Swift_RfcComplianceException $e) {
+                $message = new Email();
+                $message->subject($subject)
+                        ->from(new Address($mailFrom, $fromName))
+                        ->to($mailTo)
+                        ->html($body['html_body'])->text(strip_tags($body['plain_body']));
+                                
+        } catch (\Exception $e) {
           //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
             $msgObj->setMessageError($messageError);
@@ -257,7 +256,7 @@ class MsgsSendMailTokenCommand extends Command
      * @param type $msgrcpt
      * @return boolean
      */
-    private function sendAuthMessage(Msgs $msgObj, Swift_Message $message, $msgrcpt)
+    private function sendAuthMessage(Msgs $msgObj, Email $message, $msgrcpt)
     {
 
         $mailTo = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
@@ -265,21 +264,17 @@ class MsgsSendMailTokenCommand extends Command
       /** Sne dth emessage * */
         try {
             $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
-            $transport = new Swift_SmtpTransport($transport_server);
-            $domainEmailTo = $this->em->getRepository(Domain::class)->findOneBy(['domain' => strtolower(substr($mailTo, strpos($mailTo, '@') + 1))]);
-            if ($domainEmailTo) {
-                $transport = new Swift_SmtpTransport($domainEmailTo->getSrvSmtp(), 25);
-            }
+            $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
 
-            $mailer = new Swift_Mailer($transport);
-            $mailer->send($message, $failedRecipients);
+            $mailer = new Mailer($transport);
+            $mailer->send($message);
             $msgObj->setSendCaptcha(time());
             $msgrcpt->setSendCaptcha(time());
             $this->em->persist($msgObj);
             $this->em->persist($msgrcpt);
             $this->em->flush();
             return true;
-        } catch (Swift_TransportException $e) {
+        } catch (\Exception $e) {
           //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
             $msgObj->setMessageError($messageError);
