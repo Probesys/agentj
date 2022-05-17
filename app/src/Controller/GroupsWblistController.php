@@ -23,12 +23,13 @@ class GroupsWblistController extends AbstractController
 {
     use ControllerWBListTrait;
 
-    private $translator;
 
     private $em;
+    private $translator;
 
-    public function __construct(EntityManagerInterface $em) {
+    public function __construct(EntityManagerInterface $em, \Symfony\Contracts\Translation\TranslatorInterface $translator) {
         $this->em = $em;
+        $this->translator = $translator;
     }
         
     private function checkAccess($group)
@@ -67,7 +68,7 @@ class GroupsWblistController extends AbstractController
 
 
         $form = $this->createForm(GroupsWblistType::class, null, [
-        'actions' => $this->wBListUserActions,
+        'actions' => $this->getWBListUserActions(),
         'action' => $this->generateUrl('groups_wblist_new', ['groupId' => $groups->getId()]),
         ]);
 
@@ -122,7 +123,7 @@ class GroupsWblistController extends AbstractController
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
         $form = $this->createForm(GroupsWblistType::class, null, [
-        'actions' => $this->wBListUserActions,
+        'actions' => $this->getWBListUserActions(),
         'action' => $this->generateUrl('groups_wblist_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
         ]);
         $form->handleRequest($request);

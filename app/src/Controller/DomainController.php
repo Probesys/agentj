@@ -34,6 +34,7 @@ class DomainController extends AbstractController
     private $em;
 
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+//        parent::__construct();
         $this->translator = $translator;
         $this->em = $em;
     }
@@ -79,10 +80,11 @@ class DomainController extends AbstractController
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
+//        dd($this->getWBListDomainActions());
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
         'action' => $this->generateUrl('domain_new'),
-        'actions' => $this->wBListDomainActions,
+        'actions' => $this->getWBListDomainActions(),
         'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
@@ -310,7 +312,7 @@ class DomainController extends AbstractController
         'action' => $this->generateUrl('domain_wblist_new', ['domainId' => $domainId]),
         ]);
         $formBuilder->add('email', TextType::class);
-        $actions = $this->wBListUserActions;
+        $actions = $this->getWBListUserActions();
 
 
         $formBuilder->add('wb', ChoiceType::class, [

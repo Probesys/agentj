@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * @Security("is_granted('ROLE_ADMIN')")
@@ -24,9 +25,11 @@ class GroupsController extends AbstractController
     use ControllerWBListTrait;
 
     private $em;
+    private $translator;
 
-    public function __construct(EntityManagerInterface $em) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
         $this->em = $em;
+        $this->translator = $translator;
     }
     
     
@@ -59,11 +62,11 @@ class GroupsController extends AbstractController
         $group = new Groups();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
+            'actions' => $this->getWBListUserActions(),
             'action' => $this->generateUrl('groups_new'),
             ]);
         } else {
-            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->wBListUserActions, 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
+            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->getWBListUserActions(), 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
         }
         $form->handleRequest($request);
 
@@ -101,12 +104,12 @@ class GroupsController extends AbstractController
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
+            'actions' => $this->getWBListUserActions(),
             'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
             ]);
         } else {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
+            'actions' => $this->getWBListUserActions(),
             'user' => $this->getUser(),
             'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
             ]);

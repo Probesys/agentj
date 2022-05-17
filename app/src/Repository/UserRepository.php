@@ -40,8 +40,7 @@ class UserRepository extends ServiceEntityRepository
         }
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
