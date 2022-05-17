@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -30,11 +29,12 @@ class UserController extends AbstractController
     private $translator;
   /* @var $wblistRepository WblistRepository */
     private $wblistRepository;
+    private $em;
 
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
     {
         $this->translator = $translator;
-
+        $this->em = $em;
         $this->wblistRepository = $em->getRepository(Wblist::class);
     }
 
@@ -84,7 +84,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
-            $userNameExist = $this->getDoctrine()->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
+            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
             if ($userNameExist) {
         //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAllreadyExist'));
                 $return = [
@@ -102,7 +102,7 @@ class UserController extends AbstractController
                 $user->setPassword($encoded);
                 $user->setRoles($role);
 
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($user);
                 $em->flush();
                 $return = [
@@ -140,7 +140,7 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userNameExist = $this->getDoctrine()->getRepository(User::class)->findOneBy(['username' => $request->request->get('user')['username']]);
+            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $request->request->get('user')['username']]);
             $oldUser = $em->getUnitOfWork()->getOriginalEntityData($user);
             if ($oldUser['username'] != $request->request->get('user')['username'] && $userNameExist) {
                 $return = [
@@ -151,7 +151,7 @@ class UserController extends AbstractController
                 $role = $request->request->get('user')['roles'];
                 $user->setRoles($role);
 
-                $this->getDoctrine()->getManager()->flush();
+                $this->em->flush();
                 $return = [
                 'status' => 'success',
                 'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -189,7 +189,7 @@ class UserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
             $user->setPassword($encoded);
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('users_local_index', ['id' => $user->getId()]);
         }
@@ -206,7 +206,7 @@ class UserController extends AbstractController
     public function deleteLocal(Request $request, User $user): Response
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($user);
             $em->flush();
         }
@@ -221,7 +221,7 @@ class UserController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             if (in_array('ROLE_USER', $user->getRoles())) {
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->remove($user);
                 $em->flush();
             }
@@ -235,7 +235,7 @@ class UserController extends AbstractController
    */
     public function batchDeleteEmail(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         foreach ($request->request->get('id') as $id) {
             $user = $em->getRepository(User::class)->find($id);
             if ($user) {
@@ -300,7 +300,7 @@ class UserController extends AbstractController
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
 
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
 
                 $em->persist($user);
                 $em->flush();
@@ -356,7 +356,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
-            $aliaslExist = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $aliaslExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
             if (!$newDomain) {
                 $return = [
@@ -379,7 +379,7 @@ class UserController extends AbstractController
 
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($user);
                 $em->flush();
 
@@ -435,7 +435,7 @@ class UserController extends AbstractController
         if ($form->isSubmitted()) {
             $data = $form->getData();
           //Check, if user email was changed, if the new mail does not allready exist
-            $emailExist = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $em->getUnitOfWork()->getOriginalEntityData($user);
 
             $newDomainName = explode('@', $request->request->get('user')['email'])[1];
@@ -450,11 +450,11 @@ class UserController extends AbstractController
                 'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
             } elseif ($form->isValid()) {
-                $this->getDoctrine()->getRepository(User::class)->updateAliasGroupsFromUser($user);
+                $this->em->getRepository(User::class)->updateAliasGroupsFromUser($user);
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
                 $user->setUsername($user->getEmail());
-                $this->getDoctrine()->getManager()->flush();
+                $this->em->flush();
 
 
 
@@ -516,7 +516,7 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted()) {
             $data = $form->getData(); //dump();die;
-            $emailExist = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUser = $em->getUnitOfWork()->getOriginalEntityData($user);
             if (stream_get_contents($oldUser['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
                 $return = [
@@ -526,7 +526,7 @@ class UserController extends AbstractController
             } elseif ($form->isValid()) {
                 $user->setUsername($user->getEmail());
                 $user->setGroups($user->getOriginalUser()->getGroups());
-                $this->getDoctrine()->getManager()->flush();
+                $this->em->flush();
 
                 $this->wblistRepository->deleteUserGroup($user->getId());
                 if ($user->getGroups()) {
@@ -563,11 +563,11 @@ class UserController extends AbstractController
     private function getAlloweDomains()
     {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            $allowedomains = $this->getDoctrine()
+            $allowedomains = $this->em
               ->getRepository(Domain::class)
               ->getListByUserId($this->getUser()->getId());
         } else {
-            $allowedomains = $this->getDoctrine()
+            $allowedomains = $this->em
               ->getRepository(Domain::class)
               ->findAll();
         }
@@ -585,7 +585,7 @@ class UserController extends AbstractController
         if (!in_array($domainName, $allowedomainNamesArray)) {
             return false;
         } else {
-            return $this->getDoctrine()
+            return $this->em
                       ->getRepository(Domain::class)
                       ->findOneBy(['domain' => $domainName]);
         }
@@ -606,7 +606,7 @@ class UserController extends AbstractController
         $items = [];
         $allowedomains = [];
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            $allowedomains = $this->getDoctrine()
+            $allowedomains = $this->em
               ->getRepository(Domain::class)
               ->getListByUserId($this->getUser()->getId());
         }

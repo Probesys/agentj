@@ -96,9 +96,9 @@ class UserRepository extends ServiceEntityRepository
         }
         $sql .= ' AND original_user_id IS NULL '; //without alias
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+//        $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
