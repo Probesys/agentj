@@ -160,8 +160,8 @@ class WblistRepository extends ServiceEntityRepository
             left join groups_wblist gw on gw.group_id=u.groups_id WHERE gw.wb is not null and gw.wb != '' and u.id IS NOT NULL AND gw.group_id =" . $groupId;
 
         $stmt = $conn->prepare($sqlSelectGroupwbList);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
+//        $stmt->execute();
+        $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
             $wblist = $this->findOneBy(['rid' => $row['rid'], 'sid' => $row['sid']]);
             if ($wblist) {
