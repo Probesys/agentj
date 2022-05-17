@@ -57,7 +57,7 @@
               {% set typeLabel = 'Entities.WBList.fields.typeLabel' ~ wbTypeList ~ '.' ~wb.type %}
             <td data-title="{{ 'Entities.WBList.fields.type'|trans() }}">{{  typeLabel | trans}} </td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
-            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | localizeddate('short', 'short')}}</td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
               {% if wb.type != 2 %}
                   {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList%}

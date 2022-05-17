@@ -7,15 +7,14 @@ use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
-use App\Entity\Wblist;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use App\Form\GroupsType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups")
@@ -24,6 +23,13 @@ class GroupsController extends AbstractController
 {
     use ControllerWBListTrait;
 
+    private $em;
+
+    public function __construct(EntityManagerInterface $em) {
+        $this->em = $em;
+    }
+    
+    
     private function checkAccess($group)
     {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
@@ -38,7 +44,7 @@ class GroupsController extends AbstractController
    */
     public function index(): Response
     {
-        $groups = $this->getDoctrine()
+        $groups = $this->em
             ->getRepository(Groups::class)
             ->findByDomain($this->getUser()->getDomains());
 
@@ -62,10 +68,10 @@ class GroupsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($group);
 
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail('@.');
@@ -109,12 +115,12 @@ class GroupsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($group);
 
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
 
-            $groupsWblist = $this->getDoctrine()->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
+            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
             if ($groupsWblist) {
                 $groupsWblist->setGroups($group);
                 $groupsWblist->setWb($group->getWb());
@@ -154,13 +160,13 @@ class GroupsController extends AbstractController
     public function removeUser(Request $request, Groups $group, User $user): Response
     {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
           //check if alias
             if ($user->getOriginalUser()) {
                 $user = $user->getOriginalUser();
             }
             $domainPolicy = $user->getDomain()->getPolicy();
-            $userAliases = $this->getDoctrine()->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+            $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
             array_unshift($userAliases, $user);
 
             foreach ($userAliases as $userAlias) {
@@ -180,8 +186,8 @@ class GroupsController extends AbstractController
     public function delete(Request $request, Groups $group): Response
     {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
-            $this->getDoctrine()->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
+            $em = $this->em;
+            $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
             $em->remove($group);
             $em->flush();
         }

@@ -2,19 +2,18 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use App\Form\ImportType;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Controller\Traits\ControllerCommonTrait;
-use App\Entity\Groups;
-use App\Entity\Domain;
-use App\Entity\Wblist;
-use App\Entity\Mailaddr;
-use App\Entity\User;
 use App\Controller\Traits\ControllerWBListTrait;
+use App\Entity\Domain;
+use App\Entity\Groups;
+use App\Entity\User;
+use App\Entity\Wblist;
+use App\Form\ImportType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -26,9 +25,11 @@ class ImportController extends AbstractController {
     use ControllerWBListTrait;
 
     private $translator;
+    private $em;
 
-    public function __construct(TranslatorInterface $translator) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
         $this->translator = $translator;
+        $this->em = $em;
     }
 
     /**
@@ -90,7 +91,7 @@ class ImportController extends AbstractController {
         $errors = [];
         $batchSize = 20;
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $groups = [];
         $emails = [];
         $groupWbUpdate = [];

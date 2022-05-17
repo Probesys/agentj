@@ -18,7 +18,7 @@
       data: {
         labels: [
   {% for day in listDay %}
-            '{{day | localizeddate('short', 'short')}}',
+            '{{day | format_datetime('short', 'short')}}',
   {% endfor %}
           ],
           // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],

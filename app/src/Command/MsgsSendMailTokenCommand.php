@@ -44,14 +44,18 @@ class MsgsSendMailTokenCommand extends Command
 //    private $translator;
 
     public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator) {
-        // Inject it in the constructor and update the value on the class
-//        $this->twig = $twig;
         $this->doctrine = $doctrine;
         $this->translator = $translator;
         parent::__construct();
     }
     
 
+    /**
+     * 
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
 
@@ -61,7 +65,6 @@ class MsgsSendMailTokenCommand extends Command
         $lock = $factory->createLock('msgs-send-mail-token', 1800);
 
         if ($lock->acquire()) {
-//            $this->translator = $this->getContainer()->get('translator');
 
             $this->em = $this->doctrine->getManager();
             $this->messageStatusError = $this->em->getRepository(MessageStatus::class)->find(4); //status error
