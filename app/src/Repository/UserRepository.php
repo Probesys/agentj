@@ -60,7 +60,7 @@ class UserRepository extends ServiceEntityRepository
             $dql->andwhere('a.email = \'' . $login . '\'');
         }
 
-        return $this->_em->createQuery($dql);
+        return $dql->getQuery();
     }
 
   /**
@@ -121,9 +121,8 @@ class UserRepository extends ServiceEntityRepository
             $sql .= ' AND usr.domain_id in (' . implode($domainsIds, ',') . ') ';
         }
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
@@ -152,7 +151,7 @@ class UserRepository extends ServiceEntityRepository
         if ($q) {
             $dql->andWhere("u.email LIKE '%" . $q . "%'");
         }
-        $query = $this->_em->createQuery($dql);
+        $query = $dql->getQuery();
         $query->setMaxResults($page_limit);
 
         if ($page) {
@@ -183,7 +182,7 @@ class UserRepository extends ServiceEntityRepository
         $dql->andWhere("u.domain = '" . $domain . "'");
         if ($q && strlen($q) >= 3) {
             $dql->andWhere("u.email LIKE '%" . $slug . "%'");
-            $query = $this->_em->createQuery($dql);
+            $query = $dql->getQuery();
             $query->getSQL();
             $query->setMaxResults($page_limit);
             if ($page) {
