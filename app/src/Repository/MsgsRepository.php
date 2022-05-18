@@ -37,7 +37,7 @@ class MsgsRepository extends ServiceEntityRepository
                 return $entity->getId();
             }, $user->getDomains()->toArray());
 
-            $sqlWhere .= ' AND u.domain_id in (' . implode($domainsIds, ',') . ') ';
+            $sqlWhere .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
 
         if ($type) {
@@ -350,26 +350,6 @@ class MsgsRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-  /**
-   * Get messages blocked
-   * @todo prévoir par domaine rajouter une jointure pour les admins
-   * @return type
-   */
-    public function getMsgsBlocked()
-    {
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT  maddr.email, count(*) as nb FROM msgs m'
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' WHERE m.content != "C" AND mr.bl = "Y" AND mr.status_id IS NULL  ';
-
-        $sql .= ' GROUP BY maddr.email';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
-    }
 
   /**
    * Delete message older $date

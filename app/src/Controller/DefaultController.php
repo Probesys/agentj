@@ -83,6 +83,7 @@ class DefaultController extends AbstractController {
             throw $this->createNotFoundException('This page does not exist');
         }
 
+        /* @var $msgs Msgs */
         $msgs = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $mailId]);
 
         if (!$msgs) {
@@ -92,10 +93,11 @@ class DefaultController extends AbstractController {
         $content = "";
         $domainId = $msg[3]; //need domain Id to get message
         $domain = $em->getRepository(Domain::class)->find($domainId);
+        if (!$domain) {
+            throw $this->createNotFoundException('This page does not exist');
+        }
 
-        /* @var $msgObj Msgs */
-        $msgObj = $em->getRepository(Msgs::Class)->findOneBy(['mailId' => $mailId]);
-        $senderEmail = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
+        $senderEmail = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
         if ($domain) {
             $content = !empty($domain->getMessage()) ? $domain->getMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaPageContent');
         }
@@ -103,34 +105,29 @@ class DefaultController extends AbstractController {
         $form = $this->createForm(CaptchaFormType::class, null);
         $form->handleRequest($request); //todo gérer l'erreur si la page est rechargée
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field
-                if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageController->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, 1, $rid); // 2 : authorized and 1 : captcha validate
-                    $msgs->setValidateCaptcha(time());
-                    $em->persist($msgs);
-                    $em->flush();
-                    if ($domain) {
-                        $confirm = !empty($domain->getConfirmCaptchaMessage()) ? $domain->getConfirmCaptchaMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
+            $confirm = !empty($domain->getConfirmCaptchaMessage()) ? $domain->getConfirmCaptchaMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
+            $recipient = $em->getRepository(Msgrcpt::class)->findOneBy(['mailId' => $mailId]);
+            if ($recipient) {
+                $confirm = str_replace('[EMAIL_DEST]', stream_get_contents($recipient->getRid()->getEmail(), -1, 0), $confirm);
+            }
+                if (!$msgs->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
+                    if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
+                        $messageController->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, 1, $rid); // 2 : authorized and 1 : captcha validate
+                        $msgs->setValidateCaptcha(time());
+                        $em->persist($msgs);
+                        $em->flush();
                         $mailId = stream_get_contents($msgs->getMailId(), -1, 0);
-                        $recipient = $em->getRepository(Msgrcpt::class)->findOneBy(['mailId' => $mailId]);
-                        if ($recipient) {
-                            $confirm = str_replace('[EMAIL_DEST]', stream_get_contents($recipient->getRid()->getEmail(), -1, 0), $confirm);
-                        }
+                    } else {
+                        $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
                     }
                 } else {
                     $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
                 }
-            } else {
-                $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
-            }
-
-
-            //todo authorized ou benned le reste rid, sid dans msgs
+   
         } else {
             $form->get('email')->setData($senderEmail);
         }
 
-        //    $this->addFlash('error', $this->translator->trans('Message.Flash.deleteSuccesFull'));
         return $this->render('message/captcha.html.twig', [
                     'token' => $token,
                     'mailToValidate' => $senderEmail,

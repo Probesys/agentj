@@ -104,7 +104,7 @@ class ReportSendMailCommand extends Command {
                 $bodyTextPlain = strip_tags($bodyTextPlain);
                 
                 $message = new Email();
-                $message->subject($this->translator->trans('Message.Report.defaultMailSubject'))
+                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo )
                         ->from(new Address($mailFrom, $fromName))
                         ->to($mailTo)
                         ->html($body)->text(strip_tags($bodyTextPlain));
