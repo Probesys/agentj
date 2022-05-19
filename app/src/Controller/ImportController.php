@@ -116,8 +116,8 @@ class ImportController extends AbstractController {
                         $group = false;
                         if (isset($data[3]) && $data[3] != '') {
                             $slugGroup = $this->slugify($data[3]);
-                            if (!isset($groups[$slugGroup])) {
-                                $group = $em->getRepository(Groups::class)->findOneBy(['slug' => $slugGroup]);
+                            if (!isset($groups[$domainEmail][$slugGroup])) {
+                                $group = $em->getRepository(Groups::class)->findOneBy(['domain' => $domains[$domainEmail]['entity'], 'slug' => $slugGroup]);
                                 if (!$group) {
                                     //get rules of domain
                                     if (!isset($domains[$domainEmail]['wb'])) {
@@ -136,11 +136,12 @@ class ImportController extends AbstractController {
 
                                     $em->persist($group);
                                     $em->flush();
+                                    $groups[$domainEmail][$slugGroup] = $group;
                                 } else {
-                                    $groups[$slugGroup] = $group;
+                                    $groups[$domainEmail][$slugGroup] = $group;
                                 }
                             } else {
-                                $group = $groups[$slugGroup];
+                                $group = $groups[$domainEmail][$slugGroup];
                             }
                         }
                         if (!isset($emails[$email])) {
