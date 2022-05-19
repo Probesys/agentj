@@ -3,7 +3,6 @@
 {% else %}
   {% set logoPath = asset('img/') ~ logoImg %}
 {% endif %}
-
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
   <a class="navbar-brand mr-1" href="#sidebar" id="toggle-sidebar">
     <i class="fas fa-bars fa-lg"></i>
@@ -22,7 +21,7 @@
       {% if locales|length > 1 %}
         <li class="nav-item dropdown no-arrow mx-1">
           <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-flag"><span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span></i>
+            <i class="far fa-flag"></i><span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
             {% for locale in locales %}

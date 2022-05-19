@@ -43,7 +43,7 @@
           {% set keyPairMessage =  [wb.rid, wb.sid] %}
           <tr>  
             <td>
-              {% if wb.type != 2 %}
+              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
               <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
               {% endif %}
@@ -59,7 +59,7 @@
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
-              {% if wb.type != 2 %}
+              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN') %}
                   {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList%}
                   {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList %}
                   {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList %}
