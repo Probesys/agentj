@@ -14,7 +14,7 @@ function $_GET(param) {
 }
 
 
-$(document).ready(function () {
+document.addEventListener("turbo:load", function () {
 
   if (window.innerWidth < 1280) {
     $(".sidebar").toggleClass("toggled");
@@ -32,7 +32,7 @@ $(document).ready(function () {
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
     renderer: 'bootstrap'
-  });
+  }); 
 
   var table = $('.datatable').DataTable(
           {
@@ -60,6 +60,9 @@ $(document).ready(function () {
 //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
     e.preventDefault();
+    e.stopImmediatePropagation();
+    var select = $(this);
+    console.log(select);
     if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0)
     {
       var curFormAction = $("#massive-actions-form").prop("action");
@@ -67,29 +70,23 @@ $(document).ready(function () {
       {
         $("#massive-actions-form").prop("action", curFormAction + "/" + $(this).val());
       }
-
-
-      $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
-      $('#dialog-confirm').data("type-action-confirm", "form");
-      $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-      $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
-
-      $("#dialog-confirm").dialog("open");
-      //Reset the form action
-      $('#dialog-confirm').on('dialogclose', function (event) {
-        $("#massive-actions-form").prop("action", curFormAction);
-      });
-
     } else
     {
       $(this).val('');
     }
 
+        $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
+        $('#dialog-confirm').data("type-action-confirm", "form");
+        $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
+        $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
 
+        $("#dialog-confirm").dialog("open");
+        //Reset the form action
+        $('#dialog-confirm').on('dialogclose', function (event) {
+          $("#massive-actions-form").prop("action", curFormAction);
+          $(select).val('');
+        });
 
-    $("#dialog-confirm").on("dialogclose", function (event, ui) {
-      $('#massive-actions-select').val('');
-    });
   });
 
   //check all chekboxes in listing
@@ -121,6 +118,7 @@ $(document).ready(function () {
   });
 
   $(document).on('click', '.btn-close-modal', function (e) {
+    e.stopImmediatePropagation();
     $('#empModal').modal('toggle');
   });
 
