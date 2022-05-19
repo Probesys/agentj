@@ -3,19 +3,21 @@
 namespace App\Controller;
 
 use App\Controller\Traits\ControllerWBListTrait;
+use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Form\GroupsType;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups")
@@ -183,6 +185,29 @@ class GroupsController extends AbstractController
         return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
     }
 
+  /**
+   * Vérify if a group with lable allready exists for a domain
+   * @Route("/check-label", name="groups_check_label", methods="POST")
+   */
+    public function checkNameforDomain(Request $request): JsonResponse
+    {
+
+        $domain = $this->em->getRepository(Domain::class)->find($request->request->get('domain'));
+        $group = $this->em->getRepository(Groups::class)->findOneBy([
+            'domain' => $domain,
+            'name' => $request->request->get('name')
+        ]);
+
+        if ($group){
+            return new JsonResponse(['result' => true]);
+        }
+        else{
+            return new JsonResponse(['result' => false]);
+        }
+//        return $this->redirectToRoute('groups_index');
+    }
+
+    
   /**
    * @Route("/{id}/delete", name="groups_delete", methods="GET")
    */

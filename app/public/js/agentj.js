@@ -32,7 +32,7 @@ document.addEventListener("turbo:load", function () {
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
     renderer: 'bootstrap'
-  }); 
+  });
 
   var table = $('.datatable').DataTable(
           {
@@ -62,7 +62,6 @@ document.addEventListener("turbo:load", function () {
     e.preventDefault();
     e.stopImmediatePropagation();
     var select = $(this);
-    console.log(select);
     if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0)
     {
       var curFormAction = $("#massive-actions-form").prop("action");
@@ -75,17 +74,17 @@ document.addEventListener("turbo:load", function () {
       $(this).val('');
     }
 
-        $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
-        $('#dialog-confirm').data("type-action-confirm", "form");
-        $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-        $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
+    $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
+    $('#dialog-confirm').data("type-action-confirm", "form");
+    $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
+    $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
 
-        $("#dialog-confirm").dialog("open");
-        //Reset the form action
-        $('#dialog-confirm').on('dialogclose', function (event) {
-          $("#massive-actions-form").prop("action", curFormAction);
-          $(select).val('');
-        });
+    $("#dialog-confirm").dialog("open");
+    //Reset the form action
+    $('#dialog-confirm').on('dialogclose', function (event) {
+      $("#massive-actions-form").prop("action", curFormAction);
+      $(select).val('');
+    });
 
   });
 
@@ -95,6 +94,7 @@ document.addEventListener("turbo:load", function () {
   });
 
   $(document).on('click', '.btn-open-modal', function (e) {
+    e.stopImmediatePropagation();
     $.ajax({
       url: $(this).data('url-modal-content'),
       type: $(this).data('modal-method-type') ? $(this).data('modal-method-type') : 'post',
