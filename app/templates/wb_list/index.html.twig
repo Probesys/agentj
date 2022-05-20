@@ -45,7 +45,7 @@
             <td>
               {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
-              <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
+              <label class="for-cb" ></label>
               {% endif %}
             </td>
             {% if is_granted('ROLE_ADMIN') %}

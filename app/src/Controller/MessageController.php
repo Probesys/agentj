@@ -540,13 +540,12 @@ class MessageController extends AbstractController
             $mailaddr->setPriority('6'); //priority for email by default
             $em->persist($mailaddr);
         } else {
-            $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
-            if ($domainWblistexist) {
-                $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
-                return $this->redirectToRoute('message');
+            $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
+            if (!$wblist) {
+                $wblist = new Wblist($userDomain, $mailaddr);
             }
         }
-        $wblist = new Wblist($userDomain, $mailaddr);
+        
         $wblist->setWb($wb);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
 

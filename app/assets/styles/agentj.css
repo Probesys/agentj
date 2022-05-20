@@ -21,36 +21,6 @@ h2{
   color:#E8576B;
 }
 
-.cb {
-  display: none;
-}
-label.for-cb {
-  display: inline-block;
-  position: relative;
-  padding-left: 25px;
-  font-size: 16px;
-  line-height: 20px;
-  margin: 5px;
-}
-label.for-cb:before {
-  line-height: 20px;
-  content: "";
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  position: absolute;
-  left: 0;
-  background-color: #ffffff;
-  border: 1px solid #E8576B;
-  border-radius: 3px;
-}
-input[type=checkbox]:checked + label.for-cb:before,
-label.for-cb:hover:before {
-  content: "\2713";
-  color: #666666;
-  text-align: center;
-  line-height: 16px;
-}
 
 .page-link {
     position: relative;

@@ -64,7 +64,7 @@
                     {% set keyPairMessage =  [msg.partition_tag, msg.mail_id,msg.rid] %}
                     <tr class="{{bold}} ">
                         <td><input type="checkbox" name="id[]" value="{{ keyPairMessage|json_encode() }}" id="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
-                            <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
+                            <label class="for-cb" ></label>
                         </td>
                         {% if is_granted('ROLE_ADMIN') %}
                             <td><span title="{{ msg.mail_id }}">{{ msg.mail_id }}</span></td>
