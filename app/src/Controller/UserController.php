@@ -184,6 +184,8 @@ class UserController extends AbstractController
         $form->remove('groups');
         $form->remove('email');
         $form->remove('originalUser');
+        $form->remove('report');
+        $form->remove('sharedWith');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

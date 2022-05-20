@@ -54,12 +54,6 @@
                                             <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
                                         </a>       
-                                        <a href="{{ path('homepage', {'_switch_user': user.email}) }}" 
-                                           class='btn btn-sm btn-danger' 
-                                           title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
-                                            <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
-                                        </a>  
                                         <a href="{{ path('homepage', {'_switch_user': user.alias}) }}" 
                                            class='btn btn-sm btn-primary' 
                                            title="{{ 'Generics.actions.connectAs'|trans() ~ user.alias}} ">
