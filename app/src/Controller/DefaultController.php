@@ -16,16 +16,19 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController {
 
     private $translator;
     private $em;
+    private $security;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, Security $security) {
         $this->translator = $translator;
         $this->em = $em;
+        $this->security = $security;
     }
 
     /**
@@ -152,12 +155,16 @@ class DefaultController extends AbstractController {
 
         $url = $request->headers->get('referer');
         if (empty($url)) {
-            $url = $this->container->get('router')->generate('index');
+            $url = $this->container->get('router')->generate('message');
         }
+        
+        if (!$this->security->isGranted('ROLE_PREVIOUS_ADMIN')){
+            $user = $this->getUser()->setPreferedLang($language);
+            $em->persist($user);
+            $em->flush();
+        }
+        
 
-        $user = $this->getUser()->setPreferedLang($language);
-        $em->persist($user);
-        $em->flush();
 
         return new RedirectResponse($url);
     }
