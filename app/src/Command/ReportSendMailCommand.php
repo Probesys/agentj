@@ -9,6 +9,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -98,28 +102,30 @@ class ReportSendMailCommand extends Command {
                 $mailTo = stream_get_contents($user->getEmail(), -1, 0);
                 $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
                 $bodyTextPlain = strip_tags($bodyTextPlain);
-                $message = (new \Swift_Message($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo))
-                        ->setFrom($mailFrom, $fromName)
-                        ->setContentType("text/html")
-                        ->setTo($mailTo)
-                        ->setBody($body)
-                        ->addPart(strip_tags($bodyTextPlain), 'text/plain');
-                try {
-                    $transport = new \Swift_SmtpTransport($transport_server);
-                    $mailer = new \Swift_Mailer($transport);
+                
+                $message = new Email();
+                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo )
+                        ->from(new Address($mailFrom, $fromName))
+                        ->to($mailTo)
+                        ->html($body)->text(strip_tags($bodyTextPlain));
 
-                    $mailer->send($message, $failedRecipients);
+
+                try {
+                    $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
+                    $mailer = new Mailer($transport);
+
+                    $mailer->send($message);
                     $user->setDateLastReport(time());
                     $em->persist($user);
                     $em->flush();
 
                     $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
                     $i++;
-                } catch (\Swift_TransportException $e) {
+                } catch (\Exception $e) {
                     //catch error and save this in msgs + change status to error
                     $messageError = $e->getMessage();
                     $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
-                     return Command::FAILURE;
+                    return Command::FAILURE;
                 }
             }
         }

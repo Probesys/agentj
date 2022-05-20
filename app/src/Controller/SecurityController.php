@@ -24,7 +24,7 @@ class SecurityController extends AbstractController
       // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
         $logoUploaded = file_exists($this->getParameter('app.upload_directory') . 'logo.png');
-        return $this->render('security/login.html.twig', [
+        return $this->renderForm('security/login.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
                 'logoUploaded' => $logoUploaded
