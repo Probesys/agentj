@@ -472,3 +472,8 @@ Entities:
       banned: 'Banned by user'
       deleted: 'Deleted by user'
       auto: Automatic
+<<<<<<< HEAD
+=======
+groupNameAllreadyExist: This group label already exists for this domain. You can't
+  use it
+>>>>>>> 7a663d019bd51e4772f3d79c83c3ad7af5013abe

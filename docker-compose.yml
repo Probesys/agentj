@@ -110,7 +110,7 @@ services:
       - TZ=${TZ}
     depends_on:
       - syslogng
-    command: syslog+udp://syslogng:514?filter.name=agentj-${COMPOSE_PROJECT_NAME}*
+    command: syslog+udp://syslogng:514?filter.name=${COMPOSE_PROJECT_NAME}*
     networks:
       - ajnet
     volumes:
