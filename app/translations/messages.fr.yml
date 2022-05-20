@@ -97,6 +97,7 @@ Generics:
         emailAllreadyExist: Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser
         aliasAllreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
         userNameAllreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
+        groupNameAllreadyExist: Ce nom de groupe est déjà utilisé pour ce domaine. Vous ne pouvez pas l'utiliser
         passwordNotMatching: La confirmation du mot de passe n'est pas valide
     units:
       literByDay: litres/jour
