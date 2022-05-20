@@ -103,6 +103,8 @@ Generics:
     aliasAllreadyExist: 'This alias is already used. You can''t use it'
     userNameAllreadyExist: 'This login already exists. You can''t use it'
     passwordNotMatching: 'Password confirmation is not valid'
+    groupNameAllreadyExist: This group label already exists for this domain. You can't
+      use it
   units:
     literByDay: litres/day
     hoursByDay: Hours/day
@@ -472,5 +474,3 @@ Entities:
       banned: 'Banned by user'
       deleted: 'Deleted by user'
       auto: Automatic
-groupNameAllreadyExist: This group label already exists for this domain. You can't
-  use it
