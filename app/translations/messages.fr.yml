@@ -497,5 +497,3 @@ Entities:
       banned: Bannis par l'utilisateur
       deleted: Supprimé par l'utilisateur
       auto: Automatique
-groupNameAllreadyExist: Ce groupe existe déjà pour domaine. Vous ne pouvez pas utiliser
-  ce nom
