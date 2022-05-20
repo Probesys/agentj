@@ -105,6 +105,8 @@ Generics:
     aliasAllreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
     userNameAllreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
     passwordNotMatching: La confirmation du mot de passe n'est pas valide
+    groupNameAllreadyExist: Ce groupe existe déjà pour domaine. Vous ne pouvez pas
+      utiliser ce nom
   units:
     literByDay: litres/jour
     hoursByDay: Heures/jour
@@ -495,5 +497,3 @@ Entities:
       banned: Bannis par l'utilisateur
       deleted: Supprimé par l'utilisateur
       auto: Automatique
-groupNameAllreadyExist: Ce groupe existe déjà pour domaine. Vous ne pouvez pas utiliser
-  ce nom
