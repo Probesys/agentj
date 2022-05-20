@@ -72,7 +72,7 @@
                             {% if is_granted('ROLE_ADMIN') %}
                             <td data-title="{{'Message.Recipient'|trans }}"><span title="{{msg.email}}">{{msg.email}}</span></td>
                             {% endif %}
-                        <td data-title="{{'Message.Object'|trans }}"><span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{msg.subject|replace({'_':' '})}}">{{msg.subject|truncate(30)|replace({'_':' '})}}</span></td>
+                        <td data-title="{{'Message.Object'|trans }}"><span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{msg.subject|replace({'_':' '})}}">{{msg.subject|slice(0,30)|replace({'_':' '})}}</span></td>
                         <td  data-title="{{'Message.Sender'|trans }}">
                             {% if msg.from_addr | length > 35 %}
                                 <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msg.from_addr }}">
@@ -92,7 +92,7 @@
                                 <span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
                             {% endif %}
                         </td>            
-                        <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | localizeddate('short', 'short') }}">{{msg.time_num | localizeddate('short', 'short')}}</span> </td>
+                        <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | format_datetime('short', 'short') }}">{{msg.time_num | format_datetime('short', 'short')}}</span> </td>
                         
                             <td>{{ msg.bspam_level }}</td>
                             <td>
