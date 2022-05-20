@@ -97,6 +97,7 @@ Generics:
         emailAllreadyExist: 'This email is already used. You can''t use it'
         aliasAllreadyExist: 'This alias is already used. You can''t use it'
         userNameAllreadyExist: 'This login already exists. You can''t use it'
+        groupNameAllreadyExist: 'This group label allready exists for this domain. You can''t use it'
         passwordNotMatching: 'Password confirmation is not valid'
     units:
         literByDay: litres/day
