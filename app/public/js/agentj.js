@@ -91,7 +91,16 @@ document.addEventListener("turbo:load", function () {
   //check all chekboxes in listing
   $(document).on('click', '#checkAll', function (e) {
     $('.' + $(this).data('target-checkall-class')).attr('checked', $(this).is(':checked'));
+    e.stopImmediatePropagation();
   });
+  
+  $(document).on('click', '.for-cb', function (e) {
+    var cb = $(this).prev();
+    var isChecked = $(cb).is(':checked');
+    console.log(isChecked)
+    cb.attr('checked', isChecked ? false : true);
+    e.stopImmediatePropagation();
+  });  
 
   $(document).on('click', '.btn-open-modal', function (e) {
     e.stopImmediatePropagation();

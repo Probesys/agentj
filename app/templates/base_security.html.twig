@@ -3,6 +3,7 @@
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     {% block head_css %}
@@ -23,8 +24,6 @@
       <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" />
     {% endblock %}
       {{ encore_entry_link_tags('app') }}
-{#      {{ encore_entry_script_tags('app') }}#}
-{#      {{ encore_entry_script_tags('agentj') }}#}
     <title>{% block title %}{% endblock %}</title>
   </head>
 
@@ -35,7 +34,7 @@
     {% set bodyClass="validate-address" %}
   {% endif %}
 
-  <body id="page-top" data-base-path="{{ app.request.basePath }}" class="not-auth">
+  <body id="page-top" data-base-path="{{ app.request.basePath }}" class="not-auth" data-turbo="false">
     <div class="page-wrapper default-theme sidebar-bg bg1"> 
       <main class="page-content">
         <div id="overlay" class="overlay"></div>         
