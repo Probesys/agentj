@@ -472,5 +472,3 @@ Entities:
       banned: 'Banned by user'
       deleted: 'Deleted by user'
       auto: Automatic
-Generics.messages.incorrectCredential: Incorrect credentials, please check login and/or
-  password
