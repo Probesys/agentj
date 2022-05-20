@@ -141,15 +141,12 @@ h1{
   font-size:24px;
 }
 .login {
-  left:37.5%;
   background-color: #fff;
   align-items: center;
   margin-left: auto !important;
   margin-right: auto !important;
   position: absolute;
   top: calc(50% - 40px);;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
   -webkit-box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
   -moz-box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
   box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
