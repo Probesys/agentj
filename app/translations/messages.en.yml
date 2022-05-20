@@ -472,3 +472,5 @@ Entities:
       banned: 'Banned by user'
       deleted: 'Deleted by user'
       auto: Automatic
+groupNameAllreadyExist: This group label allready exists for this domain. You can't
+  use it
