@@ -44,7 +44,7 @@ document.addEventListener("turbo:load", function () {
                         '<label>Actions' +
                         '<select id="massive-actions-select" class="custom-select custom-select-sm form-control form-control-sm">' +
                         '<option value="">Actions</option>' +
-                        '<option data-dialog-title="' + Translator.trans('Entities.WBList.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
+                        '<option data-dialog-title="' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
                 domDropDownActions += '</select></label></div>';
                 $(domDropDownActions).insertAfter("#" + $(this).prop("id") + "_length ");
               }

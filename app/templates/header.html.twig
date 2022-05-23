@@ -25,7 +25,7 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
             {% for locale in locales %}
-              <a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}"  href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
+              <a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}" data-turbo="false" href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
             {% endfor %}
           </div>
         </li>
