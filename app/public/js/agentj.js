@@ -94,10 +94,10 @@ document.addEventListener("turbo:load", function () {
     e.stopImmediatePropagation();
   });
   
-  $(document).on('click', '.for-cb', function (e) {
+  $(document).on('click', '.for-cb:not(.check-all)', function (e) {
+    console.log('click');
     var cb = $(this).prev();
     var isChecked = $(cb).is(':checked');
-    console.log(isChecked)
     cb.attr('checked', isChecked ? false : true);
     e.stopImmediatePropagation();
   });  

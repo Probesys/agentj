@@ -433,9 +433,10 @@ class MessageController extends AbstractController
                 $msgsRelease = $em->getRepository(Msgs::class)->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                      /* @var $oneMsgRcpt Msgrc pt */
+                      /* @var $oneMsgRcpt Msgrcpt */
                         $oneMsgRcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $msgRelease['partition_tag'], 'mailId' => $msgRelease['mail_id'], 'rid' => $msgRelease['rid']]);
-                        if ($wb == 'W') {
+                        //if W we deliver blokec messages if it has been released yet
+                        if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
                               $process = new Process([$this->getParameter('app.amavisd-release'), $msgRelease['quar_loc'], $msgRelease['secret_id'], $msgRelease['recept_mail']]);
                               $process->getCommandLine();
                             $process->run(
