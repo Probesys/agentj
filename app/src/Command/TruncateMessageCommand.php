@@ -29,11 +29,11 @@ class TruncateMessageCommand extends Command
         if ($days <= 10) {
             $days = 30;
         }
-
+        
         $now = time();
         $start = strtotime('-' . $days . ' day', $now);
         $userMsgsBlocked = $em->getRepository(Msgs::class)->truncateMessageOlder($start);
-        $output->writeln(date('Y-m-d H:i:s') . "\tdelete mail entries older than " . date('Y-m-d', $start) . "\t" . $userMsgsBlocked['nbDeletedMsgs'] . ' in msgs' . "\t" . $userMsgsBlocked['nbDeletedMsgrcpt'] . ' in msgrcpt');
+        $output->writeln(date('Y-m-d H:i:s') . "\tdelete mail entries older than " . date('Y-m-d', $start) . "\t" . $userMsgsBlocked['nbDeletedMsgs'] . ' in msgs' . "\t" . $userMsgsBlocked['nbDeletedMsgrcpt'] . ' in msgrcpt'  . "\t" . $userMsgsBlocked['nbDeletedQuantaine'] . ' in quarantine');
         $nbDeletedlogs = $em->getRepository(Log::class)->truncateOlder($days);
         $output->writeln(date('Y-m-d H:i:s') . "\tdelete log entries older than " . date('Y-m-d', $start) . "\t" . $nbDeletedlogs . ' deleted');
         return Command::SUCCESS;
