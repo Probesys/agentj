@@ -24,7 +24,6 @@ RUN apk --no-cache add \
     gpg-agent \
     gzip \
     iproute2 \
-    perl-db \
     perl-dbd-mysql \
     perl-dbi \
     perl-io-socket-ssl \
