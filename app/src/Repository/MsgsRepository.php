@@ -363,15 +363,26 @@ class MsgsRepository extends ServiceEntityRepository
             $sql = ' DELETE mr FROM msgrcpt mr '
               . ' LEFT JOIN  msgs m ON m.mail_id = mr.mail_id '
               . ' WHERE m.time_num < ' . $date;
+
             $stmt = $conn->prepare($sql);
             $result = $stmt->executeQuery();
-            
             $nbDeletedMsgrcpt = $result->rowCount();
+            
+            $sql = ' DELETE q FROM quarantine q '
+              . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
+              . ' WHERE m.time_num < ' . $date;
+
+            $stmt = $conn->prepare($sql);
+            $result = $stmt->executeQuery();
+            $nbDeletedQuantaine = $result->rowCount();
+
+            
+            
             $sql2 = ' DELETE FROM msgs WHERE time_num < ' . $date;
             $stmt2 = $conn->prepare($sql2);
             $result = $stmt2->executeQuery();
             $nbDeletedMsgs = $result->rowCount();
-            return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt];
+            return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuantaine' => $nbDeletedQuantaine];
         }
     }
 }
