@@ -4,7 +4,7 @@
   {% set logoPath = asset('img/') ~ logoImg %}
 {% endif %}
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
-  <a class="navbar-brand mr-1" href="#sidebar" id="toggle-sidebar">
+  <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
     <i class="fas fa-bars fa-lg"></i>
   </a>  
   <a class="navbar-brand m-auto" href="{{ path('homepage') }}">
