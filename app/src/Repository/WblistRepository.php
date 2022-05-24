@@ -81,7 +81,7 @@ class WblistRepository extends ServiceEntityRepository
         $sql = " SELECT * FROM wblist  wb "
             . " LEFT JOIN mailaddr ma ON ma.id = wb.sid "
             . " LEFT JOIN users u ON wb.rid = u.id "
-            . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";
+            . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";        
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAssociative();
     }
