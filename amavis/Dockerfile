@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.15
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Amavis & ClamAV dockerized for AgentJ"
