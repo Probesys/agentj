@@ -25,7 +25,7 @@ RUN apk --no-cache add \
     gzip \
     iproute2 \
     perl-dbd-mysql \
-    perl-dbi \
+    perl-db \
     perl-io-socket-ssl \
     patch \
     pax-utils \
