@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Msgs;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use App\Entity\Msgs;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/report")
@@ -15,6 +13,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ReportController extends AbstractController
 {
 
+    private $em;
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+    
     /**
    * @Route("/", name="report")
    */
@@ -27,10 +31,10 @@ class ReportController extends AbstractController
         }
         $end = time();
         $start = strtotime('-1 day', $end);
-        $reportMsgs['day'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->getAllMessageReceipientForReport($email, $start, $end);
+        $reportMsgs['day'] = $this->em->getRepository(Msgs::class)->getAllMessageReceipientForReport($email, $start, $end);
 
         $start = strtotime('-1 month', $end);
-        $reportMsgs['month'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->getAllMessageReceipientForReport($email, $start, $end);
+        $reportMsgs['month'] = $this->em->getRepository(Msgs::class)->getAllMessageReceipientForReport($email, $start, $end);
 
 
         return $this->render('report/index.html.twig', [

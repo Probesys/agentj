@@ -3,9 +3,8 @@
 {% else %}
   {% set logoPath = asset('img/') ~ logoImg %}
 {% endif %}
-
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
-  <a class="navbar-brand mr-1" href="#sidebar" id="toggle-sidebar">
+  <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
     <i class="fas fa-bars fa-lg"></i>
   </a>  
   <a class="navbar-brand m-auto" href="{{ path('homepage') }}">
@@ -21,21 +20,21 @@
       </li>        
       {% if locales|length > 1 %}
         <li class="nav-item dropdown no-arrow mx-1">
-          <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-flag"><span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span></i>
+          <a  data-turbo="false" class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="far fa-flag"></i><span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
             {% for locale in locales %}
-              <a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}"  href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
+              <a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}" data-turbo="false" href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
             {% endfor %}
           </div>
         </li>
       {% endif %}
       <li class="nav-item dropdown no-arrow">
-        <a class="nav-link dropdown-toggle font-weight-bolder d-none d-md-block" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a  data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-none d-md-block" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{app.user.username}}
         </a>
-        <a class="nav-link dropdown-toggle font-weight-bolder d-block d-sm-none" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a  data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-block d-sm-none" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           @
         </a>        
         <div class="dropdown-menu dropdown-menu-right " aria-labelledby="userDropdown">

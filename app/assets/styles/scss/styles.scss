@@ -90,7 +90,7 @@ label.for-cb {
 }
 label.for-cb:before {
   line-height: 20px;
-  content: "";
+  content: ""; 
   display: inline-block;
   width: 18px;
   height: 18px;
@@ -162,7 +162,7 @@ table.dataTable thead th, table.dataTable thead td {
 body.not-auth
 {
   background-color: #fff;  
-  background-image: url("../img/fond-login-agent-j.png");
+  background-image: url("../../img/fond-login-agent-j.png");
   background-position: bottom;
   background-repeat: no-repeat;
   background-size: contain;
@@ -171,7 +171,7 @@ body.not-auth
 body.validate-address
 {
   background-color: #fff;  
-  background-image: url("../img/fond-1-agent-j-validation.png");
+  background-image: url("../../img/fond-1-agent-j-validation.png");
   background-position: top left;
   background-repeat: no-repeat;
   background-size: contain;
@@ -310,8 +310,8 @@ div[id^="dropzone-"] {
   {
     background-color: #fff;  
     background-image: 
-      url("../img/fond-1-agent-j-validation.png"),
-      url("../img/fond-2-agent-j-validation.png");
+      url("../../img/fond-1-agent-j-validation.png"),
+      url("../../img/fond-2-agent-j-validation.png");
     background-position: 
       top left,
       top right;
@@ -332,11 +332,6 @@ div[id^="dropzone-"] {
     box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
 
   }     
-}
-
-
-nav .fa-flag{
-  font-family: 'Poppins', sans-serif;
 }
 
 

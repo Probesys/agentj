@@ -117,7 +117,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         }
 
         $conStr = '{' . $conStr . '}';
-        $mbox = @imap_open($conStr, $user->getEmailFromRessource(), $password);
+        $mbox = @imap_open($conStr, $user->getEmailFromRessource(), $password,0 , 1);
         if (!imap_errors() && $mbox) {
             return true;
         }

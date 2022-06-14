@@ -53,7 +53,6 @@ class MsgrcptRepository extends ServiceEntityRepository
             . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
             . ' WHERE m.content != "C" AND msr.content != "C" AND msr.status_id IS NULL AND mr.domain = "' . $domain . '" AND ms.email =  "' . $emailSender . '"';
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 }
