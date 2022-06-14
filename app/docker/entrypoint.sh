@@ -18,14 +18,14 @@ sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
 
 
 echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php bin/console assets:install
+cd /var/www/agentj && sudo -u www-data php8 bin/console assets:install
 
 echo "Create database if not exists and update schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
+cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
+cd /var/www/agentj && php8 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
