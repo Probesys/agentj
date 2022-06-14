@@ -81,10 +81,10 @@ RUN apk --no-cache add \
     && mkdir -p /var/run/php/ && touch /var/run/php/php8-fpm.pid \
     && rm -rf node_modules
 
-COPY docker/conf/www.conf /etc/php8/php-fpm.d/www.conf
-COPY docker/conf/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
+COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
-COPY docker/conf/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/entrypoint.sh /entrypoint.sh
