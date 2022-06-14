@@ -83,7 +83,7 @@ h2{
 body.not-auth
 {
   background-color: #fff;  
-  background-image: url("../img/fond-login-agent-j.png");
+  background-image: url("../../img/fond-login-agent-j.png");
   background-position: bottom;
   background-repeat: no-repeat;
   background-size: contain;
@@ -93,8 +93,8 @@ body.validate-address
 {
   background-color: #fff;
   background-image: 
-    url("../img/fond-1-agent-j-validation.png"),
-    url("../img/fond-2-agent-j-validation.png");
+    url("../../img/fond-1-agent-j-validation.png"),
+    url("../../img/fond-2-agent-j-validation.png");
   background-position: 
     top left,
     top right;
