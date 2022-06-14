@@ -11,21 +11,20 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     composer \
     git \
     nodejs \
-    php7 \
-    php7-bz2 \
-    php7-common \
-    php7-curl \
-    php7-fpm \
-    php7-gd \
-    php7-imap \
-    php7-intl \
-    php7-json \
-    php7-mbstring \
-    php7-mysqli \
-    php7-opcache \
-    php7-xml \
-    php7-xmlrpc \
-    php7-zip \
+    php8 \
+    php8-bz2 \
+    php8-common \
+    php8-curl \
+    php8-fpm \
+    php8-gd \
+    php8-imap \
+    php8-intl \
+    php8-json \
+    php8-mbstring \
+    php8-mysqli \
+    php8-opcache \
+    php8-xml \
+    php8-zip \
     tzdata \
     yarn \
     zip \
@@ -55,36 +54,35 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     libssl1.1 \
     openssl \
     perl \
-    php7 \
-    php7-bz2 \
-    php7-common \
-    php7-ctype \
-    php7-curl \
-    php7-dom \
-    php7-fpm \
-    php7-gd \
-    php7-iconv \
-    php7-imap \
-    php7-intl \
-    php7-json \
-    php7-mbstring \
-    php7-pdo_mysql \
-    php7-opcache \
-    php7-openssl \
-    php7-session \
-    php7-simplexml \
-    php7-sysvsem \
-    php7-tokenizer \
-    php7-xml \
-    php7-xmlrpc \
-    php7-zip \
+    php8 \
+    php8-bz2 \
+    php8-common \
+    php8-ctype \
+    php8-curl \
+    php8-dom \
+    php8-fpm \
+    php8-gd \
+    php8-iconv \
+    php8-imap \
+    php8-intl \
+    php8-json \
+    php8-mbstring \
+    php8-pdo_mysql \
+    php8-opcache \
+    php8-openssl \
+    php8-session \
+    php8-simplexml \
+    php8-sysvsem \
+    php8-tokenizer \
+    php8-xml \
+    php8-zip \
     sudo \
     supervisor \
     tzdata \
-    && mkdir -p /var/run/php/ && touch /var/run/php/php7-fpm.pid \
+    && mkdir -p /var/run/php/ && touch /var/run/php/php8-fpm.pid \
     && rm -rf node_modules
 
-COPY docker/conf/www.conf /etc/php7/php-fpm.d/www.conf
+COPY docker/conf/www.conf /etc/php8/php-fpm.d/www.conf
 COPY docker/conf/supervisord.conf /etc/supervisord.conf
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/files/.env /var/www/agentj/.env

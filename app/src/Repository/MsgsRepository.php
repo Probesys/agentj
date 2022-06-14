@@ -37,7 +37,7 @@ class MsgsRepository extends ServiceEntityRepository
                 return $entity->getId();
             }, $user->getDomains()->toArray());
 
-            $sqlWhere .= ' AND u.domain_id in (' . implode($domainsIds, ',') . ') ';
+            $sqlWhere .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
 
         if ($type) {
@@ -110,11 +110,8 @@ class MsgsRepository extends ServiceEntityRepository
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias);
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $conn->close();
-        $result = $stmt->fetch();
-        unset($stmt);
-        unset($conn);
+        $result = $stmt->executeQuery()->fetchAssociative();
+
         if ($result) {
             return $result['nb_result'];
         } else {
@@ -144,11 +141,7 @@ class MsgsRepository extends ServiceEntityRepository
         $sql .= " GROUP BY SUBSTRING(m.time_iso, 1, 8) ";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $conn->close();
-        $result = $stmt->fetchAll();
-        unset($stmt);
-        unset($conn);
+        $result = $stmt->executeQuery()->fetchAllAssociative();
         return $result;
     }
 
@@ -186,9 +179,7 @@ class MsgsRepository extends ServiceEntityRepository
 
         $stmt = $conn->prepare($sql);
 
-        $stmt->execute();
-        $conn->close();
-        $return = $stmt->fetchAll();
+        $return = $stmt->executeQuery()->fetchAllAssociative();
         unset($stmt);
         unset($conn);
         return $return;
@@ -212,9 +203,8 @@ class MsgsRepository extends ServiceEntityRepository
             . ' AND mr.wl != "Y" and mr.bl != "Y"  and mr.status_id IS NULL and mr.content != "C" AND mr.content != "V" ';
   //            . ' GROUP BY m.mail_id';
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
@@ -234,7 +224,7 @@ class MsgsRepository extends ServiceEntityRepository
             . ' SET status_id = "' . $status . '"'
             . ' WHERE ms.email =  "' . $emailSender . '" AND mr.email =  "' . $emailRecipient . '" ';
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $stmt->executeQuery();
     }
 
   /**
@@ -248,7 +238,7 @@ class MsgsRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'UPDATE msgs SET status_id =  ' . $status . '  WHERE partition_tag = "' . $partitiontag . '" AND mail_id = "' . $mailId . '"';
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $stmt->executeQuery();
     }
 
   /**
@@ -272,9 +262,8 @@ class MsgsRepository extends ServiceEntityRepository
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':from_addr', $from);
 
-        $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
@@ -286,7 +275,7 @@ class MsgsRepository extends ServiceEntityRepository
       //update the email Maddr
         $sql = "UPDATE maddr SET is_invalid = 1 WHERE id in ( select sid from msgs where status_id = 4)";
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $stmt->executeQuery();
     }
 
   /**
@@ -305,8 +294,8 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
             . ' WHERE m.content != "C" AND msr.content != "C"  AND mr.email = "' . $emailRecipient . '" AND ms.email =  "' . $emailSender . '"';
     $stmt = $conn->prepare($sql);
-    $stmt->execute();
-    return $stmt->fetchAll();
+//    $stmt->execute();
+    return $stmt->executeQuery()->fetchAllAssociative();
   }
 
   /**
@@ -338,8 +327,7 @@ class MsgsRepository extends ServiceEntityRepository
         $sql .= ' GROUP BY m.content, m.status_id';
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
@@ -359,30 +347,9 @@ class MsgsRepository extends ServiceEntityRepository
         $sql .= ' GROUP BY maddr.email';
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-  /**
-   * Get messages blocked
-   * @todo prévoir par domaine rajouter une jointure pour les admins
-   * @return type
-   */
-    public function getMsgsBlocked()
-    {
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT  maddr.email, count(*) as nb FROM msgs m'
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' WHERE m.content != "C" AND mr.bl = "Y" AND mr.status_id IS NULL  ';
-
-        $sql .= ' GROUP BY maddr.email';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
-    }
 
   /**
    * Delete message older $date
@@ -396,12 +363,26 @@ class MsgsRepository extends ServiceEntityRepository
             $sql = ' DELETE mr FROM msgrcpt mr '
               . ' LEFT JOIN  msgs m ON m.mail_id = mr.mail_id '
               . ' WHERE m.time_num < ' . $date;
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
 
+            $stmt = $conn->prepare($sql);
+            $result = $stmt->executeQuery();
+            $nbDeletedMsgrcpt = $result->rowCount();
+            
+            $sql = ' DELETE q FROM quarantine q '
+              . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
+              . ' WHERE m.time_num < ' . $date;
+
+            $stmt = $conn->prepare($sql);
+            $result = $stmt->executeQuery();
+            $nbDeletedQuantaine = $result->rowCount();
+
+            
+            
             $sql2 = ' DELETE FROM msgs WHERE time_num < ' . $date;
             $stmt2 = $conn->prepare($sql2);
-            $stmt2->execute();
+            $result = $stmt2->executeQuery();
+            $nbDeletedMsgs = $result->rowCount();
+            return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuantaine' => $nbDeletedQuantaine];
         }
     }
 }

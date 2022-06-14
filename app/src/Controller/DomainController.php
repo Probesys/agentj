@@ -11,6 +11,7 @@ use App\Entity\Wblist;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Service\FileUploader;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,13 +30,20 @@ class DomainController extends AbstractController
 {
     use ControllerWBListTrait;
 
-//  private $wBListDomainActions;
     private $translator;
+    private $em;
+
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+//        parent::__construct();
+        $this->translator = $translator;
+        $this->em = $em;
+    }
+    
 
     private function checkAccess($domain)
     {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            $allowedomains = $this->getDoctrine()
+            $allowedomains = $this->em
               ->getRepository(Domain::class)
               ->getListByUserId($this->getUser()->getId());
             if (!in_array($domain, $allowedomains)) {
@@ -51,11 +59,11 @@ class DomainController extends AbstractController
     {
 
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            $domains = $this->getDoctrine()
+            $domains = $this->em
               ->getRepository(Domain::class)
               ->findAll();
         } else {
-            $domains = $this->getDoctrine()
+            $domains = $this->em
               ->getRepository(Domain::class)
               ->getListByUserId($this->getUser()->getId());
         }
@@ -72,10 +80,11 @@ class DomainController extends AbstractController
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
+//        dd($this->getWBListDomainActions());
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
         'action' => $this->generateUrl('domain_new'),
-        'actions' => $this->wBListDomainActions,
+        'actions' => $this->getWBListDomainActions(),
         'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
@@ -90,12 +99,12 @@ class DomainController extends AbstractController
             $domain->setTransport($strTransport);
           //Default messages
           //captcha page
-            $messageConfig = $this->getDoctrine()->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
+            $messageConfig = $this->em->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
             if ($messageConfig) {
-                $domain->setMessage($this->getDoctrine()->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
-                $domain->setConfirmCaptchaMessage($this->getDoctrine()->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_valid'])->getValue());
-                $domain->setMailmessage($this->getDoctrine()->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_authentification_request'])->getValue());
-                $domain->setMessageAlert($this->getDoctrine()->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_report'])->getValue());
+                $domain->setMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
+                $domain->setConfirmCaptchaMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_valid'])->getValue());
+                $domain->setMailmessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_authentification_request'])->getValue());
+                $domain->setMessageAlert($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_report'])->getValue());
             }
 
 
@@ -103,7 +112,7 @@ class DomainController extends AbstractController
 
 
 
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($domain);
 
           //add domain to users
@@ -118,7 +127,7 @@ class DomainController extends AbstractController
             $rules = $form->get("rules")->getData();
 
           //for all domain @.
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setPriority(0); // priority for domain is 0
@@ -177,15 +186,15 @@ class DomainController extends AbstractController
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
         'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-        'actions' => $this->wBListDomainActions,
+        'actions' => $this->getWBListDomainActions(),
         'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
-        $wblistArray = $this->getDoctrine()->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
+        $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
         $form->get('rules')->setData($wblistArray['wb']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             
             $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
             if ($domain->getSmtpPort()){
@@ -194,7 +203,7 @@ class DomainController extends AbstractController
             $domain->setTransport($strTransport);
             
             $policy = $form->get('policy')->getData();
-            $userDomain = $this->getDoctrine()->getRepository(User::class)->findOneBy((['email' => '@' . $domain->getDomain()]));
+            $userDomain = $this->em->getRepository(User::class)->findOneBy((['email' => '@' . $domain->getDomain()]));
             if (!$userDomain) {
                 $userDomain = new User();
                 $userDomain->setEmail('@' . $domain->getDomain());
@@ -205,7 +214,7 @@ class DomainController extends AbstractController
             $userDomain->setPolicy($policy);
 
             $rules = $form->get("rules")->getData();
-            $wblist = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy(['rid' => $wblistArray['rid'], 'sid' => $wblistArray['sid']]);
+            $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $wblistArray['rid'], 'sid' => $wblistArray['sid']]);
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
@@ -247,7 +256,7 @@ class DomainController extends AbstractController
     {
         $this->checkAccess($domain);
         if ($this->isCsrfTokenValid('delete' . $domain->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($domain);
             $em->flush();
         }
@@ -260,11 +269,11 @@ class DomainController extends AbstractController
    */
     public function deleteWblist($rid, $sid, Request $request): Response
     {
-        $wbList = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
+        $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
         $this->checkAccess($domain);
         if ($wbList) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->remove($wbList);
             $em->flush();
         }
@@ -278,8 +287,8 @@ class DomainController extends AbstractController
     public function domainwblist(Domain $domain): Response
     {
         $this->checkAccess($domain);
-        $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
-        $wblist = $this->getDoctrine()->getRepository(Wblist::class)->findBy(['rid' => $user]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
+        $wblist = $this->em->getRepository(Wblist::class)->findBy(['rid' => $user]);
         if (!$wblist) {
             $this->addFlash('danger', $this->translator->trans('Message.Flash.missingRuleForDomain'));
             return $this->redirectToRoute('domain_wblist_new', ['domainId' => $domain->getId(), 'type' => 'domain']);
@@ -292,18 +301,18 @@ class DomainController extends AbstractController
    */
     public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $domain = $this->getDoctrine()->getRepository(Domain::class)->find($domainId);
+        $em = $this->em;
+        $domain = $this->em->getRepository(Domain::class)->find($domainId);
         if (!$domain) {
             throw $this->createNotFoundException('The domain does not exist');
         }
         $this->checkAccess($domain);
-        $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
         'action' => $this->generateUrl('domain_wblist_new', ['domainId' => $domainId]),
         ]);
         $formBuilder->add('email', TextType::class);
-        $actions = $this->wBListUserActions;
+        $actions = $this->getWBListUserActions();
 
 
         $formBuilder->add('wb', ChoiceType::class, [
@@ -315,7 +324,7 @@ class DomainController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
 
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
@@ -326,7 +335,7 @@ class DomainController extends AbstractController
 
                 $em->persist($mailaddr);
             } else {
-                $domainWblistexist = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy((['rid' => $user, 'sid' => $mailaddr]));
+                $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $user, 'sid' => $mailaddr]));
                 if ($domainWblistexist) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
                     return $this->redirectToRoute('domain_wblist', ['id' => $domainId]);
@@ -358,7 +367,7 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);
         }

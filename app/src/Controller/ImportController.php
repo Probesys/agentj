@@ -2,19 +2,18 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use App\Form\ImportType;
-use Symfony\Component\Filesystem\Filesystem;
 use App\Controller\Traits\ControllerCommonTrait;
-use App\Entity\Groups;
-use App\Entity\Domain;
-use App\Entity\Wblist;
-use App\Entity\Mailaddr;
-use App\Entity\User;
 use App\Controller\Traits\ControllerWBListTrait;
+use App\Entity\Domain;
+use App\Entity\Groups;
+use App\Entity\User;
+use App\Entity\Wblist;
+use App\Form\ImportType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -26,9 +25,11 @@ class ImportController extends AbstractController {
     use ControllerWBListTrait;
 
     private $translator;
+    private $em;
 
-    public function __construct(TranslatorInterface $translator) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
         $this->translator = $translator;
+        $this->em = $em;
     }
 
     /**
@@ -90,7 +91,7 @@ class ImportController extends AbstractController {
         $errors = [];
         $batchSize = 20;
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $groups = [];
         $emails = [];
         $groupWbUpdate = [];
@@ -115,8 +116,8 @@ class ImportController extends AbstractController {
                         $group = false;
                         if (isset($data[3]) && $data[3] != '') {
                             $slugGroup = $this->slugify($data[3]);
-                            if (!isset($groups[$slugGroup])) {
-                                $group = $em->getRepository(Groups::class)->findOneBy(['slug' => $slugGroup]);
+                            if (!isset($groups[$domainEmail][$slugGroup])) {
+                                $group = $em->getRepository(Groups::class)->findOneBy(['domain' => $domains[$domainEmail]['entity'], 'name' => trim($data[3])]);
                                 if (!$group) {
                                     //get rules of domain
                                     if (!isset($domains[$domainEmail]['wb'])) {
@@ -135,11 +136,12 @@ class ImportController extends AbstractController {
 
                                     $em->persist($group);
                                     $em->flush();
+                                    $groups[$domainEmail][$slugGroup] = $group;
                                 } else {
-                                    $groups[$slugGroup] = $group;
+                                    $groups[$domainEmail][$slugGroup] = $group;
                                 }
                             } else {
-                                $group = $groups[$slugGroup];
+                                $group = $groups[$domainEmail][$slugGroup];
                             }
                         }
                         if (!isset($emails[$email])) {
@@ -160,7 +162,7 @@ class ImportController extends AbstractController {
                             $em->persist($user);
                             $emails[$user->getEmail()] = $user->getEmail();
                             if ($group) {
-                                $group->addUser($user);
+                                $user->setGroups($group);
                                 $em->persist($group);
 
                                 $groupWbUpdate[$group->getid()] = $group->getid();

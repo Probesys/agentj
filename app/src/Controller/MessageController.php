@@ -11,9 +11,9 @@ use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
 use App\Repository\MsgsRepository;
 use App\Service\LogService;
+use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,10 +29,13 @@ class MessageController extends AbstractController
 {
 
     private $translator;
+    private $em;
 
-    public function __construct(TranslatorInterface $translator)
+        
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
     {
         $this->translator = $translator;
+        $this->em = $em;
     }
 
   /**
@@ -114,7 +117,7 @@ class MessageController extends AbstractController
         if ($this->getUser()->getEmail() && in_array('ROLE_USER', $this->getUser()->getRoles())) {
             $email = stream_get_contents($this->getUser()->getEmail(), -1, 0);
         }
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $alias = $em->getRepository(User::class)->findBy(['originalUser' => $this->getUser()->getId()]);
 
         $sortParams = [];
@@ -166,7 +169,7 @@ class MessageController extends AbstractController
    */
     public function showAction($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
       /* @var $msgs Msgrcpt */
         $msgRcpt = $em->getRepository(Msgrcpt::class)->findOneBy([
@@ -199,7 +202,7 @@ class MessageController extends AbstractController
    */
     public function deleteAction($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
   //    $em->getRepository(Msgs::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED); //status == delete
         $em->getRepository(Msgrcpt::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED, $rid); //status == delete
         $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
@@ -217,7 +220,7 @@ class MessageController extends AbstractController
      */
     public function batchMessageAction($action = null, Request $request, MsgsRepository $msgRepository)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         if ($action) {
             foreach ($request->request->get('id') as $obj) {
                 $mailInfo = json_decode($obj);
@@ -256,7 +259,7 @@ class MessageController extends AbstractController
    */
     public function authorized($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
       //W = White and 2 is authorized
         if ($this->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, 0, $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
@@ -275,7 +278,7 @@ class MessageController extends AbstractController
    */
     public function banned($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
       //B = Black and msg status = 1 is banned
         if ($this->msgsToWblist($partitionTag, $mailId, "B", MessageStatus::BANNED, 0, $rid)) {
@@ -298,7 +301,7 @@ class MessageController extends AbstractController
      */
     public function restore($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
       //select msgs and msgcpt
         $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
 
@@ -355,7 +358,7 @@ class MessageController extends AbstractController
     {
         $state = false;
   //    $successReleasedMsgs = [];
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
       //select msgs and msgcpt
       /*@var $msgs Msgs */
@@ -430,9 +433,10 @@ class MessageController extends AbstractController
                 $msgsRelease = $em->getRepository(Msgs::class)->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                      /* @var $oneMsgRcpt Msgrc pt */
+                      /* @var $oneMsgRcpt Msgrcpt */
                         $oneMsgRcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $msgRelease['partition_tag'], 'mailId' => $msgRelease['mail_id'], 'rid' => $msgRelease['rid']]);
-                        if ($wb == 'W') {
+                        //if W we deliver blokec messages if it has been released yet
+                        if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
                               $process = new Process([$this->getParameter('app.amavisd-release'), $msgRelease['quar_loc'], $msgRelease['secret_id'], $msgRelease['recept_mail']]);
                               $process->getCommandLine();
                             $process->run(
@@ -478,7 +482,7 @@ class MessageController extends AbstractController
       //W = White and 2 is authorized
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "W", $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $logService = new LogService($em);
             $logService->addLog('authorize for domain ', $mailId);
         }
@@ -494,7 +498,7 @@ class MessageController extends AbstractController
       //B = Black and msg status = 1 is banned
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "B", $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $logService = new LogService($em);
             $logService->addLog('banned for domain ', $mailId);
         }
@@ -506,7 +510,7 @@ class MessageController extends AbstractController
 
     public function msgsToWblistDomain($partitionTag, $mailId, $wb, $rid)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
       //select msgs and msgcpt
         $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
@@ -527,9 +531,9 @@ class MessageController extends AbstractController
         $emailRecipient = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
         $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
 
-        $userDomain = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
+        $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
       //todo check right of user connected admin of domain access
-        $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSenderToWb]));
+        $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSenderToWb]));
 
         if (!$mailaddr) {
             $mailaddr = new Mailaddr();
@@ -537,13 +541,12 @@ class MessageController extends AbstractController
             $mailaddr->setPriority('6'); //priority for email by default
             $em->persist($mailaddr);
         } else {
-            $domainWblistexist = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
-            if ($domainWblistexist) {
-                $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
-                return $this->redirectToRoute('message');
+            $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
+            if (!$wblist) {
+                $wblist = new Wblist($userDomain, $mailaddr);
             }
         }
-        $wblist = new Wblist($userDomain, $mailaddr);
+        
         $wblist->setWb($wb);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
 
