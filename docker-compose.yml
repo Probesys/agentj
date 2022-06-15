@@ -103,16 +103,6 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  redis:
-    image: redis:6.2-alpine
-    restart: always
-    environment:
-      - TZ=${TZ}
-    networks:
-      - ajnet
-    volumes:
-      - redisdb:/data
-
   watchtower:
     image: containrrr/watchtower
     environment:
@@ -130,7 +120,6 @@ volumes:
   opendkim:
   postfix_relay:
   postqueue:
-  redisdb:
   smtpconfig:
   spamassassin:
 
