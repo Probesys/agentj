@@ -59,7 +59,6 @@ class DomainController extends AbstractController {
     public function index(): Response {
 
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-<<<<<<< HEAD
             $domains = $this->em
               ->getRepository(Domain::class)
               ->findAll();
@@ -67,56 +66,32 @@ class DomainController extends AbstractController {
             $domains = $this->em
               ->getRepository(Domain::class)
               ->getListByUserId($this->getUser()->getId());
-=======
-            $domains = $this->getDoctrine()
-                    ->getRepository(Domain::class)
-                    ->findAll();
-        } else {
-            $domains = $this->getDoctrine()
-                    ->getRepository(Domain::class)
-                    ->getListByUserId($this->getUser()->getId());
->>>>>>> bugfix-128-all_domains_dkim
         }
 
 
         return $this->render('domain/index.html.twig', ['domains' => $domains]);
     }
 
-<<<<<<< HEAD
   /**
    * @Route("/new", name="domain_new", methods="GET|POST")
    */
     public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response
     {
-=======
-    /**
-     * @Route("/new", name="domain_new", methods="GET|POST")
-     */
-    public function new(Request $request, FileUploader $fileUploader): Response {
->>>>>>> bugfix-128-all_domains_dkim
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
 //        dd($this->getWBListDomainActions());
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
-<<<<<<< HEAD
         'action' => $this->generateUrl('domain_new'),
         'actions' => $this->getWBListDomainActions(),
         'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
-=======
-            'action' => $this->generateUrl('domain_new'),
-            'actions' => $this->wBListDomainActions,
-            'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
-            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
->>>>>>> bugfix-128-all_domains_dkim
         ]);
         $form->get('defaultLang')->setData($params->get('locale'));
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
             $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
             if ($domain->getSmtpPort()){
                 $strTransport .= ":" . $domain->getSmtpPort();
@@ -125,12 +100,6 @@ class DomainController extends AbstractController {
           //Default messages
           //captcha page
             $messageConfig = $this->em->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
-=======
-            $domain->setTransport("smtp:[" . $domain->getSrvSmtp() . "]");
-            //Default messages
-            //captcha page
-            $messageConfig = $this->getDoctrine()->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
->>>>>>> bugfix-128-all_domains_dkim
             if ($messageConfig) {
                 $domain->setMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
                 $domain->setConfirmCaptchaMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_valid'])->getValue());
@@ -157,13 +126,8 @@ class DomainController extends AbstractController {
 
             $rules = $form->get("rules")->getData();
 
-<<<<<<< HEAD
           //for all domain @.
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
-=======
-            //for all domain @.
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
->>>>>>> bugfix-128-all_domains_dkim
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setPriority(0); // priority for domain is 0
@@ -221,17 +185,10 @@ class DomainController extends AbstractController {
 
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
-<<<<<<< HEAD
         'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
         'actions' => $this->getWBListDomainActions(),
         'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
         'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
-=======
-            'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-            'actions' => $this->wBListDomainActions,
-            'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
-            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
->>>>>>> bugfix-128-all_domains_dkim
         ]);
         $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
         $form->get('rules')->setData($wblistArray['wb']);
@@ -315,20 +272,12 @@ class DomainController extends AbstractController {
         return $this->redirectToRoute('domain_index');
     }
 
-<<<<<<< HEAD
   /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
    * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
    */
     public function deleteWblist($rid, $sid, Request $request): Response
     {
         $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
-=======
-    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
-     */
-    public function deleteWblist($rid, $sid, Request $request): Response {
-        $wbList = $this->getDoctrine()->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
->>>>>>> bugfix-128-all_domains_dkim
         $domain = $wbList->getRid()->getDomain();
         $this->checkAccess($domain);
         if ($wbList) {
@@ -354,7 +303,6 @@ class DomainController extends AbstractController {
         return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
     }
 
-<<<<<<< HEAD
   /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
    * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
    */
@@ -362,14 +310,6 @@ class DomainController extends AbstractController {
     {
         $em = $this->em;
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
-=======
-    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
-     */
-    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response {
-        $em = $this->getDoctrine()->getManager();
-        $domain = $this->getDoctrine()->getRepository(Domain::class)->find($domainId);
->>>>>>> bugfix-128-all_domains_dkim
         if (!$domain) {
             throw $this->createNotFoundException('The domain does not exist');
         }

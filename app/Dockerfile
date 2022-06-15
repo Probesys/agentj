@@ -53,6 +53,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     mariadb-client \
     libssl1.1 \
     nginx \
+    opendkim \
     openssl \
     perl \
     php8 \
