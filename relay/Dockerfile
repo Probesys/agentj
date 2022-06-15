@@ -19,17 +19,11 @@ RUN apk --no-cache add \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
 COPY conf/postfix/* /etc/postfix/
-COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
-COPY conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
-COPY conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
-COPY conf/opendkim/SigningTable /etc/opendkim/SigningTable
-COPY conf/opendkim/KeyTable /etc/opendkim/KeyTable
 COPY entrypoint.sh /entrypoint.sh
-
-VOLUME /etc/opendkim
+COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 25/tcp
 
 ENTRYPOINT [ "/entrypoint.sh" ] 
-HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
+HEALTHCHECK --start-period=60s CMD postfix status > /dev/null 2>&1 || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
