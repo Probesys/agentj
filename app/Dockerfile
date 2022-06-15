@@ -78,6 +78,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     php8-tokenizer \
     php8-xml \
     php8-zip \
+    rsyslog \
     sudo \
     supervisor \
     tzdata \
@@ -88,6 +89,8 @@ COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/.env /var/www/agentj/.env
