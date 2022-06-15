@@ -38,7 +38,7 @@ cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:database:create
 cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php8 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
+cd /var/www/agentj && php8 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
