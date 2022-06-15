@@ -3896,11 +3896,7 @@
             "description": "Composer plugin for Symfony",
             "support": {
                 "issues": "https://github.com/symfony/flex/issues",
-<<<<<<< HEAD
                 "source": "https://github.com/symfony/flex/tree/v1.18.7"
-=======
-                "source": "https://github.com/symfony/flex/tree/v1.18.5"
->>>>>>> bugfix-128-all_domains_dkim
             },
             "funding": [
                 {
@@ -3916,11 +3912,7 @@
                     "type": "tidelift"
                 }
             ],
-<<<<<<< HEAD
             "time": "2022-05-02T10:18:23+00:00"
-=======
-            "time": "2022-02-16T17:26:46+00:00"
->>>>>>> bugfix-128-all_domains_dkim
         },
         {
             "name": "symfony/form",
