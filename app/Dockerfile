@@ -3,7 +3,8 @@ FROM alpine:latest AS base
 WORKDIR /var/www/
 COPY . /var/www/
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
-RUN apk --no-cache add \
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
+    && apk --no-cache add \
     ca-certificates \
     curl \
     gnupg \
@@ -46,7 +47,8 @@ RUN set -x ; \
 COPY --chown=www-data:www-data --from=base /var/www/ /var/www/agentj
 WORKDIR /var/www/agentj
 
-RUN apk --no-cache add \
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
+    && apk --no-cache add \
     dcron \
     mariadb-client \
     libssl1.1 \
