@@ -54,6 +54,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     libssl1.1 \
     nginx \
     opendkim \
+    opendkim-utils \
     openssl \
     perl \
     php8 \
@@ -87,14 +88,13 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
-COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
-COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
+COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
+COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/files/.env /var/www/agentj/.env
-COPY docker/files/.env /var/www/agentj/.env
-COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/files/deldomainkey.sh /usr/local/bin/deldomainkey.sh
 COPY docker/files/gendomainkey.sh /usr/local/bin/gendomainkey.sh
