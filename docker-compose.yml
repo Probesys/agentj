@@ -47,8 +47,10 @@ services:
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
+      - opendkim:/etc/opendkim
     networks:
-      - ajnet
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.240
     ports:
       - 127.0.0.1:${PROXY_PORT:-8090}:80
 
@@ -58,7 +60,6 @@ services:
     env_file:
       - .env
     volumes:
-      - opendkim:/etc/opendkim/
       - postfix_relay:/etc/postfix/
     networks:
       ajnet:

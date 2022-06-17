@@ -31,3 +31,8 @@ content_filter=amavisfeed:[amavis]:10024
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
+
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = inet:$IPV4_NETWORK.240:8891
+non_smtpd_milters = inet:$IPV4_NETWORK.240:8891
