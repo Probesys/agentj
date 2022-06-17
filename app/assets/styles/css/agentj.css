@@ -3,6 +3,11 @@ body{
   background-color: #E5E5E5;
 }
 
+body.turbo-loading, body.turbo-loaded {
+    opacity: .2;
+}
+
+
 a{
   color: #E8576B;
 }
@@ -16,36 +21,6 @@ h2{
   color:#E8576B;
 }
 
-.cb {
-  display: none;
-}
-label.for-cb {
-  display: inline-block;
-  position: relative;
-  padding-left: 25px;
-  font-size: 16px;
-  line-height: 20px;
-  margin: 5px;
-}
-label.for-cb:before {
-  line-height: 20px;
-  content: "";
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  position: absolute;
-  left: 0;
-  background-color: #ffffff;
-  border: 1px solid #E8576B;
-  border-radius: 3px;
-}
-input[type=checkbox]:checked + label.for-cb:before,
-label.for-cb:hover:before {
-  content: "\2713";
-  color: #666666;
-  text-align: center;
-  line-height: 16px;
-}
 
 .page-link {
     position: relative;
@@ -108,7 +83,7 @@ label.for-cb:hover:before {
 body.not-auth
 {
   background-color: #fff;  
-  background-image: url("../img/fond-login-agent-j.png");
+  background-image: url("../../img/fond-login-agent-j.png");
   background-position: bottom;
   background-repeat: no-repeat;
   background-size: contain;
@@ -118,8 +93,8 @@ body.validate-address
 {
   background-color: #fff;
   background-image: 
-    url("../img/fond-1-agent-j-validation.png"),
-    url("../img/fond-2-agent-j-validation.png");
+    url("../../img/fond-1-agent-j-validation.png"),
+    url("../../img/fond-2-agent-j-validation.png");
   background-position: 
     top left,
     top right;
@@ -136,15 +111,12 @@ h1{
   font-size:24px;
 }
 .login {
-  left:37.5%;
   background-color: #fff;
   align-items: center;
   margin-left: auto !important;
   margin-right: auto !important;
   position: absolute;
   top: calc(50% - 40px);;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
   -webkit-box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
   -moz-box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
   box-shadow: 11px 10px 20px -13px rgba(0,0,0,0.75);
@@ -292,7 +264,7 @@ div[id^="dropzone-"] {
   }    
 }
 
-@media only screen and (max-width: 890px) {
+@media only screen and (max-width: 1024px) {
 
 
 

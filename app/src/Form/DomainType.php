@@ -36,7 +36,7 @@ class DomainType extends AbstractType {
 
 
         $actions = $options['actions'];
-
+//dd($actions);
         $builder
                 ->add('domain', null, [
                     'label' => 'Entities.Domain.fields.domain'

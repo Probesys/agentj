@@ -14,7 +14,7 @@ function $_GET(param) {
 }
 
 
-$(document).ready(function () {
+document.addEventListener("turbo:load", function () {
 
   if (window.innerWidth < 1280) {
     $(".sidebar").toggleClass("toggled");
@@ -44,7 +44,7 @@ $(document).ready(function () {
                         '<label>Actions' +
                         '<select id="massive-actions-select" class="custom-select custom-select-sm form-control form-control-sm">' +
                         '<option value="">Actions</option>' +
-                        '<option data-dialog-title="' + Translator.trans('Entities.WBList.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
+                        '<option data-dialog-title="' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
                 domDropDownActions += '</select></label></div>';
                 $(domDropDownActions).insertAfter("#" + $(this).prop("id") + "_length ");
               }
@@ -60,6 +60,8 @@ $(document).ready(function () {
 //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
     e.preventDefault();
+    e.stopImmediatePropagation();
+    var select = $(this);
     if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0)
     {
       var curFormAction = $("#massive-actions-form").prop("action");
@@ -67,37 +69,41 @@ $(document).ready(function () {
       {
         $("#massive-actions-form").prop("action", curFormAction + "/" + $(this).val());
       }
-
-
-      $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
-      $('#dialog-confirm').data("type-action-confirm", "form");
-      $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-      $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
-
-      $("#dialog-confirm").dialog("open");
-      //Reset the form action
-      $('#dialog-confirm').on('dialogclose', function (event) {
-        $("#massive-actions-form").prop("action", curFormAction);
-      });
-
     } else
     {
       $(this).val('');
     }
 
+    $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
+    $('#dialog-confirm').data("type-action-confirm", "form");
+    $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
+    $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
 
-
-    $("#dialog-confirm").on("dialogclose", function (event, ui) {
-      $('#massive-actions-select').val('');
+    $("#dialog-confirm").dialog("open");
+    //Reset the form action
+    $('#dialog-confirm').on('dialogclose', function (event) {
+      $("#massive-actions-form").prop("action", curFormAction);
+      $(select).val('');
     });
+
   });
 
   //check all chekboxes in listing
   $(document).on('click', '#checkAll', function (e) {
     $('.' + $(this).data('target-checkall-class')).attr('checked', $(this).is(':checked'));
+    e.stopImmediatePropagation();
   });
+  
+  $(document).on('click', '.for-cb:not(.check-all)', function (e) {
+    console.log('click');
+    var cb = $(this).prev();
+    var isChecked = $(cb).is(':checked');
+    cb.attr('checked', isChecked ? false : true);
+    e.stopImmediatePropagation();
+  });  
 
   $(document).on('click', '.btn-open-modal', function (e) {
+    e.stopImmediatePropagation();
     $.ajax({
       url: $(this).data('url-modal-content'),
       type: $(this).data('modal-method-type') ? $(this).data('modal-method-type') : 'post',
@@ -121,6 +127,7 @@ $(document).ready(function () {
   });
 
   $(document).on('click', '.btn-close-modal', function (e) {
+    e.stopImmediatePropagation();
     $('#empModal').modal('toggle');
   });
 

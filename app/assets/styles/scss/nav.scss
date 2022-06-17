@@ -74,11 +74,11 @@
     -webkit-transition: color .3s ease;
     transition: color .3s ease; }
   .sidebar-wrapper .sidebar-item {
-    -webkit-transition: all .3s linear;
+    -webkit-transition: all .3s linear; 
     transition: all .3s linear; }
   .sidebar-wrapper .sidebar-content {
-    max-height: calc(100% -35px);
-    height: calc(100% - 35px);
+    max-height: calc(100% - 35px);
+    height: calc(100% - 35px); 
     /*overflow-y: scroll;*/
     position: relative; }
     .sidebar-wrapper .sidebar-content.desktop {

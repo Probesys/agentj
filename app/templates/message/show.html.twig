@@ -11,7 +11,7 @@
       {{ 'Generics.fields.date' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msg.timeiso | localizeddate('short', 'short') }}
+      {{ msg.timeiso | format_datetime('short', 'short') }}
     </div>      
     <div class="col-md-4">
        {{ 'Generics.fields.sender' | trans }}
@@ -37,7 +37,7 @@
       {{ 'Entities.Message.dateAuthRequestAt' | trans }} : 
     </div>
     <div class="col-md-8">
-       {{ msgRcpt.sendCaptcha | localizeddate('short', 'short') }}
+       {{ msgRcpt.sendCaptcha | format_datetime('short', 'short') }}
     </div>   
     {% endif %}
     

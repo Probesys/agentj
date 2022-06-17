@@ -64,9 +64,9 @@ class WblistRepository extends ServiceEntityRepository
 
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+//        $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
   /**
@@ -81,11 +81,9 @@ class WblistRepository extends ServiceEntityRepository
         $sql = " SELECT * FROM wblist  wb "
             . " LEFT JOIN mailaddr ma ON ma.id = wb.sid "
             . " LEFT JOIN users u ON wb.rid = u.id "
-            . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";
+            . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";        
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetch();
+        return $stmt->executeQuery()->fetchAssociative();
     }
 
 
@@ -162,8 +160,8 @@ class WblistRepository extends ServiceEntityRepository
             left join groups_wblist gw on gw.group_id=u.groups_id WHERE gw.wb is not null and gw.wb != '' and u.id IS NOT NULL AND gw.group_id =" . $groupId;
 
         $stmt = $conn->prepare($sqlSelectGroupwbList);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
+//        $stmt->execute();
+        $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
             $wblist = $this->findOneBy(['rid' => $row['rid'], 'sid' => $row['sid']]);
             if ($wblist) {
@@ -213,10 +211,9 @@ class WblistRepository extends ServiceEntityRepository
         $sql_select_policy = 'SELECT *,users.id' .
             ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
             ' WHERE users.email IN (' . $r_str . ') ORDER BY users.priority DESC ';
-//dd($sql_select_policy);
+
         $stmt = $conn->prepare($sql_select_policy);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
+        $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
             $id = $row['id'];
             $sql_select_white_black_list = 'SELECT wb,wblist.priority,wblist.datemod,wblist.group_id, wblist.sid, wblist.rid ' .
@@ -226,8 +223,8 @@ class WblistRepository extends ServiceEntityRepository
 
             $sql_select_white_black_list .= ' ORDER BY wblist.priority DESC , mailaddr.priority DESC ';
             $stmt = $conn->prepare($sql_select_white_black_list);
-            $stmt->execute();
-            $result1 = $stmt->fetchAll();
+//            $stmt->execute();
+            $result1 = $stmt->executeQuery()->fetchAllAssociative();
             foreach ($result1 as $row1) {
                 $group = null;
                 if (!is_null($row1['group_id'])) {

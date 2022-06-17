@@ -3,29 +3,39 @@
 namespace App\Controller;
 
 use App\Controller\Traits\ControllerWBListTrait;
+use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
-use App\Entity\Wblist;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use App\Form\GroupsType;
+use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups")
  */
-class GroupsController extends AbstractController
-{
+class GroupsController extends AbstractController {
+
     use ControllerWBListTrait;
 
-    private function checkAccess($group)
-    {
+    private $em;
+    private $translator;
+
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
+        $this->em = $em;
+        $this->translator = $translator;
+    }
+
+    private function checkAccess($group) {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
                 throw new AccessDeniedException();
@@ -33,39 +43,46 @@ class GroupsController extends AbstractController
         }
     }
 
-  /**
-   * @Route("/", name="groups_index", methods="GET")
-   */
-    public function index(): Response
-    {
-        $groups = $this->getDoctrine()
-            ->getRepository(Groups::class)
-            ->findByDomain($this->getUser()->getDomains());
+    /**
+     * @Route("/", name="groups_index", methods="GET")
+     */
+    public function index(): Response {
+        $groups = $this->em
+                ->getRepository(Groups::class)
+                ->findByDomain($this->getUser()->getDomains());
 
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }
 
-  /**
-   * @Route("/new", name="groups_new", methods="GET|POST")
-   */
-    public function new(Request $request): Response
-    {
+    /**
+     * @Route("/new", name="groups_new", methods="GET|POST")
+     */
+    public function new(Request $request): Response {
         $group = new Groups();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
-            'action' => $this->generateUrl('groups_new'),
+                'actions' => $this->getWBListUserActions(),
+                'action' => $this->generateUrl('groups_new'),
+                'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
-            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->wBListUserActions, 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
+            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->getWBListUserActions(), 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
         }
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
+            if ($labelExists) {
+                return new Response(json_encode([
+                            'status' => 'danger',
+                            'message' => $this->translator->trans('Generics.flash.groupNameAllreadyExist'),
+                ]));
+            }
+
+            $em = $this->em;
             $em->persist($group);
 
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail('@.');
@@ -78,43 +95,59 @@ class GroupsController extends AbstractController
             $em->persist($groupsWblist);
 
             $em->flush();
-            return $this->redirectToRoute('groups_index');
+            return new Response(json_encode([
+                        'status' => 'success',
+                        'message' => $this->translator->trans('Generics.flash.addSuccess'),
+                    ]), 200);
         }
 
         return $this->render('groups/new.html.twig', [
-                'group' => $group,
-                'form' => $form->createView(),
+                    'group' => $group,
+                    'form' => $form->createView(),
         ]);
     }
 
-  /**
-   * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
-   */
-    public function edit(Request $request, Groups $group): Response
-    {
+    /**
+     * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
+     */
+    public function edit(Request $request, Groups $group): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
-            'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'actions' => $this->getWBListUserActions(),
+                'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
             $form = $this->createForm(GroupsType::class, $group, [
-            'actions' => $this->wBListUserActions,
-            'user' => $this->getUser(),
-            'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'actions' => $this->getWBListUserActions(),
+                'user' => $this->getUser(),
+                'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'attr' => ['class' => 'modal-ajax-form']
             ]);
         }
 
+        $oldName = $group->getName();
+        $olddomain = $group->getDomain();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
+            if ($oldName != $group->getName() || $olddomain != $group->getDomain()) {
+                $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
+                if ($labelExists) {
+                    return new Response(json_encode([
+                                'status' => 'danger',
+                                'message' => $this->translator->trans('Generics.flash.groupNameAllreadyExist'),
+                    ]));
+                }
+            }
+
             $em->persist($group);
 
-            $mailaddr = $this->getDoctrine()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
 
-            $groupsWblist = $this->getDoctrine()->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
+            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
             if ($groupsWblist) {
                 $groupsWblist->setGroups($group);
                 $groupsWblist->setWb($group->getWb());
@@ -125,42 +158,42 @@ class GroupsController extends AbstractController
             $em->flush();
 
             $this->updatedWBListFromGroup($group->getId());
-
-            return $this->redirectToRoute('groups_index', ['id' => $group->getId()]);
+            return new Response(json_encode([
+                        'status' => 'success',
+                        'message' => $this->translator->trans('Generics.flash.editSuccess'),
+                    ]), 200);
         }
 
         return $this->render('groups/edit.html.twig', [
-                'group' => $group,
-                'form' => $form->createView(),
+                    'group' => $group,
+                    'form' => $form->createView(),
         ]);
     }
 
-  /**
-   * @Route("/{id}/users", name="groups_list_users", methods="GET|POST")
-   */
-    public function listUsers(Request $request, Groups $group)
-    {
+    /**
+     * @Route("/{id}/users", name="groups_list_users", methods="GET|POST")
+     */
+    public function listUsers(Request $request, Groups $group) {
         $this->checkAccess($group);
         $users = $group->getUsers();
         return $this->render('groups/group_users.html.twig', [
-                'group' => $group,
-                'users' => $users
+                    'group' => $group,
+                    'users' => $users
         ]);
     }
 
-  /**
-   * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
-   */
-    public function removeUser(Request $request, Groups $group, User $user): Response
-    {
+    /**
+     * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
+     */
+    public function removeUser(Request $request, Groups $group, User $user): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
-          //check if alias
+            $em = $this->em;
+            //check if alias
             if ($user->getOriginalUser()) {
                 $user = $user->getOriginalUser();
             }
             $domainPolicy = $user->getDomain()->getPolicy();
-            $userAliases = $this->getDoctrine()->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+            $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
             array_unshift($userAliases, $user);
 
             foreach ($userAliases as $userAlias) {
@@ -174,18 +207,36 @@ class GroupsController extends AbstractController
         return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
     }
 
-  /**
-   * @Route("/{id}/delete", name="groups_delete", methods="GET")
-   */
-    public function delete(Request $request, Groups $group): Response
-    {
+    /**
+     * Vérify if a group with lable allready exists for a domain
+     */
+    public function checkNameforDomain(string $name, Domain $domain): bool {
+
+        $group = $this->em->getRepository(Groups::class)->findOneBy([
+            'domain' => $domain,
+            'name' => $name
+        ]);
+//dd($group);
+        if ($group) {
+            return true;
+        } else {
+            return false;
+        }
+//        return $this->redirectToRoute('groups_index');
+    }
+
+    /**
+     * @Route("/{id}/delete", name="groups_delete", methods="GET")
+     */
+    public function delete(Request $request, Groups $group): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
-            $this->getDoctrine()->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
+            $em = $this->em;
+            $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
             $em->remove($group);
             $em->flush();
         }
 
         return $this->redirectToRoute('groups_index');
     }
+
 }

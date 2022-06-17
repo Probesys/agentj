@@ -27,7 +27,7 @@
       <thead>
         <tr>
           <th><input type="checkbox" class="cb" id='checkAll' data-target-checkall-class="selected-msg">
-            <label class="for-cb" for="checkAll"></label>
+            <label class="for-cb check-all" for="checkAll"></label>
           </th>
           {% if is_granted('ROLE_ADMIN') %}
             <th>{{ sortLinkMacro.sortLink('Message.Recipient'|trans,'emailuser') }}</th>
@@ -43,9 +43,9 @@
           {% set keyPairMessage =  [wb.rid, wb.sid] %}
           <tr>  
             <td>
-              {% if wb.type != 2 %}
+              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
-              <label class="for-cb" for="{{ keyPairMessage|json_encode() }}"></label>
+              <label class="for-cb" ></label>
               {% endif %}
             </td>
             {% if is_granted('ROLE_ADMIN') %}
@@ -55,11 +55,11 @@
                 {% set wb = wb|merge({'type': '3'}) %}
               {% endif %}
               {% set typeLabel = 'Entities.WBList.fields.typeLabel' ~ wbTypeList ~ '.' ~wb.type %}
-            <td data-title="{{ 'Entities.WBList.fields.type'|trans() }}">{{  typeLabel | trans}} </td>
+            <td data-title="{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}">{{  typeLabel | trans}} </td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
-            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | localizeddate('short', 'short')}}</td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
-              {% if wb.type != 2 %}
+              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN') %}
                   {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList%}
                   {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList %}
                   {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList %}
