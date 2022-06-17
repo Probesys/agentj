@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.15
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Amavis & ClamAV dockerized for AgentJ"
@@ -25,7 +25,7 @@ RUN apk --no-cache add \
     gzip \
     iproute2 \
     perl-dbd-mysql \
-    perl-dbi \
+    perl-db \
     perl-io-socket-ssl \
     patch \
     pax-utils \

@@ -16,7 +16,7 @@ services:
       - ajnet
 
   amavis:
-    image: probesys38/agentj_amavis:dev
+    image: probesys38/agentj_amavis:latest
     restart: always
     env_file:
       - .env
@@ -37,7 +37,7 @@ services:
           memory: 2048m
 
   app:
-    image: probesys38/agentj_app:dev
+    image: probesys38/agentj_app:latest
     restart: always
     env_file:
       - .env
@@ -45,26 +45,28 @@ services:
       - amavis
       - db
     volumes:
-      - public:/var/www/agentj
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
+      - opendkim:/etc/opendkim
     networks:
-      - ajnet
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.42.42}.240
+    ports:
+      - 127.0.0.1:${PROXY_PORT:-8090}:80
 
   relay:
-    image: probesys38/agentj_relay:dev
+    image: probesys38/agentj_relay:latest
     restart: always
     env_file:
       - .env
     volumes:
-      - opendkim:/etc/opendkim/
       - postfix_relay:/etc/postfix/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   smtp:
-    image: probesys38/agentj_smtp:dev
+    image: probesys38/agentj_smtp:latest
     restart: always
     env_file:
       - .env
@@ -80,7 +82,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
   syslogng:
-    image: probesys38/agentj_syslogng:dev
+    image: probesys38/agentj_syslogng:latest
     restart: always
     env_file:
       - .env
@@ -88,20 +90,6 @@ services:
       - ajnet
     volumes:
       - logs:/var/log/syslogng
-
-  web:
-    image: probesys38/agentj_web:dev
-    restart: always
-    environment:
-      - TZ=${TZ}
-    depends_on:
-      - app
-    volumes:
-      - public:/var/www/agentj
-    networks:
-      - ajnet
-    ports:
-      - 127.0.0.1:${PROXY_PORT:-8090}:80
 
   logspout:
     image: gliderlabs/logspout
@@ -115,16 +103,6 @@ services:
       - ajnet
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
-  redis:
-    image: redis:6.2-alpine
-    restart: always
-    environment:
-      - TZ=${TZ}
-    networks:
-      - ajnet
-    volumes:
-      - redisdb:/data
 
   watchtower:
     image: containrrr/watchtower
@@ -143,8 +121,6 @@ volumes:
   opendkim:
   postfix_relay:
   postqueue:
-  public:
-  redisdb:
   smtpconfig:
   spamassassin:
 

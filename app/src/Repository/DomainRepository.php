@@ -38,11 +38,12 @@ class DomainRepository extends ServiceEntityRepository
         $stmt = $conn->prepare($sql);
         $stmt->execute();
 
-        $resultArray = $stmt->fetchAll(FetchMode::COLUMN, 0);
+        $resultArray = $stmt->executeQuery()->fetchFirstColumn();
+//        dd(array_values($resultArray));
         if ($resultArray) {
             $dql = $this->createQueryBuilder('d')
               ->where('d in(' . implode(',', $resultArray) . ')');
-            $query = $this->_em->createQuery($dql);
+            $query = $dql->getQuery();
             return $query->getResult();
         } else {
             return null;

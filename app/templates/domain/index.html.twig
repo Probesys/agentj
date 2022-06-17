@@ -32,7 +32,7 @@
                 {% for domain in domains %}
                     <tr>
                         <td data-title="{{'Generics.fields.name'|trans }}">{{ domain.domain }}</td>
-                        <td data-title="{{'Generics.fields.datemod'|trans }}">{{ domain.datemod ? domain.datemod | localizeddate('short', 'short') : '' }}</td>
+                        <td data-title="{{'Generics.fields.datemod'|trans }}">{{ domain.datemod ? domain.datemod | format_datetime('short', 'short') : '' }}</td>
                         <td data-title="{{'Generics.fields.active'|trans }}">{{ domain.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
                         <td>
                             <ul class="list-inline list-unstyled">
