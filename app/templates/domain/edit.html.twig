@@ -1,11 +1,23 @@
-{% extends 'modalTemplate.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block modalTitle %}
-  {{ 'Entities.Domain.edit'|trans() }} <strong>{{domain.domain}}
-{% endblock %}
 
-{% block modalContent %}
+{% block title %}
+  {{ 'Generics.actions.edit'|trans() }}{{ 'Entities.Domain.edit'|trans() }} <strong>{{domain.domain}}
+  {% endblock %}
 
-  {{ include('domain/_form.html.twig') }}
+  {% block body %}
+    {% set _title = 'Entities.Domain.edit'|trans %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
+    {% endembed %} 
+    <div class="col bg-white">
+      <div class="row">
+        <div class="col-md-12">
+          {{ include('domain/_form.html.twig') }}     
+        </div>
+      </div>
+
+    </div>
+
+  </section>
 {% endblock %}
 

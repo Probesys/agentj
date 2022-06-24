@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Model\ConnectorTypes;
 
 /**
  * @Route("/domain")
@@ -40,13 +41,12 @@ class DomainController extends AbstractController {
         $this->translator = $translator;
         $this->em = $em;
     }
-    
 
     private function checkAccess($domain) {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $allowedomains = $this->em
-              ->getRepository(Domain::class)
-              ->getListByUserId($this->getUser()->getId());
+                    ->getRepository(Domain::class)
+                    ->getListByUserId($this->getUser()->getId());
             if (!in_array($domain, $allowedomains)) {
                 throw new AccessDeniedException();
             }
@@ -60,45 +60,44 @@ class DomainController extends AbstractController {
 
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $domains = $this->em
-              ->getRepository(Domain::class)
-              ->findAll();
+                    ->getRepository(Domain::class)
+                    ->findAll();
         } else {
             $domains = $this->em
-              ->getRepository(Domain::class)
-              ->getListByUserId($this->getUser()->getId());
+                    ->getRepository(Domain::class)
+                    ->getListByUserId($this->getUser()->getId());
         }
 
 
         return $this->render('domain/index.html.twig', ['domains' => $domains]);
     }
 
-  /**
-   * @Route("/new", name="domain_new", methods="GET|POST")
-   */
-    public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response
-    {
+    /**
+     * @Route("/new", name="domain_new", methods="GET|POST")
+     */
+    public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
 //        dd($this->getWBListDomainActions());
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
-        'action' => $this->generateUrl('domain_new'),
-        'actions' => $this->getWBListDomainActions(),
-        'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
-        'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
+            'action' => $this->generateUrl('domain_new'),
+            'actions' => $this->getWBListDomainActions(),
+            'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
+            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
         $form->get('defaultLang')->setData($params->get('locale'));
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
-            if ($domain->getSmtpPort()){
+            if ($domain->getSmtpPort()) {
                 $strTransport .= ":" . $domain->getSmtpPort();
             }
             $domain->setTransport($strTransport);
-          //Default messages
-          //captcha page
+            //Default messages
+            //captcha page
             $messageConfig = $this->em->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
             if ($messageConfig) {
                 $domain->setMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
@@ -126,7 +125,7 @@ class DomainController extends AbstractController {
 
             $rules = $form->get("rules")->getData();
 
-          //for all domain @.
+            //for all domain @.
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
@@ -166,6 +165,7 @@ class DomainController extends AbstractController {
 
         return $this->render('domain/new.html.twig', [
                     'domain' => $domain,
+                    'connectorTypes' => ConnectorTypes::all(),
                     'form' => $form->createView(),
                     'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
         ]);
@@ -185,23 +185,23 @@ class DomainController extends AbstractController {
 
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
-        'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-        'actions' => $this->getWBListDomainActions(),
-        'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
-        'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
+            'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
+            'actions' => $this->getWBListDomainActions(),
+            'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
+            'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
         $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
         $form->get('rules')->setData($wblistArray['wb']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
-            
+
             $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
-            if ($domain->getSmtpPort()){
+            if ($domain->getSmtpPort()) {
                 $strTransport .= ":" . $domain->getSmtpPort();
             }
             $domain->setTransport($strTransport);
-            
+
             $policy = $form->get('policy')->getData();
             $userDomain = $this->em->getRepository(User::class)->findOneBy((['email' => '@' . $domain->getDomain()]));
             if (!$userDomain) {
@@ -245,6 +245,7 @@ class DomainController extends AbstractController {
 
         return $this->render('domain/edit.html.twig', [
                     'domain' => $domain,
+                    'connectorTypes' => ConnectorTypes::all(),
                     'form' => $form->createView(),
                     'domainSpamLevel' => $domain->getLevel()
         ]);
@@ -272,11 +273,10 @@ class DomainController extends AbstractController {
         return $this->redirectToRoute('domain_index');
     }
 
-  /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-   * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
-   */
-    public function deleteWblist($rid, $sid, Request $request): Response
-    {
+    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
+     * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
+     */
+    public function deleteWblist($rid, $sid, Request $request): Response {
         $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
         $this->checkAccess($domain);
@@ -303,11 +303,10 @@ class DomainController extends AbstractController {
         return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
     }
 
-  /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-   * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
-   */
-    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response
-    {
+    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
+     * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
+     */
+    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response {
         $em = $this->em;
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
         if (!$domain) {

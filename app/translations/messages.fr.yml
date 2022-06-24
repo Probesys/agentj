@@ -367,6 +367,9 @@ Entities:
       imapNoValidateCert: Ne pas valider les certificats
       defaultLang: Langue par défaut
     labels:
+      infos: "Informations"
+      agentJConfig : "Paramètres AgentJ"
+      connectors : "Connecteurs"
       rules: Règles
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
@@ -383,6 +386,7 @@ Entities:
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
     actions:
+      add_connector : Ajouter un connecteur  
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
       deleteRule: Supprimer la règle
