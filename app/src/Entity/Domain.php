@@ -159,6 +159,11 @@ class Domain
      */
     private $smtpPort;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Connector::class, mappedBy="domain")
+     */
+    private $connectors;
+
 
 
     public function __construct()
@@ -166,6 +171,7 @@ class Domain
         $this->users = new ArrayCollection();
         $this->datemod = new \DateTime();
         $this->groups = new ArrayCollection();
+        $this->connectors = new ArrayCollection();
     }
 
     public function __toString()
@@ -462,6 +468,36 @@ class Domain
     public function setSmtpPort(?int $smtpPort): self
     {
         $this->smtpPort = $smtpPort;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Connector>
+     */
+    public function getConnectors(): Collection
+    {
+        return $this->connectors;
+    }
+
+    public function addConnector(Connector $connector): self
+    {
+        if (!$this->connectors->contains($connector)) {
+            $this->connectors[] = $connector;
+            $connector->setDomain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnector(Connector $connector): self
+    {
+        if ($this->connectors->removeElement($connector)) {
+            // set the owning side to null (unless already changed)
+            if ($connector->getDomain() === $this) {
+                $connector->setDomain(null);
+            }
+        }
 
         return $this;
     }

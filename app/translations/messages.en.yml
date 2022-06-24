@@ -359,6 +359,9 @@ Entities:
       imapNoValidateCert: 'Do not validate certificates'
       defaultLang: 'Default language'
     labels:
+      infos: "Informations"
+      agentJConfig : "AgentJ configuration"
+      connectors : "Connectors"    
       rules: Rules
       domainrules: 'Rules of the field'
       domaineSender: 'sending domain'
@@ -370,6 +373,7 @@ Entities:
           of messages deleted', NB_RESTORED_MESSAGES: 'Number of messages restored',
         LIST_MAIL_MSGS: 'List of untreated messages'}
     actions:
+      add_connector : Add connector
       add_new: 'Add a new domain'
       add_new_rule: 'New rule'
       deleteRule: 'Delete rule'

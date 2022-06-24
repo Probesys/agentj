@@ -1,29 +1,99 @@
 {{ form_start(form) }}
-{#    {{ form_widget(form) }}#}
-{{ form_row(form.domain) }}
-{{ form_row(form.srvSmtp) }}
-{{ form_row(form.smtpPort) }}
-{{ form_row(form.srvImap) }}
-{{ form_row(form.imap_port) }}
-{{ form_row(form.imap_flag) }}
-{{ form_row(form.imapNoValidateCert) }}
-{{ form_row(form.rules) }}
-{{ form_row(form.policy) }}
-{{ form_row(form.active) }}
-<div class="form-group row">
-  <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }} : <span id="domain-spam-level">{{ domainSpamLevel }}</span></label>
-  <div class="col-sm-12">{{ form_widget(form.level) }}</div>
-</div>
-<div class="form-group row">
-  <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
-  <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+<div class="row">
+  <div class="col-md-6 mb-2">
+
+    <div class="card">
+      <div class="card-header">
+        {{ 'Entities.Domain.labels.infos' | trans()  }}
+      </div>
+
+      <div class="card-body">
+
+        {{ form_row(form.active) }}
+        {{ form_row(form.domain) }}
+        {{ form_row(form.srvSmtp) }}
+        {{ form_row(form.smtpPort) }}
+        {{ form_row(form.srvImap) }}
+        {{ form_row(form.imap_port) }}
+        {{ form_row(form.imap_flag) }}
+        {{ form_row(form.imapNoValidateCert) }}
+        {{ form_row(form.logoFile) }}
+        {{ form_row(form.defaultLang) }}        
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card mb-2">
+      <div class="card-header">
+        {{ 'Entities.Domain.labels.agentJConfig' | trans()  }}
+      </div>  
+      <div class="card-body">
+        {{ form_row(form.rules) }}
+        {{ form_row(form.policy) }}
+        <div class="form-group row">
+          <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }} : <span id="domain-spam-level">{{ domainSpamLevel }}</span></label>
+          <div class="col-sm-12">{{ form_widget(form.level) }}</div>
+        </div>
+        <div class="form-group row">
+          <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
+            <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+        </div>
+
+        {#{{ form_row(form.mailAuthenticationSender) }}#}
+
+      </div>      
+    </div>
+    <div class="card mb-2">
+      <div class="card-header">
+        {{ 'Entities.Domain.labels.connectors' | trans()  }}
+      </div>  
+      <div class="card-body">
+        <table clas="table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Type</th>              
+            </tr>
+          
+            </thead>
+            {% for connector in domain.connectors %}
+              <tr>
+                <td> {{ connector.name }}</td>
+                <td> {{ '' }}</td>
+               
+                
+              </tr>
+              {% endfor %}
+        </table>
+{#        {{ dump(connectors) }}#}
+        <div class="dropdown">
+          <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ 'Entities.Domain.actions.add_connector' | trans()  }}
+          </a>
+
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            {% for connectorType in connectorTypes %}
+            <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_new', {'domain' : domain.id}) }}?type={{ connectorType }}" href="#">{{ connectorType }}</a>
+            
+            {% endfor %}
+          </div>
+        </div>
+      </div>      
+    </div>        
+  </div>
+
+
+
+
 </div>
 
-{#{{ form_row(form.mailAuthenticationSender) }}#}
-{{ form_row(form.logoFile) }}
-  {{ form_row(form.defaultLang) }}
+{#    {{ form_widget(form) }}#}
+
+
+
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
-<a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+  <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
 </div>   
 {{ form_end(form) }}
