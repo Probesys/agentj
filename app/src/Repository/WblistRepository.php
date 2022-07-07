@@ -48,7 +48,7 @@ class WblistRepository extends ServiceEntityRepository
                 return $entity->getId();
             }, $user->getDomains()->toArray());
 
-            $sql .= ' AND u.domain_id in (' . implode($domainsIds, ',') . ') ';
+            $sql .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
 
 
