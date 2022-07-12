@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   db:
-    image: mariadb:10.7.3
+    image: mariadb
     command: ["--default-authentication-plugin=mysql_native_password"]
     restart: always
     volumes:
@@ -16,7 +16,7 @@ services:
       - ajnet
 
   amavis:
-    image: probesys38/agentj_amavis:latest
+    image: probesys38/agentj_amavis:$VERSION
     restart: on-failure:3
     env_file:
       - .env
@@ -37,7 +37,7 @@ services:
           memory: 2048m
 
   app:
-    image: probesys38/agentj_app:latest
+    image: probesys38/agentj_app:$VERSION
     restart: always
     env_file:
       - .env
@@ -55,7 +55,7 @@ services:
       - 127.0.0.1:${PROXY_PORT:-8090}:80
 
   relay:
-    image: probesys38/agentj_relay:latest
+    image: probesys38/agentj_relay:$VERSION
     restart: always
     env_file:
       - .env
@@ -66,7 +66,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   smtp:
-    image: probesys38/agentj_smtp:latest
+    image: probesys38/agentj_smtp:$VERSION
     restart: always
     env_file:
       - .env
@@ -82,7 +82,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
   syslogng:
-    image: probesys38/agentj_syslogng:latest
+    image: probesys38/agentj_syslogng:$VERSION
     restart: always
     env_file:
       - .env
