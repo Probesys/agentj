@@ -32,15 +32,13 @@
                 {{ 'Generics.actions.rememberme'|trans }}
               </label>
             </div>          
-              <a href="https://login.microsoftonline.com/cbacea7a-c8b5-4559-a2e2-073295800e9c/oauth2/v2.0/authorize?
-client_id=a25058e2-9845-41f8-ab20-10f5039a8f76
-&response_type=code
-&redirect_uri=http%3A%2F%2Flocalhost:8090
-&response_mode=query
-&scope=User.Read 
-&state=12345
-">connexion avec mon compte microsoft </a>
+              
         </form>
+      <div>
+        <div class="btn btn-default">
+        <a href="{{ path('connect_azure_start') }}"><i class="fab fa-microsoft"></i> Sign in with Micorsoft</a>
+        </div>
+      </div>              
       </div>
   </div>
 

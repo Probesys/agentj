@@ -24,6 +24,25 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+   public function findOneByUid(string $uid): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.uid = :uid')
+            ->setParameter('uid', $uid)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+
+   public function findOneByEmail(string $email): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.email = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }    
+    
   /**
    * Return all users from active domains
    * @param boolean $withAlias
