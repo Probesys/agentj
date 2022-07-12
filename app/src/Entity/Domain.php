@@ -164,6 +164,16 @@ class Domain
      */
     private $connectors;
 
+    /**
+     * @ORM\Column(type="string", length=10, nullable=true)
+     */
+    private $authMode;
+
+    /**
+     * @ORM\OneToOne(targetEntity=OAuthConfig::class, mappedBy="domain", cascade={"persist", "remove"})
+     */
+    private $oAuthConfig;
+
 
 
     public function __construct()
@@ -498,6 +508,35 @@ class Domain
                 $connector->setDomain(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAuthMode(): ?string
+    {
+        return $this->authMode;
+    }
+
+    public function setAuthMode(?string $authMode): self
+    {
+        $this->authMode = $authMode;
+
+        return $this;
+    }
+
+    public function getOAuthConfig(): ?OAuthConfig
+    {
+        return $this->oAuthConfig;
+    }
+
+    public function setOAuthConfig(OAuthConfig $oAuthConfig): self
+    {
+        // set the owning side of the relation if necessary
+        if ($oAuthConfig->getDomain() !== $this) {
+            $oAuthConfig->setDomain($this);
+        }
+
+        $this->oAuthConfig = $oAuthConfig;
 
         return $this;
     }
