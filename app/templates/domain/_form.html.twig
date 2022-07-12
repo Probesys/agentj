@@ -74,7 +74,7 @@
 
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
             {% for connectorType in connectorTypes %}
-            <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_new', {'domain' : domain.id}) }}?type={{ connectorType }}" href="#">{{ connectorType }}</a>
+{#            <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_new', {'domain' : domain.id}) }}?type={{ connectorType }}" href="#">{{ connectorType }}</a>#}
             
             {% endfor %}
           </div>
