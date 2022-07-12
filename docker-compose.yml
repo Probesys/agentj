@@ -17,7 +17,7 @@ services:
 
   amavis:
     image: probesys38/agentj_amavis:latest
-    restart: always
+    restart: on-failure:3
     env_file:
       - .env
     depends_on:

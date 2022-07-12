@@ -43,7 +43,7 @@ Generics:
     user: User
     userName: Username
     type: Type
-    active: Assets
+    active: Active
     inactive: Inactive
     priority: Priority
     list: List
@@ -350,7 +350,7 @@ Entities:
       srvSmtp: 'SMTP server'
       srvImap: 'IMAP server'
       imap_port: 'Port IMAP'
-      smtp_port: SMTP
+      smtp_port: SMTP port
       imap_flag: 'IMAP security'
       active: 'Active area'
       policy: 'Strategy for the field'
