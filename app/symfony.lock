@@ -88,6 +88,9 @@
     "egulias/email-validator": {
         "version": "3.1.1"
     },
+    "firebase/php-jwt": {
+        "version": "v6.2.0"
+    },
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.3"
     },
@@ -109,8 +112,23 @@
     "knplabs/knp-paginator-bundle": {
         "version": "v5.4.2"
     },
+    "knpuniversity/oauth2-client-bundle": {
+        "version": "2.10",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.20",
+            "ref": "1ff300d8c030f55c99219cc55050b97a695af3f6"
+        },
+        "files": [
+            "config/packages/knpu_oauth2_client.yaml"
+        ]
+    },
     "laminas/laminas-code": {
         "version": "3.4.1"
+    },
+    "league/oauth2-client": {
+        "version": "2.6.1"
     },
     "microsoft/microsoft-graph": {
         "version": "1.70.0"
@@ -120,6 +138,9 @@
     },
     "nikic/php-parser": {
         "version": "v4.10.4"
+    },
+    "paragonie/random_compat": {
+        "version": "v9.99.100"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.2.0"
@@ -578,6 +599,9 @@
     },
     "tetranz/select2entity-bundle": {
         "version": "v3.1.0"
+    },
+    "thenetworg/oauth2-azure": {
+        "version": "v2.1.1"
     },
     "twig/extra-bundle": {
         "version": "v3.3.0"

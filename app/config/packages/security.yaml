@@ -35,11 +35,12 @@ security:
         main:
             lazy: true
 #            provider: users_in_memory
-            custom_authenticator: App\Security\LoginFormAuthenticator
+            custom_authenticator: 
+             - App\Security\LoginFormAuthenticator
+             - App\Security\OAuthAuthenticator
 #            entry_point: security_login
             logout:
                 path: app_logout
-            user_checker: App\Security\UserChecker    
             remember_me:
                 secret:   '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
@@ -58,7 +59,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
          - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-         - { path: ^/oAuthClient, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+         - { path: ^/connect, roles: PUBLIC_ACCESS }
          - { path: ^/admin, roles: [ROLE_ADMIN] }
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
