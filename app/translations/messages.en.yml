@@ -16,6 +16,7 @@ Generics:
     changePassword: 'Change password'
     impersonate: 'Sign in'
     connectAs: 'Log in as a'
+    connectWithMicrosoft: Sign-in with Microsoft
     exitImpersonation: 'Back to life'
     search: Search
     display: Display
@@ -434,6 +435,17 @@ Entities:
       appliedRule: 'Information about the message'
     fields:
       bspamLevel: 'Spam rating'
+  Connector:
+    labels:
+    fields:
+      name: "Connector name"    
+      type: "Connector type"  
+  Office365Connector:
+    labels:
+    fields:
+      tenant: "Tenant Id"    
+      client: "Client Id"
+      clientSecret: "Secret client"      
   WBList:
     fields:
       user: User

@@ -27,7 +27,7 @@ class ConnectorController extends AbstractController
     {
 
         $connector = new Connector();
-        $connector->setDomain($domain);
+$connector->setDomain($domain);
         $form = $this->createForm(ConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_new', ['domain' => $domain->getId()]),
             'connectorType' => $request->query->get('type')
@@ -38,9 +38,10 @@ class ConnectorController extends AbstractController
 
             $connectorRepository->add($connector, true);
 
-            return $this->redirectToRoute('app_connector_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
         }
-
+        
+        $form->get("type")->setData($request->query->get('type'));
         return $this->renderForm('connector/new.html.twig', [
             'connector' => $connector,
             'form' => $form,

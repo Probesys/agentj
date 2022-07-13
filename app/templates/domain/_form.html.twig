@@ -37,50 +37,52 @@
         </div>
         <div class="form-group row">
           <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})</label>
-            <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+          <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
         </div>
 
         {#{{ form_row(form.mailAuthenticationSender) }}#}
 
       </div>      
     </div>
-    <div class="card mb-2">
-      <div class="card-header">
-        {{ 'Entities.Domain.labels.connectors' | trans()  }}
-      </div>  
-      <div class="card-body">
-        <table clas="table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Type</th>              
-            </tr>
-          
+    {% if domain.id is not null %}
+      <div class="card mb-2">
+        <div class="card-header">
+          {{ 'Entities.Domain.labels.connectors' | trans()  }}
+        </div>  
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ 'Entities.Connector.fields.name' | trans }}</th>
+                <th>{{ 'Entities.Connector.fields.type' | trans }}</th>              
+              </tr>
+
             </thead>
             {% for connector in domain.connectors %}
               <tr>
                 <td> {{ connector.name }}</td>
-                <td> {{ '' }}</td>
-               
-                
-              </tr>
-              {% endfor %}
-        </table>
-{#        {{ dump(connectors) }}#}
-        <div class="dropdown">
-          <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{ 'Entities.Domain.actions.add_connector' | trans()  }}
-          </a>
+                <td> {{ connector.type }}</td>
 
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            {% for connectorType in connectorTypes %}
-{#            <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_new', {'domain' : domain.id}) }}?type={{ connectorType }}" href="#">{{ connectorType }}</a>#}
-            
+
+              </tr>
             {% endfor %}
+          </table>
+          {#        {{ dump(connectors) }}#}
+          <div class="dropdown">
+            <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {{ 'Entities.Domain.actions.add_connector' | trans()  }}
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              {% for connectorType in connectorTypes %}
+                <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_new', {'domain' : domain.id}) }}?type={{ connectorType }}" href="#">{{ connectorType }}</a>
+
+              {% endfor %}
+            </div>
           </div>
-        </div>
-      </div>      
-    </div>        
+        </div>      
+      </div> 
+    {% endif %}
   </div>
 
 

@@ -10,7 +10,7 @@
         {% block content_button_actions %} 
             {% if is_granted('ROLE_SUPER_ADMIN') %}
                 <div class="p-2 flex-fill">
-                    <a href="#" data-url-modal-content="{{ path('domain_new') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new'|trans() }}</a>
+                    <a href="{{ path('domain_new') }}" class="btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new'|trans() }}</a>
                 </div>
             {%  endif %}              
         {% endblock %}          
