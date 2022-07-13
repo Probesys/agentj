@@ -90,8 +90,8 @@ class UserRepository extends ServiceEntityRepository
             $domainsIds = array_map(function ($entity) {
                 return $entity->getId();
             }, $user->getDomains()->toArray());
-
-            $sql .= ' AND usr.domain_id in (' . implode($domainsIds, ',') . ') ';
+//dd($user->getDomains()->toArray());
+            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
         $sql .= ' AND original_user_id IS NULL '; //without alias
         $stmt = $conn->prepare($sql);
@@ -118,7 +118,7 @@ class UserRepository extends ServiceEntityRepository
                 return $entity->getId();
             }, $user->getDomains()->toArray());
 
-            $sql .= ' AND usr.domain_id in (' . implode($domainsIds, ',') . ') ';
+            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
         $stmt = $conn->prepare($sql);
 
