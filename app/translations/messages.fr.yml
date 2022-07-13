@@ -16,6 +16,7 @@ Generics:
     changePassword: Changer de mot de passe
     impersonate: Se connecter
     connectAs: Se connecter en tant que
+    connectWithMicrosoft: Se connecter avec Microsoft
     exitImpersonation: Revenir à
     search: Rechercher
     display: Afficher
@@ -448,7 +449,17 @@ Entities:
       appliedRule: "Informations sur le message"
     fields:
       bspamLevel: "Note de spam"
-
+  Connector:
+    labels:
+    fields:
+      name: "Nom du connecteur"    
+      type: "Type de connecteur"  
+  Office365Connector:
+    labels:
+    fields:
+      tenant: "Id locataire"    
+      client: "Id client"
+      clientSecret: "Secret client"
   WBList:
     fields:
       user: Utilisateur

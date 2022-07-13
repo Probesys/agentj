@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Connector;
 use App\Model\ConnectorTypes;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -18,6 +19,7 @@ class ConnectorType extends AbstractType
         $this->connectorType = $options['connectorType'];
         $builder
             ->add('name')
+            ->add('type', HiddenType::class)
             ->add('active')
                 ->add('office365Connector', Office365ConnectorType::class, [
                 'label' => false,

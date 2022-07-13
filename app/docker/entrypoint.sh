@@ -29,6 +29,8 @@ sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
+sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" /var/www/agentj/.env
+sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 
 echo "Installing assets"

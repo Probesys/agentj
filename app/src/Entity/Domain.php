@@ -169,11 +169,6 @@ class Domain
      */
     private $authMode;
 
-    /**
-     * @ORM\OneToOne(targetEntity=OAuthConfig::class, mappedBy="domain", cascade={"persist", "remove"})
-     */
-    private $oAuthConfig;
-
 
 
     public function __construct()
@@ -520,23 +515,6 @@ class Domain
     public function setAuthMode(?string $authMode): self
     {
         $this->authMode = $authMode;
-
-        return $this;
-    }
-
-    public function getOAuthConfig(): ?OAuthConfig
-    {
-        return $this->oAuthConfig;
-    }
-
-    public function setOAuthConfig(OAuthConfig $oAuthConfig): self
-    {
-        // set the owning side of the relation if necessary
-        if ($oAuthConfig->getDomain() !== $this) {
-            $oAuthConfig->setDomain($this);
-        }
-
-        $this->oAuthConfig = $oAuthConfig;
 
         return $this;
     }

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityBlameableTrait;
+use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\ConnectorRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Connector
 {
+    use EntityBlameableTrait;
+    use EntityTimestampableTrait;
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -37,6 +41,11 @@ class Connector
      * @ORM\OneToOne(targetEntity=Office365Connector::class, mappedBy="connector", cascade={"persist", "remove"})
      */
     private $office365Connector;
+
+    /**
+     * @ORM\Column(type="string", length=50)
+     */
+    private $type;
 
     public function getId(): ?int
     {
@@ -92,6 +101,18 @@ class Connector
         }
 
         $this->office365Connector = $office365Connector;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }
