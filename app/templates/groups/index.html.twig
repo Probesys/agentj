@@ -33,7 +33,7 @@
                         <td data-title="{{'Entities.Group.Name'|trans }}">{{group.name}}</td>
                         <td data-title="{{'Entities.Domain.Name'|trans }}">{{group.domain.domain}}</td>
                         <td data-title="{{'Entities.Group.Active'|trans }}">{{ group.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
-                        <td data-title="{{'Entities.Group.Updated'|trans }}">{{group.datemod | localizeddate('short', 'short') }}</td>            
+                        <td data-title="{{'Entities.Group.Updated'|trans }}">{{group.datemod | format_datetime('short', 'short') }}</td>            
                         <td>
                             <ul class="list-inline list-unstyled">
                                 <li class="list-inline-item">

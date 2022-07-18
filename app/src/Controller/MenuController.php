@@ -5,25 +5,33 @@ namespace App\Controller;
 use App\Entity\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Entity\Domain;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class MenuController extends AbstractController
 {
 
+    private $translator;
+
+    private $em;
+
+    public function __construct(EntityManagerInterface $em) {
+        $this->em = $em;
+    }
+        
+    
     public function renderSlideMenu($route, $route_params)
     {
 
 
-        $alias = $this->getDoctrine()->getManager()->getRepository(User::class)->findBy(['originalUser' => $this->getUser()->getId()]);
-        $msgs['untreated'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::UNTREATED, $alias);
-        $msgs['authorized'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::AUTHORIZED, $alias);
-        $msgs['banned'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::BANNED, $alias);
-        $msgs['delete'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::DELETED, $alias);
-        $msgs['restored'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::RESTORED, $alias);
-        $msgs['error'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::ERROR, $alias);
-        $msgs['spammed'] = $this->getDoctrine()->getManager()->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
+        $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $this->getUser()->getId()]);
+        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::UNTREATED, $alias);
+        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::AUTHORIZED, $alias);
+        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::BANNED, $alias);
+        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::DELETED, $alias);
+        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::RESTORED, $alias);
+        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::ERROR, $alias);
+        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
         unset($alias);
 
         return $this->render(

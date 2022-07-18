@@ -1,0 +1,5 @@
+* * * * * cd /var/www/agentj && sudo -u www-data php8 bin/console agentj:msgs-send-mail-token >> /var/log/agentj/cron.log 2>&1
+0 3 * * * cd /var/www/agentj && sudo -u www-data php8 bin/console agentj:truncate-message-since-day 30 >> /var/log/agentj/truncate.log 2>&1
+0 7 * * * cd /var/www/agentj && sudo -u www-data php8 bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1
+# Purge old mails
+0 3 * * * find /tmp/amavis/tmp/ -type d -iname "amavis-*" -mtime +30 -exec rm -rf {}\;

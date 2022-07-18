@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Policy;
 use App\Form\PolicyType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,17 +19,19 @@ class PolicyController extends AbstractController
 
 
     private $translator;
-
-    public function __construct(TranslatorInterface $translator)
+    private $em;
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
     {
         $this->translator = $translator;
+        $this->em = $em;
     }
+
     /**
      * @Route("/", name="policy_index", methods="GET")
      */
     public function index(): Response
     {
-        $policies = $this->getDoctrine()
+        $policies = $this->em
             ->getRepository(Policy::class)
             ->findAll();
 
@@ -45,7 +48,7 @@ class PolicyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $em = $this->em;
             $em->persist($policy);
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Generics.flash.addSuccess'));
@@ -75,7 +78,7 @@ class PolicyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Generics.flash.editSuccess'));
             return $this->redirectToRoute('policy_index', ['id' => $policy->getId()]);
         }
@@ -92,7 +95,7 @@ class PolicyController extends AbstractController
     public function delete(Policy $policy): Response
     {
 
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
         $em->remove($policy);
         $em->flush();
 
