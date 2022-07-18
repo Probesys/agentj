@@ -40,7 +40,7 @@ class GroupsRepository extends ServiceEntityRepository
         if ($domainsID) {
             $dql->where('g.domain in (' . implode(',', $domainsID) . ')');
         }
-        $query = $this->_em->createQuery($dql);
+        $query = $dql->getQuery();
 
         return $query->getResult();
     }

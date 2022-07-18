@@ -1,0 +1,1 @@
+0 1 * * * find /var/log/syslogng/ -daystart -mtime +31 -type f -exec rm {} \;

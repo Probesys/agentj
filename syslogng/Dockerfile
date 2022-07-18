@@ -4,17 +4,17 @@ LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "AgentJ logs server"
 LABEL description = "A central log server for AgentJ stack services"
 
-RUN apk --update add \
+RUN apk --no-cache add \
     dcron \
     syslog-ng \
     syslog-ng-json \
     syslog-ng-scl \
     syslog-ng-sql \
     syslog-ng-tags-parser \
-    tzdata \
-    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* /usr/share/man/??  /usr/share/man/??_*
+    tzdata
 
 COPY conf/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+COPY conf/cron/syslogng-rotate /etc/cron.d/syslogng-rotate
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 514/udp

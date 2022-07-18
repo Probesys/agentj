@@ -10,80 +10,83 @@
 
 <canvas id="statsChart" style="height:calc(100%- 300px)"></canvas>
 <script>
-  $(document).ready(function (e) {
-    var ctx = document.getElementById('statsChart').getContext('2d');
-    var myLineChart = new Chart(ctx, {
-      type: 'line',
-      responsive: true,
-      data: {
-        labels: [
+  document.addEventListener("turbo:load", function () {
+    if (document.getElementById('statsChart') !== null ) {
+      var ctx = document.getElementById('statsChart').getContext('2d');
+      const myLineChart = new Chart(ctx, {
+        type: 'line',
+        responsive: true,
+        data: {
+          labels: [
   {% for day in listDay %}
-            '{{day | localizeddate('short', 'short')}}',
+              '{{day | format_datetime('short', 'short')}}',
   {% endfor %}
-          ],
-          // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-          datasets: [{
-              label: 'Mails non traités',
-              data: [
+            ],
+            // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: Translator.trans('Navigation.untreated'),
+                data: [
   {% for day in nbUntreadtedMsgByDay %}
-                '{{day.nb_result}}',
+                  '{{day.nb_result}}',
   {% endfor %}
-              ],
-              borderColor: 'blue',
-              borderWidth: 1
-            },
-            {
-              label: 'Mail autorisés',
-              data: [
+                ],
+                borderColor: 'blue',
+                borderWidth: 1
+              },
+              {
+                label: Translator.trans('Navigation.authorized'),
+                data: [
   {% for day in nbAutorizeMsgByDay %}
-                '{{day.nb_result}}',
+                  '{{day.nb_result}}',
   {% endfor %}                
-              ],
-              borderColor: 'green',
-              borderWidth: 1
-            },            
-            {
-              label: 'Mail bannis',
-              data: [
+                ],
+                borderColor: 'green',
+                borderWidth: 1
+              },
+              {
+                label: Translator.trans('Navigation.banned'),
+                data: [
   {% for day in nbBannedMsgByDay %}
-                '{{day.nb_result}}',
+                  '{{day.nb_result}}',
   {% endfor %}                
-              ],
-              borderColor: 'red',
-              borderWidth: 1
-            },
-            {
-              label: 'Mail supprimés',
-              data: [
+                ],
+                borderColor: 'red',
+                borderWidth: 1
+              },
+              {
+                label: Translator.trans('Navigation.Messagedelete'),
+                data: [
   {% for day in nbDeletedMsgByDay %}
-                '{{day.nb_result}}',
+                  '{{day.nb_result}}',
   {% endfor %}                
-              ],
-              borderColor: 'orange',
-              borderWidth: 1
-            },
-            {
-              label: 'Mail restaurés',
-              data: [
+                ],
+                borderColor: 'orange',
+                borderWidth: 1
+              },
+              {
+                label: Translator.trans('Navigation.MessageRestored'),
+                data: [
   {% for day in nbRestoredMsgByDay %}
-                '{{day.nb_result}}',
+                  '{{day.nb_result}}',
   {% endfor %}                
-              ],
-              borderColor: 'green',
-              borderWidth: 1
-            }             
-          ]
-        },
-        options: {
-          scales: {
-            yAxes: [{
-                ticks: {
-                  beginAtZero: true
-                }
-              }]
-          }
-        },
-      });
+                ],
+                borderColor: 'green',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+            }
+          },
+        });
+      }
+
     });
 
 

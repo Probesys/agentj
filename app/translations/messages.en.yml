@@ -1,447 +1,476 @@
 Generics:
-    actions:
-        create: Add
-        delete: Delete
-        cancel: Cancel
-        show: See
-        edit: Edit
-        remove: Delete
-        save: Save
-        clean: Clear
-        filter: Filter
-        close: Close
-        backToTheList: 'Back to list'
-        createAndContinue: 'Create and continue'
-        confirmDelete: 'Are you sure you want to make this deletion?'
-        changePassword: 'Change password'
-        impersonate: 'Sign in'
-        connectAs: 'Log in as a'
-        exitImpersonation: 'Back to life'
-        search: Search
-        display: Display
-        rememberme: 'Remember me'
-        importFile: "Import from file"
-    fields:
-        name: Title
-        helpMessage: 'Help message'
-        coordinate: Coordinates
-        age: Age
-        note: Note
-        birthDate: 'Date of birth'
-        species: Species
-        locale: Language
-        qty: Quantity
-        duration: Duration
-        frequency: frequency
-        stop: stop
-        comments: Comments
-        sender: Sender
-        date: Date
-        datemod: 'date of change'
-        object: Subject
-        recipient: 'Recipient'
-        user: User
-        userName: Username
-        type: Type
-        active: Assets
-        inactive: Inactive
-        priority: Priority
-        list: List
-    messages:
-        no_records_found: 'No results found'
-        confirmationDeleteMessageQuestion: 'Are you sure you want to delete this item?'
-        welcome: Welcome
-        welcomeAgentJ: Welcome on AgentJ
-        welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/> please authenticate'
-        formNotComplete: 'Please provide mandatory information'
-        emergency_consult: Emergency!
-        emergency_consult_title: 'The animal''s situation is an emergency!'
-        UserExist: 'The user already exists in the database'
-        EmailDoesNotExist: 'The email account does not exist in the database'
-        BadColumnsFile: 'The number of columns is incorrect. Check your file.'
+  actions:
+    create: Add
+    delete: Delete
+    cancel: Cancel
+    show: See
+    edit: Edit
+    remove: Delete
+    save: Save
+    clean: Clear
+    filter: Filter
+    close: Close
+    backToTheList: 'Back to list'
+    createAndContinue: 'Create and continue'
+    confirmDelete: 'Are you sure you want to make this deletion?'
+    changePassword: 'Change password'
+    impersonate: 'Sign in'
+    connectAs: 'Log in as a'
+    exitImpersonation: 'Back to life'
+    search: Search
+    display: Display
+    rememberme: 'Remember me'
+    importFile: "Import from file"
+  fields:
+    name: Title
+    helpMessage: 'Help message'
+    coordinate: Coordinates
+    age: Age
+    note: Note
+    birthDate: 'Date of birth'
+    species: Species
+    locale: Language
+    qty: Quantity
+    duration: Duration
+    frequency: frequency
+    stop: stop
+    comments: Comments
+    sender: Sender
+    date: Date
+    datemod: 'date of change'
+    object: Subject
+    recipient: 'Recipient'
+    user: User
+    userName: Username
+    type: Type
+    active: Active
+    inactive: Inactive
+    priority: Priority
+    list: List
+  messages:
+    no_records_found: 'No results found'
+    confirmationDeleteMessageQuestion: 'Are you sure you want to delete this item?'
+    welcome: Welcome
+    welcomeAgentJ: Welcome on AgentJ
+    welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/>
+      please authenticate'
+    formNotComplete: 'Please provide mandatory information'
+    emergency_consult: Emergency!
+    emergency_consult_title: 'The animal''s situation is an emergency!'
+    UserExist: 'The user already exists in the database'
+    EmailDoesNotExist: 'The email account does not exist in the database'
+    BadColumnsFile: 'The number of columns is incorrect. Check your file.'
+    incorrectCredential: Invalid credentials
+  labels:
+    filters: Filters
+    item_per_page: 'Number of items per page (sur %totalItemFound% found)'
+    lastModificationOn: 'Last modification'
+    of_type: type
+    for_client: 'for the customer'
+    childOf: Child
+    actions: Actions
+    cancel: Cancel
+    'yes': 'Yes'
+    'no': No.
+    none: None
+    byDefault: default
+  batch:
     labels:
-        filters: Filters
-        item_per_page: 'Number of items per page (sur %totalItemFound% found)'
-        lastModificationOn: 'Last modification'
-        of_type: type
-        for_client: 'for the customer'
-        childOf: Child
-        actions: Actions
-        cancel: Cancel
-        'yes': 'Yes'
-        'no': No.
-        none: None
-        byDefault: default
-    batch:
-        labels:
-            for_selection: 'For the selection'
-            choose_action: 'Choose an action'
-        flash:
-            deleteSuccess: 'Mass removal has been successfully completed!'
-            noSelectedItemError: 'You must select at least one item to complete this operation!'
+      for_selection: 'For the selection'
+      choose_action: 'Choose an action'
     flash:
-        genericFormError: 'An error occurred when processing the form'
-        updateSuccess: 'The update has been successfully completed'
-        editSuccess: 'The update has been successfully completed'
-        deleteSuccess: 'A successful removal!'
-        deleteFailure: 'An error occurred during the deletion!'
-        deleteMassiveSuccess: 'Mass removal completed successfully!'
-        addSuccess: 'Added successfully !'
-        addFailure: 'An error occurred when added!'
-        ImportSuccess: 'There are [NB_USER] email accounts that have been successfully imported!'
-        ImportErrors: 'NB_ERRORS line(s) have been ignored as they contain errors (line numbers: LIST_ROWS_ERROR).'
-        UserAlreadyPresent: 'There are [NB_USER] email accounts that were already present in the database, no action was made on these accounts.'
-        BadColumnsFile: 'Bad number of columns for the file.'
-        NoImport: 'No email account was imported.'
-        domainNotExist: 'The domain does not exist'
-        emailAllreadyExist: 'This email is already used. You can''t use it'
-        aliasAllreadyExist: 'This alias is already used. You can''t use it'
-        userNameAllreadyExist: 'This login already exists. You can''t use it'
-        passwordNotMatching: 'Password confirmation is not valid'
-    units:
-        literByDay: litres/day
-        hoursByDay: Hours/day
-        hoursByNight: Hours/night
-        hours: hours
-        weeks: weeks
-        year(s): Year(s)
-        months: month
-        bytes: Bytes
+      deleteSuccess: 'Mass removal has been successfully completed!'
+      noSelectedItemError: 'You must select at least one item to complete this operation!'
+  flash:
+    genericFormError: 'An error occurred when processing the form'
+    updateSuccess: 'The update has been successfully completed'
+    editSuccess: 'The update has been successfully completed'
+    deleteSuccess: 'A successful removal!'
+    deleteFailure: 'An error occurred during the deletion!'
+    deleteMassiveSuccess: 'Mass removal completed successfully!'
+    addSuccess: 'Added successfully !'
+    addFailure: 'An error occurred when added!'
+    ImportSuccess: 'There are [NB_USER] email accounts that have been successfully
+      imported!'
+    ImportErrors: 'NB_ERRORS line(s) have been ignored as they contain errors (line
+      numbers: LIST_ROWS_ERROR).'
+    UserAlreadyPresent: 'There are [NB_USER] email accounts that were already present
+      in the database, no action was made on these accounts.'
+    BadColumnsFile: 'Bad number of columns for the file.'
+    NoImport: 'No email account was imported.'
+    domainNotExist: 'The domain does not exist'
+    emailAllreadyExist: 'This email is already used. You can''t use it'
+    aliasAllreadyExist: 'This alias is already used. You can''t use it'
+    userNameAllreadyExist: 'This login already exists. You can''t use it'
+    passwordNotMatching: 'Password confirmation is not valid'
+    groupNameAllreadyExist: This group label already exists for this domain. You can't
+      use it
+  units:
+    literByDay: litres/day
+    hoursByDay: Hours/day
+    hoursByNight: Hours/night
+    hours: hours
+    weeks: weeks
+    year(s): Year(s)
+    months: month
+    bytes: Bytes
 Navigation:
-    mainTitle: AgentJ
-    mainSubTitle: 'Antispam solution AgentJ'
-    login: Connection
-    logout: Disconnect
-    user_profil: 'My account'
-    settings: Configuration
-    spammed: 'Spam detected'
-    virus: Virus
-    banned: Banned
-    clean: Clean
-    error: Errors
-    all: All
-    Messagedelete: Deleted
-    mailBlocked: 'Mail blocked'
-    blacklist: 'Blocked senders'
-    whitelist: 'Authorized senders'
-    MessageRestored: Restored
-    userlist:
-        title: Users
-        localUsers: Local
-        emailUsers: 'Email accounts'
-        emailAliasUsers: Alias
-    grouplist: Groups
-    domainlist: Domains
-    untreated: 'Untreated'
-    authorized: Authorized
-    policy: Strategies
-    hello: Hello.
-    import:
-        title: Imports
-        users: Email/users
-        whiteliste: 'White list'
+  mainTitle: AgentJ
+  mainSubTitle: 'Antispam solution AgentJ'
+  login: Connection
+  logout: Disconnect
+  user_profil: 'My account'
+  settings: Configuration
+  spammed: 'Spam detected'
+  virus: Virus
+  banned: Banned
+  clean: Clean
+  error: Errors
+  all: All
+  Messagedelete: Deleted
+  mailBlocked: 'Mail blocked'
+  blacklist: 'Blocked senders'
+  whitelist: 'Authorized senders'
+  MessageRestored: Restored
+  userlist:
+    title: Users
+    localUsers: Local
+    emailUsers: 'Email accounts'
+    emailAliasUsers: Alias
+  grouplist: Groups
+  domainlist: Domains
+  untreated: 'Untreated'
+  authorized: Authorized
+  policy: Strategies
+  hello: Hello
+  import:
+    title: Imports
+    users: Email/users
+    whiteliste: 'White list'
 Config:
-    title: Configuration
-    labels:
-        logo: Logo
-        logoMimetype: '.gif, .jpg, .png'
-        logoSize: 170x45px
+  title: Configuration
+  labels:
+    logo: Logo
+    logoMimetype: '.gif, .jpg, .png'
+    logoSize: 170x45px
 Message:
-    Object: Subject
-    Sender: Sender
-    Recipient: 'Recipient'
-    Status: Status
-    Date: Date
-    ErrorSendCaptcha: 'Error email verification'
-    Actions:
-        list: Actions
-        Autorized: Authorize
-        AutorizedSender: 'Authorize the sender'
-        AutorizedDomain: 'Authorize the sender to all users'
-        Banned: Ban
-        BannedSender: 'Ban the sender'
-        BannedDomain: 'Ban sender for all users'
-        Delete: Delete
-        DeleteMessage: 'Delete the message'
-        Restore: Recover
-        RestoreMessage: 'Recover the message'
-        massiveActionContent: 'Are you sure you want to perform this action on all the selected items?'
-    Dialogs:
-        confirmDeleteUserTitle: 'Delete the user'
-        confirmDeleteUserContent: 'Are you sure you want to delete this user?'
-        confirmDeleteDomainTitle: 'Delete the domain'
-        confirmDeleteDomainContent: 'Are you sure you want to delete this domain?'
-        confirmDeleteMsgtitle: 'Delete the message'
-        confirmDeleteMsgContent: 'Are you sure you want to delete the message?'
-        confirmAuthorizedMsgtitle: 'Authorize the sender'
-        confirmAuthorizedDomainMsgtitle: 'Authorize sender for all users'
-        confirmAuthorizedMsgContent: 'Are you sure you''re authorizing the sender?'
-        confirmAuthorizedDomainMsgContent: 'Are you sure to authorize the sender for all users?'
-        confirmBannedMsgtitle: 'Ban the sender'
-        confirmBannedMsgContent: 'Are you sure you''re banging the sender?'
-        confirmBannedDomainMsgtitle: 'Ban sender for all users'
-        confirmBannedDomainMsgContent: 'Are you sure to ban the sender for all users?'
-        confirmRestoreMsgtitle: 'Recover the message'
-        confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
-        confirmDeleteSenderTitleW: 'Delete this sender?'
-        confirmDeleteSenderTitleB: 'Unlock this sender?'
-        confirmDeleteSenderContentW: 'Are you sure you want to delete this sender?'
-        confirmDeleteSenderContentB: 'Are you sure you want to unlock this sender?'
-        confirmDeleteGroupTitle: 'Delete this group?'
-        confirmDeleteGroupContent: 'Are you sure you want to delete this group?'
-        confirmRemoveUserFromGroupTitle: 'Remove from the group?'
-        confirmRemoveUserFromGroupContent: 'Are you sure you want to remove this user from the group?'
-        confirmRemoveRuleTitle: 'Delete the rule?'
-        confirmRemoveRuleContent: 'Are you sure you want to delete this rule?'
-    Flash:
-        deleteSuccesFull: 'Successful deletion'
-        domainCreatd: 'The domain has been successfully created'
-        domainUpdated: 'The field has successfully changed'
-        missingRuleForDomain: 'A first rule must first be created in this field'
-        ruleExistForDomain: 'A similar rule already exists in this area'
-        domainRuleCreated: 'The domain rule was created with success'
-        domainRuleUpdated: 'The domain rule has been updated with success'
-        newRuleCreated: 'New rule created!'
-        ruleUpdated: 'Rule has been updated!'
-        ruleExists: 'This rule already exists!'
-        messageDeleted: 'Message deleted successfully'
-        messageRestored: 'Message successfully recovered'
-        senderAuthorized: 'The address is now authorized'
-        senderBanned: 'The address is now banished'
-        checkMailUnsuccessful: 'We couldn''t check this email.'
-    http:
-        404:
-            title: 'Page not found'
-            description: 'The requested page was not found. Check the url or return to the home page.'
-        403:
-            title: 'Unauthorized access'
-            description: 'You don''t have the right to view this page.'
-        500:
-            title: 'An error occurred'
-            description: 'An error occurred that prevents the display of this page. <br/><br/> We are trying to solve this problem as quickly as possible.<br/><br/> Please excuse us for the inconvenience'
-    Toast:
-        defaultTitle: Information
-        newUntreatedMessage: 'new(x) unprocessed messages'
-    Report:
-        defaultMailSubject: 'Messages pending on AgentJ for '
-        defaultAlertMailContent: 'Hello.<br/> You have [NB_UNTREATED_MESSAGES] emails that are in validation expectations.<br/><br/> And [NB_BLOCKED_MESSAGES] messages that were blocked by AgentJ. <br/><br/> You can treat them on <a href="[URL_MSGS]">[URL_MSGS]</a>.<br/><br/> Thank you and good day. '
-    Captcha:
-        defaultMailSubject: 'Audit Email'
-        defaultMailContent: 'Hello.<br/><br/> You tried to send an email to: [EMAIL_DEST] <br/><br/> For security reasons we are obliged to check your email. <br/><br/> Please confirm your email by clicking on the following link: <br/> <a href="[URL_CAPTCHA]">[URL_CAPTCHA]</a> <br/><br/> Thank you and good day '
-        defaultCaptchaPageContent: '<strong>Audit of your email</strong> <br/> Please validate your email by validating the captcha below'
-        defaultCaptchaConfirmMsg: 'Thank you and good day'
+  Object: Subject
+  Sender: Sender
+  Recipient: 'Recipient'
+  Status: Status
+  Date: Date
+  ErrorSendCaptcha: 'Error email verification'
+  Actions:
+    list: Actions
+    Autorized: Authorize
+    AutorizedSender: 'Authorize the sender'
+    AutorizedDomain: 'Authorize the sender to all users'
+    Banned: Ban
+    BannedSender: 'Ban the sender'
+    BannedDomain: 'Ban sender for all users'
+    Delete: Delete
+    DeleteMessage: 'Delete the message'
+    Restore: Recover
+    RestoreMessage: 'Recover the message'
+    massiveActionContent: 'Are you sure you want to perform this action on all the
+      selected items?'
+  Dialogs:
+    confirmDeleteUserTitle: 'Delete the user'
+    confirmDeleteUserContent: 'Are you sure you want to delete this user?'
+    confirmDeleteDomainTitle: 'Delete the domain'
+    confirmDeleteDomainContent: 'Are you sure you want to delete this domain?'
+    confirmDeleteMsgtitle: 'Delete the message'
+    confirmDeleteMsgContent: 'Are you sure you want to delete the message?'
+    confirmAuthorizedMsgtitle: 'Authorize the sender'
+    confirmAuthorizedDomainMsgtitle: 'Authorize sender for all users'
+    confirmAuthorizedMsgContent: 'Are you sure you''re authorizing the sender?'
+    confirmAuthorizedDomainMsgContent: 'Are you sure to authorize the sender for all
+      users?'
+    confirmBannedMsgtitle: 'Ban the sender'
+    confirmBannedMsgContent: 'Are you sure you''re banging the sender?'
+    confirmBannedDomainMsgtitle: 'Ban sender for all users'
+    confirmBannedDomainMsgContent: 'Are you sure to ban the sender for all users?'
+    confirmRestoreMsgtitle: 'Recover the message'
+    confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
+    confirmDeleteSenderTitleW: 'Delete this sender?'
+    confirmDeleteSenderTitleB: 'Unlock this sender?'
+    confirmDeleteSenderContentW: 'Are you sure you want to delete this sender?'
+    confirmDeleteSenderContentB: 'Are you sure you want to unlock this sender?'
+    confirmDeleteGroupTitle: 'Delete this group?'
+    confirmDeleteGroupContent: 'Are you sure you want to delete this group?'
+    confirmRemoveUserFromGroupTitle: 'Remove from the group?'
+    confirmRemoveUserFromGroupContent: 'Are you sure you want to remove this user
+      from the group?'
+    confirmRemoveRuleTitle: 'Delete the rule?'
+    confirmRemoveRuleContent: 'Are you sure you want to delete this rule?'
+  Flash:
+    deleteSuccesFull: 'Successful deletion'
+    domainCreatd: 'The domain has been successfully created'
+    domainUpdated: 'The field has successfully changed'
+    missingRuleForDomain: 'A first rule must first be created in this field'
+    ruleExistForDomain: 'A similar rule already exists in this area'
+    domainRuleCreated: 'The domain rule was created with success'
+    domainRuleUpdated: 'The domain rule has been updated with success'
+    newRuleCreated: 'New rule created!'
+    ruleUpdated: 'Rule has been updated!'
+    ruleExists: 'This rule already exists!'
+    messageDeleted: 'Message deleted successfully'
+    messageRestored: 'Message successfully recovered'
+    senderAuthorized: 'The address is now authorized'
+    senderBanned: 'The address is now banished'
+    checkMailUnsuccessful: 'We couldn''t check this email.'
+  http:
+    404:
+      title: 'Page not found'
+      description: 'The requested page was not found. Check the url or return to the
+        home page.'
+    403:
+      title: 'Unauthorized access'
+      description: 'You don''t have the right to view this page.'
+    500:
+      title: 'An error occurred'
+      description: 'An error occurred that prevents the display of this page. <br/><br/>
+        We are trying to solve this problem as quickly as possible.<br/><br/> Please
+        excuse us for the inconvenience'
+  Toast:
+    defaultTitle: Information
+    newUntreatedMessage: 'new(x) unprocessed messages'
+  Report:
+    defaultMailSubject: 'Messages pending on AgentJ for '
+    defaultAlertMailContent: 'Hello.<br/> You have [NB_UNTREATED_MESSAGES] emails
+      that are in validation expectations.<br/><br/> And [NB_BLOCKED_MESSAGES] messages
+      that were blocked by AgentJ. <br/><br/> You can treat them on <a href="[URL_MSGS]">[URL_MSGS]</a>.<br/><br/>
+      Thank you and good day. '
+  Captcha:
+    defaultMailSubject: 'Audit Email'
+    defaultMailContent: 'Hello.<br/><br/> You tried to send an email to: [EMAIL_DEST]
+      <br/><br/> For security reasons we are obliged to check your email. <br/><br/>
+      Please confirm your email by clicking on the following link: <br/> <a href="[URL_CAPTCHA]">[URL_CAPTCHA]</a>
+      <br/><br/> Thank you and good day '
+    defaultCaptchaPageContent: '<strong>Audit of your email</strong> <br/> Please
+      validate your email by validating the captcha below'
+    defaultCaptchaConfirmMsg: 'Thank you and good day'
 Form:
-    PolicyDomain: 'Filter threshold'
-    ImportFile: 'Select a file to import'
+  PolicyDomain: 'Filter threshold'
+  ImportFile: 'Select a file to import'
 Entities:
-    Group:
-        Title: 'Managing groups'
-        Name: Name
-        Updated: Update
-        Actions:
-            list: Actions
-            New: 'Create a group'
-            Updated: Edit
-            updateGroup: 'Modify the group'
-            Delete: Delete
-            manageList: 'Manage consignors'
-            addRule: 'Add a rule'
-            addRuleToGroup: 'Add a rule to the group'
-            deleteRule: 'Delete rule'
-            editRule: 'Edit the rule'
-            editRuleGroup: 'Edit the group rule'
-            backToGroupList: 'Return to group list'
-        labels:
-            rules: Rules
-            grouprules: 'Group rules'
-            users: Users
-            usersGroup: 'Users of the group'
-        fields:
-            policy: Policy
-            name: 'Group name'
-            rights: rights
-            users: users
-            domain: 'Associated domains'
-            overrideUser: 'Supplante user choices'
-    Policy:
-        label: Policy
-        index: 'List of policies'
-        fields:
-            virusLover: 'Love viruses'
-            spamLover: 'Love the spam'
-            bannedFilesLover: 'Likes banned files'
-            badHeaderLover: 'Love the bad headers'
-            bypassVirusChecks: 'Bypass virus verification'
-            bypassBannedChecks: 'Bypass the ban check'
-            bypassHeaderChecks: 'Bypass the header check'
-            bypassSpamChecks: 'Bypass the spam check'
-            virusQuarantineTo: 'Follow viruses to email'
-            spamQuarantineTo: 'Follow the spam to the mail'
-            bannedQuarantineTo: 'Follow the banned to the mail'
-            badHeaderQuarantineTo: 'Follow the wrong headers to the mail'
-            uncheckedQuarantineTo: 'Follow spams not checked to mail'
-            cleanQuarantineTo: 'Follow the spams cleaned to the mail'
-            archiveQuarantineTo: 'Follow the archived spams to the mail'
-            spamTagLevel: 'Tag level of SPAM'
-            spamTag2Level: 'Tag level2 of SPAM'
-            spamTag3Level: 'Tag level3 of SPAM'
-            spamKillLevel: 'Level of SPAM kill'
-            spamDsnCutoffLevel: 'Seuil dsn du SPAM'
-            spamQuarantineCutoffLevel: 'Seuil quarantine du SPAM'
-            spamSubjectTag: 'SPAM tag dans le sujet'
-            spamSubjectTag2: 'SPAM tag dans le sujet 2'
-            spamSubjectTag3: 'SPAM tag dans le sujet 3'
-            addrExtensionVirus: 'Address extension virus'
-            addrExtensionSpam: 'SPAM extension address'
-            addrExtensionBanned: 'Banner extension address'
-            addrExtensionBadHeader: 'Address extension bad header'
-            warnvirusrecip: 'Addressing warning of viruses'
-            warnbannedrecip: 'Avert recipient banni'
-            warnbadhrecip: 'Warning recipient bad head'
-            newvirusAdmin: 'Admin new virus'
-            virusAdmin: 'Admin virus'
-            bannedAdmin: Banished
-            badHeaderAdmin: 'Admin bad header'
-            spamAdmin: 'Admin SPAM'
-            messageSizeLimit: 'Message size limit'
-            bannedRulenames: 'Names of rules banished'
-            disclaimerOptions: 'Warning options'
-            forwardMethod: 'Method for forwarding'
-            saUserconf: 'User configuration SA'
-            saUsername: 'User name SA'
-            uncheckedLover: uncheckedLover
-        tabs:
-            policy: Strategy
-            quarantine: Quarantine
-            tagLevel: 'Tag level'
-            other: Other
-        actions:
-            add_new: 'Add a new strategy'
-    Domain:
-        Name: Area
-        index: 'List of domains'
-        edit: 'Edit domain'
-        fields:
-            mailMessage: 'Text of the email validation mail with the link captcha'
-            captachaMessage: 'Text of presentation on captcha page'
-            successCaptchaMessage: 'Captcha validation message'
-            messageAlert: 'Message of the report'
-            domain: 'Domain name'
-            srvSmtp: 'SMTP server'
-            srvImap: 'IMAP server'
-            imap_port: 'Port IMAP'
-            smtp_port: SMTP
-            imap_flag: 'IMAP security'
-            active: 'Active area'
-            policy: 'Strategy for the field'
-            level: 'Spam threshold'
-            mailAuthenticationSender: 'Email address that sends authentication requests'
-            imapNoValidateCert: 'Do not validate certificates'
-            defaultLang: 'Default language'
-        labels:
-            rules: Rules
-            domainrules: 'Rules of the field'
-            domaineSender: 'sending domain'
-            domainMessages: 'Messages from the field'
-            dynamicsVariables: { URL_CAPTCHA: 'Link to captcha', EMAIL_DEST: 'Email of recipient', URL_MSGS: 'Link to mails pending', NB_AUTHORIZED_MESSAGES: 'Authorized messages', NB_UNTREATED_MESSAGES: 'Number of untreated messages', NB_SPAMMED_MESSAGES: 'Number of spam messages', NB_BANNED_MESSAGES: 'Number of messages banned', NB_DELETED_MESSAGES: 'Number of messages deleted', NB_RESTORED_MESSAGES: 'Number of messages restored', LIST_MAIL_MSGS: 'List of untreated messages' }
-        actions:
-            add_new: 'Add a new domain'
-            add_new_rule: 'New rule'
-            deleteRule: 'Delete rule'
-            editDomainRule: 'Amend a rule'
-            WBList: List
-            messages: Messages
-            blockAllMails: 'Block all mails'
-            allowAllMails: 'Allow all emails'
-            allowWithSpamFilter: 'Allow with spam filter'
-            allowWithLightFilter: 'Allow with flexible filter'
-            backToDomainList: 'Return to the list of domains'
-        rulesValues:
-            10: 'Block all mails'
-            B: 'Block all mails'
-            W: 'Allow all emails'
-            0: 'Allow with spam filter'
-            2: 'Allow with flexible filter'
-    User:
-        indexLocal: 'List of administrators'
-        indexEmail: 'List of email accounts'
-        indexAlias: 'List of alias emails'
-        actions:
-            add_new: 'New user'
-            add_new_alias: 'Add a new alias'
-            edit: 'Edition of a user'
-            deleteEmailAccount: 'Delete the email account'
-        fields:
-            email: Email
-            emailRecovery: 'Recovery email'
-            password: Password
-            fullName: Name
-            userName: Login
-            roles: Role
-            domain: Area
-            originalUser: 'Reference email'
-            alias: Alias
-            sharedBy: 'Shared with'
-            groups: Group
-            imapLogin: 'Login IMAP'
-            repeatPassword: 'Confirm password'
-            report: 'Send report'
-            bypassHumanAuth: 'Deactivate human authentication'
-    Message:
-        index: 'List of messages'
-        untreated: 'No treaties'
-        authorized: Authorized
-        banned: Banned
-        delete: Deleted
-        restored: Restored
-        spammedDetect: 'spammed detected automatically'
-        informationMessage: 'The messages will be automatically deleted after 30 days.'
-        spamLevel: Note
-        dateAuthRequestAt: 'Authentication request sent the'
-        isMailingList: 'Mailing list? '
-    Msgrcpt:
-        labels:
-            infos: 'Information about the message'
-            appliedRule: 'Information about the message'
-        fields:
-            bspamLevel: 'Spam rating'
-    WBList:
-        fields:
-            user: User
-            typeB: 'Type of blockage'
-            typeW: 'Type of validation'
-            white: 'White list'
-            black: Blacklist
-            typeLabelW: ['Validated by you', 'Validated by captcha', 'Validated by the group', 'Validated by the administrator']
-            typeLabelB: ['Blocked by you', 'Blocked by captcha', 'Blocked by the group', 'Blocked by the administrator']
-        actions:
-            deleteSenderW: 'Delete sender'
-            deleteSenderB: 'Unlock the sender'
-    Import:
-        Wbliste:
-            title: 'White list: import a list'
-            description: 'The file must be encoded in utf8 in text or csv format.<br/> Each line must have a valid email address<br/>'
-        Users:
-            title: 'Import users'
-            labels: { titleInfo: Information }
-            description: 'The file must be encoded in utf8 in csv format separated by comma points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>'
-        WhiteListe:
-            title: 'Import a list of addresses to allow'
-        actions:
-            import: Import
-    Report:
-        title: 'Activity report'
-        titleDay: 'On the last 24 hours'
-        titleMonth: 'Last month'
-        stateMessage: State
-        typeMessage: Type
-        mailFromName: 'AgentJ Report'
-        numberMessage: Number
-        typeState:
-            C: Past
-            S: Blocked
-        typeLabel:
-            authorized: 'Authorized by the user'
-            banned: 'Banned by user'
-            deleted: 'Deleted by user'
-            auto: Automatic
+  Group:
+    Title: 'Managing groups'
+    Name: Name
+    Updated: Update
+    Actions:
+      list: Actions
+      New: 'Create a group'
+      Updated: Edit
+      updateGroup: 'Modify the group'
+      Delete: Delete
+      manageList: 'Manage consignors'
+      addRule: 'Add a rule'
+      addRuleToGroup: 'Add a rule to the group'
+      deleteRule: 'Delete rule'
+      editRule: 'Edit the rule'
+      editRuleGroup: 'Edit the group rule'
+      backToGroupList: 'Return to group list'
+    labels:
+      rules: Rules
+      grouprules: 'Group rules'
+      users: Users
+      usersGroup: 'Users of the group'
+    fields:
+      policy: Policy
+      name: 'Group name'
+      rights: rights
+      users: users
+      domain: 'Associated domains'
+      overrideUser: 'Supplante user choices'
+  Policy:
+    label: Policy
+    index: 'List of policies'
+    fields:
+      virusLover: 'Love viruses'
+      spamLover: 'Love the spam'
+      bannedFilesLover: 'Likes banned files'
+      badHeaderLover: 'Love the bad headers'
+      bypassVirusChecks: 'Bypass virus verification'
+      bypassBannedChecks: 'Bypass the ban check'
+      bypassHeaderChecks: 'Bypass the header check'
+      bypassSpamChecks: 'Bypass the spam check'
+      virusQuarantineTo: 'Follow viruses to email'
+      spamQuarantineTo: 'Follow the spam to the mail'
+      bannedQuarantineTo: 'Follow the banned to the mail'
+      badHeaderQuarantineTo: 'Follow the wrong headers to the mail'
+      uncheckedQuarantineTo: 'Follow spams not checked to mail'
+      cleanQuarantineTo: 'Follow the spams cleaned to the mail'
+      archiveQuarantineTo: 'Follow the archived spams to the mail'
+      spamTagLevel: 'Tag level of SPAM'
+      spamTag2Level: 'Tag level2 of SPAM'
+      spamTag3Level: 'Tag level3 of SPAM'
+      spamKillLevel: 'Level of SPAM kill'
+      spamDsnCutoffLevel: 'Seuil dsn du SPAM'
+      spamQuarantineCutoffLevel: 'Seuil quarantine du SPAM'
+      spamSubjectTag: 'SPAM tag dans le sujet'
+      spamSubjectTag2: 'SPAM tag dans le sujet 2'
+      spamSubjectTag3: 'SPAM tag dans le sujet 3'
+      addrExtensionVirus: 'Address extension virus'
+      addrExtensionSpam: 'SPAM extension address'
+      addrExtensionBanned: 'Banner extension address'
+      addrExtensionBadHeader: 'Address extension bad header'
+      warnvirusrecip: 'Addressing warning of viruses'
+      warnbannedrecip: 'Avert recipient banni'
+      warnbadhrecip: 'Warning recipient bad head'
+      newvirusAdmin: 'Admin new virus'
+      virusAdmin: 'Admin virus'
+      bannedAdmin: Banished
+      badHeaderAdmin: 'Admin bad header'
+      spamAdmin: 'Admin SPAM'
+      messageSizeLimit: 'Message size limit'
+      bannedRulenames: 'Names of rules banished'
+      disclaimerOptions: 'Warning options'
+      forwardMethod: 'Method for forwarding'
+      saUserconf: 'User configuration SA'
+      saUsername: 'User name SA'
+      uncheckedLover: uncheckedLover
+    tabs:
+      policy: Strategy
+      quarantine: Quarantine
+      tagLevel: 'Tag level'
+      other: Other
+    actions:
+      add_new: 'Add a new strategy'
+  Domain:
+    Name: Area
+    index: 'List of domains'
+    edit: 'Edit domain'
+    fields:
+      mailMessage: 'Text of the email validation mail with the link captcha'
+      captachaMessage: 'Text of presentation on captcha page'
+      successCaptchaMessage: 'Captcha validation message'
+      messageAlert: 'Message of the report'
+      domain: 'Domain name'
+      srvSmtp: 'SMTP server'
+      srvImap: 'IMAP server'
+      imap_port: 'Port IMAP'
+      smtp_port: SMTP port
+      imap_flag: 'IMAP security'
+      active: 'Active area'
+      policy: 'Strategy for the field'
+      level: 'Spam threshold'
+      mailAuthenticationSender: 'Email address that sends authentication requests'
+      imapNoValidateCert: 'Do not validate certificates'
+      defaultLang: 'Default language'
+    labels:
+      rules: Rules
+      domainrules: 'Rules of the field'
+      domaineSender: 'sending domain'
+      domainMessages: 'Messages from the field'
+      dynamicsVariables: {URL_CAPTCHA: 'Link to captcha', EMAIL_DEST: 'Email of recipient',
+        URL_MSGS: 'Link to mails pending', NB_AUTHORIZED_MESSAGES: 'Authorized messages',
+        NB_UNTREATED_MESSAGES: 'Number of untreated messages', NB_SPAMMED_MESSAGES: 'Number
+          of spam messages', NB_BANNED_MESSAGES: 'Number of messages banned', NB_DELETED_MESSAGES: 'Number
+          of messages deleted', NB_RESTORED_MESSAGES: 'Number of messages restored',
+        LIST_MAIL_MSGS: 'List of untreated messages'}
+    actions:
+      add_new: 'Add a new domain'
+      add_new_rule: 'New rule'
+      deleteRule: 'Delete rule'
+      editDomainRule: 'Amend a rule'
+      WBList: List
+      messages: Messages
+      blockAllMails: 'Block all mails'
+      allowAllMails: 'Allow all emails'
+      allowWithSpamFilter: 'Allow with spam filter'
+      allowWithLightFilter: 'Allow with flexible filter'
+      backToDomainList: 'Return to the list of domains'
+    rulesValues:
+      10: 'Block all mails'
+      B: 'Block all mails'
+      W: 'Allow all emails'
+      0: 'Allow with spam filter'
+      2: 'Allow with flexible filter'
+  User:
+    indexLocal: 'List of administrators'
+    indexEmail: 'List of email accounts'
+    indexAlias: 'List of alias emails'
+    actions:
+      add_new: 'New user'
+      add_new_alias: 'Add a new alias'
+      edit: 'Edition of a user'
+      deleteEmailAccount: 'Delete the email account'
+    fields:
+      email: Email
+      emailRecovery: 'Recovery email'
+      password: Password
+      fullName: Name
+      userName: Login
+      roles: Role
+      domain: Area
+      originalUser: 'Reference email'
+      alias: Alias
+      sharedBy: 'Shared with'
+      groups: Group
+      imapLogin: 'Login IMAP'
+      repeatPassword: 'Confirm password'
+      report: 'Send report'
+      bypassHumanAuth: 'Deactivate human authentication'
+  Message:
+    index: 'List of messages'
+    untreated: 'No treaties'
+    authorized: Authorized
+    banned: Banned
+    delete: Deleted
+    restored: Restored
+    spammedDetect: 'spammed detected automatically'
+    informationMessage: 'The messages will be automatically deleted after 30 days.'
+    spamLevel: Note
+    dateAuthRequestAt: 'Authentication request sent the'
+    isMailingList: 'Mailing list? '
+  Msgrcpt:
+    labels:
+      infos: 'Information about the message'
+      appliedRule: 'Information about the message'
+    fields:
+      bspamLevel: 'Spam rating'
+  WBList:
+    fields:
+      user: User
+      typeB: 'Type of blockage'
+      typeW: 'Type of validation'
+      white: 'White list'
+      black: Blacklist
+      typeLabelW: ['Validated by you', 'Validated by captcha', 'Validated by the group',
+        'Validated by the administrator']
+      typeLabelB: ['Blocked by you', 'Blocked by captcha', 'Blocked by the group',
+        'Blocked by the administrator']
+    actions:
+      deleteSenderW: 'Delete sender'
+      deleteSenderB: 'Unlock the sender'
+  Import:
+    Wbliste:
+      title: 'White list: import a list'
+      description: 'The file must be encoded in utf8 in text or csv format.<br/> Each
+        line must have a valid email address<br/>'
+    Users:
+      title: 'Import users'
+      labels: {titleInfo: Information}
+      description: 'The file must be encoded in utf8 in csv format separated by comma
+        points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>'
+    WhiteListe:
+      title: 'Import a list of addresses to allow'
+    actions:
+      import: Import
+  Report:
+    title: 'Activity report'
+    titleDay: 'On the last 24 hours'
+    titleMonth: 'Last month'
+    stateMessage: State
+    typeMessage: Type
+    mailFromName: 'AgentJ Report'
+    numberMessage: Number
+    typeState:
+      C: Past
+      S: Blocked
+    typeLabel:
+      authorized: 'Authorized by the user'
+      banned: 'Banned by user'
+      deleted: 'Deleted by user'
+      auto: Automatic

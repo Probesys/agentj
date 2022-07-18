@@ -60,7 +60,8 @@ class LogRepository extends ServiceEntityRepository
 
             $sql = ' delete  from log where DATEDIFF(now(),log.created)> ' . $nbDays;
             $stmt = $conn->prepare($sql);
-            $stmt->execute();
+            $result = $stmt->execute();
+            return $result->rowCount();
         }
     }
 }

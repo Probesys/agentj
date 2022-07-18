@@ -1,6 +1,20 @@
 #!/bin/sh
 set -e
 
+# Configure opendkim
+sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/opendkim/TrustedHosts
+sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/opendkim/TrustedHosts
+touch /etc/opendkim/DomainsList
+touch /etc/opendkim/KeyTable
+touch /etc/opendkim/SigningTable
+addgroup www-data opendkim
+if [ ! -d /etc/opendkim/keys ]
+then
+    mkdir /etc/opendkim/keys
+fi
+chgrp -R opendkim /etc/opendkim
+chmod -R g+w /etc/opendkim
+
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 # Generate token for encryption
@@ -15,17 +29,17 @@ sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
-
+sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 
 echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php bin/console assets:install
+cd /var/www/agentj && sudo -u www-data php8 bin/console assets:install
 
 echo "Create database if not exists and update schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
+cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php8 bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_password
+cd /var/www/agentj && php8 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
@@ -39,10 +53,7 @@ if [ ! -d /var/log/agentj ]
 then
     mkdir /var/log/agentj && chown -R www-data /var/log/agentj
 fi
-echo "* * * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:msgs-send-mail-token >> /var/log/agentj/cron.log 2>&1" > /etc/cron.d/agentj
-echo "0 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-message-since-day 30 >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
-echo "5 3 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:truncate-virus-queue >> /var/log/agentj/truncate.log 2>&1" >> /etc/cron.d/agentj
-echo "0 7 * * * cd /var/www/agentj && sudo -u www-data php bin/console agentj:report-send-mail >> /var/log/agentj/send.log 2>&1" >> /etc/cron.d/agentj
+
 crond
 
 exec "$@"
