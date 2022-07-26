@@ -250,19 +250,3 @@ deploy-tags:
   except:
     - branches
     - merge_requests
-
-prepare-prod:
-  stage: publish
-  cache: {}
-  variables:
-    TAG: $CI_COMMIT_TAG
-  before_script:
-    - echo $TAG 
-    - echo $REGISTRY
-  script:
-    - sed -i "s|\$VERSION|$TAG|g" docker-compose.yml
-    - sed -i "s|agentj_version|$TAG|g" .env.example
-  only:
-    - prod
-  except:
-    - merge_requests
