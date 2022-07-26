@@ -8,10 +8,8 @@ The AgentJ Docker stack is composed of the following services:
 
 - **db**: a MariaDB instance, it keeps track of the mail headers and other information needed to manage the e-mails life cycle (sender, recipient, amavis id, ...)
 - **app**: a Web UI that allows you to add and manage your domains and associated users as well as managing the incoming e-mails (block, release, white/black lists)
-- **web**: a Nginx based reverse proxy that serves the **app**
 - **stmp**: a Postfix instance that will receive the e-mails and forward them to the **amavis** container (Amavis/ClamAV/Spamassassin service)
 - **amavis**: a container running Amavis/Spamassassin and ClamAV services
-- **redis**: a Redis instance used as cache for the **app**
 - **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
 - **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their receipient(s)
 
@@ -19,7 +17,7 @@ The AgentJ Docker stack is composed of the following services:
 
 All you have to do is to clone the repository
 
-    git clone https://github.com/Probesys/agentj-docker.git
+    git clone https://github.com/Probesys/agentj.git
 
 then, `cd` to the cloned repository to configure a few variables:
 
@@ -33,6 +31,7 @@ The following runtime variables must be configured:
 
 | Variable             | Default        | Use                                         |
 |----------------------|----------------|---------------------------------------------|
+| VERSION              |                | this AgentJ latest prod version             |
 | COMPOSE_PROJECT_NAME | local          | this AgentJ instance name                   |
 | DB_ROOT_PASSWORD     | secret         | the MariaDB instance root password          |
 | DB_NAME              | agentj         | the AgentJ database name                    |
@@ -44,12 +43,12 @@ The following runtime variables must be configured:
 | SUPER_ADMIN_USERNAME | admin          | default super admin login                   |
 | SUPER_ADMIN_password | Sup3rZECR37    | default super admin password                |
 | TZ                   | Europe/Paris   | the containers default timezone             |
-| PROXY_PORT           | 8090           | default listening port for Nginx web proxy  |
+| PROXY_PORT           | 8090           | default listening port for web interface    |
 
 
 ### Network
 
-The AgentJ antispam stack has its own Docker bridge `br-agentj` and IPv4 subnet which defaults to `172.42.42.0/24` (configurable, see variables table above).
+The AgentJ antispam stack has its own Docker bridge and IPv4 subnet which defaults to `172.42.42.0/24` (configurable, see variables table above).
 
 ## Use
 
@@ -59,7 +58,7 @@ After you have set the above variables, you can start the stack with following c
     docker-compose up -d
 
 The Web UI will be available at http://hostname:8090.
-The default login is `admin` and the default password is `Sup3rZECR37` (yes, this is a space between the two words).
+The default login is `admin` and the default password is `Sup3rZECR37`.
 
 ## Details
 
@@ -67,25 +66,27 @@ The default login is `admin` and the default password is `Sup3rZECR37` (yes, thi
 
 When started, the AgentJ stack will create the following volumes:
 
-- *public*: the **app** sources files
+- *amavis* : the Amavis databases
+- *applogs* : the application logs (cron tasks)
+- *clamav* : the ClamAV signatures database
 - *db* : the MariaDB databases files
-- *redisdb*: Redis DB dumps
-- *clamdb*: the ClamAV virus signatures database, updated 4 times a day
-- *quarantine*: the quarantined e-mails
 - *logs*: the log files from all containers, centralized by the **syslogng** container
+- *opendkim* : DKIM signature and conf files
+- *postfix_relay* : relay configuration
+- *postqueue* : the mail queue
+- *smtpconfig* : the main Postfix config
+- *spamassassin* : SA rules
 
 ### Communication matrix
 
-| from ↓ \ to →           | amavis        | app          | db           | redis | relay      | smtp          | syslog      | web |
-|-------------------------|---------------|--------------|--------------|-------|------------|---------------|-------------|-----|
-| amavis (10024/tcp)      | -             | -            | ? → 3306/tcp | -     | -          | ? → 10025/tcp | ? → 514/udp | -   |
-| app (9000/tcp)          | ? → 9998/tcp  | -            | ? → 3306/tcp | -     | ???        | ? → 514/udp   | -           | -   |
-| db (3306/tcp)           | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
-| redis ()                | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
-| relay 25/tcp)           | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
-| stmp (25/tcp 10025/tcp) | ? → 10024/tcp | -            | ? → 3306/tcp | -     | ? → 25/tcp | ? → 514/udp   | -           | -   |
-| syslogng (514/udp)      | -             | -            | -            | -     | -          | -             | ? → 514/udp | -   |
-| web (8090/tcp)          | -             | ? → 9000/tcp | -            | -     | -          | -             | ? → 514/udp | -   |
+| from ↓ \ to →           | amavis        | app          | db           | relay      | smtp          | syslog      |
+|-------------------------|---------------|--------------|--------------|------------|---------------|-------------|
+| amavis (10024/tcp)      | -             | -            | ? → 3306/tcp | -          | ? → 10025/tcp | ? → 514/udp |
+| app (8090/tcp)          | ? → 9998/tcp  | -            | ? → 3306/tcp | ???        | ? → 514/udp   | -           |
+| db (3306/tcp)           | -             | -            | -            | -          | -             | ? → 514/udp |
+| relay 25/tcp)           | -             | -            | -            | -          | -             | ? → 514/udp |
+| stmp (25/tcp 10025/tcp) | ? → 10024/tcp | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   | -           |
+| syslogng (514/udp)      | -             | -            | -            | -          | -             | ? → 514/udp |
 
 ## Upgrade
 
@@ -96,7 +97,6 @@ In order to upgrade the AgentJ dockerized stack, you must stop the running conta
     docker image rm $(docker image ls -q -f reference=*/*agentj_app)
     # To upgrade all the stack, delete and update all images
     docker image rm $(docker image ls -q -f reference=*/*agentj_*)
-    docker volume rm agentj-docker_public
     docker-compose up -d
 
 ## About

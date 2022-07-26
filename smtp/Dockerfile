@@ -10,6 +10,7 @@ RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     postfix \
     postfix-mysql \
+    postfix-policyd-spf-python \
     supervisor \
     rsyslog \
     tzdata \
@@ -18,6 +19,7 @@ RUN apt-get update -q --fix-missing && \
 
 COPY conf/postfix/* /etc/postfix/
 COPY conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY conf/postifx-policyd-spf-python/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 25/tcp
