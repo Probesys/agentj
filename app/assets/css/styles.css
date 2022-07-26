@@ -8395,6 +8395,9 @@ div[id^="dropzone-"] {
     -webkit-box-shadow: 11px 10px 20px -13px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: 11px 10px 20px -13px rgba(0, 0, 0, 0.75);
     box-shadow: 11px 10px 20px -13px rgba(0, 0, 0, 0.75); } }
+nav .fa-flag {
+  font-family: 'Poppins', sans-serif; }
+
 @media only screen and (max-width: 890px) {
   .search-form {
     float: none; }
