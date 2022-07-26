@@ -27,6 +27,7 @@ RUN apk --no-cache add \
     perl-dbd-mysql \
     perl-db \
     perl-io-socket-ssl \
+    perl-mail-spf \
     patch \
     pax-utils \
     rsyslog \
