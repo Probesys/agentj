@@ -104,14 +104,6 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  watchtower:
-    image: containrrr/watchtower
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: agentj_*
-
 volumes:
   amavis:
   applogs:
