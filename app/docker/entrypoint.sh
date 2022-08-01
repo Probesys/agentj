@@ -30,6 +30,7 @@ sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
+sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php8/php.ini
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php8 bin/console assets:install
