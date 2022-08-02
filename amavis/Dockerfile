@@ -26,6 +26,7 @@ RUN apk --no-cache add \
     iproute2 \
     perl-dbd-mysql \
     perl-db \
+    perl-dbi \
     perl-io-socket-ssl \
     perl-mail-spf \
     patch \
@@ -42,16 +43,17 @@ COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
-COPY init.sh /init.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY amavisd.patch /root/amavisd.patch
 
 RUN patch -p1 /usr/sbin/amavisd < /root/amavisd.patch
+RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
+        --daemon-notify=/etc/clamav/clamd.conf \
+        --config-file=/etc/clamav/freshclam.conf
+RUN /usr/bin/sa-update
 
 VOLUME [ "/var/amavis" ]
-VOLUME [ "/var/lib/clamav" ]
-VOLUME [ "/var/lib/spamassassin" ]
 
 EXPOSE 10024/tcp
 
