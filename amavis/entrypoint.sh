@@ -28,9 +28,4 @@ fi
 
 crond
 
-if [ ! -f /var/amavis/.initdone ]
-then
-    ./init.sh && rm ./init.sh
-fi
-
 exec "$@"

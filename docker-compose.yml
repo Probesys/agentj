@@ -26,8 +26,6 @@ services:
       - ajnet
     volumes:
       - amavis:/var/amavis/
-      - clamav:/var/lib/clamav/
-      - spamassassin:/var/lib/spamassassin/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.252
@@ -59,8 +57,6 @@ services:
     restart: always
     env_file:
       - .env
-    volumes:
-      - postfix_relay:/etc/postfix/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
@@ -74,7 +70,6 @@ services:
       - db
     volumes:
       - postqueue:/var/spool/postfix
-      - smtpconfig:/etc/postfix
     ports:
       - 0.0.0.0:25:25
     networks:
@@ -107,14 +102,10 @@ services:
 volumes:
   amavis:
   applogs:
-  clamav:
   db:
   logs:
   opendkim:
-  postfix_relay:
   postqueue:
-  smtpconfig:
-  spamassassin:
 
 networks:
   ajnet:
