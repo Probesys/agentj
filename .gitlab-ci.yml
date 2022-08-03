@@ -137,19 +137,6 @@ mass_build:
         done
   when: manual
 
-# This task is manually triggered only
-mass_build:
-  stage: build
-  script:
-    - for DIR in amavis app relay smtp syslogng web ;
-        do cd $CI_PROJECT_DIR/$DIR && docker build
-        --cache-from $REGISTRY/agentj_$DIR:dev
-        --build-arg BUILDKIT_INLINE_CACHE=1
-        -t $REGISTRY/agentj_$DIR:dev . ;
-        docker push $REGISTRY/agentj_$DIR:dev ;
-        done
-  when: manual
-
 deploy-dev:
   stage: deploy
   cache: {}
