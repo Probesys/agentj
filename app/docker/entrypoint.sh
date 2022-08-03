@@ -14,6 +14,7 @@ then
 fi
 chgrp -R opendkim /var/db/dkim
 chmod -R g+w /var/db/dkim
+chmod 0644 /etc/sudoers.d/opendkim
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
