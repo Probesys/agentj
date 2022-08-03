@@ -2,18 +2,18 @@
 set -e
 
 # Configure opendkim
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/opendkim/TrustedHosts
-sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/opendkim/TrustedHosts
-touch /etc/opendkim/DomainsList
-touch /etc/opendkim/KeyTable
-touch /etc/opendkim/SigningTable
+sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /var/db/dkim/TrustedHosts
+sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /var/db/dkim/TrustedHosts
+touch /var/db/dkim/DomainsList
+touch /var/db/dkim/KeyTable
+touch /var/db/dkim/SigningTable
 addgroup www-data opendkim
-if [ ! -d /etc/opendkim/keys ]
+if [ ! -d /var/db/dkim/keys ]
 then
-    mkdir /etc/opendkim/keys
+    mkdir /var/db/dkim/keys
 fi
-chgrp -R opendkim /etc/opendkim
-chmod -R g+w /etc/opendkim
+chgrp -R opendkim /var/db/dkim
+chmod -R g+w /var/db/dkim
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
