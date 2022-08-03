@@ -38,16 +38,16 @@ if [ $# -ne 2 ] ; then
     exit 2
 fi
 
-if [ ! -d /etc/opendkim/keys/"$_DOMAIN" ]; then
+if [ ! -d /var/db/dkim/keys/"$_DOMAIN" ]; then
     echo "This domain does not have DKIM keys. Nothing to do."
 else                                                                     
     echo "Removing DKIM keys and config for this domain..."                                                               
-    sed -i "/$_DOMAIN/d" /etc/opendkim/DomainsList                              
-    sed -i "/$_MX/d" /etc/opendkim/TrustedHosts                                                                                  
-    sed -i "/*@$_DOMAIN agentj._domainkey.$_DOMAIN/d" /etc/opendkim/SigningTable                                                 
-    sed -i "/agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:\/etc\/opendkim\/keys\/$_DOMAIN\/agentj.private/d" /etc/opendkim/KeyTable
-    sudo /bin/rm -rf /etc/opendkim/keys/"$_DOMAIN"                   
-    sudo /bin/chown -R opendkim:opendkim /etc/opendkim
+    sed -i "/$_DOMAIN/d" /var/db/dkim/DomainsList                              
+    sed -i "/$_MX/d" /var/db/dkim/TrustedHosts                                                                                  
+    sed -i "/*@$_DOMAIN agentj._domainkey.$_DOMAIN/d" /var/db/dkim/SigningTable                                                 
+    sed -i "/agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:\/etc\/opendkim\/keys\/$_DOMAIN\/agentj.private/d" /var/db/dkim/KeyTable
+    sudo /bin/rm -rf /var/db/dkim/keys/"$_DOMAIN"                   
+    sudo /bin/chown -R opendkim:opendkim /var/db/dkim
 fi                                                     
                                                        
 exit $?
