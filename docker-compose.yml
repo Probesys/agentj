@@ -45,7 +45,7 @@ services:
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-      - opendkim:/etc/opendkim
+      - opendkim:/var/db/dkim
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.240
