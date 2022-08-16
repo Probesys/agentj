@@ -9,6 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=ConnectorRepository::class)
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="discr", type="string")
+ * @ORM\DiscriminatorMap({"office365" = "Office365Connector"})
  */
 class Connector
 {
@@ -37,10 +40,6 @@ class Connector
      */
     private $domain;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Office365Connector::class, mappedBy="connector", cascade={"persist", "remove"})
-     */
-    private $office365Connector;
 
     /**
      * @ORM\Column(type="string", length=50)
@@ -88,22 +87,6 @@ class Connector
         return $this;
     }
 
-    public function getOffice365Connector(): ?Office365Connector
-    {
-        return $this->office365Connector;
-    }
-
-    public function setOffice365Connector(Office365Connector $office365Connector): self
-    {
-        // set the owning side of the relation if necessary
-        if ($office365Connector->getConnector() !== $this) {
-            $office365Connector->setConnector($this);
-        }
-
-        $this->office365Connector = $office365Connector;
-
-        return $this;
-    }
 
     public function getType(): ?string
     {

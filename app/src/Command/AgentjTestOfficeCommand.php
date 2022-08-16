@@ -22,7 +22,7 @@ class AgentjTestOfficeCommand extends Command {
 
     protected function configure(): void {
         $this
-                ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
+                ->addArgument('comain', InputArgument::OPTIONAL, 'Domain ')
                 ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
         ;
     }
