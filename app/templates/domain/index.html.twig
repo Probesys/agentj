@@ -38,20 +38,20 @@
                             <ul class="list-inline list-unstyled">
                                 <li class="list-inline-item">
                                     <a href="{{ path('domain_edit', {'id': domain.id}) }}"  class='btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
-                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                        
+                                      <div> <i class="fas fa-edit "></i> <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span></div>
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
                                     <a href="{{ path('domain_wblist',{'id':domain.id}) }}" class='btn btn-sm btn-dark ' title="{{ 'Entities.Domain.actions.WBList'|trans() }}" >
-                                        <i class="fas fa-ruler d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Entities.Domain.labels.rules'|trans() }}</span>                         
+                                        <i class="fas fa-ruler d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                        <span class="d-none d-lg-block">{{ 'Entities.Domain.labels.rules'|trans() }}</span>                         
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
                                     <a href="{{ path('domain_messages',{'id':domain.id}) }}" class='btn btn-sm btn-secondary ' title="{{ 'Domain.Actions.messages'|trans() }}">
-                                        <i class="fas fa-comments d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Entities.Domain.actions.messages'|trans() }}</span>
+                                        <i class="fas fa-comments d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                        <span class="d-none d-lg-block">{{ 'Entities.Domain.actions.messages'|trans() }}</span>
                                     </a>
                                 </li>
                                 <li class="list-inline-item">
@@ -60,8 +60,8 @@
                                        data-dialog-title='{{ 'Message.Dialogs.confirmDeleteDomainTitle'|trans }}' 
                                        data-dialog-content='{{ 'Message.Dialogs.confirmDeleteDomainContent'|trans }}'
                                        title="{{ 'Generics.actions.delete'|trans() }}">
-                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                        <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                        <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
                                     </a>
                                 </li>
                             </ul>

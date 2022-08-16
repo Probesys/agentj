@@ -8,14 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=Office365ConnectorRepository::class)
  */
-class Office365Connector
+class Office365Connector extends Connector
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
 
     /**
      * @ORM\Column(type="string", length=100)
@@ -32,17 +26,6 @@ class Office365Connector
      */
     private $clientSecret;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Connector::class, inversedBy="office365Connector", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $connector;
-
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getTenant(): ?string
     {
@@ -76,18 +59,6 @@ class Office365Connector
     public function setClientSecret(string $clientSecret): self
     {
         $this->clientSecret = $clientSecret;
-
-        return $this;
-    }
-
-    public function getConnector(): ?Connector
-    {
-        return $this->connector;
-    }
-
-    public function setConnector(Connector $connector): self
-    {
-        $this->connector = $connector;
 
         return $this;
     }

@@ -12,40 +12,23 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 class ConnectorType extends AbstractType
 {
-    private $connectorType;
+
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->connectorType = $options['connectorType'];
         $builder
             ->add('name')
-            ->add('type', HiddenType::class)
-            ->add('active')
-                ->add('office365Connector', Office365ConnectorType::class, [
-                'label' => false,
-            ])
-            ->addEventListener(
-                FormEvents::PRE_SET_DATA,
-                [$this, 'onPreSetData']
-            )                
+            ->add('type', HiddenType::class)               
         ;
     }
 
-    public function onPreSetData(FormEvent $event): void
-    {
-        $form = $event->getForm();
-        if ($this->connectorType == ConnectorTypes::LDAP){
-            $form->remove('office365Connector');
-        }
-    }
+
     
     
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Connector::class,
-            'connectorType' => ConnectorTypes::Office365,
-//            'allow_extra_fields' => true
         ]);
     }
 }
