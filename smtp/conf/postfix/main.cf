@@ -1,4 +1,4 @@
-smtpd_banner = Agent-J
+smtpd_banner = $myhostname AgentJ ESMTP (libre antispam system)
 biff = no
 append_dot_mydomain = no
 readme_directory = no
@@ -9,11 +9,35 @@ myhostname = $MAIL_HOSTNAME
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK.0/24
 mydestination = 
 
-smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination
-smtpd_helo_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_invalid_helo_hostname, reject_unknown_helo_hostname, reject_non_fqdn_helo_hostname
-smtpd_sender_restrictions = reject_unknown_sender_domain, reject_non_fqdn_sender
-smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_non_fqdn_recipient, reject_unknown_recipient_domain, reject_unlisted_recipient, reject_unauth_destination
-smtpd_client_restrictions = permit_mynetworks, reject_unknown_client_hostname, reject_unknown_reverse_client_hostname, reject_rbl_client zen.spamhaus.org, reject_rhsbl_reverse_client dbl.spamhaus.org, reject_rhsbl_helo dbl.spamhaus.org, reject_rhsbl_sender dbl.spamhaus.org
+smtpd_relay_restrictions = 
+    permit_mynetworks, 
+    permit_sasl_authenticated, 
+    defer_unauth_destination
+smtpd_helo_restrictions = 
+    permit_mynetworks, 
+    permit_sasl_authenticated, 
+    reject_invalid_helo_hostname, 
+    reject_unknown_helo_hostname, 
+    reject_non_fqdn_helo_hostname
+smtpd_sender_restrictions = 
+    reject_unknown_sender_domain, 
+    reject_non_fqdn_sender
+smtpd_recipient_restrictions = 
+    permit_mynetworks, 
+    permit_sasl_authenticated, 
+    reject_non_fqdn_recipient, 
+    reject_unknown_recipient_domain, 
+    reject_unlisted_recipient, 
+    reject_unauth_destination,
+    check_policy_service unix:private/policyd-spf
+smtpd_client_restrictions = 
+    permit_mynetworks, 
+    reject_unknown_client_hostname, 
+    reject_unknown_reverse_client_hostname, 
+    reject_rbl_client zen.spamhaus.org, 
+    reject_rhsbl_reverse_client dbl.spamhaus.org, 
+    reject_rhsbl_helo dbl.spamhaus.org, 
+    reject_rhsbl_sender dbl.spamhaus.org
 
 alias_maps = hash:/etc/postfix/aliases
 alias_database = hash:/etc/postfix/aliases
@@ -31,6 +55,8 @@ content_filter=amavisfeed:[amavis]:10024
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
+
+policyd-spf_time_limit = 3600
 
 milter_default_action = accept
 milter_protocol = 6
