@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   db:
-    image: mariadb:10.7.3
+    image: mariadb:10.8.3
     command: ["--default-authentication-plugin=mysql_native_password"]
     restart: always
     volumes:
@@ -16,8 +16,8 @@ services:
       - ajnet
 
   amavis:
-    image: probesys38/agentj_amavis:latest
-    restart: on-failure:3
+    image: probesys38/agentj_amavis:${VERSION}
+    restart: always
     env_file:
       - .env
     depends_on:
@@ -26,8 +26,6 @@ services:
       - ajnet
     volumes:
       - amavis:/var/amavis/
-      - clamav:/var/lib/clamav/
-      - spamassassin:/var/lib/spamassassin/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.252
@@ -37,7 +35,7 @@ services:
           memory: 2048m
 
   app:
-    image: probesys38/agentj_app:latest
+    image: probesys38/agentj_app:${VERSION}
     restart: always
     env_file:
       - .env
@@ -47,7 +45,7 @@ services:
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-      - opendkim:/etc/opendkim
+      - opendkim:/var/db/dkim
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.240
@@ -55,18 +53,16 @@ services:
       - 127.0.0.1:${PROXY_PORT:-8090}:80
 
   relay:
-    image: probesys38/agentj_relay:latest
+    image: probesys38/agentj_relay:${VERSION}
     restart: always
     env_file:
       - .env
-    volumes:
-      - postfix_relay:/etc/postfix/
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.251
 
   smtp:
-    image: probesys38/agentj_smtp:latest
+    image: probesys38/agentj_smtp:${VERSION}
     restart: always
     env_file:
       - .env
@@ -74,7 +70,6 @@ services:
       - db
     volumes:
       - postqueue:/var/spool/postfix
-      - smtpconfig:/etc/postfix
     ports:
       - 0.0.0.0:25:25
     networks:
@@ -82,7 +77,7 @@ services:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
 
   syslogng:
-    image: probesys38/agentj_syslogng:latest
+    image: probesys38/agentj_syslogng:${VERSION}
     restart: always
     env_file:
       - .env
@@ -104,25 +99,13 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  watchtower:
-    image: containrrr/watchtower
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: agentj_*
-
 volumes:
   amavis:
   applogs:
-  clamav:
   db:
   logs:
   opendkim:
-  postfix_relay:
   postqueue:
-  smtpconfig:
-  spamassassin:
 
 networks:
   ajnet:

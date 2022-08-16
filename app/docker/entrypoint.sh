@@ -2,18 +2,19 @@
 set -e
 
 # Configure opendkim
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/opendkim/TrustedHosts
-sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/opendkim/TrustedHosts
-touch /etc/opendkim/DomainsList
-touch /etc/opendkim/KeyTable
-touch /etc/opendkim/SigningTable
+sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /var/db/dkim/TrustedHosts
+sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /var/db/dkim/TrustedHosts
+touch /var/db/dkim/DomainsList
+touch /var/db/dkim/KeyTable
+touch /var/db/dkim/SigningTable
 addgroup www-data opendkim
-if [ ! -d /etc/opendkim/keys ]
+if [ ! -d /var/db/dkim/keys ]
 then
-    mkdir /etc/opendkim/keys
+    mkdir /var/db/dkim/keys
 fi
-chgrp -R opendkim /etc/opendkim
-chmod -R g+w /etc/opendkim
+chgrp -R opendkim /var/db/dkim
+chmod -R g+w /var/db/dkim
+chmod 0644 /etc/sudoers.d/opendkim
 
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
@@ -32,6 +33,7 @@ sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
 sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" /var/www/agentj/.env
 sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
+sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php8/php.ini
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php8 bin/console assets:install

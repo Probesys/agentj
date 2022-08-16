@@ -84,11 +84,12 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     supervisor \
     tzdata \
     && mkdir -p /var/run/php/ && touch /var/run/php/php8-fpm.pid \
-    && rm -rf node_modules
+    && rm -rf node_modules \
+    && mkdir -p /var/db/dkim
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/conf/opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+COPY docker/conf/opendkim/TrustedHosts /var/db/dkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
 COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
@@ -99,7 +100,7 @@ COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 COPY docker/files/deldomainkey.sh /usr/local/bin/deldomainkey.sh
 COPY docker/files/gendomainkey.sh /usr/local/bin/gendomainkey.sh
 
-VOLUME /etc/opendkim
+VOLUME /var/db/dkim
 
 EXPOSE 9000
 EXPOSE 8891

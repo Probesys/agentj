@@ -166,6 +166,12 @@ class DefaultController extends AbstractController {
         
 
 
+        $user = $this->getUser()->setPreferedLang($language);
+        $em->persist($user);
+        $em->flush();
+        
+
+        
         return new RedirectResponse($url);
     }
 

@@ -38,19 +38,19 @@ if [ $# -ne 2 ] ; then
     exit 2
 fi
 
-echo "$_DOMAIN" >> /etc/opendkim/DomainsList
-echo "$_MX" >> /etc/opendkim/TrustedHosts
-echo "*@$_DOMAIN agentj._domainkey.$_DOMAIN" >> /etc/opendkim/SigningTable
-echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/etc/opendkim/keys/$_DOMAIN/agentj.private" >> /etc/opendkim/KeyTable
+echo "$_DOMAIN" >> /var/db/dkim/DomainsList
+echo "$_MX" >> /var/db/dkim/TrustedHosts
+echo "*@$_DOMAIN agentj._domainkey.$_DOMAIN" >> /var/db/dkim/SigningTable
+echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/etc/opendkim/keys/$_DOMAIN/agentj.private" >> /var/db/dkim/KeyTable
 
-if [ -d /etc/opendkim/keys/"$_DOMAIN" ]; then
+if [ -d /var/db/dkim/keys/"$_DOMAIN" ]; then
     echo "This domain already has DKIM keys. Nothing to do."
 else
     echo "No DKIM keys exist for this domain. Generating new ones."
-    mkdir -p /etc/opendkim/keys/"$_DOMAIN"
-    cd /etc/opendkim/keys/"$_DOMAIN" || exit
+    mkdir -p /var/db/dkim/keys/"$_DOMAIN"
+    cd /var/db/dkim/keys/"$_DOMAIN" || exit
     opendkim-genkey -s agentj -d "$_DOMAIN"
-    sudo /bin/chown -R opendkim:opendkim /etc/opendkim
+    sudo /bin/chown -R opendkim:opendkim /var/db/dkim
 fi
 
 exit $?
