@@ -164,12 +164,6 @@ class Domain
      */
     private $connectors;
 
-    /**
-     * @ORM\Column(type="string", length=10, nullable=true)
-     */
-    private $authMode;
-
-
 
     public function __construct()
     {
@@ -507,15 +501,5 @@ class Domain
         return $this;
     }
 
-    public function getAuthMode(): ?string
-    {
-        return $this->authMode;
-    }
-
-    public function setAuthMode(?string $authMode): self
-    {
-        $this->authMode = $authMode;
-
-        return $this;
-    }
+    
 }
