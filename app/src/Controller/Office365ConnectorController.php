@@ -81,19 +81,19 @@ class Office365ConnectorController extends AbstractController {
     }
 
     #[Route('/office365/{id}/sync-user', name: 'app_office365_connector_sync')]
-    public function syncUser(Connector $connector): Response {
-        $this->application->setAutoExit(false);
-        $input = new ArrayInput([
-            'connectorId' => $connector->getId(),
-        ]);
-        $command = $this->application->find(Office365ImportCommand::getDefaultName());
-        $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
-        $command->run($input, $output);
-        dd($output->fetch());
+    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+        if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
+            $input = new ArrayInput([
+                'connectorId' => $connector->getId(),
+            ]);
+            $command = $this->application->find(Office365ImportCommand::getDefaultName());
+            $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
+            $command->run($input, $output);
+            $this->addFlash('success', $output->fetch());
+        }
 
-        return $this->render('office365_connector/index.html.twig', [
-                    'controller_name' => 'Office365ConnectorController',
-        ]);
+
+        return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
 
 }

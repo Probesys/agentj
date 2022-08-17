@@ -8,7 +8,7 @@ use App\Util\Enum;
 class ConnectorTypes extends Enum
 {
     public const Office365 = 'Office365';
-    public const LDAP = 'LDAP';
+//    public const LDAP = 'LDAP';
   
 
 }

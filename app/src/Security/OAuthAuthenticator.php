@@ -47,8 +47,7 @@ class OAuthAuthenticator extends OAuth2Authenticator
         return new SelfValidatingPassport(
             new UserBadge($accessToken->getToken(), function () use ($accessToken, $client) {
                 $oAuthUser = $client->fetchUserFromToken($accessToken);
-//                return $oAuthUser;
-//dd($oAuthUser);
+
                 $existingUser = $this->userRepository->findOneByUid($oAuthUser->getId());
 
                 if ($existingUser !== null) {
@@ -73,7 +72,7 @@ class OAuthAuthenticator extends OAuth2Authenticator
     {
         $redirectUri =
             $this->getTargetPath($request->getSession(), $firewallName) ??
-            $this->router->generate('home');
+            $this->router->generate('homepage');
 
         return new RedirectResponse($redirectUri);
     }
