@@ -25,7 +25,7 @@ class ConnectorController extends AbstractController {
 
     #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
     public function delete(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
-        if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->query->get('_token'))) {
+        if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
             $connectorRepository->remove($connector, true);
         }
 

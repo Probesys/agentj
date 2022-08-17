@@ -21,6 +21,7 @@ Generics:
     search: Search
     display: Display
     rememberme: 'Remember me'
+    import: "Import"
     importFile: "Import from file"
   fields:
     name: Title
@@ -233,6 +234,9 @@ Message:
       description: 'An error occurred that prevents the display of this page. <br/><br/>
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
+  Office365Connector:
+    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated"
+    tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: 'new(x) unprocessed messages'
@@ -375,6 +379,7 @@ Entities:
         LIST_MAIL_MSGS: 'List of untreated messages'}
     actions:
       add_connector : Add connector
+      importUserAndAliases: "Import users and aliases"
       add_new: 'Add a new domain'
       add_new_rule: 'New rule'
       deleteRule: 'Delete rule'
@@ -439,7 +444,7 @@ Entities:
     labels:
     fields:
       name: "Connector name"    
-      type: "Connector type"  
+      type: "Connector type" 
   Office365Connector:
     labels:
     fields:

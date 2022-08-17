@@ -17,6 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsCommand(
             name: 'agentj:import-office365',
@@ -25,11 +26,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class Office365ImportCommand extends Command {
 
     private EntityManagerInterface $em;
-    private string $tenant;
+    private Office365Connector $connector;
+    private int $nbUserCreated = 0;
+    private int $nbUserUpdated = 0;
+    private $translator;
 
-    public function __construct(EntityManagerInterface $em) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
         parent::__construct();
         $this->em = $em;
+        $this->translator = $translator;
     }
 
     protected function configure(): void {
@@ -44,32 +49,32 @@ class Office365ImportCommand extends Command {
         $connectorId = $input->getArgument('connectorId');
 
         /* @var $connector Office365Connector */
-        $connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
-        if (!$connector) {
+        $this->connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
+        if (!$this->connector) {
             $io->error('Connector not found');
             return Command::FAILURE;
         }
 
-        $this->tenant = $connector->getTenant();
-
-        $token = $this->getToken($connector);
+        $token = $this->getToken();
         if (!$token) {
-            $io->error('Unable to get access token from graph API. Please check your parameters');
+            $io->write($this->translator->trans('Message.Office365Connector.tokenError'));
             return Command::FAILURE;
         }
         $this->loadUsers($token);
-        $accessToken = $token->access_token;
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
+            '$NB_CREATED' => $this->nbUserCreated,
+            '$NB_UPDATED' => $this->nbUserUpdated,
+        ]));
 
         return Command::SUCCESS;
     }
 
-    private function getToken(Office365Connector $connector): ?\stdClass {
+    private function getToken(): ?\stdClass {
         $guzzle = new Client();
-        $clientId = $connector->getClient();
-        $clientSecret = $connector->getClientSecret();
-        $url = 'https://login.microsoftonline.com/' . $this->tenant . '/oauth2/v2.0/token';
+        $clientId = $this->connector->getClient();
+        $clientSecret = $this->connector->getClientSecret();
+        $url = 'https://login.microsoftonline.com/' . $this->connector->getTenant() . '/oauth2/v2.0/token';
         try {
             $token = json_decode($guzzle->post($url, [
                         'form_params' => [
@@ -82,52 +87,62 @@ class Office365ImportCommand extends Command {
 
             return $token;
         } catch (GuzzleException $exception) {
-//            $io->error('Unable to connect with this parameters' . $exception->getMessage());
             return null;
         }
     }
 
-    private function loadGroups($token) {
-
-        $graph = new Graph();
-        $graph->setAccessToken($token->access_token);
-
-        $user = $graph->createRequest("GET", '/users/b9b39c23-160b-445c-a90f-f6763998cf15?$select=proxyaddresses')
-//                      ->setReturnType(User::class)
-                ->execute();
-        dd($user->getBody());
-        echo "Hello, I am {$user->getGivenName()}.";
-    }
-
     private function loadUsers($token) {
-//        dd($token);
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
 
-        $result = $graph->createRequest("GET", '/users')
-//                      ->setReturnType(User::class)
+        $users = $graph->createRequest("GET", '/users' . '?$select=displayName,mail,proxyaddresses')
+                ->setReturnType(graphUser::class)
                 ->execute();
-        $users = $result->getBody()['value'];
         foreach ($users as $graphUser) {
             /* @var $graphUser graphUser */
-            $user = new User();
-            $user->setEmail($graphUser['mail']);
-            dump($graphUser);
+
+            
+            $email = $graphUser->getMail();
+            $domain = $this->connector->getDomain();
+            $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+            if (!$user) {
+                $user = new User();
+                $user->setEmail($email);
+                $this->nbUserCreated++;
+            }
+            else {
+                $this->nbUserUpdated++;
+            }
+            $user->setUsername($graphUser->getDisplayName());
+            $user->setFullname($graphUser->getDisplayName());
+            $user->setReport(true);
+            $user->setRoles("['ROLE_USER']");
+            $user->setDomain($domain);
+            $user->setPolicy($domain->getPolicy());
+            $user->setPriority(7);
+            if (count($graphUser->getProxyAddresses()) > 1) {
+                $this->addAliases($user, $graphUser->getProxyAddresses());
+            }
+
+            $this->em->persist($user);
+            $this->em->flush();
         }
-        die;
-        echo "Hello, I am {$user->getGivenName()}.";
     }
 
-    private function loadAliases($userId) {
+    private function addAliases(User $user, array $proxyAdresses) {
+        foreach ($proxyAdresses as $proxyAdresse) {
+            if (substr($proxyAdresse, 0, 4) === 'smtp') {
 
-        $graph = new Graph();
-        $graph->setAccessToken($token->access_token);
-
-        $user = $graph->createRequest("GET", '/users/' . $userId . '?$select=proxyaddresses')
-//                      ->setReturnType(User::class)
-                ->execute();
-        dd($user->getBody());
-        echo "Hello, I am {$user->getGivenName()}.";
+                $aliasEmail = substr($proxyAdresse, 5, strlen($proxyAdresse));
+                $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
+                if (!$alias) {
+                    $alias = clone $user;
+                }
+                $alias->setEmail($aliasEmail);
+                $alias->setOriginalUser($user);
+                $this->em->persist($alias);
+            }
+        }
     }
 
 }

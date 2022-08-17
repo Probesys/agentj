@@ -21,6 +21,7 @@ Generics:
     search: Rechercher
     display: Afficher
     rememberme: Se souvenir de moi
+    import: "Importer"
     importFile: "Importer depuis un fichier"
   fields:
     name: Intitulé
@@ -238,6 +239,9 @@ Message:
       description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
+  Office365Connector:
+    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour"
+    tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: nouveau(x) messages non traités
@@ -386,7 +390,8 @@ Entities:
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
     actions:
-      add_connector : Ajouter un connecteur  
+      add_connector : Ajouter un connecteur 
+      importUserAndAliases: "Importer les utilisateurs et les alias" 
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
       deleteRule: Supprimer la règle
