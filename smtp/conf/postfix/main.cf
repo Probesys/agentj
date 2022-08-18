@@ -1,4 +1,4 @@
-smtpd_banner = Agent-J
+smtpd_banner = $myhostname AgentJ ESMTP (libre antispam system)
 biff = no
 append_dot_mydomain = no
 readme_directory = no
