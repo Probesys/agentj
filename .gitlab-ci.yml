@@ -197,6 +197,7 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
