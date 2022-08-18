@@ -9,8 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model\User as graphUser;
-use Microsoft\Graph\Model\Group as graphGroup;
+use Microsoft\Graph\Model\User as GraphUser;
+use Microsoft\Graph\Model\Group as GraphGroup;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -61,9 +61,10 @@ class Office365ImportCommand extends Command {
             $io->write($this->translator->trans('Message.Office365Connector.tokenError'));
             return Command::FAILURE;
         }
-        
+
+//        
+        $this->importUsers($token);
         $this->importGroupsToUser($token);
-        $this->loadUsers($token);
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
@@ -94,27 +95,27 @@ class Office365ImportCommand extends Command {
         }
     }
 
-    private function loadUsers(\stdclass $token) {
+    private function importUsers(\stdclass $token) {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
 
         try {
-            $users = $graph->createRequest("GET", '/users' . '?$select=displayName,mail,proxyaddresses')
-                    ->setReturnType(graphUser::class)
+            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses')
+                    ->setReturnType(GraphUser::class)
                     ->execute();
         } catch (GuzzleException $exc) {
             return false;
         }
 
         foreach ($users as $graphUser) {
-            /* @var $graphUser graphUser */
+            /* @var $graphUser GraphUser */
 
-            $email = $graphUser->getMail();
-            if (is_null($email)){
+
+            if (is_null($graphUser->getMail())) {
                 continue;
             }
             $domain = $this->connector->getDomain();
-            $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+            $user = $this->em->getRepository(User::class)->findOneByUid($graphUser->getId());
             if (!$user) {
                 $user = new User();
                 $user->setEmail($email);
@@ -122,11 +123,12 @@ class Office365ImportCommand extends Command {
             } else {
                 $this->nbUserUpdated++;
             }
-            $user->setUsername($graphUser->getDisplayName());
+            $user->setUsername($graphUser->getMail());
             $user->setFullname($graphUser->getDisplayName());
             $user->setReport(true);
-            $user->setRoles("['ROLE_USER']");
+            $user->setRoles('["ROLE_USER"]');
             $user->setDomain($domain);
+            $user->setUid($graphUser->getId());
             $user->setPolicy($domain->getPolicy());
             $user->setPriority(7);
             if (count($graphUser->getProxyAddresses()) > 1) {
@@ -153,20 +155,72 @@ class Office365ImportCommand extends Command {
             }
         }
     }
-    
-    private function importGroupsToUser(\stdclass $token){
+
+    private function importGroupsToUser(\stdclass $token) {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
-        
+        $domain = $this->connector->getDomain();
         try {
             $groups = $graph->createRequest("GET", '/groups' . '?$select=id,displayName,mail')
-                    ->setReturnType(graphGroup::class)
+                    ->setReturnType(GraphGroup::class)
                     ->execute();
-            dd($groups);
+            foreach ($groups as $group) {
+                /* @var $group GraphGroup */
+                $userGroup = $this->em->getRepository(User::class)->findOneByUid($group->getId());
+                if (!$userGroup) {
+                    $userGroup = new User();
+                    $userGroup->setEmail($group->getMail());
+                    $this->nbUserCreated++;
+                } else {
+                    $this->nbUserUpdated++;
+                }
+                $userGroup->setUsername($group->getMail());
+                $userGroup->setFullname($group->getDisplayName());
+                $userGroup->setReport(true);
+                $userGroup->setRoles('["ROLE_USER"]');
+                $userGroup->setDomain($domain);
+                $userGroup->setUid($group->getId());
+                $userGroup->setPolicy($domain->getPolicy());
+                $userGroup->setPriority(7);
+                $this->em->persist($userGroup);
+                $this->em->flush();
+                $owners = $this->getGroupOwners($token, $userGroup);
+            }
+//            die;
         } catch (GuzzleException $exc) {
-            dd($exc);
             return false;
-        }        
+        }
+    }
+
+    /**
+     * Get owners of office 365 group. Share the group email with is members
+     * @param \stdclass $token
+     * @param User $userGroup
+     * @return void
+     */
+    private function getGroupOwners(\stdclass $token, User $userGroup): void {
+        $owners = [];
+        $graph = new Graph();
+        $graph->setAccessToken($token->access_token);
+
+        try {
+            $owners = $graph->createRequest("GET", '/groups/' . $userGroup->getUId() . '/owners')
+                    ->setReturnType(GraphUser::class)
+                    ->execute();
+
+//            return $owners;
+        } catch (GuzzleException $exc) {
+            
+        }
+
+        // user created from group
+//        $userGroup = $this->em->getRepository(User::class)->findOneByUid($userGroup->getUId());
+        foreach ($owners as $owner) {
+            $user = $this->em->getRepository(User::class)->findOneByUid($owner->getId());
+            if ($user) {
+                $userGroup->addSharedWith($user);
+            }
+        }
     }
 
 }
