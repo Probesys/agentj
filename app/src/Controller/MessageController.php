@@ -25,27 +25,23 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @Route("/message")
  */
-class MessageController extends AbstractController
-{
+class MessageController extends AbstractController {
 
     private $translator;
     private $em;
 
-        
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
-    {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
         $this->translator = $translator;
         $this->em = $em;
     }
 
-  /**
-   * @Route("/{type}", name="message")
-   */
-    public function index($type = null, Request $request, TranslatorInterface $translator, PaginatorInterface $paginator)
-    {
+    /**
+     * @Route("/{type}", name="message")
+     */
+    public function index($type = null, Request $request, TranslatorInterface $translator, PaginatorInterface $paginator) {
         $subTitle = '';
         $messageActions = [
-        'Message.Actions.Delete' => 'delete'
+            'Message.Actions.Delete' => 'delete'
         ];
 
         if ($type) {
@@ -53,9 +49,9 @@ class MessageController extends AbstractController
                 case 'spam':
                     $subTitle = 'Entities.Message.spammedDetect';
                     $messageActions = [
-                      'Message.Actions.Restore' => 'restore',                      
-                      'Message.Actions.Autorized' => 'authorized',
-                      'Message.Actions.Delete' => 'delete',
+                        'Message.Actions.Restore' => 'restore',
+                        'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Delete' => 'delete',
                     ];
                     $type = MessageStatus::SPAMMED;
                     break;
@@ -65,15 +61,15 @@ class MessageController extends AbstractController
                     $subTitle = 'Entities.Message.' . $type;
                     $type = MessageStatus::BANNED;
                     $messageActions = [
-                    'Message.Actions.Autorized' => 'authorized',
-                    'Message.Actions.Delete' => 'delete',
+                        'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Delete' => 'delete',
                     ];
                     break;
                 case 'authorized':
                     $subTitle = 'Entities.Message.' . $type;
                     $messageActions = [
-                    'Message.Actions.Banned' => 'banned',
-                    'Message.Actions.Delete' => 'delete',
+                        'Message.Actions.Banned' => 'banned',
+                        'Message.Actions.Delete' => 'delete',
                     ];
                     $type = MessageStatus::AUTHORIZED;
                     break;
@@ -89,20 +85,20 @@ class MessageController extends AbstractController
                 default:
                     $subTitle = 'Entities.Message.untreated';
                     $messageActions = [
-                    'Message.Actions.Autorized' => 'authorized',
-                    'Message.Actions.Banned' => 'banned',
-                    'Message.Actions.Delete' => 'delete',
-                    'Message.Actions.Restore' => 'restore',
+                        'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Banned' => 'banned',
+                        'Message.Actions.Delete' => 'delete',
+                        'Message.Actions.Restore' => 'restore',
                     ];
                     $type = MessageStatus::UNTREATED;
                     break;
             }
         } else {
             $messageActions = [
-            'Message.Actions.Autorized' => 'authorized',
-            'Message.Actions.Banned' => 'banned',
-            'Message.Actions.Delete' => 'delete',
-            'Message.Actions.Restore' => 'restore',
+                'Message.Actions.Autorized' => 'authorized',
+                'Message.Actions.Banned' => 'banned',
+                'Message.Actions.Delete' => 'delete',
+                'Message.Actions.Restore' => 'restore',
             ];
             $subTitle = 'Entities.Message.untreated';
         }
@@ -142,84 +138,80 @@ class MessageController extends AbstractController
         }
         $filterForm->get('per_page')->setData($per_page);
 
-
         $msg2Show = $paginator->paginate(
-            $allMessages,
-            $request->query->getInt('page', 1)/* page number */,
-            $per_page
+                $allMessages,
+                $request->query->getInt('page', 1)/* page number */,
+                $per_page
         );
         unset($allMessages);
         return $this->render('message/index.html.twig', [
-                'controller_name' => 'MessageController',
-                'subTitle' => $subTitle,
-                'msgs' => $msg2Show,
-                'type' => $type,
-                'per_page_global' => $per_page,
-                'totalItemFound' => $totalMsgFound,
-                'filter_form' => $filterForm->createView()
+                    'controller_name' => 'MessageController',
+                    'subTitle' => $subTitle,
+                    'msgs' => $msg2Show,
+                    'type' => $type,
+                    'per_page_global' => $per_page,
+                    'totalItemFound' => $totalMsgFound,
+                    'filter_form' => $filterForm->createView()
         ]);
     }
 
-  /**
-   * Show infos about message.
-   * @param integer $id
-   * @Route("/{partitionTag}/{mailId}/{rid}/show/", name="message_show",  methods="GET")
-   *
-   * @return Response
-   */
-    public function showAction($partitionTag, $mailId, $rid, Request $request)
-    {
+    /**
+     * Show infos about message.
+     * @param integer $id
+     * @Route("/{partitionTag}/{mailId}/{rid}/show/", name="message_show",  methods="GET")
+     *
+     * @return Response
+     */
+    public function showAction($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
 
-      /* @var $msgs Msgrcpt */
+        /* @var $msgs Msgrcpt */
         $msgRcpt = $em->getRepository(Msgrcpt::class)->findOneBy([
-        'partitionTag' => $partitionTag,
-        'mailId' => $mailId,
-        'rid' => $rid
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid
         ]);
 
-      /* @var $msg Msgs */
+        /* @var $msg Msgs */
         $msg = $em->getRepository(Msgs::class)->findOneBy([
-        'partitionTag' => $partitionTag,
-        'mailId' => $mailId,
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
         ]);
-      /* @var $user User */
+        /* @var $user User */
         $wbListInfos = $em->getRepository(Wblist::class)->getWbListInfoForSender($msg->getSid()->getEmailClear(), $msgRcpt->getRid()->getEmailClear(), $msg->getTimeIso());
         return $this->render('message/show.html.twig', [
-                'controller_name' => 'MessageController',
-                'msg' => $msg,
-                'msgRcpt' => $msgRcpt,
-                'wblistInfo' => $wbListInfos
+                    'controller_name' => 'MessageController',
+                    'msg' => $msg,
+                    'msgRcpt' => $msgRcpt,
+                    'wblistInfo' => $wbListInfos
         ]);
     }
 
-  /**
-   * Delete a message entity.
-   * @param integer $id
-   * @Route("/{partitionTag}/{mailId}/{rid}/delete/", name="message_delete",  methods="GET")
-   *
-   * @return Response
-   */
-    public function deleteAction($partitionTag, $mailId, $rid, Request $request)
-    {
+    /**
+     * Delete a message entity.
+     * @param integer $id
+     * @Route("/{partitionTag}/{mailId}/{rid}/delete/", name="message_delete",  methods="GET")
+     *
+     * @return Response
+     */
+    public function deleteAction($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
-  //    $em->getRepository(Msgs::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED); //status == delete
+        //    $em->getRepository(Msgs::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED); //status == delete
         $em->getRepository(Msgrcpt::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED, $rid); //status == delete
         $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
         $logService = new LogService($em);
         $logService->addLog('delete', $mailId);
         $referer = $request->headers->get('referer');
         return new RedirectResponse($referer);
-  //    return $this->redirectToRoute('message', ['type' => $type]);
+        //    return $this->redirectToRoute('message', ['type' => $type]);
     }
 
-  /**
+    /**
      *
      * @Route("/batch/{action}", name="message_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
-    public function batchMessageAction($action = null, Request $request, MsgsRepository $msgRepository)
-    {
+    public function batchMessageAction($action = null, Request $request, MsgsRepository $msgRepository) {
         $em = $this->em;
         if ($action) {
             foreach ($request->request->get('id') as $obj) {
@@ -254,13 +246,12 @@ class MessageController extends AbstractController
         return $this->redirect($referer);
     }
 
-  /**
-   * @Route("/{partitionTag}/{mailId}/{rid}/authorized", name="message_authorized")
-   */
-    public function authorized($partitionTag, $mailId, $rid, Request $request)
-    {
+    /**
+     * @Route("/{partitionTag}/{mailId}/{rid}/authorized", name="message_authorized")
+     */
+    public function authorized($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
-      //W = White and 2 is authorized
+        //W = White and 2 is authorized
         if ($this->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, 0, $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
             $logService = new LogService($em);
@@ -273,14 +264,13 @@ class MessageController extends AbstractController
         }
     }
 
-  /**
-   * @Route("/{partitionTag}/{mailId}/{rid}/banned", name="message_banned")
-   */
-    public function banned($partitionTag, $mailId, $rid, Request $request)
-    {
+    /**
+     * @Route("/{partitionTag}/{mailId}/{rid}/banned", name="message_banned")
+     */
+    public function banned($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
 
-      //B = Black and msg status = 1 is banned
+        //B = Black and msg status = 1 is banned
         if ($this->msgsToWblist($partitionTag, $mailId, "B", MessageStatus::BANNED, 0, $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
             $logService = new LogService($em);
@@ -290,7 +280,7 @@ class MessageController extends AbstractController
         return new RedirectResponse($referer);
     }
 
-  /**
+    /**
      * Only release the message for all recipients. Does not add entries in wblist
      * @param type $partitionTag
      * @param type $mailId
@@ -299,29 +289,28 @@ class MessageController extends AbstractController
      * @throws ProcessFailedException
      * @Route("/{partitionTag}/{mailId}/{rid}/restore", name="message_restore")
      */
-    public function restore($partitionTag, $mailId, $rid, Request $request)
-    {
+    public function restore($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
-      //select msgs and msgcpt
+        //select msgs and msgcpt
         $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
 
-      /* @var $msgrcpt Msgrcpt */
+        /* @var $msgrcpt Msgrcpt */
         $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
         if ($msgrcpt && $msgs->getQuarLoc() && $msgs->getSecretId()) {
             $mailRcpt = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
             $process = new Process([$this->getParameter('app.amavisd-release'), stream_get_contents($msgs->getQuarLoc(), -1, 0), stream_get_contents($msgs->getSecretId(), -1, 0), $mailRcpt]);
             $process->run(
-                function ($type, $buffer) use ($msgrcpt) {
-                    $msgrcpt->setAmavisOutput($buffer);
-                }
+                    function ($type, $buffer) use ($msgrcpt) {
+                        $msgrcpt->setAmavisOutput($buffer);
+                    }
             );
             if (!$process->isSuccessful()) {
-                  throw new ProcessFailedException($process);
+                throw new ProcessFailedException($process);
             }
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageRestored'));
-    //      $logService = new LogService($em);
-    //      $logService->addLog('restored', $mailId);
+            //      $logService = new LogService($em);
+            //      $logService->addLog('restored', $mailId);
 
             $msgStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::RESTORED);
             $msgs->setStatus($msgStatus);
@@ -342,26 +331,25 @@ class MessageController extends AbstractController
         }
     }
 
-  /**
-   * Create wblist and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate )
-   * @param type $partitionTag
-   * @param type $mailId
-   * @param type $wb
-   * @param type $status
-   * @param type $type
-   * @param type $rid
-   * @return boolean
-   * @throws type
-   * @throws ProcessFailedException
-   */
-    public function msgsToWblist($partitionTag, $mailId, $wb, $status, $type = 0, $rid = null)
-    {
+    /**
+     * Create wblist and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate )
+     * @param type $partitionTag
+     * @param type $mailId
+     * @param type $wb
+     * @param type $status
+     * @param type $type
+     * @param type $rid
+     * @return boolean
+     * @throws type
+     * @throws ProcessFailedException
+     */
+    public function msgsToWblist($partitionTag, $mailId, $wb, $status, $type = 0, $rid = null) {
         $state = false;
-  //    $successReleasedMsgs = [];
+        //    $successReleasedMsgs = [];
         $em = $this->em;
 
-      //select msgs and msgcpt
-      /*@var $msgs Msgs */
+        //select msgs and msgcpt
+        /* @var $msgs Msgs */
         $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         if (!$msgs) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -373,21 +361,21 @@ class MessageController extends AbstractController
             $msgrcpt = $em->getRepository(Msgrcpt::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         }
 
-      //check if sender exists in the database
+        //check if sender exists in the database
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
-       //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
+        //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
 
+        $fromAddr = null;
         preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msgs->getFromAddr(), $matches);
         if (isset($matches[0][0]) && filter_var($matches[0][0], FILTER_VALIDATE_EMAIL)) {
             $fromAddr = filter_var($matches[0][0], FILTER_VALIDATE_EMAIL);
-            $emailSenderToWb = $emailSender != $fromAddr ? $fromAddr : $emailSender;
         }
 
-
+        $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
 
         $mailaddrSender = $em->getRepository(Mailaddr::class)->findOneBy(['email' => $emailSenderToWb]);
 
-      //if notwe create email in Mailaddr
+        //if notwe create email in Mailaddr
         if (!$mailaddrSender) {
             $mailaddrSender = new Mailaddr();
             $mailaddrSender->setEmail($emailSenderToWb);
@@ -400,24 +388,23 @@ class MessageController extends AbstractController
             $emailReceipt = stream_get_contents($messageRecipient->getRid()->getEmail(), -1, 0);
             $mainUser = $em->getRepository(User::class)->findOneBy(['email' => $emailReceipt]);
 
-          // if adress in an alias we get the target mail
+            // if adress in an alias we get the target mail
             if ($mainUser && $mainUser->getOriginalUser()) {
                 $mainUser = $mainUser->getOriginalUser();
             }
 
-          // we check if aliases exist
+            // we check if aliases exist
             if ($mainUser) {
                 $userAndAliases = $em->getRepository(User::class)->findBy(['originalUser' => $mainUser->getId()]);
                 array_unshift($userAndAliases, $mainUser);
             }
 
             foreach ($userAndAliases as $user) {
-              //add white liste
-
-      //        $sid = $mailaddrSender->getId();
+                //add white liste
+                //        $sid = $mailaddrSender->getId();
                 $rid = $user->getId();
-              //if the msgs is authorized we release all msgs of the same sender
-              //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
+                //if the msgs is authorized we release all msgs of the same sender
+                //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
                 $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user]);
                 if (!$wblist) {
                     $wblist = new Wblist($user, $mailaddrSender);
@@ -429,23 +416,23 @@ class MessageController extends AbstractController
 
                 $messageStatus = $em->getRepository(MessageStatus::class)->find($status);
 
-              //get all msgs from email Sender and send all message for one user
+                //get all msgs from email Sender and send all message for one user
                 $msgsRelease = $em->getRepository(Msgs::class)->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                      /* @var $oneMsgRcpt Msgrcpt */
+                        /* @var $oneMsgRcpt Msgrcpt */
                         $oneMsgRcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $msgRelease['partition_tag'], 'mailId' => $msgRelease['mail_id'], 'rid' => $msgRelease['rid']]);
                         //if W we deliver blokec messages if it has been released yet
                         if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
-                              $process = new Process([$this->getParameter('app.amavisd-release'), $msgRelease['quar_loc'], $msgRelease['secret_id'], $msgRelease['recept_mail']]);
-                              $process->getCommandLine();
+                            $process = new Process([$this->getParameter('app.amavisd-release'), $msgRelease['quar_loc'], $msgRelease['secret_id'], $msgRelease['recept_mail']]);
+                            $process->getCommandLine();
                             $process->run(
-                                function ($type, $buffer) use ($oneMsgRcpt) {
-                                    $oneMsgRcpt->setAmavisOutput($buffer);
-                                }
+                                    function ($type, $buffer) use ($oneMsgRcpt) {
+                                        $oneMsgRcpt->setAmavisOutput($buffer);
+                                    }
                             );
                             if (!$process->isSuccessful()) {
-                                    throw new ProcessFailedException($process);
+                                throw new ProcessFailedException($process);
                             }
                         }
 
@@ -474,12 +461,11 @@ class MessageController extends AbstractController
         return $state;
     }
 
-  /**
-   * @Route("/{partitionTag}/{mailId}/{rid}/authorizedDomain", name="message_authorized_domain")
-   */
-    public function authorizedDomain($partitionTag, $mailId, $rid, Request $request)
-    {
-      //W = White and 2 is authorized
+    /**
+     * @Route("/{partitionTag}/{mailId}/{rid}/authorizedDomain", name="message_authorized_domain")
+     */
+    public function authorizedDomain($partitionTag, $mailId, $rid, Request $request) {
+        //W = White and 2 is authorized
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "W", $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
             $em = $this->em;
@@ -490,12 +476,11 @@ class MessageController extends AbstractController
         return new RedirectResponse($referer);
     }
 
-  /**
-   * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
-   */
-    public function bannedDomain($partitionTag, $mailId, $rid, Request $request)
-    {
-      //B = Black and msg status = 1 is banned
+    /**
+     * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
+     */
+    public function bannedDomain($partitionTag, $mailId, $rid, Request $request) {
+        //B = Black and msg status = 1 is banned
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "B", $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
             $em = $this->em;
@@ -506,13 +491,12 @@ class MessageController extends AbstractController
         return new RedirectResponse($referer);
     }
 
-  /* Create rules of domain and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate ) */
+    /* Create rules of domain and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate ) */
 
-    public function msgsToWblistDomain($partitionTag, $mailId, $wb, $rid)
-    {
+    public function msgsToWblistDomain($partitionTag, $mailId, $wb, $rid) {
         $em = $this->em;
 
-      //select msgs and msgcpt
+        //select msgs and msgcpt
         $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         if (!$msgs) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -532,7 +516,7 @@ class MessageController extends AbstractController
         $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
 
         $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
-      //todo check right of user connected admin of domain access
+        //todo check right of user connected admin of domain access
         $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSenderToWb]));
 
         if (!$mailaddr) {
@@ -546,7 +530,7 @@ class MessageController extends AbstractController
                 $wblist = new Wblist($userDomain, $mailaddr);
             }
         }
-        
+
         $wblist->setWb($wb);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
 
@@ -560,12 +544,12 @@ class MessageController extends AbstractController
                 $process = new Process([$this->getParameter('app.amavisd-release'), $oneRcpt['quar_loc'], $oneRcpt['secret_id'], $oneRcpt['recept_mail']]);
                 $process->getCommandLine();
                 $process->run(
-                    function ($type, $buffer) use ($oneMsgRcptObj) {
-                        $oneMsgRcptObj->setAmavisOutput($buffer);
-                    }
+                        function ($type, $buffer) use ($oneMsgRcptObj) {
+                            $oneMsgRcptObj->setAmavisOutput($buffer);
+                        }
                 );
                 if (!$process->isSuccessful()) {
-                      throw new ProcessFailedException($process);
+                    throw new ProcessFailedException($process);
                 }
                 $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::AUTHORIZED);
             } else {
@@ -585,4 +569,5 @@ class MessageController extends AbstractController
         $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
         return $state;
     }
+
 }
