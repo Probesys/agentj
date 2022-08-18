@@ -137,19 +137,6 @@ mass_build:
         done
   when: manual
 
-# This task is manually triggered only
-mass_build:
-  stage: build
-  script:
-    - for DIR in amavis app relay smtp syslogng web ;
-        do cd $CI_PROJECT_DIR/$DIR && docker build
-        --cache-from $REGISTRY/agentj_$DIR:dev
-        --build-arg BUILDKIT_INLINE_CACHE=1
-        -t $REGISTRY/agentj_$DIR:dev . ;
-        docker push $REGISTRY/agentj_$DIR:dev ;
-        done
-  when: manual
-
 deploy-dev:
   stage: deploy
   cache: {}
@@ -210,6 +197,7 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
@@ -249,20 +237,4 @@ deploy-tags:
     - tags
   except:
     - branches
-    - merge_requests
-
-prepare-prod:
-  stage: publish
-  cache: {}
-  variables:
-    TAG: $CI_COMMIT_TAG
-  before_script:
-    - echo $TAG 
-    - echo $REGISTRY
-  script:
-    - sed -i "s|\$VERSION|$TAG|g" docker-compose.yml
-    - sed -i "s|agentj_version|$TAG|g" .env.example
-  only:
-    - prod
-  except:
     - merge_requests
