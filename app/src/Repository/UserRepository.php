@@ -16,40 +16,38 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository
-{
+class UserRepository extends ServiceEntityRepository {
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(ManagerRegistry $registry) {
         parent::__construct($registry, User::class);
     }
 
-   public function findOneByUid(string $uid): ?User
-    {
+    public function findOneByUid(string $uid): ?User {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.uid = :uid')
-            ->setParameter('uid', $uid)
-            ->getQuery()
-            ->getOneOrNullResult();
+                        ->join('u.domain', 'd')
+                        ->andWhere('u.uid = :uid')
+                        ->andWhere('d.active=1')
+                        ->setParameter('uid', $uid)
+                        ->getQuery()
+                        ->getOneOrNullResult();
     }
 
-
-   public function findOneByEmail(string $email): ?User
-    {
+    public function findOneByEmail(string $email): ?User {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.email = :email')
-            ->setParameter('email', $email)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }    
-    
-  /**
-   * Return all users from active domains
-   * @param boolean $withAlias
-   * @return type
-   */
-    public function activeUsers($withAlias = false)
-    {
+                        ->join('u.domain', 'd')
+                        ->andWhere('u.email = :email')
+                        ->andWhere('d.active=1')
+                        ->setParameter('email', $email)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }
+
+    /**
+     * Return all users from active domains
+     * @param boolean $withAlias
+     * @return type
+     */
+    public function activeUsers($withAlias = false) {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'SELECT u.id from users u
             inner join domain d on u.domain_id=d.id
@@ -62,17 +60,16 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-  /**
-   * search query
-   * @param type $login
-   * @return type
-   */
-    public function search($login)
-    {
+    /**
+     * search query
+     * @param type $login
+     * @return type
+     */
+    public function search($login) {
 
         $login = strtolower($login);
         $dql = $this->createQueryBuilder('a')
-            ->select('a')
+                ->select('a')
         ;
 
         if (isset($login) && $login != '') {
@@ -82,17 +79,16 @@ class UserRepository extends ServiceEntityRepository
         return $dql->getQuery();
     }
 
-  /**
-   * search query by role
-   * @param type $roles
-   * @return type
-   */
-    public function searchByRoles(User $user, $roles)
-    {
+    /**
+     * search query by role
+     * @param type $roles
+     * @return type
+     */
+    public function searchByRoles(User $user, $roles) {
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = "SELECT usr.id, usr.email, usr.fullname, usr.username ,usr.roles, g.name as groups,usr.imaplogin from users usr "
-            . " LEFT JOIN groups g ON usr.groups_id = g.id ";
+                . " LEFT JOIN groups g ON usr.groups_id = g.id ";
         if (is_array($roles) && count($roles) > 0) {
             $i = 0;
 
@@ -119,19 +115,18 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-  /**
+    /**
      * Return a list of aliases associate to a user
      * @return type
      */
-    public function searchAlias(User $user)
-    {
+    public function searchAlias(User $user) {
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = "SELECT usr.id, usr.email as alias, u.email as email  from users usr "
-            . " LEFT JOIN users u ON usr.original_user_id = u.id "
-            . " WHERE usr.original_user_id IS NOT NULL ";
+                . " LEFT JOIN users u ON usr.original_user_id = u.id "
+                . " WHERE usr.original_user_id IS NOT NULL ";
         ;
-  //todo finir les droits sur les domaines
+        //todo finir les droits sur les domaines
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             $domainsIds = array_map(function ($entity) {
                 return $entity->getId();
@@ -144,20 +139,19 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-  /**
-   *  autocomplete query
-   * @param type $q
-   * @param type $all
-   * @return type
-   */
-    public function autocomplete($q, $page_limit = 30, $page = null, $allowedomains = null)
-    {
-  //    $slugify = new Slugify();
+    /**
+     *  autocomplete query
+     * @param type $q
+     * @param type $all
+     * @return type
+     */
+    public function autocomplete($q, $page_limit = 30, $page = null, $allowedomains = null) {
+        //    $slugify = new Slugify();
         $dql = $this->createQueryBuilder('u')
-            ->select('u.id, u.email')
-            ->andWhere(" u.originalUser is null")// filter only email user without alias
-            ->andWhere(" u.roles !='[\"ROLE_SUPER_ADMIN\"]'")// filter only email user without alias
-            ->andWhere(" u.email NOT LIKE '@%' ")// filter only email user without domain
+                ->select('u.id, u.email')
+                ->andWhere(" u.originalUser is null")// filter only email user without alias
+                ->andWhere(" u.roles !='[\"ROLE_SUPER_ADMIN\"]'")// filter only email user without alias
+                ->andWhere(" u.email NOT LIKE '@%' ")// filter only email user without domain
         ;
 
         if ($allowedomains) {
@@ -179,22 +173,21 @@ class UserRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-  /**
-   * Search users in list of domains
-   * @param type $domains
-   * @param type $q
-   * @param type $page_limit
-   * @param type $page
-   * @return type
-   */
-    public function searchInDomains($domain, $q, $page_limit = 30, $page = null)
-    {
+    /**
+     * Search users in list of domains
+     * @param type $domains
+     * @param type $q
+     * @param type $page_limit
+     * @param type $page
+     * @return type
+     */
+    public function searchInDomains($domain, $q, $page_limit = 30, $page = null) {
         $slugify = new Slugify();
         $slug = $slugify->slugify($q, '-');
 
         $dql = $this->createQueryBuilder('u')
-            ->select('u.id, u.email')
-            ->where(" u.username is null")// filter only email user without user admin
+                ->select('u.id, u.email')
+                ->where(" u.username is null")// filter only email user without user admin
 
         ;
 
@@ -213,45 +206,42 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
-  /**
-   * Update the user policy from group policy
-   * @param type $groupId
-   * @return type
-   */
-    public function updatePolicyForGroup($groupId)
-    {
+    /**
+     * Update the user policy from group policy
+     * @param type $groupId
+     * @return type
+     */
+    public function updatePolicyForGroup($groupId) {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " UPDATE users set policy_id = (SELECT policy_id FROM groups WHERE id = " . $groupId . " ) "
-            . " WHERE groups_id =  " . $groupId
+                . " WHERE groups_id =  " . $groupId
         ;
         $stmt = $conn->prepare($sql);
         return $stmt->execute();
     }
 
-  /**
-   * Update the user policy from domain policy
-   * @param type $groupId
-   * @return type
-   */
-    public function updatePolicyFromGroupToDomain($groupId)
-    {
+    /**
+     * Update the user policy from domain policy
+     * @param type $groupId
+     * @return type
+     */
+    public function updatePolicyFromGroupToDomain($groupId) {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " UPDATE users  u "
-            . "INNER JOIN groups g on g.id=u.groups_id "
-            . "INNER JOIN domain d on d.id=u.domain_id "
-            . " set u.policy_id =d.policy_id "
+                . "INNER JOIN groups g on g.id=u.groups_id "
+                . "INNER JOIN domain d on d.id=u.domain_id "
+                . " set u.policy_id =d.policy_id "
         ;
         $stmt = $conn->prepare($sql);
         return $stmt->execute();
     }
 
-  /**
-   * Update the group_id for user alaises
-   * @param type $groupId
-   * @return type
-   */
-    public function updateAliasGroupsFromUser(User $originalUser)
-    {
+    /**
+     * Update the group_id for user alaises
+     * @param type $groupId
+     * @return type
+     */
+    public function updateAliasGroupsFromUser(User $originalUser) {
         if ($originalUser) {
             $groupID = $originalUser->getGroups() ? $originalUser->getGroups()->getId() : 'null';
             $conn = $this->getEntityManager()->getConnection();
@@ -261,12 +251,11 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
-  /**
-   * create a default wblist entry for the new user based on domain wblist
-   * @param type $user
-   */
-    public function createDefaultWbListFromdomain(User $user)
-    {
+    /**
+     * create a default wblist entry for the new user based on domain wblist
+     * @param type $user
+     */
+    public function createDefaultWbListFromdomain(User $user) {
 
         $mailaddr = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
         $domainWblist = $this->getEntityManager()->getRepository(Domain::class)->getDomainWblist('@' . $user->getDomain(), $mailaddr->getId());
@@ -279,4 +268,5 @@ class UserRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
 }
