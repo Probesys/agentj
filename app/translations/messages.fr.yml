@@ -12,7 +12,7 @@ Generics:
     close: Fermer
     backToTheList: Retour à la liste
     createAndContinue: Créer et continuer
-    confirmDelete: Etes vous certain de vouloir réaliser cette suppression ?
+    confirmDelete: Êtes vous certain de vouloir réaliser cette suppression ?
     changePassword: Changer de mot de passe
     impersonate: Se connecter
     connectAs: Se connecter en tant que
@@ -49,7 +49,7 @@ Generics:
     list: "Liste"
   messages:
     no_records_found: Aucun résultat trouvé
-    confirmationDeleteMessageQuestion: Etes vous certain de vouloir supprimer cet
+    confirmationDeleteMessageQuestion: Êtes vous certain de vouloir supprimer cet
       élément ?
     welcome: Bienvenue
     welcomeAgentJ: Bienvenue sur AgentJ
@@ -175,7 +175,7 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
-    massiveActionContent: Etes-vous sûr de vouloir effectuer cette action sur tous
+    massiveActionContent: Êtes-vous sûr de vouloir effectuer cette action sur tous
       les éléments sélectionnés ?
   Dialogs:
     confirmDeleteUserTitle: Supprimer l'utilisateur
@@ -205,8 +205,7 @@ Message:
     confirmDeleteGroupTitle: Supprimer ce groupe ?
     confirmDeleteGroupContent: Êtes-vous sûr de vouloir supprimer ce groupe ?
     confirmRemoveUserFromGroupTitle: Supprimer du groupe ?
-    confirmRemoveUserFromGroupContent: Êtes-vous sûr de vouloir enlever cet utilistateur
-      du groupe ?
+    confirmRemoveUserFromGroupContent: Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?
     confirmRemoveRuleTitle: Supprimer la règle ?
     confirmRemoveRuleContent: Êtes-vous sûr de vouloir supprimer cette règle ?
   Flash:
@@ -215,8 +214,8 @@ Message:
     domainUpdated: Le domaine a modifié avec succès
     missingRuleForDomain: Une première règle doit d'abord être créée pour ce domaine
     ruleExistForDomain: Une règle similaire existe déjà pour ce domaine
-    domainRuleCreated: La règle du domaine a été créée avec succcès
-    domainRuleUpdated: La règle du domaine a été modifiée avec succcès
+    domainRuleCreated: La règle du domaine a été créée avec succès
+    domainRuleUpdated: La règle du domaine a été modifiée avec succès
     newRuleCreated: Nouvelle règle créée !
     ruleUpdated: Règle modifiée !
     ruleExists: Cette règle existe déjà !
@@ -236,7 +235,7 @@ Message:
     500:
       title: Une erreur s'est produite
       description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
-        \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidemment\
+        \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
   Toast:
     defaultTitle: Information
@@ -453,7 +452,7 @@ Entities:
       white: Liste blanche
       black: Liste noire
       typeLabelW:
-        0: Validé par vou
+        0: Validé par vous
         1: Validé par captcha
         2: Validé par le groupe
         3: Validé par l'administrateur
@@ -485,7 +484,7 @@ Entities:
     title: Rapport d'activité
     titleDay: Sur les dernières 24h
     titleMonth: Sur le dernier mois
-    stateMessage: Etat
+    stateMessage: État
     typeMessage: Type
     mailFromName: Rapport AgentJ
     numberMessage: Nombre
