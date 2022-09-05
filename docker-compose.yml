@@ -29,10 +29,6 @@ services:
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.252
-    deploy:
-      resources:
-        limits:
-          memory: 2048m
 
   app:
     image: probesys38/agentj_app:${VERSION}
@@ -50,7 +46,7 @@ services:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.240
     ports:
-      - 127.0.0.1:${PROXY_PORT:-8090}:80
+      - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
   relay:
     image: probesys38/agentj_relay:${VERSION}
@@ -71,7 +67,7 @@ services:
     volumes:
       - postqueue:/var/spool/postfix
     ports:
-      - 0.0.0.0:25:25
+      - ${SMTP_LISTEN_ADDR:-0.0.0.0}:${SMTP_PORT:-25}:25
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.42.42}.250
