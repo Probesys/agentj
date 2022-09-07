@@ -16,10 +16,12 @@ Generics:
     changePassword: 'Change password'
     impersonate: 'Sign in'
     connectAs: 'Log in as a'
+    connectWithMicrosoft: Sign-in with Microsoft
     exitImpersonation: 'Back to life'
     search: Search
     display: Display
     rememberme: 'Remember me'
+    import: "Import"
     importFile: "Import from file"
   fields:
     name: Title
@@ -232,6 +234,9 @@ Message:
       description: 'An error occurred that prevents the display of this page. <br/><br/>
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
+  Office365Connector:
+    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated"
+    tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: 'new(x) unprocessed messages'
@@ -359,6 +364,9 @@ Entities:
       imapNoValidateCert: 'Do not validate certificates'
       defaultLang: 'Default language'
     labels:
+      infos: "Informations"
+      agentJConfig : "AgentJ configuration"
+      connectors : "Connectors"    
       rules: Rules
       domainrules: 'Rules of the field'
       domaineSender: 'sending domain'
@@ -370,6 +378,8 @@ Entities:
           of messages deleted', NB_RESTORED_MESSAGES: 'Number of messages restored',
         LIST_MAIL_MSGS: 'List of untreated messages'}
     actions:
+      add_connector : Add connector
+      importUserAndAliases: "Import users and aliases"
       add_new: 'Add a new domain'
       add_new_rule: 'New rule'
       deleteRule: 'Delete rule'
@@ -430,6 +440,17 @@ Entities:
       appliedRule: 'Information about the message'
     fields:
       bspamLevel: 'Spam rating'
+  Connector:
+    labels:
+    fields:
+      name: "Connector name"    
+      type: "Connector type" 
+  Office365Connector:
+    labels:
+    fields:
+      tenant: "Tenant Id"    
+      client: "Client Id"
+      clientSecret: "Secret client"      
   WBList:
     fields:
       user: User
