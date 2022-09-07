@@ -21,13 +21,17 @@ All you have to do is to clone the repository
 
 then, `cd` to the cloned repository to configure a few variables:
 
-    cd agentj-docker
+    cd agentj
 
 ## Configure
 
 ### Variables
 
-The following runtime variables must be configured:
+Variables are defined in the `.env.example`. This file is just a template, you **must** copy and rename it to `.env`:
+
+    cp .env.example .env
+
+Then the following runtime variables must be configured in the `.env` file:
 
 | Variable             | Default        | Use                                         |
 |----------------------|----------------|---------------------------------------------|
@@ -41,7 +45,7 @@ The following runtime variables must be configured:
 | MAIL_HOSTNAME        | aj.example.com | the mailname used in postfix configuration  |
 | MAIL_DOMAINNAME      | example.com    | the domain name used in relay configuration |
 | SUPER_ADMIN_USERNAME | admin          | default super admin login                   |
-| SUPER_ADMIN_password | Sup3rZECR37    | default super admin password                |
+| SUPER_ADMIN_PASSWORD | Sup3rZECR37    | default super admin password                |
 | TZ                   | Europe/Paris   | the containers default timezone             |
 | PROXY_PORT           | 8090           | default listening port for web interface    |
 | PROXY_LISTEN_ADDR    | 127.0.0.1      | default listening address for web interface |
