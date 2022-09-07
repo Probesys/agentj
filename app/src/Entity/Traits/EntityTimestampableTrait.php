@@ -15,16 +15,34 @@ trait EntityTimestampableTrait
      */
     private $created;
 
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     public function getCreated(): ?\DateTimeInterface
     {
         return $this->created;
     }
 
+    public function getUpdated(): ?\DateTimeInterface
+    {
+        return $this->updated;
+    }
 
     public function setCreated(\DateTimeInterface $created): self
     {
         $this->created = $created;
+
+        return $this;
+    }
+
+    public function setUpdated(\DateTimeInterface $updated): self
+    {
+        $this->updated = $updated;
 
         return $this;
     }

@@ -156,6 +156,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $preferedLang;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $uid;
+
     public function __construct()
     {
 
@@ -507,6 +512,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPreferedLang(?string $preferedLang): self
     {
         $this->preferedLang = $preferedLang;
+
+        return $this;
+    }
+
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): self
+    {
+        $this->uid = $uid;
 
         return $this;
     }
