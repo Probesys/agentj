@@ -33,6 +33,7 @@ sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
 sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" /var/www/agentj/.env
 sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" /var/www/agentj/.env
 sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" /var/www/agentj/.env
+sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php8/php.ini
 
