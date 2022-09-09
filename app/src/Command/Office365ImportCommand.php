@@ -114,11 +114,15 @@ class Office365ImportCommand extends Command {
             if (is_null($graphUser->getMail())) {
                 continue;
             }
+            
+            
+            
             $domain = $this->connector->getDomain();
-            $user = $this->em->getRepository(User::class)->findOneByUid($graphUser->getId());
+            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $graphUser->getId(), 'email' => $graphUser->getMail()]);
+
             if (!$user) {
                 $user = new User();
-                $user->setEmail($email);
+                $user->setEmail($graphUser->getMail());
                 $this->nbUserCreated++;
             } else {
                 $this->nbUserUpdated++;
@@ -216,7 +220,8 @@ class Office365ImportCommand extends Command {
         // user created from group
 //        $userGroup = $this->em->getRepository(User::class)->findOneByUid($userGroup->getUId());
         foreach ($owners as $owner) {
-            $user = $this->em->getRepository(User::class)->findOneByUid($owner->getId());
+//            $user = $this->em->getRepository(User::class)->findOneByUid($owner->getId());
+            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $owner->getId(), 'email' => $owner->getMail()]);
             if ($user) {
                 $userGroup->addSharedWith($user);
             }
