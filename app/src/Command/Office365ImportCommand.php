@@ -64,7 +64,7 @@ class Office365ImportCommand extends Command {
 
 //        
         $this->importUsers($token);
-        $this->importGroupsToUser($token);
+        $this->importGroupsAsUser($token);
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
@@ -98,10 +98,12 @@ class Office365ImportCommand extends Command {
     private function importUsers(\stdclass $token) {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
+        $domain = $this->connector->getDomain();
 
         try {
-            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses')
+            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses&$filter=endsWith(userPrincipalName,\'' . $domain->getDomain() . '\' )&$count=true')
                     ->setReturnType(GraphUser::class)
+                    ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
         } catch (GuzzleException $exc) {
             return false;
@@ -114,10 +116,10 @@ class Office365ImportCommand extends Command {
             if (is_null($graphUser->getMail())) {
                 continue;
             }
-            
-            
-            
-            $domain = $this->connector->getDomain();
+
+
+
+
             $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $graphUser->getId(), 'email' => $graphUser->getMail()]);
 
             if (!$user) {
@@ -146,9 +148,8 @@ class Office365ImportCommand extends Command {
 
     private function addAliases(User $user, array $proxyAdresses) {
         foreach ($proxyAdresses as $proxyAdresse) {
-            if (substr($proxyAdresse, 0, 4) === 'smtp') {
-
-                $aliasEmail = substr($proxyAdresse, 5, strlen($proxyAdresse));
+            if (strpos($proxyAdresse, "SMTP")) {
+                $aliasEmail = substr($proxyAdresse, strpos($proxyAdresse, "SMTP"), strlen($proxyAdresse));
                 $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
                 if (!$alias) {
                     $alias = clone $user;
@@ -160,14 +161,16 @@ class Office365ImportCommand extends Command {
         }
     }
 
-    private function importGroupsToUser(\stdclass $token) {
+    private function importGroupsAsUser(\stdclass $token) {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
         try {
-            $groups = $graph->createRequest("GET", '/groups' . '?$select=id,displayName,mail')
+            $groups = $graph->createRequest("GET", '/groups' . '?$filter=endsWith(mail,\'' . $domain->getDomain() . '\' )&$count=true')
                     ->setReturnType(GraphGroup::class)
+                    ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
+           
             foreach ($groups as $group) {
                 /* @var $group GraphGroup */
                 $userGroup = $this->em->getRepository(User::class)->findOneByUid($group->getId());
@@ -190,7 +193,6 @@ class Office365ImportCommand extends Command {
                 $this->em->flush();
                 $owners = $this->getGroupOwners($token, $userGroup);
             }
-//            die;
         } catch (GuzzleException $exc) {
             return false;
         }
@@ -218,7 +220,6 @@ class Office365ImportCommand extends Command {
         }
 
         // user created from group
-//        $userGroup = $this->em->getRepository(User::class)->findOneByUid($userGroup->getUId());
         foreach ($owners as $owner) {
 //            $user = $this->em->getRepository(User::class)->findOneByUid($owner->getId());
             $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $owner->getId(), 'email' => $owner->getMail()]);
