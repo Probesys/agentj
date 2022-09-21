@@ -132,7 +132,7 @@ class Office365ImportCommand extends Command {
             $user->setUsername($graphUser->getMail());
             $user->setFullname($graphUser->getDisplayName());
             $user->setReport(true);
-            $user->setRoles('["ROLE_USER"]');
+            $user->setRoles("['ROLE_USER']");
             $user->setDomain($domain);
             $user->setUid($graphUser->getId());
             $user->setPolicy($domain->getPolicy());
@@ -184,7 +184,7 @@ class Office365ImportCommand extends Command {
                 $userGroup->setUsername($group->getMail());
                 $userGroup->setFullname($group->getDisplayName());
                 $userGroup->setReport(true);
-                $userGroup->setRoles('["ROLE_USER"]');
+                $userGroup->setRoles("['ROLE_USER']");
                 $userGroup->setDomain($domain);
                 $userGroup->setUid($group->getId());
                 $userGroup->setPolicy($domain->getPolicy());
