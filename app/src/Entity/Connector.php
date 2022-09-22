@@ -36,7 +36,7 @@ class Connector
 
     /**
      * @ORM\ManyToOne(targetEntity=Domain::class, inversedBy="connectors")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $domain;
 
