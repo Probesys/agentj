@@ -4,36 +4,45 @@
 
 {% block body %}
   <div class="h-100 ">
-      <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
-        <form method="post" name="login_form" id="login_form">
-          {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-          {% endif %}
-          <div class="mb-3"><img class="logo" src="{{ asset('img/agent-j-logo-desktop.svg') }}" /></div>
-          <h1 class="mb-5 font-weight-bolder">{{ 'Generics.messages.welcomeHomeMessage'|trans|raw }}</h1>
+    <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+      <form method="post" name="login_form" id="login_form" data-controller="login">
+        {% if error %}
+          <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+        <div class="mb-3"><img class="logo" src="{{ asset('img/agent-j-logo-desktop.svg') }}" /></div>
+        <h1 class="mb-5 font-weight-bolder">{{ 'Generics.messages.welcomeHomeMessage'|trans|raw }}</h1>
 
-          <div class="form-group">
-            <label for="inputUsername" class="sr-only">Username</label>
-            <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" placeholder="{{ 'Entities.User.fields.userName'|trans }}" required autofocus  autocapitalize="none"/>
+        <div class="form-group">
+          <label for="inputUsername" class="sr-only">Username</label>
+          <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" placeholder="{{ 'Entities.User.fields.userName'|trans }}" required autofocus  autocapitalize="none"/>
+        </div>
+        <div class="form-group">
+          <label for="inputPassword" class="sr-only">{{ 'Entities.User.fields.password'|trans }}</label>
+          <input type="password" name="password" id="inputPassword" class="form-control" placeholder="{{ 'Entities.User.fields.password'|trans }}" required>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+
+        <button class="btn btn-lg btn-primary" type="submit" name="loginBtn" id="loginBtn">
+          {{ 'Generics.actions.impersonate'|trans }}
+        </button>
+        <div class="icheck-primary">
+          <input type="checkbox" id="remember_me" name="_remember_me">
+          <label for="remember_me">
+            {{ 'Generics.actions.rememberme'|trans }}
+          </label>
+        </div>          
+
+      </form>
+      {% if enable_azure_oauth == 'true' %}
+        <div>
+          <div class="btn btn-default ">
+            <i class="fab fa-microsoft"></i><a href="{{ path('connect_azure_start') }}"> {{ 'Generics.actions.connectWithMicrosoft' | trans }}</a>
           </div>
-          <div class="form-group">
-            <label for="inputPassword" class="sr-only">{{ 'Entities.User.fields.password'|trans }}</label>
-            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="{{ 'Entities.User.fields.password'|trans }}" required>
-          </div>
-          <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        </div>                
+      {% endif %}
 
-
-          <button class="btn btn-lg btn-primary" type="submit" name="loginBtn" id="loginBtn">
-            {{ 'Generics.actions.impersonate'|trans }}
-          </button>
-            <div class="icheck-primary">
-              <input type="checkbox" id="remember_me" name="_remember_me">
-              <label for="remember_me">
-                {{ 'Generics.actions.rememberme'|trans }}
-              </label>
-            </div>          
-        </form>
-      </div>
+    </div>
   </div>
 
 {% endblock %}
