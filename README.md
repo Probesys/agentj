@@ -48,6 +48,9 @@ Then the following runtime variables must be configured in the `.env` file:
 | SUPER_ADMIN_PASSWORD | Sup3rZECR37    | default super admin password                |
 | TZ                   | Europe/Paris   | the containers default timezone             |
 | PROXY_PORT           | 8090           | default listening port for web interface    |
+| PROXY_LISTEN_ADDR    | 127.0.0.1      | default listening address for web interface |
+| SMTP_PORT            | 25             | default listening port for smtp server      |
+| SMTP_LISTEN_ADDR     | 0.0.0.0        | default listening address for smtp server   |
 
 
 ### Network

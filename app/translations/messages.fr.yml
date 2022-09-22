@@ -16,10 +16,12 @@ Generics:
     changePassword: Changer de mot de passe
     impersonate: Se connecter
     connectAs: Se connecter en tant que
+    connectWithMicrosoft: Se connecter avec Microsoft
     exitImpersonation: Revenir à
     search: Rechercher
     display: Afficher
     rememberme: Se souvenir de moi
+    import: "Importer"
     importFile: "Importer depuis un fichier"
   fields:
     name: Intitulé
@@ -237,6 +239,9 @@ Message:
       description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
+  Office365Connector:
+    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour"
+    tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: nouveau(x) messages non traités
@@ -366,6 +371,9 @@ Entities:
       imapNoValidateCert: Ne pas valider les certificats
       defaultLang: Langue par défaut
     labels:
+      infos: "Informations"
+      agentJConfig : "Paramètres AgentJ"
+      connectors : "Connecteurs"
       rules: Règles
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
@@ -382,6 +390,8 @@ Entities:
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
     actions:
+      add_connector : Ajouter un connecteur 
+      importUserAndAliases: "Importer les utilisateurs et les alias" 
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
       deleteRule: Supprimer la règle
@@ -443,7 +453,17 @@ Entities:
       appliedRule: "Informations sur le message"
     fields:
       bspamLevel: "Note de spam"
-
+  Connector:
+    labels:
+    fields:
+      name: "Nom du connecteur"    
+      type: "Type de connecteur"  
+  Office365Connector:
+    labels:
+    fields:
+      tenant: "Id locataire"    
+      client: "Id client"
+      clientSecret: "Secret client"
   WBList:
     fields:
       user: Utilisateur
