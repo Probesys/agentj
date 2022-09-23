@@ -460,6 +460,9 @@ Entities:
       type: "Type de connecteur"  
   Office365Connector:
     labels:
+    actions:
+      add: "Ajouter un connecteur Office365"
+      edit: "Editer le connecteur Office365"
     fields:
       tenant: "Id locataire"    
       client: "Id client"
