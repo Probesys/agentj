@@ -210,6 +210,8 @@ Message:
     confirmRemoveUserFromGroupContent: Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?
     confirmRemoveRuleTitle: Supprimer la règle ?
     confirmRemoveRuleContent: Êtes-vous sûr de vouloir supprimer cette règle ?
+    confirmRemoveConnectorTitle: Supprimer le connecteur.
+    confirmRemoveConnectorContent: Êtes-vous sûr de vouloir supprimer ce connecteur ?    
   Flash:
     deleteSuccesFull: Suppression effectuée avec succès
     domainCreatd: Le domaine a été créé avec succès
