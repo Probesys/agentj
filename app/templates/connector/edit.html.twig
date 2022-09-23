@@ -1,10 +1,12 @@
 {% extends 'modalTemplate.html.twig' %}
 
-
+{% block modalTitle %}
+  {{ 'Entities.Office365Connector.actions.edit'|trans() }}
+{% endblock %}
 
 {% block modalContent %}
 
-    {{ include('connector/_form.html.twig', {'button_label': 'Update'}) }}
+    {{ include('connector/_form.html.twig') }}
 
 
 {% endblock %}

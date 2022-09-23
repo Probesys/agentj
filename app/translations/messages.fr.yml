@@ -210,6 +210,8 @@ Message:
     confirmRemoveUserFromGroupContent: Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?
     confirmRemoveRuleTitle: Supprimer la règle ?
     confirmRemoveRuleContent: Êtes-vous sûr de vouloir supprimer cette règle ?
+    confirmRemoveConnectorTitle: Supprimer le connecteur.
+    confirmRemoveConnectorContent: Êtes-vous sûr de vouloir supprimer ce connecteur ?    
   Flash:
     deleteSuccesFull: Suppression effectuée avec succès
     domainCreatd: Le domaine a été créé avec succès
@@ -460,6 +462,9 @@ Entities:
       type: "Type de connecteur"  
   Office365Connector:
     labels:
+    actions:
+      add: "Ajouter un connecteur Office365"
+      edit: "Editer le connecteur Office365"
     fields:
       tenant: "Id locataire"    
       client: "Id client"
