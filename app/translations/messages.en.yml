@@ -205,6 +205,8 @@ Message:
       from the group?'
     confirmRemoveRuleTitle: 'Delete the rule?'
     confirmRemoveRuleContent: 'Are you sure you want to delete this rule?'
+    confirmRemoveConnectorTitle: Delete connector.
+    confirmRemoveConnectorContent: Are tou sure you want to delete this connector ?       
   Flash:
     deleteSuccesFull: 'Successful deletion'
     domainCreatd: 'The domain has been successfully created'
@@ -442,6 +444,9 @@ Entities:
       bspamLevel: 'Spam rating'
   Connector:
     labels:
+    actions:
+      add: "Add Office365 connector"
+      edit: "Edit Office365 connector"    
     fields:
       name: "Connector name"    
       type: "Connector type" 

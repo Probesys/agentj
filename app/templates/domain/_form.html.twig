@@ -91,8 +91,8 @@
                   </a> 
                   <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" 
                      class='btn btn-sm btn-danger confirmModal' 
-                     data-dialog-title='{{ 'Message.Dialogs.confirmDeleteDomainTitle'|trans }}' 
-                     data-dialog-content='{{ 'Message.Dialogs.confirmDeleteDomainContent'|trans }}'
+                     data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' 
+                     data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
                      title="{{ 'Generics.actions.delete'|trans() }}">
                     <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                     <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
