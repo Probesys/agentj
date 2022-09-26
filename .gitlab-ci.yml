@@ -185,7 +185,9 @@ deploy-preprod:
     - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
   script:
-    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
+    - mkdir ~/.ssh
+    - echo "$DEPLOY_PREPROD_HOST_SSHD_PUB_KEY" >> ~/.ssh/known_hosts
+    - chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD:-$1}"
