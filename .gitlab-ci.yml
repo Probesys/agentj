@@ -142,7 +142,6 @@ deploy-dev:
   cache: {}
   environment:
     name: dev
-    url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
