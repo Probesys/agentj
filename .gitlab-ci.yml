@@ -152,6 +152,7 @@ deploy-dev:
     - echo $TAG
     - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_DEV >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
@@ -219,12 +220,14 @@ deploy-tags:
     - echo $REGISTRY
   script:
     - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
-    - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
+    - echo $SSH_CONFIG_PREPROD
+    - echo "$SSH_CONFIG_PREPROD" > ~/.ssh/config && chmod 400 ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
     - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD:-$1}"
     - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - sed -i "s|agentj_version|$TAG|g" .env.example
     - echo $DEPLOY_DIR
+    - echo $DEPLOY_PREPROD
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
