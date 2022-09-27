@@ -187,11 +187,21 @@ deploy-preprod:
     - echo $REGISTRY
   script:
     - mkdir ~/.ssh
+    - echo $DEPLOY_PREPROD_HOST_SSHD_PUB_KEY
     - echo "$DEPLOY_PREPROD_HOST_SSHD_PUB_KEY" >> ~/.ssh/known_hosts
     - chmod 700 ~/.ssh
-    - echo "$SSH_CONFIG_PREPROD" > ~/.ssh/config && chmod 400 ~/.ssh/config
+    - echo $SSH_CONFIG_PREPROD
+    - echo "$SSH_CONFIG_PREPROD" > ~/.ssh/config
+    - chmod 400 ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - echo $DEPLOY_PREPROD_HOST
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD_HOST:-$1}"
+    - echo $DOCKER_HOST
+    - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD_HOST:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
