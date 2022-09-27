@@ -159,6 +159,7 @@ deploy-dev:
     - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEV:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
