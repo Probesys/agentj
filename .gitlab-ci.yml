@@ -142,7 +142,6 @@ deploy-dev:
   cache: {}
   environment:
     name: dev
-    url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
@@ -160,6 +159,7 @@ deploy-dev:
     - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEV:$DEPLOY_DIR/
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
@@ -175,7 +175,6 @@ deploy-preprod:
   cache: {}
   environment:
     name: preprod
-    url: https://agentj-$CI_ENVIRONMENT_SLUG.$DOMAIN
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
@@ -186,19 +185,28 @@ deploy-preprod:
     - REGISTRY="$CI_REGISTRY/$CI_PROJECT_PATH"
     - echo $REGISTRY
   script:
-    - mkdir ~/.ssh && ssh-keyscan $DEPLOY_PREPROD >> ~/.ssh/known_hosts && chmod 700 ~/.ssh
-    - echo "$SSH_CONFIG" > ~/.ssh/config && chmod 400 ~/.ssh/config
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD:-$1}"
+    - mkdir ~/.ssh
+    - echo $DEPLOY_PREPROD_HOST_SSHD_PUB_KEY
+    - echo "$DEPLOY_PREPROD_HOST_SSHD_PUB_KEY" >> ~/.ssh/known_hosts
+    - chmod 700 ~/.ssh
+    - echo $SSH_CONFIG_PREPROD
+    - echo "$SSH_CONFIG_PREPROD" > ~/.ssh/config
+    - chmod 400 ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - echo $DEPLOY_PREPROD_HOST
+    - export DOCKER_HOST="ssh://${DEPLOY_USER:-$USER}@${DEPLOY_PREPROD_HOST:-$1}"
+    - echo $DOCKER_HOST
     - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - echo $DEPLOY_DIR
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
-    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+    - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD_HOST:$DEPLOY_DIR/
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
   except:
     - merge_requests
   only:
