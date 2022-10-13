@@ -10,7 +10,9 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
+use App\Model\ConnectorTypes;
 use App\Service\FileUploader;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -24,7 +26,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Model\ConnectorTypes;
 
 /**
  * @Route("/domain")
@@ -35,11 +36,13 @@ class DomainController extends AbstractController {
 
     private $translator;
     private $em;
+    private $userService;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, UserService $userService) {
 //        parent::__construct();
         $this->translator = $translator;
         $this->em = $em;
+        $this->userService = $userService;
     }
 
     private function checkAccess($domain) {
@@ -218,6 +221,9 @@ class DomainController extends AbstractController {
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
+            // Update users with domain policy
+            
+            
             if ($form->has('logoFile')) {
                 $uploadedFile = $form['logoFile']->getData();
                 if ($uploadedFile) {
@@ -229,8 +235,12 @@ class DomainController extends AbstractController {
             $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
 
             $em->persist($wblist);
+            //$em->persist($domain);
             $em->persist($userDomain);
             $em->flush();
+            
+            $this->userService->updateUsersPolicyfromDoamin($domain);
+            
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainUpdated'));
             return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);
         } elseif ($form->isSubmitted()) {
