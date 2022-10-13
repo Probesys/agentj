@@ -67,12 +67,20 @@
         <div class="tab-pane fade" id="account-rules" role="tabpanel" aria-labelledby="account-rules-tab">
           <div class="row">
             <div class="col-md-4">
-              Paramètre par défaut du domaine
+              {{ 'Entities.User.labels.defaultDomainParameters'|trans() }}
             </div>
             <div class="col-md-8">
               {{ domainDefaulWb }}
             </div>
           </div>
+          <div class="row">
+            <div class="col-md-4">
+              {{ 'Entities.User.fields.policy'|trans() }}
+            </div>
+            <div class="col-md-8">
+              {{ app.user.policy|trans() }}
+            </div>
+          </div>            
           {% if app.user.groups and groupDefaulWb is not null %}
           <div class="row">
             <div class="col-md-4">
