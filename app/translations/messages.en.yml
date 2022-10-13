@@ -403,6 +403,8 @@ Entities:
     indexLocal: 'List of administrators'
     indexEmail: 'List of email accounts'
     indexAlias: 'List of alias emails'
+    labels:
+      defaultDomainParameters: "Default domain parameters"    
     actions:
       add_new: 'New user'
       add_new_alias: 'Add a new alias'
@@ -424,6 +426,7 @@ Entities:
       repeatPassword: 'Confirm password'
       report: 'Send report'
       bypassHumanAuth: 'Deactivate human authentication'
+      policy: "Policy"
   Message:
     index: 'List of messages'
     untreated: 'No treaties'

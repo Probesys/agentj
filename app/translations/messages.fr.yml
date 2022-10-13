@@ -415,6 +415,8 @@ Entities:
     indexLocal: Liste des administrateurs
     indexEmail: Liste des comptes emails
     indexAlias: Liste des alias emails
+    labels:
+      defaultDomainParameters: "Paramètre par défaut du domaine"
     actions:
       add_new: Nouvel utilisateur
       add_new_alias: Ajouter un nouvel alias
@@ -436,6 +438,7 @@ Entities:
       repeatPassword: Confirmer le mot de passe
       report: Envoyer le rapport
       bypassHumanAuth: Désactiver l'authentification humaine
+      policy: "Stratégie"
   Message:
     index: Liste des messages
     untreated: Non traités
