@@ -1,6 +1,6 @@
 name: Mirroring
 
-on: [push, merge]
+on: [push]
 
 jobs:
   to_gitlab:
