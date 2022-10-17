@@ -19,4 +19,4 @@ jobs:
         git config user.email "githubBot@users.noreply.github.com"
         git remote add gitlab "https://githubBot:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.probesys.com/agentj/agentj-docker.git"
         git fetch --all        
-        git push gitlab main:gitlab_ci
+        git push gitlab main:gitlab_ci_dev
