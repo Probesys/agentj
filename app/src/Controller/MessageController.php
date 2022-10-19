@@ -21,6 +21,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Route("/message")
@@ -478,6 +479,7 @@ class MessageController extends AbstractController {
 
     /**
      * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function bannedDomain($partitionTag, $mailId, $rid, Request $request) {
         //B = Black and msg status = 1 is banned
