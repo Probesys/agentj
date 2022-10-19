@@ -1,18 +1,18 @@
 monolog:
     handlers:
         main:
-            type:  rotating_file
-            path:  '%kernel.logs_dir%/%kernel.environment%.log'
-            level: error
-            # max number of log files to keep
-            # defaults to zero, which means infinite files
-            max_files: 10
+            type: fingers_crossed
+            action_level: error
+            handler: nested
+            excluded_404s:
+                # regex: exclude all 404 errors from the logs
+                - ^/            
         nested:
             type: stream
-            path: php://stderr
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: error
-            formatter: monolog.formatter.json
+            channels: ["!event", "!doctrine","!security"]
         console:
-            type: console
+            type:   console
             process_psr_3_messages: false
-            channels: ["!event", "!doctrine"]
+            channels: ["!event", "!doctrine","!security"]
