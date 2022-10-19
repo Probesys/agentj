@@ -524,13 +524,11 @@ class MessageController extends AbstractController {
             $mailaddr->setEmail($emailSenderToWb);
             $mailaddr->setPriority('6'); //priority for email by default
             $em->persist($mailaddr);
-        } else {
-            $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
-            if (!$wblist) {
-                $wblist = new Wblist($userDomain, $mailaddr);
-            }
+        }  
+        $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
+        if (!$wblist) {
+            $wblist = new Wblist($userDomain, $mailaddr);
         }
-
         $wblist->setWb($wb);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
 
