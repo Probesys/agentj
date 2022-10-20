@@ -21,6 +21,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Route("/message")
@@ -478,6 +479,7 @@ class MessageController extends AbstractController {
 
     /**
      * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function bannedDomain($partitionTag, $mailId, $rid, Request $request) {
         //B = Black and msg status = 1 is banned
@@ -524,13 +526,11 @@ class MessageController extends AbstractController {
             $mailaddr->setEmail($emailSenderToWb);
             $mailaddr->setPriority('6'); //priority for email by default
             $em->persist($mailaddr);
-        } else {
-            $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
-            if (!$wblist) {
-                $wblist = new Wblist($userDomain, $mailaddr);
-            }
+        }  
+        $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
+        if (!$wblist) {
+            $wblist = new Wblist($userDomain, $mailaddr);
         }
-
         $wblist->setWb($wb);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
 
