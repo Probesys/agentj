@@ -41,7 +41,7 @@ fi
 echo "$_DOMAIN" >> /var/db/dkim/DomainsList
 echo "$_MX" >> /var/db/dkim/TrustedHosts
 echo "*@$_DOMAIN agentj._domainkey.$_DOMAIN" >> /var/db/dkim/SigningTable
-echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/etc/opendkim/keys/$_DOMAIN/agentj.private" >> /var/db/dkim/KeyTable
+echo "agentj._domainkey.$_DOMAIN $_DOMAIN:agentj:/var/db/dkim/keys/$_DOMAIN/agentj.private" >> /var/db/dkim/KeyTable
 
 if [ -d /var/db/dkim/keys/"$_DOMAIN" ]; then
     echo "This domain already has DKIM keys. Nothing to do."
