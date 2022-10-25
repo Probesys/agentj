@@ -115,7 +115,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $domain;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Groups", inversedBy="users")
+   * @ORM\ManyToMany(targetEntity="Groups", inversedBy="users")
    * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
    */
     private $groups;
@@ -167,6 +167,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->domains = new ArrayCollection();
         $this->sharedWith = new ArrayCollection();
         $this->owners = new ArrayCollection();
+        $this->groups = new ArrayCollection();
+        $this->ownedSharedBoxes = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -366,18 +368,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
-    public function getGroups(): ?Groups
-    {
-        return $this->groups;
-    }
-
-    public function setGroups(?Groups $groups): self
-    {
-        $this->groups = $groups;
-
-        return $this;
-    }
-
     public function getEmailRecovery(): ?string
     {
         return $this->emailRecovery;
@@ -524,6 +514,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUid(?string $uid): self
     {
         $this->uid = $uid;
+
+        return $this;
+    }
+
+    public function isReport(): ?bool
+    {
+        return $this->report;
+    }
+
+    public function isBypassHumanAuth(): ?bool
+    {
+        return $this->bypassHumanAuth;
+    }
+
+    /**
+     * @return Collection<int, Groups>
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Groups $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Groups $group): self
+    {
+        $this->groups->removeElement($group);
 
         return $this;
     }
