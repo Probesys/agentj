@@ -95,7 +95,7 @@ class UserRepository extends ServiceEntityRepository {
 
         if ($role) {
             $dql->andWhere('u.roles = :role');
-            $dql->setParameter('role', '["ROLE_USER"]');
+            $dql->setParameter('role', $role);
         }
 
 //        if (is_array($roles) && count($roles) > 0) {

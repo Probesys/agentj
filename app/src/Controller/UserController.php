@@ -44,7 +44,7 @@ class UserController extends AbstractController {
      * @Route("/local", name="users_local_index", methods="GET")
      */
     public function indexUserLocal(UserRepository $userRepository): Response {
-        $users = $userRepository->searchByRole($this->getUser(), ['ROLE_ADMIN']);
+        $users = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
@@ -52,7 +52,7 @@ class UserController extends AbstractController {
      * @Route("/email", name="users_email_index", methods="GET")
      */
     public function indexUserEmail(UserRepository $userRepository): Response {
-        $users = $userRepository->searchByRole($this->getUser(), 'ROLE_USER');
+        $users = $userRepository->searchByRole($this->getUser(), '["ROLE_USER"]');
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
@@ -330,7 +330,7 @@ class UserController extends AbstractController {
     /**
      * @Route("/newAlias", name="new_user_email_alias", methods="GET|POST")
      */
-    public function newUserAlias(Request $request): Response {
+    public function newUserAlias(Request $request, UserService $userService): Response {
         $groups = null;
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -366,8 +366,9 @@ class UserController extends AbstractController {
                 $user->setRoles('["ROLE_USER"]');
                 $user->setDomain($newDomain);
                 $user->setUsername($user->getEmail());
-                if ($user->getOriginalUser() && $groups = $user->getOriginalUser()->getGroups()) {
-                    $user->setGroups($groups);
+                if ($user->getOriginalUser()) {
+                    $userService->updateAliasGroupsFromUser($user->getOriginalUser());
+//                    $user->setGroups($groups);
                 }
                 $user->setUsername($user->getEmail());
 
