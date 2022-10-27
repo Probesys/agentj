@@ -157,7 +157,7 @@ class GroupsController extends AbstractController {
 
 
             $em->flush();
-            foreach ($group->getUsers() as $user){
+            foreach ($group->getUsers() as $user){                
                 $groupService->updateWblistForUser($user, $group);
             }
             return new Response(json_encode([

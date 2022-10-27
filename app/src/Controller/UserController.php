@@ -245,7 +245,7 @@ class UserController extends AbstractController {
     /**
      * @Route("/email/newUser", name="user_email_new", methods="GET|POST")
      */
-    public function newUserEmail(Request $request, UserRepository $userRepository): Response {
+    public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService): Response {
         $user = new User();
 
         $allowedomainIds = array_map(function ($entity) {
@@ -299,10 +299,12 @@ class UserController extends AbstractController {
                 $em->persist($user);
                 $em->flush();
 
-                if ($user->getGroups()) {
-                    $this->updatedWBListFromGroup($user->getGroups()->getId());
-                }
+                // if ($user->getGroups()) {
+                //     $this->updatedWBListFromGroup($user->getGroups()->getId());
+                // }
 
+                $userService->updateAliasGroupsFromUser($user);
+                $groupService->updateWblistForUserAndAliases($user);
 
                 $return = [
                     'status' => 'success',

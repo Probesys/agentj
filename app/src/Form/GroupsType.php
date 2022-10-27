@@ -4,18 +4,19 @@ namespace App\Form;
 
 use App\Entity\Domain;
 use App\Entity\Groups;
-use App\Entity\User;
 use App\Entity\Policy;
+use App\Entity\User;
 use App\Repository\DomainRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class GroupsType extends AbstractType
 {
@@ -43,6 +44,10 @@ class GroupsType extends AbstractType
                 'label' => 'Form.PolicyDomain',
                 'required' => false
                 ])
+            ->add('priority', NumberType::class, [
+                'label' => 'Generics.fields.priority',
+                'required' => true
+                ])                
             ->add('domain', EntityType::class, [
                 'label' => 'Entities.Group.fields.domain',
                 'class' => Domain::class,

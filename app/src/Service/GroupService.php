@@ -29,7 +29,7 @@ class GroupService {
      * @param User $user
      * @return void
      */
-    public function updateWblistForUserAndAliases(User $user, array $oldGroups): void {
+    public function updateWblistForUserAndAliases(User $user, array $oldGroups = []): void {
 
         $userRepository = $this->em->getRepository(User::class);
         $aliases = $userRepository->getListAliases();
