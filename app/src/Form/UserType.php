@@ -60,7 +60,7 @@ class UserType extends AbstractType
                 ->add('groups', EntityType::class, [
                     'label' => 'Entities.User.fields.groups',
                     'class' => Groups::class,
-                    'multiple' => false,
+                    'multiple' => true,
                     'attr' => ['class' => 'select2'],
                     'placeholder' => ' ',
                     'required' => false,

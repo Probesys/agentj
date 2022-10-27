@@ -7,13 +7,14 @@ use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Form\GroupsWblistType;
+use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Security("is_granted('ROLE_ADMIN')")
@@ -57,7 +58,7 @@ class GroupsWblistController extends AbstractController
   /**
    * @Route("/{groupId}/new", name="groups_wblist_new", methods="GET|POST")
    */
-    public function new($groupId, Request $request): Response
+    public function new($groupId, Request $request, GroupService $groupService): Response
     {
         $groups = $this->em->getRepository(Groups::class)->findOneBy((['id' => $groupId]));
         if (!$groups) {
@@ -102,7 +103,11 @@ class GroupsWblistController extends AbstractController
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
-            $this->updatedWBListFromGroup($groupId);
+
+            foreach ($groupsWblist->getGroups()->getUsers() as $user){
+                $groupService->updateWblistForUser($user, $groupsWblist->getGroups());
+            }
+//            $this->updatedWBListFromGroup($groupId);
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         }
@@ -117,7 +122,7 @@ class GroupsWblistController extends AbstractController
   /**
    * @Route("/{groupId}/edit/{sid}", name="groups_wblist_edit", methods="GET|POST")
    */
-    public function edit($groupId, $sid, Request $request)
+    public function edit($groupId, $sid, Request $request, GroupService $groupService)
     {
         $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy(['mailaddr' => $sid, 'groups' => $groupId]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
@@ -154,7 +159,9 @@ class GroupsWblistController extends AbstractController
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
-            $this->updatedWBListFromGroup($groupId);
+            foreach ($groupWbList->getGroups()->getUsers() as $user){
+                $groupService->updateWblistForUser($user, $groupWbList->getGroups());
+            }
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         } else {

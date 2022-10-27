@@ -63,10 +63,15 @@ class Groups
     private $wb;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="groups", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="App\Entity\User", mappedBy="groups", cascade={"persist"})
      */
     private $users;
 
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\GroupsWblist", mappedBy="groups")
+     */    
+    private $groupsWbLists;    
 
     /**
      * @ORM\Column(type="string",length=128, unique=true)
@@ -84,6 +89,11 @@ class Groups
      */
     private $active;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $priority;
+
     public function __toString()
     {
         return $this->name;
@@ -95,6 +105,7 @@ class Groups
         $this->datemod = new \DateTime();
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->groupsWbLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -259,6 +270,58 @@ class Groups
     public function setActive(?bool $active): self
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function getPriority(): ?int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(?int $priority): self
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
+    public function isOverrideUser(): ?bool
+    {
+        return $this->overrideUser;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @return Collection<int, GroupsWblist>
+     */
+    public function getGroupsWbLists(): Collection
+    {
+        return $this->groupsWbLists;
+    }
+
+    public function addGroupsWbList(GroupsWblist $groupsWbList): self
+    {
+        if (!$this->groupsWbLists->contains($groupsWbList)) {
+            $this->groupsWbLists[] = $groupsWbList;
+            $groupsWbList->setGroups($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupsWbList(GroupsWblist $groupsWbList): self
+    {
+        if ($this->groupsWbLists->removeElement($groupsWbList)) {
+            // set the owning side to null (unless already changed)
+            if ($groupsWbList->getGroups() === $this) {
+                $groupsWbList->setGroups(null);
+            }
+        }
 
         return $this;
     }

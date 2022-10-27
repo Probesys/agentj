@@ -40,9 +40,9 @@
                                 <input type="checkbox" name="id[]" value="{{ user.id }}" id="{{ user.id }}" class="cb selected-msg">
                                 <label class="for-cb"></label>
                             </td>
-                            <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email }}</td>
+                            <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
                             <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                            <td data-title="{{'Entities.User.fields.groups'|trans }}">{{ user.groups }}</td>
+                            <td data-title="{{'Entities.User.fields.groups'|trans }}">{#{{ user.groups }}#}</td>
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">
@@ -60,7 +60,7 @@
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
                                         </a> 
 
-                                        <a href="{{ path('homepage', {'_switch_user': user.email}) }}" 
+                                        <a href="{{ path('homepage', {'_switch_user': user.email | stream_get_contents}) }}" 
                                            class='btn btn-sm btn-primary' 
                                            title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
                                             <i class="fas fa-random  d-none d-md-block d-lg-none"></i>

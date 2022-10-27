@@ -15,6 +15,7 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFilter('lcfirst', [$this, 'lcfirst']),
+            new TwigFilter('stream_get_contents', [$this, 'streamGetcontent']),
         ];
     }
 
@@ -23,4 +24,10 @@ class AppExtension extends AbstractExtension
 
         return lcfirst($strInput);
     }
+    
+    public function streamGetcontent($input): string
+    {
+
+        return stream_get_contents($input, -1, 0);
+    }    
 }

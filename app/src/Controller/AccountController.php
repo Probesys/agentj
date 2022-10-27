@@ -6,6 +6,7 @@ use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserPreferencesType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,9 +28,10 @@ class AccountController extends AbstractController
   /**
    * @Route("/account", name="account")
    */
-    public function index(Request $request)
+    public function index(Request $request, UserRepository $userRepository)
     {
 
+        $groupDefaulWb = null;
       /**@var  User  $user */
         $user = $this->getUser();
         $form = $this->createForm(UserPreferencesType::class, $this->getUser(), [
@@ -46,14 +48,17 @@ class AccountController extends AbstractController
             return $item == $wbDomain;
         }))[0];
 
-        if ($user->getGroups() && $user->getGroups()->getWb()) {
-            $wbGroup = $user->getGroups()->getWb();
+        if ($user->getGroups() && count($user->getGroups()) > 0) {
+            $defaultGroup = $userRepository->getMainUserGroup($user);
+            
+            $wbGroup = $defaultGroup->getWb();
             $groupDefaulWb = array_keys(array_filter($this->getWBListUserActions(), function ($item) use ($wbGroup) {
                 return $item == $wbGroup;
             }))[0];
         } else {
             $groupDefaulWb = null;
         }
+//        dd($domainDefaulWb);
 
 
         return $this->render('account/index.html.twig', [

@@ -239,7 +239,7 @@ class DomainController extends AbstractController {
             $em->persist($userDomain);
             $em->flush();
             
-            $this->userService->updateUsersPolicyfromDoamin($domain);
+            $this->userService->updateUsersPolicyfromDomain($domain);
             
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainUpdated'));
             return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);

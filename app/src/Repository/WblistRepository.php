@@ -103,20 +103,25 @@ class WblistRepository extends ServiceEntityRepository
         return $stmt->execute();
     }
 
-  /**
-   * delete user from a group
-   * @param int $userId
-   * @return type
-   */
-    public function deleteUserGroup($userId)
+  
+    /**
+     * Delete wblist entries for a group and user
+     * @param Group $group
+     * @param User $user
+     * @return mixed
+     */
+    public function deleteUserWbListFromGroup(Groups $group, User $user)
     {
+        $qdl = $this->createQueryBuilder('wb')
+                ->delete()
+                ->where('wb.groups = :group')
+                ->andWhere('wb.rid =:user')
+                ->setParameter('group', $group)
+                ->setParameter('user', $user);
 
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = " DELETE FROM wblist "
-            . " WHERE rid = '" . $userId . "' AND group_id IS NOT NULL ";
-        $stmt = $conn->prepare($sql);
+        
 
-        return $stmt->execute();
+        return $qdl->getQuery()->execute();
     }
 
   /**
@@ -285,5 +290,24 @@ class WblistRepository extends ServiceEntityRepository
 
         $wb = $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
         return $wb ? $wb->getWb() : null;
+    }
+    
+    /**
+     * Verify if a wblist rule exists for $user from $mailaddr
+     * @param User $user
+     * @param Mailaddr $mailaddr
+     * @return bool
+     */
+    public function getOneByUser(User $user, Mailaddr $mailaddr): ?Wblist {
+        $dql = $this->createQueryBuilder('wb')
+                ->select('wb')
+                ->where('wb.rid = :user')
+                ->andWhere('wb.sid = :sender')
+                ->setParameter('user', $user)
+                ->setParameter('sender', $mailaddr);
+        
+        $query = $dql->getQuery();
+        $result = $query->getOneOrNullResult();
+        return $query->getOneOrNullResult();
     }
 }

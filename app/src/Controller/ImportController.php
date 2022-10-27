@@ -155,7 +155,7 @@ class ImportController extends AbstractController {
                                 $user->setFullname(trim($data[1] . " " . $data[2]));
                             }
                             $import++;
-                            $user->setRoles("['ROLE_USER']");
+                            $user->setRoles('["ROLE_USER"]');
                             $domainEmail = strtolower(substr($data[0], strpos($data[0], '@') + 1));
                             $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
                             $user->setDomain($domain);

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
+use App\Entity\Groups;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
@@ -84,35 +85,56 @@ class UserRepository extends ServiceEntityRepository {
      * @param type $roles
      * @return type
      */
-    public function searchByRoles(User $user, $roles) {
+    public function searchByRole(User $user, $role = null) {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = "SELECT usr.id, usr.email, usr.fullname, usr.username ,usr.roles, g.name as groups,usr.imaplogin from users usr "
-                . " LEFT JOIN groups g ON usr.groups_id = g.id ";
-        if (is_array($roles) && count($roles) > 0) {
-            $i = 0;
+//        $sql = "SELECT usr.id, usr.email, usr.fullname, usr.username ,usr.roles, usr.imaplogin from users usr ";
+        $dql = $this->createQueryBuilder('u')
+                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin')
+                ->where('u.originalUser is null');
 
-            foreach ($roles as $role) {
-                if ($i == 0) {
-                    $sql .= " where usr.roles like '%" . $role . "%'";
-                } else {
-                    $sql .= " or usr.roles like '%" . $role . "%'";
-                }
-                $i++;
-            }
+        if ($role) {
+            $dql->andWhere('u.roles = :role');
+            $dql->setParameter('role', '["ROLE_USER"]');
         }
+
+//        if (is_array($roles) && count($roles) > 0) {
+//            $i = 0;
+//
+//            foreach ($roles as $role) {
+//                if ($i == 0) {
+//                    $sql .= " where usr.roles like '%" . $role . "%'";
+//                } else {
+//                    $sql .= " or usr.roles like '%" . $role . "%'";
+//                }
+//                $i++;
+//            }
+//        }
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             $domainsIds = array_map(function ($entity) {
                 return $entity->getId();
             }, $user->getDomains()->toArray());
-//dd($user->getDomains()->toArray());
-            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
+            $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
+//            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
-        $sql .= ' AND original_user_id IS NULL '; //without alias
-        $stmt = $conn->prepare($sql);
-//        $stmt->execute();
 
-        return $stmt->executeQuery()->fetchAllAssociative();
+//        $sql .= ' AND original_user_id IS NULL '; //without alias
+//        $stmt = $conn->prepare($sql);
+//        $stmt->execute();
+//        $dql->getQuery()->execute();
+
+        $result = $dql->getQuery()->execute();
+//        dd($result);
+//        dd(count($result));
+        return $result;
+    }
+
+    public function getListAliases(): ?array {
+        $dql = $this->createQueryBuilder('u')
+                ->join('u.originalUser', 'a');
+
+        $query = $dql->getQuery();
+        return $query->getResult();
     }
 
     /**
@@ -237,21 +259,6 @@ class UserRepository extends ServiceEntityRepository {
     }
 
     /**
-     * Update the group_id for user alaises
-     * @param type $groupId
-     * @return type
-     */
-    public function updateAliasGroupsFromUser(User $originalUser) {
-        if ($originalUser) {
-            $groupID = $originalUser->getGroups() ? $originalUser->getGroups()->getId() : 'null';
-            $conn = $this->getEntityManager()->getConnection();
-            $sql = " UPDATE users  u  set u.groups_id =" . $groupID . " WHERE u.original_user_id = " . $originalUser->getId();
-            $stmt = $conn->prepare($sql);
-            return $stmt->execute();
-        }
-    }
-
-    /**
      * create a default wblist entry for the new user based on domain wblist
      * @param type $user
      */
@@ -268,5 +275,21 @@ class UserRepository extends ServiceEntityRepository {
             $this->getEntityManager()->flush();
         }
     }
+
+    /**
+     * Return the main (hightest priority) group of the user $user
+     * @param User $user
+     * @return array|null
+     */
+    public function getMainUserGroup(User $user): ?array {
+        $dql = $this->createQueryBuilder('u')
+                ->innerJoin('u.groups', 'g')
+                ->where('g.active = true')
+                ->orderBy('g.priority', 'DESC');
+        $query = $dql->getQuery()->setMaxResults(1);
+        return $query->getResult();
+    }
+    
+
 
 }

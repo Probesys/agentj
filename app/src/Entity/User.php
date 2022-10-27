@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * Users
@@ -117,6 +118,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
   /**
    * @ORM\ManyToMany(targetEntity="Groups", inversedBy="users")
    * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
+   * @OrderBy({"priority" = "ASC"})
    */
     private $groups;
 

@@ -4,38 +4,62 @@ namespace App\Service;
 
 use App\Entity\Domain;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use function dd;
 
+class UserService {
 
-class UserService
-{
-
-  //  private $params;
 
     private ParameterBagInterface $params;
     private EntityManagerInterface $em;
-    public function __construct(ParameterBagInterface $params, EntityManagerInterface $em)
-    {
+    private $userRepository;
+
+    public function __construct(ParameterBagInterface $params, EntityManagerInterface $em, UserRepository $userRepository) {
         $this->params = $params;
         $this->em = $em;
+        $this->userRepository = $userRepository;
     }
 
-    public function updateUsersPolicyfromDoamin(Domain $domain){
-        
-        $users = $this->em->getRepository(User::class)->findBy([
+    /**
+     * Update domain users policy with domain policy if user is not in a group
+     * @param Domain $domain
+     * @return void
+     */
+    public function updateUsersPolicyfromDomain(Domain $domain): void {
+        $users = $this->userRepository->findBy([
             'domain' => $domain,
-            'groups' => null
         ]);
-        foreach ($users as $user){
-            
-            /*@var $user User */
-            $user->setPolicy($domain->getPolicy());
-            $this->em->persist($user);
-            $this->em->flush();            
+        foreach ($users as $user) {
+
+            /* @var $user User */
+            $group = $this->userRepository->getMainUserGroup($user);
+            if (!$group) {
+                $user->setPolicy($domain->getPolicy());
+                $this->em->persist($user);
+                $this->em->flush();
+            }
         }
-        
-        
     }
+
+    /**
+     * Update groups for user alaises
+     * @param type $groupId
+     * @return type
+     */
+    public function updateAliasGroupsFromUser(User $originalUser) {
+        if ($originalUser) {
+            $aliases = $this->userRepository->getListAliases();
+            foreach ($aliases as $alias) {
+                /*@var $alias User */
+                $alias->getGroups()->clear();
+                $this->em->flush();
+                foreach ($originalUser->getGroups() as $group) {
+                    $alias->addGroup($group);
+                }
+                $this->em->flush();
+            }
+        }
+    }
+
 }

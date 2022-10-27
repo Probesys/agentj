@@ -9,12 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="groups_wblist")
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\GroupsWblistRepository")
  */
 class GroupsWblist
 {
 
     /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Groups")
+    * @ORM\ManyToOne(targetEntity="App\Entity\Groups", inversedBy="groupsWbLists")
     * @ORM\JoinColumn(name="group_id", nullable=true, onDelete="CASCADE")
     * @ORM\Id
     */

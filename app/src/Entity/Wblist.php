@@ -18,6 +18,10 @@ class Wblist
     const WBLIST_PRIORITY_GROUP = 50;
     const WBLIST_PRIORITY_USER = 100;
     const WBLIST_PRIORITY_GROUP_OVERRIDE = 200;
+    
+    const WBLIST_TYPE_USER = 0 ; // Web liste origin is user        
+    const WBLIST_TYPE_SENDER = 1 ; // Web liste origin is sender via human authentication
+    const WBLIST_TYPE_GROUP = 2; // Web list origin is group
 
 
     /**

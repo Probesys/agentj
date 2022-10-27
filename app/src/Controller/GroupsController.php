@@ -9,6 +9,7 @@ use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Form\GroupsType;
+use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -110,7 +111,7 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Groups $group): Response {
+    public function edit(Request $request, Groups $group, GroupService $groupService): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -156,8 +157,9 @@ class GroupsController extends AbstractController {
 
 
             $em->flush();
-
-            $this->updatedWBListFromGroup($group->getId());
+            foreach ($group->getUsers() as $user){
+                $groupService->updateWblistForUser($user, $group);
+            }
             return new Response(json_encode([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.editSuccess'),
