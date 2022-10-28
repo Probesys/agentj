@@ -27,12 +27,14 @@ class GroupsWblistController extends AbstractController {
 
     use ControllerWBListTrait;
 
-    private $em;
-    private $translator;
+    private EntityManagerInterface $em;
+    private TranslatorInterface $translator;
+    private GroupsWblistService $groupsWblistService;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator, GroupsWblistService $groupsWblistService) {
         $this->em = $em;
         $this->translator = $translator;
+        $this->groupsWblistService = $groupsWblistService;
     }
 
     private function checkAccess($group) {
@@ -58,7 +60,7 @@ class GroupsWblistController extends AbstractController {
     /**
      * @Route("/{groupId}/new", name="groups_wblist_new", methods="GET|POST")
      */
-    public function new($groupId, Request $request, GroupsWblistService $groupsWblistService, MailaddrService $mailaddrService): Response {
+    public function new($groupId, Request $request, MailaddrService $mailaddrService): Response {
         $groups = $this->em->getRepository(Groups::class)->findOneBy((['id' => $groupId]));
         if (!$groups) {
             throw $this->createNotFoundException('The groups does not exist');
@@ -101,7 +103,7 @@ class GroupsWblistController extends AbstractController {
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
-            $groupsWblistService->updateWblist($groupsWblist);
+            $this->groupsWblistService->updateWblist($groupsWblist);
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         }
@@ -116,7 +118,7 @@ class GroupsWblistController extends AbstractController {
     /**
      * @Route("/{groupId}/edit/{sid}", name="groups_wblist_edit", methods="GET|POST")
      */
-    public function edit($groupId, $sid, Request $request, GroupsWblistService $groupsWblistService, MailaddrService $mailaddrService) {
+    public function edit($groupId, $sid, Request $request, MailaddrService $mailaddrService) {
         $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy(['mailaddr' => $sid, 'groups' => $groupId]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
@@ -152,7 +154,7 @@ class GroupsWblistController extends AbstractController {
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
-            $groupsWblistService->updateWblist($groupWbList);
+            $this->groupsWblistService->updateWblist($groupWbList);
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         } else {
@@ -178,7 +180,8 @@ class GroupsWblistController extends AbstractController {
             $em = $this->em;
             $em->remove($groupsWblist);
             $em->flush();
-            $this->updatedWBListFromGroup($groupId);
+            $this->groupsWblistService->updateWblist($groupsWblist);
+//            $this->updatedWBListFromGroup($groupId);
         }
 
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
