@@ -26,6 +26,7 @@ final class Version20221025152327 extends AbstractMigration
         $this->addSql('ALTER TABLE msgs CHANGE originating originating CHAR(1) DEFAULT \' \' NOT NULL');
         $this->addSql('ALTER TABLE users DROP FOREIGN KEY FK_1483A5E9F373DCF');
         $this->addSql('DROP INDEX IDX_1483A5E9F373DCF ON users');
+        $this->addSql('INSERT INTO user_groups (user_id, groups_id) SELECT id, groups_id  FROM users WHERE groups_id is not null');
         $this->addSql('ALTER TABLE users DROP groups_id');
     }
 
