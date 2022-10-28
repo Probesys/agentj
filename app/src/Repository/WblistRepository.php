@@ -27,10 +27,10 @@ class WblistRepository extends ServiceEntityRepository {
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->join('wb.rid', 'u')
                 ->join('wb.sid', 's')
-                ->join('wb.groups','g');
+                ->leftJoin('wb.groups','g');
 
         $conn = $this->getEntityManager()->getConnection();
-//        dd($user->getRoles());
+
         if (in_array('ROLE_USER', $user->getRoles())) {
             $dql->andWhere('wb.rid = :user')
                     ->setParameter('user', $user);
@@ -211,7 +211,7 @@ class WblistRepository extends ServiceEntityRepository {
         $sql_select_policy = 'SELECT *,users.id' .
                 ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
                 ' WHERE users.email IN (' . $r_str . ') ORDER BY users.priority DESC ';
-//dd($sql_select_policy);
+
         $stmt = $conn->prepare($sql_select_policy);
         $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
