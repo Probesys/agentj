@@ -51,15 +51,5 @@ services:
     App.crypt_encrypt:
        class: App\Service\CryptEncrypt
        public: true   
-#    App\Twig\AppExtension:
-#        lazy:  true        
-#    twig.extension.text:
-#            class: Twig_Extensions_Extension_Text
-#            tags:
-#                - { name: twig.extension }  
-#    twig.extension.intl:
-#        class: Twig_Extensions_Extension_Intl
-#        tags:
-#            - { name: twig.extension } 
     App\Service\FileUploader:
         arguments: ['%app.upload_directory%', "@doctrine.orm.entity_manager"]   

@@ -163,6 +163,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $uid;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Wblist", mappedBy="rid")
+     */    
+    private $wbLists;       
+
     public function __construct()
     {
 
@@ -171,6 +176,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->owners = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->ownedSharedBoxes = new ArrayCollection();
+        $this->wbLists = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -550,6 +556,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeGroup(Groups $group): self
     {
         $this->groups->removeElement($group);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wblist>
+     */
+    public function getWbLists(): Collection
+    {
+        return $this->wbLists;
+    }
+
+    public function addWbList(Wblist $wbList): self
+    {
+        if (!$this->wbLists->contains($wbList)) {
+            $this->wbLists[] = $wbList;
+            $wbList->setRid($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWbList(Wblist $wbList): self
+    {
+        if ($this->wbLists->removeElement($wbList)) {
+            // set the owning side to null (unless already changed)
+            if ($wbList->getRid() === $this) {
+                $wbList->setRid(null);
+            }
+        }
 
         return $this;
     }

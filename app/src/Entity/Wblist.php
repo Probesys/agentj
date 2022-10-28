@@ -25,7 +25,7 @@ class Wblist
 
 
     /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\User")
+    * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="wbLists")
     * @ORM\JoinColumn(name="rid", nullable=true, onDelete="CASCADE")
     * @ORM\Id
     */
