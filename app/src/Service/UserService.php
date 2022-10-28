@@ -49,7 +49,7 @@ class UserService {
      */
     public function updateAliasGroupsFromUser(User $originalUser) {
         if ($originalUser) {
-            $aliases = $this->userRepository->getListAliases();
+            $aliases = $this->userRepository->getListAliases($originalUser);
             foreach ($aliases as $alias) {
                 /*@var $alias User */
                 $alias->getGroups()->clear();

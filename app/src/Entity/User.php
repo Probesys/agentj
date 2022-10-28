@@ -118,7 +118,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
   /**
    * @ORM\ManyToMany(targetEntity="Groups", inversedBy="users")
    * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
-   * @OrderBy({"priority" = "ASC"})
+   * @OrderBy({"priority" = "DESC"})
    */
     private $groups;
 

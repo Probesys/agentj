@@ -88,7 +88,6 @@ class UserRepository extends ServiceEntityRepository {
     public function searchByRole(User $user, $role = null) {
         $conn = $this->getEntityManager()->getConnection();
 
-//        $sql = "SELECT usr.id, usr.email, usr.fullname, usr.username ,usr.roles, usr.imaplogin from users usr ";
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin')
                 ->where('u.originalUser is null');
@@ -98,40 +97,23 @@ class UserRepository extends ServiceEntityRepository {
             $dql->setParameter('role', $role);
         }
 
-//        if (is_array($roles) && count($roles) > 0) {
-//            $i = 0;
-//
-//            foreach ($roles as $role) {
-//                if ($i == 0) {
-//                    $sql .= " where usr.roles like '%" . $role . "%'";
-//                } else {
-//                    $sql .= " or usr.roles like '%" . $role . "%'";
-//                }
-//                $i++;
-//            }
-//        }
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             $domainsIds = array_map(function ($entity) {
                 return $entity->getId();
             }, $user->getDomains()->toArray());
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
-//            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
+
         }
 
-//        $sql .= ' AND original_user_id IS NULL '; //without alias
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute();
-//        $dql->getQuery()->execute();
-
         $result = $dql->getQuery()->execute();
-//        dd($result);
-//        dd(count($result));
         return $result;
     }
 
-    public function getListAliases(): ?array {
+    public function getListAliases(User $user): ?array {
         $dql = $this->createQueryBuilder('u')
-                ->join('u.originalUser', 'a');
+                ->join('u.originalUser', 'a')
+                ->where('u.originalUser= :user')
+                ->setParameter('user', $user);
 
         $query = $dql->getQuery();
         return $query->getResult();

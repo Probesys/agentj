@@ -12,6 +12,7 @@ use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Service\FileUploader;
+use App\Service\MailaddrService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -316,7 +317,7 @@ class DomainController extends AbstractController {
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
      */
-    public function newwblist($domainId, Request $request, GroupsController $groupsController, AuthorizationCheckerInterface $authChecker): Response {
+    public function newwblist($domainId, Request $request, MailaddrService $mailaddrService): Response {
         $em = $this->em;
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
         if (!$domain) {
@@ -345,7 +346,7 @@ class DomainController extends AbstractController {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail($data['email']);
 
-                $priority = $this->computeMailAddrPriority($data['email']);
+                $priority = $mailaddrService->computePriority($data['email']);
                 $mailaddr->setPriority($priority);
 
                 $em->persist($mailaddr);
@@ -392,43 +393,7 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    /**
-     *
-     * @param type $email
-     * @return int
-     */
-    private function computeMailAddrPriority($email = "") {
-
-        $priority = 5; //default priority for email
-        //in case domain
-        if (substr(trim($email), 0, 1) == '@') {
-            $domain = substr($email, 1);
-            if ($domain == '.') {
-                $priority = 0; //in case @.
-            }
-            $subdomain = explode('.', $domain);
-            if (count($subdomain) == "2") {
-                if ($subdomain[0] == '') {//in case @.com
-                    $priority = 1;
-                } else {//in case @example.com
-                    $priority = 5; // to be confirme
-                }
-            } elseif (count($subdomain) == "3") {
-                if ($subdomain[0] == '') {//in case @.example.com
-                    $priority = 2;
-                } else {//in case @sub.example.com
-                    $priority = 5;
-                }
-            } elseif (count($subdomain) == "4") {
-                if ($subdomain[0] == '') {//in case @.sub.example.com
-                    $priority = 3;
-                }
-            }
-        } else {
-            //todo user (priority 6) / user+foo (priority 7) / user@sub.example.com (priority 8) / user+foo@sub.example.com (priority 9)
-        }
-        return $priority;
-    }
+    
 
     private function generateOpenDkim(string $smtpServer, string $domainName): bool {
         $process = new Process([$this->getParameter('app.dkim_generator'), $domainName, $smtpServer]);

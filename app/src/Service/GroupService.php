@@ -25,14 +25,15 @@ class GroupService {
     }
 
     /**
-     * Update user wblists from wblist defined in his group
+     * Update user and aliases wblists from wblist defined in user group
      * @param User $user
+     * @param array $oldGroups
      * @return void
      */
     public function updateWblistForUserAndAliases(User $user, array $oldGroups = []): void {
 
         $userRepository = $this->em->getRepository(User::class);
-        $aliases = $userRepository->getListAliases();
+        $aliases = $userRepository->getListAliases($user);
 
         foreach ($oldGroups as $oldGroup) {
             if (!($user->getGroups()->contains($oldGroup))) {
