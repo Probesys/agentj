@@ -27,7 +27,7 @@ class WblistRepository extends ServiceEntityRepository {
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->join('wb.rid', 'u')
                 ->join('wb.sid', 's')
-                ->join('wb.groups','g');
+                ->leftJoin('wb.groups','g');
 
         $conn = $this->getEntityManager()->getConnection();
 //        dd($user->getRoles());
