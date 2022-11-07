@@ -30,7 +30,7 @@ class WblistRepository extends ServiceEntityRepository {
                 ->leftJoin('wb.groups','g');
 
         $conn = $this->getEntityManager()->getConnection();
-//        dd($user->getRoles());
+
         if (in_array('ROLE_USER', $user->getRoles())) {
             $dql->andWhere('wb.rid = :user')
                     ->setParameter('user', $user);
@@ -211,7 +211,7 @@ class WblistRepository extends ServiceEntityRepository {
         $sql_select_policy = 'SELECT *,users.id' .
                 ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
                 ' WHERE users.email IN (' . $r_str . ') ORDER BY users.priority DESC ';
-//dd($sql_select_policy);
+
         $stmt = $conn->prepare($sql_select_policy);
         $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
