@@ -235,11 +235,14 @@ class GroupsController extends AbstractController {
     public function delete(Request $request, Groups $group, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
             $groupUsers = $group->getUsers()->toArray();
-            foreach ($group->getUsers() as $user) {
-                $userService->updateUserAndAliasPolicy($user);
-            }
+
             $this->em->remove($group);
             $this->em->flush();
+            
+            foreach ($groupUsers as $user) {
+                $userService->updateUserAndAliasPolicy($user);
+            }
+            
             foreach ($groupUsers as $user) {
                 $groupService->updateWblistForUserAndAliases($user);
             }

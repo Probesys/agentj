@@ -98,8 +98,9 @@ class GroupService {
                     }
                 }
             }
-            $this->em->flush();
+            
         }
+        $this->em->flush();
     }
 
 

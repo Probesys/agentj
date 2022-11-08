@@ -9,12 +9,14 @@ use App\Entity\Groups;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ImportType;
+use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use function dd;
 
 /**
  * @Route("/admin/import")
@@ -24,12 +26,14 @@ class ImportController extends AbstractController {
     use ControllerCommonTrait;
     use ControllerWBListTrait;
 
-    private $translator;
-    private $em;
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $em;
+    private GroupService $groupService;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, GroupService $groupService) {
         $this->translator = $translator;
         $this->em = $em;
+        $this->groupService = $groupService;
     }
 
     /**
@@ -162,7 +166,7 @@ class ImportController extends AbstractController {
                             $em->persist($user);
                             $emails[$user->getEmail()] = $user->getEmail();
                             if ($group) {
-                                $user->setGroups($group);
+                                $user->addGroup($group);
                                 $em->persist($group);
 
                                 $groupWbUpdate[$group->getid()] = $group->getid();
@@ -185,7 +189,11 @@ class ImportController extends AbstractController {
             //Need to flush if user new is inferior $batchSize
             $em->flush();
             foreach ($groupWbUpdate as $groupIdUpdate) {
-                $this->updatedWBListFromGroup($groupIdUpdate);
+                $group = $em->getRepository(Groups::class)->find($groupIdUpdate);
+                foreach ($group->getUsers() as $user) {
+                    $this->groupService->updateWblistForUserAndAliases($user);
+                }
+
             }
         }
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
