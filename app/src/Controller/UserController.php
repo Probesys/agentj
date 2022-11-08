@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
+use App\Entity\Groups;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
@@ -543,9 +544,9 @@ class UserController extends AbstractController {
      */
     private function computeUserPolicy(User $user): Policy {
         $policy = null;
-        $userRepository = $this->em->getRepository(User::class);
+        $groupsRepository = $this->em->getRepository(Groups::class);
         if ($user->getGroups() && count($user->getGroups()) > 0) {
-            $defaultGroup = $userRepository->getMainUserGroup($user);
+            $defaultGroup = $groupsRepository->getMainUserGroup($user);
             $policy = $defaultGroup ? $defaultGroup[0]->getPolicy() : null;
         }
 
