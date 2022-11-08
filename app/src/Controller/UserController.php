@@ -454,7 +454,9 @@ class UserController extends AbstractController {
                 $this->em->persist($user);
                 $this->em->flush();
 
+                $userService->updateUserAndAliasPolicy($user);
                 $userService->updateAliasGroupsFromUser($user);
+                
                 $groupService->updateWblistForUserAndAliases($user, $oldGroups);
 
                 $return = [

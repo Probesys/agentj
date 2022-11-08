@@ -258,19 +258,7 @@ class UserRepository extends ServiceEntityRepository {
         }
     }
 
-    /**
-     * Return the main (hightest priority) group of the user $user
-     * @param User $user
-     * @return array|null
-     */
-    public function getMainUserGroup(User $user): ?array {
-        $dql = $this->createQueryBuilder('u')
-                ->innerJoin('u.groups', 'g')
-                ->where('g.active = true')
-                ->orderBy('g.priority', 'DESC');
-        $query = $dql->getQuery()->setMaxResults(1);
-        return $query->getResult();
-    }
+
     
 
 

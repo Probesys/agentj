@@ -28,7 +28,7 @@ class AccountController extends AbstractController
   /**
    * @Route("/account", name="account")
    */
-    public function index(Request $request, UserRepository $userRepository)
+    public function index(Request $request, \App\Repository\GroupsRepository $groupsRepository)
     {
 
         $groupDefaulWb = null;
@@ -49,7 +49,7 @@ class AccountController extends AbstractController
         }))[0];
 
         if ($user->getGroups() && count($user->getGroups()) > 0) {
-            $defaultGroup = $userRepository->getMainUserGroup($user);
+            $defaultGroup = $groupsRepository->getMainUserGroup($user);
             
             $wbGroup = $defaultGroup->getWb();
             $groupDefaulWb = array_keys(array_filter($this->getWBListUserActions(), function ($item) use ($wbGroup) {

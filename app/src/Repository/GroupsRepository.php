@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Groups;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -45,6 +46,20 @@ class GroupsRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    /**
+     * Return the main (hightest priority) group of the user $user
+     * @param User $user
+     * @return array|null
+     */
+    public function getMainUserGroup(User $user): ?array {
+        $dql = $this->createQueryBuilder('g')
+                ->innerJoin('g.users', 'u')
+                ->where('g.active = true')
+                ->orderBy('g.priority', 'DESC');
+        $query = $dql->getQuery()->setMaxResults(1);
+        return $query->getResult();
+    }
+    
   // /**
   //  * @return Captcha[] Returns an array of Captcha objects
   //  */
