@@ -194,17 +194,17 @@ class GroupsController extends AbstractController {
      */
     public function removeUser(Request $request, Groups $group, User $user, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
+            $oldGroups = $user->getGroups()->toArray();
             $group->removeUser($user);
+
             $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-            foreach ($userAliases as $alias){
+            foreach ($userAliases as $alias) {
                 $group->removeUser($alias);
             }
-
+            $this->em->flush();
             $userService->updateUserAndAliasPolicy($user);
-            $groupService->updateWblistForUserAndAliases($user, [$group]);
+            $groupService->updateWblistForUserAndAliases($user, $oldGroups);
 
-            $this->em->persist($user);
-            $this->em->persist($group);
             $this->em->flush();
         }
 
