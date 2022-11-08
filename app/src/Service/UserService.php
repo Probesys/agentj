@@ -30,6 +30,7 @@ class UserService {
         $defaultGroup = $this->groupsRepository->getMainUserGroup($user);
 
         $policy = $defaultGroup ? $defaultGroup[0]->getPolicy() : $user->getDomain()->getPolicy();
+        
         $user->setPolicy($policy);
         $this->em->persist($user);
         $aliases = $this->userRepository->getListAliases($user);
@@ -62,22 +63,22 @@ class UserService {
     }
 
     /**
-     * Update groups for user alaises
-     * @param type $groupId
-     * @return type
+     * Update groups and policy for user aliases
+     * @param User $originalUser
+     * @return void
      */
-    public function updateAliasGroupsFromUser(User $originalUser) {
-        if ($originalUser) {
-            $aliases = $this->userRepository->getListAliases($originalUser);
-            foreach ($aliases as $alias) {
-                /* @var $alias User */
-                $alias->getGroups()->clear();
-                $this->em->flush();
-                foreach ($originalUser->getGroups() as $group) {
-                    $alias->addGroup($group);
-                }
-                $this->em->flush();
+    public function updateAliasGroupsAndPolicyFromUser(User $originalUser): void {
+        $aliases = $this->userRepository->getListAliases($originalUser);   
+        foreach ($aliases as $alias) {
+            /* @var $alias User */
+            $alias->getGroups()->clear();
+            $this->em->flush();
+            foreach ($originalUser->getGroups() as $group) {
+                $alias->addGroup($group);
+                
             }
+            $alias->setPolicy($originalUser->getPolicy());
+            $this->em->flush();
         }
     }
 

@@ -55,7 +55,9 @@ class GroupsRepository extends ServiceEntityRepository
         $dql = $this->createQueryBuilder('g')
                 ->innerJoin('g.users', 'u')
                 ->where('g.active = true')
-                ->orderBy('g.priority', 'DESC');
+                ->andWhere('u.id = :user')
+                ->orderBy('g.priority', 'DESC')
+                ->setParameter('user', $user);
         $query = $dql->getQuery()->setMaxResults(1);
         return $query->getResult();
     }

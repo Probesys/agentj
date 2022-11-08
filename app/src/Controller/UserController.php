@@ -10,7 +10,6 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserType;
 use App\Repository\UserRepository;
-use App\Repository\WblistRepository;
 use App\Service\GroupService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,15 +29,12 @@ class UserController extends AbstractController {
 
     use ControllerWBListTrait;
 
-    private $translator;
-    /* @var $wblistRepository WblistRepository */
-    private $wblistRepository;
-    private $em;
+    private TranslatorInterface $translator;
+    private EntityManagerInterface $em;
 
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
         $this->translator = $translator;
         $this->em = $em;
-        $this->wblistRepository = $em->getRepository(Wblist::class);
     }
 
     /**
@@ -101,9 +97,8 @@ class UserController extends AbstractController {
                 $user->setPassword($encoded);
                 $user->setRoles($role);
 
-                $em = $this->em;
-                $em->persist($user);
-                $em->flush();
+                $this->em->persist($user);
+                $this->em->flush();
                 $return = [
                     'status' => 'success',
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -124,7 +119,7 @@ class UserController extends AbstractController {
      * @Route("/local/{id}/edit", name="user_local_edit", methods="GET|POST")
      *
      */
-    public function edit(Request $request, User $user, EntityManagerInterface $em): Response {
+    public function edit(Request $request, User $user): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form']
@@ -139,7 +134,7 @@ class UserController extends AbstractController {
 
         if ($form->isSubmitted() && $form->isValid()) {
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $request->request->get('user')['username']]);
-            $oldUser = $em->getUnitOfWork()->getOriginalEntityData($user);
+            $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
             if ($oldUser['username'] != $request->request->get('user')['username'] && $userNameExist) {
                 $return = [
                     'status' => 'danger',
@@ -204,9 +199,8 @@ class UserController extends AbstractController {
      */
     public function deleteLocal(Request $request, User $user): Response {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->em;
-            $em->remove($user);
-            $em->flush();
+            $this->em->remove($user);
+            $this->em->flush();
         }
         $referer = $request->headers->get('referer');
         return $this->redirect($referer);
@@ -218,9 +212,8 @@ class UserController extends AbstractController {
     public function deleteEmail(Request $request, User $user): Response {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             if (in_array('ROLE_USER', $user->getRoles())) {
-                $em = $this->em;
-                $em->remove($user);
-                $em->flush();
+                $this->em->remove($user);
+                $this->em->flush();
             }
         }
         $referer = $request->headers->get('referer');
@@ -231,14 +224,14 @@ class UserController extends AbstractController {
      * @Route("/email/batchDelete", name="user_email_batch_delete", methods="POST")
      */
     public function batchDeleteEmail(Request $request): Response {
-        $em = $this->em;
+
         foreach ($request->request->get('id') as $id) {
-            $user = $em->getRepository(User::class)->find($id);
+            $user = $this->em->getRepository(User::class)->find($id);
             if ($user) {
-                $em->remove($user);
+                $this->em->remove($user);
             }
         }
-        $em->flush();
+        $this->em->flush();
         $referer = $request->headers->get('referer');
         return $this->redirect($referer);
     }
@@ -295,16 +288,10 @@ class UserController extends AbstractController {
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
 
-                $em = $this->em;
+                $this->em->persist($user);
+                $this->em->flush();
 
-                $em->persist($user);
-                $em->flush();
-
-                // if ($user->getGroups()) {
-                //     $this->updatedWBListFromGroup($user->getGroups()->getId());
-                // }
-
-                $userService->updateAliasGroupsFromUser($user);
+                $userService->updateAliasGroupsAndPolicyFromUser($user);
                 $groupService->updateWblistForUserAndAliases($user);
 
                 $return = [
@@ -331,7 +318,7 @@ class UserController extends AbstractController {
     /**
      * @Route("/newAlias", name="new_user_email_alias", methods="GET|POST")
      */
-    public function newUserAlias(Request $request, UserService $userService): Response {
+    public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response {
         $groups = null;
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -367,19 +354,15 @@ class UserController extends AbstractController {
                 $user->setRoles('["ROLE_USER"]');
                 $user->setDomain($newDomain);
                 $user->setUsername($user->getEmail());
-                if ($user->getOriginalUser()) {
-                    $userService->updateAliasGroupsFromUser($user->getOriginalUser());
-//                    $user->setGroups($groups);
-                }
-                $user->setUsername($user->getEmail());
 
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
-                $em = $this->em;
-                $em->persist($user);
-                $em->flush();
 
-                $em->getRepository(Wblist::class)->importWbListFromUserToAlias($user);
+                $this->em->persist($user);
+                $this->em->flush();
+
+                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $groupService->updateWblistForUserAndAliases($user->getOriginalUser());
 
                 $return = [
                     'status' => 'success',
@@ -404,10 +387,10 @@ class UserController extends AbstractController {
      * @Route("/email/{id}/edit", name="user_email_edit", methods="GET|POST")
      *
      */
-    public function editUserEmail(Request $request, User $user, EntityManagerInterface $em, UserService $userService, GroupService $groupService): Response {
+    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService): Response {
 
         $oldGroups = $user->getGroups()->toArray();
-        
+
         $allowedomainIds = array_map(function ($entity) {
 
             if ($entity) {
@@ -447,17 +430,16 @@ class UserController extends AbstractController {
                 ];
             } elseif ($form->isValid()) {
 
-
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
                 $user->setUsername($user->getEmail());
-                
+
                 $this->em->persist($user);
                 $this->em->flush();
 
                 $userService->updateUserAndAliasPolicy($user);
-                $userService->updateAliasGroupsFromUser($user);
-                
+                $userService->updateAliasGroupsAndPolicyFromUser($user);
+
                 $groupService->updateWblistForUserAndAliases($user, $oldGroups);
 
                 $return = [
@@ -479,7 +461,7 @@ class UserController extends AbstractController {
      * @Route("/alias/{id}/edit", name="user_email_alias_edit", methods="GET|POST")
      *
      */
-    public function editUserEmailAlias(Request $request, User $user, EntityManagerInterface $em): Response {
+    public function editUserEmailAlias(Request $request, User $user, UserService $userService, GroupService $groupService): Response {
         $userId = null;
         if ($user->getOriginalUser()) {
             $userId = $user->getOriginalUser()->getId();
@@ -504,7 +486,7 @@ class UserController extends AbstractController {
         if ($form->isSubmitted()) {
             $data = $form->getData(); //dump();die;
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-            $oldUser = $em->getUnitOfWork()->getOriginalEntityData($user);
+            $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
             if (stream_get_contents($oldUser['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
                 $return = [
                     'status' => 'danger',
@@ -512,14 +494,10 @@ class UserController extends AbstractController {
                 ];
             } elseif ($form->isValid()) {
                 $user->setUsername($user->getEmail());
-                $user->setGroups($user->getOriginalUser()->getGroups());
                 $this->em->flush();
 
-                $this->wblistRepository->deleteUserGroup($user->getId());
-                if ($user->getGroups()) {
-                    $this->updatedWBListFromGroup($user->getGroups()->getId());
-                }
-
+                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $groupService->updateWblistForUserAndAliases($user->getOriginalUser(), []);
 
                 $return = [
                     'status' => 'success',

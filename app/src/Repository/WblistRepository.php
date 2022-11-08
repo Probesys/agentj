@@ -251,23 +251,6 @@ class WblistRepository extends ServiceEntityRepository {
         return $infos;
     }
 
-    /**
-     * insert wblist from user to alias when alias is created
-     * @return type
-     */
-    public function importWbListFromUserToAlias(User $alias) {
-
-        $originalUser = $alias->getOriginalUser();
-        $wbLists = $this->findBy(['rid' => $originalUser->getId()]);
-        foreach ($wbLists as $wblist) {
-            /* @var $newWbLis Wblist */
-            $newWbLis = clone $wblist;
-            $newWbLis->setDatemod(new \DateTime());
-            $newWbLis->setRid($alias);
-            $this->getEntityManager()->persist($newWbLis);
-        }
-        $this->getEntityManager()->flush();
-    }
 
     /**
      * Return the default Wb for a domain
