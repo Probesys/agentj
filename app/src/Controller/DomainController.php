@@ -236,7 +236,6 @@ class DomainController extends AbstractController {
             $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
 
             $em->persist($wblist);
-            //$em->persist($domain);
             $em->persist($userDomain);
             $em->flush();
             

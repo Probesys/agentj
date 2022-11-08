@@ -158,7 +158,7 @@ class GroupsController extends AbstractController {
 
             $em->flush();
             foreach ($group->getUsers() as $user){                
-                $groupService->updateWblistForUser($user, $group);
+                $groupService->updateWblistForUserAndAliases($user);
             }
             return new Response(json_encode([
                         'status' => 'success',
@@ -233,6 +233,11 @@ class GroupsController extends AbstractController {
     public function delete(Request $request, Groups $group): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
             $em = $this->em;
+            
+            foreach ($group->getUsers() as $user){                
+                $groupService->updateWblistForUserAndAliases($user);
+            }
+            
             $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
             $em->remove($group);
             $em->flush();
