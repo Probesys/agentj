@@ -232,17 +232,17 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/delete", name="groups_delete", methods="GET")
      */
-    public function delete(Request $request, Groups $group): Response {
+    public function delete(Request $request, Groups $group, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-            $em = $this->em;
-
+            $groupUsers = $group->getUsers()->toArray();
             foreach ($group->getUsers() as $user) {
+                $userService->updateUserAndAliasPolicy($user);
+            }
+            $this->em->remove($group);
+            $this->em->flush();
+            foreach ($groupUsers as $user) {
                 $groupService->updateWblistForUserAndAliases($user);
             }
-
-            $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
-            $em->remove($group);
-            $em->flush();
         }
 
         return $this->redirectToRoute('groups_index');
