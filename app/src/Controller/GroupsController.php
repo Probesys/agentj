@@ -10,6 +10,7 @@ use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Form\GroupsType;
 use App\Service\GroupService;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -111,7 +112,7 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Groups $group, GroupService $groupService, \App\Service\UserService $userService): Response {
+    public function edit(Request $request, Groups $group, GroupService $groupService, UserService $userService): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -157,8 +158,8 @@ class GroupsController extends AbstractController {
 
 
             $em->flush();
-            foreach ($group->getUsers() as $user){            
-                
+            foreach ($group->getUsers() as $user) {
+
                 //update policy fom group
                 $userService->updateUserAndAliasPolicy($user);
                 //update Wblist fom group
@@ -191,23 +192,20 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
      */
-    public function removeUser(Request $request, Groups $group, User $user): Response {
+    public function removeUser(Request $request, Groups $group, User $user, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->em;
-            //check if alias
-            if ($user->getOriginalUser()) {
-                $user = $user->getOriginalUser();
-            }
-            $domainPolicy = $user->getDomain()->getPolicy();
+            $group->removeUser($user);
             $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-            array_unshift($userAliases, $user);
-
-            foreach ($userAliases as $userAlias) {
-                $userAlias->setGroups(null);
-                $userAlias->setPolicy($domainPolicy);
+            foreach ($userAliases as $alias){
+                $group->removeUser($alias);
             }
-            $em->flush();
-            $this->updatedWBListFromGroup($group->getId());
+
+            $userService->updateUserAndAliasPolicy($user);
+            $groupService->updateWblistForUserAndAliases($user, [$group]);
+
+            $this->em->persist($user);
+            $this->em->persist($group);
+            $this->em->flush();
         }
 
         return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
@@ -237,11 +235,11 @@ class GroupsController extends AbstractController {
     public function delete(Request $request, Groups $group): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
             $em = $this->em;
-            
-            foreach ($group->getUsers() as $user){                
+
+            foreach ($group->getUsers() as $user) {
                 $groupService->updateWblistForUserAndAliases($user);
             }
-            
+
             $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
             $em->remove($group);
             $em->flush();

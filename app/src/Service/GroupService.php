@@ -35,6 +35,7 @@ class GroupService {
         $userRepository = $this->em->getRepository(User::class);
         $aliases = $userRepository->getListAliases($user);
 
+        //Delete wblist from groups where user not in
         foreach ($oldGroups as $oldGroup) {
             if (!($user->getGroups()->contains($oldGroup))) {
                 $this->wblistRepository->deleteUserWbListFromGroup($oldGroup, $user);
