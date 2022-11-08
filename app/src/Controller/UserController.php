@@ -467,6 +467,7 @@ class UserController extends AbstractController {
             $userId = $user->getOriginalUser()->getId();
         }
 
+        $oldAliasGroups = $user->getGroups()->toArray();
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_email_alias_edit', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form']
@@ -497,7 +498,7 @@ class UserController extends AbstractController {
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
-                $groupService->updateWblistForUserAndAliases($user->getOriginalUser(), []);
+                $groupService->updateWblistForUserAndAliases($user->getOriginalUser(), $oldAliasGroups);
 
                 $return = [
                     'status' => 'success',
