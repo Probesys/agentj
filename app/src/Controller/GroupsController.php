@@ -111,7 +111,7 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Groups $group, GroupService $groupService): Response {
+    public function edit(Request $request, Groups $group, GroupService $groupService, \App\Service\UserService $userService): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -157,7 +157,11 @@ class GroupsController extends AbstractController {
 
 
             $em->flush();
-            foreach ($group->getUsers() as $user){                
+            foreach ($group->getUsers() as $user){            
+                
+                //update policy fom group
+                $userService->updateUserAndAliasPolicy($user);
+                //update Wblist fom group
                 $groupService->updateWblistForUserAndAliases($user);
             }
             return new Response(json_encode([
