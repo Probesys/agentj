@@ -26,11 +26,11 @@ class GroupsWblistService {
 
     public function updateWblist(GroupsWblist $groupsWblist) {
         foreach ($groupsWblist->getGroups()->getUsers() as $user) {
-            /* @var $user User */
-                $this->groupService->updateWblistForUser($user, $groupsWblist->getGroups());
+            
+            $this->groupService->updateWblistForUser($user, $groupsWblist->getGroups());
             $aliases = $this->userRepository->getListAliases($user);
-            foreach($aliases as $alias){
-                $this->groupService->updateWblistForUser($user, $groupsWblist->getGroups());    
+            foreach ($aliases as $alias) {
+                $this->groupService->updateWblistForUser($user, $groupsWblist->getGroups());
             }
         }
     }

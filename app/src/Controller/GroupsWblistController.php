@@ -172,18 +172,20 @@ class GroupsWblistController extends AbstractController {
     /**
      * @Route("/{groupId}/{sid}/delete", name="groups_wblist_delete", methods="GET")
      */
-    public function delete($groupId, $sid, Request $request) {
+    public function delete($groupId, $sid, Request $request, GroupService $groupService) {
+        /*@var $group Groups */
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
         $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $sid, 'groups' => $groupId]));
         if ($groupsWblist) {
             $em = $this->em;
             $em->remove($groupsWblist);
-            $em->flush();
-            $this->groupsWblistService->updateWblist($groupsWblist);
-//            $this->updatedWBListFromGroup($groupId);
+            $em->flush();            
         }
 
+        foreach ($group->getUsers() as $user){
+            $groupService->updateWblistForUser($user);
+        }
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
     }
 
