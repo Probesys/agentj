@@ -292,7 +292,7 @@ class UserController extends AbstractController {
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
-                $groupService->updateWblistForUserAndAliases($user);
+                $groupService->updateWblist();
 
                 $return = [
                     'status' => 'success',
@@ -362,8 +362,7 @@ class UserController extends AbstractController {
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
-                $groupService->updateWblistForUserAndAliases($user->getOriginalUser());
-
+                $groupService->updateWblist();
                 $return = [
                     'status' => 'success',
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -440,7 +439,7 @@ class UserController extends AbstractController {
                 $userService->updateUserAndAliasPolicy($user);
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
 
-                $groupService->updateWblistForUserAndAliases($user, $oldGroups);
+                $groupService->updateWblist();
 
                 $return = [
                     'status' => 'success',
@@ -498,7 +497,7 @@ class UserController extends AbstractController {
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
-                $groupService->updateWblistForUserAndAliases($user->getOriginalUser(), $oldAliasGroups);
+                $groupService->updateWblist();
 
                 $return = [
                     'status' => 'success',

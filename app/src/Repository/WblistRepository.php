@@ -27,7 +27,7 @@ class WblistRepository extends ServiceEntityRepository {
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->join('wb.rid', 'u')
                 ->join('wb.sid', 's')
-                ->leftJoin('wb.groups','g');
+                ->leftJoin('wb.groups', 'g');
 
         $conn = $this->getEntityManager()->getConnection();
 
@@ -46,14 +46,14 @@ class WblistRepository extends ServiceEntityRepository {
 
         if ($type) {
             $dql->andWhere('wb.wb = :type')
-                    ->setParameter('type', $type);            
+                    ->setParameter('type', $type);
         }
-        
+
         if ($searchKey) {
             $dql->andWhere('(s.email like :searchkey or u.email like :searchkey or u.fullname like :searchkey )')
-                    ->setParameter('searchkey', $searchKey);                
+                    ->setParameter('searchkey', $searchKey);
         }
-        
+
         if ($sortPrams) {
             $dql->orderBy($sortPrams['sort'], $sortPrams['direction']);
 //            $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
@@ -69,11 +69,8 @@ class WblistRepository extends ServiceEntityRepository {
 //        } else {
 //            $sql .= ' ORDER BY wb.datemod desc ';
 //        }
-
-
 //        $stmt = $conn->prepare($sql);
 //        $stmt->execute();
-
 //        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
@@ -98,11 +95,11 @@ class WblistRepository extends ServiceEntityRepository {
      * @param int $groupId
      * @return type
      */
-    public function deleteFromGroup($groupId) {
+    public function deleteFromGroup() {
 
         $conn = $this->getEntityManager()->getConnection();
         $sql = " DELETE FROM wblist "
-                . " WHERE group_id = '" . $groupId . "'";
+                . " WHERE group_id  is not null";
         $stmt = $conn->prepare($sql);
 
         return $stmt->execute();
@@ -120,6 +117,21 @@ class WblistRepository extends ServiceEntityRepository {
                 ->where('wb.groups = :group')
                 ->andWhere('wb.rid =:user')
                 ->setParameter('group', $group)
+                ->setParameter('user', $user);
+
+        return $qdl->getQuery()->execute();
+    }
+
+    /**
+     * Delete wblist group entries for a user
+     * @param User $user
+     * @return type
+     */
+    public function deleteUserWbListFromUserGroups(User $user) {
+        $qdl = $this->createQueryBuilder('wb')
+                ->delete()
+                ->where('wb.groups is not null')
+                ->andWhere('wb.rid =:user')
                 ->setParameter('user', $user);
 
         return $qdl->getQuery()->execute();
@@ -145,44 +157,22 @@ class WblistRepository extends ServiceEntityRepository {
      * @param int $groupId
      * @return type
      */
-    public function insertFromGroup($groupId) {
-        $baseAddr = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy(['email' => '@.']);
-        /* @var $group Groups */
-        $group = $this->getEntityManager()->getRepository(Groups::class)->findOneBy(['id' => $groupId]);
-        $priority = Wblist::WBLIST_PRIORITY_GROUP;
-        if ($group->getOverrideUser()) {
-            $priority = Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE;
-        }
+    public function insertFromGroup() {
 
         $conn = $this->getEntityManager()->getConnection();
-        $sqlSelectGroupwbList = "SELECT u.id as rid , '" . $baseAddr->getId() . "' as sid, g.wb,2,g.id," . $priority . " FROM groups g 
-            left join users u ON u.groups_id = g.id 
-            WHERE g.wb is not null and g.wb != ''  and u.id IS NOT NULL AND g.id =  " . $groupId . "
-            UNION
-            SELECT u.id as rid, gw.sid as sid,gw.wb as wb,2,gw.group_id as id, " . $priority . "
-            from users u
-            left join groups_wblist gw on gw.group_id=u.groups_id WHERE gw.wb is not null and gw.wb != '' and u.id IS NOT NULL AND gw.group_id =" . $groupId;
-
+        $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
+                                    select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
+                                    CASE g.override_user
+                                          WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE .  " + g.priority" .
+                                          " WHEN 0 THEN " . Wblist::WBLIST_PRIORITY_GROUP .  " + g.priority
+                                    END as 'priority'  from users u 
+                                    inner join user_groups ug on ug.user_id =u.id
+                                    inner join groups g on g.id =ug.groups_id 
+                                    inner join groups_wblist gw on gw.group_id =g.id 
+                                    where g.active = true";
+//dd($sqlSelectGroupwbList);
         $stmt = $conn->prepare($sqlSelectGroupwbList);
-//        $stmt->execute();
-        $result = $stmt->executeQuery()->fetchAllAssociative();
-        foreach ($result as $row) {
-            $wblist = $this->findOneBy(['rid' => $row['rid'], 'sid' => $row['sid']]);
-            if ($wblist) {
-                $wblist->setGroups($group);
-                $wblist->setPriority($priority);
-            } else {
-                $user = $this->getEntityManager()->getRepository(User::class)->find($row['rid']);
-                $mailAddr = $this->getEntityManager()->getRepository(Mailaddr::class)->find($row['sid']);
-                $wblist = new Wblist($user, $mailAddr);
-                $wblist->setGroups($group);
-                $wblist->setPriority($priority);
-                $wblist->setType(2);
-                $wblist->setWb($row['wb']);
-            }
-            $this->getEntityManager()->persist($wblist);
-        }
-        $this->getEntityManager()->flush();
+        $stmt->execute();
     }
 
     /**
@@ -251,7 +241,6 @@ class WblistRepository extends ServiceEntityRepository {
         return $infos;
     }
 
-
     /**
      * Return the default Wb for a domain
      * @return type
@@ -279,7 +268,6 @@ class WblistRepository extends ServiceEntityRepository {
                 ->setParameter('sender', $mailaddr);
 
         $query = $dql->getQuery();
-        $result = $query->getOneOrNullResult();
         return $query->getOneOrNullResult();
     }
 

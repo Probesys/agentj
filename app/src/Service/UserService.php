@@ -38,7 +38,7 @@ class UserService {
             $alias->setPolicy($policy);
             $this->em->persist($alias);
         }
-        $this->em->flush();
+//        $this->em->flush();
     }
 
     /**

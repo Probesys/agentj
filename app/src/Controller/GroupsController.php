@@ -158,13 +158,11 @@ class GroupsController extends AbstractController {
 
 
             $em->flush();
-            foreach ($group->getUsers() as $user) {
 
-                //update policy fom group
-                $userService->updateUserAndAliasPolicy($user);
-                //update Wblist fom group
-                $groupService->updateWblistForUserAndAliases($user);
-            }
+            $groupService->updateWblist();
+
+            $em->flush();
+
             return new Response(json_encode([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.editSuccess'),
@@ -203,7 +201,7 @@ class GroupsController extends AbstractController {
             }
             $this->em->flush();
             $userService->updateUserAndAliasPolicy($user);
-            $groupService->updateWblistForUserAndAliases($user, $oldGroups);
+            $groupService->updateWblist();
 
             $this->em->flush();
         }
@@ -238,14 +236,11 @@ class GroupsController extends AbstractController {
 
             $this->em->remove($group);
             $this->em->flush();
-            
+            $groupService->updateWblist();
             foreach ($groupUsers as $user) {
                 $userService->updateUserAndAliasPolicy($user);
             }
-            
-            foreach ($groupUsers as $user) {
-                $groupService->updateWblistForUserAndAliases($user);
-            }
+
         }
 
         return $this->redirectToRoute('groups_index');

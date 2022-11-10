@@ -259,7 +259,34 @@ class UserRepository extends ServiceEntityRepository {
     }
 
 
+    public function getGroupsWbListForUser(User $user){
+        $dql =$this->createQueryBuilder('u')
+                ->select('u.id as rid ,gwl.wb,g.id as groupId,maddr.id as sid, g.priority, g.overrideUser')
+                ->innerJoin('u.groups', 'g')
+                ->innerJoin('g.groupsWbLists', 'gwl')
+                ->innerJoin('gwl.mailaddr', 'maddr')
+                ->where('g.active = true')                
+                ->andWhere('u.id= :user')
+                ->setParameter('user', $user)
+                ->orderBy('g.priority', 'desc');
+        $query = $dql->getQuery();
+        
+        return $query->getScalarResult();
+    }
+      
+    public function getWbListForUser(User $user, bool $excludeGroupWblist = false){
+        $dql =$this->createQueryBuilder('u')
+                ->select('maddr.id ')
+                ->innerJoin('u.wbLists', 'wb')
+                ->innerJoin('wb.rid', 'maddr')               
+                ->andWhere('u.id= :user')
+                ->setParameter('user', $user);
+        if ($excludeGroupWblist){
+            $dql->andWhere('wb.groups is null');
+        }
+        $query = $dql->getQuery();
+        
+        return $query->getScalarResult();
+    }    
     
-
-
 }

@@ -8,7 +8,6 @@ use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Form\GroupsWblistType;
 use App\Service\GroupService;
-use App\Service\GroupsWblistService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -29,12 +28,10 @@ class GroupsWblistController extends AbstractController {
 
     private EntityManagerInterface $em;
     private TranslatorInterface $translator;
-    private GroupsWblistService $groupsWblistService;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator, GroupsWblistService $groupsWblistService) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
         $this->em = $em;
         $this->translator = $translator;
-        $this->groupsWblistService = $groupsWblistService;
     }
 
     private function checkAccess($group) {
@@ -60,7 +57,7 @@ class GroupsWblistController extends AbstractController {
     /**
      * @Route("/{groupId}/new", name="groups_wblist_new", methods="GET|POST")
      */
-    public function new($groupId, Request $request, MailaddrService $mailaddrService): Response {
+    public function new($groupId, Request $request, MailaddrService $mailaddrService, GroupService $groupService): Response {
         $groups = $this->em->getRepository(Groups::class)->findOneBy((['id' => $groupId]));
         if (!$groups) {
             throw $this->createNotFoundException('The groups does not exist');
@@ -80,7 +77,7 @@ class GroupsWblistController extends AbstractController {
             $data = $form->getData();
 
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
-            if (!$mailaddr) {                
+            if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail($data['email']);
                 $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
@@ -103,7 +100,7 @@ class GroupsWblistController extends AbstractController {
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
-            $this->groupsWblistService->updateWblist($groupsWblist);
+            $groupService->updateWblist();
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         }
@@ -118,7 +115,7 @@ class GroupsWblistController extends AbstractController {
     /**
      * @Route("/{groupId}/edit/{sid}", name="groups_wblist_edit", methods="GET|POST")
      */
-    public function edit($groupId, $sid, Request $request, MailaddrService $mailaddrService) {
+    public function edit($groupId, $sid, Request $request, MailaddrService $mailaddrService, GroupService $groupService) {
         $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy(['mailaddr' => $sid, 'groups' => $groupId]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
@@ -154,7 +151,7 @@ class GroupsWblistController extends AbstractController {
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
-            $this->groupsWblistService->updateWblist($groupWbList);
+            $groupService->updateWblist();
 
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         } else {
@@ -173,19 +170,17 @@ class GroupsWblistController extends AbstractController {
      * @Route("/{groupId}/{sid}/delete", name="groups_wblist_delete", methods="GET")
      */
     public function delete($groupId, $sid, Request $request, GroupService $groupService) {
-        /*@var $group Groups */
+        /* @var $group Groups */
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
         $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $sid, 'groups' => $groupId]));
         if ($groupsWblist) {
             $em = $this->em;
             $em->remove($groupsWblist);
-            $em->flush();            
+            $em->flush();
         }
+        $groupService->updateWblist();
 
-        foreach ($group->getUsers() as $user){
-            $groupService->updateWblistForUser($user);
-        }
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
     }
 

@@ -188,13 +188,7 @@ class ImportController extends AbstractController {
             }
             //Need to flush if user new is inferior $batchSize
             $em->flush();
-            foreach ($groupWbUpdate as $groupIdUpdate) {
-                $group = $em->getRepository(Groups::class)->find($groupIdUpdate);
-                foreach ($group->getUsers() as $user) {
-                    $this->groupService->updateWblistForUserAndAliases($user);
-                }
-
-            }
+            $this->groupService->updateWblist();
         }
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
     }

@@ -67,6 +67,7 @@ class Wblist
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Id     
      */
     private $priority;
 
