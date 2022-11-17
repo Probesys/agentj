@@ -28,6 +28,7 @@
                         </th>
                         <th>{{ 'Entities.User.fields.email'|trans }}</th>
                         <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
+                        <th>{{ 'Entities.User.fields.policy'|trans }}</th>
                         <th>{{ 'Entities.User.fields.groups'|trans }}</th>
                         <th>actions</th>
                     </tr>
@@ -42,7 +43,8 @@
                             </td>
                             <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
                             <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                            <td data-title="{{'Entities.User.fields.groups'|trans }}">{#{{ user.groups }}#}</td>
+                            <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
+                            <td data-title="{{'Entities.User.fields.groups'|trans }}">{{ user.id | user_groups }}</td>
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">

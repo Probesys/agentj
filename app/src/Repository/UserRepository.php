@@ -86,10 +86,10 @@ class UserRepository extends ServiceEntityRepository {
      * @return type
      */
     public function searchByRole(User $user, $role = null) {
-        $conn = $this->getEntityManager()->getConnection();
 
         $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin')
+                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName')
+                ->join('u.policy', 'p')
                 ->where('u.originalUser is null');
 
         if ($role) {
@@ -102,7 +102,6 @@ class UserRepository extends ServiceEntityRepository {
                 return $entity->getId();
             }, $user->getDomains()->toArray());
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
-
         }
 
         $result = $dql->getQuery()->execute();
@@ -124,23 +123,21 @@ class UserRepository extends ServiceEntityRepository {
      * @return type
      */
     public function searchAlias(User $user) {
-        $conn = $this->getEntityManager()->getConnection();
+        $dql = $this->createQueryBuilder('u')
+                ->select('u.id, u.email as alias, a.email as email')
+                ->join('u.originalUser', 'a')
+                ->where('u.originalUser is not null');
 
-        $sql = "SELECT usr.id, usr.email as alias, u.email as email  from users usr "
-                . " LEFT JOIN users u ON usr.original_user_id = u.id "
-                . " WHERE usr.original_user_id IS NOT NULL ";
-        ;
         //todo finir les droits sur les domaines
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             $domainsIds = array_map(function ($entity) {
                 return $entity->getId();
             }, $user->getDomains()->toArray());
-
-            $sql .= ' AND usr.domain_id in (' . implode(',', $domainsIds) . ') ';
+            $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
-        $stmt = $conn->prepare($sql);
 
-        return $stmt->executeQuery()->fetchAllAssociative();
+
+        return $dql->getQuery()->getScalarResult();
     }
 
     /**
@@ -258,35 +255,34 @@ class UserRepository extends ServiceEntityRepository {
         }
     }
 
-
-    public function getGroupsWbListForUser(User $user){
-        $dql =$this->createQueryBuilder('u')
+    public function getGroupsWbListForUser(User $user) {
+        $dql = $this->createQueryBuilder('u')
                 ->select('u.id as rid ,gwl.wb,g.id as groupId,maddr.id as sid, g.priority, g.overrideUser')
                 ->innerJoin('u.groups', 'g')
                 ->innerJoin('g.groupsWbLists', 'gwl')
                 ->innerJoin('gwl.mailaddr', 'maddr')
-                ->where('g.active = true')                
+                ->where('g.active = true')
                 ->andWhere('u.id= :user')
                 ->setParameter('user', $user)
                 ->orderBy('g.priority', 'desc');
         $query = $dql->getQuery();
-        
+
         return $query->getScalarResult();
     }
-      
-    public function getWbListForUser(User $user, bool $excludeGroupWblist = false){
-        $dql =$this->createQueryBuilder('u')
+
+    public function getWbListForUser(User $user, bool $excludeGroupWblist = false) {
+        $dql = $this->createQueryBuilder('u')
                 ->select('maddr.id ')
                 ->innerJoin('u.wbLists', 'wb')
-                ->innerJoin('wb.rid', 'maddr')               
+                ->innerJoin('wb.rid', 'maddr')
                 ->andWhere('u.id= :user')
                 ->setParameter('user', $user);
-        if ($excludeGroupWblist){
+        if ($excludeGroupWblist) {
             $dql->andWhere('wb.groups is null');
         }
         $query = $dql->getQuery();
-        
+
         return $query->getScalarResult();
-    }    
-    
+    }
+
 }
