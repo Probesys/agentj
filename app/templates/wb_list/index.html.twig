@@ -49,7 +49,7 @@
               {% endif %}
             </td>
             {% if is_granted('ROLE_ADMIN') %}
-              <td data-title="{{ 'Entities.WBList.fields.user'|trans() }}">{{wb.fullname}}<br />{{wb.emailuser | stream_get_contents}} </td>
+              <td data-title="{{ 'Entities.WBList.fields.user'|trans() }}">{{wb.fullname}}<br />{{wb.emailuser}} </td>
               {% endif %}
               {% if  wb.type is empty %}
                 {% set wb = wb|merge({'type': '3'}) %}
@@ -61,7 +61,7 @@
               {% endif %}            
             
             <td data-title="{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}">{{  typeLabel}} </td>
-            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email | stream_get_contents}}</td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
               {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN') %}

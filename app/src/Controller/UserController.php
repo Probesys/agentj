@@ -285,6 +285,7 @@ class UserController extends AbstractController {
                 $user->setRoles('["ROLE_USER"]');
                 $user->setUsername($user->getEmail());
                 $user->setDomain($newDomain);
+
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
 
@@ -355,8 +356,7 @@ class UserController extends AbstractController {
                 $user->setDomain($newDomain);
                 $user->setUsername($user->getEmail());
 
-                $policy = $this->computeUserPolicy($user);
-                $user->setPolicy($policy);
+                $user->setPolicy($user->getOriginalUser()->getPolicy());
 
                 $this->em->persist($user);
                 $this->em->flush();
@@ -521,11 +521,14 @@ class UserController extends AbstractController {
      * @return Policy
      */
     private function computeUserPolicy(User $user): Policy {
-        $policy = null;
+        $policy = null;        
         $groupsRepository = $this->em->getRepository(Groups::class);
-        if ($user->getGroups() && count($user->getGroups()) > 0) {
-            $defaultGroup = $groupsRepository->getMainUserGroup($user);
-            $policy = $defaultGroup ? $defaultGroup[0]->getPolicy() : null;
+        if ($user->getGroups() && count($user->getGroups()) > 0) {            
+            $defaultGroup = array_reduce($user->getGroups()->toArray(), function ($a, $b) {
+                return $a && $a->getPriority() > $b->getPriority() ? $a : $b;
+            });
+
+            $policy = $defaultGroup ? $defaultGroup->getPolicy() : null;
         }
 
         if (!$policy) {

@@ -25,8 +25,8 @@ class WblistRepository extends ServiceEntityRepository {
 
         $dql = $this->createQueryBuilder('wb')
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
-                ->join('wb.rid', 'u')
-                ->join('wb.sid', 's')
+                ->innerJoin('wb.rid', 'u')
+                ->innerJoin('wb.sid', 's')
                 ->leftJoin('wb.groups', 'g');
 
         $conn = $this->getEntityManager()->getConnection();
@@ -60,9 +60,9 @@ class WblistRepository extends ServiceEntityRepository {
         } else {
 //            $sql .= ' ORDER BY wb.datemod desc ';
         }
-        $query = $dql->getQuery()->getResult();
+       $dql->getQuery()->getScalarResult();
 
-        return $query;
+        return $dql->getQuery()->getScalarResult();
 
 //        if ($sortPrams) {
 //            $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
