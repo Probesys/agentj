@@ -169,7 +169,7 @@ class WblistRepository extends ServiceEntityRepository {
                                     inner join user_groups ug on ug.user_id =u.id
                                     inner join groups g on g.id =ug.groups_id 
                                     inner join groups_wblist gw on gw.group_id =g.id 
-                                    where g.active = true";
+                                    where g.active = true and gw.wb !=''";
 //dd($sqlSelectGroupwbList);
         $stmt = $conn->prepare($sqlSelectGroupwbList);
         $stmt->execute();

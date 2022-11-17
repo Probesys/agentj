@@ -160,6 +160,10 @@ class GroupsController extends AbstractController {
             $em->flush();
 
             $groupService->updateWblist();
+            foreach($group->getUsers() as $user){
+                $userService->updateUserAndAliasPolicy($user);    
+            }
+            
 
             $em->flush();
 

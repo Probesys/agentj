@@ -52,7 +52,7 @@ class UserRepository extends ServiceEntityRepository {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'SELECT u.id from users u
             inner join domain d on u.domain_id=d.id
-            where d.active=1 and u.roles="[\'ROLE_USER\']"';
+            where d.active=1 and u.roles="[\"ROLE_USER\"]"';
         if (!$withAlias) {
             $sql .= " and u.original_user_id is null ";
         }
