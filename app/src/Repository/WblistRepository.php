@@ -24,7 +24,7 @@ class WblistRepository extends ServiceEntityRepository {
     public function search($type = null, User $user = null, $searchKey = null, $sortPrams = null) {
 
         $dql = $this->createQueryBuilder('wb')
-                ->select('u.id as rid, s.id as sid,wb.type as type,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
+                ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->innerJoin('wb.rid', 'u')
                 ->innerJoin('wb.sid', 's')
                 ->leftJoin('wb.groups', 'g');
@@ -170,7 +170,6 @@ class WblistRepository extends ServiceEntityRepository {
                                     inner join groups g on g.id =ug.groups_id 
                                     inner join groups_wblist gw on gw.group_id =g.id 
                                     where g.active = true and gw.wb !=''";
-//dd($sqlSelectGroupwbList);
         $stmt = $conn->prepare($sqlSelectGroupwbList);
         $stmt->execute();
     }
@@ -271,4 +270,23 @@ class WblistRepository extends ServiceEntityRepository {
         return $query->getOneOrNullResult();
     }
 
+    /**
+     * Check if wblist is overriden by anotherOne with highter prioriry
+     * @param array $wbInfo
+     * @return bool
+     */
+    public function wbListIsOverriden(array $wbInfo): bool {
+        $dql = $this->createQueryBuilder('wb')
+                ->select('wb')
+                ->where('wb.rid =:rid')
+                ->andWhere('wb.sid =:sid')
+                ->andWhere('wb.priority > :priority')
+                ->setParameter('rid', $wbInfo['rid'])
+                ->setParameter('sid', $wbInfo['sid'])
+                ->setParameter('priority', $wbInfo['priority']);
+
+       $query = $dql->getQuery();
+       $result = $query->getOneOrNullResult();
+       return !is_null($result);
+    }
 }

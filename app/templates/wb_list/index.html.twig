@@ -40,8 +40,10 @@
       </thead>
       <tbody>
         {% for wb in wblist %}
+          
+          {% set classLine = wb | wblist_is_overridden ? 'opacity-50' : '' %}
           {% set keyPairMessage =  [wb.rid, wb.sid] %}
-          <tr>  
+          <tr class="{{ classLine }}">  
             <td>
               {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
@@ -71,7 +73,7 @@
                   <a href="{{path('wblist_delete',{'rid':wb.rid,'sid':wb.sid})}}?_token={{ csrf_token('delete_wblist' ~ wb.rid ~ wb.sid)}}" class='btn btn-sm btn-danger confirmModal' 
                      data-dialog-title='{{ deleteConfirmTitle|trans }}' 
                      data-dialog-content='{{ deleteConfirmContent|trans }}'                   
-                     title="{{ 'Entities.WBList.actions.deleteSender'|trans() }}">
+                     title="{{ deleteLabel|trans() }}">
                     <i class="fas fa-trash-alt  d-md-block d-lg-none"></i>          
                      
                     <span class="d-md-none d-lg-block">{{ deleteLabel |trans() }}</span>                                
