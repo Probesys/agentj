@@ -53,9 +53,15 @@ class Connector
      */
     private $users;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Groups::class, mappedBy="originConnector")
+     */
+    private $groups;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->groups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -136,6 +142,36 @@ class Connector
             // set the owning side to null (unless already changed)
             if ($user->getOriginConnector() === $this) {
                 $user->setOriginConnector(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Groups>
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Groups $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+            $group->setOriginConnector($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Groups $group): self
+    {
+        if ($this->groups->removeElement($group)) {
+            // set the owning side to null (unless already changed)
+            if ($group->getOriginConnector() === $this) {
+                $group->setOriginConnector(null);
             }
         }
 

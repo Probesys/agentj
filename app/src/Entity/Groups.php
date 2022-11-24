@@ -94,6 +94,16 @@ class Groups
      */
     private $priority;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $uid;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="groups")
+     */
+    private $originConnector;
+
     public function __toString()
     {
         return $this->name;
@@ -319,6 +329,30 @@ class Groups
         if ($this->users->removeElement($user)) {
             $user->removeGroup($this);
         }
+
+        return $this;
+    }
+
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): self
+    {
+        $this->uid = $uid;
+
+        return $this;
+    }
+
+    public function getOriginConnector(): ?Connector
+    {
+        return $this->originConnector;
+    }
+
+    public function setOriginConnector(?Connector $originConnector): self
+    {
+        $this->originConnector = $originConnector;
 
         return $this;
     }
