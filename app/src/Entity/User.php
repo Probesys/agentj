@@ -166,7 +166,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Wblist", mappedBy="rid")
      */    
-    private $wbLists;       
+    private $wbLists;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="users")
+     */
+    private $originConnector;       
 
     public function __construct()
     {
@@ -586,6 +591,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $wbList->setRid(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOriginConnector(): ?Connector
+    {
+        return $this->originConnector;
+    }
+
+    public function setOriginConnector(?Connector $originConnector): self
+    {
+        $this->originConnector = $originConnector;
 
         return $this;
     }

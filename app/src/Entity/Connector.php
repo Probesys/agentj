@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Entity\Traits\EntityBlameableTrait;
 use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\ConnectorRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -45,6 +47,16 @@ class Connector
      * @ORM\Column(type="string", length=50)
      */
     private $type;
+
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="originConnector")
+     */
+    private $users;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -96,6 +108,36 @@ class Connector
     public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setOriginConnector($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getOriginConnector() === $this) {
+                $user->setOriginConnector(null);
+            }
+        }
 
         return $this;
     }
