@@ -3,14 +3,16 @@
 namespace App\Command;
 
 use App\Entity\Domain;
+use App\Entity\Groups;
 use App\Entity\Office365Connector;
 use App\Entity\User as User;
+use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model\User as GraphUser;
 use Microsoft\Graph\Model\Group as GraphGroup;
+use Microsoft\Graph\Model\User as GraphUser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -64,13 +66,12 @@ class Office365ImportCommand extends Command {
 
 //        
         $this->importUsers($token);
-        $this->importGroupsAsUser($token);
+        $this->importGroups($token);
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
                     '$NB_UPDATED' => $this->nbUserUpdated,
         ]));
-
         return Command::SUCCESS;
     }
 
@@ -108,7 +109,7 @@ class Office365ImportCommand extends Command {
         } catch (GuzzleException $exc) {
             return false;
         }
-
+//dd($users);
         foreach ($users as $graphUser) {
             /* @var $graphUser GraphUser */
 
@@ -116,9 +117,6 @@ class Office365ImportCommand extends Command {
             if (is_null($graphUser->getMail())) {
                 continue;
             }
-
-
-
 
             $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $graphUser->getId(), 'email' => $graphUser->getMail()]);
 
@@ -136,26 +134,23 @@ class Office365ImportCommand extends Command {
             $user->setDomain($domain);
             $user->setUid($graphUser->getId());
             $user->setPolicy($domain->getPolicy());
-            $user->setOriginConnector($this->connector);
-            $user->setPriority(7);
+            $user->setOriginConnector($this->connector);            
+            $user->setPriority(MailaddrService::computePriority($graphUser->getMail()));
             if (count($graphUser->getProxyAddresses()) > 1) {
-                dump($graphUser);
-                dump($graphUser->getProxyAddresses());
                 $this->addAliases($user, $graphUser->getProxyAddresses());
             }
 
             $this->em->persist($user);
             $this->em->flush();
-
         }
     }
 
-    private function addAliases(User $user, array $proxyAdresses) {
+    private function addAliases(User $user, array $proxyAdresses):void {
         foreach ($proxyAdresses as $proxyAdresse) {
             if (strpos($proxyAdresse, "smtp") !== false) {
-                
+
                 $aliasEmail = explode('smtp:', $proxyAdresse)[1];
-                $domainAlias = explode('@', $aliasEmail)[1];      
+                $domainAlias = explode('@', $aliasEmail)[1];
                 if ($domainAlias == $this->connector->getDomain()->getDomain()) {
                     $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
                     if (!$alias) {
@@ -171,7 +166,12 @@ class Office365ImportCommand extends Command {
         }
     }
 
-    private function importGroupsAsUser(\stdclass $token) {
+    /**
+     * 
+     * @param \stdclass $token
+     * @return void
+     */
+    private function importGroups(\stdclass $token):void {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
@@ -181,31 +181,77 @@ class Office365ImportCommand extends Command {
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
 
-            foreach ($groups as $group) {
+            foreach ($groups as $m365group) {
+
+                $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
+                if (!$localGroup) {
+                    $localGroup = new Groups();
+                    $localGroup->setPriority(1);
+                    $localGroup->setName($m365group->getDisplayName());
+                    $localGroup->isActive(true);
+                    $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
+                    $localGroup->setDomain($this->connector->getDomain());
+                    $localGroup->setOriginConnector($this->connector);
+                    $localGroup->setWb("");
+                    $localGroup->setUid($m365group->getId());
+                    $this->em->persist($localGroup);
+                    $this->em->flush();
+                }
                 /* @var $group GraphGroup */
-                $userGroup = $this->em->getRepository(User::class)->findOneByUid($group->getId());
+                $userGroup = $this->em->getRepository(User::class)->findOneByUid($m365group->getId());
                 if (!$userGroup) {
                     $userGroup = new User();
-                    $userGroup->setEmail($group->getMail());
+                    $userGroup->setEmail($m365group->getMail());
                     $this->nbUserCreated++;
                 } else {
                     $this->nbUserUpdated++;
                 }
-                $userGroup->setUsername($group->getMail());
-                $userGroup->setFullname($group->getDisplayName());
+                $userGroup->setUsername($m365group->getMail());
+                $userGroup->setFullname($m365group->getDisplayName());
                 $userGroup->setReport(true);
                 $userGroup->setRoles('["ROLE_USER"]');
                 $userGroup->setDomain($domain);
-                $userGroup->setUid($group->getId());
+                $userGroup->setUid($m365group->getId());
                 $userGroup->setPolicy($domain->getPolicy());
-                $userGroup->setPriority(7);
+                $userGroup->setPriority(MailaddrService::computePriority($m365group->getMail()));
                 $this->em->persist($userGroup);
                 $this->em->flush();
-                $owners = $this->getGroupOwners($token, $userGroup);
+                $this->addUserGroupOwners($token, $userGroup);
+                $this->addMembersToGroup($token, $localGroup);
             }
         } catch (GuzzleException $exc) {
             return false;
         }
+    }
+
+    /**
+     * 
+     * @param \stdclass $token
+     * @param Groups $group
+     * @return void
+     */
+    private function addMembersToGroup(\stdclass $token, Groups $group): void {
+        $members = [];
+        $graph = new Graph();
+        $graph->setAccessToken($token->access_token);
+
+        try {
+            $members = $graph->createRequest("GET", '/groups/' . $group->getUid() . '/members')
+                    ->setReturnType(GraphUser::class)
+                    ->execute();
+        } catch (GuzzleException $exc) {
+            
+        }
+
+        foreach ($members as $member) {
+            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $member->getId()]);
+            if ($user) {
+
+                $group->addUser($user);
+                $this->em->persist($user);
+            }
+        }
+        $this->em->flush();
     }
 
     /**
@@ -214,7 +260,7 @@ class Office365ImportCommand extends Command {
      * @param User $userGroup
      * @return void
      */
-    private function getGroupOwners(\stdclass $token, User $userGroup): void {
+    private function addUserGroupOwners(\stdclass $token, User $userGroup): void {
         $owners = [];
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
@@ -223,15 +269,12 @@ class Office365ImportCommand extends Command {
             $owners = $graph->createRequest("GET", '/groups/' . $userGroup->getUId() . '/owners')
                     ->setReturnType(GraphUser::class)
                     ->execute();
-
-//            return $owners;
         } catch (GuzzleException $exc) {
             
         }
 
         // user created from group
         foreach ($owners as $owner) {
-//            $user = $this->em->getRepository(User::class)->findOneByUid($owner->getId());
             $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $owner->getId(), 'email' => $owner->getMail()]);
             if ($user) {
                 $userGroup->addSharedWith($user);

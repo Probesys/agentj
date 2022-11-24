@@ -9,7 +9,7 @@ class MailaddrService {
      * @param type $email
      * @return int
      */
-    public function computePriority($email = "") {
+    public static function computePriority($email = "") {
 
         $priority = 5; //default priority for email
         //in case domain
