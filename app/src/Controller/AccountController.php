@@ -52,7 +52,7 @@ class AccountController extends AbstractController {
         if ($user->getGroups() && count($user->getGroups()) > 0) {
             $defaultGroup = $groupsRepository->getMainUserGroup($user);
             if ($defaultGroup) {
-                $wbGroup = $defaultGroup[0]->getWb();
+                $wbGroup = $defaultGroup->getWb();
                 $groupDefaulWb = array_keys(array_filter($this->getWBListUserActions(), function ($item) use ($wbGroup) {
                                     return $item == $wbGroup;
                                 }))[0];

@@ -160,10 +160,10 @@ class GroupsController extends AbstractController {
             $em->flush();
 
             $groupService->updateWblist();
-            foreach($group->getUsers() as $user){
-                $userService->updateUserAndAliasPolicy($user);    
+            foreach ($group->getUsers() as $user) {
+                $userService->updateUserAndAliasPolicy($user);
             }
-            
+
 
             $em->flush();
 
@@ -244,7 +244,7 @@ class GroupsController extends AbstractController {
             foreach ($groupUsers as $user) {
                 $userService->updateUserAndAliasPolicy($user);
             }
-
+            $this->em->flush();
         }
 
         return $this->redirectToRoute('groups_index');

@@ -29,8 +29,8 @@ class UserService {
     public function updateUserAndAliasPolicy(User $user): void {
         $defaultGroup = $this->groupsRepository->getMainUserGroup($user);
 
-        $policy = $defaultGroup ? $defaultGroup[0]->getPolicy() : $user->getDomain()->getPolicy();
-        
+        $policy = $defaultGroup ? $defaultGroup->getPolicy() : $user->getDomain()->getPolicy();
+//        dd($policy);
         $user->setPolicy($policy);
         $this->em->persist($user);
         $aliases = $this->userRepository->getListAliases($user);

@@ -46,12 +46,12 @@ class GroupsRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    /**
-     * Return the main (hightest priority) group of the user $user
-     * @param User $user
-     * @return array|null
-     */
-    public function getMainUserGroup(User $user): ?array {
+   /**
+    * Return the main (hightest priority) group of the user $user
+    * @param User $user
+    * @return Groups|null
+    */
+    public function getMainUserGroup(User $user): ?Groups {
         $dql = $this->createQueryBuilder('g')
                 ->innerJoin('g.users', 'u')
                 ->where('g.active = true')
@@ -59,7 +59,7 @@ class GroupsRepository extends ServiceEntityRepository
                 ->orderBy('g.priority', 'DESC')
                 ->setParameter('user', $user);
         $query = $dql->getQuery()->setMaxResults(1);
-        return $query->getResult();
+        return $query->getOneOrNullResult();
     }
     
   // /**
