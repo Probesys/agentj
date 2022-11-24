@@ -60,7 +60,7 @@ class WblistRepository extends ServiceEntityRepository {
         } else {
 //            $sql .= ' ORDER BY wb.datemod desc ';
         }
-       $dql->getQuery()->getScalarResult();
+        $dql->getQuery()->getScalarResult();
 
         return $dql->getQuery()->getScalarResult();
 
@@ -142,14 +142,20 @@ class WblistRepository extends ServiceEntityRepository {
      * @param int $groupId
      * @return type
      */
-    public function delete($rid, $sid) {
+    public function delete($rid, $sid, $priority) {
+//
+        $qdl = $this->createQueryBuilder('wb')
+                ->delete()
+                ->where('wb.rid =:rid')
+                ->andWhere('wb.sid =:sid')
+                ->andWhere('wb.priority =:priority')
+                ->setParameter('rid', $rid)
+                ->setParameter('sid', $sid)
+                ->setParameter('priority', $priority);
+
+        return $qdl->getQuery()->execute();
 
         $conn = $this->getEntityManager()->getConnection();
-        $sql = " DELETE FROM wblist "
-                . " WHERE rid = '" . $rid . "' and sid='" . $sid . "'";
-        $stmt = $conn->prepare($sql);
-
-        return $stmt->execute();
     }
 
     /**
@@ -163,8 +169,8 @@ class WblistRepository extends ServiceEntityRepository {
         $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
                                     CASE g.override_user
-                                          WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE .  " + g.priority" .
-                                          " WHEN 0 THEN " . Wblist::WBLIST_PRIORITY_GROUP .  " + g.priority
+                                          WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE . " + g.priority" .
+                " WHEN 0 THEN " . Wblist::WBLIST_PRIORITY_GROUP . " + g.priority
                                     END as 'priority'  from users u 
                                     inner join user_groups ug on ug.user_id =u.id
                                     inner join groups g on g.id =ug.groups_id 
@@ -285,8 +291,9 @@ class WblistRepository extends ServiceEntityRepository {
                 ->setParameter('sid', $wbInfo['sid'])
                 ->setParameter('priority', $wbInfo['priority']);
 
-       $query = $dql->getQuery();
-       $result = $query->getOneOrNullResult();
-       return !is_null($result);
+        $query = $dql->getQuery();
+        $result = $query->getOneOrNullResult();
+        return !is_null($result);
     }
+
 }
