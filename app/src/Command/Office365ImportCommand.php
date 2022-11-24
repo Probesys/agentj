@@ -101,7 +101,7 @@ class Office365ImportCommand extends Command {
         $domain = $this->connector->getDomain();
 
         try {
-            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses&$filter=endsWith(userPrincipalName,\'' . $domain->getDomain() . '\' )&$count=true')
+            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses&$filter=endsWith(userPrincipalName,\'@' . $domain->getDomain() . '\' )&$count=true')
                     ->setReturnType(GraphUser::class)
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
@@ -136,27 +136,37 @@ class Office365ImportCommand extends Command {
             $user->setDomain($domain);
             $user->setUid($graphUser->getId());
             $user->setPolicy($domain->getPolicy());
+            $user->setOriginConnector($this->connector);
             $user->setPriority(7);
             if (count($graphUser->getProxyAddresses()) > 1) {
+                dump($graphUser);
+                dump($graphUser->getProxyAddresses());
                 $this->addAliases($user, $graphUser->getProxyAddresses());
             }
 
             $this->em->persist($user);
             $this->em->flush();
+
         }
     }
 
     private function addAliases(User $user, array $proxyAdresses) {
         foreach ($proxyAdresses as $proxyAdresse) {
-            if (strpos($proxyAdresse, "SMTP")) {
-                $aliasEmail = substr($proxyAdresse, strpos($proxyAdresse, "SMTP"), strlen($proxyAdresse));
-                $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
-                if (!$alias) {
-                    $alias = clone $user;
+            if (strpos($proxyAdresse, "smtp") !== false) {
+                
+                $aliasEmail = explode('smtp:', $proxyAdresse)[1];
+                $domainAlias = explode('@', $aliasEmail)[1];      
+                if ($domainAlias == $this->connector->getDomain()->getDomain()) {
+                    $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
+                    if (!$alias) {
+                        $alias = clone $user;
+                    }
+                    $alias->setEmail($aliasEmail);
+                    $alias->setUserName($aliasEmail);
+                    $alias->setOriginalUser($user);
+                    $alias->setOriginConnector($this->connector);
+                    $this->em->persist($alias);
                 }
-                $alias->setEmail($aliasEmail);
-                $alias->setOriginalUser($user);
-                $this->em->persist($alias);
             }
         }
     }
@@ -166,11 +176,11 @@ class Office365ImportCommand extends Command {
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
         try {
-            $groups = $graph->createRequest("GET", '/groups' . '?$filter=endsWith(mail,\'' . $domain->getDomain() . '\' )&$count=true')
+            $groups = $graph->createRequest("GET", '/groups' . '?$filter=endsWith(mail,\'@' . $domain->getDomain() . '\' )&$count=true')
                     ->setReturnType(GraphGroup::class)
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
-           
+
             foreach ($groups as $group) {
                 /* @var $group GraphGroup */
                 $userGroup = $this->em->getRepository(User::class)->findOneByUid($group->getId());
