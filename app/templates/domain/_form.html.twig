@@ -54,11 +54,8 @@
             </a>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              {% for connectorType in connectorTypes %}
-                {% set urlNew =  path('app_connector_o365_new', {'domain' : domain.id}) %}
-                <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ urlNew }}" href="#">{{ connectorType }}</a>
-
-              {% endfor %}
+              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
+              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
             </div>
           </div>          
         </div>  
@@ -74,7 +71,14 @@
 
             </thead>
             {% for connector in domain.connectors %}
-               {% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
+              
+              {% if connector.type == 'LDAP' %}
+                {% set urlEdit =  path('app_connector_ldap_edit', {'id' : connector.id}) %}
+              {% endif %}
+              {% if connector.type == 'Office365' %}
+                {% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
+              {% endif %}
+{#              {{ connector.type }}#}
               <tr>
                 <td> {{ connector.name }}</td>
                 <td> {{ connector.type }}</td>
@@ -102,7 +106,7 @@
               </tr>
             {% endfor %}
           </table>
-                 
+
 
         </div>      
       </div> 

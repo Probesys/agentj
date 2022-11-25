@@ -220,7 +220,7 @@ class Office365ImportCommand extends Command {
                 $this->addMembersToGroup($token, $localGroup);
             }
         } catch (GuzzleException $exc) {
-            return false;
+            
         }
     }
 

@@ -169,7 +169,6 @@ class DomainController extends AbstractController {
 
         return $this->render('domain/new.html.twig', [
                     'domain' => $domain,
-                    'connectorTypes' => ConnectorTypes::all(),
                     'form' => $form->createView(),
                     'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
         ]);
