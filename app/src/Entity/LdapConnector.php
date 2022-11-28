@@ -13,68 +13,148 @@ class LdapConnector extends Connector
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $LdapHost;
+    private $ldapHost;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $LdapPort;
+    private $ldapPort;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $LdapBaseDN;
+    private $ldapBaseDN;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $LdapPassword;
+    private $ldapPassword;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapGroupField;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapLoginField;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapRealNameField;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapEmailField;
 
 
     public function getLdapHost(): ?string
     {
-        return $this->LdapHost;
+        return $this->ldapHost;
     }
 
-    public function setLdapHost(?string $LdapHost): self
+    public function setLdapHost(?string $ldapHost): self
     {
-        $this->LdapHost = $LdapHost;
+        $this->ldapHost = $ldapHost;
 
         return $this;
     }
 
     public function getLdapPort(): ?int
     {
-        return $this->LdapPort;
+        return $this->ldapPort;
     }
 
-    public function setLdapPort(?int $LdapPort): self
+    public function setLdapPort(?int $ldapPort): self
     {
-        $this->LdapPort = $LdapPort;
+        $this->ldapPort = $ldapPort;
 
         return $this;
     }
 
     public function getLdapBaseDN(): ?string
     {
-        return $this->LdapBaseDN;
+        return $this->ldapBaseDN;
     }
 
-    public function setLdapBaseDN(?string $LdapBaseDN): self
+    public function setLdapBaseDN(?string $ldapBaseDN): self
     {
-        $this->LdapBaseDN = $LdapBaseDN;
+        $this->ldapBaseDN = $ldapBaseDN;
 
         return $this;
     }
 
     public function getLdapPassword(): ?string
     {
-        return $this->LdapPassword;
+        return $this->ldapPassword;
     }
 
-    public function setLdapPassword(?string $LdapPassword): self
+    public function setLdapPassword(?string $ldapPassword): self
     {
-        $this->LdapPassword = $LdapPassword;
+        $this->ldapPassword = $ldapPassword;
+
+        return $this;
+    }
+
+    public function getLdapGroupFieldName(): ?string
+    {
+        return $this->ldapGroupField;
+    }
+
+    public function setLdapGroupFieldName(?string $ldapGroupField): self
+    {
+        $this->ldapGroupField = $ldapGroupField;
+
+        return $this;
+    }
+
+    public function getLdapLoginField(): ?string
+    {
+        return $this->ldapLoginField;
+    }
+
+    public function setLdapLoginField(?string $ldapLoginField): self
+    {
+        $this->ldapLoginField = $ldapLoginField;
+
+        return $this;
+    }
+
+    public function getLdapGroupField(): ?string
+    {
+        return $this->ldapGroupField;
+    }
+
+    public function setLdapGroupField(?string $ldapGroupField): self
+    {
+        $this->ldapGroupField = $ldapGroupField;
+
+        return $this;
+    }
+
+    public function getLdapRealNameField(): ?string
+    {
+        return $this->ldapRealNameField;
+    }
+
+    public function setLdapRealNameField(?string $ldapRealNameField): self
+    {
+        $this->ldapRealNameField = $ldapRealNameField;
+
+        return $this;
+    }
+
+    public function getLdapEmailField(): ?string
+    {
+        return $this->ldapEmailField;
+    }
+
+    public function setLdapEmailField(?string $ldapEmailField): self
+    {
+        $this->ldapEmailField = $ldapEmailField;
 
         return $this;
     }

@@ -453,6 +453,20 @@ Entities:
     fields:
       name: "Connector name"    
       type: "Connector type" 
+  LdapConnector:
+    labels:
+    actions:
+      add: "Add Ldap connector"
+      edit: "Edit Ldap connector"
+    fields:
+      ldapHost: "Hst"
+      ldapPort: "Port (default 389)"
+      LdapBaseDN: "BaseDN"
+      ldapLoginField: "LDAP field for login (ex : uid)"
+      LdapPassword: "Password"
+      ldapRealNameField: "LDAP Field for username (ex : sn)"
+      ldapEmailField: "LDAP for email"
+      ldapGroupField: "LDAP field for groups"
   Office365Connector:
     labels:
     fields:

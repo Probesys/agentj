@@ -463,6 +463,20 @@ Entities:
     fields:
       name: "Nom du connecteur"    
       type: "Type de connecteur"  
+  LdapConnector:
+    labels:
+    actions:
+      add: "Ajouter un connecteur Ldap"
+      edit: "Editer le connecteur Ldap"
+    fields:
+      ldapHost: "Hôte"
+      ldapPort: "Port (défaut 389)"
+      LdapBaseDN: "BaseDN"
+      ldapLoginField: "Champ LDAP pour le login (ex : uid)"
+      LdapPassword: "Mot de passe"
+      ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
+      ldapEmailField: "Champ LDAP pour l'email"
+      ldapGroupField: "Champ LDAP pour les groupes"
   Office365Connector:
     labels:
     actions:
