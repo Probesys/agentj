@@ -22,6 +22,9 @@ class LdapConnectorType extends ConnectorType
             ->add('LdapBaseDN', null, [
                 'label' => 'Entities.LdapConnector.fields.LdapBaseDN',
             ])
+            ->add('ldapRootDn', null, [
+                'label' => 'Entities.LdapConnector.fields.ldapRootDn',
+            ])                
             ->add('LdapPassword', null, [
                 'label' => 'Entities.LdapConnector.fields.LdapPassword',
             ])

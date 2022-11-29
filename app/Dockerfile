@@ -18,6 +18,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     php8-fpm \
     php8-gd \
     php8-imap \
+    php8-ldap \
     php8-intl \
     php8-json \
     php8-mbstring \
@@ -69,6 +70,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     php8-imap \
     php8-intl \
     php8-json \
+    php8-ldap \
     php8-mbstring \
     php8-pdo_mysql \
     php8-opcache \

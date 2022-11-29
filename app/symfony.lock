@@ -345,6 +345,9 @@
     "symfony/intl": {
         "version": "v5.2.4"
     },
+    "symfony/ldap": {
+        "version": "v5.4.13"
+    },
     "symfony/lock": {
         "version": "5.2",
         "recipe": {
