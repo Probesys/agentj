@@ -21,8 +21,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-#[Route('/ldap')]
+/**
+ * @Security("is_granted('ROLE_ADMIN')")
+ * @Route("/ldap")
+ */
 class LdapConnectorController extends AbstractController {
 
     private $translator;

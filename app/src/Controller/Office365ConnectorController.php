@@ -20,8 +20,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-#[Route('/office365')]
+
+/**
+ * @Security("is_granted('ROLE_ADMIN')")
+ * @Route("/office365")
+ */
 class Office365ConnectorController extends AbstractController {
 
     private Application $application;
@@ -30,6 +35,7 @@ class Office365ConnectorController extends AbstractController {
         $this->application = new Application($kernel);
     }
 
+    
     #[Route('/{domain}/new', name: 'app_connector_o365_new', methods: ['GET', 'POST'])]
     public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response {
 
