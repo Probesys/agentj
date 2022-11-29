@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
+use App\Service\CryptEncryptService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
@@ -12,12 +13,14 @@ use GuzzleHttp\Exception\GuzzleException;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model\Group as GraphGroup;
 use Microsoft\Graph\Model\User as GraphUser;
+use stdClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Ldap\Exception\InvalidCredentialsException;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -33,11 +36,13 @@ class LDAPImportCommand extends Command {
     private int $nbUserCreated = 0;
     private int $nbUserUpdated = 0;
     private $translator;
+    private CryptEncryptService $cryptEncryptService;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator, CryptEncryptService $cryptEncryptService) {
         parent::__construct();
         $this->em = $em;
         $this->translator = $translator;
+        $this->cryptEncryptService = $cryptEncryptService;
     }
 
     protected function configure(): void {
@@ -64,52 +69,9 @@ class LDAPImportCommand extends Command {
         ]);
         $this->connect();
 
-        $mailAttribute = $this->connector->getLdapEmailField();
-        $realNameAttribute = $this->connector->getLdapRealNameField();
-
-        $ldapQuery = "(&(objectClass=organizationalPerson)(" . $mailAttribute . "=*))";
-
-        $query = $this->ldap->query("ou=users,dc=easyd,dc=local", $ldapQuery);
-
-        $results = $query->execute();
-        foreach ($results as $entry) {
-
-            $user = $this->em->getRepository(User::class)->findOneByUid($entry->getDN());
-            $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
-            $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
-//            dump($emailAdress);
-            if (!$emailAdress) {
-                continue;
-            }
-            if (!$user) {
-                $user = new User();
-                $user->setUid($entry->getDN());
-                $user->setPolicy($this->connector->getDomain()->getPolicy());
-            }
-
-            $user->setFullname($userName);
-            $user->setUsername($emailAdress);
-            $user->setEmail($emailAdress);
-            $user->setDomain($this->connector->getDomain());
-            $user->setRoles('["ROLE_USER"]');
-            
-
-            $this->em->persist($user);
-//            
-//            dump($user);
-        }
-        $this->em->flush();
-//        dump(count($results));
-        die;
-        $token = $this->getToken();
-        if (!$token) {
-            $io->write($this->translator->trans('Message.Office365Connector.tokenError'));
-            return Command::FAILURE;
-        }
-
-//        
-        $this->importUsers($token);
-        $this->importGroups($token);
+                
+        $this->importUsers();
+//        $this->importGroups($token);
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
@@ -132,81 +94,54 @@ class LDAPImportCommand extends Command {
 
 
         try {
-            $this->ldap->bind($baseDN, $searchPassword);
+
+            $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
+//             dd($clearPassword);
+            $this->ldap->bind($baseDN, $clearPassword);
         } catch (InvalidCredentialsException $exception) {
             $this->addFlash('danger', 'Connexion to LDAP failed !!!! Check user and password');
         }
 //        return $baseDN;
     }
 
-    private function getToken(): ?\stdClass {
-        $guzzle = new Client();
-        $clientId = $this->connector->getClient();
-        $clientSecret = $this->connector->getClientSecret();
-        $url = 'https://login.microsoftonline.com/' . $this->connector->getTenant() . '/oauth2/v2.0/token';
-        try {
-            $token = json_decode($guzzle->post($url, [
-                        'form_params' => [
-                            'client_id' => $clientId,
-                            'client_secret' => $clientSecret,
-                            'scope' => 'https://graph.microsoft.com/.default',
-                            'grant_type' => 'client_credentials',
-                        ],
-                    ])->getBody()->getContents());
+  
+    private function importUsers() {
+        $mailAttribute = $this->connector->getLdapEmailField();
+        $realNameAttribute = $this->connector->getLdapRealNameField();
 
-            return $token;
-        } catch (GuzzleException $exception) {
-            return null;
-        }
-    }
+        $ldapQuery = "(&(objectClass=organizationalPerson)(" . $mailAttribute . "=*))";
 
-    private function importUsers(\stdclass $token) {
-        $graph = new Graph();
-        $graph->setAccessToken($token->access_token);
-        $domain = $this->connector->getDomain();
+        $query = $this->ldap->query("ou=users,dc=easyd,dc=local", $ldapQuery);
 
-        try {
-            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses&$filter=endsWith(userPrincipalName,\'@' . $domain->getDomain() . '\' )&$count=true')
-                    ->setReturnType(GraphUser::class)
-                    ->addHeaders(['ConsistencyLevel' => 'eventual'])
-                    ->execute();
-        } catch (GuzzleException $exc) {
-            return false;
-        }
-//dd($users);
-        foreach ($users as $graphUser) {
-            /* @var $graphUser GraphUser */
+        $results = $query->execute();
+        foreach ($results as $entry) {
 
-
-            if (is_null($graphUser->getMail())) {
+            $user = $this->em->getRepository(User::class)->findOneByUid($entry->getDN());
+            $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
+            $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
+            if (!$emailAdress) {
                 continue;
             }
-
-            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $graphUser->getId(), 'email' => $graphUser->getMail()]);
-
+            $isNew = false;
             if (!$user) {
                 $user = new User();
-                $user->setEmail($graphUser->getMail());
-                $this->nbUserCreated++;
-            } else {
-                $this->nbUserUpdated++;
-            }
-            $user->setUsername($graphUser->getMail());
-            $user->setFullname($graphUser->getDisplayName());
-            $user->setReport(true);
-            $user->setRoles('["ROLE_USER"]');
-            $user->setDomain($domain);
-            $user->setUid($graphUser->getId());
-            $user->setPolicy($domain->getPolicy());
-            $user->setOriginConnector($this->connector);
-            $user->setPriority(MailaddrService::computePriority($graphUser->getMail()));
-            if (count($graphUser->getProxyAddresses()) > 1) {
-                $this->addAliases($user, $graphUser->getProxyAddresses());
+                $user->setUid($entry->getDN());
+                $user->setPolicy($this->connector->getDomain()->getPolicy());
+                $isNew = true;
             }
 
+            $user->setFullname($userName);
+            $user->setUsername($emailAdress);
+            $user->setEmail($emailAdress);
+            $user->setDomain($this->connector->getDomain());
+            $user->setRoles('["ROLE_USER"]');
+
             $this->em->persist($user);
-            $this->em->flush();
+            
+            $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated;
+            $this->nbUserCreated = $isNew ? $this->nbUserCreated : $this->nbUserCreated++;
         }
+        $this->em->flush();
     }
 
     private function addAliases(User $user, array $proxyAdresses): void {

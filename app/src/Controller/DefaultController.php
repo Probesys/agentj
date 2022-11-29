@@ -64,7 +64,7 @@ class DefaultController extends AbstractController {
         $em = $this->em;
         $confirm = "";
 
-        $decrypt = $cryptEncrypt->decryptUrl($token);
+        $decrypt = $cryptEncrypt->decrypt($token);
         $mailId = null;
         $date = null;
         $rid = null;

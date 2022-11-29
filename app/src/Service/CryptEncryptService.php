@@ -37,7 +37,7 @@ class CryptEncryptService
      * @param type $token
      * @return type
      */
-    public function decryptUrl($str)
+    public function decrypt($str)
     {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');

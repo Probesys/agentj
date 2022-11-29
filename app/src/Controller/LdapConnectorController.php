@@ -57,15 +57,28 @@ class LdapConnectorController extends AbstractController {
     }
 
     #[Route('/{id}/edit', name: 'app_connector_ldap_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+    public function edit(Request $request, LdapConnector $connector, ConnectorRepository $connectorRepository): Response {
+        $oldPass = $connector->getLdapPassword();
+        $oldPassClear = $this->cryptEncryptService->decrypt($oldPass)[1];
+        
         $form = $this->createForm(LdapConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_ldap_edit', ['id' => $connector->getId()]),
         ]);
         $form->handleRequest($request);
 
+        
         if ($form->isSubmitted() && $form->isValid()) {
+            
+            $connector = $form->getData();
+            if (!$connector->getLdapPassword()){
+                $connector->setLdapPassword($oldPass);
+            }
+            
+            if ($connector->getLdapPassword() && $oldPass !== $connector->getLdapPassword()){
+                $newPass = $this->cryptEncryptService->encrypt($connector->getLdapPassword());
+                $connector->setLdapPassword($newPass);
+            }
             $connectorRepository->add($connector, true);
-
             return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
         }
 
