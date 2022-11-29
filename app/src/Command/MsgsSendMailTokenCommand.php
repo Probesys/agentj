@@ -174,7 +174,7 @@ class MsgsSendMailTokenCommand extends Command
         $cryptEncrypt = $this->getApplication()->getKernel()->getContainer()->get('App.crypt_encrypt');
 
       /** Body Mail Body Settings * */
-        $token = $cryptEncrypt->encryptUrl($msg['mail_id'] . '%%%' . $msg['secret_id'] . '%%%' . $msg['partition_tag'] . '%%%' . $destDomain->getId() . '%%%' . $msg['rid']);
+        $token = $cryptEncrypt->encrypt($msg['mail_id'] . '%%%' . $msg['secret_id'] . '%%%' . $msg['partition_tag'] . '%%%' . $destDomain->getId() . '%%%' . $msg['rid']);
         $url = $scheme . "://" . $domain . "/check/" . $token;
 
         if ($destDomain && !empty($destDomain->getMailmessage())) {

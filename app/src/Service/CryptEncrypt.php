@@ -20,7 +20,7 @@ class CryptEncrypt
      * @param type $url
      * @return type
      */
-    public function encryptUrl($url)
+    public function encrypt($url)
     {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
