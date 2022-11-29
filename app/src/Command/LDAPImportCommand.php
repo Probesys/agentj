@@ -67,7 +67,11 @@ class LDAPImportCommand extends Command {
                     'host' => $this->connector->getLdapHost(),
                     'port' => $this->connector->getLdapPort(),
         ]);
-        $this->connect();
+        if (!$this->connect()){
+            $io->error("Cannot connect to LDAP Server");
+            return Command::FAILURE;
+        }
+        ;
 
                 
         $this->importUsers();
@@ -96,12 +100,11 @@ class LDAPImportCommand extends Command {
         try {
 
             $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
-//             dd($clearPassword);
             $this->ldap->bind($baseDN, $clearPassword);
+            return true;
         } catch (InvalidCredentialsException $exception) {
-            $this->addFlash('danger', 'Connexion to LDAP failed !!!! Check user and password');
+            return false;
         }
-//        return $baseDN;
     }
 
   
@@ -138,8 +141,8 @@ class LDAPImportCommand extends Command {
 
             $this->em->persist($user);
             
-            $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated;
-            $this->nbUserCreated = $isNew ? $this->nbUserCreated : $this->nbUserCreated++;
+            $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated = $this->nbUserUpdated + 1;
+            $this->nbUserCreated = $isNew ? $this->nbUserCreated  = $this->nbUserCreated + 1 : $this->nbUserCreated;
         }
         $this->em->flush();
     }
