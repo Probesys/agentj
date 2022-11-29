@@ -77,7 +77,7 @@ class LDAPImportCommand extends Command {
             $user = $this->em->getRepository(User::class)->findOneByUid($entry->getDN());
             $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
             $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
-            dump($emailAdress);
+//            dump($emailAdress);
             if (!$emailAdress) {
                 continue;
             }

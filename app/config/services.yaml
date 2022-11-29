@@ -49,8 +49,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App.crypt_encrypt:
-       class: App\Service\CryptEncrypt
-       public: true   
+#    App.crypt_encrypt:
+#       class: App\Service\CryptEncrypt
+#       public: true   
     App\Service\FileUploader:
         arguments: ['%app.upload_directory%', "@doctrine.orm.entity_manager"]   

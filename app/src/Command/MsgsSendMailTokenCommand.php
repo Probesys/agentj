@@ -7,6 +7,7 @@ use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Service\CryptEncryptService;
 use App\Service\LogService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
-//use App\Service\CryptEncrypt;
+
 
 class MsgsSendMailTokenCommand extends Command
 {
@@ -31,6 +32,7 @@ class MsgsSendMailTokenCommand extends Command
     private $messageStatusError;
     private $messageStatusAuthorized;
     private $em;
+    private CryptEncryptService $cryptEncryptService;
 
     protected function configure()
     {
@@ -39,12 +41,12 @@ class MsgsSendMailTokenCommand extends Command
         ;
     }
     
-    
-//    private $translator;
 
-    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator) {
+
+    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator, CryptEncryptService $cryptEncryptService) {
         $this->doctrine = $doctrine;
         $this->translator = $translator;
+        $this->cryptEncryptService = $cryptEncryptService;
         parent::__construct();
     }
     
@@ -171,10 +173,10 @@ class MsgsSendMailTokenCommand extends Command
     {
         $domain = $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
         $scheme = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
-        $cryptEncrypt = $this->getApplication()->getKernel()->getContainer()->get('App.crypt_encrypt');
+        
 
       /** Body Mail Body Settings * */
-        $token = $cryptEncrypt->encrypt($msg['mail_id'] . '%%%' . $msg['secret_id'] . '%%%' . $msg['partition_tag'] . '%%%' . $destDomain->getId() . '%%%' . $msg['rid']);
+        $token = $this->cryptEncryptService->encrypt($msg['mail_id'] . '%%%' . $msg['secret_id'] . '%%%' . $msg['partition_tag'] . '%%%' . $destDomain->getId() . '%%%' . $msg['rid']);
         $url = $scheme . "://" . $domain . "/check/" . $token;
 
         if ($destDomain && !empty($destDomain->getMailmessage())) {

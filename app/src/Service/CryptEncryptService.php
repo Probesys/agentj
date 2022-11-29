@@ -4,7 +4,7 @@ namespace App\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class CryptEncrypt
+class CryptEncryptService
 {
 
   //  private $params;
@@ -20,12 +20,12 @@ class CryptEncrypt
      * @param type $url
      * @return type
      */
-    public function encrypt($url)
+    public function encrypt(string $str)
     {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
-        $crypt = openssl_encrypt($url, 'aes-256-cbc', $salt, 0, $iv);
-        //durée de validité du lien
+        $crypt = openssl_encrypt($str, 'aes-256-cbc', $salt, 0, $iv);
+        //add date for revocation
         $date = time() + 7 * 24 * 3600;
         return base64_encode($date . $crypt);
     }
@@ -37,12 +37,12 @@ class CryptEncrypt
      * @param type $token
      * @return type
      */
-    public function decryptUrl($token)
+    public function decryptUrl($str)
     {
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
-        $cryptdate = substr(base64_decode($token), 0, 10);
-        $crypt = substr_replace(base64_decode($token), '', 0, 10);
+        $cryptdate = substr(base64_decode($str), 0, 10);
+        $crypt = substr_replace(base64_decode($str), '', 0, 10);
         $decrypted = openssl_decrypt($crypt, 'aes-256-cbc', $salt, 0, $iv);
         return array($cryptdate, $decrypted);
     }
