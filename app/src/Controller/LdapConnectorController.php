@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Command\LDAPImportCommand;
 use App\Entity\Connector;
 use App\Entity\Domain;
 use App\Entity\LdapConnector;
@@ -10,9 +11,14 @@ use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -22,11 +28,13 @@ class LdapConnectorController extends AbstractController {
     private $translator;
     private $em;
     private CryptEncryptService $cryptEncryptService;
+    private Application $application;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, CryptEncryptService $cryptEncryptService) {
+    public function __construct(KernelInterface $kernel, TranslatorInterface $translator, EntityManagerInterface $em, CryptEncryptService $cryptEncryptService) {
         $this->translator = $translator;
         $this->em = $em;
         $this->cryptEncryptService = $cryptEncryptService;
+        $this->application = new Application($kernel);
     }
 
     #[Route('/{domain}/new', name: 'app_connector_ldap_new', methods: ['GET', 'POST'])]
@@ -60,21 +68,20 @@ class LdapConnectorController extends AbstractController {
     public function edit(Request $request, LdapConnector $connector, ConnectorRepository $connectorRepository): Response {
         $oldPass = $connector->getLdapPassword();
         $oldPassClear = $this->cryptEncryptService->decrypt($oldPass)[1];
-        
+
         $form = $this->createForm(LdapConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_ldap_edit', ['id' => $connector->getId()]),
         ]);
         $form->handleRequest($request);
 
-        
         if ($form->isSubmitted() && $form->isValid()) {
-            
+
             $connector = $form->getData();
-            if (!$connector->getLdapPassword()){
+            if (!$connector->getLdapPassword()) {
                 $connector->setLdapPassword($oldPass);
             }
-            
-            if ($connector->getLdapPassword() && $oldPass !== $connector->getLdapPassword()){
+
+            if ($connector->getLdapPassword() && $oldPass !== $connector->getLdapPassword()) {
                 $newPass = $this->cryptEncryptService->encrypt($connector->getLdapPassword());
                 $connector->setLdapPassword($newPass);
             }
@@ -86,6 +93,22 @@ class LdapConnectorController extends AbstractController {
                     'connector' => $connector,
                     'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/sync-user', name: 'app_ldap_connector_sync')]
+    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+        if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
+            $input = new ArrayInput([
+                'connectorId' => $connector->getId(),
+            ]);
+            $command = $this->application->find(LDAPImportCommand::getDefaultName());
+            $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
+            $command->run($input, $output);
+            $this->addFlash('success', $output->fetch());
+        }
+
+
+        return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
 
 }

@@ -74,16 +74,18 @@
               
               {% if connector.type == 'LDAP' %}
                 {% set urlEdit =  path('app_connector_ldap_edit', {'id' : connector.id}) %}
+                {% set urlSync =  path('app_ldap_connector_sync', {'id' : connector.id}) %}
               {% endif %}
               {% if connector.type == 'Office365' %}
                 {% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
+                {% set urlSync =  path('app_office365_connector_sync', {'id' : connector.id}) %}
               {% endif %}
 {#              {{ connector.type }}#}
               <tr>
                 <td> {{ connector.name }}</td>
                 <td> {{ connector.type }}</td>
                 <td>
-                  <a href="{{ path('app_office365_connector_sync', {'id' : connector.id}) }}?_token={{ csrf_token('sync' ~ connector.id) }}"  class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
+                  <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"  class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
                     <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i> 
                     <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
                   </a>                   
