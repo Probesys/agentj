@@ -478,6 +478,7 @@ Entities:
       ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
       ldapEmailField: "Champ LDAP pour l'email"
       ldapGroupField: "Champ LDAP pour les groupes"
+      ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
   Office365Connector:
     labels:
     actions:

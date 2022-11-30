@@ -55,6 +55,11 @@ class LdapConnector extends Connector
      */
     private $ldapRootDn;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapGroupMemberField;
+
 
 
     public function getLdapHost(): ?string
@@ -173,6 +178,18 @@ class LdapConnector extends Connector
     public function setLdapRootDn(?string $ldapRootDn): self
     {
         $this->ldapRootDn = $ldapRootDn;
+
+        return $this;
+    }
+
+    public function getLdapGroupMemberField(): ?string
+    {
+        return $this->ldapGroupMemberField;
+    }
+
+    public function setLdapGroupMemberField(?string $ldapGroupMemberField): self
+    {
+        $this->ldapGroupMemberField = $ldapGroupMemberField;
 
         return $this;
     }

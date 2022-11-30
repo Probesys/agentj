@@ -8,18 +8,17 @@ use App\Entity\User as User;
 use App\Service\CryptEncryptService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model\Group as GraphGroup;
 use Microsoft\Graph\Model\User as GraphUser;
-use stdClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\InvalidCredentialsException;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -73,7 +72,7 @@ class LDAPImportCommand extends Command {
         }
         ;
 
-        $this->importUsers();
+//        $this->importUsers();
         $this->importGroups();
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
@@ -177,66 +176,32 @@ class LDAPImportCommand extends Command {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
 
-        $ldapQuery = "(&(objectClass=posixGroup))";
+        $ldapQuery = "(|(objectClass=posixGroup)(objectClass=group))";
 
-        $query = $this->ldap->query("dc=easyd,dc=local", $ldapQuery);
+        $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
         $results = $query->execute();
-        foreach ($results as $entry) {
-            dump($entry);
-        }   
-        die;
-        dd($results);
-        $graph = new Graph();
-        $graph->setAccessToken($token->access_token);
-        $domain = $this->connector->getDomain();
-        try {
-            $groups = $graph->createRequest("GET", '/groups' . '?$filter=endsWith(mail,\'@' . $domain->getDomain() . '\' )&$count=true')
-                    ->setReturnType(GraphGroup::class)
-                    ->addHeaders(['ConsistencyLevel' => 'eventual'])
-                    ->execute();
+        foreach ($results as $ldapGroup) {
+            /*@var $ldapGroup Entry */
+            $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
+            if (!$group) {
+                $group = new Groups();
+                $group->setLdapDN($ldapGroup->getDn());
+                $group->setPolicy($this->connector->getDomain()->getPolicy());
+                $group->setActive(true);
+                $group->setPriority(1);
+                $group->setDomain($this->connector->getDomain());
+                $group->setWb("");
 
-            foreach ($groups as $m365group) {
-
-                $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
-                if (!$localGroup) {
-                    $localGroup = new Groups();
-                    $localGroup->setPriority(1);
-                    $localGroup->setName($m365group->getDisplayName());
-                    $localGroup->isActive(true);
-                    $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
-                    $localGroup->setDomain($this->connector->getDomain());
-                    $localGroup->setOriginConnector($this->connector);
-                    $localGroup->setWb("");
-                    $localGroup->setUid($m365group->getId());
-                    $this->em->persist($localGroup);
-                    $this->em->flush();
-                }
-                /* @var $group GraphGroup */
-                $userGroup = $this->em->getRepository(User::class)->findOneByUid($m365group->getId());
-                if (!$userGroup) {
-                    $userGroup = new User();
-                    $userGroup->setEmail($m365group->getMail());
-                    $this->nbUserCreated++;
-                } else {
-                    $this->nbUserUpdated++;
-                }
-                $userGroup->setUsername($m365group->getMail());
-                $userGroup->setFullname($m365group->getDisplayName());
-                $userGroup->setReport(true);
-                $userGroup->setRoles('["ROLE_USER"]');
-                $userGroup->setDomain($domain);
-                $userGroup->setUid($m365group->getId());
-                $userGroup->setPolicy($domain->getPolicy());
-                $userGroup->setPriority(MailaddrService::computePriority($m365group->getMail()));
-                $this->em->persist($userGroup);
-                $this->em->flush();
-                $this->addUserGroupOwners($token, $userGroup);
-                $this->addMembersToGroup($token, $localGroup);
-            }
-        } catch (GuzzleException $exc) {
+            }            
+            $group->setName($ldapGroup->getAttribute('cn')[0]);
+            $group->setOriginConnector($this->connector);
+            $this->em->persist($group);
             
-        }
+            $this->addMembersToGroup($ldapGroup, $group);
+            
+        }   
+        $this->em->flush();
     }
 
     /**
@@ -245,28 +210,17 @@ class LDAPImportCommand extends Command {
      * @param Groups $group
      * @return void
      */
-    private function addMembersToGroup(\stdclass $token, Groups $group): void {
-        $members = [];
-        $graph = new Graph();
-        $graph->setAccessToken($token->access_token);
-
-        try {
-            $members = $graph->createRequest("GET", '/groups/' . $group->getUid() . '/members')
-                    ->setReturnType(GraphUser::class)
-                    ->execute();
-        } catch (GuzzleException $exc) {
-            
-        }
-
-        foreach ($members as $member) {
-            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $member->getId()]);
-            if ($user) {
-
+    private function addMembersToGroup(Entry $ldapGroup, Groups $group): void {
+        
+        $groupMemberfield = $this->connector->getLdapGroupMemberField();
+        $members = $ldapGroup->getAttribute($groupMemberfield);
+        foreach($members as $member){
+            $user = $this->em->getRepository(User::class)->findOneByUid($member);
+            if ($user){
                 $group->addUser($user);
-                $this->em->persist($user);
             }
         }
-        $this->em->flush();
+        
     }
 
     /**

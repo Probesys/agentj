@@ -1,0 +1,75 @@
+{{ form_start(form) }}
+<div class="row">
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_name">{{ 'Entities.Connector.fields.name'|trans }}</label>
+      {{ form_widget(form.name) }}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapHost">{{ 'Entities.LdapConnector.fields.ldapHost'|trans }}</label>
+      {{ form_widget(form.ldapHost) }}
+    </div>
+  </div>    
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapPort">{{ 'Entities.LdapConnector.fields.ldapPort'|trans }}</label>
+      {{ form_widget(form.ldapPort) }}
+    </div>
+  </div>       
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_LdapBaseDN">{{ 'Entities.LdapConnector.fields.LdapBaseDN'|trans }}</label>
+      {{ form_widget(form.LdapBaseDN) }}
+    </div>
+  </div>    
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapRootDn">{{ 'Entities.LdapConnector.fields.ldapRootDn'|trans }}</label>
+      {{ form_widget(form.ldapRootDn) }}
+    </div>
+  </div>    
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_LdapPassword">{{ 'Entities.LdapConnector.fields.LdapPassword'|trans }}</label>
+      {{ form_widget(form.LdapPassword) }}
+    </div>
+  </div>      
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapLoginField">{{ 'Entities.LdapConnector.fields.ldapLoginField'|trans }}</label>
+      {{ form_widget(form.ldapLoginField) }}
+    </div>
+  </div>    
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapRealNameField">{{ 'Entities.LdapConnector.fields.ldapRealNameField'|trans }}</label>
+      {{ form_widget(form.ldapRealNameField) }}
+    </div>
+  </div>       
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapEmailField">{{ 'Entities.LdapConnector.fields.ldapEmailField'|trans }}</label>
+      {{ form_widget(form.ldapEmailField) }}
+    </div>
+  </div>    
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="ldap_connector_ldapGroupField">{{ 'Entities.LdapConnector.fields.ldapGroupField'|trans }}</label>
+      {{ form_widget(form.ldapGroupField) }}
+    </div>
+  </div>    
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_ldapGroupMemberField">{{ 'Entities.LdapConnector.fields.ldapGroupMemberField'|trans }}</label>
+      {{ form_widget(form.ldapGroupMemberField) }}
+    </div>
+  </div>    
+</div>
+{{ form_widget(form) }}
+<div class="d-flex justify-content-center">
+  <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
+  <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>
+{{ form_end(form) }}

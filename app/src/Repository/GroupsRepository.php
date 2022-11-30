@@ -26,6 +26,14 @@ class GroupsRepository extends ServiceEntityRepository {
                         ->getQuery()
                         ->getOneOrNullResult();
     }
+    
+    public function findOneByLdapDN(string $dn): ?Groups {
+        return $this->createQueryBuilder('g')
+                        ->where('g.ldapDN = :ldapDN')
+                        ->setParameter('ldapDN', $dn)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }    
 
     /**
      * Return the groups associated to one or more domains

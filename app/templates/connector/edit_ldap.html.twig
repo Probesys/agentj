@@ -1,0 +1,12 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ 'Entities.LdapConnector.actions.edit'|trans() }}
+{% endblock %}
+
+{% block modalContent %}
+
+    {{ include('connector/_form_ldap.html.twig') }}
+
+
+{% endblock %}
