@@ -67,15 +67,14 @@ class LDAPImportCommand extends Command {
                     'host' => $this->connector->getLdapHost(),
                     'port' => $this->connector->getLdapPort(),
         ]);
-        if (!$this->connect()){
+        if (!$this->connect()) {
             $io->error("Cannot connect to LDAP Server");
             return Command::FAILURE;
         }
         ;
 
-                
         $this->importUsers();
-//        $this->importGroups($token);
+        $this->importGroups();
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
@@ -107,7 +106,6 @@ class LDAPImportCommand extends Command {
         }
     }
 
-  
     private function importUsers() {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
@@ -129,11 +127,11 @@ class LDAPImportCommand extends Command {
             if (!$user) {
                 $user = new User();
                 $user->setLdapDN($entry->getDN());
-                $user->setUid($entry->getDN());
                 $user->setPolicy($this->connector->getDomain()->getPolicy());
                 $isNew = true;
             }
-
+            $user->setUid($entry->getAttribute('uid')[0]);
+            $user->setOriginConnector($this->connector);
             $user->setFullname($userName);
             $user->setUsername($emailAdress);
             $user->setEmail($emailAdress);
@@ -141,9 +139,9 @@ class LDAPImportCommand extends Command {
             $user->setRoles('["ROLE_USER"]');
 
             $this->em->persist($user);
-            
+
             $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated = $this->nbUserUpdated + 1;
-            $this->nbUserCreated = $isNew ? $this->nbUserCreated  = $this->nbUserCreated + 1 : $this->nbUserCreated;
+            $this->nbUserCreated = $isNew ? $this->nbUserCreated = $this->nbUserCreated + 1 : $this->nbUserCreated;
         }
         $this->em->flush();
     }
@@ -174,7 +172,21 @@ class LDAPImportCommand extends Command {
      * @param \stdclass $token
      * @return void
      */
-    private function importGroups(\stdclass $token): void {
+    private function importGroups(): void {
+        
+        $mailAttribute = $this->connector->getLdapEmailField();
+        $realNameAttribute = $this->connector->getLdapRealNameField();
+
+        $ldapQuery = "(&(objectClass=posixGroup))";
+
+        $query = $this->ldap->query("dc=easyd,dc=local", $ldapQuery);
+
+        $results = $query->execute();
+        foreach ($results as $entry) {
+            dump($entry);
+        }   
+        die;
+        dd($results);
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
