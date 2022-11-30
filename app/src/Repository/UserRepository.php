@@ -32,6 +32,16 @@ class UserRepository extends ServiceEntityRepository {
                         ->getQuery()
                         ->getOneOrNullResult();
     }
+    
+    public function findOneByLdapDN(string $dn): ?User {
+        return $this->createQueryBuilder('u')
+                        ->join('u.domain', 'd')
+                        ->andWhere('u.ldapDN = :ldapDN')
+                        ->andWhere('d.active=1')
+                        ->setParameter('ldapDN', $dn)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }    
 
     public function findOneByEmail(string $email): ?User {
         return $this->createQueryBuilder('u')

@@ -119,16 +119,16 @@ class LDAPImportCommand extends Command {
         $results = $query->execute();
         foreach ($results as $entry) {
 
-            $user = $this->em->getRepository(User::class)->findOneByUid($entry->getDN());
+            $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
             $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
             $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
-            if (!$emailAdress) {
+            if (!$emailAdress || (!filter_var($emailAdress, FILTER_VALIDATE_EMAIL))) {
                 continue;
             }
             $isNew = false;
             if (!$user) {
                 $user = new User();
-                $user->setUid($entry->getDN());
+                $user->setLdapDN($entry->getDN());
                 $user->setPolicy($this->connector->getDomain()->getPolicy());
                 $isNew = true;
             }
