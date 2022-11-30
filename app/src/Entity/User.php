@@ -171,7 +171,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\ManyToOne(targetEntity=Connector::class, inversedBy="users")
      */
-    private $originConnector;       
+    private $originConnector;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapDN;       
 
     public function __construct()
     {
@@ -603,6 +608,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setOriginConnector(?Connector $originConnector): self
     {
         $this->originConnector = $originConnector;
+
+        return $this;
+    }
+
+    public function getLdapDN(): ?string
+    {
+        return $this->ldapDN;
+    }
+
+    public function setLdapDN(?string $ldapDN): self
+    {
+        $this->ldapDN = $ldapDN;
 
         return $this;
     }
