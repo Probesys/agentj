@@ -129,6 +129,7 @@ class LDAPImportCommand extends Command {
             if (!$user) {
                 $user = new User();
                 $user->setLdapDN($entry->getDN());
+                $user->setUid($entry->getDN());
                 $user->setPolicy($this->connector->getDomain()->getPolicy());
                 $isNew = true;
             }
