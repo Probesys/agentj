@@ -72,7 +72,7 @@ class LDAPImportCommand extends Command {
         }
         ;
 
-//        $this->importUsers();
+        $this->importUsers();
         $this->importGroups();
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
@@ -111,17 +111,28 @@ class LDAPImportCommand extends Command {
 
         $ldapQuery = "(&(objectClass=organizationalPerson)(" . $mailAttribute . "=*))";
 
-        $query = $this->ldap->query("ou=users,dc=easyd,dc=local", $ldapQuery);
+        $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
         $results = $query->execute();
         foreach ($results as $entry) {
 
             $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
             $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
+            
             $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
+         
             if (!$emailAdress || (!filter_var($emailAdress, FILTER_VALIDATE_EMAIL))) {
                 continue;
             }
+            
+            //check if same domain
+            $domainAdress = explode('@', $emailAdress)[1];
+            
+            if ($domainAdress !== $this->connector->getDomain()->getDomain()){
+                continue;
+            }
+            dump($domainAdress);
+            
             $isNew = false;
             if (!$user) {
                 $user = new User();
@@ -145,26 +156,7 @@ class LDAPImportCommand extends Command {
         $this->em->flush();
     }
 
-    private function addAliases(User $user, array $proxyAdresses): void {
-        foreach ($proxyAdresses as $proxyAdresse) {
-            if (strpos($proxyAdresse, "smtp") !== false) {
 
-                $aliasEmail = explode('smtp:', $proxyAdresse)[1];
-                $domainAlias = explode('@', $aliasEmail)[1];
-                if ($domainAlias == $this->connector->getDomain()->getDomain()) {
-                    $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
-                    if (!$alias) {
-                        $alias = clone $user;
-                    }
-                    $alias->setEmail($aliasEmail);
-                    $alias->setUserName($aliasEmail);
-                    $alias->setOriginalUser($user);
-                    $alias->setOriginConnector($this->connector);
-                    $this->em->persist($alias);
-                }
-            }
-        }
-    }
 
     /**
      * 
@@ -178,10 +170,12 @@ class LDAPImportCommand extends Command {
 
         $ldapQuery = "(|(objectClass=posixGroup)(objectClass=group))";
 
-        $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
+        $query = $this->ldap->query('cn=groups,cn=accounts,dc=idm,dc=probesys,dc=net', $ldapQuery);
 
         $results = $query->execute();
         foreach ($results as $ldapGroup) {
+            $nbMembers = $ldapGroup->getAttribute('member') ?  count($ldapGroup->getAttribute('member')) : 0;
+            if ($nbMembers > 0){
             /*@var $ldapGroup Entry */
             $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
             if (!$group) {
@@ -190,6 +184,7 @@ class LDAPImportCommand extends Command {
                 $group->setPolicy($this->connector->getDomain()->getPolicy());
                 $group->setActive(true);
                 $group->setPriority(1);
+                $group->setOverrideUser(false);
                 $group->setDomain($this->connector->getDomain());
                 $group->setWb("");
 
@@ -199,11 +194,17 @@ class LDAPImportCommand extends Command {
             $this->em->persist($group);
             
             $this->addMembersToGroup($ldapGroup, $group);
+            }
             
-        }   
+            
+        }
+  
         $this->em->flush();
     }
 
+    private function loadLdapGroup(string $dn){
+        
+    }
     /**
      * 
      * @param \stdclass $token
@@ -212,10 +213,16 @@ class LDAPImportCommand extends Command {
      */
     private function addMembersToGroup(Entry $ldapGroup, Groups $group): void {
         
+        $members=[];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();
-        $members = $ldapGroup->getAttribute($groupMemberfield);
+        $members = $ldapGroup->getAttribute($groupMemberfield) ? $ldapGroup->getAttribute($groupMemberfield) : [];
+//        dump($members);
         foreach($members as $member){
-            $user = $this->em->getRepository(User::class)->findOneByUid($member);
+            $user = $this->em->getRepository(User::class)->findOneByLdapDN($member);
+            if ($groupMemberfield == 'memberUid'){
+                $user = $this->em->getRepository(User::class)->findOneByUid($member);
+            }
+            
             if ($user){
                 $group->addUser($user);
             }
