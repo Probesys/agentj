@@ -82,7 +82,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         if (!$domain) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
-//        dd($domain);
+
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => strtolower($username)]);
         if (!$user) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
@@ -123,6 +123,22 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         }
         return false;
     }
+    
+    private function ldapConnect(User $user, String $password) {
+        $domain = $user->getDomain();
+        $conStr = $domain->getSrvImap() . ":" . $domain->getImapPort() . $domain->getImapFlag();
+        if ($domain->getImapNoValidateCert()) {
+            $conStr .= '/novalidate-cert';
+        }
+
+        $conStr = '{' . $conStr . '}';
+        $mbox = @imap_open($conStr, $user->getEmailFromRessource(), $password,0 , 1);
+        if (!imap_errors() && $mbox) {
+            return true;
+        }
+        return false;
+    }
+    
 
     private function getLocalUser(String $userName) {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);

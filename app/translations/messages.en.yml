@@ -237,7 +237,7 @@ Message:
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
   Office365Connector:
-    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated"
+    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated<br>$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED updated<br>"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information

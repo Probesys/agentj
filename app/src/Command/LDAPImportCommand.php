@@ -10,7 +10,6 @@ use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model\Group as GraphGroup;
 use Microsoft\Graph\Model\User as GraphUser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,6 +33,8 @@ class LDAPImportCommand extends Command {
     private Ldap $ldap;
     private int $nbUserCreated = 0;
     private int $nbUserUpdated = 0;
+    private int $nbGroupCreated = 0;
+    private int $nbGroupUpdated = 0;
     private $translator;
     private CryptEncryptService $cryptEncryptService;
 
@@ -78,6 +79,8 @@ class LDAPImportCommand extends Command {
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,
                     '$NB_UPDATED' => $this->nbUserUpdated,
+                    '$NB_GROUP_UPDATED' => $this->nbGroupUpdated,
+                    '$NB_GROUP_CREATED' => $this->nbGroupCreated,
         ]));
         return Command::SUCCESS;
     }
@@ -92,8 +95,6 @@ class LDAPImportCommand extends Command {
         if (!$searchPassword = $this->connector->getLdapPassword()) {
             throw new \Exception('Please configure ldap password');
         }
-
-
 
         try {
 
@@ -118,21 +119,20 @@ class LDAPImportCommand extends Command {
 
             $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
             $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
-            
+
             $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
-         
+
             if (!$emailAdress || (!filter_var($emailAdress, FILTER_VALIDATE_EMAIL))) {
                 continue;
             }
-            
+
             //check if same domain
             $domainAdress = explode('@', $emailAdress)[1];
-            
-            if ($domainAdress !== $this->connector->getDomain()->getDomain()){
+
+            if ($domainAdress !== $this->connector->getDomain()->getDomain()) {
                 continue;
             }
-            dump($domainAdress);
-            
+
             $isNew = false;
             if (!$user) {
                 $user = new User();
@@ -146,6 +146,7 @@ class LDAPImportCommand extends Command {
             $user->setUsername($emailAdress);
             $user->setEmail($emailAdress);
             $user->setDomain($this->connector->getDomain());
+            $user->setPriority(MailaddrService::computePriority($emailAdress));
             $user->setRoles('["ROLE_USER"]');
 
             $this->em->persist($user);
@@ -156,15 +157,13 @@ class LDAPImportCommand extends Command {
         $this->em->flush();
     }
 
-
-
     /**
      * 
      * @param \stdclass $token
      * @return void
      */
     private function importGroups(): void {
-        
+
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
 
@@ -174,37 +173,38 @@ class LDAPImportCommand extends Command {
 
         $results = $query->execute();
         foreach ($results as $ldapGroup) {
-            $nbMembers = $ldapGroup->getAttribute('member') ?  count($ldapGroup->getAttribute('member')) : 0;
-            if ($nbMembers > 0){
-            /*@var $ldapGroup Entry */
-            $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
-            if (!$group) {
-                $group = new Groups();
-                $group->setLdapDN($ldapGroup->getDn());
-                $group->setPolicy($this->connector->getDomain()->getPolicy());
-                $group->setActive(true);
-                $group->setPriority(1);
-                $group->setOverrideUser(false);
-                $group->setDomain($this->connector->getDomain());
-                $group->setWb("");
-
-            }            
-            $group->setName($ldapGroup->getAttribute('cn')[0]);
-            $group->setOriginConnector($this->connector);
-            $this->em->persist($group);
-            
-            $this->addMembersToGroup($ldapGroup, $group);
+            $nbMembers = $ldapGroup->getAttribute('member') ? count($ldapGroup->getAttribute('member')) : 0;
+            if ($nbMembers > 0) {
+                /* @var $ldapGroup Entry */
+                $isNew = false;
+                $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
+                if (!$group) {
+                    $group = new Groups();
+                    $group->setLdapDN($ldapGroup->getDn());
+                    $group->setPolicy($this->connector->getDomain()->getPolicy());
+                    $group->setActive(true);
+                    $group->setPriority(1);
+                    $group->setOverrideUser(false);
+                    $group->setDomain($this->connector->getDomain());
+                    $group->setWb("");
+                    $isNew = true;
+                }
+                $group->setName($ldapGroup->getAttribute('cn')[0]);
+                $group->setOriginConnector($this->connector);
+                $this->em->persist($group);
+            $this->nbGroupUpdated = $isNew ? $this->nbGroupUpdated : $this->nbGroupUpdated = $this->nbGroupUpdated + 1;
+            $this->nbGroupCreated = $isNew ? $this->nbGroupCreated = $this->nbGroupCreated + 1 : $this->nbGroupCreated;
+                $this->addMembersToGroup($ldapGroup, $group);
             }
-            
-            
         }
-  
+
         $this->em->flush();
     }
 
-    private function loadLdapGroup(string $dn){
+    private function loadLdapGroup(string $dn) {
         
     }
+
     /**
      * 
      * @param \stdclass $token
@@ -212,22 +212,21 @@ class LDAPImportCommand extends Command {
      * @return void
      */
     private function addMembersToGroup(Entry $ldapGroup, Groups $group): void {
-        
-        $members=[];
+
+        $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();
         $members = $ldapGroup->getAttribute($groupMemberfield) ? $ldapGroup->getAttribute($groupMemberfield) : [];
 //        dump($members);
-        foreach($members as $member){
+        foreach ($members as $member) {
             $user = $this->em->getRepository(User::class)->findOneByLdapDN($member);
-            if ($groupMemberfield == 'memberUid'){
+            if ($groupMemberfield == 'memberUid') {
                 $user = $this->em->getRepository(User::class)->findOneByUid($member);
             }
-            
-            if ($user){
+
+            if ($user) {
                 $group->addUser($user);
             }
         }
-        
     }
 
     /**

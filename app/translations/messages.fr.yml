@@ -242,7 +242,7 @@ Message:
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
   Office365Connector:
-    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour"
+    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour<br>$NB_GROUP_CREATED groupes créés, $NB_GROUP_UPDATED mis à jour<br>"
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
