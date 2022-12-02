@@ -289,7 +289,8 @@ class WblistRepository extends ServiceEntityRepository {
                 ->andWhere('wb.priority > :priority')
                 ->setParameter('rid', $wbInfo['rid'])
                 ->setParameter('sid', $wbInfo['sid'])
-                ->setParameter('priority', $wbInfo['priority']);
+                ->setParameter('priority', $wbInfo['priority'])
+                ->setMaxResults(1);
 
         $query = $dql->getQuery();
         $result = $query->getOneOrNullResult();

@@ -37,7 +37,6 @@ class UserRepository extends ServiceEntityRepository {
         return $this->createQueryBuilder('u')
                         ->join('u.domain', 'd')
                         ->andWhere('u.ldapDN = :ldapDN')
-                        ->andWhere('d.active=1')
                         ->setParameter('ldapDN', $dn)
                         ->getQuery()
                         ->getOneOrNullResult();
