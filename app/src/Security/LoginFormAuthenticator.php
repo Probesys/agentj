@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\Domain;
 use App\Entity\User;
+use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -35,6 +36,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
     private $csrfTokenManager;
     private $entityManager;
     private $translator;
+    private LdapService $ldapService;
 
     public const LOGIN_ROUTE = 'app_login';
 
@@ -43,13 +45,15 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             ParameterBagInterface $params,
             CsrfTokenManagerInterface $csrfTokenManager,
             EntityManagerInterface $entityManager,
-            TranslatorInterface $translator
+            TranslatorInterface $translator, 
+            LdapService $ldapService
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->params = $params;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->entityManager = $entityManager;
         $this->translator = $translator;
+        $this->ldapService = $ldapService;
     }
 
     public function authenticate(Request $request): PassportInterface {
@@ -88,6 +92,13 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
 
+        $ldapBind = $this->ldapService->bindUser($user, $password);
+        if ($ldapBind){
+            return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
+        }
+        
+//        dd($ldapBind);
+        
         $loginImap = $this->getLoginImap($user, $password);
         if (!$loginImap) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
@@ -124,20 +135,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return false;
     }
     
-    private function ldapConnect(User $user, String $password) {
-        $domain = $user->getDomain();
-        $conStr = $domain->getSrvImap() . ":" . $domain->getImapPort() . $domain->getImapFlag();
-        if ($domain->getImapNoValidateCert()) {
-            $conStr .= '/novalidate-cert';
-        }
 
-        $conStr = '{' . $conStr . '}';
-        $mbox = @imap_open($conStr, $user->getEmailFromRessource(), $password,0 , 1);
-        if (!imap_errors() && $mbox) {
-            return true;
-        }
-        return false;
-    }
     
 
     private function getLocalUser(String $userName) {
