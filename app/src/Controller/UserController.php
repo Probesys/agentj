@@ -94,7 +94,10 @@ class UserController extends AbstractController {
             } elseif ($form->isValid()) {
                 $role = $request->request->get('user')['roles'];
                 $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
+                $policy = $this->em->getRepository(Policy::class)->find(5);
                 $user->setPassword($encoded);
+                $user->setPolicy($policy);
+                $user->setUsername($user->getFullname());
                 $user->setRoles($role);
 
                 $this->em->persist($user);
