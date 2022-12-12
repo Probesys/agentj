@@ -1,1 +1,1 @@
-0 10 * * * sleep $(($RANDOM % 25200)); /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf;
+0 10 * * * sleep $(($RANDOM % 25200)); /usr/bin/freshclam --log=/var/log/clamav/freshclam.log --daemon-notify=/etc/clamav/clamd.conf --config-file=/etc/clamav/freshclam.conf; /usr/bin/sa-update
