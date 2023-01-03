@@ -468,6 +468,8 @@ Entities:
       ldapRealNameField: "LDAP Field for username (ex : sn)"
       ldapEmailField: "LDAP for email"
       ldapGroupField: "LDAP field for groups"
+      ldapUserFilter: "Filter for user"
+      ldapGroupFilter: "Filter for groups"      
   Office365Connector:
     labels:
     fields:

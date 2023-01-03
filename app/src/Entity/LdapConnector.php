@@ -56,20 +56,21 @@ class LdapConnector extends Connector
      */
     private $ldapGroupMemberField;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $userFilter;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $groupFilter;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $ldapBindDn;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapUserFilter;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapGroupFilter;
 
 
 
@@ -193,30 +194,7 @@ class LdapConnector extends Connector
 
         return $this;
     }
-
-    public function getUserFilter(): ?string
-    {
-        return $this->userFilter;
-    }
-
-    public function setUserFilter(?string $userFilter): self
-    {
-        $this->userFilter = $userFilter;
-
-        return $this;
-    }
-
-    public function getGroupFilter(): ?string
-    {
-        return $this->groupFilter;
-    }
-
-    public function setGroupFilter(string $groupFilter): self
-    {
-        $this->groupFilter = $groupFilter;
-
-        return $this;
-    }
+   
 
     public function getLdapBindDn(): ?string
     {
@@ -226,6 +204,30 @@ class LdapConnector extends Connector
     public function setLdapBindDn(?string $ldapBindDn): self
     {
         $this->ldapBindDn = $ldapBindDn;
+
+        return $this;
+    }
+
+    public function getLdapUserFilter(): ?string
+    {
+        return $this->ldapUserFilter;
+    }
+
+    public function setLdapUserFilter(?string $ldapUserFilter): self
+    {
+        $this->ldapUserFilter = $ldapUserFilter;
+
+        return $this;
+    }
+
+    public function getLdapGroupFilter(): ?string
+    {
+        return $this->ldapGroupFilter;
+    }
+
+    public function setLdapGroupFilter(?string $ldapGroupFilter): self
+    {
+        $this->ldapGroupFilter = $ldapGroupFilter;
 
         return $this;
     }

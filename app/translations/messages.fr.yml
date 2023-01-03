@@ -479,6 +479,8 @@ Entities:
       ldapEmailField: "Champ LDAP pour l'email"
       ldapGroupField: "Champ LDAP pour les groupes"
       ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
+      ldapUserFilter: "Filtre pour les utilisateur"
+      ldapGroupFilter: "Filtre pour les groupes"
   Office365Connector:
     labels:
     actions:
