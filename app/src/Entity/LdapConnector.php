@@ -18,7 +18,7 @@ class LdapConnector extends Connector
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $ldapPort;
+    private $ldapPort = 389;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -59,6 +59,16 @@ class LdapConnector extends Connector
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $ldapGroupMemberField;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $userFilter;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $groupFilter;
 
 
 
@@ -190,6 +200,30 @@ class LdapConnector extends Connector
     public function setLdapGroupMemberField(?string $ldapGroupMemberField): self
     {
         $this->ldapGroupMemberField = $ldapGroupMemberField;
+
+        return $this;
+    }
+
+    public function getUserFilter(): ?string
+    {
+        return $this->userFilter;
+    }
+
+    public function setUserFilter(?string $userFilter): self
+    {
+        $this->userFilter = $userFilter;
+
+        return $this;
+    }
+
+    public function getGroupFilter(): ?string
+    {
+        return $this->groupFilter;
+    }
+
+    public function setGroupFilter(string $groupFilter): self
+    {
+        $this->groupFilter = $groupFilter;
 
         return $this;
     }
