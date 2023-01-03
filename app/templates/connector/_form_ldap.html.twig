@@ -17,25 +17,28 @@
       <label for="ldap_connector_ldapPort">{{ 'Entities.LdapConnector.fields.ldapPort'|trans }}</label>
       {{ form_widget(form.ldapPort) }}
     </div>
-  </div>       
-  <div class="col-md-12">
+  </div>        
+  <div class="col-md-5">
     <div class="form-group">
-      <label for="ldap_connector_LdapBaseDN">{{ 'Entities.LdapConnector.fields.LdapBaseDN'|trans }}</label>
-      {{ form_widget(form.LdapBaseDN) }}
-    </div>
-  </div>    
-  <div class="col-md-6">
-    <div class="form-group">
-      <label for="ldap_connector_ldapRootDn">{{ 'Entities.LdapConnector.fields.ldapRootDn'|trans }}</label>
+      <label for="ldap_connector_ldapBindDn">{{ 'Entities.LdapConnector.fields.ldapBindDn'|trans }}</label>
       {{ form_widget(form.ldapBindDn) }}
     </div>
   </div>    
-  <div class="col-md-6">
+  <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_LdapPassword">{{ 'Entities.LdapConnector.fields.LdapPassword'|trans }}</label>
       {{ form_widget(form.LdapPassword) }}
     </div>
   </div>      
+    <div class="col-md-2">
+      not connected
+    </div>
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_LdapBaseDN">{{ 'Entities.LdapConnector.fields.LdapBaseDN'|trans }}</label>
+      {{ form_widget(form.LdapBaseDN) }}
+    </div>
+  </div>       
   <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapLoginField">{{ 'Entities.LdapConnector.fields.ldapLoginField'|trans }}</label>
