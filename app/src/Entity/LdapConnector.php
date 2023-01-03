@@ -50,10 +50,6 @@ class LdapConnector extends Connector
      */
     private $ldapEmailField;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $ldapRootDn;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -69,6 +65,11 @@ class LdapConnector extends Connector
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $groupFilter;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $ldapBindDn;
 
 
 
@@ -180,17 +181,6 @@ class LdapConnector extends Connector
         return $this;
     }
 
-    public function getLdapRootDn(): ?string
-    {
-        return $this->ldapRootDn;
-    }
-
-    public function setLdapRootDn(?string $ldapRootDn): self
-    {
-        $this->ldapRootDn = $ldapRootDn;
-
-        return $this;
-    }
 
     public function getLdapGroupMemberField(): ?string
     {
@@ -227,5 +217,18 @@ class LdapConnector extends Connector
 
         return $this;
     }
+
+    public function getLdapBindDn(): ?string
+    {
+        return $this->ldapBindDn;
+    }
+
+    public function setLdapBindDn(?string $ldapBindDn): self
+    {
+        $this->ldapBindDn = $ldapBindDn;
+
+        return $this;
+    }
+
 
 }

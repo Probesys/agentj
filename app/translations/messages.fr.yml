@@ -473,7 +473,7 @@ Entities:
       ldapPort: "Port (défaut 389)"
       LdapBaseDN: "BaseDN"
       ldapLoginField: "Champ LDAP pour le login (ex : uid)"
-      ldapRootDn: "DN pour la synchro"
+      ldapBindDn: "Bind Dn"
       LdapPassword: "Mot de passe"
       ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
       ldapEmailField: "Champ LDAP pour l'email"

@@ -26,9 +26,9 @@ class LdapConnectorType extends ConnectorType
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.LdapBaseDN',
             ])
-            ->add('ldapRootDn', null, [
+            ->add('ldapBindDn', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapRootDn',
+                'label' => 'Entities.LdapConnector.fields.ldapBindDn',
             ])                
             ->add('LdapPassword', PasswordType::class, [
                 'required' => is_null($builder->getData()->getId()),
@@ -53,7 +53,15 @@ class LdapConnectorType extends ConnectorType
             ->add('ldapGroupMemberField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupMemberField',
-            ])                   
+            ])       
+            ->add('userFilter', null, [
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.userFilter',
+            ]) 
+            ->add('groupFilter', null, [
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.groupFilter',
+            ])                 
         ;
     }
 

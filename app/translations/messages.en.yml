@@ -463,7 +463,7 @@ Entities:
       ldapPort: "Port (default 389)"
       LdapBaseDN: "BaseDN"
       ldapLoginField: "LDAP field for login (ex : uid)"
-      ldapRootDn: "DN for synchro"
+      ldapBindDn: "Bind Dn"
       LdapPassword: "Password"
       ldapRealNameField: "LDAP Field for username (ex : sn)"
       ldapEmailField: "LDAP for email"
