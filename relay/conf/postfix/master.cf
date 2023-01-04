@@ -38,3 +38,9 @@ maildrop  unix  -       n       n       -       -       pipe
 
 uucp      unix  -       n       n       -       -       pipe
   flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)
+# rate limited outgoing transport for slow destination domains
+slow      unix  -       -       -       -       -       smtp
+    -o slow_destination_concurrency_limit=2
+    -o slow_destination_recipient_limit=3
+    -o slow_destination_rate_delay=30s
+    -o slow_destination_concurrency_failed_cohort_limit=10
