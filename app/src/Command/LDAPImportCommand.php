@@ -6,6 +6,7 @@ use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Service\CryptEncryptService;
+use App\Service\LdapService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -36,13 +37,16 @@ class LDAPImportCommand extends Command {
     private int $nbGroupCreated = 0;
     private int $nbGroupUpdated = 0;
     private $translator;
-    private CryptEncryptService $cryptEncryptService;
+    private LdapService $ldapService;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator, CryptEncryptService $cryptEncryptService) {
+    public function __construct(
+            EntityManagerInterface $em, 
+            TranslatorInterface $translator,             
+            LdapService $ldapService) {
         parent::__construct();
         $this->em = $em;
         $this->translator = $translator;
-        $this->cryptEncryptService = $cryptEncryptService;
+        $this->ldapService = $ldapService;
     }
 
     protected function configure(): void {
@@ -63,11 +67,7 @@ class LDAPImportCommand extends Command {
             return Command::FAILURE;
         }
 
-        $this->ldap = Ldap::create('ext_ldap', [
-                    'host' => $this->connector->getLdapHost(),
-                    'port' => $this->connector->getLdapPort(),
-        ]);
-        if (!$this->connect()) {
+        if (!$this->ldap = $this->ldapService->bind($this->connector)) {
             $io->error("Cannot connect to LDAP Server");
             return Command::FAILURE;
         }
@@ -85,26 +85,7 @@ class LDAPImportCommand extends Command {
         return Command::SUCCESS;
     }
 
-    public function connect() {
-
-        $baseDN = "";
-        if (!$baseDN = $this->connector->getLdapBindDn()) {
-            throw new \Exception('Please configure ldap search DN');
-        }
-
-        if (!$searchPassword = $this->connector->getLdapPassword()) {
-            throw new \Exception('Please configure ldap password');
-        }
-
-        try {
-
-            $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
-            $this->ldap->bind($baseDN, $clearPassword);
-            return true;
-        } catch (InvalidCredentialsException $exception) {
-            return false;
-        }
-    }
+    
 
     private function importUsers() {
         $mailAttribute = $this->connector->getLdapEmailField();

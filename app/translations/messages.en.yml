@@ -223,6 +223,8 @@ Message:
     senderAuthorized: 'The address is now authorized'
     senderBanned: 'The address is now banished'
     checkMailUnsuccessful: 'We couldn''t check this email.'
+    connectionOk : "Connexion success"
+    connectionKo : "Unable to connect"    
   http:
     404:
       title: 'Page not found'

@@ -1,4 +1,6 @@
-{{ form_start(form) }}
+{{ form_start(form, { "attr" : {'data-controller' : 'form-ldap-connector'}}) }}
+<input type="hidden" value="{{ path('app_connector_ldap_checkbind') }}" data-form-ldap-connector-target="urlCheckBind">
+<input type="hidden" name="" data-form-ldap-connector-target="url-check-bind">
 <div class="row">
   <div class="col-md-12">
     <div class="form-group">
@@ -9,28 +11,28 @@
   <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapHost">{{ 'Entities.LdapConnector.fields.ldapHost'|trans }}</label>
-      {{ form_widget(form.ldapHost) }}
+      {{ form_widget(form.ldapHost, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapHost',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>    
   <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapPort">{{ 'Entities.LdapConnector.fields.ldapPort'|trans }}</label>
-      {{ form_widget(form.ldapPort) }}
+      {{ form_widget(form.ldapPort, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPort',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>        
   <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_ldapBindDn">{{ 'Entities.LdapConnector.fields.ldapBindDn'|trans }}</label>
-      {{ form_widget(form.ldapBindDn) }}
+      {{ form_widget(form.ldapBindDn, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapBindDn',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>    
   <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_LdapPassword">{{ 'Entities.LdapConnector.fields.LdapPassword'|trans }}</label>
-      {{ form_widget(form.LdapPassword) }}
+      {{ form_widget(form.LdapPassword, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPassword',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>      
-    <div class="col-md-2">
+    <div class="col-md-2" data-form-ldap-connector-target="ldapBindResult">
       not connected
     </div>
   <div class="col-md-12">

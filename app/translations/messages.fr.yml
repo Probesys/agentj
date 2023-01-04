@@ -228,6 +228,8 @@ Message:
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
+    connectionOk : "Connexion établie"
+    connectionKo : "Connexion échouée"
   http:
     404:
       title: Page non trouvée

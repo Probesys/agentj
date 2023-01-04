@@ -10,18 +10,20 @@ use App\Form\LdapConnectorType;
 use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
+use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Security("is_granted('ROLE_ADMIN')")
@@ -114,5 +116,32 @@ class LdapConnectorController extends AbstractController {
 
         return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
+    
+    #[Route('/checkbind', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
+    public function checkbind(Request $request, LdapService $ldapService): Response {
+        
+        $return = [
+            'status' => ''
+        ];
+        $testConnector = new LdapConnector();
+        $testConnector->setLdapBindDn($request->request->get('ldapBindDn'));
+        
+        $clearPass = $request->request->get('ldapPassword');
+        $this->cryptEncryptService->encrypt($clearPass);
+        $testConnector->setLdapPassword($this->cryptEncryptService->encrypt($clearPass));
+        
+        $testConnector->setLdapHost($request->request->get('ldapHost'));
+        $testConnector->setLdapPort($request->request->get('ldapPort'));
+//       dd($testConnector);
+        if ($ldap = $ldapService->bind($testConnector)) {
+           
+            return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.connectionOk')]);
+        }        
+        else{
+            return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+        }
+        
+        
+    }    
 
 }

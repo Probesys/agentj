@@ -17,29 +17,39 @@ class LdapService {
     private EntityManagerInterface $em;
     private WblistRepository $wblistRepository;
     private GroupsWblistRepository $groupsWblistRepository;
+     private CryptEncryptService $cryptEncryptService;
 
-    public function __construct(EntityManagerInterface $em, WblistRepository $wblistRepository, GroupsWblistRepository $groupsWblistRepository) {
+    public function __construct(
+            EntityManagerInterface $em, 
+            WblistRepository $wblistRepository, 
+            GroupsWblistRepository $groupsWblistRepository,
+            CryptEncryptService $cryptEncryptService) {
         $this->em = $em;
         $this->wblistRepository = $wblistRepository;
+        $this->cryptEncryptService = $cryptEncryptService;
         $this->groupsWblistRepository = $groupsWblistRepository;
     }
 
-    public function connect(LdapConnector $connector): bool {
+    public function bind(LdapConnector $connector): bool|Ldap {
 
+        $ldap = Ldap::create('ext_ldap', [
+                    'host' => $connector->getLdapHost(),
+                    'port' => $connector->getLdapPort(),
+        ]);        
         $baseDN = "";
-        if (!$baseDN = $connector->getLdapRootDn()) {
+        if (!$bindDN = $connector->getLdapBindDn()) {
             throw new Exception('Please configure ldap search DN');
         }
 
-        if (!$searchPassword = $this->connector->getLdapPassword()) {
+        if (!$searchPassword = $connector->getLdapPassword()) {
             throw new Exception('Please configure ldap password');
         }
 
         try {
-
             $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
-            $this->ldap->bind($baseDN, $clearPassword);
-            return true;
+            
+            $ldap->bind($bindDN, $clearPassword);
+            return $ldap;
         } catch (InvalidCredentialsException $exception) {
             return false;
         }
