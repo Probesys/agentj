@@ -30,3 +30,21 @@ milter_default_action = accept
 milter_protocol = 6
 smtpd_milters = inet:$IPV4_NETWORK.240:8891
 non_smtpd_milters = inet:$IPV4_NETWORK.240:8891
+
+# Rate limit smtp transport a bit.
+# This may need to be adjusted on instances with more than a few hundred users
+smtp_destination_concurrency_limit = 5
+smtp_destination_recipient_limit = 20
+smtp_destination_rate_delay = 5s
+smtp_destination_concurrency_failed_cohort_limit = 10
+
+# Specific transport for slow destination domains.
+# A slow destination domain considers postfix default delivery rate too fast.
+# It will answer "SMTP 4XX" after a few emails if you don't setup a quite high
+# rate delay.
+# It needs a specific transport not to clog your outgoing queue because of a
+# destination_rate_delay >= 30s.
+# **IMPORTANT:** this slow_dest_domains_tranport hash is "french-centric".
+# It needs to be adapted to fit your local internet landscape if your
+# organization is outside of France.
+transport_maps = hash:/etc/postfix/slow_dest_domains_transport
