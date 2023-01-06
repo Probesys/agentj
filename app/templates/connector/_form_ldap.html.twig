@@ -79,6 +79,13 @@
       <small class="d-none form-text text-muted"></small>
     </div>
   </div>        
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_ldapUserFilter">{{ 'Entities.LdapConnector.fields.ldapGroupFilter'|trans }}</label>
+      {{ form_widget(form.ldapGroupFilter, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapGroupFilter',  ' data-action' : 'blur->form-ldap-connector#checkUserFilter' }})  }}
+      <small class="d-none form-text text-muted"></small>
+    </div>
+  </div>        
 </div>
 {{ form_widget(form) }}
 <div class="d-flex justify-content-center">
