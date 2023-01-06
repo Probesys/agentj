@@ -230,6 +230,8 @@ Message:
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
     connectionOk : "Connexion établie"
     connectionKo : "Connexion échouée"
+    invalidLdapQuery: "Requête Ldap incorrecte"
+    ldapNbUserfound: "$NB_USER utilisateurs trouvés"
   http:
     404:
       title: Page non trouvée

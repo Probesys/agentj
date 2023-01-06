@@ -38,11 +38,11 @@ class LdapService {
         ]);        
         $baseDN = "";
         if (!$bindDN = $connector->getLdapBindDn()) {
-            throw new Exception('Please configure ldap search DN');
+            throw new ConnectionException('Please configure ldap search DN');
         }
 
         if (!$searchPassword = $connector->getLdapPassword()) {
-            throw new Exception('Please configure ldap password');
+            throw new ConnectionException('Please configure ldap password');
         }
 
         try {
@@ -50,8 +50,8 @@ class LdapService {
             
             $ldap->bind($bindDN, $clearPassword);
             return $ldap;
-        } catch (InvalidCredentialsException $exception) {
-            return false;
+        } catch (ConnectionException $exception) {
+            throw new ConnectionException('Please configure ldap search DN');
         }
     }
 

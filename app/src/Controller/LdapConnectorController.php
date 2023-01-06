@@ -22,6 +22,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Ldap\Exception\ConnectionException;
+use Symfony\Component\Ldap\Exception\LdapException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -116,32 +118,72 @@ class LdapConnectorController extends AbstractController {
 
         return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
-    
+
     #[Route('/checkbind', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
-    public function checkbind(Request $request, LdapService $ldapService): Response {
-        
-        $return = [
-            'status' => ''
-        ];
+    public function checkbindAction(Request $request, LdapService $ldapService): Response {
+
         $testConnector = new LdapConnector();
-        $testConnector->setLdapBindDn($request->request->get('ldapBindDn'));
-        
-        $clearPass = $request->request->get('ldapPassword');
-        $this->cryptEncryptService->encrypt($clearPass);
-        $testConnector->setLdapPassword($this->cryptEncryptService->encrypt($clearPass));
-        
-        $testConnector->setLdapHost($request->request->get('ldapHost'));
-        $testConnector->setLdapPort($request->request->get('ldapPort'));
-//       dd($testConnector);
-        if ($ldap = $ldapService->bind($testConnector)) {
-           
-            return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.connectionOk')]);
-        }        
-        else{
-            return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+        $form = $this->createForm(LdapConnectorType::class, $testConnector);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $testConnector = $form->getData();
+            $pass = $request->request->get('encryptedPass');
+            if ($testConnector->getLdapPassword()) {
+                $pass = $this->cryptEncryptService->encrypt($testConnector->getLdapPassword());
+            }
+
+            $testConnector->setLdapPassword($pass);
+
+            try {
+                $ldapService->bind($testConnector);
+                return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.connectionOk')]);
+            } catch (ConnectionException $exc) {
+                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+            }
         }
-        
-        
-    }    
+    }
+
+    #[Route('/heck-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
+    public function checkUserFilter(Domain $domain, Request $request, LdapService $ldapService): Response {
+
+        $testConnector = new LdapConnector();
+        $form = $this->createForm(LdapConnectorType::class, $testConnector);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $testConnector = $form->getData();
+            $testConnector->setDomain($domain);
+            $pass = $request->request->get('encryptedPass');
+            if ($testConnector->getLdapPassword()) {
+                $pass = $this->cryptEncryptService->encrypt($testConnector->getLdapPassword());
+            }
+
+            $testConnector->setLdapPassword($pass);
+            $return = [
+                'status' => ''
+            ];
+
+            try {
+                $ldap = $ldapService->bind($testConnector);
+                $ldapQuery = $testConnector->getLdapUserFilter();
+                $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
+                try {
+                    $results = $query->execute();
+                    $users = array_filter($results->toArray(), function ($user) use ($testConnector) {
+                        $email = $user->getAttribute($testConnector->getLdapEmailField()) ? $user->getAttribute($testConnector->getLdapEmailField())[0] : null;
+                        $domainName = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? explode('@', $email)[1] : null;
+
+                        return $domainName == $testConnector->getDomain()->getDomain();
+                    });
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($users)])]);
+                } catch (LdapException $exc) {
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+                }
+            } catch (ConnectionException $exc) {
+                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+            }
+        }
+    }
 
 }

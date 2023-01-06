@@ -9,44 +9,87 @@ import { Controller } from 'stimulus';
  *
  * Delete this file or adapt it for your use!
  */
+var controllerForm = null;
 export default class extends Controller {
   static get targets() {
-    return ['ldapHost', 'ldapPort', 'ldapBindDn', 'ldapPassword', 'urlCheckBind', 'ldapBindResult'];
+    return ['ldapPort', 'urlCheckBind', 'urlCheckUserFilter', 'ldapBindResult'];
   }
-  connect() {
 
-//        this.element.textContent = 'Hello Stimulus! Edit me in assets/controllers/hello_controller.js';
+  connect() {
+    controllerForm = this.element;
+
+    this.checkConnection();
   }
 
   checkConnection() {
 
-    const formData = new FormData();
-    formData.append('ldapHost', this.ldapHostTarget.value);
-    formData.append('ldapPort', this.ldapPortTarget.value);
-    formData.append('ldapBindDn', this.ldapBindDnTarget.value);
-    formData.append('ldapPassword', this.ldapPasswordTarget.value);
     const targetResult = this.ldapBindResultTarget;
-    fetch(this.urlCheckBindTarget.value, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-      },
-      body: formData
-    })
-            .then((response) => {
-              return response.json();
-            })
-            .then((data) => {
-              if (data.status == 'success') {
-                targetResult.classList.add('text-success');
-                targetResult.classList.remove('text-danger');
-                
-              } else {
-                targetResult.classList.add('text-danger');
-                targetResult.classList.remove('text-success');
-              }
-              targetResult.textContent = data.message;
-              ;
-            });
+
+    var result = false;
+    if (this.ldapPortTarget.validity.valid) {
+      const formData = new FormData(controllerForm);
+
+
+      fetch(this.urlCheckBindTarget.value, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: formData
+      })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                this.showConnectionResult(data.status, targetResult);
+
+
+                ;
+              });
+    } else {
+      this.showConnectionResult('error', targetResult);
+
+    }
+
+  }
+
+  showConnectionResult(status, target) {
+    if (status == 'success') {
+      target.classList.add('text-success');
+      target.classList.remove('text-danger');
+      target.innerHTML = '<i class="fas fa-2x fa-wifi"></i>';
+
+    } else {
+      target.classList.add('text-danger');
+      target.classList.remove('text-success');
+      target.innerHTML = '<i class="fas fa-2x fa-wifi"></i>';
+    }
+
+  }
+
+  checkUserFilter(e) {
+    const targetResult = e.target;
+
+    var result = false;
+    if (this.ldapPortTarget.validity.valid) {
+      const formData = new FormData(controllerForm);
+
+
+      fetch(this.urlCheckUserFilterTarget.value, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: formData
+      })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                targetResult.nextSibling.nextSibling.innerHTML = data.message;
+                targetResult.nextSibling.nextSibling.classList.remove("d-none");
+              });
+    }
+
   }
 }

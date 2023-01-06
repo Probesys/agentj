@@ -17,10 +17,12 @@ class LdapConnectorType extends ConnectorType
             ->add('ldapHost', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapHost',
+                'help' => 'In cents',
             ])
             ->add('ldapPort', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapPort',
+                'attr' => ['pattern' => '[0-9]+']
             ])
             ->add('LdapBaseDN', null, [
                 'required' => true,

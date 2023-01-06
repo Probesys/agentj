@@ -1,6 +1,7 @@
 {{ form_start(form, { "attr" : {'data-controller' : 'form-ldap-connector'}}) }}
 <input type="hidden" value="{{ path('app_connector_ldap_checkbind') }}" data-form-ldap-connector-target="urlCheckBind">
-<input type="hidden" name="" data-form-ldap-connector-target="url-check-bind">
+<input type="hidden" value="{{ path('app_connector_ldap_check_user_filter', { 'domain' : connector.domain.id }) }}" data-form-ldap-connector-target="urlCheckUserFilter">
+
 <div class="row">
   <div class="col-md-12">
     <div class="form-group">
@@ -11,30 +12,30 @@
   <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapHost">{{ 'Entities.LdapConnector.fields.ldapHost'|trans }}</label>
-      {{ form_widget(form.ldapHost, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapHost',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
+      {{ form_row(form.ldapHost, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapHost',  ' data-action' : 'blur->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>    
   <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapPort">{{ 'Entities.LdapConnector.fields.ldapPort'|trans }}</label>
-      {{ form_widget(form.ldapPort, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPort',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
+      {{ form_widget(form.ldapPort, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPort',  ' data-action' : 'blur->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>        
   <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_ldapBindDn">{{ 'Entities.LdapConnector.fields.ldapBindDn'|trans }}</label>
-      {{ form_widget(form.ldapBindDn, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapBindDn',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
+      {{ form_widget(form.ldapBindDn, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapBindDn',  ' data-action' : 'blur->form-ldap-connector#checkConnection' }}) }}
     </div>
   </div>    
   <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_LdapPassword">{{ 'Entities.LdapConnector.fields.LdapPassword'|trans }}</label>
-      {{ form_widget(form.LdapPassword, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPassword',  ' data-action' : 'change->form-ldap-connector#checkConnection' }}) }}
+      
+      {{ form_widget(form.LdapPassword, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPassword',  ' data-action' : 'blur->form-ldap-connector#checkConnection' }}) }}
+      <input type="hidden" name="encryptedPass" value="{{ connector.ldapPassword }}" data-form-ldap-connector-target="encryptedPass"/>
     </div>
   </div>      
-    <div class="col-md-2" data-form-ldap-connector-target="ldapBindResult">
-      not connected
-    </div>
+    <div class="col-md-2 mt-4 pt-2 text-success text-center" data-form-ldap-connector-target="ldapBindResult"></div>
   <div class="col-md-12">
     <div class="form-group">
       <label for="ldap_connector_LdapBaseDN">{{ 'Entities.LdapConnector.fields.LdapBaseDN'|trans }}</label>
@@ -71,6 +72,13 @@
       {{ form_widget(form.ldapGroupMemberField) }}
     </div>
   </div>    
+  <div class="col-md-12">
+    <div class="form-group">
+      <label for="ldap_connector_ldapUserFilter">{{ 'Entities.LdapConnector.fields.ldapUserFilter'|trans }}</label>
+      {{ form_widget(form.ldapUserFilter, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapUserFilter',  ' data-action' : 'blur->form-ldap-connector#checkUserFilter' }})  }}
+      <small class="d-none form-text text-muted"></small>
+    </div>
+  </div>        
 </div>
 {{ form_widget(form) }}
 <div class="d-flex justify-content-center">
