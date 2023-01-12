@@ -30,6 +30,10 @@ class UserType extends AbstractType
                     'label' => $labelEmail,
                     'required' => true,
                 ])
+                ->add('imapLogin', null, [
+                    'label' => 'Entities.User.fields.imapLogin',
+                    'required' => false,
+                ])                  
                 ->add('emailRecovery', EmailType::class, [
                     'label' => 'Entities.User.fields.emailRecovery',
                     'required' => false,
