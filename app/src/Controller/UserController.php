@@ -442,10 +442,10 @@ class UserController extends AbstractController {
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
-            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
+            } elseif ($oldUserData['imapLogin'] != $request->request->get('user')['imapLogin'] && $imapLoginExist) {
                 $return = [
                 'status' => 'danger',
-                'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
                 ];                
             } elseif ($form->isValid()) {
 
