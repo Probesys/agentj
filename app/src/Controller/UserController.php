@@ -273,7 +273,10 @@ class UserController extends AbstractController {
             $data = $form->getData();
 
             $emailExist = $userRepository->findOneBy(['email' => $data->getEmail()]);
+            
             $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
+            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
@@ -284,6 +287,11 @@ class UserController extends AbstractController {
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
+            } elseif ($imapLoginExist) {
+                $return = [
+                'status' => 'danger',
+                'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                ];                
             } elseif ($form->isValid()) {
                 $user->setRoles('["ROLE_USER"]');
                 $user->setUsername($user->getEmail());
@@ -389,9 +397,10 @@ class UserController extends AbstractController {
      * @Route("/email/{id}/edit", name="user_email_edit", methods="GET|POST")
      *
      */
-    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService): Response {
+    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService, UserRepository $userRepository): Response {
 
         $oldGroups = $user->getGroups()->toArray();
+
 
         $allowedomainIds = array_map(function ($entity) {
 
@@ -419,8 +428,11 @@ class UserController extends AbstractController {
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
 
-            $newDomainName = explode('@', $request->request->get('user')['email'])[1];
-            if (!$this->checkDomainAccess($newDomainName)) {
+//            $newDomainName = explode('@', $request->request->get('user')['email'])[1];
+            $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
+            
+            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
@@ -430,6 +442,11 @@ class UserController extends AbstractController {
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
+            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
+                $return = [
+                'status' => 'danger',
+                'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                ];                
             } elseif ($form->isValid()) {
 
                 $policy = $this->computeUserPolicy($user);

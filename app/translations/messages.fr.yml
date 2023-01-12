@@ -104,6 +104,7 @@ Generics:
     NoImport: Aucun compte email n'a été importé.
     domainNotExist: Le domaine n'existe pas
     emailAllreadyExist: Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser
+    imapLoginAllreadyExist: Ce login imap est déjà utilisé. Vous ne pouvez pas l'utiliser
     aliasAllreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
     userNameAllreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
     passwordNotMatching: La confirmation du mot de passe n'est pas valide

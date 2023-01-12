@@ -102,6 +102,7 @@ Generics:
     NoImport: 'No email account was imported.'
     domainNotExist: 'The domain does not exist'
     emailAllreadyExist: 'This email is already used. You can''t use it'
+    imapLoginAllreadyExist: 'This imap login allready exists. You can''t use it'
     aliasAllreadyExist: 'This alias is already used. You can''t use it'
     userNameAllreadyExist: 'This login already exists. You can''t use it'
     passwordNotMatching: 'Password confirmation is not valid'
