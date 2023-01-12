@@ -81,13 +81,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             );
         }
 
-        // check if a domain exists and if it's active
-        $domain = $this->getUserDomainAuth($username);
-        if (!$domain) {
-            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+/*@var $user User */
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => strtolower($username)]);
+        if (!$user){
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['imapLogin' => strtolower($username)]);
         }
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => strtolower($username)]);
         if (!$user) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
@@ -100,25 +99,15 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 //        dd($ldapBind);
         
         $loginImap = $this->getLoginImap($user, $password);
+        
         if (!$loginImap) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
-        return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
+//        dd($username);
+        return new SelfValidatingPassport(new UserBadge($user->getEmailFromRessource()), [new RememberMeBadge()]);
     }
 
-    private function getUserDomainAuth(String $username) {
-        $mail = explode('@', $username);
-        if (!isset($mail[1])) {
-            return false;
-        }
-        /* @var $domain Domain */
-        $domain = $this->entityManager->getRepository(Domain::class)->findOneBy(['domain' => strtolower($mail[1]), 'active' => 1]);
-        if (!$domain) {
-            return false;
-        }
 
-        return $domain;
-    }
 
     private function getLoginImap(User $user, String $password) {
         $domain = $user->getDomain();
@@ -129,8 +118,9 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
         $conStr = '{' . $conStr . '}';
         $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
+        
         $mbox = @imap_open($conStr, $login, $password,0 , 1);
-        if (!imap_errors() && $mbox) {
+        if ($mbox) {
             return true;
         }
         return false;
