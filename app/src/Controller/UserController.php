@@ -284,7 +284,10 @@ class UserController extends AbstractController
             $data = $form->getData();
 
             $emailExist = $userRepository->findOneBy(['email' => $data->getEmail()]);
+            
             $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
+            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            
             if (!$newDomain) {
                 $return = [
                 'status' => 'danger',
@@ -295,6 +298,11 @@ class UserController extends AbstractController
                 'status' => 'danger',
                 'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
+            } elseif ($imapLoginExist) {
+                $return = [
+                'status' => 'danger',
+                'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                ];                
             } elseif ($form->isValid()) {
                 $user->setRoles("['ROLE_USER']");
                 $user->setUsername($user->getEmail());
@@ -410,7 +418,7 @@ class UserController extends AbstractController
    * @Route("/email/{id}/edit", name="user_email_edit", methods="GET|POST")
    *
    */
-    public function editUserEmail(Request $request, User $user, EntityManagerInterface $em): Response
+    public function editUserEmail(Request $request, User $user, UserRepository $userRepository): Response
     {
 
         $allowedomainIds = array_map(function ($entity) {
@@ -438,10 +446,13 @@ class UserController extends AbstractController
             $data = $form->getData();
           //Check, if user email was changed, if the new mail does not allready exist
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-            $oldUserData = $em->getUnitOfWork()->getOriginalEntityData($user);
+            $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
 
-            $newDomainName = explode('@', $request->request->get('user')['email'])[1];
-            if (!$this->checkDomainAccess($newDomainName)) {
+//            $newDomainName = explode('@', $request->request->get('user')['email'])[1];
+            $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
+            
+            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            if (!$newDomain) {
                 $return = [
                 'status' => 'danger',
                 'message' => $this->translator->trans('Generics.flash.domainNotExist'),
@@ -451,6 +462,11 @@ class UserController extends AbstractController
                 'status' => 'danger',
                 'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
+            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
+                $return = [
+                'status' => 'danger',
+                'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                ];                
             } elseif ($form->isValid()) {
                 $this->em->getRepository(User::class)->updateAliasGroupsFromUser($user);
                 $policy = $this->computeUserPolicy($user);
@@ -463,7 +479,7 @@ class UserController extends AbstractController
               //Alias user and alias group management
 
                 $this->wblistRepository->deleteUserGroup($user->getId());
-                $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+                $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
                 foreach ($alias as $userAlias) {
                     $this->wblistRepository->deleteUserGroup($userAlias->getId());
                     $userAlias->setGroups($user->getGroups());
