@@ -63,6 +63,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     php8-ctype \
     php8-curl \
     php8-dom \
+    php8-fileinfo \
     php8-fpm \
     php8-gd \
     php8-iconv \
