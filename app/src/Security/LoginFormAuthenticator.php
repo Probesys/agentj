@@ -25,6 +25,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Webklex\PHPIMAP\ClientManager;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
+
 
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
@@ -99,20 +102,27 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
 
     private function getLoginImap(User $user, String $password) {
-        $domain = $user->getDomain();
-        $conStr = $domain->getSrvImap() . ":" . $domain->getImapPort() . $domain->getImapFlag();
-        if ($domain->getImapNoValidateCert()) {
-            $conStr .= '/novalidate-cert';
+        $cm = new ClientManager($options = []);
+        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
+        $client = $cm->make([
+            'host'          => $user->getDomain()->getSrvImap(),
+            'port'          =>  $user->getDomain()->getImapPort(),
+            'encryption'    => 'ssl',
+            'validate_cert' => !$user->getDomain()->getImapNoValidateCert(),
+            'username'      => $login,
+            'password'      => $password,
+            'protocol'      => 'imap'
+        ]);
+
+        try {
+            $client->connect();
+            return $client->isConnected();
+        } catch (ConnectionFailedException $exc) {
+            return false;
         }
 
-        $conStr = '{' . $conStr . '}';
-        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
         
-        $mbox = @imap_open($conStr, $login, $password,0 , 1);
-        if ($mbox) {
-            return true;
-        }
-        return false;
+        
     }
 
     private function getLocalUser(String $userName) {
