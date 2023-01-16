@@ -22,6 +22,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Translation\TranslatableMessage;
 
+
 class OAuthAuthenticator extends OAuth2Authenticator
 {
     use TargetPathTrait;
