@@ -65,9 +65,9 @@ class DomainType extends AbstractType {
                     'label' => 'Entities.Domain.fields.imap_flag',
                     'required' => false,
                     'choices' => [
-                        'Generics.labels.none' => '',
-                        'STARTTLS' => '/imap/tls',
-                        'SSL' => '/imap/ssl'
+                        'Generics.labels.none' => '',                        
+                        'SSL' => 'ssl',
+                        'TLS' => 'tls',
                     ]
                 ])
                 ->add('imapNoValidateCert', null, [
