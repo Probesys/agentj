@@ -42,9 +42,12 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($type) {
             switch ($type) {
-                case MessageStatus::SPAMMED:
+                case MessageStatus::SPAMMED: //spam and 
                     $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" ';
                     break;
+                case MessageStatus::VIRUS: //spam and 
+                    $sqlWhere .= ' and mr.content = "V" ';
+                    break;                
                 case MessageStatus::BANNED:
                     $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  ';
                     break;
