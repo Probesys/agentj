@@ -435,6 +435,7 @@ Entities:
     banned: Banned
     delete: Deleted
     restored: Restored
+    virus: with virus
     spammedDetect: 'spammed detected automatically'
     informationMessage: 'The messages will be automatically deleted after 30 days.'
     spamLevel: Note

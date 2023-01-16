@@ -19,15 +19,19 @@
 
 
     {% include 'common/blocActionsAndSearch.html.twig'  %}
+
     {{ form_start(filter_form, {'attr': {'id': 'massive-actions-form'}}) }}
 
     <section id="no-more-tables">
         <table id ="table_msgs" data-type-list-msgs="{{ type }}"  class="table table-hover">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id='checkAll' class="cb" data-target-checkall-class="selected-msg">
-                        <label class="for-cb check-all" for="checkAll"></label>
-                    </th>
+                    {# it not virus #}
+                    {% if type != '7' %}  
+                        <th><input type="checkbox" id='checkAll' class="cb" data-target-checkall-class="selected-msg">
+                            <label class="for-cb check-all" for="checkAll"></label>
+                        </th>
+                    {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
                         <th></th>
                         {% endif %}
@@ -38,11 +42,15 @@
                     <th>{{ sortLinkMacro.sortLink('Message.Object'|trans,'subject') }}</th>
                     <th>{{ sortLinkMacro.sortLink('Message.Sender'|trans,'from_addr') }}</th>          
                     <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'time_num') }}</th>
-                        
+                        {# it not virus #}
+                        {% if type != '7' %}
                         <th>{{ 'Entities.Message.spamLevel'|trans }}</th>
-                        
+                        {% endif %}
                     <th></th>
-                    <th>{{ 'Message.Actions.list'|trans() }}</th>
+                        {# it not virus #}
+                        {% if type != '7' %}                       
+                        <th>{{ 'Message.Actions.list'|trans() }}</th>
+                        {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -63,9 +71,12 @@
                     {% endif %}
                     {% set keyPairMessage =  [msg.partition_tag, msg.mail_id,msg.rid] %}
                     <tr class="{{bold}} ">
-                        <td><input type="checkbox" name="id[]" value="{{ keyPairMessage|json_encode() }}" id="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
-                            <label class="for-cb" ></label>
-                        </td>
+                        {# it not virus #}
+                        {% if type != '7' %}                     
+                            <td><input type="checkbox" name="id[]" value="{{ keyPairMessage|json_encode() }}" id="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
+                                <label class="for-cb" ></label>
+                            </td>
+                        {% endif %}
                         {% if is_granted('ROLE_ADMIN') %}
                             <td><span title="{{ msg.mail_id }}">{{ msg.mail_id }}</span></td>
                             {% endif %}            
@@ -93,161 +104,167 @@
                             {% endif %}
                         </td>            
                         <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | format_datetime('short', 'short') }}">{{msg.time_num | format_datetime('short', 'short')}}</span> </td>
-                        
+                        {# it not virus #}
+                        {% if type != '7' %}
                             <td>{{ msg.bspam_level }}</td>
-                            <td>
-                                <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
-                            </td>
-                        
+                        {% endif %}
                         <td>
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu" style="z-index:10300"> 
-
-                                    {% if type == '1' %}{# banned #}
-                                        <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-primary' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
-                                           >                            
-                                            <span class="fas fa-download"></span>
-                                            {{ 'Message.Actions.Restore'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-success'
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.AutorizedSender'|trans }}'
-                                           >
-                                            <span class="fas fa-user-check "></span> 
-                                            {{ 'Message.Actions.Autorized'|trans() }}
-                                        </a>
-                                    {% endif %}
-                                    {% if type == '2' %}{# authorized #}
-                                        <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal'
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                     
-                                           title="{{ 'Message.Actions.BannedSender'|trans() }}">
-                                            <span class="fas fa-user-slash "></span>
-                                            {{ 'Message.Actions.Banned'|trans() }}
-                                        </a>
-                                    {% endif %}
-                                    {% if type is empty or type == '4'  %}
-                                        <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item   text-primary confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
-                                           >                            
-                                            <span class="fas fa-download"></span>
-                                            {{ 'Message.Actions.Restore'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-success' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'                       
-                                           title="{{ 'Message.Actions.AutorizedSender'|trans() }}">
-                                            <span class="fas fa-user-check "></span>
-                                            {{ 'Message.Actions.Autorized'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                      
-                                           title="{{ 'Message.Actions.BannedSender'|trans() }}">
-                                            <span class="fas fa-user-slash "></span>
-                                            {{ 'Message.Actions.Banned'|trans() }}
-                                        </a>
-                                    {% endif %}
-                                    {% if type == '6'  %} {# spam compared to the level #}
-                                        <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-primary' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
-                                           >                            
-                                            <span class="fas fa-download"></span>
-                                            {{ 'Message.Actions.Restore'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-success'
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.AutorizedSender'|trans }}'
-                                           >
-                                            <span class="fas fa-user-check "></span> 
-                                            {{ 'Message.Actions.Autorized'|trans() }}
-                                        </a>
-                                    {% endif %}
-                                    {% if type == '3' %}
-                                        <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-primary' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
-                                           title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
-                                           >                            
-                                            <span class="fas fa-download"></span>
-                                            {{ 'Message.Actions.Restore'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal text-success' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'                       
-                                           title="{{ 'Message.Actions.AutorizedSender'|trans() }}">
-                                            <span class="fas fa-user-check "></span>
-                                            {{ 'Message.Actions.Autorized'|trans() }}
-                                        </a>
-                                        <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                      
-                                           title="{{ 'Message.Actions.BannedSender'|trans() }}">
-                                            <span class="fas fa-user-slash "></span>
-                                            {{ 'Message.Actions.Banned'|trans() }}
-                                        </a>                                        
-                                    {% endif %}                                    
-                                    {% if type != '3' %}
-                                        <a href="{{path('message_delete',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item  confirmModal text-danger' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}'                             
-                                           data-target='delete' 
-                                           title="{{ 'Message.Actions.DeleteMessage'|trans() }}"
-                                           >
-                                            <span class="fas fa-trash-alt "></span>
-                                            {{ 'Message.Actions.Delete'|trans() }}
-                                        </a>
-                                    {% endif %}
-
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                        <div class="dropdown-divider"></div>
-                                        {#                  <li class="list-inline-item mt-1 admin-actions">#}
-                                        <a href="{{path('message_authorized_domain',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                                           class='dropdown-item  confirmModal  text-success' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgContent'|trans }}'                       
-                                           title="{{ 'Message.Actions.AutorizedDomain'|trans() }}" >
-                                            <span class="fas fa-check-double "></span>
-                                            {{ 'Message.Actions.Autorized'|trans() }}
-                                        </a>
-                                        {#                  </li>#}
-
-                                        <a href="{{path('message_banned_domain',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" class='dropdown-item confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmBannedDomainMsgContent'|trans }}'                       
-                                           title="{{ 'Message.Actions.BannedDomain'|trans() }}">
-                                            <span class="fas fa-ban "></span>
-                                            {{ 'Message.Actions.Banned'|trans() }}
-                                        </a>
-
-                                    {% endif %}   
-                                </div>
-                            </div>                  
+                            <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
                         </td>
+                        {# it not virus #}
+                        {% if type != '7' %}          
+                            <td>
+
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                        Action
+                                    </button>
+                                    <div class="dropdown-menu" style="z-index:10300"> 
+
+                                        {% if type == '1' %}{# banned #}
+                                            <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-primary' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                               >                            
+                                                <span class="fas fa-download"></span>
+                                                {{ 'Message.Actions.Restore'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-success'
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.AutorizedSender'|trans }}'
+                                               >
+                                                <span class="fas fa-user-check "></span> 
+                                                {{ 'Message.Actions.Autorized'|trans() }}
+                                            </a>
+                                        {% endif %}
+                                        {% if type == '2' %}{# authorized #}
+                                            <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal'
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                     
+                                               title="{{ 'Message.Actions.BannedSender'|trans() }}">
+                                                <span class="fas fa-user-slash "></span>
+                                                {{ 'Message.Actions.Banned'|trans() }}
+                                            </a>
+                                        {% endif %}
+                                        {% if type is empty or type == '4'  %}
+                                            <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item   text-primary confirmModal' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                               >                            
+                                                <span class="fas fa-download"></span>
+                                                {{ 'Message.Actions.Restore'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-success' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'                       
+                                               title="{{ 'Message.Actions.AutorizedSender'|trans() }}">
+                                                <span class="fas fa-user-check "></span>
+                                                {{ 'Message.Actions.Autorized'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                      
+                                               title="{{ 'Message.Actions.BannedSender'|trans() }}">
+                                                <span class="fas fa-user-slash "></span>
+                                                {{ 'Message.Actions.Banned'|trans() }}
+                                            </a>
+                                        {% endif %}
+                                        {% if type == '6'  %} {# spam compared to the level #}
+                                            <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-primary' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                               >                            
+                                                <span class="fas fa-download"></span>
+                                                {{ 'Message.Actions.Restore'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-success'
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.AutorizedSender'|trans }}'
+                                               >
+                                                <span class="fas fa-user-check "></span> 
+                                                {{ 'Message.Actions.Autorized'|trans() }}
+                                            </a>
+                                        {% endif %}
+                                        {% if type == '3' %}
+                                            <a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-primary' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
+                                               title ='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                               >                            
+                                                <span class="fas fa-download"></span>
+                                                {{ 'Message.Actions.Restore'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal text-success' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'                       
+                                               title="{{ 'Message.Actions.AutorizedSender'|trans() }}">
+                                                <span class="fas fa-user-check "></span>
+                                                {{ 'Message.Actions.Autorized'|trans() }}
+                                            </a>
+                                            <a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item confirmModal' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'                      
+                                               title="{{ 'Message.Actions.BannedSender'|trans() }}">
+                                                <span class="fas fa-user-slash "></span>
+                                                {{ 'Message.Actions.Banned'|trans() }}
+                                            </a>                                        
+                                        {% endif %}                                    
+                                        {% if type != '3' %}
+                                            <a href="{{path('message_delete',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item  confirmModal text-danger' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}'                             
+                                               data-target='delete' 
+                                               title="{{ 'Message.Actions.DeleteMessage'|trans() }}"
+                                               >
+                                                <span class="fas fa-trash-alt "></span>
+                                                {{ 'Message.Actions.Delete'|trans() }}
+                                            </a>
+                                        {% endif %}
+
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <div class="dropdown-divider"></div>
+                                            {#                  <li class="list-inline-item mt-1 admin-actions">#}
+                                            <a href="{{path('message_authorized_domain',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+                                               class='dropdown-item  confirmModal  text-success' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgContent'|trans }}'                       
+                                               title="{{ 'Message.Actions.AutorizedDomain'|trans() }}" >
+                                                <span class="fas fa-check-double "></span>
+                                                {{ 'Message.Actions.Autorized'|trans() }}
+                                            </a>
+                                            {#                  </li>#}
+
+                                            <a href="{{path('message_banned_domain',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" class='dropdown-item confirmModal' 
+                                               data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}' 
+                                               data-dialog-content='{{ 'Message.Dialogs.confirmBannedDomainMsgContent'|trans }}'                       
+                                               title="{{ 'Message.Actions.BannedDomain'|trans() }}">
+                                                <span class="fas fa-ban "></span>
+                                                {{ 'Message.Actions.Banned'|trans() }}
+                                            </a>
+
+                                        {% endif %}   
+                                    </div>
+                                </div>   
+
+                            </td>
+                        {% endif %}    
                     </tr>
 
                 {% endfor %}

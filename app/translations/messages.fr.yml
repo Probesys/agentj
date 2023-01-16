@@ -447,6 +447,7 @@ Entities:
     banned: Bannis
     delete: Supprimés
     restored: Récupérés
+    virus: avec virus
     spammedDetect: spammés détectés automatiquement
     informationMessage: Les messages seront automatiquement effacés au bout de 30
       jours.
