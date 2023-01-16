@@ -25,6 +25,13 @@
                 </a>
               </li> 
 
+              <li class="{%  if route == 'message' and route_params['type'] == 'virus'%}active{% endif %}" >
+                <a href="{{path('message',{'type':'virus'})}}">
+                  <span class="badge  pull-right badge-warning" id="nb-spammed-messages">{{ msgs['virus'] }}</span>
+                  {{'Navigation.virus'|trans}} 
+                </a>
+              </li> 
+              
               <li class="{%  if route == 'message' and route_params['type'] == 'authorized'%}active{% endif %}" >
                 <a href="{{path('message',{'type':'authorized'})}}">
                   <span class="badge badge-pill badge-success">{{ msgs['authorized'] }}</span>
