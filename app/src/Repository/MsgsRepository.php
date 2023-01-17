@@ -62,11 +62,11 @@ class MsgsRepository extends ServiceEntityRepository
                     $sqlWhere .= ' and mr.status_id=5  ';
                     break;
                 default:
-                    $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" AND mr.content != "Y" and  mr.status_id=' . $type .  ' ';
+                    $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" and mr.content != "V" and  mr.status_id=' . $type .  ' ';
                     break;
             }
         } else {
-            $sqlWhere .= ' and mr.content != "C"  AND mr.wl != "Y" AND mr.bl != "Y"  and ( mr.status_id IS NULL  OR mr.status_id = 4 ) and bspam_level <= d.level ';
+            $sqlWhere .= ' and mr.content != "C"  and mr.content != "V" AND mr.wl != "Y" AND mr.bl != "Y"  and ( mr.status_id IS NULL  OR mr.status_id = 4 ) and bspam_level <= d.level ';
         }
 
 
