@@ -19,6 +19,7 @@ class MessageStatus
     const ERROR = 4;
     const RESTORED = 5;
     const SPAMMED = 6;
+    const VIRUS = 7;
 
   /**
    * @ORM\Id()

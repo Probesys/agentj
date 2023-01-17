@@ -128,7 +128,7 @@ Navigation:
   user_profil: Mon compte
   settings: Configuration
   spammed: Spam détectés
-  virus: Virus
+  virus: Virus détectés
   banned: Bannis
   clean: Propres
   error: Erreurs
@@ -451,6 +451,7 @@ Entities:
     banned: Bannis
     delete: Supprimés
     restored: Récupérés
+    virus: avec virus
     spammedDetect: spammés détectés automatiquement
     informationMessage: Les messages seront automatiquement effacés au bout de 30
       jours.

@@ -118,7 +118,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         $client = $cm->make([
             'host'          => $user->getDomain()->getSrvImap(),
             'port'          =>  $user->getDomain()->getImapPort(),
-            'encryption'    => 'ssl',
+            'encryption'    => $user->getDomain()->getImapFlag(),
             'validate_cert' => !$user->getDomain()->getImapNoValidateCert(),
             'username'      => $login,
             'password'      => $password,

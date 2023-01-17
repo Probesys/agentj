@@ -57,6 +57,9 @@ class MessageController extends AbstractController {
                     $type = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
+                    $subTitle = 'Entities.Message.virus';
+                    $type = MessageStatus::VIRUS;
+                    $messageActions = [];                    
                     break;
                 case 'banned':
                     $subTitle = 'Entities.Message.' . $type;
@@ -107,7 +110,7 @@ class MessageController extends AbstractController {
 
         $filterForm = $this->createForm(ActionsFilterType::class, null, ['avalaibleActions' => $messageActions, 'action' => $this->generateUrl('message_batch')]);
 
-        if ($type == MessageStatus::DELETED) {
+        if ($type == MessageStatus::DELETED || $type == MessageStatus::VIRUS) {
             $filterForm->remove('actions');
         }
 
