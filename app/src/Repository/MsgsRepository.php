@@ -43,23 +43,23 @@ class MsgsRepository extends ServiceEntityRepository
         if ($type) {
             switch ($type) {
                 case MessageStatus::SPAMMED: //spam and 
-                    $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" ';
+                    $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" and mr.content != "V"  ';
                     break;
                 case MessageStatus::VIRUS: //spam and 
                     $sqlWhere .= ' and mr.content = "V" ';
                     break;                
                 case MessageStatus::BANNED:
-                    $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  ';
+                    $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"  ';
                     break;
                 case MessageStatus::AUTHORIZED:
                   //$sqlWhere .= ' and (mr.status_id=2 or (mr.wl = "Y" and mr.status_id != 3)) ';
-                    $sqlWhere .= ' and (mr.status_id=2 or mr.wl = "Y") ';
+                    $sqlWhere .= ' and (mr.status_id=2 or mr.wl = "Y") and mr.content != "V" ';
                     break;
                 case MessageStatus::DELETED:
-                    $sqlWhere .= ' and mr.status_id=3  ';
+                    $sqlWhere .= ' and mr.status_id=3 and mr.content != "V"  ';
                     break;
                 case MessageStatus::RESTORED:
-                    $sqlWhere .= ' and mr.status_id=5  ';
+                    $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
                     break;
                 default:
                     $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" and mr.content != "V" and  mr.status_id=' . $type .  ' ';
