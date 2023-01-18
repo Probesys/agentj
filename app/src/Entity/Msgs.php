@@ -6,189 +6,165 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Msgs
- *
- * @ORM\Table(name="msgs", indexes={@ORM\Index(name="msgs_idx_sid", columns={"sid"}), @ORM\Index(name="msgs_idx_mess_id", columns={"message_id"}), @ORM\Index(name="msgs_idx_time_num", columns={"time_num"}), @ORM\Index(name="msgs_idx_time_iso", columns={"time_iso"}), @ORM\Index(name="msgs_idx_mail_id", columns={"mail_id"})})
- * @ORM\Entity(repositoryClass="App\Repository\MsgsRepository")
  */
+#[ORM\Table(name: 'msgs')]
+#[ORM\Index(name: 'msgs_idx_sid', columns: ['sid'])]
+#[ORM\Index(name: 'msgs_idx_mess_id', columns: ['message_id'])]
+#[ORM\Index(name: 'msgs_idx_time_num', columns: ['time_num'])]
+#[ORM\Index(name: 'msgs_idx_time_iso', columns: ['time_iso'])]
+#[ORM\Index(name: 'msgs_idx_mail_id', columns: ['mail_id'])]
+#[ORM\Entity(repositoryClass: 'App\Repository\MsgsRepository')]
 class Msgs
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="partition_tag", type="integer", nullable=false)
-     * @ORM\Id
      */
+    #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
+    #[ORM\Id]
     private $partitionTag = '0';
 
     /**
      * @var binary
-     *
-     * @ORM\Column(name="mail_id", type="binary", nullable=false)
-     * @ORM\Id
-     * @ORM\OneToOne(targetEntity="App\Entity\Msgrcpt", inversedBy="msgs", cascade={"persist", "remove"},fetch="EAGER")
      */
+    #[ORM\Column(name: 'mail_id', type: 'binary', nullable: false)]
+    #[ORM\Id]
+    #[ORM\OneToOne(targetEntity: 'App\Entity\Msgrcpt', inversedBy: 'msgs', cascade: ['persist', 'remove'], fetch: 'EAGER')]
     private $mailId;
 
     /**
      * @var binary|null
-     *
-     * @ORM\Column(name="secret_id", type="binary", nullable=true)
      */
+    #[ORM\Column(name: 'secret_id', type: 'binary', nullable: true)]
     private $secretId = '';
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="am_id", type="string", length=20, nullable=false)
      */
+    #[ORM\Column(name: 'am_id', type: 'string', length: 20, nullable: false)]
     private $amId;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="time_num", type="integer", nullable=false, options={"unsigned"=true})
      */
+    #[ORM\Column(name: 'time_num', type: 'integer', nullable: false, options: ['unsigned' => true])]
     private $timeNum;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="time_iso", type="string", length=16, nullable=false, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'time_iso', type: 'string', length: 16, nullable: false, options: ['fixed' => true])]
     private $timeIso;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="policy", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'policy', type: 'string', length: 255, nullable: true)]
     private $policy = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="client_addr", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'client_addr', type: 'string', length: 255, nullable: true)]
     private $clientAddr = '';
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="size", type="integer", nullable=false, options={"unsigned"=true})
      */
+    #[ORM\Column(name: 'size', type: 'integer', nullable: false, options: ['unsigned' => true])]
     private $size;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="originating", type="string", length=1, nullable=false, options={"fixed"=true,"default":" "})
      */
+    #[ORM\Column(name: 'originating', type: 'string', length: 1, nullable: false, options: ['fixed' => true, 'default' => ' '])]
     private $originating = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="content", type="string", length=1, nullable=true, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'content', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $content;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="quar_type", type="string", length=1, nullable=true, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'quar_type', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $quarType;
 
     /**
      * @var binary|null
-     *
-     * @ORM\Column(name="quar_loc", type="binary", nullable=true)
      */
+    #[ORM\Column(name: 'quar_loc', type: 'binary', nullable: true)]
     private $quarLoc = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="dsn_sent", type="string", length=1, nullable=true, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'dsn_sent', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $dsnSent;
 
     /**
      * @var float|null
-     *
-     * @ORM\Column(name="spam_level", type="float", precision=10, scale=0, nullable=true)
      */
+    #[ORM\Column(name: 'spam_level', type: 'float', precision: 10, scale: 0, nullable: true)]
     private $spamLevel;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="message_id", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'message_id', type: 'string', length: 255, nullable: true)]
     private $messageId = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="from_addr", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'from_addr', type: 'string', length: 255, nullable: true)]
     private $fromAddr = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="subject", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'subject', type: 'string', length: 255, nullable: true)]
     private $subject = '';
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="host", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'host', type: 'string', length: 255, nullable: false)]
     private $host;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="validate_captcha", type="integer", nullable=true, options={"unsigned"=true,"default":0})
      */
+    #[ORM\Column(name: 'validate_captcha', type: 'integer', nullable: true, options: ['unsigned' => true, 'default' => 0])]
     private $validate_captcha;
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\MessageStatus")
-    * @ORM\JoinColumn(name="status_id", nullable=true)
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\MessageStatus')]
+    #[ORM\JoinColumn(name: 'status_id', nullable: true)]
     private $status;
 
     /**
      * @var \Maddr
-     *
-     * @ORM\ManyToOne(targetEntity="Maddr")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="sid", referencedColumnName="id")
-     * })
      */
+    #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: 'Maddr')]
     private $sid;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="send_captcha", type="integer", nullable=false, options={"unsigned"=true,"default":0})
      */
+    #[ORM\Column(name: 'send_captcha', type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
     private $sendCaptcha = 0;
 
     /**
      * @var text
      *
-     * @ORM\Column(name="message_error", type="text", nullable=true)
      *
      */
+    #[ORM\Column(name: 'message_error', type: 'text', nullable: true)]
     private $messageError;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $isMlist;
 
 

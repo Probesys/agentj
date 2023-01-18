@@ -8,10 +8,9 @@ use App\Entity\Mailaddr;
 
 /**
  * Wblist
- *
- * @ORM\Table(name="wblist")
- * @ORM\Entity(repositoryClass="App\Repository\WblistRepository")
  */
+#[ORM\Table(name: 'wblist')]
+#[ORM\Entity(repositoryClass: 'App\Repository\WblistRepository')]
 class Wblist
 {
     const WBLIST_PRIORITY_DOMAIN = 0;
@@ -22,53 +21,40 @@ class Wblist
     const WBLIST_TYPE_USER = 0 ; // Web liste origin is user        
     const WBLIST_TYPE_SENDER = 1 ; // Web liste origin is sender via human authentication
     const WBLIST_TYPE_GROUP = 2; // Web list origin is group
-
-
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="wbLists")
-    * @ORM\JoinColumn(name="rid", nullable=true, onDelete="CASCADE")
-    * @ORM\Id
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\User', inversedBy: 'wbLists')]
+    #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]
+    #[ORM\Id]
     private $rid;
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Mailaddr")
-    * @ORM\JoinColumn(name="sid", nullable=true)
-    * @ORM\Id
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr')]
+    #[ORM\JoinColumn(name: 'sid', nullable: true)]
+    #[ORM\Id]
     private $sid;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="wb", type="string", length=10, nullable=false)
      */
+    #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
     private $wb;
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="datemod", type="datetime", nullable=true, options={"default"="CURRENT_TIMESTAMP"})
      */
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod ;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="type", type="integer", nullable=true)
      */
+    #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
     private $type;
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Groups")
-    * @ORM\JoinColumn(name="group_id", nullable=true, onDelete="CASCADE")
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
+    #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     private $groups;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     * @ORM\Id     
-     */
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Id]
     private $priority;
 
     public function __construct(User $user, Mailaddr $mailaddr)

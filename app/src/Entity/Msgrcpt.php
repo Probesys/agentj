@@ -6,114 +6,96 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Msgrcpt
- *
- * @ORM\Table(name="msgrcpt", indexes={@ORM\Index(name="msgrcpt_idx_mail_id", columns={"mail_id"}), @ORM\Index(name="msgrcpt_idx_rid", columns={"rid"})})
- * @ORM\Entity(repositoryClass="App\Repository\MsgrcptRepository")
  */
+#[ORM\Table(name: 'msgrcpt')]
+#[ORM\Index(name: 'msgrcpt_idx_mail_id', columns: ['mail_id'])]
+#[ORM\Index(name: 'msgrcpt_idx_rid', columns: ['rid'])]
+#[ORM\Entity(repositoryClass: 'App\Repository\MsgrcptRepository')]
 class Msgrcpt
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="partition_tag", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
      */
+    #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
     private $partitionTag = '0';
 
     /**
      * @var binary
-     *
-     * @ORM\Column(name="mail_id", type="binary", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
      */
+    #[ORM\Column(name: 'mail_id', type: 'binary', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
     private $mailId;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="rseqnum", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
      */
+    #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
     private $rseqnum = '0';
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Maddr")
-    * @ORM\JoinColumn(name="rid", nullable=true)
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Maddr')]
+    #[ORM\JoinColumn(name: 'rid', nullable: true)]
     private $rid;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="is_local", type="string", length=1, nullable=false, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'is_local', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private $isLocal = '';
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="content", type="string", length=1, nullable=false, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'content', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private $content = '';
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="ds", type="string", length=1, nullable=false, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'ds', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private $ds;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="rs", type="string", length=1, nullable=false, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'rs', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private $rs;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="bl", type="string", length=1, nullable=true, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'bl', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $bl = '';
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="wl", type="string", length=1, nullable=true, options={"fixed"=true})
      */
+    #[ORM\Column(name: 'wl', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $wl = '';
 
     /**
      * @var float|null
-     *
-     * @ORM\Column(name="bspam_level", type="float", precision=10, scale=0, nullable=true)
      */
+    #[ORM\Column(name: 'bspam_level', type: 'float', precision: 10, scale: 0, nullable: true)]
     private $bspamLevel;
 
     /**
      * @var string|null
-     *
-     * @ORM\Column(name="smtp_resp", type="string", length=255, nullable=true)
      */
+    #[ORM\Column(name: 'smtp_resp', type: 'string', length: 255, nullable: true)]
     private $smtpResp = '';
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\MessageStatus", inversedBy="msgrcpts")
-     */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\MessageStatus', inversedBy: 'msgrcpts')]
     private $status;
 
-    /**
-     * @ORM\Column(type="integer", type="integer", nullable=false, options={"unsigned"=true,"default":0})
-     */
+    #[ORM\Column(type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
     private $sendCaptcha = 0;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $amavisOutput;
 
     public function getPartitionTag(): ?int

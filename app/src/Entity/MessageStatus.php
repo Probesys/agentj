@@ -6,9 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\MessageStatusRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\MessageStatusRepository')]
 class MessageStatus
 {
 
@@ -21,21 +19,15 @@ class MessageStatus
     const SPAMMED = 6;
     const VIRUS = 7;
 
-  /**
-   * @ORM\Id()
-   * @ORM\GeneratedValue()
-   * @ORM\Column(type="integer")
-   */
+  #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-  /**
-   * @ORM\Column(type="string", length=255)
-   */
+  #[ORM\Column(type: 'string', length: 255)]
     private $name;
 
-  /**
-   * @ORM\OneToMany(targetEntity="App\Entity\Msgrcpt", mappedBy="status")
-   */
+  #[ORM\OneToMany(targetEntity: 'App\Entity\Msgrcpt', mappedBy: 'status')]
     private $msgrcpts;
 
     public function __construct()
