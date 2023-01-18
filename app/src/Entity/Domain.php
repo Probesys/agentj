@@ -9,159 +9,128 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Domain
- *
- * @ORM\Table(name="domain")
- * @ORM\Entity(repositoryClass="App\Repository\DomainRepository")
- * @UniqueEntity("domain")
  */
+#[ORM\Table(name: 'domain')]
+#[ORM\Entity(repositoryClass: 'App\Repository\DomainRepository')]
+#[UniqueEntity('domain')]
 class Domain
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
+    #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="domain", type="string", length=255,unique=true, nullable=false)
      */
+    #[ORM\Column(name: 'domain', type: 'string', length: 255, unique: true, nullable: false)]
     private $domain;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="srv_smtp", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'srv_smtp', type: 'string', length: 255, nullable: false)]
     private $srvSmtp;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="srv_imap", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'srv_imap', type: 'string', length: 255, nullable: false)]
     private $srvImap;
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="datemod", type="datetime", nullable=true, options={"default"="CURRENT_TIMESTAMP"})
      */
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="imap_port", type="integer", nullable=false, options={"default"="143"})
      */
+    #[ORM\Column(name: 'imap_port', type: 'integer', nullable: false, options: ['default' => 143])]
     private $imap_port;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="imap_flag", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'imap_flag', type: 'string', length: 255, nullable: false)]
     private $imap_flag;
 
     /**
      * @var bool
-     *
-     * @ORM\Column(name="active", type="boolean", nullable=false)
      */
+    #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
     private $active;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="transport", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'transport', type: 'string', length: 255, nullable: false)]
     private $transport;
 
     /**
      * @var text
      *
-     * @ORM\Column(name="message", type="text", nullable=true)
      *
      */
+    #[ORM\Column(name: 'message', type: 'text', nullable: true)]
     private $message;
 
     /**
      * @var text
      *
-     * @ORM\Column(name="mailmessage", type="text", nullable=true)
      *
      */
+    #[ORM\Column(name: 'mailmessage', type: 'text', nullable: true)]
     private $mailmessage;
 
     /**
      * @var text
      *
-     * @ORM\Column(name="mail_alert", type="text", nullable=true)
      *
      */
+    #[ORM\Column(name: 'mail_alert', type: 'text', nullable: true)]
     private $message_alert;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="level", type="float", nullable=true)
      */
+    #[ORM\Column(name: 'level', type: 'float', nullable: true)]
     private $level = 20;
 
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Policy")
-    * @ORM\JoinColumn(name="policy_id", nullable=true)
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
+    #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private $policy;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\User", mappedBy="domains")
-     */
+    #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'domains')]
     private $users;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     private $confirmCaptchaMessage;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Groups", mappedBy="domain", orphanRemoval=true)
-     */
+    #[ORM\OneToMany(targetEntity: 'App\Entity\Groups', mappedBy: 'domain', orphanRemoval: true)]
     private $groups;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $logo;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $mailAuthenticationSender;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $imapNoValidateCert;
 
-    /**
-     * @ORM\Column(type="string", length=5, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private $defaultLang;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
+    #[ORM\Column(type: 'integer', nullable: true)]
     private $smtpPort;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Connector::class, mappedBy="domain")
-     */
+    #[ORM\OneToMany(targetEntity: Connector::class, mappedBy: 'domain')]
     private $connectors;
 
 

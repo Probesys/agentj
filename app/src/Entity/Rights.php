@@ -6,33 +6,23 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="rights")
- * @ORM\Entity(repositoryClass="App\Repository\RightsRepository")
- */
+#[ORM\Table(name: 'rights')]
+#[ORM\Entity(repositoryClass: 'App\Repository\RightsRepository')]
 class Rights
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $name;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $system_name;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Groups", inversedBy="rights")
-     * @ORM\JoinTable(name="rights_groups")
-     */
+    #[ORM\JoinTable(name: 'rights_groups')]
+    #[ORM\ManyToMany(targetEntity: 'App\Entity\Groups', inversedBy: 'rights')]
     private $groups;
 
     public function __construct()

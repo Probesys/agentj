@@ -10,78 +10,60 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Groups
- *
- * @ORM\Table(name="groups")
- * @ORM\Entity(repositoryClass="App\Repository\GroupsRepository")
  */
+#[ORM\Table(name: 'groups')]
+#[ORM\Entity(repositoryClass: 'App\Repository\GroupsRepository')]
 class Groups
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
+    #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255, nullable=false)
      */
+    #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
     private $name;
 
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="datemod", type="datetime", nullable=true, options={"default"="CURRENT_TIMESTAMP"})
      */
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod;
 
-    /**
-    * @ORM\ManyToOne(targetEntity="App\Entity\Policy")
-    * @ORM\JoinColumn(name="policy_id", nullable=true)
-    */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
+    #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private $policy;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Rights", mappedBy="groups")
-     */
+    #[ORM\ManyToMany(targetEntity: 'App\Entity\Rights', mappedBy: 'groups')]
     private $rights;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Domain", inversedBy="groups")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Domain', inversedBy: 'groups')]
+    #[ORM\JoinColumn(nullable: false)]
     private $domain;
 
-    /**
-     * @ORM\Column(type="string", length=10)
-     */
+    #[ORM\Column(type: 'string', length: 10)]
     private $wb;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="groups", cascade={"persist"})
-     */
+    #[ORM\OneToMany(targetEntity: 'App\Entity\User', mappedBy: 'groups', cascade: ['persist'])]
     private $users;
 
 
     /**
-     * @ORM\Column(type="string",length=128, unique=true)
      * @Gedmo\Slug(fields={"name"})
      */
+    #[ORM\Column(type: 'string', length: 128, unique: true)]
     private $slug;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $overrideUser;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $active;
 
     public function __toString()
