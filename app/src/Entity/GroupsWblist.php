@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
  * GroupsWblist
  */
 #[ORM\Table(name: 'groups_wblist')]
-#[ORM\Entity]
 #[ORM\Entity(repositoryClass: 'App\Repository\GroupsWblistRepository')]
 class GroupsWblist
 {

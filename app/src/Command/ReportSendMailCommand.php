@@ -45,7 +45,7 @@ class ReportSendMailCommand extends Command {
         $container = $this->getApplication()->getKernel()->getContainer();
         $domain = $container->getParameter('domain');
         $scheme = $container->getParameter('scheme');
-        $failedRecipients = [];
+//        $failedRecipients = [];
 
         $url = $scheme . "://" . $domain;
         $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport_report');
