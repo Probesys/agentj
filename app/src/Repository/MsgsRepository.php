@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Domain;
 use App\Entity\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
