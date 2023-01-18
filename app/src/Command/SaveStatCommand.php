@@ -66,6 +66,7 @@ class SaveStatCommand extends Command {
         $stat->setNbBanned(count($nbBanned) > 0 ? $nbBanned[0]['nb_result'] : 0);
         $stat->setNbDeleted(count($nbDeleted) > 0 ? $nbDeleted[0]['nb_result'] : 0);
         $stat->setNbRestored(count($nbRestored) > 0 ? $nbRestored[0]['nb_result'] : 0);
+        $this->em->persist($stat);
         $this->em->flush();
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
