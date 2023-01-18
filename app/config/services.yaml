@@ -16,6 +16,7 @@ parameters:
     app.dkim_generator: '%env(DKIM_GENERATOR)%'
     app.dkim_removal: '%env(DKIM_REMOVAL)%'
     app.smtp-transport: '%env(SMTP_TRANSPORT)%'
+    app.smtp-transport_report: '%env(SMTP_TRANSPORT_REPORT)%'
     app.upload_directory: '%kernel.project_dir%/public/files/upload/'
     app.amavis_quarantine_dir: '%env(AMAVIS_QUARANTINE_DIR)%'
     app.amavis_quarantine_nbdays_before_delete: '%env(AMAVIS_QUARANTINE_NBDAYS_BEFORE_DELETE)%'
