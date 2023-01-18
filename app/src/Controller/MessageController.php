@@ -52,6 +52,7 @@ class MessageController extends AbstractController {
                     $messageActions = [
                         'Message.Actions.Restore' => 'restore',
                         'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
                     $type = MessageStatus::SPAMMED;
