@@ -37,6 +37,10 @@ class DailyStat
     #[ORM\Column(type: 'integer', nullable: true)]
     private $nbRestored;
 
+    #[ORM\ManyToOne(inversedBy: 'dailyStats')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Domain $domain = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -134,6 +138,18 @@ class DailyStat
     public function setNbRestored(?int $nbRestored): self
     {
         $this->nbRestored = $nbRestored;
+
+        return $this;
+    }
+
+    public function getDomain(): ?Domain
+    {
+        return $this->domain;
+    }
+
+    public function setDomain(?Domain $domain): self
+    {
+        $this->domain = $domain;
 
         return $this;
     }
