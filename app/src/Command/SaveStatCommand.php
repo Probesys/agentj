@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\DailyStat;
 use App\Entity\MessageStatus;
 use App\Repository\MsgsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +20,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     )]
 class SaveStatCommand extends Command {
 
-    private $msgsRepository;
+    private MsgsRepository $msgsRepository;
+    private EntityManagerInterface $em;
     
     protected function configure(): void {
         $this
@@ -27,16 +29,17 @@ class SaveStatCommand extends Command {
         ;
     }
     
-    public function __construct(MsgsRepository $msgsRepository) {
+    public function __construct(MsgsRepository $msgsRepository, EntityManagerInterface $em) {
         parent::__construct();
         $this->msgsRepository = $msgsRepository;
-        ;
+        $this->em = $em;        
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
         $day = $input->getArgument('day');
         $dateToSave = new \DateTime();
+//$dateToSave->modify('-1 day');
 
         if ($day) {
             $dateToSave = \Datetime::createFromFormat('Ymd', $day);
@@ -47,10 +50,23 @@ class SaveStatCommand extends Command {
         }
 
         $stat = new DailyStat();
-        $nbUntretaed = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::UNTREATED, null, $dateToSave);
-        dd($nbUntretaed);
+        $nbUntreated = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::UNTREATED, null, $dateToSave);
+        $nbSpam = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::SPAMMED, null, $dateToSave);
+        $nbVirus = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::VIRUS, null, $dateToSave);
+        $nbAuthorized = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::AUTHORIZED, null, $dateToSave);
+        $nbBanned = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::BANNED, null, $dateToSave);
+        $nbDeleted = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::DELETED, null, $dateToSave);
+        $nbRestored = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::RESTORED, null, $dateToSave);
+        
         $stat->setDate($dateToSave);
-
+        $stat->setNbUntreated(count($nbUntreated) > 0 ? $nbUntreated[0]['nb_result'] : 0);
+        $stat->setNbSpam(count($nbSpam) > 0 ? $nbSpam[0]['nb_result'] : 0);
+        $stat->setNbVirus(count($nbVirus) > 0 ? $nbVirus[0]['nb_result'] : 0);
+        $stat->setNbAuthorized(count($nbAuthorized) > 0 ? $nbAuthorized[0]['nb_result'] : 0);
+        $stat->setNbBanned(count($nbBanned) > 0 ? $nbBanned[0]['nb_result'] : 0);
+        $stat->setNbDeleted(count($nbDeleted) > 0 ? $nbDeleted[0]['nb_result'] : 0);
+        $stat->setNbRestored(count($nbRestored) > 0 ? $nbRestored[0]['nb_result'] : 0);
+        $this->em->flush();
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
         return Command::SUCCESS;
