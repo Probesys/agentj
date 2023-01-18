@@ -11,154 +11,116 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Users
- *
- * @ORM\Table(name="users")
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity(
- *     fields={"email"},
- *     ignoreNull=true,
- * )
  */
+#[ORM\Table(name: 'users')]
+#[ORM\Entity(repositoryClass: 'App\Repository\UserRepository')]
+#[UniqueEntity(fields: ['email'], ignoreNull: true)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
   /**
-   * @var int
-   *
-   * @ORM\Column(name="id", type="integer", nullable=false, options={"unsigned"=true})
-   * @ORM\Id
-   * @ORM\GeneratedValue(strategy="IDENTITY")
-   */
+     * @var int
+     */
+    #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
   /**
-   * @var int
-   *
-   * @ORM\Column(name="priority", type="integer", nullable=false, options={"default"="7"})
-   */
+     * @var int
+     */
+    #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
     private $priority = '7';
 
   /**
-   * @var binary
-   *
-   * @ORM\Column(name="email", type="binary", nullable=true, unique=true)
-   */
+     * @var binary
+     */
+    #[ORM\Column(name: 'email', type: 'binary', nullable: true, unique: true)]
     private $email;
 
   /**
-   * @var string|null
-   *
-   * @ORM\Column(name="fullname", type="string", length=255, nullable=true)
-   */
+     * @var string|null
+     */
+    #[ORM\Column(name: 'fullname', type: 'string', length: 255, nullable: true)]
     private $fullname;
 
   /**
-   * @var string|null
-   *
-   * @ORM\Column(name="username", type="string", length=255, nullable=true)
-   */
+     * @var string|null
+     */
+    #[ORM\Column(name: 'username', type: 'string', length: 255, nullable: true)]
     private $username;
 
   /**
-   * @var string|null
-   *
-   * @ORM\Column(name="local", type="string", length=1, nullable=true, options={"fixed"=true})
-   */
+     * @var string|null
+     */
+    #[ORM\Column(name: 'local', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $local;
 
   /**
-   * @var string
-   *
-   * @ORM\Column(name="password", type="string", length=255, nullable=true)
-   */
+     * @var string
+     */
+    #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
     private $password;
 
   /**
-   * @var string
-   *
-   * @ORM\Column(name="roles", type="text", length=0, nullable=true)
-   */
+     * @var string
+     */
+    #[ORM\Column(name: 'roles', type: 'text', length: 0, nullable: true)]
     private $roles;
 
   /**
-   * @var string|null
-   *
-   * @ORM\Column(name="emailRecovery", type="string", length=255, nullable=true)
-   */
+     * @var string|null
+     */
+    #[ORM\Column(name: 'emailRecovery', type: 'string', length: 255, nullable: true)]
     private $emailRecovery;
 
   /**
-   * @var string|null
-   *
-   * @ORM\Column(name="imapLogin", type="string", length=255, nullable=true)
-   */
+     * @var string|null
+     */
+    #[ORM\Column(name: 'imapLogin', type: 'string', length: 255, nullable: true)]
     private $imapLogin;
 
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Policy")
-   * @ORM\JoinColumn(name="policy_id", nullable=true)
-   */
+  #[ORM\ManyToOne(targetEntity: 'Policy')]
+    #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private $policy;
 
 
-  /**
-   * @ORM\ManyToMany(targetEntity="Domain", inversedBy="users")
-   * @ORM\JoinTable(name="users_domains")
-   */
+  #[ORM\JoinTable(name: 'users_domains')]
+    #[ORM\ManyToMany(targetEntity: 'Domain', inversedBy: 'users')]
     private $domains;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Domain")
-   * @ORM\JoinColumn(name="domain_id", nullable=true, onDelete="CASCADE")
-   */
+  #[ORM\ManyToOne(targetEntity: 'Domain')]
+    #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
     private $domain;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Groups", inversedBy="users")
-   * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
-   */
+  #[ORM\ManyToOne(targetEntity: 'Groups', inversedBy: 'users')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private $groups;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="User")
-   * @ORM\JoinColumn(name="original_user_id", nullable=true, onDelete="CASCADE")
-   */
+  #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
     private $originalUser;
 
-  /**
-   * @ORM\Column(type="boolean", nullable=true)
-   */
+  #[ORM\Column(type: 'boolean', nullable: true)]
     private $report;
 
-  /**
-   * @ORM\ManyToMany(targetEntity=User::class, inversedBy="ownedSharedBoxes")
-   */
+  #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'ownedSharedBoxes')]
     private $sharedWith;
 
-  /**
-   * @ORM\ManyToMany(targetEntity=User::class, mappedBy="sharedWith")
-   */
+  #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'sharedWith')]
     private $ownedSharedBoxes;
 
-  /**
-   * @ORM\Column(type="integer", nullable=true)
-   */
+  #[ORM\Column(type: 'integer', nullable: true)]
     private $dateLastReport;
 
-  /**
-   * @ORM\Column(type="boolean", nullable=true)
-   */
+  #[ORM\Column(type: 'boolean', nullable: true)]
     private $bypassHumanAuth;
 
-    /**
-     * @ORM\Column(type="string", length=5, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private $preferedLang;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $uid;
 
     public function __construct()

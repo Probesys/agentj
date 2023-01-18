@@ -5,25 +5,17 @@ namespace App\Entity;
 use App\Repository\Office365ConnectorRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=Office365ConnectorRepository::class)
- */
+#[ORM\Entity(repositoryClass: Office365ConnectorRepository::class)]
 class Office365Connector extends Connector
 {
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: 'string', length: 100)]
     private $tenant;
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: 'string', length: 100)]
     private $client;
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: 'string', length: 100)]
     private $clientSecret;
 
 
