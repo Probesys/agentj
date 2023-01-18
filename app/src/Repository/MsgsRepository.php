@@ -128,7 +128,7 @@ class MsgsRepository extends ServiceEntityRepository
      * @param type $alias
      * @return int
      */
-    public function countByTypeAndDays(User $user = null, $type = null, $alias = [])
+    public function countByTypeAndDays(User $user = null, $type = null, $alias = [], \DateTime $day = null)
     {
         $conn = $this->getEntityManager()->getConnection();
         $conn->getConfiguration()->getSQLLogger(null);
@@ -140,6 +140,9 @@ class MsgsRepository extends ServiceEntityRepository
             . 'left join users u on u.email=maddr.email '
             . 'left join domain d on u.domain_id=d.id ';
 
+        if ($day){
+            $sql.= " AND date(m.time_iso) = " . $day->format('Y-m-d');
+        }
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias);
         $sql .= " GROUP BY SUBSTRING(m.time_iso, 1, 8) ";
 
