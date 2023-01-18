@@ -26,8 +26,7 @@ class SaveStatCommand extends Command {
 
     protected function configure(): void {
         $this
-                ->addArgument('day', InputArgument::OPTIONAL, 'Day  (YYYYMMDD) to save stat')
-        ;
+                ->addArgument('day', InputArgument::OPTIONAL, 'Day  (YYYYMMDD) to save stat');
     }
 
     public function __construct(MsgsRepository $msgsRepository, EntityManagerInterface $em) {
@@ -40,7 +39,7 @@ class SaveStatCommand extends Command {
         $io = new SymfonyStyle($input, $output);
         $day = $input->getArgument('day');
         $dateToSave = new \DateTime();
-//$dateToSave->modify('-1 day');
+        $dateToSave->modify('-1 day');
 
         if ($day) {
             $dateToSave = \Datetime::createFromFormat('Ymd', $day);
@@ -52,7 +51,11 @@ class SaveStatCommand extends Command {
 
         $domains = $this->em->getRepository(Domain::class)->findBy(['active' => true]);
         foreach ($domains as $domain) {
-            $stat = new DailyStat();
+            $stat = $this->em->getRepository(DailyStat::class)->findOneBy(['date' => $dateToSave, 'domain' => $domain]);
+            if (!$stat) {
+                $stat = new DailyStat();
+            }
+
             $nbUntreated = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::UNTREATED, null, $dateToSave, $domain);
             $nbSpam = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::SPAMMED, null, $dateToSave, $domain);
             $nbVirus = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::VIRUS, null, $dateToSave, $domain);
@@ -75,7 +78,7 @@ class SaveStatCommand extends Command {
 
 
         $this->em->flush();
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->success(date('Y-m-d H:i:s') . '\nStat saved');
 
         return Command::SUCCESS;
     }
