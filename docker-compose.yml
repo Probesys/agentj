@@ -43,6 +43,7 @@ services:
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
+      - symfonylogs:/var/www/agentj/var/log
       - opendkim:/var/db/dkim
     networks:
       ajnet:
