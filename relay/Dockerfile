@@ -20,6 +20,7 @@ RUN apk --no-cache add \
 
 COPY conf/postfix/* /etc/postfix/
 COPY entrypoint.sh /entrypoint.sh
+COPY conf/rsyslog/rsyslog.conf /etc/rsyslog.conf
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 25/tcp

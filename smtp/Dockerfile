@@ -18,6 +18,7 @@ RUN apt-get update -q --fix-missing && \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
 COPY conf/postfix/* /etc/postfix/
+COPY conf/rsyslog/rsyslog.conf /etc/rsyslog/rsyslog.conf
 COPY conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 COPY conf/postifx-policyd-spf-python/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 COPY entrypoint.sh /entrypoint.sh

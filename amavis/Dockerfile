@@ -39,13 +39,14 @@ RUN apk --no-cache add \
     unzip \
     zip
 
-COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY amavisd.patch /root/amavisd.patch
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
+COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY conf/rsyslog/rsyslog.conf /etc/rsyslog/rsyslog.conf
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
-COPY amavisd.patch /root/amavisd.patch
 
 RUN patch -p1 /usr/sbin/amavisd < /root/amavisd.patch
 RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
