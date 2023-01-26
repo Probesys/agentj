@@ -93,7 +93,7 @@ COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/conf/opendkim/TrustedHosts /var/db/dkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
-COPY docker/conf/rsyslog/rsyslog.conf /etc/rsyslog/rsyslog.conf
+COPY docker/conf/rsyslog/rsyslog.conf /etc/rsyslog.conf
 COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
