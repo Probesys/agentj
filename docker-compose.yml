@@ -16,7 +16,8 @@ services:
       - TZ=${TZ:-Europe/Paris}
     networks:
       - ajnet
-
+    ports:
+      - "3307:3306"
   amavis:
     image: probesys38/agentj_amavis:${VERSION}
     restart: always
@@ -31,6 +32,23 @@ services:
     networks:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.24.42}.252
+
+  outamavis:
+    build:
+      context: ./outamavis/.
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - ajnet
+    volumes:
+      - amavis:/var/amavis/
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.24.42}.232
+
 
   app:
     image: probesys38/agentj_app:${VERSION}
@@ -74,6 +92,22 @@ services:
       ajnet:
         ipv4_address: ${IPV4_NETWORK:-172.24.42}.250
 
+  outsmtp:
+    build:
+      context: ./outsmtp/.
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - outpostqueue:/var/spool/postfix
+    ports:
+      - ${SMTP_LISTEN_ADDR:-0.0.0.0}:26:25
+    networks:
+      ajnet:
+        ipv4_address: ${IPV4_NETWORK:-172.24.42}.230
+
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}
     restart: always
@@ -104,6 +138,7 @@ volumes:
   logs:
   opendkim:
   postqueue:
+  outpostqueue:
 
 networks:
   ajnet:

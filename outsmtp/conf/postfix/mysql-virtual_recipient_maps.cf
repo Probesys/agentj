@@ -1,0 +1,8 @@
+hosts = db
+user = u_agentj
+password = changeme
+dbname = agentj
+table = users
+select_field = 'OK' 
+where_field = email
+additional_conditions = and email not like '@%%' 
