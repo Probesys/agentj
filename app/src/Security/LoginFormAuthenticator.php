@@ -2,9 +2,9 @@
 
 namespace App\Security;
 
-use App\Entity\Domain;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,6 +38,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
     private $csrfTokenManager;
     private $entityManager;
     private $translator;
+    private $logger;
 
     public const LOGIN_ROUTE = 'app_login';
 
@@ -46,10 +47,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             ParameterBagInterface $params,
             CsrfTokenManagerInterface $csrfTokenManager,
             EntityManagerInterface $entityManager,
-            TranslatorInterface $translator
+            TranslatorInterface $translator,
+            LoggerInterface $logger
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->params = $params;
+        $this->logger = $logger;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->entityManager = $entityManager;
         $this->translator = $translator;
@@ -118,6 +121,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             $client->connect();
             return $client->isConnected();
         } catch (ConnectionFailedException $exc) {
+            $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());
             return false;
         }
 
