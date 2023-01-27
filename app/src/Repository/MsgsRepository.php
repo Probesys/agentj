@@ -214,8 +214,8 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN domain d on d.id=u.domain_id'
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
             . ' WHERE (m.is_mlist is null or m.is_mlist=0) and m.status_id is null and mr.send_captcha=0 and m.content != "C" AND m.content != "V"  AND mr.bspam_level < d.level AND maddr.is_invalid is null '
-            . ' AND mr.wl != "Y" and mr.bl != "Y"  and mr.status_id IS NULL and mr.content != "C" AND mr.content != "V" ';
-  //            . ' GROUP BY m.mail_id';
+            . ' AND mr.wl != "Y" and mr.bl != "Y"  and mr.status_id IS NULL and mr.content != "C" AND mr.content != "V" '
+             . '  GROUP BY email,sid';
         $stmt = $conn->prepare($sql);
 
         return $stmt->executeQuery()->fetchAllAssociative();
@@ -270,8 +270,8 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
             . ' LEFT JOIN maddr ON maddr.id = mr.rid '
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE email = "' . $to . '"  AND from_addr = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1 '
-            . ' GROUP BY email,sid, send_captcha';
+            . ' WHERE email = "' . $to . '"  AND from_addr = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1'; // AND m.mail_id != "' . $mailId . '"'
+      //. ' GROUP BY email,sid, send_captcha';
 
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':from_addr', $from);
