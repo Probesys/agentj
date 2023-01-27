@@ -1,14 +1,15 @@
 monolog:
     handlers:
-        main:
-            type:  rotating_file
-            path:  '%kernel.logs_dir%/%kernel.environment%.log'
+        # this "file_log" key could be anything
+        file_log:
+            type: stream
+            # log to var/log/(environment).log
+            path: 'php://stderr'
+            # log *all* messages (debug is lowest level)
             level: error
-            # max number of log files to keep
-            # defaults to zero, which means infinite files
-            max_files: 10     
-            # channels: ["!event", "!security"] 
-        console:
-            type:   console
-            process_psr_3_messages: false
-            channels: ["!event", "!doctrine","!security"]
+
+        syslog_handler:
+            type: syslog
+            # log error-level messages and higher
+            level: error
+ 

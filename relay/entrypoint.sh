@@ -6,6 +6,7 @@ sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/postfix/main.cf
 sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/postfix/main.cf
 sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /etc/postfix/master.cf
 echo relay.$MAIL_DOMAINNAME > /etc/mailname
+postmap /etc/postfix/slow_dest_domains_transport
 
 # Fix file permissions
 find /etc/postfix/ -type f -exec chmod 644 {} \;
