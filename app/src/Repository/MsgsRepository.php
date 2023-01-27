@@ -270,7 +270,7 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
             . ' LEFT JOIN maddr ON maddr.id = mr.rid '
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE email = "' . $to . '"  AND from_addr = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1'
+            . ' WHERE email = "' . $to . '"  AND from_addr = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1 '
             . ' GROUP BY email,sid, send_captcha';
 
         $stmt = $conn->prepare($sql);
