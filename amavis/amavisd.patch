@@ -1,33 +1,167 @@
---- "amavisd-new (copie)"	2021-02-05 12:00:49.272903000 +0100
-+++ amavisd-new	2021-02-17 15:39:44.116826097 +0100
-@@ -1427,8 +1427,8 @@
-       'INSERT INTO maddr (partition_tag, email, domain) VALUES (?,?,?)',
-     'ins_msg' =>
-       'INSERT INTO msgs (partition_tag, mail_id, secret_id, am_id,'.
--      ' time_num, time_iso, sid, policy, client_addr, size, host)'.
--      ' VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-+      ' time_num, time_iso, sid, policy, client_addr, size, host,is_mlist)'.
-+      ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-     'upd_msg' =>
-       'UPDATE msgs SET content=?, quar_type=?, quar_loc=?, dsn_sent=?,'.
-       ' spam_level=?, message_id=?, from_addr=?, subject=?, client_addr=?,'.
-@@ -26735,14 +26735,16 @@
-       # when data type of msgs.time_iso is TIMESTAMP (instead of a string)
-       my $time_iso = $timestamp_fmt_mysql && $conn_h->driver_name eq 'mysql'
-                        ? iso8601_utc_timestamp($msginfo->rx_time,1,'')
--                       : iso8601_utc_timestamp($msginfo->rx_time);
-+                       : iso8601_utc_timestamp($msginfo->rx_time);      
-+      my $is_mlist = length($msginfo->is_mlist) > 0 ? 1 : 0;
-       # insert a placeholder msgs record with sender information
-       $conn_h->execute($ins_msg,
-         $partition_tag, $msginfo->mail_id, $msginfo->secret_id,
-         $msginfo->log_id, int($msginfo->rx_time), $time_iso,
-         untaint($sid), c('policy_bank_path'), untaint($msginfo->client_addr),
-         0+untaint($msginfo->msg_size),
--        untaint(substr(idn_to_utf8(c('myhostname')),0,255)));
-+        untaint(substr(idn_to_utf8(c('myhostname')),0,255)),
-+        $is_mlist);
-       $conn_h->commit;  1;
-     } or do {
-       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-
+1490,1491c1490,1491
+<       ' time_num, time_iso, sid, policy, client_addr, size, host)'.
+<       ' VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+---
+>       ' time_num, time_iso, sid, policy, client_addr, size, host,is_mlist)'.
+>       ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+1520a1521,1524
+>     'ins_out_wbl' => "",
+>     'sel_mailadr' => "",
+>     'ins_mailadr' => "",
+>     'ins_wblist' => "",
+27353a27358,27488
+> # find an existing e-mail address record or insert one for MAILADDR, returning its id;
+> # may return undef if 'sel_mailadr' or 'ins_mailadr' SQL clauses are not defined;
+> #
+> sub find_or_save_mailaddr {
+>   my($self,$addr,$keep_localpart_case) = @_;
+>   my $id; my $existed = 0; my($localpart,$domain);
+>   my $naddr = untaint($addr);
+>   if ($naddr ne '') {    # normalize address (lowercase, 7-bit, max 255 ch...)
+>     ($localpart,$domain) = split_address($naddr);
+>     $domain = idn_to_ascii($domain);
+>     if (!$keep_localpart_case && !c('localpart_is_case_sensitive')) {
+>       $localpart = lc $localpart;
+>     }
+>     local($1);
+>     $domain = $1  if $domain=~/^\@?(.*?)\.*\z/s;  # chop leading @ and tr. dots
+>     $naddr = $localpart.'@'.$domain;
+>     substr($naddr,255) = ''  if length($naddr) > 255;
+>     # avoid UTF-8 SQL trouble, legitimate RFC 5321 addresses only need 7 bits
+>     $naddr =~ s/[^\040-\176]/?/gs  if !$sql_allow_8bit_address;
+>     # SQL character strings disallow zero octets, and also disallow any other
+>     # octet values and sequences of octet values that are invalid according to
+>     # the database's selected character set encoding
+>   }
+>   my $conn_h = $self->{conn_h}; my $sql_cl_r = cr('sql_clause');
+>   my $sel_mailadr = $sql_cl_r->{'sel_mailadr'};
+>   my $ins_mailadr = $sql_cl_r->{'ins_mailadr'};
+>   if (!defined($sel_mailadr) || $sel_mailadr eq '') {
+>     # no way to query a database, behave as if no record was found
+>     do_log(5,"find_or_save_mailaddr: sel_mailadr query disabled, %s", $naddr);
+>   } else {
+>     $conn_h->begin_work_nontransaction;  #(re)connect if necessary, autocommit
+>     my $datatype = SQL_VARCHAR;
+>     if ($sql_allow_8bit_address) {
+>       my $driver = $conn_h->driver_name;  # only available when connected
+>       $datatype = $driver eq 'Pg' ? { pg_type => DBD::Pg::PG_BYTEA() }
+>                                   : SQL_VARBINARY;
+>     }
+>     $conn_h->execute($sel_mailadr, [$naddr,$datatype]);
+>     my($a_ref,$a2_ref);
+>     if (defined($a_ref=$conn_h->fetchrow_arrayref($sel_mailadr))) {  # exists?
+>       $id = $a_ref->[0]; $conn_h->finish($sel_mailadr);
+>       $existed = 1;
+>     } elsif (!defined($ins_mailadr) || $ins_mailadr eq '') {
+>       # record does not exist, insertion is not allowed
+>       do_log(5,"find_or_save_mailaddr: ins_mailadr insertion disabled, %s", $naddr);
+>     } else {  # does not exist, attempt to insert a new e-mail address record
+>       $conn_h->begin_work_nontransaction;  # (re)connect if not connected
+>       my $eval_stat;
+>       eval { $conn_h->execute($ins_mailadr, [$naddr,$datatype]); 1 }
+>         or do { $eval_stat = $@ ne '' ? $@ : "errno=$!" };
+>       # INSERT may have failed because of race condition with other processes;
+>       # try the SELECT again, it will most likely succeed this time;
+>       # SELECT after INSERT also avoids the need for a working last_insert_id()
+>       $conn_h->begin_work_nontransaction;  # (re)connect if not connected
+>       # try select again, regardless of the success of INSERT
+>       $conn_h->execute($sel_mailadr, [$naddr,$datatype]);
+>       if ( defined($a2_ref=$conn_h->fetchrow_arrayref($sel_mailadr)) ) {
+>         $id = $a2_ref->[0]; $conn_h->finish($sel_mailadr);
+>         add_entropy($id);	
+>         if (!defined($eval_stat)) {  # status of the INSERT
+>           do_log(5,"find_or_save_addr: record inserted, id=%s, %s",
+>                    $id,$naddr);
+>         } else {
+>           $existed = 1; chomp $eval_stat;
+>           do_log(5,"find_or_save_mailaddr: found on a second attempt, ".
+>                    "id=%s, %s, (first attempt: %s)", $id,$naddr,$eval_stat);
+>           die $eval_stat  if $eval_stat =~ /^timed out\b/;  # resignal timeout
+>         }
+>       } else {  # still does not exist
+>         $id = $existed = undef;
+>         if (defined $eval_stat) {  # status of the INSERT
+>           chomp $eval_stat;
+>           die $eval_stat  if $eval_stat =~ /^timed out\b/;  # resignal timeout
+>         };
+>         die "find_or_save_mailaddr: failed to insert mailaddr $naddr: $eval_stat";
+>       }
+>     }
+>   }
+>   ($id, $existed);
+> }
+> 
+> # find an existing user address record returning its id;
+> # may return undef if 'sel_user' or 'ins_mailadr' SQL clauses are not defined;
+> #
+> sub find_user {
+>   my($self,$addr,$keep_localpart_case) = @_;
+>   my $id; my $existed = 0; my($localpart,$domain);
+>   my $naddr = untaint($addr);
+>   if ($naddr ne '') {    # normalize address (lowercase, 7-bit, max 255 ch...)
+>     ($localpart,$domain) = split_address($naddr);
+>     $domain = idn_to_ascii($domain);
+>     if (!$keep_localpart_case && !c('localpart_is_case_sensitive')) {
+>       $localpart = lc $localpart;
+>     }
+>     local($1);
+>     $domain = $1  if $domain=~/^\@?(.*?)\.*\z/s;  # chop leading @ and tr. dots
+>     $naddr = $localpart.'@'.$domain;
+>     substr($naddr,255) = ''  if length($naddr) > 255;
+>     # avoid UTF-8 SQL trouble, legitimate RFC 5321 addresses only need 7 bits
+>     $naddr =~ s/[^\040-\176]/?/gs  if !$sql_allow_8bit_address;
+>     # SQL character strings disallow zero octets, and also disallow any other
+>     # octet values and sequences of octet values that are invalid according to
+>     # the database's selected character set encoding
+>   }
+>   my $conn_h = $self->{conn_h}; my $sql_cl_r = cr('sql_clause');
+>   my $sel_user = $sql_cl_r->{'sel_user'};
+>   if (!defined($sel_user) || $sel_user eq '') {
+>     # no way to query a database, behave as if no record was found
+>     do_log(5,"find_user: sel_user query disabled, %s", $naddr);
+>   } else {
+>     $conn_h->begin_work_nontransaction;  #(re)connect if necessary, autocommit
+>     my $datatype = SQL_VARCHAR;
+>     if ($sql_allow_8bit_address) {
+>       my $driver = $conn_h->driver_name;  # only available when connected
+>       $datatype = $driver eq 'Pg' ? { pg_type => DBD::Pg::PG_BYTEA() }
+>                                   : SQL_VARBINARY;
+>     }
+>     $conn_h->execute($sel_user, [$naddr,$datatype]);
+>     my($a_ref,$a2_ref);
+>     if (defined($a_ref=$conn_h->fetchrow_arrayref($sel_user))) {  # exists?
+>       $id = $a_ref->[0]; $conn_h->finish($sel_user);
+>       $existed = 1;
+>     } else {
+>       # record does not exist, insertion is not allowed
+>       do_log(5,"find_user: ins_user don t exist, %s", $naddr);
+>     }
+> 
+>     }
+>   ($id, $existed);
+> }
+> 
+27484a27620
+>       my $is_mlist = length($msginfo->is_mlist) > 0 ? 1 : 0;
+27491c27627,27628
+<         untaint(substr(idn_to_utf8(c('myhostname')),0,255)));
+---
+>         untaint(substr(idn_to_utf8(c('myhostname')),0,255)),
+>         $is_mlist);
+27523a27661,27662
+>   my $ins_wblist = $sql_cl_r->{'ins_wblist'};
+> 
+27560c27699,27709
+<         $conn_h->execute($ins_rcp,
+---
+> 	#Add for AgentJ
+> 	
+> 	if ($d eq "PASS" and defined($ins_wblist) and $ins_wblist ne '') {
+> 		my ($myrid,$myrexisted) = $self->find_or_save_mailaddr($r->recip_addr);
+> 		my ($mysid,$mysexisted) = $self->find_user($msginfo->rfc2822_from);
+> 		if ($mysexisted == 1 and $myrexisted == 1) {
+> 			$conn_h->execute($ins_wblist,untaint($mysid),untaint($myrid),untaint($mysid),untaint($myrid));
+> 		}
+> 	}
+> 	### end	
+> 	$conn_h->execute($ins_rcp,
