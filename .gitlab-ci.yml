@@ -145,7 +145,7 @@ deploy-dev:
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
-    TAG: "dev"
+    TAG: "main"
   before_script:
     - apk add --no-cache rsync
     - echo $TAG
