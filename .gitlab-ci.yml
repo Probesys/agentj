@@ -23,8 +23,8 @@ stages:
 
 before_script:
   - |-
-        if [ $CI_COMMIT_BRANCH == "gitlab_ci_dev" ] ; then
-            TAG="dev"
+        if [ $CI_COMMIT_BRANCH == "main" ] ; then
+            TAG="main"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         elif [ $CI_COMMIT_BRANCH == "gitlab_ci_preprod" ] ; then
@@ -168,7 +168,7 @@ deploy-dev:
   except:
     - merge_requests
   only:
-    - gitlab_ci_dev
+    - main
 
 deploy-preprod:
   stage: deploy
