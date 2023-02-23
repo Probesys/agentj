@@ -120,7 +120,8 @@ class Office365ImportCommand extends Command {
 
 
 
-            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $graphUser->getId(), 'email' => $graphUser->getMail()]);
+            $user = $this->em->getRepository(User::class)->findOneBy(['email' => $graphUser->getMail()]);
+
 
             if (!$user) {
                 $user = new User();
