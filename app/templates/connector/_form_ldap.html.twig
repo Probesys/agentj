@@ -6,7 +6,7 @@
   <div class="col-md-12">
     <div class="form-group">
       <label for="ldap_connector_name">{{ 'Entities.Connector.fields.name'|trans }}</label>
-      {{ form_widget(form.name) }}
+      {{ form_row(form.name) }}
     </div>
   </div>
   <div class="col-md-6">
@@ -30,12 +30,12 @@
   <div class="col-md-5">
     <div class="form-group">
       <label for="ldap_connector_LdapPassword">{{ 'Entities.LdapConnector.fields.LdapPassword'|trans }}</label>
-      
+
       {{ form_widget(form.LdapPassword, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapPassword',  ' data-action' : 'blur->form-ldap-connector#checkConnection' }}) }}
       <input type="hidden" name="encryptedPass" value="{{ connector.ldapPassword }}" data-form-ldap-connector-target="encryptedPass"/>
     </div>
   </div>      
-    <div class="col-md-2 mt-4 pt-2 text-success text-center" data-form-ldap-connector-target="ldapBindResult"></div>
+  <div class="col-md-2 mt-4 pt-2 text-success text-center" data-form-ldap-connector-target="ldapBindResult"></div>
   <div class="col-md-12">
     <div class="form-group">
       <label for="ldap_connector_LdapBaseDN">{{ 'Entities.LdapConnector.fields.LdapBaseDN'|trans }}</label>
@@ -60,7 +60,14 @@
       {{ form_widget(form.ldapEmailField) }}
     </div>
   </div>    
-  <div class="col-md-6">
+
+  <div class="col-md-12">
+    <div class="form-group">
+      {#      <label for="ldap_connector_synchronizeGroup">{{ 'Entities.LdapConnector.fields.synchronizeGroup'|trans }}</label>#}
+      {{ form_widget(form.synchronizeGroup, { 'attr' : {'data-action' : 'click->form-ldap-connector#showHideGroupInfoEventClick' }}) }}
+    </div>      
+ <fieldset id="info-group-ldap">
+     <div class="col-md-6">
     <div class="form-group">
       <label for="ldap_connector_ldapGroupField">{{ 'Entities.LdapConnector.fields.ldapGroupField'|trans }}</label>
       {{ form_widget(form.ldapGroupField) }}
@@ -85,7 +92,11 @@
       {{ form_widget(form.ldapGroupFilter, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapGroupFilter',  ' data-action' : 'blur->form-ldap-connector#checkUserFilter' }})  }}
       <small class="d-none form-text text-muted"></small>
     </div>
-  </div>        
+  </div>   
+  </fieldset>    
+  </div>
+
+      
 </div>
 {{ form_widget(form) }}
 <div class="d-flex justify-content-center">

@@ -17,7 +17,8 @@ export default class extends Controller {
 
   connect() {
     controllerForm = this.element;
-
+    const cboxSyncGroup = this.element.querySelector('#ldap_connector_synchronizeGroup');
+    this.showHideGroupInfo(cboxSyncGroup.checked);     
     this.checkConnection();
   }
 
@@ -91,5 +92,20 @@ export default class extends Controller {
               });
     }
 
+  }
+  
+  
+  showHideGroupInfoEventClick(event){
+    this.showHideGroupInfo(event.target.checked);        
+  }
+  
+  showHideGroupInfo(show){
+    const fieldSetGroupInfo = this.element.querySelector('#info-group-ldap');
+    if (show){
+      fieldSetGroupInfo.classList.remove('d-none');
+    }
+    else{
+      fieldSetGroupInfo.classList.add('d-none');
+    }
   }
 }

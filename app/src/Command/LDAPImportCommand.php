@@ -74,7 +74,11 @@ class LDAPImportCommand extends Command {
         ;
 
         $this->importUsers();
-        $this->importGroups();
+        if ($this->connector->isSynchronizeGroup())
+        {
+            $this->importGroups();    
+        }
+        
 
         $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
                     '$NB_CREATED' => $this->nbUserCreated,

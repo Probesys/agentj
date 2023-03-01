@@ -482,6 +482,7 @@ Entities:
       ldapBindDn: "Bind Dn"
       LdapPassword: "Mot de passe"
       ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
+      synchronizeGroup: "Synchronisez également les groupes"
       ldapEmailField: "Champ LDAP pour l'email"
       ldapGroupField: "Champ LDAP pour les groupes"
       ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
