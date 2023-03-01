@@ -40,8 +40,8 @@ class LDAPImportCommand extends Command {
     private LdapService $ldapService;
 
     public function __construct(
-            EntityManagerInterface $em, 
-            TranslatorInterface $translator,             
+            EntityManagerInterface $em,
+            TranslatorInterface $translator,
             LdapService $ldapService) {
         parent::__construct();
         $this->em = $em;
@@ -85,13 +85,10 @@ class LDAPImportCommand extends Command {
         return Command::SUCCESS;
     }
 
-    
-
     private function importUsers() {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
 
-        
         if ($this->connector->getLdapUserFilter()) {
             $ldapQuery = $this->connector->getLdapUserFilter();
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
@@ -151,6 +148,7 @@ class LDAPImportCommand extends Command {
 
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
+        $groupMemberAttribute = $this->connector->getLdapGroupMemberField();
 
         if ($this->connector->getLdapGroupFilter()) {
             $ldapQuery = $this->connector->getLdapGroupFilter();
@@ -158,7 +156,8 @@ class LDAPImportCommand extends Command {
 
             $results = $query->execute();
             foreach ($results as $ldapGroup) {
-                $nbMembers = $ldapGroup->getAttribute('member') ? count($ldapGroup->getAttribute('member')) : 0;
+                $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
+
                 if ($nbMembers > 0) {
                     /* @var $ldapGroup Entry */
                     $isNew = false;
@@ -174,19 +173,18 @@ class LDAPImportCommand extends Command {
                         $group->setWb("");
                         $isNew = true;
                     }
-                    $group->setName($ldapGroup->getAttribute('cn')[0]);
+                    $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                     $group->setOriginConnector($this->connector);
                     $this->em->persist($group);
                     $this->nbGroupUpdated = $isNew ? $this->nbGroupUpdated : $this->nbGroupUpdated = $this->nbGroupUpdated + 1;
                     $this->nbGroupCreated = $isNew ? $this->nbGroupCreated = $this->nbGroupCreated + 1 : $this->nbGroupCreated;
                     $this->addMembersToGroup($ldapGroup, $group);
-                }
+                } 
             }
 
             $this->em->flush();
         }
     }
-
 
     /**
      * 
@@ -199,13 +197,9 @@ class LDAPImportCommand extends Command {
         $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();
         $members = $ldapGroup->getAttribute($groupMemberfield) ? $ldapGroup->getAttribute($groupMemberfield) : [];
-//        dump($members);
+        dump($members);
         foreach ($members as $member) {
             $user = $this->em->getRepository(User::class)->findOneByLdapDN($member);
-            if ($groupMemberfield == 'memberUid') {
-                $user = $this->em->getRepository(User::class)->findOneByUid($member);
-            }
-
             if ($user) {
                 $group->addUser($user);
             }

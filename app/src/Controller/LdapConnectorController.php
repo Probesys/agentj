@@ -144,7 +144,7 @@ class LdapConnectorController extends AbstractController {
         }
     }
 
-    #[Route('/heck-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
+    #[Route('/check-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
     public function checkUserFilter(Domain $domain, Request $request, LdapService $ldapService): Response {
 
         $testConnector = new LdapConnector();
@@ -166,7 +166,7 @@ class LdapConnectorController extends AbstractController {
 
             try {
                 $ldap = $ldapService->bind($testConnector);
-                $ldapQuery = $testConnector->getLdapUserFilter();
+                $ldapQuery = $testConnector->getLdapUserFilter() ? $testConnector->getLdapUserFilter() : '';
                 $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
                 try {
                     $results = $query->execute();
