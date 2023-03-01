@@ -46,6 +46,9 @@ class LdapConnector extends Connector
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapGroupFilter;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapGroupNameField = null;
+
 
 
     public function getLdapHost(): ?string
@@ -202,6 +205,18 @@ class LdapConnector extends Connector
     public function setLdapGroupFilter(?string $ldapGroupFilter): self
     {
         $this->ldapGroupFilter = $ldapGroupFilter;
+
+        return $this;
+    }
+
+    public function getLdapGroupNameField(): ?string
+    {
+        return $this->ldapGroupNameField;
+    }
+
+    public function setLdapGroupNameField(?string $ldapGroupNameField): self
+    {
+        $this->ldapGroupNameField = $ldapGroupNameField;
 
         return $this;
     }
