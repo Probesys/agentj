@@ -1,6 +1,6 @@
 # AgentJ dockerized repository
 
- This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
+This is the Docker stack to set up a fully functional AgentJ antispam system at a glance.
 
 ## Introduction
 
@@ -8,10 +8,10 @@ The AgentJ Docker stack is composed of the following services:
 
 - **db**: a MariaDB instance, it keeps track of the mail headers and other information needed to manage the e-mails life cycle (sender, recipient, amavis id, ...)
 - **app**: a Web UI that allows you to add and manage your domains and associated users as well as managing the incoming e-mails (block, release, white/black lists)
-- **stmp**: a Postfix instance that will receive the e-mails and forward them to the **amavis** container (Amavis/ClamAV/Spamassassin service)
+- **smtp**: a Postfix instance that will receive the e-mails and forward them to the **amavis** container (Amavis/ClamAV/Spamassassin service)
 - **amavis**: a container running Amavis/Spamassassin and ClamAV services
 - **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
-- **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their receipient(s)
+- **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
 
 ## Get the sources
 
@@ -33,29 +33,35 @@ Variables are defined in the `.env.example`. This file is just a template, you *
 
 Then the following runtime variables must be configured in the `.env` file:
 
-| Variable             | Default        | Use                                         |
-|----------------------|----------------|---------------------------------------------|
-| VERSION              |                | this AgentJ latest prod version             |
-| COMPOSE_PROJECT_NAME | local          | this AgentJ instance name                   |
-| DB_ROOT_PASSWORD     | secret         | the MariaDB instance root password          |
-| DB_NAME              | agentj         | the AgentJ database name                    |
-| DB_USER              | agentj         | the AgentJ database user name               |
-| DB_PASSWORD          | secret         | the AgentJ database password                |
-| IPV4_NETWORK         | 172.42.42      | the AgentJ Docker default network           |
-| MAIL_HOSTNAME        | aj.example.com | the mailname used in postfix configuration  |
-| MAIL_DOMAINNAME      | example.com    | the domain name used in relay configuration |
-| SUPER_ADMIN_USERNAME | admin          | default super admin login                   |
-| SUPER_ADMIN_PASSWORD | Sup3rZECR37    | default super admin password                |
-| TZ                   | Europe/Paris   | the containers default timezone             |
-| PROXY_PORT           | 8090           | default listening port for web interface    |
-| PROXY_LISTEN_ADDR    | 127.0.0.1      | default listening address for web interface |
-| SMTP_PORT            | 25             | default listening port for smtp server      |
-| SMTP_LISTEN_ADDR     | 0.0.0.0        | default listening address for smtp server   |
-
+| Variable                  | Default        | Use                                         |
+|---------------------------|----------------|---------------------------------------------|
+| VERSION                   |                | this AgentJ latest prod version             |
+| COMPOSE_PROJECT_NAME      | local          | this AgentJ instance name                   |
+| DB_ROOT_PASSWORD          | secret         | the MariaDB instance root password          |
+| DB_NAME                   | agentj         | the AgentJ database name                    |
+| DB_USER                   | agentj         | the AgentJ database user name               |
+| DB_PASSWORD               | secret         | the AgentJ database password                |
+| IPV4_NETWORK              | 172.42.42      | the AgentJ Docker default network           |
+| MAIL_HOSTNAME             | aj.example.com | the mailname used in postfix configuration  |
+| MAIL_DOMAINNAME           | example.com    | the domain name used in relay configuration |
+| SUPER_ADMIN_USERNAME      | admin          | default super admin login                   |
+| SUPER_ADMIN_PASSWORD      | Sup3rZECR37    | default super admin password                |
+| TZ                        | Europe/Paris   | the containers default timezone             |
+| PROXY_PORT                | 8090           | default listening port for web interface    |
+| PROXY_LISTEN_ADDR         | 127.0.0.1      | default listening address for web interface |
+| SMTP_PORT                 | 25             | default listening port for smtp server      |
+| SMTP_LISTEN_ADDR          | 0.0.0.0        | default listening address for smtp server   |
+| OAUTH_AZURE_CLIENT_SECRET | secret         | client secret if using Azure auth           |
+| OAUTH_AZURE_CLIENT_ID     | secret         | client ID if using Azure auth               |
+| ENABLE_AZURE_OAUTH        | false          | enable Azure OAuth                          |
+| TRUSTED_PROXIES           | 172.24.42.1    | default stack gateway                       |
+| CLAMAV_AUTOSTART          | true           | use the ClamAV instance of this stack       |
+| CLAMAV_TCPADDRESS         | 0.0.0.0        | remote ClamAV server IP address             |
+| CLAMAV_TCPPORT            | 3310           | remote ClamAV server TCP port               |
 
 ### Network
 
-The AgentJ antispam stack has its own Docker bridge and IPv4 subnet which defaults to `172.42.42.0/24` (configurable, see variables table above).
+The AgentJ antispam stack has its own Docker bridge and IPv4 subnet which defaults to `172.24.42.0/24` (configurable, see variables table above).
 
 ## Use
 
@@ -79,10 +85,7 @@ When started, the AgentJ stack will create the following volumes:
 - *db* : the MariaDB databases files
 - *logs*: the log files from all containers, centralized by the **syslogng** container
 - *opendkim* : DKIM signature and conf files
-- *postfix_relay* : relay configuration
 - *postqueue* : the mail queue
-- *smtpconfig* : the main Postfix config
-- *spamassassin* : SA rules
 
 ### Communication matrix
 
@@ -97,13 +100,12 @@ When started, the AgentJ stack will create the following volumes:
 
 ## Upgrade
 
-In order to upgrade the AgentJ dockerized stack, you must stop the running containers, pull (or build locally if you prefer) the updated images, remove the `public` volume and start the updated stack:
+Please read the [dedicated documentation](https://doc.agentj.io/infra/upgrade/) as well as releases notes before upgrading.
+
+Generally speaking, the upgrade processes consists in the following:
 
     docker-compose down
-    # To upgrade only the webapp, delete and update its image
-    docker image rm $(docker image ls -q -f reference=*/*agentj_app)
-    # To upgrade all the stack, delete and update all images
-    docker image rm $(docker image ls -q -f reference=*/*agentj_*)
+    # Change VERSION variable in your `.nev` file
     docker-compose up -d
 
 ## About
