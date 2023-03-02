@@ -180,7 +180,7 @@ class LDAPImportCommand extends Command {
                         $group = new Groups();
                         $group->setLdapDN($ldapGroup->getDn());
                         $group->setPolicy($this->connector->getDomain()->getPolicy());
-                        $group->setActive(true);
+                        $group->setActive(false);
                         $group->setPriority(1);
                         $group->setOverrideUser(false);
                         $group->setDomain($this->connector->getDomain());
