@@ -192,7 +192,7 @@ class Office365ImportCommand extends Command {
                     $localGroup = new Groups();
                     $localGroup->setPriority(1);
                     $localGroup->setName($m365group->getDisplayName());
-                    $localGroup->isActive(true);
+                    $localGroup->isActive(false);
                     $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
                     $localGroup->setDomain($this->connector->getDomain());
                     $localGroup->setOriginConnector($this->connector);
