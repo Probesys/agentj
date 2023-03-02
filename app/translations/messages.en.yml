@@ -473,7 +473,6 @@ Entities:
       synchronizeGroup: "Also synchronize groups"
       ldapGroupNameField: "LDAP field for group name (ex : sn)"
       ldapEmailField: "LDAP field for email"
-      ldapGroupField: "LDAP field for groups"
       ldapUserFilter: "Filter for user"
       ldapGroupFilter: "Filter for groups"      
   Office365Connector:

@@ -56,11 +56,6 @@ class LdapConnectorType extends ConnectorType
                 'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',
                 'attr'=> ['data-ldap-group' => 'true']
             ])                                                   
-            ->add('ldapGroupField', null, [
-                'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapGroupField',
-                'attr'=> ['data-ldap-group' => 'true']
-            ])   
             ->add('ldapGroupMemberField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupMemberField',

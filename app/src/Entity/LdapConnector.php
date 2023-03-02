@@ -20,8 +20,6 @@ class LdapConnector extends Connector
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapPassword;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapGroupField;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapLoginField;
@@ -102,17 +100,6 @@ class LdapConnector extends Connector
         return $this;
     }
 
-    public function getLdapGroupFieldName(): ?string
-    {
-        return $this->ldapGroupField;
-    }
-
-    public function setLdapGroupFieldName(?string $ldapGroupField): self
-    {
-        $this->ldapGroupField = $ldapGroupField;
-
-        return $this;
-    }
 
     public function getLdapLoginField(): ?string
     {
@@ -126,19 +113,7 @@ class LdapConnector extends Connector
         return $this;
     }
 
-    public function getLdapGroupField(): ?string
-    {
-        return $this->ldapGroupField;
-    }
-
-    public function setLdapGroupField(?string $ldapGroupField): self
-    {
-        $this->ldapGroupField = $ldapGroupField;
-
-        return $this;
-    }
-
-    public function getLdapRealNameField(): ?string
+       public function getLdapRealNameField(): ?string
     {
         return $this->ldapRealNameField;
     }
