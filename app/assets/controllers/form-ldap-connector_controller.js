@@ -18,7 +18,7 @@ export default class extends Controller {
   connect() {
     controllerForm = this.element;
     const cboxSyncGroup = this.element.querySelector('#ldap_connector_synchronizeGroup');
-    this.showHideGroupInfo(cboxSyncGroup.checked);     
+    this.showHideGroupInfo(cboxSyncGroup.checked);
     this.checkConnection();
   }
 
@@ -93,19 +93,26 @@ export default class extends Controller {
     }
 
   }
-  
-  
-  showHideGroupInfoEventClick(event){
-    this.showHideGroupInfo(event.target.checked);        
+
+  showHideGroupInfoEventClick(event) {
+    this.showHideGroupInfo(event.target.checked);
   }
-  
-  showHideGroupInfo(show){
+
+  showHideGroupInfo(show) {
     const fieldSetGroupInfo = this.element.querySelector('#info-group-ldap');
-    if (show){
+    if (show) {
       fieldSetGroupInfo.classList.remove('d-none');
-    }
-    else{
+      const listGroupInput = document.querySelectorAll('[data-ldap-group]');
+      listGroupInput.forEach(input => {
+        input.setAttribute('required', true);
+      });
+    } else {
       fieldSetGroupInfo.classList.add('d-none');
+      const listGroupInput = document.querySelectorAll('[data-ldap-group]');
+      listGroupInput.forEach(input => {
+        input.removeAttribute('required');
+      });
     }
+
   }
 }

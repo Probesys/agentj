@@ -51,21 +51,29 @@ class LdapConnectorType extends ConnectorType
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.synchronizeGroup',
             ])                    
+            ->add('ldapGroupNameField', null, [
+                'required' => false,
+                'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',
+                'attr'=> ['data-ldap-group' => 'true']
+            ])                                                   
             ->add('ldapGroupField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupField',
+                'attr'=> ['data-ldap-group' => 'true']
             ])   
             ->add('ldapGroupMemberField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupMemberField',
+                'attr'=> ['data-ldap-group' => 'true']
             ])       
             ->add('ldapUserFilter', null, [
-                'required' => false,
-                'label' => 'Entities.LdapConnector.fields.ldapUserFilter',
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.ldapUserFilter',                
             ]) 
             ->add('ldapGroupFilter', null, [
-                'required' => false,
+                'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupFilter',
+                'attr'=> ['data-ldap-group' => 'true']
             ])                 
         ;
     }
