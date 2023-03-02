@@ -81,22 +81,21 @@ class GroupsController extends AbstractController {
                 ]));
             }
 
-            $em = $this->em;
-            $em->persist($group);
+            $this->em->persist($group);
 
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail('@.');
-                $em->persist($mailaddr);
+                $this->em->persist($mailaddr);
             }
             $groupsWblist = new GroupsWblist();
             $groupsWblist->setMailaddr($mailaddr);
             $groupsWblist->setGroups($group);
             $groupsWblist->setWb($group->getWb());
-            $em->persist($groupsWblist);
+            $this->em->persist($groupsWblist);
 
-            $em->flush();
+            $this->em->flush();
             return new Response(json_encode([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -222,13 +221,12 @@ class GroupsController extends AbstractController {
             'domain' => $domain,
             'name' => $name
         ]);
-//dd($group);
+
         if ($group) {
             return true;
         } else {
             return false;
         }
-//        return $this->redirectToRoute('groups_index');
     }
 
     /**
@@ -248,6 +246,26 @@ class GroupsController extends AbstractController {
         }
 
         return $this->redirectToRoute('groups_index');
+    }
+
+    /**
+     * @Route("/check-priority", name="groups_check_priority", methods="GET|POST")
+     */
+    public function checkPriorityExist(Request $request) {
+        $domainId = $request->request->get('domainId');
+        $domain = $this->em->getRepository(Domain::class)->find($domainId);
+
+        $priority = $request->request->get('priority');
+        $group = $this->em->getRepository(Groups::class)->findOneBy([
+            'domain' => $domain,
+            'priority' => $priority,
+        ]);
+
+        if (!$group || $group->getId() == $request->request->get('groupId')){
+            return new JsonResponse(['status' => 'success']);    
+        }
+        
+        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Generics.messages.groupWithPriorityExists')]);
     }
 
 }
