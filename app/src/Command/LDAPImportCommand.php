@@ -5,13 +5,9 @@ namespace App\Command;
 use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
-use App\Service\CryptEncryptService;
 use App\Service\LdapService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Exception\GuzzleException;
-use Microsoft\Graph\Graph;
-use Microsoft\Graph\Model\User as GraphUser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +15,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Ldap\Entry;
-use Symfony\Component\Ldap\Exception\InvalidCredentialsException;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -101,6 +96,7 @@ class LDAPImportCommand extends Command {
             foreach ($results as $entry) {
 
                 $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
+                // we consider that the first element of the email array is the main email of the user
                 $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
 
                 $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
@@ -133,6 +129,20 @@ class LDAPImportCommand extends Command {
                 $user->setRoles('["ROLE_USER"]');
 
                 $this->em->persist($user);
+                $listEmail = $entry->getAttribute($mailAttribute);
+                for ($i=1; $i < count($listEmail); $i++){
+                    $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $listEmail[$i]]);
+                    if (!$alias){
+                        $alias = new User();    
+                    }
+                    
+                    $alias->setEmail($listEmail[$i]);
+                    $alias->setUsername($listEmail[$i]);
+                    $alias->setOriginalUser($user);
+                    $alias->setDomain($user->getDomain());
+                    $this->em->persist($alias);                    
+                }
+
 
                 $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated = $this->nbUserUpdated + 1;
                 $this->nbUserCreated = $isNew ? $this->nbUserCreated = $this->nbUserCreated + 1 : $this->nbUserCreated;
