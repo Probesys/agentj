@@ -169,7 +169,7 @@ class LDAPImportCommand extends Command {
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
             $nbGroup = $this->connector->getDomain()->getGroups() ? count($this->connector->getDomain()->getGroups()) : 0;
-//            dd($nbGroup);
+
             $results = $query->execute();
             foreach ($results as $ldapGroup) {
                 $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;

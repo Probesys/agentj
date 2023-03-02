@@ -184,13 +184,13 @@ class Office365ImportCommand extends Command {
                     ->setReturnType(GraphGroup::class)
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
-
+            $nbGroup = $this->connector->getDomain()->getGroups() ? count($this->connector->getDomain()->getGroups()) : 0;
             foreach ($groups as $m365group) {
 
                 $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
                 if (!$localGroup) {
                     $localGroup = new Groups();
-                    $localGroup->setPriority(1);
+                    $localGroup->setPriority($nbGroup + 1);
                     $localGroup->setName($m365group->getDisplayName());
                     $localGroup->isActive(false);
                     $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
@@ -200,6 +200,7 @@ class Office365ImportCommand extends Command {
                     $localGroup->setUid($m365group->getId());
                     $this->em->persist($localGroup);
                     $this->em->flush();
+                    $nbGroup++;
                 }
                 /* @var $group GraphGroup */
                 $userGroup = $this->em->getRepository(User::class)->findOneByUid($m365group->getId());
