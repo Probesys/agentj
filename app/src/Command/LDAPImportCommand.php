@@ -168,7 +168,8 @@ class LDAPImportCommand extends Command {
             $ldapQuery = $this->connector->getLdapGroupFilter();
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
-            $nbGroup = $this->connector->getDomain()->getGroups() ? count($this->connector->getDomain()->getGroups()) : 0;
+//            $nbGroup = $this->connector->getDomain()->getGroups() ? count($this->connector->getDomain()->getGroups()) : 0;
+            $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
 
             $results = $query->execute();
             foreach ($results as $ldapGroup) {
@@ -183,12 +184,12 @@ class LDAPImportCommand extends Command {
                         $group->setLdapDN($ldapGroup->getDn());
                         $group->setPolicy($this->connector->getDomain()->getPolicy());
                         $group->setActive(false);
-                        $group->setPriority($nbGroup + 1);
+                        $group->setPriority($priorityMax);
                         $group->setOverrideUser(false);
                         $group->setDomain($this->connector->getDomain());
                         $group->setWb("");
                         $isNew = true;
-                        $nbGroup++;
+                        $priorityMax++;
                     }
                     $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                     $group->setOriginConnector($this->connector);

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -73,6 +74,17 @@ class GroupsRepository extends ServiceEntityRepository {
                 ->setParameter('user', $user);
         $query = $dql->getQuery()->setMaxResults(1);
         return $query->getOneOrNullResult();
+    }
+    
+    public function getMaxPriorityforDomain(Domain $domain): int {
+        $dql = $this->createQueryBuilder('g')
+                ->select('MAX(g.priority) as max')
+                ->where('g.domain = :domain')
+                ->setParameter('domain', $domain);
+        $query = $dql->getQuery();
+        $result = $query->getOneOrNullResult();
+        
+        return $result ? $result['max'] : 0;
     }
 
     // /**
