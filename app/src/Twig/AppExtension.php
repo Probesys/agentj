@@ -41,23 +41,23 @@ class AppExtension extends AbstractExtension {
         return stream_get_contents($input, -1, 0);
     }
 
-    public function getUserGroups(int $userId): string {
+    public function getUserGroups(int $userId): array {
 
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
-            return "";
+            return [];
         }
 
         $groups = $user->getGroups()->toArray();
         if (count($groups) === 0) {
-            return "";
+            return [];
         }
 
         $groupsLabel = array_map(function (Groups $group) {
             return $group->getName();
         }
                 , $groups);
-        return implode(', ', $groupsLabel);
+        return $groupsLabel;
     }
 
     /**

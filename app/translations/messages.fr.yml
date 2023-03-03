@@ -233,7 +233,8 @@ Message:
     connectionOk : "Connexion établie"
     connectionKo : "Connexion échouée"
     invalidLdapQuery: "Requête Ldap incorrecte"
-    ldapNbUserfound: "$NB_USER utilisateurs trouvés"
+    ldapNbUserfound: "$NB_USER utilisateur(s) trouvé(s)"
+    ldapNbGroupfound: "$NB_GROUP groupe(s) trouvé(s)"
   http:
     404:
       title: Page non trouvée

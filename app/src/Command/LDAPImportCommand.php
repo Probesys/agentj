@@ -39,7 +39,6 @@ class LDAPImportCommand extends Command {
         $this->em = $em;
         $this->translator = $translator;
         $this->ldapService = $ldapService;
-        
     }
 
     protected function configure(): void {
@@ -50,7 +49,7 @@ class LDAPImportCommand extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
-        $this->io =  new SymfonyStyle($input, $output);
+        $this->io = new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
         /* @var $connector LdapConnector */
@@ -67,11 +66,10 @@ class LDAPImportCommand extends Command {
         ;
 
         $this->importUsers();
-        if ($this->connector->isSynchronizeGroup())
-        {
-            $this->importGroups();    
+        if ($this->connector->isSynchronizeGroup()) {
+            $this->importGroups();
         }
-        
+
         return Command::SUCCESS;
     }
 
@@ -84,6 +82,8 @@ class LDAPImportCommand extends Command {
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
             $results = $query->execute();
+            $this->ldapService->filterUserResultOnDomain($results, $this->connector);
+
             $nbUserUpdated = 0;
             $nbUserCreated = 0;
             foreach ($results as $entry) {
@@ -93,17 +93,6 @@ class LDAPImportCommand extends Command {
                 $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
 
                 $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
-
-                if (!$emailAdress || (!filter_var($emailAdress, FILTER_VALIDATE_EMAIL))) {
-                    continue;
-                }
-
-                //check if same domain
-                $domainAdress = explode('@', $emailAdress)[1];
-
-                if ($domainAdress !== $this->connector->getDomain()->getDomain()) {
-                    continue;
-                }
 
                 $isNew = false;
                 if (!$user) {
@@ -123,17 +112,17 @@ class LDAPImportCommand extends Command {
 
                 $this->em->persist($user);
                 $listEmail = $entry->getAttribute($mailAttribute);
-                for ($i=1; $i < count($listEmail); $i++){
+                for ($i = 1; $i < count($listEmail); $i++) {
                     $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $listEmail[$i]]);
-                    if (!$alias){
-                        $alias = new User();    
+                    if (!$alias) {
+                        $alias = new User();
                     }
-                    
+
                     $alias->setEmail($listEmail[$i]);
                     $alias->setUsername($listEmail[$i]);
                     $alias->setOriginalUser($user);
                     $alias->setDomain($user->getDomain());
-                    $this->em->persist($alias);                    
+                    $this->em->persist($alias);
                 }
 
 
@@ -164,45 +153,43 @@ class LDAPImportCommand extends Command {
             $ldapQuery = $this->connector->getLdapGroupFilter();
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
-//            $nbGroup = $this->connector->getDomain()->getGroups() ? count($this->connector->getDomain()->getGroups()) : 0;
             $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
 
             $results = $query->execute();
             $nbGroupUpdated = 0;
             $nbGroupCreated = 0;
-            foreach ($results as $ldapGroup) {
-                $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
+            $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
 
-                if ($nbMembers > 0) {
-                    /* @var $ldapGroup Entry */
-                    $isNew = false;
-                    $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
-                    if (!$group) {
-                        $group = new Groups();
-                        $group->setLdapDN($ldapGroup->getDn());
-                        $group->setPolicy($this->connector->getDomain()->getPolicy());
-                        $group->setActive(false);
-                        $group->setPriority($priorityMax);
-                        $group->setOverrideUser(false);
-                        $group->setDomain($this->connector->getDomain());
-                        $group->setWb("");
-                        $isNew = true;
-                        $priorityMax++;
-                    }
-                    $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
-                    $group->setOriginConnector($this->connector);
-                    $this->em->persist($group);
-                    $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
-                    $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
-                    $this->addMembersToGroup($ldapGroup, $group);
-                } 
+            foreach ($results as $ldapGroup) {
+
+                /* @var $ldapGroup Entry */
+                $isNew = false;
+                $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
+                if (!$group) {
+                    $group = new Groups();
+                    $group->setLdapDN($ldapGroup->getDn());
+                    $group->setPolicy($this->connector->getDomain()->getPolicy());
+                    $group->setActive(false);
+                    $group->setPriority($priorityMax);
+                    $group->setOverrideUser(false);
+                    $group->setDomain($this->connector->getDomain());
+                    $group->setWb("");
+                    $isNew = true;
+                    $priorityMax++;
+                }
+                $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
+                $group->setOriginConnector($this->connector);
+                $this->em->persist($group);
+                $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
+                $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
+                $this->addMembersToGroup($ldapGroup, $group);
             }
-            
-        $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
-                    '$NB_GROUP_CREATED' => $nbGroupCreated,
-                    '$NB_GROUP_UPDATED' => $nbGroupUpdated,
-        ]));
-        
+
+            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+                        '$NB_GROUP_CREATED' => $nbGroupCreated,
+                        '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+            ]));
+
             $this->em->flush();
         }
     }

@@ -226,7 +226,10 @@ Message:
     senderBanned: 'The address is now banished'
     checkMailUnsuccessful: 'We couldn''t check this email.'
     connectionOk : "Connexion success"
-    connectionKo : "Unable to connect"    
+    connectionKo : "Unable to connect"   
+    invalidLdapQuery: "Invalid Ldap query"
+    ldapNbUserfound: "$NB_USER user(s) found"
+    ldapNbGroupfound: "$NB_GROUP group(s) found"     
   http:
     404:
       title: 'Page not found'

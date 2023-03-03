@@ -1,6 +1,7 @@
 {{ form_start(form, { "attr" : {'data-controller' : 'form-ldap-connector'}}) }}
 <input type="hidden" value="{{ path('app_connector_ldap_checkbind') }}" data-form-ldap-connector-target="urlCheckBind">
 <input type="hidden" value="{{ path('app_connector_ldap_check_user_filter', { 'domain' : connector.domain.id }) }}" data-form-ldap-connector-target="urlCheckUserFilter">
+<input type="hidden" value="{{ path('app_connector_ldap_check_groups_filter', { 'domain' : connector.domain.id }) }}" data-form-ldap-connector-target="urlCheckGroupFilter">
 
 <div class="row">
   <div class="col-md-12">
@@ -89,7 +90,7 @@
       <div class="col-md-12">
         <div class="form-group">
           <label for="ldap_connector_ldapUserFilter">{{ 'Entities.LdapConnector.fields.ldapGroupFilter'|trans }}</label>
-          {{ form_widget(form.ldapGroupFilter, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapGroupFilter',  ' data-action' : 'blur->form-ldap-connector#checkUserFilter' }})  }}
+          {{ form_widget(form.ldapGroupFilter, { 'attr' : { 'data-form-ldap-connector-target' : 'ldapGroupFilter',  ' data-action' : 'blur->form-ldap-connector#checkGroupFilter' }})  }}
           <small class="d-none form-text text-muted"></small>
         </div>
       </div>   

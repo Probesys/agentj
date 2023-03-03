@@ -170,13 +170,46 @@ class LdapConnectorController extends AbstractController {
                 $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
                 try {
                     $results = $query->execute();
-                    $users = array_filter($results->toArray(), function ($user) use ($testConnector) {
-                        $email = $user->getAttribute($testConnector->getLdapEmailField()) ? $user->getAttribute($testConnector->getLdapEmailField())[0] : null;
-                        $domainName = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? explode('@', $email)[1] : null;
+                    $ldapService->filterUserResultOnDomain($results, $testConnector);
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($results)])]);
+                } catch (LdapException $exc) {
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+                }
+            } catch (ConnectionException $exc) {
+                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+            }
+        }
+    }
 
-                        return $domainName == $testConnector->getDomain()->getDomain();
-                    });
-                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($users)])]);
+    #[Route('/check-groups-filter/{domain}', name: 'app_connector_ldap_check_groups_filter', methods: ['GET', 'POST'])]
+    public function checkGroupFilter(Domain $domain, Request $request, LdapService $ldapService): Response {
+
+        $testConnector = new LdapConnector();
+        $form = $this->createForm(LdapConnectorType::class, $testConnector);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $testConnector = $form->getData();
+            $testConnector->setDomain($domain);
+            $pass = $request->request->get('encryptedPass');
+            if ($testConnector->getLdapPassword()) {
+                $pass = $this->cryptEncryptService->encrypt($testConnector->getLdapPassword());
+            }
+
+            $testConnector->setLdapPassword($pass);
+            $return = [
+                'status' => ''
+            ];
+
+            try {
+                $ldap = $ldapService->bind($testConnector);
+                $ldapQuery = $testConnector->getLdapGroupFilter() ? $testConnector->getLdapGroupFilter() : '';
+                $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
+                try {
+                    $groups = $query->execute();
+                    $ldapService->filterGroupResultWihtoutMembers($groups, $testConnector->getLdapGroupMemberField());
+
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbGroupfound', ['$NB_GROUP' => count($groups)])]);
                 } catch (LdapException $exc) {
                     return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
                 }

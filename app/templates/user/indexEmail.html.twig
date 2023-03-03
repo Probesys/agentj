@@ -36,6 +36,8 @@
                 <tbody>
 
                     {% for user in users %}
+                      {% set groups = user.id | user_groups  %}
+{#                      {{ dump(groups) }}#}
                         <tr>
                             <td>
                                 <input type="checkbox" name="id[]" value="{{ user.id }}" id="{{ user.id }}" class="cb selected-msg">
@@ -44,7 +46,12 @@
                             <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
                             <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
                             <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
-                            <td data-title="{{'Entities.User.fields.groups'|trans }}">{{ user.id | user_groups }}</td>
+                            <td data-title="{{'Entities.User.fields.groups'|trans }}">
+                              {% for group in groups %}
+                                
+                                <span class="badge badge-secondary">{{ group }}</span>
+                              {% endfor %}
+                              </td>
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">

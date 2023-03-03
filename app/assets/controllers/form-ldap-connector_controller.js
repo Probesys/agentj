@@ -4,7 +4,7 @@ import { Controller } from 'stimulus';
 var controllerForm = null;
 export default class extends Controller {
   static get targets() {
-    return ['ldapPort', 'urlCheckBind', 'urlCheckUserFilter', 'ldapBindResult'];
+    return ['ldapPort', 'urlCheckBind', 'urlCheckUserFilter', 'urlCheckGroupFilter', 'ldapBindResult'];
   }
 
   connect() {
@@ -86,6 +86,33 @@ export default class extends Controller {
 
   }
 
+  checkGroupFilter(e) {
+    const targetResult = e.target;
+
+    var result = false;
+    if (this.ldapPortTarget.validity.valid) {
+      const formData = new FormData(controllerForm);
+
+
+      fetch(this.urlCheckGroupFilterTarget.value, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: formData
+      })
+              .then((response) => {
+                return response.json();
+              })
+              .then((data) => {
+                targetResult.nextSibling.nextSibling.innerHTML = data.message;
+                targetResult.nextSibling.nextSibling.classList.remove("d-none");
+              });
+    }
+
+  }
+  
+  
   showHideGroupInfoEventClick(event) {
     this.showHideGroupInfo(event.target.checked);
   }
