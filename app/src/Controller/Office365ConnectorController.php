@@ -95,7 +95,7 @@ class Office365ConnectorController extends AbstractController {
             $command = $this->application->find(Office365ImportCommand::getDefaultName());
             $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
             $command->run($input, $output);
-            $this->addFlash('success', $output->fetch());
+            $this->addFlash('success', nl2br($output->fetch()));
         }
 
 

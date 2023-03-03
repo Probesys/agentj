@@ -30,10 +30,9 @@ class Office365ImportCommand extends Command {
 
     private EntityManagerInterface $em;
     private Office365Connector $connector;
-    private int $nbUserCreated = 0;
-    private int $nbUserUpdated = 0;
     private $translator;
-
+    private SymfonyStyle $io;
+    
     public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
         parent::__construct();
         $this->em = $em;
@@ -48,30 +47,26 @@ class Office365ImportCommand extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
-        $io = new SymfonyStyle($input, $output);
+        $this->io =  new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
         /* @var $connector Office365Connector */
         $this->connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
         if (!$this->connector) {
-            $io->error('Connector not found');
+            $this->io->error('Connector not found');
             return Command::FAILURE;
         }
 
         $token = $this->getToken();
         if (!$token) {
-            $io->write($this->translator->trans('Message.Office365Connector.tokenError'));
+            $this->io->write($this->translator->trans('Message.Office365Connector.tokenError'));
             return Command::FAILURE;
         }
 
-//        
         $this->importUsers($token);
         $this->importGroups($token);
 
-        $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
-                    '$NB_CREATED' => $this->nbUserCreated,
-                    '$NB_UPDATED' => $this->nbUserUpdated,
-        ]));
+
         return Command::SUCCESS;
     }
 
@@ -110,6 +105,8 @@ class Office365ImportCommand extends Command {
             return false;
         }
 
+        $nbUserCreated = 0;
+        $nbUserUpdated = 0;
         foreach ($users as $graphUser) {
             /* @var $graphUser GraphUser */
             if (is_null($graphUser->getMail())) {
@@ -121,9 +118,9 @@ class Office365ImportCommand extends Command {
             if (!$user) {
                 $user = new User();
                 $user->setEmail($graphUser->getMail());
-                $this->nbUserCreated++;
+                $nbUserCreated++;
             } else {
-                $this->nbUserUpdated++;
+                $nbUserUpdated++;
             }
             
             $user->setUsername($graphUser->getMail());
@@ -142,6 +139,10 @@ class Office365ImportCommand extends Command {
             $this->em->persist($user);
             $this->em->flush();
         }
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
+                    '$NB_USER_CREATED' => $nbUserCreated,
+                    '$NB_USER_UPDATED' => $nbUserUpdated,
+        ]));        
     }
 
     private function addAliases(User $user, array $proxyAdresses):void {
@@ -180,6 +181,8 @@ class Office365ImportCommand extends Command {
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
             $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
+            $nbGroupCreated = 0;
+            $nbGroupUpdated = 0;
             foreach ($groups as $m365group) {
 
                 $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
@@ -202,9 +205,9 @@ class Office365ImportCommand extends Command {
                 if (!$userGroup) {
                     $userGroup = new User();
                     $userGroup->setEmail($m365group->getMail());
-                    $this->nbUserCreated++;
+                    $nbGroupCreated++;
                 } else {
-                    $this->nbUserUpdated++;
+                    $nbGroupUpdated++;
                 }
                 $userGroup->setUsername($m365group->getMail());
                 $userGroup->setFullname($m365group->getDisplayName());
@@ -222,6 +225,10 @@ class Office365ImportCommand extends Command {
         } catch (GuzzleException $exc) {
             
         }
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+                    '$NB_GROUP_CREATED' => $nbGroupCreated,
+                    '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+        ]));        
     }
 
     /**

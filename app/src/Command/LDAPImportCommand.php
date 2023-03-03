@@ -27,12 +27,9 @@ class LDAPImportCommand extends Command {
     private EntityManagerInterface $em;
     private ?LdapConnector $connector;
     private Ldap $ldap;
-    private int $nbUserCreated = 0;
-    private int $nbUserUpdated = 0;
-    private int $nbGroupCreated = 0;
-    private int $nbGroupUpdated = 0;
     private $translator;
     private LdapService $ldapService;
+    private SymfonyStyle $io;
 
     public function __construct(
             EntityManagerInterface $em,
@@ -42,6 +39,7 @@ class LDAPImportCommand extends Command {
         $this->em = $em;
         $this->translator = $translator;
         $this->ldapService = $ldapService;
+        
     }
 
     protected function configure(): void {
@@ -52,18 +50,18 @@ class LDAPImportCommand extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
-        $io = new SymfonyStyle($input, $output);
+        $this->io =  new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
         /* @var $connector LdapConnector */
         $this->connector = $this->em->getRepository(LdapConnector::class)->find($connectorId);
         if (!$this->connector) {
-            $io->error('Connector not found');
+            $this->io->error('Connector not found');
             return Command::FAILURE;
         }
 
         if (!$this->ldap = $this->ldapService->bind($this->connector)) {
-            $io->error("Cannot connect to LDAP Server");
+            $this->io->error("Cannot connect to LDAP Server");
             return Command::FAILURE;
         }
         ;
@@ -74,13 +72,6 @@ class LDAPImportCommand extends Command {
             $this->importGroups();    
         }
         
-
-        $io->write($this->translator->trans('Message.Office365Connector.resultImport', [
-                    '$NB_CREATED' => $this->nbUserCreated,
-                    '$NB_UPDATED' => $this->nbUserUpdated,
-                    '$NB_GROUP_UPDATED' => $this->nbGroupUpdated,
-                    '$NB_GROUP_CREATED' => $this->nbGroupCreated,
-        ]));
         return Command::SUCCESS;
     }
 
@@ -93,6 +84,8 @@ class LDAPImportCommand extends Command {
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
             $results = $query->execute();
+            $nbUserUpdated = 0;
+            $nbUserCreated = 0;
             foreach ($results as $entry) {
 
                 $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
@@ -144,12 +137,15 @@ class LDAPImportCommand extends Command {
                 }
 
 
-                $this->nbUserUpdated = $isNew ? $this->nbUserUpdated : $this->nbUserUpdated = $this->nbUserUpdated + 1;
-                $this->nbUserCreated = $isNew ? $this->nbUserCreated = $this->nbUserCreated + 1 : $this->nbUserCreated;
+                $nbUserUpdated = $isNew ? $nbUserUpdated : $nbUserUpdated = $nbUserUpdated + 1;
+                $nbUserCreated = $isNew ? $nbUserCreated = $nbUserCreated + 1 : $nbUserCreated;
             }
         }
 
-
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
+                    '$NB_USER_CREATED' => $nbUserCreated,
+                    '$NB_USER_UPDATED' => $nbUserUpdated,
+        ]));
         $this->em->flush();
     }
 
@@ -172,6 +168,8 @@ class LDAPImportCommand extends Command {
             $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
 
             $results = $query->execute();
+            $nbGroupUpdated = 0;
+            $nbGroupCreated = 0;
             foreach ($results as $ldapGroup) {
                 $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
 
@@ -194,12 +192,17 @@ class LDAPImportCommand extends Command {
                     $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                     $group->setOriginConnector($this->connector);
                     $this->em->persist($group);
-                    $this->nbGroupUpdated = $isNew ? $this->nbGroupUpdated : $this->nbGroupUpdated = $this->nbGroupUpdated + 1;
-                    $this->nbGroupCreated = $isNew ? $this->nbGroupCreated = $this->nbGroupCreated + 1 : $this->nbGroupCreated;
+                    $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
+                    $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
                     $this->addMembersToGroup($ldapGroup, $group);
                 } 
             }
-
+            
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+                    '$NB_GROUP_CREATED' => $nbGroupCreated,
+                    '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+        ]));
+        
             $this->em->flush();
         }
     }

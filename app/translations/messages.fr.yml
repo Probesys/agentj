@@ -247,8 +247,10 @@ Message:
       description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
-  Office365Connector:
-    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour<br>$NB_GROUP_CREATED groupes créés, $NB_GROUP_UPDATED mis à jour<br>"
+  Connector:
+    resultImportUser: "$NB_USER_CREATED utilisateurs créé(s), $NB_USER_UPDATED mis à jour"
+    resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED mis à jour"
+    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED users updated"  
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information

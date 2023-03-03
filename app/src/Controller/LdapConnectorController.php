@@ -112,7 +112,7 @@ class LdapConnectorController extends AbstractController {
             $command = $this->application->find(LDAPImportCommand::getDefaultName());
             $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
             $command->run($input, $output);
-            $this->addFlash('success', $output->fetch());
+            $this->addFlash('success', nl2br($output->fetch()));
         }
 
 
