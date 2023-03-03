@@ -133,7 +133,6 @@ class GroupsController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->em;
             if ($oldName != $group->getName() || $olddomain != $group->getDomain()) {
                 $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
                 if ($labelExists) {
@@ -144,19 +143,21 @@ class GroupsController extends AbstractController {
                 }
             }
 
-            $em->persist($group);
+            $this->em->persist($group);
 
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
 
             $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
-            if ($groupsWblist) {
+            if (!$groupsWblist){
+                $groupsWblist = new GroupsWblist();
+                $groupsWblist->setMailaddr($mailaddr);
+            }
                 $groupsWblist->setGroups($group);
                 $groupsWblist->setWb($group->getWb());
-                $em->persist($groupsWblist);
-            }
+                $this->em->persist($groupsWblist);
 
 
-            $em->flush();
+            $this->em->flush();
 
             $groupService->updateWblist();
             foreach ($group->getUsers() as $user) {
@@ -164,7 +165,7 @@ class GroupsController extends AbstractController {
             }
 
 
-            $em->flush();
+            $this->em->flush();
 
             return new Response(json_encode([
                         'status' => 'success',
