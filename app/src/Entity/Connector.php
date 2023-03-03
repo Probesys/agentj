@@ -13,10 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
 #[ORM\DiscriminatorMap(['office365' => 'Office365Connector', 'LDAP' => 'LdapConnector'])]
-class Connector
-{
+class Connector {
+
     use EntityBlameableTrait;
     use EntityTimestampableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -32,7 +33,6 @@ class Connector
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private $domain;
 
-
     #[ORM\Column(type: 'string', length: 50)]
     private $type;
 
@@ -42,61 +42,53 @@ class Connector
     #[ORM\OneToMany(targetEntity: Groups::class, mappedBy: 'originConnector')]
     private $groups;
 
-    public function __construct()
-    {
+    #[ORM\Column(nullable: true)]
+    private ?bool $synchronizeGroup = null;
+
+    public function __construct() {
         $this->users = new ArrayCollection();
         $this->groups = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getName(): ?string
-    {
+    public function getName(): ?string {
         return $this->name;
     }
 
-    public function setName(string $name): self
-    {
+    public function setName(string $name): self {
         $this->name = $name;
 
         return $this;
     }
 
-    public function isActive(): ?bool
-    {
+    public function isActive(): ?bool {
         return $this->active;
     }
 
-    public function setActive(?bool $active): self
-    {
+    public function setActive(?bool $active): self {
         $this->active = $active;
 
         return $this;
     }
 
-    public function getDomain(): ?Domain
-    {
+    public function getDomain(): ?Domain {
         return $this->domain;
     }
 
-    public function setDomain(?Domain $domain): self
-    {
+    public function setDomain(?Domain $domain): self {
         $this->domain = $domain;
 
         return $this;
     }
 
-
-    public function getType(): ?string
-    {
+    public function getType(): ?string {
         return $this->type;
     }
 
-    public function setType(string $type): self
-    {
+    public function setType(string $type): self {
         $this->type = $type;
 
         return $this;
@@ -105,13 +97,11 @@ class Connector
     /**
      * @return Collection<int, User>
      */
-    public function getUsers(): Collection
-    {
+    public function getUsers(): Collection {
         return $this->users;
     }
 
-    public function addUser(User $user): self
-    {
+    public function addUser(User $user): self {
         if (!$this->users->contains($user)) {
             $this->users[] = $user;
             $user->setOriginConnector($this);
@@ -120,8 +110,7 @@ class Connector
         return $this;
     }
 
-    public function removeUser(User $user): self
-    {
+    public function removeUser(User $user): self {
         if ($this->users->removeElement($user)) {
             // set the owning side to null (unless already changed)
             if ($user->getOriginConnector() === $this) {
@@ -135,13 +124,11 @@ class Connector
     /**
      * @return Collection<int, Groups>
      */
-    public function getGroups(): Collection
-    {
+    public function getGroups(): Collection {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
-    {
+    public function addGroup(Groups $group): self {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
             $group->setOriginConnector($this);
@@ -150,8 +137,7 @@ class Connector
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
-    {
+    public function removeGroup(Groups $group): self {
         if ($this->groups->removeElement($group)) {
             // set the owning side to null (unless already changed)
             if ($group->getOriginConnector() === $this) {
@@ -161,4 +147,15 @@ class Connector
 
         return $this;
     }
+
+    public function isSynchronizeGroup(): ?bool {
+        return $this->synchronizeGroup;
+    }
+
+    public function setSynchronizeGroup(?bool $synchronizeGroup): self {
+        $this->synchronizeGroup = $synchronizeGroup;
+
+        return $this;
+    }
+
 }

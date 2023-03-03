@@ -64,8 +64,11 @@ class Office365ImportCommand extends Command {
         }
 
         $this->importUsers($token);
-        $this->importGroups($token);
-
+        
+        if ($this->connector->isSynchronizeGroup())
+        {
+            $this->importGroups($token);
+        }
 
         return Command::SUCCESS;
     }

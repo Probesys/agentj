@@ -47,10 +47,6 @@ class LdapConnector extends Connector
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ldapGroupNameField = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $synchronizeGroup = null;
-
-
 
     public function getLdapHost(): ?string
     {
@@ -199,17 +195,7 @@ class LdapConnector extends Connector
         return $this;
     }
 
-    public function isSynchronizeGroup(): ?bool
-    {
-        return $this->synchronizeGroup;
-    }
-
-    public function setSynchronizeGroup(?bool $synchronizeGroup): self
-    {
-        $this->synchronizeGroup = $synchronizeGroup;
-
-        return $this;
-    }
+    
 
 
 }

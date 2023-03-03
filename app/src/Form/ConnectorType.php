@@ -20,7 +20,11 @@ class ConnectorType extends AbstractType
             ->add('name', null, [
                 'label' => 'Entities.Connector.fields.name'
             ])
-            ->add('type', HiddenType::class)               
+            ->add('type', HiddenType::class) 
+            ->add('synchronizeGroup', null, [
+                'required' => false,
+                'label' => 'Entities.LdapConnector.fields.synchronizeGroup',
+            ])                 
         ;
     }
 
