@@ -108,6 +108,7 @@ Generics:
     passwordNotMatching: 'Password confirmation is not valid'
     groupNameAllreadyExist: This group label already exists for this domain. You can't
       use it
+    BadFormatcsv: "Bad format file"
   units:
     literByDay: litres/day
     hoursByDay: Hours/day
