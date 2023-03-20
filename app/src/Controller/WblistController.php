@@ -201,7 +201,7 @@ class WblistController extends AbstractController {
                     $this->em->flush();
                 }
 
-                if (filter_var(trim($data), FILTER_VALIDATE_EMAIL)) {
+                if (filter_var(trim($data), FILTER_VALIDATE_EMAIL) || filter_var(trim($data), FILTER_VALIDATE_DOMAIN)) {
 
                     foreach ($domains as $domain) {
                         if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
