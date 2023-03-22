@@ -85,6 +85,28 @@ class WblistRepository extends ServiceEntityRepository
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAssociative();
     }
+    
+  /**
+   * 
+   * @param type $rid
+   * @param type $sid
+   * @return Wblist|null
+   */
+    public function findOneByRidAndSid($rid, Mailaddr $senderAddr):?Wblist
+    {
+dd($rid);
+        $dql = $this->createQueryBuilder('wb')
+                ->select('wb')
+                ->join('wb.sid', 'maddr')
+                ->where('wb.rid = :rid')
+                ->andWhere('maddr.email= :maddr')
+                ->setParameter('maddr', $senderAddr->getEmail())
+                ->setParameter('rid', $rid);
+        $query = $dql->getQuery();
+//        dd($query->getSQL());
+        $result = $query->getOneOrNullResult();
+        return $result;
+    }    
 
 
   /**

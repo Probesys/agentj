@@ -40,6 +40,8 @@ class ImportController extends AbstractController {
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_user_email'),
         ]);
+        $form->remove('domains');
+        
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();

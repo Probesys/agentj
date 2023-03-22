@@ -110,6 +110,7 @@ Generics:
     passwordNotMatching: La confirmation du mot de passe n'est pas valide
     groupNameAllreadyExist: Ce groupe existe déjà pour domaine. Vous ne pouvez pas
       utiliser ce nom
+    BadFormatcsv: "Mauvais format de fichier"
   units:
     literByDay: litres/jour
     hoursByDay: Heures/jour

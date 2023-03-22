@@ -43,6 +43,7 @@ COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/amavisd.conf /etc/amavisd.conf
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
+COPY conf/spamassassin/local.cf /etc/mail/spamassassin/local.cf
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY amavisd.patch /root/amavisd.patch
