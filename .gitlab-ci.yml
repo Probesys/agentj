@@ -56,6 +56,7 @@ app_build:
         -t $REGISTRY/agentj_$IMG:base .
     - cd $CI_PROJECT_DIR/$IMG && docker build
         --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --target run
         --build-arg BUILDKIT_INLINE_CACHE=1
         -t $REGISTRY/agentj_$IMG:$TAG .
     - docker push $REGISTRY/agentj_$IMG:$TAG
