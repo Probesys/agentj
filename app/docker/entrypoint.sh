@@ -37,20 +37,28 @@ sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php81/php.ini
 
-echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php81 bin/console assets:install
+DIR=/var/www/agentj/vendor
 
-echo "Create database if not exists and update schemas"
-cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:database:create --if-not-exists
-cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:migration:migrate
+if [ -d "$DIR" ]; then
+    echo "Installing assets"
+    cd /var/www/agentj && sudo -u www-data php81 bin/console assets:install
 
-echo "Create or update super admin user"
-cd /var/www/agentj && php81 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+    echo "Create database if not exists and update schemas"
+    cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:database:create --if-not-exists
+    cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:migration:migrate
 
-# Allow web server user to write Symphony logs
-rm -rf /var/www/agentj/var/cache
-chown -R www-data:www-data /var/www/agentj/var
-find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
+    echo "Create or update super admin user"
+    cd /var/www/agentj && php81 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+
+    # Allow web server user to write Symphony logs
+    rm -rf /var/www/agentj/var/cache
+    chown -R www-data:www-data /var/www/agentj/var
+    find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
+else
+    # If we are in dev environment
+    echo "Install symfony with composer install"
+fi
+
 # Allow web server user to purge old virus and spam mails
 addgroup -g 101 amavis && adduser www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 

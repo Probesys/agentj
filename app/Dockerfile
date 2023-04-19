@@ -63,15 +63,27 @@ RUN apk --no-cache add \
     php81 \
     php81-bz2 \
     php81-common \
+    php81-ctype \
     php81-curl \
+    php81-dom \
+    php81-fileinfo \
     php81-fpm \
     php81-gd \
+    php81-iconv \
     php81-imap \
     php81-intl \
     php81-json \
     php81-mbstring \
     php81-mysqli \
+    php81-mysqlnd \
     php81-opcache \
+    php81-openssl \
+    php81-pdo_mysql \
+    php81-phar \
+    php81-session \
+    php81-simplexml \
+    php81-sysvsem \
+    php81-tokenizer \
     php81-xml \
     php81-zip \
     rsyslog \
@@ -83,7 +95,9 @@ RUN apk --no-cache add \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
     && yarn add @symfony/webpack-encore \
-    && yarn encore production
+    && yarn encore production\
+    && mkdir -p /var/run/php/ && touch /var/run/php/php81-fpm.pid \
+    && mkdir -p /var/db/dkim
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
