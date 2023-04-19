@@ -1033,10 +1033,10 @@
 "@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets":
   version "0.1.0"
 
-"@symfony/webpack-encore@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@symfony/webpack-encore/-/webpack-encore-4.0.0.tgz#47937806dd17866d41845c000824ab42f1a7d099"
-  integrity sha512-4CrI3Q4mxl/wmAOhGlNVJGasbw9XlZiffN2HgOb9qUsuzJPnNf1qqKz4BbZO8I/R8XLWXi3wVMgIl4cKFxxtCw==
+"@symfony/webpack-encore@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@symfony/webpack-encore/-/webpack-encore-4.2.0.tgz#1eec87e3fca9a410563511eb557f70461c10cce5"
+  integrity sha512-m0ZGm7vZpmc9pVKE7YBppS1tb9bK8r0qzOvRI2uCK7UfXtzfV3VgXr0VdTAlfmC72vvLKI+s9YJpiesOFbR6Aw==
   dependencies:
     "@nuxt/friendly-errors-webpack-plugin" "^2.5.1"
     assets-webpack-plugin "7.0.*"
@@ -2824,16 +2824,7 @@ loader-runner@^4.2.0:
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.3.0.tgz#c1b4a163b99f614830353b16755e7149ac2314e1"
   integrity sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==
 
-loader-utils@^2.0.0:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-2.0.4.tgz#8b5cb38b5c34a9a018ee1fc0e6a066d1dfcc528c"
-  integrity sha512-xXqpXoINfFhgua9xiqD8fPFHgkoq1mmmpE92WlDbm9rNRd/EbRb+Gqf908T2DMfuHjjJlksiK2RbHVOdD/MqSw==
-  dependencies:
-    big.js "^5.2.2"
-    emojis-list "^3.0.0"
-    json5 "^2.1.2"
-
-loader-utils@^2.0.4:
+loader-utils@^2.0.0, loader-utils@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-2.0.4.tgz#8b5cb38b5c34a9a018ee1fc0e6a066d1dfcc528c"
   integrity sha512-xXqpXoINfFhgua9xiqD8fPFHgkoq1mmmpE92WlDbm9rNRd/EbRb+Gqf908T2DMfuHjjJlksiK2RbHVOdD/MqSw==
