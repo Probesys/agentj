@@ -41,7 +41,7 @@ services:
       - amavis
       - db
     volumes:
-      - ./app:/var/www/agentj
+      - ./app:/var/www/
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
       - opendkim:/var/db/dkim
