@@ -230,7 +230,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles = json_decode($this->roles);
 

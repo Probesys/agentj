@@ -146,7 +146,7 @@ class LDAPImportCommand extends Command {
     private function importGroups(): void {
 
         $mailAttribute = $this->connector->getLdapEmailField();
-        $realNameAttribute = $this->connector->getLdapRealNameField();
+        $realNameAttribute = $this->connector->getLdapGroupNameField();
         $groupMemberAttribute = $this->connector->getLdapGroupMemberField();
 
         if ($this->connector->getLdapGroupFilter()) {
@@ -177,6 +177,8 @@ class LDAPImportCommand extends Command {
                     $isNew = true;
                     $priorityMax++;
                 }
+//                dump($realNameAttribute);
+//                dd($ldapGroup);
                 $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                 $group->setOriginConnector($this->connector);
                 $this->em->persist($group);
