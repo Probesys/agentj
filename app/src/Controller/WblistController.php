@@ -120,7 +120,7 @@ class WblistController extends AbstractController {
     public function batchDeleteAction(Request $request, MsgsRepository $msgRepository) {
         $em = $this->em;
 
-        foreach ($request->request->all('id') as $obj) {
+        foreach ($request->request->get('id') as $obj) {
             $mailInfo = json_decode($obj);
             $em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
         }
@@ -138,7 +138,7 @@ class WblistController extends AbstractController {
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);
-            foreach ($request->request->all('id') as $obj) {
+            foreach ($request->request->get('id') as $obj) {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'delete':

@@ -171,7 +171,7 @@ class LdapConnectorController extends AbstractController {
                 try {
                     $results = $query->execute();
                     $ldapService->filterUserResultOnDomain($results, $testConnector);
-                    return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($results)])]);
+                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($results)])]);
                 } catch (LdapException $exc) {
                     return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
                 }

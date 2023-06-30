@@ -66,7 +66,8 @@ class LdapService {
                 $baseDN = $connector->getLdapBaseDN();
                 $dn = $connector->getLdapLoginField() . '=' . $user->getUid() . ',' . $baseDN;
                 try {
-                    $ldap->bind(null, $password);
+
+                    $ldap->bind($dn, $password);
                     return true;
                 } catch (ConnectionException $exception) {
                     continue;

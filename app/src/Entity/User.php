@@ -416,29 +416,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
- 
-    /**
-     * @return Collection<int, User>
-     */
+  /**
+   * @return Collection|self[]
+   */
     public function getOwnedSharedBoxes(): Collection
     {
         return $this->ownedSharedBoxes;
     }
 
-    public function addOwnedSharedBox(User $ownedSharedBox): self
+    public function addOwnedSharedBox(self $ownedSharedBox): self
     {
         if (!$this->ownedSharedBoxes->contains($ownedSharedBox)) {
-            $this->ownedSharedBoxes->add($ownedSharedBox);
-            $ownedSharedBox->addSharedWith($this);
+            $this->ownedSharedBoxes[] = $ownedSharedBox;
+            $owner->addSharedWith($this);
         }
 
         return $this;
     }
 
-    public function removeOwnedSharedBox(User $ownedSharedBox): self
+    public function removeOwnedSharedBox(self $ownedSharedBox): self
     {
-        if ($this->ownedSharedBoxes->removeElement($ownedSharedBox)) {
-            $ownedSharedBox->removeSharedWith($this);
+        if ($this->owners->contains($ownedSharedBox)) {
+            $this->owners->removeElement($ownedSharedBox);
+            $ownedSharedBoxes->removeSharedWith($this);
         }
 
         return $this;
