@@ -219,7 +219,7 @@ class MessageController extends AbstractController {
     public function batchMessageAction($action = null, Request $request, MsgsRepository $msgRepository) {
         $em = $this->em;
         if ($action) {
-            foreach ($request->request->get('id') as $obj) {
+            foreach ($request->request->all('id') as $obj) {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'authorized':
