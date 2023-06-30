@@ -88,19 +88,21 @@ class LDAPImportCommand extends Command {
             $nbUserCreated = 0;
             foreach ($results as $entry) {
 
-                $user = $this->em->getRepository(User::class)->findOneByLdapDN($entry->getDN());
-                // we consider that the first element of the email array is the main email of the user
                 $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
+                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
+                // we consider that the first element of the email array is the main email of the user
+                
 
                 $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
 
                 $isNew = false;
                 if (!$user) {
                     $user = new User();
-                    $user->setLdapDN($entry->getDN());
+                    
                     $user->setPolicy($this->connector->getDomain()->getPolicy());
                     $isNew = true;
                 }
+                $user->setLdapDN($entry->getDN());
                 $user->setUid($entry->getAttribute('uid')[0]);
                 $user->setOriginConnector($this->connector);
                 $user->setFullname($userName);

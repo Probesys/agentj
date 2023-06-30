@@ -50,7 +50,7 @@ class LdapService {
             $ldap->bind($bindDN, $clearPassword);
             return $ldap;
         } catch (ConnectionException $exception) {
-            throw new ConnectionException('Please configure ldap search DN');
+            throw new ConnectionException('Could not connect to ldap server');
         }
     }
 
