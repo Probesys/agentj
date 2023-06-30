@@ -7,7 +7,6 @@ use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\Policy;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
@@ -75,25 +74,27 @@ class UserController extends AbstractController {
         $form->remove('originalUser');
         $form->remove('report');
         $form->remove('sharedWith');
+        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
+//            dd($form->get('password')->get('first')->getData());
             if ($userNameExist) {
                 //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAllreadyExist'));
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
                 ];
-            } elseif ($request->request->get('user')['password']['first'] != $request->request->get('user')['password']['second']) {
+            } elseif ($form->get('password')->get('first')->getData() != $form->get('password')->get('second')->getData()) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.passwordNotMatching'),
                 ];
             } elseif ($form->isValid()) {
-                $role = $request->request->get('user')['roles'];
-                $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
+                $role = $form->get('roles')->getData();
+                $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
                 $policy = $this->em->getRepository(Policy::class)->find(5);
                 $user->setPassword($encoded);
                 $user->setPolicy($policy);
@@ -133,18 +134,19 @@ class UserController extends AbstractController {
         $form->remove('originalUser');
         $form->remove('report');
         $form->remove('sharedWith');
+        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $request->request->get('user')['username']]);
+            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $form->get('username')->getData()]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if ($oldUser['username'] != $request->request->get('user')['username'] && $userNameExist) {
+            if ($oldUser['username'] != $form->get('username')->getData() && $userNameExist) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
                 ];
             } else {
-                $role = $request->request->get('user')['roles'];
+                $role = $form->get('roles')->getData();
                 $user->setRoles($role);
 
                 $this->em->flush();
@@ -181,12 +183,21 @@ class UserController extends AbstractController {
         $form->remove('originalUser');
         $form->remove('report');
         $form->remove('sharedWith');
+        $form->remove('imapLogin');
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $encoded = $passwordHasher->hashPassword($user, $request->request->get('user')['password']['first']);
-            $user->setPassword($encoded);
-            $this->em->flush();
+        if ($form->isSubmitted()) {
+
+            if (!$form->isValid()) {
+                $errros = $form->getErrors(true);
+//                dd($errros[0]->getMessage());
+                $this->addFlash('error', $errros[0]->getMessage());
+            } else {
+                $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
+                $user->setPassword($encoded);
+                $this->em->flush();
+            }
+
 
             return $this->redirectToRoute('users_local_index', ['id' => $user->getId()]);
         }
@@ -228,7 +239,7 @@ class UserController extends AbstractController {
      */
     public function batchDeleteEmail(Request $request): Response {
 
-        foreach ($request->request->get('id') as $id) {
+        foreach ($request->request->all('id') as $id) {
             $user = $this->em->getRepository(User::class)->find($id);
             if ($user) {
                 $this->em->remove($user);
@@ -273,10 +284,10 @@ class UserController extends AbstractController {
             $data = $form->getData();
 
             $emailExist = $userRepository->findOneBy(['email' => $data->getEmail()]);
-            
-            $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
-            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
-            
+//            dd($form->get('email')->getData());
+            $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
+            $imapLoginExist = !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
@@ -289,9 +300,9 @@ class UserController extends AbstractController {
                 ];
             } elseif ($imapLoginExist) {
                 $return = [
-                'status' => 'danger',
-                'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
-                ];                
+                    'status' => 'danger',
+                    'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                ];
             } elseif ($form->isValid()) {
                 $user->setRoles('["ROLE_USER"]');
                 $user->setUsername($user->getEmail());
@@ -351,7 +362,7 @@ class UserController extends AbstractController {
         if ($form->isSubmitted()) {
             $data = $form->getData();
             $aliaslExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-            $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
+            $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
@@ -401,7 +412,6 @@ class UserController extends AbstractController {
 
         $oldGroups = $user->getGroups()->toArray();
 
-
         $allowedomainIds = array_map(function ($entity) {
 
             if ($entity) {
@@ -428,25 +438,25 @@ class UserController extends AbstractController {
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
 
-//            $newDomainName = explode('@', $request->request->get('user')['email'])[1];
-            $newDomain = $this->checkDomainAccess(explode('@', $request->request->get('user')['email'])[1]);
-            
-            $imapLoginExist =  !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+//            $newDomainName = explode('@', $form->get('email')->getData())[1];
+            $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
+
+            $imapLoginExist = !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
-            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
+            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
-            } elseif ($oldUserData['imapLogin'] != $request->request->get('user')['imapLogin'] && $imapLoginExist) {
+            } elseif ($oldUserData['imapLogin'] != $form->get('imapLogin')->getData() && $imapLoginExist) {
                 $return = [
-                'status' => 'danger',
-                'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
-                ];                
+                    'status' => 'danger',
+                    'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                ];
             } elseif ($form->isValid()) {
 
                 $policy = $this->computeUserPolicy($user);
@@ -507,7 +517,7 @@ class UserController extends AbstractController {
             $data = $form->getData(); //dump();die;
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if (stream_get_contents($oldUser['email'], -1, 0) != $request->request->get('user')['email'] && $emailExist) {
+            if (stream_get_contents($oldUser['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
@@ -541,9 +551,9 @@ class UserController extends AbstractController {
      * @return Policy
      */
     private function computeUserPolicy(User $user): Policy {
-        $policy = null;        
+        $policy = null;
         $groupsRepository = $this->em->getRepository(Groups::class);
-        if ($user->getGroups() && count($user->getGroups()) > 0) {            
+        if ($user->getGroups() && count($user->getGroups()) > 0) {
             $defaultGroup = array_reduce($user->getGroups()->toArray(), function ($a, $b) {
                 return $a && $a->getPriority() > $b->getPriority() ? $a : $b;
             });
@@ -655,5 +665,4 @@ class UserController extends AbstractController {
 
         return new Response(json_encode($return), $return ? 200 : 404);
     }
-
 }
