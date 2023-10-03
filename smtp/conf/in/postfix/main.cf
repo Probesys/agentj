@@ -6,7 +6,7 @@ compatibility_level = 2
 smtp_host_lookup = dns, native
 
 myhostname = $MAIL_HOSTNAME
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK.0/24
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK
 mydestination = 
 
 smtpd_relay_restrictions = 
@@ -45,9 +45,9 @@ alias_database = hash:/etc/postfix/aliases
 local_recipient_maps =
 local_transport = error:local mail delivery is disabled 
 
-relay_domains = proxy:mysql:/etc/postfix/mysql-virtual_domains.cf
-relay_recipient_maps = mysql:/etc/postfix/mysql-virtual_recipient_maps.cf
-transport_maps = proxy:mysql:/etc/postfix/mysql-transport_map.cf
+relay_domains = proxy:mysql:/etc/conf/in/postfix/mysql-virtual_domains.cf
+relay_recipient_maps = mysql:/etc/conf/in/postfix/mysql-virtual_recipient_maps.cf
+transport_maps = proxy:mysql:/etc/conf/in/postfix/mysql-transport_map.cf
 relayhost =
 soft_bounce = no
 
@@ -60,5 +60,5 @@ policyd-spf_time_limit = 3600
 
 milter_default_action = accept
 milter_protocol = 6
-smtpd_milters = inet:$IPV4_NETWORK.240:8891
-non_smtpd_milters = inet:$IPV4_NETWORK.240:8891
+smtpd_milters = inet:app:8891
+non_smtpd_milters = inet:app:8891
