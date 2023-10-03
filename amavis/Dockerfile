@@ -40,7 +40,7 @@ RUN apk --no-cache add \
     zip
 
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
-COPY conf/amavis/amavisd.conf /etc/amavisd.conf
+COPY conf/amavis/*.conf /etc/
 COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
 COPY entrypoint.sh /entrypoint.sh
