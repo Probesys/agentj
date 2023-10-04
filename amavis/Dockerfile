@@ -1,43 +1,50 @@
-FROM alpine:3.15
+FROM debian:stable-slim 
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Amavis & ClamAV dockerized for AgentJ"
 LABEL description = "Starts Amavis with DB connection, uses local ClamAV as AV scanner"
 
-RUN apk --no-cache add \
-    amavis \
-    unarj \
-    bzip2 \
-    ca-certificates \
+
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
+    apt-get update -q --fix-missing && \
+    apt-get -y install --no-install-recommends \
+    amavisd-new \
+    arj \
     cabextract \
     clamav \
-    clamav-clamdscan \
-    clamav-db \
     clamav-daemon \
-    clamav-libunrar \
-    clamav-milter \
-    clamav-scanner \
     cpio \
-    dcron \
-    file \
-    freshclam \
-    gpg-agent \
-    gzip \
-    iproute2 \
-    perl-dbd-mysql \
-    perl-db \
-    perl-dbi \
-    perl-io-socket-ssl \
-    perl-mail-spf \
-    patch \
-    pax-utils \
-    rsyslog \
+    lhasa \
+    libdbi-perl \
+    libjson-perl \
+    liblwp-protocol-https-perl \
+    libwww-perl \
+    lzop \
+    nomarch \
+    p7zip \
+    rpm \
     spamassassin \
-    spamassassin-client \
-    supervisor \
-    tzdata \
-    unzip \
-    zip
+    spamc \
+    spamd \
+    gnupg \
+    libmail-spf-perl \
+    libencode-detect-perl \
+    libio-socket-ssl-perl \
+    libnet-patricia-perl \
+    libdbd-mysql-perl \
+    #unrar \
+    pyzor  \
+    razor \
+    supervisor  \ 
+    rsyslog \ 
+    tzdata  \
+    iproute2 \
+    cron \
+    patch  
+
+
 
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/*.conf /etc/
@@ -47,7 +54,7 @@ COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 COPY amavisd.patch /root/amavisd.patch
 
-RUN patch -p1 /usr/sbin/amavisd < /root/amavisd.patch
+RUN cd /usr/share/perl5/Amavis && patch -p1 < /root/amavisd.patch
 RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
         --daemon-notify=/etc/clamav/clamd.conf \
         --config-file=/etc/clamav/freshclam.conf
