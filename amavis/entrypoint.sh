@@ -1,12 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
+IPV4=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d\/)
 # Initialize Amavis conf with variables
 sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/$AMAVIS_CONF
 sed -i "s/\$DB_USER/$DB_USER/g" /etc/$AMAVIS_CONF
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/$AMAVIS_CONF
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/$AMAVIS_CONF
 sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/$AMAVIS_CONF
+sed -i "s~\$IPV4~$IPV4~g" /etc/$AMAVIS_CONF
 sed -i "s/\$CLAMAV_AUTOSTART/$CLAMAV_AUTOSTART/g" /etc/supervisord.conf
 echo "$MAIL_HOSTNAME" > /etc/mailname
 chmod 644 /etc/$AMAVIS_CONF
@@ -26,7 +28,7 @@ then
     adduser clamav amavis && adduser amavis clamav
     chown -R clamav:clamav /run/clamav
 fi
-if [ "$CLAMAV_AUTOSTART" == "true" ]
+if [ $CLAMAV_AUTOSTART == "true" ]
 then
     echo "Configuring local ClamAV server"
     CLAMAV_CONFIG="\/run\/clamav\/clamd.ctl"
@@ -38,6 +40,6 @@ else
 fi
 sed -i "s/\$CLAMAV_CONFIG/$CLAMAV_CONFIG/g" /etc/$AMAVIS_CONF
 
-crond
+cron
 
 exec "$@"
