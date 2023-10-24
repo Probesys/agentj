@@ -83,7 +83,6 @@ class GroupsRepository extends ServiceEntityRepository {
                 ->setParameter('domain', $domain);
         $query = $dql->getQuery();
         $result = $query->getOneOrNullResult();
-//        dd($result);
         return $result && $result['max'] ? $result['max'] : 0;
     }
 
