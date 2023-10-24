@@ -39,7 +39,7 @@ class MessageController extends AbstractController {
     /**
      * @Route("/{type}", name="message")
      */
-    public function index($type = null, Request $request, TranslatorInterface $translator, PaginatorInterface $paginator) {
+    public function index(Request $request, TranslatorInterface $translator, PaginatorInterface $paginator, $type = null) {
         $subTitle = '';
         $messageActions = [
             'Message.Actions.Delete' => 'delete'
@@ -216,7 +216,7 @@ class MessageController extends AbstractController {
      * @Route("/batch/{action}", name="message_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
-    public function batchMessageAction($action = null, Request $request, MsgsRepository $msgRepository) {
+    public function batchMessageAction(Request $request, MsgsRepository $msgRepository, $action = null) {
         $em = $this->em;
         if ($action) {
             foreach ($request->request->all('id') as $obj) {

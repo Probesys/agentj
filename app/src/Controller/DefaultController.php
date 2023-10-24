@@ -148,7 +148,7 @@ class DefaultController extends AbstractController {
      * @param string  $language
      * @return Response
      */
-    public function setLocaleAction(Request $request, $language = null, EntityManagerInterface $em) {
+    public function setLocaleAction(Request $request, EntityManagerInterface $em, $language = null) {
         if (null != $language) {
             $request->getSession()->set('_locale', $language);
         }
