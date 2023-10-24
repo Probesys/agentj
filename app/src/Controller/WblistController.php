@@ -134,7 +134,7 @@ class WblistController extends AbstractController {
      * @Route("/batch/{action}", name="wblist_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
-    public function batchWbListAction($action = null, Request $request, MsgsRepository $msgRepository) {
+    public function batchWbListAction(Request $request, MsgsRepository $msgRepository, $action = null) {
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);
