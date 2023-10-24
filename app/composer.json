@@ -53,7 +53,7 @@
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.4",
         "twig/twig": "3.4.3",
-        "webklex/php-imap": "^4.1",
+        "webklex/php-imap": "^5.3",
         "willdurand/js-translation-bundle": "^4.0"
     },
     "require-dev": {
