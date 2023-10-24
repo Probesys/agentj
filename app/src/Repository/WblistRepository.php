@@ -197,7 +197,9 @@ dd($rid);
                                     inner join user_groups ug on ug.user_id =u.id
                                     inner join groups g on g.id =ug.groups_id 
                                     inner join groups_wblist gw on gw.group_id =g.id 
-                                    where g.active = true and gw.wb !=''";
+                                    where g.active = true and gw.wb !='' and g.priority is not null";
+
+                
         $stmt = $conn->prepare($sqlSelectGroupwbList);
         $stmt->execute();
     }

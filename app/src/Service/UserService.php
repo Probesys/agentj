@@ -30,7 +30,6 @@ class UserService {
         $defaultGroup = $this->groupsRepository->getMainUserGroup($user);
 
         $policy = $defaultGroup ? $defaultGroup->getPolicy() : $user->getDomain()->getPolicy();
-//        dd($policy);
         $user->setPolicy($policy);
         $this->em->persist($user);
         $aliases = $this->userRepository->getListAliases($user);
@@ -38,7 +37,6 @@ class UserService {
             $alias->setPolicy($policy);
             $this->em->persist($alias);
         }
-//        $this->em->flush();
     }
 
     /**
