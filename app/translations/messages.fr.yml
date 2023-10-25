@@ -65,6 +65,7 @@ Generics:
     EmailDoesNotExist: Le compte email n'existe pas dans la base de données
     BadColumnsFile: Le nombre de colonne est incorrecte. Vérifier votre fichier.
     incorrectCredential: Identifiants incorrects
+    groupWithPriorityExists: 'Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'
   labels:
     filters: Filtres
     item_per_page: Nombre d'éléments par page (sur %totalItemFound% trouvés)
@@ -230,6 +231,11 @@ Message:
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
+    connectionOk : "Connexion établie"
+    connectionKo : "Connexion échouée"
+    invalidLdapQuery: "Requête Ldap incorrecte"
+    ldapNbUserfound: "$NB_USER utilisateur(s) trouvé(s)"
+    ldapNbGroupfound: "$NB_GROUP groupe(s) trouvé(s)"
   http:
     404:
       title: Page non trouvée
@@ -243,8 +249,10 @@ Message:
       description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
-  Office365Connector:
-    resultImport: "$NB_CREATED utilisateurs créés, $NB_UPDATED mis à jour"
+  Connector:
+    resultImportUser: "$NB_USER_CREATED utilisateurs créé(s), $NB_USER_UPDATED mis à jour"
+    resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED mis à jour"
+    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED users updated"  
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
@@ -466,6 +474,25 @@ Entities:
     fields:
       name: "Nom du connecteur"    
       type: "Type de connecteur"  
+  LdapConnector:
+    labels:
+    actions:
+      add: "Ajouter un connecteur Ldap"
+      edit: "Editer le connecteur Ldap"
+    fields:
+      ldapHost: "Hôte"
+      ldapPort: "Port (défaut 389)"
+      LdapBaseDN: "BaseDN"
+      ldapLoginField: "Champ LDAP pour le login (ex : uid)"
+      ldapBindDn: "Bind Dn"
+      LdapPassword: "Mot de passe"
+      ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
+      synchronizeGroup: "Synchronisez également les groupes"
+      ldapGroupNameField: "Champ LDAP pour le nom du groupe (ex : sn)"
+      ldapEmailField: "Champ LDAP pour l'email"
+      ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
+      ldapUserFilter: "Filtre pour les utilisateur"
+      ldapGroupFilter: "Filtre pour les groupes"
   Office365Connector:
     labels:
     actions:

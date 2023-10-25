@@ -63,6 +63,7 @@ Generics:
     EmailDoesNotExist: 'The email account does not exist in the database'
     BadColumnsFile: 'The number of columns is incorrect. Check your file.'
     incorrectCredential: Invalid credentials
+    groupWithPriorityExists: 'A group with same priority allready exists for this domain. Please choose another one'
   labels:
     filters: Filters
     item_per_page: 'Number of items per page (sur %totalItemFound% found)'
@@ -225,6 +226,11 @@ Message:
     senderAuthorized: 'The address is now authorized'
     senderBanned: 'The address is now banished'
     checkMailUnsuccessful: 'We couldn''t check this email.'
+    connectionOk : "Connexion success"
+    connectionKo : "Unable to connect"   
+    invalidLdapQuery: "Invalid Ldap query"
+    ldapNbUserfound: "$NB_USER user(s) found"
+    ldapNbGroupfound: "$NB_GROUP group(s) found"     
   http:
     404:
       title: 'Page not found'
@@ -238,8 +244,10 @@ Message:
       description: 'An error occurred that prevents the display of this page. <br/><br/>
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
-  Office365Connector:
-    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated"
+  Connector:
+    resultImportUser: "$NB_USER_CREATED users created, $NB_USER_UPDATED updated"
+    resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED updated"
+    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED users updated"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information
@@ -456,6 +464,24 @@ Entities:
     fields:
       name: "Connector name"    
       type: "Connector type" 
+  LdapConnector:
+    labels:
+    actions:
+      add: "Add Ldap connector"
+      edit: "Edit Ldap connector"
+    fields:
+      ldapHost: "Host"
+      ldapPort: "Port (default 389)"
+      LdapBaseDN: "BaseDN"
+      ldapLoginField: "LDAP field for login (ex : uid)"
+      ldapBindDn: "Bind Dn"
+      LdapPassword: "Password"
+      ldapRealNameField: "LDAP Field for username (ex : sn)"
+      synchronizeGroup: "Also synchronize groups"
+      ldapGroupNameField: "LDAP field for group name (ex : sn)"
+      ldapEmailField: "LDAP field for email"
+      ldapUserFilter: "Filter for user"
+      ldapGroupFilter: "Filter for groups"      
   Office365Connector:
     labels:
     fields:

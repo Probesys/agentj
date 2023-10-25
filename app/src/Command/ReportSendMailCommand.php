@@ -35,7 +35,7 @@ class ReportSendMailCommand extends Command {
         $this->setDescription('Send report email ');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output):int {
 //        $translator = $this->getContainer()->get('translator');
 
         $io = new SymfonyStyle($input, $output);

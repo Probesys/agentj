@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Security;
+//use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+
 
 use App\Entity\User;
+use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -21,7 +24,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -38,6 +40,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
     private $csrfTokenManager;
     private $entityManager;
     private $translator;
+    private LdapService $ldapService;
     private $logger;
 
     public const LOGIN_ROUTE = 'app_login';
@@ -47,8 +50,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             ParameterBagInterface $params,
             CsrfTokenManagerInterface $csrfTokenManager,
             EntityManagerInterface $entityManager,
-            TranslatorInterface $translator,
+            TranslatorInterface $translator, 
+            LdapService $ldapService,
             LoggerInterface $logger
+
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->params = $params;
@@ -56,9 +61,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         $this->csrfTokenManager = $csrfTokenManager;
         $this->entityManager = $entityManager;
         $this->translator = $translator;
+        $this->ldapService = $ldapService;
     }
 
-    public function authenticate(Request $request): PassportInterface {
+    public function authenticate(Request $request): Passport {
 
         $username = $request->request->get('username', '');
         $csrf_token = $request->request->get('_csrf_token', '');
@@ -93,6 +99,13 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
 
+        $ldapBind = $this->ldapService->bindUser($user, $password);
+        if ($ldapBind){
+            return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
+        }
+        
+//        dd($ldapBind);
+        
         $loginImap = $this->getLoginImap($user, $password);
         
         if (!$loginImap) {
@@ -128,6 +141,9 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         
         
     }
+    
+
+    
 
     private function getLocalUser(String $userName) {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
