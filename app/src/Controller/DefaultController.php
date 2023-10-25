@@ -9,7 +9,7 @@ use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Form\CaptchaFormType;
-use App\Service\CryptEncrypt;
+use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -60,11 +60,11 @@ class DefaultController extends AbstractController {
     /**
      * @Route("/check/{token}", name="check_message", methods="GET|POST")
      */
-    public function checkCaptcha($token, Request $request, MessageController $messageController, CryptEncrypt $cryptEncrypt) {
+    public function checkCaptcha($token, Request $request, MessageController $messageController, CryptEncryptService $cryptEncrypt) {
         $em = $this->em;
         $confirm = "";
 
-        $decrypt = $cryptEncrypt->decryptUrl($token);
+        $decrypt = $cryptEncrypt->decrypt($token);
         $mailId = null;
         $date = null;
         $rid = null;
@@ -148,7 +148,7 @@ class DefaultController extends AbstractController {
      * @param string  $language
      * @return Response
      */
-    public function setLocaleAction(Request $request, $language = null, EntityManagerInterface $em) {
+    public function setLocaleAction(Request $request, EntityManagerInterface $em, $language = null) {
         if (null != $language) {
             $request->getSession()->set('_locale', $language);
         }

@@ -50,7 +50,7 @@ class ActionsFilterType extends AbstractType
         return 'massive-actions-form';
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix():string
     {
         return $this->getName();
     }

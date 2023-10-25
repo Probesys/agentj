@@ -164,7 +164,7 @@ class MsgsRepository extends ServiceEntityRepository
    * @param type $type
    * @return type
    */
-    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate)
+    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null)
     {
 
         $conn = $this->getEntityManager()->getConnection();

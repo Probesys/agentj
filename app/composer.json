@@ -27,6 +27,7 @@
         "symfony/framework-bundle": "5.4.*",
         "symfony/http-client": "5.4.*",
         "symfony/intl": "5.4.*",
+        "symfony/ldap": "5.4.*",
         "symfony/lock": "5.4.*",
         "symfony/mailer": "5.4.*",
         "symfony/mime": "5.4.*",
@@ -52,10 +53,12 @@
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/intl-extra": "^3.4",
         "twig/twig": "3.4.3",
-        "webklex/php-imap": "^4.1",
+        "webklex/php-imap": "^5.3",
         "willdurand/js-translation-bundle": "^4.0"
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "fzaninotto/faker": "^1.5",
         "rector/rector": "^0.15.7",
         "symfony/browser-kit": "^5.3",
         "symfony/css-selector": "^5.3",

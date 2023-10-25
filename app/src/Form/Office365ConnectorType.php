@@ -13,9 +13,15 @@ class Office365ConnectorType extends ConnectorType
     {
         parent::buildForm($builder, $options);
         $builder
-            ->add('tenant')
-            ->add('client')
-            ->add('clientSecret')
+            ->add('tenant', null, [
+                'label' => 'Entities.Office365Connector.fields.tenant',
+            ])
+            ->add('client', null, [
+                'label' => 'Entities.Office365Connector.fields.client',
+            ])
+            ->add('clientSecret', null, [
+                'label' => 'Entities.Office365Connector.fields.clientSecret',
+            ])
 //            ->add('connector')
         ;
     }

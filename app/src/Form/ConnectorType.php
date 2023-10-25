@@ -17,8 +17,14 @@ class ConnectorType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name')
-            ->add('type', HiddenType::class)               
+            ->add('name', null, [
+                'label' => 'Entities.Connector.fields.name'
+            ])
+            ->add('type', HiddenType::class) 
+            ->add('synchronizeGroup', null, [
+                'required' => false,
+                'label' => 'Entities.LdapConnector.fields.synchronizeGroup',
+            ])                 
         ;
     }
 

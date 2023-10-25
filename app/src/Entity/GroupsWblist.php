@@ -8,11 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
  * GroupsWblist
  */
 #[ORM\Table(name: 'groups_wblist')]
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: 'App\Repository\GroupsWblistRepository')]
 class GroupsWblist
 {
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups', inversedBy: 'groupsWbLists')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
     private $groups;

@@ -9,6 +9,8 @@ use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Form\GroupsType;
+use App\Service\GroupService;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -79,22 +81,21 @@ class GroupsController extends AbstractController {
                 ]));
             }
 
-            $em = $this->em;
-            $em->persist($group);
+            $this->em->persist($group);
 
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
                 $mailaddr = new Mailaddr();
                 $mailaddr->setEmail('@.');
-                $em->persist($mailaddr);
+                $this->em->persist($mailaddr);
             }
             $groupsWblist = new GroupsWblist();
             $groupsWblist->setMailaddr($mailaddr);
             $groupsWblist->setGroups($group);
             $groupsWblist->setWb($group->getWb());
-            $em->persist($groupsWblist);
+            $this->em->persist($groupsWblist);
 
-            $em->flush();
+            $this->em->flush();
             return new Response(json_encode([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -110,7 +111,7 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Groups $group): Response {
+    public function edit(Request $request, Groups $group, GroupService $groupService, UserService $userService): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -132,7 +133,6 @@ class GroupsController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->em;
             if ($oldName != $group->getName() || $olddomain != $group->getDomain()) {
                 $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
                 if ($labelExists) {
@@ -143,21 +143,30 @@ class GroupsController extends AbstractController {
                 }
             }
 
-            $em->persist($group);
+            $this->em->persist($group);
 
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
 
             $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
-            if ($groupsWblist) {
+            if (!$groupsWblist){
+                $groupsWblist = new GroupsWblist();
+                $groupsWblist->setMailaddr($mailaddr);
+            }
                 $groupsWblist->setGroups($group);
                 $groupsWblist->setWb($group->getWb());
-                $em->persist($groupsWblist);
+                $this->em->persist($groupsWblist);
+
+
+            $this->em->flush();
+
+            $groupService->updateWblist();
+            foreach ($group->getUsers() as $user) {
+                $userService->updateUserAndAliasPolicy($user);
             }
 
 
-            $em->flush();
+            $this->em->flush();
 
-            $this->updatedWBListFromGroup($group->getId());
             return new Response(json_encode([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.editSuccess'),
@@ -185,23 +194,20 @@ class GroupsController extends AbstractController {
     /**
      * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
      */
-    public function removeUser(Request $request, Groups $group, User $user): Response {
+    public function removeUser(Request $request, Groups $group, User $user, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $em = $this->em;
-            //check if alias
-            if ($user->getOriginalUser()) {
-                $user = $user->getOriginalUser();
-            }
-            $domainPolicy = $user->getDomain()->getPolicy();
-            $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-            array_unshift($userAliases, $user);
+            $oldGroups = $user->getGroups()->toArray();
+            $group->removeUser($user);
 
-            foreach ($userAliases as $userAlias) {
-                $userAlias->setGroups(null);
-                $userAlias->setPolicy($domainPolicy);
+            $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+            foreach ($userAliases as $alias) {
+                $group->removeUser($alias);
             }
-            $em->flush();
-            $this->updatedWBListFromGroup($group->getId());
+            $this->em->flush();
+            $userService->updateUserAndAliasPolicy($user);
+            $groupService->updateWblist();
+
+            $this->em->flush();
         }
 
         return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
@@ -216,27 +222,51 @@ class GroupsController extends AbstractController {
             'domain' => $domain,
             'name' => $name
         ]);
-//dd($group);
+
         if ($group) {
             return true;
         } else {
             return false;
         }
-//        return $this->redirectToRoute('groups_index');
     }
 
     /**
      * @Route("/{id}/delete", name="groups_delete", methods="GET")
      */
-    public function delete(Request $request, Groups $group): Response {
+    public function delete(Request $request, Groups $group, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-            $em = $this->em;
-            $this->em->getRepository(User::class)->updatePolicyFromGroupToDomain($group->getId());
-            $em->remove($group);
-            $em->flush();
+            $groupUsers = $group->getUsers()->toArray();
+
+            $this->em->remove($group);
+            $this->em->flush();
+            $groupService->updateWblist();
+            foreach ($groupUsers as $user) {
+                $userService->updateUserAndAliasPolicy($user);
+            }
+            $this->em->flush();
         }
 
         return $this->redirectToRoute('groups_index');
+    }
+
+    /**
+     * @Route("/check-priority", name="groups_check_priority", methods="GET|POST")
+     */
+    public function checkPriorityExist(Request $request) {
+        $domainId = $request->request->get('domainId');
+        $domain = $this->em->getRepository(Domain::class)->find($domainId);
+
+        $priority = $request->request->get('priority');
+        $group = $this->em->getRepository(Groups::class)->findOneBy([
+            'domain' => $domain,
+            'priority' => $priority,
+        ]);
+
+        if (!$group || $group->getId() == $request->request->get('groupId')){
+            return new JsonResponse(['status' => 'success']);    
+        }
+        
+        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Generics.messages.groupWithPriorityExists')]);
     }
 
 }

@@ -50,9 +50,12 @@ class Groups
     #[ORM\Column(type: 'string', length: 10)]
     private $wb;
 
-    #[ORM\OneToMany(targetEntity: 'App\Entity\User', mappedBy: 'groups', cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'groups', cascade: ['persist'])]
     private $users;
 
+
+    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
+    private $groupsWbLists;    
 
     /**
      * @Gedmo\Slug(fields={"name"})
@@ -66,6 +69,18 @@ class Groups
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $active;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $priority;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $uid;
+
+    #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'groups')]
+    private $originConnector;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $ldapDN;
+
     public function __toString()
     {
         return $this->name;
@@ -77,6 +92,7 @@ class Groups
         $this->datemod = new \DateTime();
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->groupsWbLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -178,37 +194,7 @@ class Groups
         return $this;
     }
 
-    /**
-     * @return Collection|User[]
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-            $user->setGroups($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        if ($this->users->contains($user)) {
-            $this->users->removeElement($user);
-            // set the owning side to null (unless already changed)
-            if ($user->getGroups() === $this) {
-                $user->setGroups(null);
-            }
-        }
-
-        return $this;
-    }
-
+    
     public function getSlug(): ?string
     {
         return $this->slug;
@@ -241,6 +227,121 @@ class Groups
     public function setActive(?bool $active): self
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function getPriority(): ?int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(?int $priority): self
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
+    public function isOverrideUser(): ?bool
+    {
+        return $this->overrideUser;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @return Collection<int, GroupsWblist>
+     */
+    public function getGroupsWbLists(): Collection
+    {
+        return $this->groupsWbLists;
+    }
+
+    public function addGroupsWbList(GroupsWblist $groupsWbList): self
+    {
+        if (!$this->groupsWbLists->contains($groupsWbList)) {
+            $this->groupsWbLists[] = $groupsWbList;
+            $groupsWbList->setGroups($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupsWbList(GroupsWblist $groupsWbList): self
+    {
+        if ($this->groupsWbLists->removeElement($groupsWbList)) {
+            // set the owning side to null (unless already changed)
+            if ($groupsWbList->getGroups() === $this) {
+                $groupsWbList->setGroups(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->addGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): self
+    {
+        $this->uid = $uid;
+
+        return $this;
+    }
+
+    public function getOriginConnector(): ?Connector
+    {
+        return $this->originConnector;
+    }
+
+    public function setOriginConnector(?Connector $originConnector): self
+    {
+        $this->originConnector = $originConnector;
+
+        return $this;
+    }
+
+    public function getLdapDN(): ?string
+    {
+        return $this->ldapDN;
+    }
+
+    public function setLdapDN(?string $ldapDN): self
+    {
+        $this->ldapDN = $ldapDN;
 
         return $this;
     }

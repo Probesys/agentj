@@ -17,9 +17,11 @@ class Wblist
     const WBLIST_PRIORITY_GROUP = 50;
     const WBLIST_PRIORITY_USER = 100;
     const WBLIST_PRIORITY_GROUP_OVERRIDE = 200;
-
-
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\User')]
+    
+    const WBLIST_TYPE_USER = 0 ; // Web liste origin is user        
+    const WBLIST_TYPE_SENDER = 1 ; // Web liste origin is sender via human authentication
+    const WBLIST_TYPE_GROUP = 2; // Web list origin is group
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\User', inversedBy: 'wbLists')]
     #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
     private $rid;
@@ -52,6 +54,7 @@ class Wblist
     private $groups;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Id]
     private $priority;
 
     public function __construct(User $user, Mailaddr $mailaddr)

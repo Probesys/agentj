@@ -4,18 +4,14 @@ namespace App\Form;
 
 use App\Entity\Domain;
 use App\Entity\Groups;
-use App\Entity\User;
-use App\Entity\Policy;
 use App\Repository\DomainRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormInterface;
 
 class GroupsType extends AbstractType
 {
@@ -26,6 +22,10 @@ class GroupsType extends AbstractType
         $user = $options['user'];
 
         $builder
+            ->add('id', HiddenType::class, [
+                'attr' => ['data-form-group-target' =>  'group'],
+                'mapped' => false,
+            ])                
             ->add('name', null, [
                 'label' => 'Entities.Group.fields.name'
             ])
@@ -35,7 +35,6 @@ class GroupsType extends AbstractType
             ->add('policy', null, [
                 'label' => 'Entities.Group.fields.policy',
                 'required' => true,
-                //'empty_data' => $policyNormal, //not work
                 'placeholder' => 'Select a policy'
             ])
             ->add('wb', ChoiceType::class, [
@@ -43,11 +42,16 @@ class GroupsType extends AbstractType
                 'label' => 'Form.PolicyDomain',
                 'required' => false
                 ])
+            ->add('priority', NumberType::class, [
+                'label' => 'Generics.fields.priority',
+                'required' => true,
+                'attr' => ['data-action' => 'blur->form-group#checkPriorityValidity', 'data-form-group-target' =>  'priority']
+                ])                
             ->add('domain', EntityType::class, [
                 'label' => 'Entities.Group.fields.domain',
                 'class' => Domain::class,
                 'multiple' => false,
-                'attr' => ['class' => 'select2'],
+                'attr' => ['data-form-group-target' =>  'domain', 'data-action' => 'change->form-group#checkPriorityValidity'],
                 'placeholder' => 'Select Domain',
                 'required' => true,
                 'query_builder' => function (DomainRepository $rep) use ($user) {

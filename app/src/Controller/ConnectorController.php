@@ -11,8 +11,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-#[Route('/connector')]
+/**
+ * @Security("is_granted('ROLE_ADMIN')")
+ * @Route("/connector")
+ */
 class ConnectorController extends AbstractController {
 
     #[Route('/', name: 'app_connector_index', methods: ['GET'])]

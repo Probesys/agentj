@@ -20,7 +20,7 @@ class TruncateVirusMailFiles extends Command
         $this->setDescription('Truncate amavis quarantine files older than X days (see .ENV file)  ');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output):int
     {
         $deleteFiles = [];
         if (!$this->getApplication()->getKernel()->getContainer()->getParameter('app.amavis_quarantine_dir')) {

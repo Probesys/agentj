@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Domain;
 use App\Entity\Groups;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -12,21 +14,34 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Captcha[]    findAll()
  * @method Captcha[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class GroupsRepository extends ServiceEntityRepository
-{
+class GroupsRepository extends ServiceEntityRepository {
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(ManagerRegistry $registry) {
         parent::__construct($registry, Groups::class);
     }
 
-  /**
-   * Return the groups associated to one or more domains
-   * @param type $domains
-   * @return type
-   */
-    public function findByDomain($domains)
-    {
+    public function findOneByUid(string $uid): ?Groups {
+        return $this->createQueryBuilder('g')
+                        ->where('g.uid = :uid')
+                        ->setParameter('uid', $uid)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }
+    
+    public function findOneByLdapDN(string $dn): ?Groups {
+        return $this->createQueryBuilder('g')
+                        ->where('g.ldapDN = :ldapDN')
+                        ->setParameter('ldapDN', $dn)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }    
+
+    /**
+     * Return the groups associated to one or more domains
+     * @param type $domains
+     * @return type
+     */
+    public function findByDomain($domains) {
         $dql = $this->createQueryBuilder('g');
 
         if (is_array($domains->toArray())) {
@@ -45,32 +60,58 @@ class GroupsRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-  // /**
-  //  * @return Captcha[] Returns an array of Captcha objects
-  //  */
-  /*
-    public function findByExampleField($value)
-    {
-    return $this->createQueryBuilder('c')
-    ->andWhere('c.exampleField = :val')
-    ->setParameter('val', $value)
-    ->orderBy('c.id', 'ASC')
-    ->setMaxResults(10)
-    ->getQuery()
-    ->getResult()
-    ;
+    /**
+     * Return the main (hightest priority) group of the user $user
+     * @param User $user
+     * @return Groups|null
+     */
+    public function getMainUserGroup(User $user): ?Groups {
+        $dql = $this->createQueryBuilder('g')
+                ->innerJoin('g.users', 'u')
+                ->where('g.active = true')
+                ->andWhere('u.id = :user')
+                ->orderBy('g.priority', 'DESC')
+                ->setParameter('user', $user);
+        $query = $dql->getQuery()->setMaxResults(1);
+        return $query->getOneOrNullResult();
     }
-   */
+    
+    public function getMaxPriorityforDomain(Domain $domain): int {
+        $dql = $this->createQueryBuilder('g')
+                ->select('MAX(g.priority) as max')
+                ->where('g.domain = :domain')
+                ->setParameter('domain', $domain);
+        $query = $dql->getQuery();
+        $result = $query->getOneOrNullResult();
+        return $result && $result['max'] ? $result['max'] : 0;
+    }
 
-  /*
-    public function findOneBySomeField($value): ?Captcha
-    {
-    return $this->createQueryBuilder('c')
-    ->andWhere('c.exampleField = :val')
-    ->setParameter('val', $value)
-    ->getQuery()
-    ->getOneOrNullResult()
-    ;
-    }
-   */
+    // /**
+    //  * @return Captcha[] Returns an array of Captcha objects
+    //  */
+    /*
+      public function findByExampleField($value)
+      {
+      return $this->createQueryBuilder('c')
+      ->andWhere('c.exampleField = :val')
+      ->setParameter('val', $value)
+      ->orderBy('c.id', 'ASC')
+      ->setMaxResults(10)
+      ->getQuery()
+      ->getResult()
+      ;
+      }
+     */
+
+    /*
+      public function findOneBySomeField($value): ?Captcha
+      {
+      return $this->createQueryBuilder('c')
+      ->andWhere('c.exampleField = :val')
+      ->setParameter('val', $value)
+      ->getQuery()
+      ->getOneOrNullResult()
+      ;
+      }
+     */
 }
