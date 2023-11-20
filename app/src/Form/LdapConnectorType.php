@@ -26,14 +26,20 @@ class LdapConnectorType extends ConnectorType
             ->add('LdapBaseDN', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.LdapBaseDN',
+            ])                
+            ->add('allowAnonymousBind', null, [
+//                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.allowAnonymousBind',
             ])
             ->add('ldapBindDn', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapBindDn',
+                'attr'=> ['data-ldap-bind' => 'true']
             ])                
             ->add('LdapPassword', PasswordType::class, [
                 'required' => is_null($builder->getData()->getId()),
                 'label' => 'Entities.LdapConnector.fields.LdapPassword',
+                'attr'=> ['data-ldap-bind' => 'true']
             ])
             ->add('ldapLoginField', null, [
                 'required' => true,
