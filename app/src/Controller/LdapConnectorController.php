@@ -58,8 +58,11 @@ class LdapConnectorController extends AbstractController {
         if ($form->isSubmitted() && $form->isValid()) {
 
             $data = $form->getData();
-            $cryptedPass = $this->cryptEncryptService->encrypt($data->getLdapPassword());
-            $data->setLdapPassword($cryptedPass);
+            if($data->getLdapPassword()){
+                $cryptedPass = $this->cryptEncryptService->encrypt($data->getLdapPassword());
+                $data->setLdapPassword($cryptedPass);                
+            }
+
             $connectorRepository->add($connector, true);
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);

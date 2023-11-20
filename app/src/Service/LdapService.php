@@ -35,6 +35,16 @@ class LdapService {
                     'host' => $connector->getLdapHost(),
                     'port' => $connector->getLdapPort(),
         ]);
+
+        if ($connector->isAllowAnonymousBind()) {
+            try {
+                $ldap->bind();
+                return $ldap;
+            } catch (ConnectionException $exception) {
+                throw new ConnectionException('Could not connect to ldap server');
+            }
+        }
+        
         $baseDN = "";
         if (!$bindDN = $connector->getLdapBindDn()) {
             throw new ConnectionException('Please configure ldap search DN');
@@ -86,14 +96,12 @@ class LdapService {
             return $domainName == $connector->getDomain()->getDomain();
         });
     }
-    
-    
+
     public function filterGroupResultWihtoutMembers(CollectionInterface &$result, string $groupMemberAttribute): void {
 
         $result = array_filter($result->toArray(), function ($ldapGroup) use ($groupMemberAttribute) {
             $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
             return $nbMembers > 0;
         });
-    }    
-
+    }
 }

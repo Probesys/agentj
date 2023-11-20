@@ -47,6 +47,9 @@ class LdapConnector extends Connector
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ldapGroupNameField = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $allowAnonymousBind = null;
+
 
     public function getLdapHost(): ?string
     {
@@ -191,6 +194,18 @@ class LdapConnector extends Connector
     public function setLdapGroupNameField(?string $ldapGroupNameField): self
     {
         $this->ldapGroupNameField = $ldapGroupNameField;
+
+        return $this;
+    }
+
+    public function isAllowAnonymousBind(): ?bool
+    {
+        return $this->allowAnonymousBind;
+    }
+
+    public function setAllowAnonymousBind(?bool $allowAnonymousBind): static
+    {
+        $this->allowAnonymousBind = $allowAnonymousBind;
 
         return $this;
     }
