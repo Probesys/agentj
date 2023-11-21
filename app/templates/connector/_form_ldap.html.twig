@@ -27,7 +27,7 @@
             {{ form_widget(form.allowAnonymousBind, { 'attr' : { ' data-action' : 'click->form-ldap-connector#showHideBindInfoEventClick' }}) }}
         </div>
     </div>    
-    <div class="col-md-2 mt-4 pt-2 text-success text-center" data-form-ldap-connector-target="ldapBindResult"></div>
+    <div class="col-md-2 pt-2 text-success text-center" data-form-ldap-connector-target="ldapBindResult"></div>
     <div class="col-md-12" id="info-binding-ldap">
         <div class="row">
             <div class="col-md-5">
@@ -53,24 +53,30 @@
             {{ form_widget(form.LdapBaseDN) }}
         </div>
     </div>       
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="form-group">
             <label for="ldap_connector_ldapLoginField">{{ 'Entities.LdapConnector.fields.ldapLoginField'|trans }}</label>
             {{ form_widget(form.ldapLoginField) }}
         </div>
     </div>    
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="form-group">
             <label for="ldap_connector_ldapRealNameField">{{ 'Entities.LdapConnector.fields.ldapRealNameField'|trans }}</label>
             {{ form_widget(form.ldapRealNameField) }}
         </div>
     </div>       
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="form-group">
             <label for="ldap_connector_ldapEmailField">{{ 'Entities.LdapConnector.fields.ldapEmailField'|trans }}</label>
             {{ form_widget(form.ldapEmailField) }}
         </div>
     </div>    
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="ldap_connector_ldapAliasField">{{ 'Entities.LdapConnector.fields.ldapAliasField'|trans }}</label>
+            {{ form_widget(form.ldapAliasField) }}
+        </div>
+    </div>          
     <div class="col-md-12">
         <div class="form-group">
             <label for="ldap_connector_ldapUserFilter">{{ 'Entities.LdapConnector.fields.ldapUserFilter'|trans }}</label>

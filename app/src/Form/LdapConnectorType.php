@@ -52,7 +52,11 @@ class LdapConnectorType extends ConnectorType
             ->add('ldapEmailField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapEmailField',
-            ])                   
+            ])            
+            ->add('ldapAliasField', null, [
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.ldapAliasField',
+            ])                      
             ->add('ldapGroupNameField', null, [
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',

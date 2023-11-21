@@ -491,6 +491,7 @@ Entities:
       synchronizeGroup: "Synchronisez également les groupes"
       ldapGroupNameField: "Champ LDAP pour le nom du groupe (ex : sn)"
       ldapEmailField: "Champ LDAP pour l'email"
+      ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
       ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
       ldapUserFilter: "Filtre pour les utilisateur"
       ldapGroupFilter: "Filtre pour les groupes"
