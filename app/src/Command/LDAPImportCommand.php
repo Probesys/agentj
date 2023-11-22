@@ -118,7 +118,7 @@ class LDAPImportCommand extends Command {
                 // if a specific field is used for aliases we complete the list of aliases with these attribute
                 $aliasAttribute = $this->connector->getLdapAliasField();
                 if ($aliasAttribute) {
-                    $listAliases = $entry->getAttribute($aliasAttribute) ? $entry->getAttribute($aliasAttribute) : [];
+                    $listAliases = $entry->getAttribute($aliasAttribute) ?? [];
                     foreach ($listAliases as $aliasEntry) {
                         $this->createAlias($user, $aliasEntry);
                     }
@@ -137,18 +137,18 @@ class LDAPImportCommand extends Command {
         $this->em->flush();
     }
 
-    private function createAlias(User $user, $entry): void {
-        $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $entry]);
+    private function createAlias(User $user, string $email): void {
+        $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
         if (!$alias) {
             $alias = new User();
         }
 
-        $alias->setEmail($entry);
-        $alias->setUsername($entry);
+        $alias->setEmail($email);
+        $alias->setUsername($email);
         $alias->setOriginalUser($user);
         $alias->setDomain($user->getDomain());
         $this->em->persist($alias);
-        
+        $this->em->flush();        
     }
 
     /**
