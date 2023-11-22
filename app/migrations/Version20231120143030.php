@@ -7,14 +7,12 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
+
 final class Version20231120143030 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Add ldap_alias_field column to the connector table.';
     }
 
     public function up(Schema $schema): void
