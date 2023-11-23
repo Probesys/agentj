@@ -65,7 +65,11 @@ class LdapService {
     }
 
     public function bindUser(User $user, string $password) {
-
+        
+        if (!$user->getLdapDN()){
+            return false;
+        }
+        
         foreach ($user->getDomain()->getConnectors() as $connector) {
 
             if ($connector instanceof LdapConnector) {
@@ -73,18 +77,16 @@ class LdapService {
                             'host' => $connector->getLdapHost(),
                             'port' => $connector->getLdapPort(),
                 ]);
-                $baseDN = $connector->getLdapBaseDN();
-                $dn = $connector->getLdapLoginField() . '=' . $user->getUid() . ',' . $baseDN;
                 try {
-
-                    $ldap->bind(null, $password);
+                    $ldap->bind($user->getLdapDN(), $password);
                     return true;
                 } catch (ConnectionException $exception) {
                     continue;
                 }
-            }
-            return false;
+            }            
         }
+        
+        return false;
     }
 
     public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void {

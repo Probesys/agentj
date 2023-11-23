@@ -104,14 +104,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
             return new SelfValidatingPassport(new UserBadge($username), [new RememberMeBadge()]);
         }
 
-//        dd($ldapBind);
-
         $loginImap = $this->getLoginImap($user, $password);
 
         if (!$loginImap) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
         }
-//        dd($username);
+
         return new SelfValidatingPassport(new UserBadge($user->getEmailFromRessource()), [new RememberMeBadge()]);
     }
 
