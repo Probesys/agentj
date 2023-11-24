@@ -11,21 +11,21 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     composer \
     git \
     nodejs \
-    php8 \
-    php8-bz2 \
-    php8-common \
-    php8-curl \
-    php8-fpm \
-    php8-gd \
-    php8-imap \
-    php8-ldap \
-    php8-intl \
-    php8-json \
-    php8-mbstring \
-    php8-mysqli \
-    php8-opcache \
-    php8-xml \
-    php8-zip \
+    php81 \
+    php81-bz2 \
+    php81-common \
+    php81-curl \
+    php81-fpm \
+    php81-gd \
+    php81-imap \
+    php81-ldap \
+    php81-intl \
+    php81-json \
+    php81-mbstring \
+    php81-mysqli \
+    php81-opcache \
+    php81-xml \
+    php81-zip \
     tzdata \
     yarn \
     zip \
@@ -58,35 +58,35 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     opendkim-utils \
     openssl \
     perl \
-    php8 \
-    php8-bz2 \
-    php8-common \
-    php8-ctype \
-    php8-curl \
-    php8-dom \
-    php8-fileinfo \
-    php8-fpm \
-    php8-gd \
-    php8-iconv \
-    php8-imap \
-    php8-intl \
-    php8-json \
-    php8-ldap \
-    php8-mbstring \
-    php8-pdo_mysql \
-    php8-opcache \
-    php8-openssl \
-    php8-session \
-    php8-simplexml \
-    php8-sysvsem \
-    php8-tokenizer \
-    php8-xml \
-    php8-zip \
+    php81 \
+    php81-bz2 \
+    php81-common \
+    php81-ctype \
+    php81-curl \
+    php81-dom \
+    php81-fileinfo \
+    php81-fpm \
+    php81-gd \
+    php81-iconv \
+    php81-imap \
+    php81-intl \
+    php81-json \
+    php81-ldap \
+    php81-mbstring \
+    php81-pdo_mysql \
+    php81-opcache \
+    php81-openssl \
+    php81-session \
+    php81-simplexml \
+    php81-sysvsem \
+    php81-tokenizer \
+    php81-xml \
+    php81-zip \
     rsyslog \
     sudo \
     supervisor \
     tzdata \
-    && mkdir -p /var/run/php/ && touch /var/run/php/php8-fpm.pid \
+    && mkdir -p /var/run/php/ && touch /var/run/php/php81-fpm.pid \
     && rm -rf node_modules \
     && mkdir -p /var/db/dkim
 
@@ -94,7 +94,7 @@ COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/conf/opendkim/TrustedHosts /var/db/dkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
-COPY docker/conf/php-fpm/www.conf /etc/php8/php-fpm.d/www.conf
+COPY docker/conf/php-fpm/www.conf /etc/php81/php-fpm.d/www.conf
 COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
