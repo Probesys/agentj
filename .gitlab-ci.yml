@@ -161,10 +161,10 @@ deploy-dev:
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEV:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker compose up -d"
   except:
     - merge_requests
   only:
@@ -202,11 +202,11 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD_HOST:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker compose up -d"
   except:
     - merge_requests
   only:
@@ -237,10 +237,10 @@ deploy-tags:
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker compose up -d"
   only:
     - tags
   except:
