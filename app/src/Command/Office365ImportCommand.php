@@ -159,6 +159,7 @@ class Office365ImportCommand extends Command {
                     if (!$alias) {
                         $alias = clone $user;
                     }
+                    $alias->setUid(null);
                     $alias->setEmail($aliasEmail);
                     $alias->setUserName($aliasEmail);
                     $alias->setOriginalUser($user);

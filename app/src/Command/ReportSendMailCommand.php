@@ -45,10 +45,8 @@ class ReportSendMailCommand extends Command {
         $container = $this->getApplication()->getKernel()->getContainer();
         $domain = $container->getParameter('domain');
         $scheme = $container->getParameter('scheme');
-//        $failedRecipients = [];
 
         $url = $scheme . "://" . $domain;
-        $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport_report');
         $i = 0;
 
         // Get users to send report
@@ -111,7 +109,9 @@ class ReportSendMailCommand extends Command {
 
 
                 try {
-                    $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
+                    $smtpServer = $user->getDomain()->getSrvSmtp();
+                    $smtpPort = $user->getDomain()->getSmtpPort();
+                    $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
                     $mailer = new Mailer($transport);
 
                     $mailer->send($message);

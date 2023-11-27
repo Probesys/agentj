@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:bookworm-slim
 
 LABEL maintainer="Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Postfix incoming smtp for AgentJ"
