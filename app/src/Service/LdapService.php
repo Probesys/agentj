@@ -35,6 +35,16 @@ class LdapService {
                     'host' => $connector->getLdapHost(),
                     'port' => $connector->getLdapPort(),
         ]);
+
+        if ($connector->isAllowAnonymousBind()) {
+            try {
+                $ldap->bind();
+                return $ldap;
+            } catch (ConnectionException $exception) {
+                throw new ConnectionException('Could not connect to ldap server');
+            }
+        }
+        
         $baseDN = "";
         if (!$bindDN = $connector->getLdapBindDn()) {
             throw new ConnectionException('Please configure ldap search DN');
@@ -55,7 +65,11 @@ class LdapService {
     }
 
     public function bindUser(User $user, string $password) {
-
+        
+        if (!$user->getLdapDN()){
+            return false;
+        }
+        
         foreach ($user->getDomain()->getConnectors() as $connector) {
 
             if ($connector instanceof LdapConnector) {
@@ -63,18 +77,16 @@ class LdapService {
                             'host' => $connector->getLdapHost(),
                             'port' => $connector->getLdapPort(),
                 ]);
-                $baseDN = $connector->getLdapBaseDN();
-                $dn = $connector->getLdapLoginField() . '=' . $user->getUid() . ',' . $baseDN;
                 try {
-
-                    $ldap->bind(null, $password);
+                    $ldap->bind($user->getLdapDN(), $password);
                     return true;
                 } catch (ConnectionException $exception) {
                     continue;
                 }
-            }
-            return false;
+            }            
         }
+        
+        return false;
     }
 
     public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void {
@@ -86,14 +98,12 @@ class LdapService {
             return $domainName == $connector->getDomain()->getDomain();
         });
     }
-    
-    
+
     public function filterGroupResultWihtoutMembers(CollectionInterface &$result, string $groupMemberAttribute): void {
 
         $result = array_filter($result->toArray(), function ($ldapGroup) use ($groupMemberAttribute) {
             $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
             return $nbMembers > 0;
         });
-    }    
-
+    }
 }

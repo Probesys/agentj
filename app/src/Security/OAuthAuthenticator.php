@@ -84,12 +84,12 @@ class OAuthAuthenticator extends OAuth2Authenticator
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $loginUrl = $this->router->generate('app_login', [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $microsoftLogoutUrl = "https://login.windows.net/common/oauth2/logout?post_logout_redirect_uri=$loginUrl";
+//        $loginUrl = $this->router->generate('app_login', [], UrlGeneratorInterface::ABSOLUTE_URL);
+//        $microsoftLogoutUrl = "https://login.windows.net/common/oauth2/logout?post_logout_redirect_uri=$loginUrl";
 
         $this->flashBag->add(
             'error',
-            new TranslatableMessage('user.login.not_found_oauth', ['url' => $microsoftLogoutUrl])
+            new TranslatableMessage('Generics.messages.incorrectCredential')
         );
 
         throw $exception->getPrevious() ?? $exception;

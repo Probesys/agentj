@@ -472,6 +472,7 @@ Entities:
     fields:
       ldapHost: "Host"
       ldapPort: "Port (default 389)"
+      allowAnonymousBind: "Allow anonymous connexion"
       LdapBaseDN: "BaseDN"
       ldapLoginField: "LDAP field for login (ex : uid)"
       ldapBindDn: "Bind Dn"
@@ -480,6 +481,7 @@ Entities:
       synchronizeGroup: "Also synchronize groups"
       ldapGroupNameField: "LDAP field for group name (ex : sn)"
       ldapEmailField: "LDAP field for email"
+      ldapAliasField: "LDAP field for alias (if different from email)"
       ldapUserFilter: "Filter for user"
       ldapGroupFilter: "Filter for groups"      
   Office365Connector:

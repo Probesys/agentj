@@ -11,6 +11,8 @@ export default class extends Controller {
     controllerForm = this.element;
     const cboxSyncGroup = this.element.querySelector('#ldap_connector_synchronizeGroup');
     this.showHideGroupInfo(cboxSyncGroup.checked);
+    const cboxAnonymousBind = this.element.querySelector('#ldap_connector_allowAnonymousBind');
+    this.showHideBindInfo(cboxAnonymousBind.checked);
     this.checkConnection();
   }
 
@@ -134,4 +136,27 @@ export default class extends Controller {
     }
 
   }
+
+  showHideBindInfoEventClick(event) {
+
+    this.showHideBindInfo(event.target.checked);
+  }  
+
+  showHideBindInfo(checked) {
+    const divBindingInfo = this.element.querySelector('#info-binding-ldap');
+    if (!checked) {
+      divBindingInfo.classList.remove('d-none');
+      const listBindingInput = document.querySelectorAll('[data-ldap-bind]');
+      listBindingInput.forEach(input => {
+        input.setAttribute('required', true);
+      });
+    } else {
+      divBindingInfo.classList.add('d-none');
+      const listBindingInput = document.querySelectorAll('[data-ldap-bind]');
+      listBindingInput.forEach(input => {
+        input.removeAttribute('required');
+      });
+    }
+    this.checkConnection();
+  }    
 }
