@@ -57,13 +57,11 @@ Generics:
     welcomeAgentJ: Bienvenue sur AgentJ
     welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br>\
       \ veuillez vous authentifier"
-    formNotComplete: Veuillez renseigner les informations obligatoire
-    emergency_consult: Urgence !
-    emergency_consult_title: La situation de l'animal présente un caractère d'urgence
-      !
+    formNotComplete: Veuillez renseigner les informations obligatoire    
     UserExist: L'utilisateur existe déjà dans la base de données
     EmailDoesNotExist: Le compte email n'existe pas dans la base de données
     BadColumnsFile: Le nombre de colonne est incorrecte. Vérifier votre fichier.
+    azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
     incorrectCredential: Identifiants incorrects
     groupWithPriorityExists: 'Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'
   labels:

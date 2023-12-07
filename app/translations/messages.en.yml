@@ -57,11 +57,11 @@ Generics:
     welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/>
       please authenticate'
     formNotComplete: 'Please provide mandatory information'
-    emergency_consult: Emergency!
-    emergency_consult_title: 'The animal''s situation is an emergency!'
     UserExist: 'The user already exists in the database'
     EmailDoesNotExist: 'The email account does not exist in the database'
     BadColumnsFile: 'The number of columns is incorrect. Check your file.'
+    azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
+    azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
     groupWithPriorityExists: 'A group with same priority allready exists for this domain. Please choose another one'
   labels:

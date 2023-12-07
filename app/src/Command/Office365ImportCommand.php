@@ -100,7 +100,7 @@ class Office365ImportCommand extends Command {
         $domain = $this->connector->getDomain();
 
         try {
-            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses&$filter=endsWith(userPrincipalName,\'@' . $domain->getDomain() . '\' )&$count=true')
+            $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses, userPrincipalName&$filter=endsWith(userPrincipalName,\'@' . $domain->getDomain() . '\' )&$count=true&$top=999')
                     ->setReturnType(GraphUser::class)
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
@@ -116,7 +116,11 @@ class Office365ImportCommand extends Command {
                 continue;
             }
 
-            $user = $this->em->getRepository(User::class)->findOneBy(['email' => $graphUser->getMail()]);
+            $user = $this->em->getRepository(User::class)->findOneBy(['office365PrincipalName' => $graphUser->getUserPrincipalName()]);
+
+            if (!$user) {
+                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $graphUser->getMail()]);
+            }
 
             if (!$user) {
                 $user = new User();
@@ -126,6 +130,7 @@ class Office365ImportCommand extends Command {
                 $nbUserUpdated++;
             }
             
+            $user->setOffice365PrincipalName($graphUser->getUserPrincipalName());
             $user->setUsername($graphUser->getMail());
             $user->setFullname($graphUser->getDisplayName());
             $user->setReport(true);
