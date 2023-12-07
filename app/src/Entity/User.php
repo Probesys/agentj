@@ -135,7 +135,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $ldapDN;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $Office365PrincipalName = null;       
+    private ?string $office365PrincipalName = null;       
 
     public function __construct()
     {
@@ -585,12 +585,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getOffice365PrincipalName(): ?string
     {
-        return $this->Office365PrincipalName;
+        return $this->office365PrincipalName;
     }
 
-    public function setOffice365PrincipalName(?string $Office365PrincipalName): static
+    public function setOffice365PrincipalName(?string $office365PrincipalName): static
     {
-        $this->Office365PrincipalName = $Office365PrincipalName;
+        $this->office365PrincipalName = $office365PrincipalName;
 
         return $this;
     }
