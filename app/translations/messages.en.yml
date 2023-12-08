@@ -245,9 +245,9 @@ Message:
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
   Connector:
-    resultImportUser: "$NB_USER_CREATED users created, $NB_USER_UPDATED updated"
-    resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED updated"
-    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED users updated"
+    resultImportUser: "$NB_USER_CREATED users created, $NB_USER_UPDATED synchronized"
+    resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED synchronized"
+    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED synchronized"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information
@@ -437,6 +437,7 @@ Entities:
       report: 'Send report'
       bypassHumanAuth: 'Deactivate human authentication'
       policy: "Policy"
+      office365PrincipalName: "M365 principal mail"
   Message:
     index: 'List of messages'
     untreated: 'No treaties'

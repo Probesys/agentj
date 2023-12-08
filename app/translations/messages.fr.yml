@@ -248,9 +248,9 @@ Message:
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
   Connector:
-    resultImportUser: "$NB_USER_CREATED utilisateurs créé(s), $NB_USER_UPDATED mis à jour"
-    resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED mis à jour"
-    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED users updated"  
+    resultImportUser: "$NB_USER_CREATED utilisateurs créé(s), $NB_USER_UPDATED synchronisés"
+    resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED synchronisés"
+    resultImportAliase: "$NB_ALIAS_CREATED alias créés, $NB_ALIAS_UPDATED  synchronisés"  
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
@@ -447,6 +447,7 @@ Entities:
       report: Envoyer le rapport
       bypassHumanAuth: Désactiver l'authentification humaine
       policy: "Stratégie"
+      office365PrincipalName: "Nom principal M365"
   Message:
     index: Liste des messages
     untreated: Non traités
