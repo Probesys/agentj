@@ -31,7 +31,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     zip \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
-    && yarn add @symfony/webpack-encore \
+    # && yarn add @symfony/webpack-encore \
     && yarn encore production
 
 FROM alpine:latest AS run
