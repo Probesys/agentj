@@ -18,6 +18,10 @@ then
 fi
 chown -R amavis:amavis /var/run/amavis
 
+# amavis TEMPBASE & db_home folders
+mkdir -p /var/amavis/tmp /var/amavis/db
+chown -R amavis:amavis /var/amavis/
+
 # Make sure Clamd environment exists
 if [ ! -d /run/clamav ]
 then

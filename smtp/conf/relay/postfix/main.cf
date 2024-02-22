@@ -5,7 +5,7 @@ readme_directory = no
 compatibility_level = 3.6
 smtp_host_lookup = dns, native
 
-myhostname = relay.$MAIL_DOMAINNAME
+myhostname = relay.$MAIL_HOSTNAME
 myorigin = /etc/mailname
 alias_maps = lmdb:/etc/postfix/aliases
 alias_database = lmdb:/etc/postfix/aliases

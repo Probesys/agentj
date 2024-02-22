@@ -5,7 +5,7 @@ IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
 sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/conf/$SMTP_TYPE/postfix/main.cf
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/conf/$SMTP_TYPE/postfix/main.cf
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/conf/$SMTP_TYPE/postfix/master.cf
-echo $MAIL_HOSTNAME > /etc/conf/$SMTP_TYPE/mailname
+echo $MAIL_HOSTNAME > /etc/mailname
 
 if [ $SMTP_TYPE != "relay" ] 
 then
