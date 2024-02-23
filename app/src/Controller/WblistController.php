@@ -73,13 +73,13 @@ class WblistController extends AbstractController {
 
     /**
      * @param integer $id
-     * @Route("/WBlist/{rid}/{sid}/delete", name="wblist_delete",  methods="GET")
+     * @Route("/WBlist/{rid}/{sid}/{priority}/delete", name="wblist_delete",  methods="GET")
      *
      * @return Response
      */
-    public function deleteAction($rid, $sid, WblistRepository $WblistRepository, Request $request) {
+    public function deleteAction($rid, $sid,$priority, WblistRepository $WblistRepository, Request $request) {
         if ($this->isCsrfTokenValid('delete_wblist' . $rid . $sid, $request->query->get('_token'))) {
-            $this->deleteWbList($rid, $sid, $WblistRepository);
+            $this->deleteWbList($rid, $sid,$priority, $WblistRepository);
             $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
         } else {
             $this->addFlash('error', 'Invalid csrf token');
@@ -92,7 +92,7 @@ class WblistController extends AbstractController {
         }
     }
 
-    private function deleteWbList($rid, $sid, WblistRepository $WblistRepository) {
+    private function deleteWbList($rid, $sid, $priority, WblistRepository $WblistRepository) {
 
         $mainUser = $this->em->getRepository(User::class)->find($rid);
 
@@ -108,7 +108,7 @@ class WblistController extends AbstractController {
         }
 
         foreach ($userAndAliases as $user) {
-            $WblistRepository->delete($user->getId(), $sid);
+            $WblistRepository->delete($user->getId(), $sid, $priority);
         }
     }
 
@@ -120,9 +120,9 @@ class WblistController extends AbstractController {
     public function batchDeleteAction(Request $request, MsgsRepository $msgRepository) {
         $em = $this->em;
 
-        foreach ($request->request->get('id') as $obj) {
+        foreach ($request->request->all('id') as $obj) {
             $mailInfo = json_decode($obj);
-            $em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1]);
+            $em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
         }
 
         $referer = $request->headers->get('referer');
@@ -134,16 +134,16 @@ class WblistController extends AbstractController {
      * @Route("/batch/{action}", name="wblist_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
-    public function batchWbListAction($action = null, Request $request, MsgsRepository $msgRepository) {
+    public function batchWbListAction(Request $request, MsgsRepository $msgRepository, $action = null) {
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);
-            foreach ($request->request->get('id') as $obj) {
+            foreach ($request->request->all('id') as $obj) {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'delete':
                         $mailInfo = json_decode($obj);
-                        $this->deleteWbList($mailInfo[0], $mailInfo[1], $em->getRepository(Wblist::class));
+                        $this->deleteWbList($mailInfo[0], $mailInfo[1], $mailInfo[2], $em->getRepository(Wblist::class));
                         //            $em->getRepository(Wblist::class)->deleteMessage($mailInfo[0], $mailInfo[1]);
                         $logService->addLog('delete batch wblist', $mailInfo[1]);
                         break;
@@ -169,61 +169,63 @@ class WblistController extends AbstractController {
             if ($fileUpload->getClientMimeType() == "text/csv") {
                 $filename = 'import-wblist-agentj-' . time() . ".csv";
                 $file = $fileUpload->move('/tmp/', $filename);
-
-                $users = [];
-                if ($form->has('domains')) {
-                    $domainIds = array_map(function ($entity) {
-                        return $entity->getId();
-                    }, $form->get('domains')->getData()->toArray());
-
-                    $users = $this->em->getRepository(User::class)->findBy(['domain' => $domainIds, 'originalUser' => null]);
-                } else {
-                    $users[] = $this->getUser();
-                }
-                $result = $this->importWbList($file->getPathname(), $users);
+                $this->importWbList($file->getPathname(), $form->get('domains')->getData());
+            } else {
+                $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
+            $referer = $request->headers->get('referer');
+            return $this->redirect($referer);
         }
-        return $this->render('import/index_wblist.html.twig', [
+        return $this->renderForm('import/index_wblist.html.twig', [
                     'controller_name' => 'ImportController',
-                    'form' => $form->createView(),
+                    'form' => $form,
         ]);
     }
 
     /**
-     * Import email adresses to whiteliste of $users
+     * Import email adresses to whiteliste of $domains
      * @param type $pathfile
      * @param type $users
      */
-    private function importWbList($pathfile, $users) {
-        $em = $this->em;
-        if (($handle = fopen($pathfile, "r")) !== false) {
+    private function importWbList($pathfile, $domains) {
+        $tabWblist = [];
+        if (($handle = fopen($pathfile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {
-                $mailaddrSender = $em->getRepository(Mailaddr::class)->findOneBy(['email' => trim($data)]);
+                $mailaddrSender = $this->em->getRepository(Mailaddr::class)->findOneBy(['email' => trim($data)]);
                 //if email doesn't exist then we create email in Mailaddr
                 if (!$mailaddrSender) {
                     $mailaddrSender = new Mailaddr();
                     $mailaddrSender->setEmail(trim($data));
                     $mailaddrSender->setPriority(6);
-                    $em->persist($mailaddrSender);
+                    $this->em->persist($mailaddrSender);
+                    $this->em->flush();
                 }
 
-                if (filter_var(trim($data), FILTER_VALIDATE_EMAIL)) {
-                    foreach ($users as $user) {
-                        $wblist = $em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $users]);
+                if (filter_var(trim($data), FILTER_VALIDATE_EMAIL) || filter_var(trim($data), FILTER_VALIDATE_DOMAIN)) {
+
+                    foreach ($domains as $domain) {
+                        if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
+                            continue;
+                        }
+                        $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
+                        $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
                         if (!$wblist) {
                             $wblist = new Wblist($user, $mailaddrSender);
                         }
+                        
                         $wblist->setWb('W');
                         $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
                         $wblist->setType(1);
-                        $em->persist($wblist);
-
-                        //            dump($wblist);
-                        echo stream_get_contents($user->getEmail(), -1, 0) . "<br>";
+                        $this->em->persist($wblist);
+                        $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
+                        
                     }
+                   
+                    
                 }
             }
-            $em->flush();
+            $this->em->flush();
+            
         }
     }
 

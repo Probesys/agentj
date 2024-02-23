@@ -379,3 +379,7 @@ body.sidebar-toggled footer.sticky-footer {
 .scroll-to-top i {
   font-weight: 800;
 }
+
+.opacity-50 {
+  opacity: 0.5;
+}

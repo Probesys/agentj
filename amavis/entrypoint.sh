@@ -36,11 +36,13 @@ if [ $CLAMAV_AUTOSTART == "true" ]
 then
     echo "Configuring local ClamAV server"
     CLAMAV_CONFIG="\/run\/clamav\/clamd.ctl"
-    sed -i '105i \\ ["ClamAV-clamd", \n\ \ \\&ask_daemon, ["CONTSCAN {}\\n", "$CLAMAV_CONFIG"],\n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],\n' /etc/$AMAVIS_CONF
+    #sed -i '105i \\ ["ClamAV-clamd", \n\ \ \\&ask_daemon, ["CONTSCAN {}\\n", "$CLAMAV_CONFIG"],\n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],\n' /etc/$AMAVIS_CONF
+    sed -i 's|\$AGENTJ_AV_SCANNER|\ ["ClamAV-clamd", \n\ \ \\\&ask_daemon, ["CONTSCAN {}\\n", "$CLAMAV_CONFIG"],\n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],\n|g' /etc/$AMAVIS_CONF
 else
     echo "Configuring remote ClamAV server"
     CLAMAV_CONFIG="$CLAMAV_TCPADDRESS:$CLAMAV_TCPPORT"
-    sed -i '105i \\ ["ClamAV-remote-stream", \n\ \ \\&ask_daemon, [ \n\ \ \ "{}/*", \n\ \ \ [ \n\ \ \ \ "clamd:$CLAMAV_CONFIG", \n\ \ \ ], \n\ \ ], \n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m \n\ ],\n' /etc/$AMAVIS_CONF
+    sed -i 's|\$AGENTJ_AV_SCANNER|\ ["ClamAV-remote-stream", \n\ \ \\\&ask_daemon, [ \n\ \ \ "{}/*", \n\ \ \ [ \n\ \ \ \ "clamd:$CLAMAV_CONFIG", \n\ \ \ ], \n\ \ ], \n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m \n\ ],\n|g' /etc/$AMAVIS_CONF
+    #sed -i '105i \\ ["ClamAV-remote-stream", \n\ \ \\&ask_daemon, [ \n\ \ \ "{}/*", \n\ \ \ [ \n\ \ \ \ "clamd:$CLAMAV_CONFIG", \n\ \ \ ], \n\ \ ], \n\ \ qr/\\bOK$/m, qr/\\bFOUND$/m, \n\ \ qr/^.*?: (?!Infected Archive)(.*) FOUND$/m \n\ ],\n' /etc/$AMAVIS_CONF
 fi
 sed -i "s/\$CLAMAV_CONFIG/$CLAMAV_CONFIG/g" /etc/$AMAVIS_CONF
 

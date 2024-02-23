@@ -20,7 +20,7 @@ class TruncateMessageCommand extends Command
         $this->addArgument('days');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output):int
     {
         $em = $this->getApplication()->getKernel()->getContainer()->get('doctrine')->getManager();
 

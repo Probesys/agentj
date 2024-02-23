@@ -21,6 +21,7 @@
                     {#        <th><input type="checkbox" id='checkAll'></th>#}
                     <th>{{ 'Entities.Group.Name'|trans() }}</th>
                     <th>{{ 'Entities.Domain.Name'|trans() }}</th>
+                    <th>{{ 'Generics.fields.priority'|trans() }}</th>
                     <th>{{ 'Generics.fields.active'|trans() }}</th>
                     <th>{{ 'Entities.Group.Updated'|trans() }}</th>
                     <th>{{ 'Entities.Group.Actions.list'|trans() }}</th>
@@ -32,7 +33,8 @@
                         {#          <td><input type="checkbox"></td>#}
                         <td data-title="{{'Entities.Group.Name'|trans }}">{{group.name}}</td>
                         <td data-title="{{'Entities.Domain.Name'|trans }}">{{group.domain.domain}}</td>
-                        <td data-title="{{'Entities.Group.Active'|trans }}">{{ group.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
+                        <td data-title="{{'Generics.fields.priority'|trans }}">{{ group.priority }}</td>
+                        <td data-title="{{'Generics.fields.active'|trans }}">{{ group.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
                         <td data-title="{{'Entities.Group.Updated'|trans }}">{{group.datemod | format_datetime('short', 'short') }}</td>            
                         <td>
                             <ul class="list-inline list-unstyled">

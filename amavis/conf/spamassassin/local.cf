@@ -1,0 +1,6 @@
+# spoofing + phishing campaigns are getting more and more frequent:
+# score spf softfail and spf fail more severely. +1.5 when no learning,
+# +1 when learning. Parens denote a relative increase.
+score SPF_SOFTFAIL (0) (0.528) (0) (0.335)
+score SPF_FAIL     (0) (0.581) (0) (0.999)
+

@@ -57,12 +57,13 @@ Generics:
     welcomeHomeMessage: 'Welcome to <span style="white-space: nowrap">AgentJ</span>,<br/>
       please authenticate'
     formNotComplete: 'Please provide mandatory information'
-    emergency_consult: Emergency!
-    emergency_consult_title: 'The animal''s situation is an emergency!'
     UserExist: 'The user already exists in the database'
     EmailDoesNotExist: 'The email account does not exist in the database'
     BadColumnsFile: 'The number of columns is incorrect. Check your file.'
+    azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
+    azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
+    groupWithPriorityExists: 'A group with same priority allready exists for this domain. Please choose another one'
   labels:
     filters: Filters
     item_per_page: 'Number of items per page (sur %totalItemFound% found)'
@@ -108,6 +109,7 @@ Generics:
     passwordNotMatching: 'Password confirmation is not valid'
     groupNameAllreadyExist: This group label already exists for this domain. You can't
       use it
+    BadFormatcsv: "Bad format file"
   units:
     literByDay: litres/day
     hoursByDay: Hours/day
@@ -224,6 +226,11 @@ Message:
     senderAuthorized: 'The address is now authorized'
     senderBanned: 'The address is now banished'
     checkMailUnsuccessful: 'We couldn''t check this email.'
+    connectionOk : "Connexion success"
+    connectionKo : "Unable to connect"   
+    invalidLdapQuery: "Invalid Ldap query"
+    ldapNbUserfound: "$NB_USER user(s) found"
+    ldapNbGroupfound: "$NB_GROUP group(s) found"     
   http:
     404:
       title: 'Page not found'
@@ -237,8 +244,10 @@ Message:
       description: 'An error occurred that prevents the display of this page. <br/><br/>
         We are trying to solve this problem as quickly as possible.<br/><br/> Please
         excuse us for the inconvenience'
-  Office365Connector:
-    resultImport: "$NB_CREATED users created, $NB_UPDATED users updated"
+  Connector:
+    resultImportUser: "$NB_USER_CREATED users created, $NB_USER_UPDATED synchronized"
+    resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED synchronized"
+    resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED synchronized"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
   Toast:
     defaultTitle: Information
@@ -428,6 +437,7 @@ Entities:
       report: 'Send report'
       bypassHumanAuth: 'Deactivate human authentication'
       policy: "Policy"
+      office365PrincipalName: "M365 principal mail"
   Message:
     index: 'List of messages'
     untreated: 'No treaties'
@@ -455,6 +465,26 @@ Entities:
     fields:
       name: "Connector name"    
       type: "Connector type" 
+  LdapConnector:
+    labels:
+    actions:
+      add: "Add Ldap connector"
+      edit: "Edit Ldap connector"
+    fields:
+      ldapHost: "Host"
+      ldapPort: "Port (default 389)"
+      allowAnonymousBind: "Allow anonymous connexion"
+      LdapBaseDN: "BaseDN"
+      ldapLoginField: "LDAP field for login (ex : uid)"
+      ldapBindDn: "Bind Dn"
+      LdapPassword: "Password"
+      ldapRealNameField: "LDAP Field for username (ex : sn)"
+      synchronizeGroup: "Also synchronize groups"
+      ldapGroupNameField: "LDAP field for group name (ex : sn)"
+      ldapEmailField: "LDAP field for email"
+      ldapAliasField: "LDAP field for alias (if different from email)"
+      ldapUserFilter: "Filter for user"
+      ldapGroupFilter: "Filter for groups"      
   Office365Connector:
     labels:
     fields:

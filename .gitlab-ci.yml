@@ -23,11 +23,11 @@ stages:
 
 before_script:
   - |-
-        if [ $CI_COMMIT_BRANCH == "gitlab_ci_dev" ] ; then
-            TAG="dev"
+        if [ $CI_COMMIT_BRANCH == "main" ] ; then
+            TAG="main"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [ $CI_COMMIT_BRANCH == "gitlab_ci_preprod" ] ; then
+        elif [ $CI_COMMIT_BRANCH == "preprod" ] ; then
             TAG="preprod"
             REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -130,10 +130,10 @@ mass_build:
   script:
     - for DIR in amavis app relay smtp syslogng ;
         do cd $CI_PROJECT_DIR/$DIR && docker build
-        --cache-from $REGISTRY/agentj_$DIR:dev
+        --cache-from $REGISTRY/agentj_$DIR:main
         --build-arg BUILDKIT_INLINE_CACHE=1
-        -t $REGISTRY/agentj_$DIR:dev . ;
-        docker push $REGISTRY/agentj_$DIR:dev ;
+        -t $REGISTRY/agentj_$DIR:main . ;
+        docker push $REGISTRY/agentj_$DIR:main ;
         done
   when: manual
 
@@ -145,7 +145,7 @@ deploy-dev:
   variables:
     DEPLOY_USER: docker
     DEPLOY_DIR: "/home/$DEPLOY_USER/agentj-docker"
-    TAG: "dev"
+    TAG: "main"
   before_script:
     - apk add --no-cache rsync
     - echo $TAG
@@ -161,14 +161,14 @@ deploy-dev:
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - ssh $DEPLOY_USER@$DEPLOY_DEV -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_DEV:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_DEV -C "cd $DEPLOY_DIR/ && docker compose up -d"
   except:
     - merge_requests
   only:
-    - gitlab_ci_dev
+    - main
 
 deploy-preprod:
   stage: deploy
@@ -202,15 +202,15 @@ deploy-preprod:
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD_HOST:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "sed -i "s/VERSION=.*/VERSION=$TAG/" /home/docker/agentj-docker/.env"
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD_HOST -C "cd $DEPLOY_DIR/ && docker compose up -d"
   except:
     - merge_requests
   only:
-    - gitlab_ci_preprod
+    - preprod
 
 deploy-tags:
   stage: deploy
@@ -237,10 +237,10 @@ deploy-tags:
     - echo $DEPLOY_DIR
     - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "[ ! -d $DEPLOY_DIR ] && mkdir -p $DEPLOY_DIR || true"
     - rsync -arv --exclude=".env" ./ $DEPLOY_USER@$DEPLOY_PREPROD:$DEPLOY_DIR/
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose down"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker compose down"
     - docker image rm $(docker images -q --filter=reference="*/*/*/*agentj*") || true
     - docker volume rm agentj-docker_public || true
-    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker-compose up -d"
+    - ssh $DEPLOY_USER@$DEPLOY_PREPROD -C "cd $DEPLOY_DIR/ && docker compose up -d"
   only:
     - tags
   except:
