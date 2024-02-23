@@ -86,6 +86,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private $policy;
 
+  #[ORM\ManyToOne(targetEntity: 'Policy')]
+    #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
+    private $outPolicy;
+
 
   #[ORM\JoinTable(name: 'users_domains')]
     #[ORM\ManyToMany(targetEntity: 'Domain', inversedBy: 'users')]
@@ -96,7 +100,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $domain;
 
   #[ORM\ManyToMany(targetEntity: 'Groups', inversedBy: 'users')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     #[OrderBy(['priority' => 'DESC'])]
     private $groups;
 
@@ -301,6 +305,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPolicy(?Policy $policy): self
     {
         $this->policy = $policy;
+
+        return $this;
+    }
+
+    public function getOutPolicy(): ?Policy
+    {
+        return $this->outPolicy;
+    }
+
+    public function setOutPolicy(?Policy $outPolicy): self
+    {
+        $this->outPolicy = $outPolicy;
 
         return $this;
     }
