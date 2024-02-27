@@ -8,15 +8,16 @@ SHELL [ "/bin/sh", "-e", "-c" ]
 
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
-    bind-tools \
+    bind9-dnsutils \
     opendkim \
-    opendkim-utils \
+    opendkim-tools \
     openssl \
     postfix \
     postfix-mysql \
     supervisor \
     rsyslog \
     tzdata \
+    && rm -rf /var/lib/apt/lists/* \
     && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
 
 COPY conf/postfix/* /etc/postfix/
