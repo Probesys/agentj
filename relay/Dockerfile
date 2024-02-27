@@ -1,12 +1,13 @@
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 LABEL maintainer="Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Postfix outgoing relay for AgentJ"
 LABEL description = "Postfix server to relay good emails to their final server"
 
-SHELL [ "/bin/sh", "-o", "pipefail", "-c" ]
+SHELL [ "/bin/sh", "-e", "-c" ]
 
-RUN apk --no-cache add \
+RUN apt-get update -q --fix-missing && \
+    apt-get -y install --no-install-recommends \
     bind-tools \
     opendkim \
     opendkim-utils \
@@ -24,6 +25,6 @@ COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 25/tcp
 
-ENTRYPOINT [ "/entrypoint.sh" ] 
+ENTRYPOINT [ "/entrypoint.sh" ]
 HEALTHCHECK --start-period=60s CMD postfix status 2> /dev/null || exit 1
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]
