@@ -1,0 +1,19 @@
+--- /usr/share/perl5/Amavis/Out/SQL/Log.pm      2023-05-11 22:52:23.000000000 +0000
++++ /root/perl5_Amavis_Out_SQL_Log.pm   2024-02-28 09:30:07.394480067 +0000
+@@ -253,13 +253,15 @@
+       my $time_iso = $timestamp_fmt_mysql && ($conn_h->driver_name eq 'mysql' || $conn_h->driver_name eq 'MariaDB')
+                        ? iso8601_utc_timestamp($msginfo->rx_time,1,'')
+                        : iso8601_utc_timestamp($msginfo->rx_time);
++      my $is_mlist = length($msginfo->is_mlist) > 0 ? 1 : 0;
+       # insert a placeholder msgs record with sender information
+       $conn_h->execute($ins_msg,
+         $partition_tag, $msginfo->mail_id, $msginfo->secret_id,
+         $msginfo->log_id, int($msginfo->rx_time), $time_iso,
+         untaint($sid), c('policy_bank_path'), untaint($msginfo->client_addr),
+         0+untaint($msginfo->msg_size),
+-        untaint(substr(idn_to_utf8(c('myhostname')),0,255)));
++       untaint(substr(idn_to_utf8(c('myhostname')),0,255)),
++       $is_mlist);
+       $conn_h->commit;  1;
+     } or do {
+       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;

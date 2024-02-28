@@ -1,0 +1,13 @@
+--- /usr/share/perl5/Amavis/Conf.pm     2023-05-11 22:52:23.000000000 +0000
++++ /root/perl5_Amavis_Conf.pm  2024-02-28 09:24:37.367099483 +0000
+@@ -1238,8 +1238,8 @@
+       'INSERT INTO maddr (partition_tag, email, domain) VALUES (?,?,?)',
+     'ins_msg' =>
+       'INSERT INTO msgs (partition_tag, mail_id, secret_id, am_id,'.
+-      ' time_num, time_iso, sid, policy, client_addr, size, host)'.
+-      ' VALUES (?,?,?,?,?,?,?,?,?,?,?)',
++      ' time_num, time_iso, sid, policy, client_addr, size, host, is_mlist)'.
++      ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+     'upd_msg' =>
+       'UPDATE msgs SET content=?, quar_type=?, quar_loc=?, dsn_sent=?,'.
+       ' spam_level=?, message_id=?, from_addr=?, subject=?, client_addr=?,'.
