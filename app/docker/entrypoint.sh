@@ -7,7 +7,7 @@ sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /var/db/dkim/TrustedHosts
 touch /var/db/dkim/DomainsList
 touch /var/db/dkim/KeyTable
 touch /var/db/dkim/SigningTable
-addgroup www-data opendkim
+usermod -aG www-data opendkim
 if [ ! -d /var/db/dkim/keys ]
 then
     mkdir /var/db/dkim/keys
@@ -35,27 +35,27 @@ sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" /var/www/agentj/.env
 sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" /var/www/agentj/.env
 sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
-sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php81/php.ini
+sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 
 echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php81 bin/console assets:install
+cd /var/www/agentj && sudo -u www-data php bin/console assets:install
 
 echo "Create database if not exists and update schemas"
-cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:database:create --if-not-exists
-cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:migration:migrate
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php81 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
 
 echo "update groups wblist"
-cd /var/www/agentj && php81 bin/console agentj:update-groups-wblist
+cd /var/www/agentj && php bin/console agentj:update-groups-wblist
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache
 chown -R www-data:www-data /var/www/agentj/var
 find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 # Allow web server user to purge old virus and spam mails
-addgroup -g 101 amavis && adduser www-data amavis && chmod -R g+w /tmp/amavis/quarantine
+usermod -aG www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 
 echo "Installing crontabs"
 if [ ! -d /var/log/agentj ]
@@ -63,6 +63,6 @@ then
     mkdir /var/log/agentj && chown -R www-data /var/log/agentj
 fi
 
-crond
+cron
 
 exec "$@"
