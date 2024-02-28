@@ -40,19 +40,21 @@ else
 	postmap /etc/conf/$SMTP_TYPE/postfix/slow_dest_domains_transport
 fi
 
-# Fix file permissions
+# For existing installs: fix file permissions
+# For new installs: create dir
 find /etc/conf/$SMTP_TYPE/postfix/ -type f -exec chmod 644 {} \;
 
 for dir in active bounce corrupt defer deferred flush hold incoming \
     private saved trace
 do
     mkdir -p /var/spool/postfix/"$dir"
-    chown -R 100:0 /var/spool/postfix/"$dir"
+    chown -R postfix:root /var/spool/postfix/"$dir"
 done
+
 for dir in maildrop public
 do
     mkdir -p /var/spool/postfix/"$dir"
-    chown -R 100:103 /var/spool/postfix/"$dir"
+    chown -R postfix:postdrop /var/spool/postfix/"$dir"
 done
 
 exec "$@"
