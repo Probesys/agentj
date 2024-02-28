@@ -24,14 +24,14 @@ sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/postfix/mysql-virtual_domains.cf
 
 # Fix file permissions
 find /etc/postfix/ -type f -exec chmod 644 {} \;
-for dir in active bounce corrupt defer deferred flush hold incoming \
-    private saved trace
+for dir in active bounce corrupt defer deferred flush incoming \
+    private saved
 do
-    chown -R 100:0 /var/spool/postfix/"$dir"
+    chown -R postfix:root /var/spool/postfix/"$dir"
 done
 for dir in maildrop public
 do
-    chown -R 100:103 /var/spool/postfix/"$dir"
+    chown -R postfix:postdrop /var/spool/postfix/"$dir"
 done
 
 
