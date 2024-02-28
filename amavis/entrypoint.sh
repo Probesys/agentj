@@ -23,7 +23,6 @@ then
     chmod 755 /run/clamav
     touch /run/clamav/clamd.ctl
     chmod 644 /etc/amavisd.conf
-    adduser clamav amavis && adduser amavis clamav
     chown -R clamav:clamav /run/clamav
 fi
 if [ "$CLAMAV_AUTOSTART" == "true" ]
