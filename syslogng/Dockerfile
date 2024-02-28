@@ -1,17 +1,17 @@
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "AgentJ logs server"
 LABEL description = "A central log server for AgentJ stack services"
 
-RUN apk --no-cache add \
-    dcron \
-    syslog-ng \
-    syslog-ng-json \
+RUN apt-get update -q --fix-missing && \
+    apt-get -y install --no-install-recommends \
+    cron \
+    syslog-ng-core \
     syslog-ng-scl \
-    syslog-ng-sql \
-    syslog-ng-tags-parser \
-    tzdata
+    syslog-ng-mod-sql \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY conf/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 COPY conf/cron/syslogng-rotate /etc/cron.d/syslogng-rotate
