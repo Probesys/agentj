@@ -33,6 +33,7 @@ RUN apt-get update -q --fix-missing && \
     rsyslog \
     spamassassin \
     spamc \
+    spamd \
     supervisor \
     tzdata \
     unzip \
