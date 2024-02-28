@@ -38,6 +38,6 @@ else
 fi
 sed -i "s/\$CLAMAV_CONFIG/$CLAMAV_CONFIG/g" /etc/amavisd.conf
 
-crond
+cron
 
 exec "$@"

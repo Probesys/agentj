@@ -18,5 +18,4 @@ else
     echo "relayhost="  >> /etc/postfix/main.cf
 fi
 
-
 exec "$@"
