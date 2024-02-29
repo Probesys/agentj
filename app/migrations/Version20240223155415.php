@@ -14,14 +14,14 @@ final class Version20240223155415 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add out (sending) policy for users';
+        return 'Add out (sending) policy for users and amavis tables for outgoing mails ';
     }
 
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE users ADD `out_policy_id` INTEGER DEFAULT NULL');
-        // $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E957DAB4D1 FOREIGN KEY (out_policy_id) REFERENCES policy (id)');
+        $this->addSql('ALTER TABLE users ADD `out_policy_id` INT UNSIGNED DEFAULT NULL');
+        $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E957DAB4D1 FOREIGN KEY (out_policy_id) REFERENCES policy (id)');
         $this->addSql('CREATE INDEX IDX_1483A5E957DAB4D1 ON users (out_policy_id)');
         $this->addSql('CREATE TABLE out_quarantine (partition_tag INT NOT NULL, mail_id VARBINARY(255) NOT NULL, chunk_ind INT UNSIGNED NOT NULL, mail_text BLOB NOT NULL, PRIMARY KEY(partition_tag, mail_id, chunk_ind)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
         $this->addSql('CREATE TABLE out_msgs (partition_tag INT NOT NULL, mail_id VARBINARY(255) NOT NULL, status_id INT DEFAULT NULL, sid BIGINT UNSIGNED DEFAULT NULL, secret_id VARBINARY(255) DEFAULT NULL, am_id VARCHAR(20) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, time_num INT UNSIGNED NOT NULL, time_iso CHAR(16) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, policy VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, client_addr VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, size INT UNSIGNED NOT NULL, originating CHAR(1) CHARACTER SET utf8mb4 DEFAULT \'\' NOT NULL COLLATE `utf8mb4_unicode_ci`, content CHAR(1) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, quar_type CHAR(1) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, quar_loc VARBINARY(255) DEFAULT NULL, dsn_sent CHAR(1) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, spam_level DOUBLE PRECISION DEFAULT NULL, message_id VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, from_addr VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, subject VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, host VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, validate_captcha INT UNSIGNED DEFAULT 0, send_captcha INT UNSIGNED DEFAULT 0 NOT NULL, message_error LONGTEXT CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_unicode_ci`, is_mlist TINYINT(1) DEFAULT NULL, INDEX msgs_idx_sid (sid), INDEX IDX_5D0FFB2D6BF700BD (status_id), INDEX msgs_idx_time_iso (time_iso), INDEX msgs_idx_mail_id (mail_id), INDEX msgs_idx_time_num (time_num), INDEX msgs_idx_mess_id (message_id), PRIMARY KEY(partition_tag, mail_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
