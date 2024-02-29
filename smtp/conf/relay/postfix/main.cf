@@ -5,7 +5,7 @@ readme_directory = no
 compatibility_level = 3.6
 smtp_host_lookup = dns, native
 
-myhostname = relay.$MAIL_HOSTNAME
+myhostname = relay.$MAIL_DOMAINNAME
 myorigin = /etc/mailname
 alias_maps = lmdb:/etc/postfix/aliases
 alias_database = lmdb:/etc/postfix/aliases
@@ -46,4 +46,4 @@ smtp_destination_concurrency_failed_cohort_limit = 10
 # **IMPORTANT:** this slow_dest_domains_tranport hash is "french-centric".
 # It needs to be adapted to fit your local internet landscape if your
 # organization is outside of France.
-transport_maps = lmdb:/etc/postfix/slow_dest_domains_transport
+transport_maps = lmdb:/etc/conf/relay/postfix/slow_dest_domains_transport
