@@ -79,21 +79,6 @@ amavis_build:
         - amavis/*
         - amavis/**/*
 
-relay_build:
-  stage: build
-  variables:
-    IMG: relay
-  script:
-    - cd $CI_PROJECT_DIR/$IMG && docker build
-        --cache-from $REGISTRY/agentj_$IMG:$TAG
-        --build-arg BUILDKIT_INLINE_CACHE=1
-        -t $REGISTRY/agentj_$IMG:$TAG .
-    - docker push $REGISTRY/agentj_$IMG:$TAG
-  only:
-    changes:
-      - relay/*
-      - relay/**/*
-
 smtp_build:
   stage: build
   variables:
