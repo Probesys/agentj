@@ -88,7 +88,7 @@ RUN apt-get update -q --fix-missing && \
     && mkdir -p /var/db/dkim
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
-COPY docker/conf/nginx/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/opendkim/TrustedHosts /var/db/dkim/TrustedHosts
 COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
