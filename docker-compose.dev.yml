@@ -1,0 +1,21 @@
+---
+
+services:
+  db:
+    ports:
+      - $DB_EXPOSED_PORT:3306
+
+  app:
+    build:
+      context: app/
+    volumes:
+      - ./app/src/:/var/www/agentj/src
+      - ./app/config/:/var/www/agentj/config
+      - ./app/migrations/:/var/www/agentj/migrations
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - 8025:8025
+
+

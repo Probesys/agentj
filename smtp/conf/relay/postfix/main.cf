@@ -10,7 +10,7 @@ myorigin = /etc/mailname
 alias_maps = lmdb:/etc/postfix/aliases
 alias_database = lmdb:/etc/postfix/aliases
 
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK.0/24
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK
 mydestination =
 local_recipient_maps =
 local_transport = error:local mail delivery is disabled 
@@ -27,8 +27,8 @@ recipient_delimiter = +
 
 milter_default_action = accept
 milter_protocol = 6
-smtpd_milters = inet:$IPV4_NETWORK.240:8891
-non_smtpd_milters = inet:$IPV4_NETWORK.240:8891
+smtpd_milters = inet:app:8891
+non_smtpd_milters = inet:app:8891
 
 # Rate limit smtp transport a bit.
 # This may need to be adjusted on instances with more than a few hundred users
@@ -46,4 +46,4 @@ smtp_destination_concurrency_failed_cohort_limit = 10
 # **IMPORTANT:** this slow_dest_domains_tranport hash is "french-centric".
 # It needs to be adapted to fit your local internet landscape if your
 # organization is outside of France.
-transport_maps = lmdb:/etc/postfix/slow_dest_domains_transport
+transport_maps = lmdb:/etc/conf/relay/postfix/slow_dest_domains_transport
