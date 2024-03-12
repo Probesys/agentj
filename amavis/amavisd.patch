@@ -202,7 +202,7 @@ diff -ruN AMA/Out/SQL/Log.pm Amavis/Out/SQL/Log.pm
 +        if ($d eq "PASS" and defined($ins_wblist) and $ins_wblist ne '') {
 +                my ($myrid,$myrexisted) = $self->find_or_save_mailaddr($r->recip_addr);
 +                my ($mysid,$mysexisted) = $self->find_user($msginfo->rfc2822_from);
-+                if ($mysexisted == 1 and $myrexisted == 1) {
++                if ($mysexisted == 1) {
 +                        $conn_h->execute($ins_wblist,untaint($mysid),untaint($myrid),untaint($mysid),untaint($myrid));
 +                }
 +        }
