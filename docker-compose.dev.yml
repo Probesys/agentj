@@ -13,9 +13,24 @@ services:
       - ./app/config/:/var/www/agentj/config
       - ./app/migrations/:/var/www/agentj/migrations
 
+  # manual test (gui on http://localhost:8025)
   mailpit:
     image: axllent/mailpit
     ports:
       - 8025:8025
 
-
+  # auto tests
+  smtp4test:
+    build:
+      context: tests/
+    env_file:
+      - .env
+    networks:
+      default:
+        aliases:
+          - smtp.test
+    depends_on:
+      - db
+      - outsmtp
+      - smtp
+      - app
