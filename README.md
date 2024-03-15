@@ -60,7 +60,13 @@ Then the following runtime variables must be configured in the `.env` file:
 | CLAMAV_AUTOSTART          | true           | use the ClamAV instance of this stack       |
 | CLAMAV_TCPADDRESS         | 0.0.0.0        | remote ClamAV server IP address             |
 | CLAMAV_TCPPORT            | 3310           | remote ClamAV server TCP port               |
+
+For dev/tests:
+
+| Variable                  | Default        | Use                                         |
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
+| IN_SMTP                   | smtp           | host (container) name of in smtp server     |
+| OUT_SMTP                  | outsmtp        | host (container) name of out smtp server    |
 
 
 ## Use
