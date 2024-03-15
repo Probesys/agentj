@@ -15,3 +15,4 @@ services:
       - db
       - outsmtp
       - smtp
+      - app

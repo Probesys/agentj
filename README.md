@@ -64,9 +64,12 @@ Then the following runtime variables must be configured in the `.env` file:
 For dev/tests:
 
 | Variable                  | Default        | Use                                         |
+|---------------------------|----------------|---------------------------------------------|
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
 | IN_SMTP                   | smtp           | host (container) name of in smtp server     |
 | OUT_SMTP                  | outsmtp        | host (container) name of out smtp server    |
+| APP_HOST                  | app            | host (container) name of app                |
+| DB_HOST                   | app            | host (container) name of app                |
 
 
 ## Use
