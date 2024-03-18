@@ -17,5 +17,3 @@ services:
     image: axllent/mailpit
     ports:
       - 8025:8025
-
-

@@ -1,0 +1,18 @@
+---
+
+services:
+  # auto tests
+  smtp4test:
+    build:
+      context: tests/
+    env_file:
+      - .env
+    networks:
+      default:
+        aliases:
+          - smtp.test
+    depends_on:
+      - db
+      - outsmtp
+      - smtp
+      - app
