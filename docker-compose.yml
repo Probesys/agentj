@@ -105,9 +105,9 @@ services:
   opendkim:
     build:
       context: ./opendkim/
+    restart: unless-stopped
     depends_on:
       - db
-
 
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}

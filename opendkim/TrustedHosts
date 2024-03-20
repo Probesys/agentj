@@ -1,3 +1,5 @@
 127.0.0.1
-$IPV4_NETWORK.0/24
-$MAIL_HOSTNAME
+outsmtp
+relay
+outsmtp.agentj.local
+relay.agentj.local

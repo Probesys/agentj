@@ -1,9 +1,8 @@
 FROM debian:bookworm-slim
 
-RUN apt update ; apt install -y opendkim libopendbx1-mysql
-RUN mkdir -p /var/db/dkim
+RUN apt update
+RUN apt install -y opendkim libopendbx1-mysql rsyslog
 COPY opendkim.conf /etc/opendkim.conf
-# wrong
-COPY TrustedHosts /var/db/dkim/TrustedHosts
+COPY TrustedHosts /etc/opendkim_sign_hosts
 EXPOSE 8891
-CMD /usr/sbin/opendkim -x /etc/opendkim.conf -f -v
+CMD rsyslogd & /usr/sbin/opendkim -x /etc/opendkim.conf -f -v

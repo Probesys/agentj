@@ -71,7 +71,6 @@ For dev/tests:
 | APP_HOST                  | app            | host (container) name of app                |
 | DB_HOST                   | app            | host (container) name of app                |
 
-
 ## Use
 
 It is not recommended to launch the stack as *root*. We recommend you to create a dedicated *docker* user (make sure it belongs to the *docker* group).
@@ -84,8 +83,15 @@ The default login is `admin` and the default password is `Sup3rZECR37`.
 
 ### Development
 
-To expose database on host (set `DB_EXPOSED_PORT` in .env), mount app src, config and migrations directories in the running container, and start `mailpit` use  
+To mount app src, config and migrations directories in the running container and expose database on host (for this, set `DB_EXPOSED_PORT` in .env) :
 `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d`
+
+### Tests
+
+The `smtp4test` container spawn a smtp server, a dns server (for dkim) and a shell script which send mails to/through the agentj stack.  
+Currently **the test script erase the database**
+
+
 
 ## Details
 
