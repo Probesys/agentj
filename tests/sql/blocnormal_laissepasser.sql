@@ -996,6 +996,20 @@ INSERT INTO `wblist` VALUES
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+DROP TABLE IF EXISTS `dkim`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dkim` (
+  `id` bigint(20) unsigned NOT NULL,
+  `domain_name` varchar(255) NOT NULL,
+  `selector` varchar(63) NOT NULL,
+  `private_key` text DEFAULT NULL,
+  `public_key` text DEFAULT NULL,
+  KEY `dkim_domain_name_IDX` (`domain_name`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

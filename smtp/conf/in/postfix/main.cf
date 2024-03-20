@@ -59,7 +59,7 @@ inet_interfaces = all
 
 policyd-spf_time_limit = 3600
 
-milter_default_action = accept
+milter_default_action = tempfail
 milter_protocol = 6
-smtpd_milters = inet:app:8891
-non_smtpd_milters = inet:app:8891
+smtpd_milters = inet:opendkim:8891
+non_smtpd_milters = inet:opendkim:8891

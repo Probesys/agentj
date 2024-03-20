@@ -102,6 +102,11 @@ services:
       - ${SMTP_LISTEN_ADDR:-0.0.0.0}:$SMTP_OUT_PORT:25
     command:  [ "supervisord", "-c", "/etc/conf/out/supervisor/supervisord.conf" ]
 
+  opendkim:
+    build:
+      context: ./opendkim/
+    depends_on:
+      - db
 
 
   syslogng:
