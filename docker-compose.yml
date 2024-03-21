@@ -49,6 +49,7 @@ services:
       - .env
     depends_on:
       - amavis
+      - outamavis
       - db
     volumes:
       - amavis:/tmp/amavis
@@ -80,6 +81,7 @@ services:
       - .env
     depends_on:
       - db
+      - opendkim
     volumes:
       - postqueue:/var/spool/postfix
     ports:
@@ -96,6 +98,7 @@ services:
       - .env
     depends_on:
       - db
+      - opendkim
     volumes:
       - outpostqueue:/var/spool/postfix
     ports:

@@ -48,8 +48,8 @@ if [ -d /var/db/dkim/keys/"$_DOMAIN" ]; then
 else
     echo "No DKIM keys exist for this domain. Generating new ones."
     mkdir -p /var/db/dkim/keys/"$_DOMAIN"
-    cd /var/db/dkim/keys/"$_DOMAIN" || exit
-    opendkim-genkey -s agentj -d "$_DOMAIN"
+    cd /var/db/dkim/keys/"$_DOMAIN" || { echo "FAILED to create/cd to /var/db/dkim/keys/$_DOMAIN"; exit; }
+    opendkim-genkey -s agentj -d "$_DOMAIN" || echo "FAILED to gen keys for $_DOMAIN"
     sudo /bin/chown -R opendkim:opendkim /var/db/dkim
 fi
 

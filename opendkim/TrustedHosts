@@ -1,5 +1,2 @@
 127.0.0.1
-outsmtp
-relay
-outsmtp.agentj.local
-relay.agentj.local
+agentj-smtpfriend-1.agentj_default

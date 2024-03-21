@@ -2,7 +2,7 @@
 
 services:
   # auto tests
-  smtp4test:
+  smtptest:
     build:
       context: tests/
     env_file:
@@ -12,7 +12,20 @@ services:
         aliases:
           - smtp.test
     depends_on:
-      - db
       - outsmtp
       - smtp
       - app
+
+  smtpfriend:
+    build:
+      context: tests/
+    env_file:
+      - .env
+    networks:
+      default:
+        aliases:
+          - smtp.friend
+    depends_on:
+      - smtptest
+    command: sh /usr/local/sbin/testmail.sh 'smtp.friend' 26
+
