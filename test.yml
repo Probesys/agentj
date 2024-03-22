@@ -16,16 +16,7 @@ services:
       - smtp
       - app
 
-  smtpfriend:
-    build:
-      context: tests/
-    env_file:
-      - .env
-    networks:
-      default:
-        aliases:
-          - smtp.friend
-    depends_on:
-      - smtptest
-    command: sh /usr/local/sbin/testmail.sh 'smtp.friend' 26
-
+  opendkim:
+    volumes:
+      - ./tests/opendkim.test.conf:/etc/opendkim.test.conf
+      - ./tests/stubdns:/srv/stubdns

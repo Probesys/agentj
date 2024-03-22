@@ -11,42 +11,39 @@ echo ' ok'
 
 
 # insert test base
-if [ "$3" = "reinit_test_db" ];
+if [ "$1" = "reinit_db" ];
 then
-	echo 'reinit test db'
-	 mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
-	 [ "$?" -eq "0" ] || { echo 'failed to insert test data, exiting'; exit $?; }
+	echo 'reinit db'
+	mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
+	[ "$?" -eq "0" ] || { echo 'failed to insert test data, exiting'; exit $?; }
 fi 
 
-local_host="$1"
-target_port="$2"
 
-
-# args:
-# testname: for log
-# in|out: send a mail to agentj or via agentj
-# addr: agentj test address
-# expected_result: 0 the mail should have been received, 1 should not
-# swaks_opts: additionnal swaks options (eg attach a file)
 send() {
+	# for log
 	testname="$1"
+	# in|out (send to agentj or via agentj)
 	in_out="$2"
+	# agentj test address (from or to)
 	aj_addr="$3"
+	# 0: the mail should have been received, 1: should not
 	expected_result="$4"
+	# additionnal swaks options (eg attach a file)
 	swaks_opts="$5"
-	local_addr="root@$local_host"
+	local_addr="root@smtp.test"
 	test_str=''
 
+	echo "---- $testname ----"
 	echo -n "[$testname] ... "
 
 	case $in_out in
 		"in")
-			swaks --from $local_addr --to $aj_addr --body "sent to agentj" -s $IN_SMTP -p $target_port $swaks_opts > /srv/$logname.log 2>&1
+			swaks --from $local_addr --to $aj_addr --body "sent to agentj" -s 127.0.0.1:26 $swaks_opts > /srv/$testname.log 2>&1
 			swaks_exit_code=$?
 			test_str="From: $local_addr"
 			;;
 		"out")
-			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s $OUT_SMTP -p $target_port $swaks_opts > /srv/$logname.log 2>&1
+			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s $OUT_SMTP $swaks_opts > /srv/$testname.log 2>&1
 			swaks_exit_code=$?
 			test_str="From: $aj_addr"
 			;;
