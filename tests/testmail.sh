@@ -30,7 +30,7 @@ send() {
 	expected_result="$4"
 	# additionnal swaks options (eg attach a file)
 	swaks_opts="$5"
-	local_addr="root@smtp.test"
+	local_addr='root@smtp.test'
 	test_str=''
 
 	echo "---- $testname ----"

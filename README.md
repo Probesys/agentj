@@ -14,6 +14,8 @@ The AgentJ Docker stack is composed of the following services:
 - **outamavis**: same as **amavis** but used for mail sent by local user (by their original smtp server)
 - **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
 - **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
+- *wip* **opendkim**: handle DKIM signature verification for incoming mail, and signing when the domain privkey is found in **db**
+- *for tests only* **smtptest**: see [tests](#tests) below
 
 ## Get the sources
 
@@ -88,7 +90,7 @@ To mount app src, config and migrations directories in the running container and
 
 ### Tests
 
-The `smtp4test` container spawn a smtp server, a dns server (for dkim) and a shell script which send mails to/through the agentj stack.  
+The `smtptest` container spawn a smtp server and a shell script which send mails to/through the agentj stack.  
 Currently **the test script erase the database**
 
 
@@ -109,18 +111,19 @@ When started, the AgentJ stack will create the following volumes:
 
 ### Communication matrix
 
-*italic are to be verified*
+*italics are to be verified*
 
-| from ↓ \ to →              | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        |
-|----------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|
-| amavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   |
-| outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* |
-| app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             |
-| db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
-| relay 25/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
-| stmp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             |
-| outstmp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             |
-| syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
+| from ↓ \ to →              | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        | opendkim      |
+|----------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|---------------|
+| amavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   | -             |
+| outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* | -             |
+| app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             | -             |
+| db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
+| opendkim (881/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
+| relay (25/tcp)             | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 881/tcp   |
+| smtp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 881/tcp   |
+| outsmtp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 881/tcp   |
+| syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
 
 ## Upgrade
 
@@ -129,7 +132,7 @@ Please read the [dedicated documentation](https://doc.agentj.io/infra/upgrade/) 
 Generally speaking, the upgrade processes consists in the following:
 
     docker-compose down
-    # Change VERSION variable in your `.nev` file
+    # Change VERSION variable in your `.env` file
     docker-compose up -d
 
 ## About
