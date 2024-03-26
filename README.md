@@ -105,7 +105,7 @@ Please read the [dedicated documentation](https://doc.agentj.io/infra/upgrade/) 
 Generally speaking, the upgrade processes consists in the following:
 
     docker-compose down
-    # Change VERSION variable in your `.nev` file
+    # Change VERSION variable in your `.env` file
     docker-compose up -d
 
 ## About
