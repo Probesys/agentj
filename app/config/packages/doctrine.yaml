@@ -2,7 +2,7 @@ doctrine:
     dbal:
         override_url: true
         url: '%env(resolve:DATABASE_URL)%'
-        schema_filter: '~^(?!out_)~'
+        schema_filter: '~^(?!out_|mail_count)~'
 
         # IMPORTANT: You MUST configure your server version,
         # either here or in the DATABASE_URL env var (see .env file)

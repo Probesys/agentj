@@ -15,7 +15,6 @@ smtpd_relay_restrictions =
         reject_unknown_recipient_domain,
         reject_unauth_destination
 
-
 alias_maps = hash:/etc/postfix/aliases
 alias_database = hash:/etc/postfix/aliases
 
@@ -30,8 +29,9 @@ mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
 
-
 milter_default_action = tempfail
 milter_protocol = 6
 smtpd_milters = inet:opendkim:8891
 non_smtpd_milters = inet:opendkim:8891
+
+smtpd_data_restrictions = check_policy_service { inet:[policyd-rate-limit]:8552, default_action=DUNNO }

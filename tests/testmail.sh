@@ -30,6 +30,8 @@ send() {
 	expected_result="$4"
 	# additionnal swaks options (eg attach a file)
 	swaks_opts="$5"
+	# expected swaks error code (if empty, means no error expected)
+	swaks_error="$6"
 	local_addr='root@smtp.test'
 	test_str=''
 
@@ -53,7 +55,12 @@ send() {
 			;;
 	esac
 
-	[ "$swaks_exit_code" -ne 0 ] && echo -n "swaks error: $swaks_exit_code swaks_opts: '$swaks_opts' ... "
+	if [ -n "$swaks_error" ]
+	then
+		[ "$swaks_exit_code" -eq "$swaks_error" ] && echo "swaks failed as expected (error code $swaks_exit_code)" || echo -n "swaks error: $swaks_exit_code swaks_opts: '$swaks_opts' expected error code: $swaks_error ... "
+	else
+		[ "$swaks_exit_code" -ne 0 ] && echo -n "swaks error: $swaks_exit_code swaks_opts: '$swaks_opts' ... "
+	fi
 
 	# wait 10 seconds, except if a mail is received
 	secs=0
@@ -89,3 +96,11 @@ send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 '--attach /srv/eicar.co
 
 send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 1 '--attach /srv/eicar.com.txt'
 send 'out_pass_virus' 'out' 'user@laissepasser.fr' 1 '--attach /srv/eicar.com.txt'
+
+# trigger rate limit for user@blocnormal.fr which is limited to 1 mail per second
+send 'out_rate_limit_pass' 'out' 'user@blocnormal.fr' 0 "" "" & \
+	send 'out_rate_limit_bloc' 'out' 'user@blocnormal.fr' 0 "" 25 & \
+	send 'out_rate_limit_bloc' 'out' 'user@blocnormal.fr' 0 "" 25
+
+sleep 3
+mv /var/mail/root /var/mail/after_trigger_rate_limit

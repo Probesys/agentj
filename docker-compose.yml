@@ -113,6 +113,11 @@ services:
     depends_on:
       - db
 
+  policyd-rate-limit:
+    build:
+      context: ./policyd-rate-limit
+    restart: unless-stopped
+
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}
     restart: always
