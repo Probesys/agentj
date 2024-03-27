@@ -37,7 +37,7 @@ else
 	    echo "relayhost="  >> /etc/conf/$SMTP_TYPE/postfix/main.cf
 	fi
 
-	postmap /etc/conf/$SMTP_TYPE/postfix/slow_dest_domains_transport
+	postmap lmdb:/etc/conf/$SMTP_TYPE/postfix/slow_dest_domains_transport
 fi
 
 # For existing installs: fix file permissions

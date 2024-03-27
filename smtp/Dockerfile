@@ -14,6 +14,7 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     postfix \ 
     postfix-mysql \ 
     postfix-policyd-spf-python \ 
+    postfix-lmdb \
     supervisor  \ 
     rsyslog \ 
     tzdata  \ 
