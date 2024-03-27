@@ -25,10 +25,10 @@ smtpd_relay_restrictions =
 mailbox_size_limit = 0
 recipient_delimiter = +
 
-milter_default_action = accept
+milter_default_action = tempfail
 milter_protocol = 6
-smtpd_milters = inet:app:8891
-non_smtpd_milters = inet:app:8891
+smtpd_milters = inet:opendkim:8891
+non_smtpd_milters = inet:opendkim:8891
 
 # Rate limit smtp transport a bit.
 # This may need to be adjusted on instances with more than a few hundred users

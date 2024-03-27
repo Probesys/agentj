@@ -52,8 +52,6 @@ RUN apt-get update -q --fix-missing && \
     libssl3 \
     mariadb-client \
     nginx-light \
-    opendkim \
-    opendkim-tools \
     openssl \
     perl \
     php8.2 \
@@ -84,26 +82,17 @@ RUN apt-get update -q --fix-missing && \
     tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid \
-    && rm -rf node_modules \
-    && mkdir -p /var/db/dkim
+    && rm -rf node_modules
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
-COPY docker/conf/opendkim/TrustedHosts /var/db/dkim/TrustedHosts
-COPY docker/conf/opendkim/opendkim.conf /etc/opendkim/opendkim.conf
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
-COPY docker/conf/sudo/opendkim /etc/sudoers.d/opendkim
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
-COPY docker/files/deldomainkey.sh /usr/local/bin/deldomainkey.sh
-COPY docker/files/gendomainkey.sh /usr/local/bin/gendomainkey.sh
-
-VOLUME /var/db/dkim
 
 EXPOSE 9000
-EXPOSE 8891
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]

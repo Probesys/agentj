@@ -14,6 +14,8 @@ The AgentJ Docker stack is composed of the following services:
 - **outamavis**: same as **amavis** but used for mail sent by local user (by their original smtp server)
 - **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
 - **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
+- *wip* **opendkim**: handle DKIM signature verification for incoming mail, and signing when the domain privkey is found in **db**
+- *for tests only* **smtptest**: see [tests](#tests) below
 
 ## Get the sources
 
@@ -69,8 +71,7 @@ For dev/tests:
 | IN_SMTP                   | smtp           | host (container) name of in smtp server     |
 | OUT_SMTP                  | outsmtp        | host (container) name of out smtp server    |
 | APP_HOST                  | app            | host (container) name of app                |
-| DB_HOST                   | app            | host (container) name of app                |
-
+| DB_HOST                   | db             | host (container) name of app                |
 
 ## Use
 
@@ -84,8 +85,15 @@ The default login is `admin` and the default password is `Sup3rZECR37`.
 
 ### Development
 
-To expose database on host (set `DB_EXPOSED_PORT` in .env), mount app src, config and migrations directories in the running container, and start `mailpit` use  
-`docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d`
+To mount app src, config and migrations directories in the running container and expose database on host (for this, set `DB_EXPOSED_PORT` in .env) :
+`docker compose -f docker-compose.yml -f dev.yml up -d`
+
+### Tests
+
+The `smtptest` container spawn a smtp server and a shell script which send mails to/through the agentj stack.  
+Currently **the test script erase the database**
+
+
 
 ## Details
 
@@ -97,24 +105,24 @@ When started, the AgentJ stack will create the following volumes:
 - *applogs* : the application logs (cron tasks)
 - *db* : the MariaDB databases files
 - *logs*: the log files from all containers, centralized by the **syslogng** container
-- *opendkim* : DKIM signature and conf files
 - *postqueue* : the incoming mail queue (for **smtp**)
 - *outpostqueue* : the outgoing mail queue (for **outsmtp**)
 
 ### Communication matrix
 
-*italic are to be verified*
+*italics are to be verified*
 
-| from ↓ \ to →              | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        |
-|----------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|
-| amavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   |
-| outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* |
-| app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             |
-| db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
-| relay 25/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
-| stmp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             |
-| outstmp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             |
-| syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   |
+| from ↓ \ to →              | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        | opendkim      |
+|----------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|---------------|
+| amavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   | -             |
+| outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* | -             |
+| app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             | -             |
+| db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
+| opendkim (8891/tcp)        | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
+| relay (25/tcp)             | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 8891/tcp  |
+| smtp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 8891/tcp  |
+| outsmtp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 8891/tcp  |
+| syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
 
 ## Upgrade
 
@@ -123,7 +131,7 @@ Please read the [dedicated documentation](https://doc.agentj.io/infra/upgrade/) 
 Generally speaking, the upgrade processes consists in the following:
 
     docker-compose down
-    # Change VERSION variable in your `.nev` file
+    # Change VERSION variable in your `.env` file
     docker-compose up -d
 
 ## About

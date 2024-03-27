@@ -49,11 +49,11 @@ services:
       - .env
     depends_on:
       - amavis
+      - outamavis
       - db
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-      - opendkim:/var/db/dkim
     ports:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
@@ -80,6 +80,7 @@ services:
       - .env
     depends_on:
       - db
+      - opendkim
     volumes:
       - postqueue:/var/spool/postfix
     ports:
@@ -96,13 +97,21 @@ services:
       - .env
     depends_on:
       - db
+      - opendkim
     volumes:
       - outpostqueue:/var/spool/postfix
     ports:
       - ${SMTP_LISTEN_ADDR:-0.0.0.0}:$SMTP_OUT_PORT:25
     command:  [ "supervisord", "-c", "/etc/conf/out/supervisor/supervisord.conf" ]
 
-
+  opendkim:
+    build:
+      context: ./opendkim/
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}
@@ -128,7 +137,6 @@ volumes:
   applogs:
   db:
   logs:
-  opendkim:
   postqueue:
   outpostqueue:
 
