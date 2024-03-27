@@ -1,21 +1,6 @@
 #!/bin/sh
 set -e
 
-# Configure opendkim
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /var/db/dkim/TrustedHosts
-sed -i "s/\$IPV4_NETWORK/$IPV4_NETWORK/g" /var/db/dkim/TrustedHosts
-touch /var/db/dkim/DomainsList
-touch /var/db/dkim/KeyTable
-touch /var/db/dkim/SigningTable
-usermod -aG www-data opendkim
-if [ ! -d /var/db/dkim/keys ]
-then
-    mkdir /var/db/dkim/keys
-fi
-chgrp -R opendkim /var/db/dkim
-chmod -R g+w /var/db/dkim
-chmod 0644 /etc/sudoers.d/opendkim
-
 # Generate APP_SECRET (required for CSRF token)
 MYAPPSECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 # Generate token for encryption

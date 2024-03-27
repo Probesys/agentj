@@ -4,6 +4,7 @@ RUN apt update
 RUN apt install -y opendkim libopendbx1-mysql rsyslog
 COPY entrypoint.sh /entrypoint.sh
 COPY opendkim.conf /etc/opendkim.conf
+COPY TrustedHosts /etc/trusted.opendkim.conf
 # used only during tests. cf test.yml
 RUN touch /etc/opendkim.test.conf
 EXPOSE 8891

@@ -54,7 +54,6 @@ services:
     volumes:
       - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-      - opendkim:/var/db/dkim
     ports:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
@@ -138,7 +137,6 @@ volumes:
   applogs:
   db:
   logs:
-  opendkim:
   postqueue:
   outpostqueue:
 
