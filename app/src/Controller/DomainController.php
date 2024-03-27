@@ -110,6 +110,7 @@ class DomainController extends AbstractController {
                 $domain->setMessageAlert($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_report'])->getValue());
             }
 
+            $this->generateOpenDkim($domain);
 
 
 
@@ -150,9 +151,8 @@ class DomainController extends AbstractController {
                 }
             }
 
-            $em->flush();
 
-            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
+            $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_index');
         } elseif ($form->isSubmitted()) {
@@ -232,7 +232,8 @@ class DomainController extends AbstractController {
                 }
             }
 
-            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
+	    if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
+		    $this->generateOpenDkim($domain);
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -391,21 +392,26 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    
+    /* Generate private and public keys for DKIM */
+    private function generateOpenDkim(Domain $domain): bool {
+	$dkim = $domain->getDomainKeys();
+	$dkim->setDomainName($domain->getDomain());
+	$dkim->setSelector('agentj');
+	try {
+	    $private_key = openssl_pkey_new();
+	    $privkey_pem = null;
+	    openssl_pkey_export($private_key, $privkey_pem);
+	    $dkim->setPrivateKey($privkey_pem);
 
-    private function generateOpenDkim(string $smtpServer, string $domainName): bool {
-        $process = new Process([$this->getParameter('app.dkim_generator'), $domainName, $smtpServer]);
-//        $process->run();
+	    $pubkey_pem = openssl_pkey_get_details($private_key)['key'];
+	    $dkim->setPublicKey($pubkey_pem);
+	    // $public_key = openssl_pkey_get_public($public_key_pem);
 
-        try {
-            $process->run();
-
-            $this->addFlash('info', $smtpServer . ' : ' . $process->getOutput());
-            return true;
-        } catch (ProcessFailedException $exception) {
-            $this->addFlash('error', $exception->getMessage());
-            return false;
-        }
+	    $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getPublicKey());
+	    return true;
+	} catch (ProcessFailedException $exception) {
+	    $this->addFlash('error', $exception->getMessage());
+	    return false;
+	}
     }
-
 }
