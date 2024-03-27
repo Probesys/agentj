@@ -71,7 +71,7 @@ For dev/tests:
 | IN_SMTP                   | smtp           | host (container) name of in smtp server     |
 | OUT_SMTP                  | outsmtp        | host (container) name of out smtp server    |
 | APP_HOST                  | app            | host (container) name of app                |
-| DB_HOST                   | app            | host (container) name of app                |
+| DB_HOST                   | db             | host (container) name of app                |
 
 ## Use
 
@@ -86,7 +86,7 @@ The default login is `admin` and the default password is `Sup3rZECR37`.
 ### Development
 
 To mount app src, config and migrations directories in the running container and expose database on host (for this, set `DB_EXPOSED_PORT` in .env) :
-`docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d`
+`docker compose -f docker-compose.yml -f dev.yml up -d`
 
 ### Tests
 
@@ -105,7 +105,6 @@ When started, the AgentJ stack will create the following volumes:
 - *applogs* : the application logs (cron tasks)
 - *db* : the MariaDB databases files
 - *logs*: the log files from all containers, centralized by the **syslogng** container
-- *opendkim* : DKIM signature and conf files
 - *postqueue* : the incoming mail queue (for **smtp**)
 - *outpostqueue* : the outgoing mail queue (for **outsmtp**)
 
@@ -119,10 +118,10 @@ When started, the AgentJ stack will create the following volumes:
 | outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* | -             |
 | app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             | -             |
 | db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
-| opendkim (881/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
-| relay (25/tcp)             | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 881/tcp   |
-| smtp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 881/tcp   |
-| outsmtp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 881/tcp   |
+| opendkim (8891/tcp)        | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
+| relay (25/tcp)             | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 8891/tcp  |
+| smtp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 8891/tcp  |
+| outsmtp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 8891/tcp  |
 | syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
 
 ## Upgrade
