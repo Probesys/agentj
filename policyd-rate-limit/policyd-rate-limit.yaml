@@ -4,12 +4,17 @@ debug: True
 # path where the program will try to write its pid to.
 pidfile: "/var/run/policyd-rate-limit/policyd-rate-limit.pid"
 
+# The user policyd-rate-limit will use to drop privileges.
+user: "policyd-rate-limit"
+# The group policyd-rate-limit will use to drop privileges.
+group: "policyd-rate-limit"
+
 # The config to connect to a mysql server.
 mysql_config:
-    user: "u_agentj"
-    passwd: "changeme"
-    db: "agentj_outmail"
-    host: "db"
+    user: "$DB_USER"
+    passwd: "$DB_PASSWORD"
+    db: "$DB_NAME"
+    host: "$DB_HOST"
     charset: 'utf8'
 
 # 0 for sqlite3, 1 for mysql and 2 for postgresql.
@@ -46,11 +51,11 @@ limit_by_sasl: True
 # apply limits by sender addresses.
 limit_by_sender: True
 # If sasl username and sender address not found or disabled, apply limits by ip addresses.
-limit_by_ip: True
+limit_by_ip: False
 
 # A list of ip networks in cidr notation on which limits are applied. An empty list is equal
 # to limit_by_ip: False, put "0.0.0.0/0" and "::/0" for every ip addresses.
-limited_networks: ["0.0.0.0/0", "::/0"]
+#limited_networks: ["0.0.0.0/0", "::/0"]
 
 # If no limits are reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
@@ -83,7 +88,7 @@ report_limits: [86400]
 report_only_if_needed: True
 
 # The smtp server to use to send emails [host, port]
-smtp_server: [relay, 25]
+#smtp_server: [$SMTP_RELAY, 25]
 # Should we use starttls (you should set this to True if you use smtp_credentials)
 smtp_starttls: False
 # Should we use credentials to connect to smtp_server ? if yes set ["user", "password"], else null

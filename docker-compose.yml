@@ -116,6 +116,8 @@ services:
   policyd-rate-limit:
     build:
       context: ./policyd-rate-limit
+    env_file:
+      - .env
     restart: unless-stopped
 
   syslogng:
