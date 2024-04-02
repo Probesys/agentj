@@ -12,4 +12,4 @@ RUN useradd -m policyd-rate-limit
 RUN chown policyd-rate-limit /var/run/policyd-rate-limit
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-CMD while true ; do sleep 3600 ; policyd-rate-limit --clean ; done & policyd-rate-limit
+CMD while true ; do sleep 3600 ; su -l policyd-rate-limit policyd-rate-limit --clean ; done & policyd-rate-limit

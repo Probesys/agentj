@@ -18,7 +18,6 @@ then
 	[ "$?" -eq "0" ] || { echo 'failed to insert test data, exiting'; exit $?; }
 fi 
 
-
 send() {
 	# for log
 	testname="$1"
@@ -26,12 +25,12 @@ send() {
 	in_out="$2"
 	# agentj test address (from or to)
 	aj_addr="$3"
-	# 0: the mail should have been received, 1: should not
-	expected_result="$4"
+	# number of received mail expected
+	expected_received_count="$4"
 	# additionnal swaks options (eg attach a file)
 	swaks_opts="$5"
 	# expected swaks error code (if empty, means no error expected)
-	swaks_error="$6"
+	swaks_expected="${6:-0}"
 	local_addr='root@smtp.test'
 	test_str=''
 
@@ -55,52 +54,66 @@ send() {
 			;;
 	esac
 
-	if [ -n "$swaks_error" ]
+	if [ "$swaks_expected" -ne "$swaks_exit_code" ]
 	then
-		[ "$swaks_exit_code" -eq "$swaks_error" ] && echo "swaks failed as expected (error code $swaks_exit_code)" || echo -n "swaks error: $swaks_exit_code swaks_opts: '$swaks_opts' expected error code: $swaks_error ... "
-	else
-		[ "$swaks_exit_code" -ne 0 ] && echo -n "swaks error: $swaks_exit_code swaks_opts: '$swaks_opts' ... "
+		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, options: '$swaks_opts' "
 	fi
 
-	# wait 10 seconds, except if a mail is received
+	touch /var/mail/root
+	# wait for all mail to be received, or 10 seconds
 	secs=0
-	while [ ! -f /var/mail/root ] && [ "$secs" -lt "10" ]
+	while [ "$(grep -c "$test_str" /var/mail/root)" -ne "$expected_received_count" ] && [ "$secs" -lt "10" ]
 	do
 		sleep 1; secs=$((secs + 1))
 	done
+	# if we didn't expect any mail, sleep 10 to be sure nothing is received
+	if [ "$expected_received_count" -eq 0 ]
+	then
+		sleep 10
+	fi
 
-	touch /var/mail/root
-	grep -q "$test_str" /var/mail/root
-	received="$?"
-	if [ "$received" -eq "$expected_result" ]
+	received=$(grep -c "$test_str" /var/mail/root)
+	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok (${secs}s)"
 	else
-		echo "failed. aj_addr: '$aj_addr' ; test_str: '$test_str' ; swaks_opts: '$swaks_opts'"
+		echo "failed, received $received mail (expected $expected_received_count) with '$test_str'. agentj address: '$aj_addr', swaks options: '$swaks_opts'"
 	fi
 
 	mv /var/mail/root /var/mail/$testname
 }
 
-send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
-send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 0
+send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 0
+send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
-send 'out_bloc' 'out' 'user@blocnormal.fr' 0
-send 'out_pass' 'out' 'user@laissepasser.fr' 0
+send 'out_bloc' 'out' 'user@blocnormal.fr' 1
+send 'out_pass' 'out' 'user@laissepasser.fr' 1
 
-send 'in_bloc_known' 'in' 'user@blocnormal.fr' 0
-send 'in_pass_known' 'in' 'user@laissepasser.fr' 0
+send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
+send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
 
-send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 1 '--attach /srv/eicar.com.txt'
-send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 '--attach /srv/eicar.com.txt'
+send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
+send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
 
-send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 1 '--attach /srv/eicar.com.txt'
-send 'out_pass_virus' 'out' 'user@laissepasser.fr' 1 '--attach /srv/eicar.com.txt'
+send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
+send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
 
+echo "---- test trigger rate limiting ----"
 # trigger rate limit for user@blocnormal.fr which is limited to 1 mail per second
-send 'out_rate_limit_pass' 'out' 'user@blocnormal.fr' 0 "" "" & \
-	send 'out_rate_limit_bloc' 'out' 'user@blocnormal.fr' 0 "" 25 & \
-	send 'out_rate_limit_bloc' 'out' 'user@blocnormal.fr' 0 "" 25
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+# expect swak error 25 and one mail
+send 'out_rate_limit_limited' 'out' 'user@blocnormal.fr' 1 "" 25
 
-sleep 3
-mv /var/mail/root /var/mail/after_trigger_rate_limit
+echo "---- test trigger rate limiting ----"
+# same without rate limit
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+sleep 10
+# expect no swak error and 5 mails
+send 'out_no_rate_limit' 'out' 'user@laissepasser.fr' 5
+

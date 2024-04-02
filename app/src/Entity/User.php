@@ -142,7 +142,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $office365PrincipalName = null;       
 
     #[ORM\OneToOne(targetEntity: 'App\Entity\SenderRateLimit')]
-    private ?string $sender_rate_limit = null;
+    private ?SenderRateLimit $sender_rate_limit = null;
 
     public function __construct()
     {
@@ -614,12 +614,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSenderRateLimit(): ?string
+    public function getSenderRateLimit(): ?SenderRateLimit
     {
 	    return $this->sender_rate_limit;
     }
 
-    public function setSenderRateLimit(string $limits): self
+    public function setSenderRateLimit(SenderRateLimit $limits): self
     {
 	    $this->sender_rate_limit = $limits;
 
