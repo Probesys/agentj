@@ -34,7 +34,7 @@ send() {
 	local_addr='root@smtp.test'
 	test_str=''
 
-	echo "---- $testname ----"
+	echo "---- $testname ----" 1>&2
 	echo -n "[$testname] ... "
 
 	case $in_out in
@@ -98,7 +98,7 @@ send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 0 '--attach /srv/eicar.co
 send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
 send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
 
-echo "---- test trigger rate limiting ----"
+echo "---- test trigger rate limiting ----" 1>&2
 # trigger rate limit for user@blocnormal.fr which is limited to 1 mail per second
 swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
 swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
@@ -107,7 +107,7 @@ swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP
 # expect swak error 25 and one mail
 send 'out_rate_limit_limited' 'out' 'user@blocnormal.fr' 1 "" 25
 
-echo "---- test trigger rate limiting ----"
+echo "---- test trigger rate limiting ----" 1>&2
 # same without rate limit
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 

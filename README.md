@@ -14,7 +14,8 @@ The AgentJ Docker stack is composed of the following services:
 - **outamavis**: same as **amavis** but used for mail sent by local user (by their original smtp server)
 - **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
 - **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
-- *wip* **opendkim**: handle DKIM signature verification for incoming mail, and signing when the domain privkey is found in **db**
+- **opendkim**: handle DKIM signature verification for incoming mail, and signing when the domain privkey is found in **db**
+- **policyd-rate-limit**: policy service used by `outsmtp` which can read differents rate limits policy by user from the **db**
 - *for tests only* **smtptest**: see [tests](#tests) below
 
 ## Get the sources
