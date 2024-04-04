@@ -69,10 +69,12 @@ send() {
 	# if we didn't expect any mail, sleep 10 to be sure nothing is received
 	if [ "$expected_received_count" -eq 0 ]
 	then
+		secs=10
 		sleep 10
 	fi
 
 	received=$(grep -c "$test_str" /var/mail/root)
+	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' /var/mail/root)" && echo -n "(missing DKIM signature) "
 	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok (${secs}s)"
@@ -105,7 +107,7 @@ swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP
 swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
 swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
 # expect swak error 25 and one mail
-send 'out_rate_limit_limited' 'out' 'user@blocnormal.fr' 1 "" 25
+send 'out_rate_limit' 'out' 'user@blocnormal.fr' 1 "" 25
 
 echo "---- test trigger rate limiting ----" 1>&2
 # same without rate limit
