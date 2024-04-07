@@ -27,7 +27,5 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
-VOLUME /var/spool/postfix
-
 ENTRYPOINT [ "/entrypoint.sh" ]
 HEALTHCHECK --start-period=60s CMD postfix status 2>/dev/null || exit 1

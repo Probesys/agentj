@@ -61,8 +61,6 @@ RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
         --config-file=/etc/clamav/freshclam.conf
 RUN /usr/bin/sa-update
 
-VOLUME [ "/var/amavis" ]
-
 EXPOSE 10024/tcp
 
 CMD [ "supervisord", "-c", "/etc/supervisord.conf" ]

@@ -1,5 +1,4 @@
 ---
-version: '3.7'
 
 services:
   db:
@@ -26,7 +25,7 @@ services:
     depends_on:
       - db
     volumes:
-      - amavis:/var/amavis/
+      - amavis_in:/var/lib/amavis/
 
   outamavis:
     build:
@@ -39,7 +38,7 @@ services:
     depends_on:
       - db
     volumes:
-      - amavis:/var/amavis/
+      - amavis_out:/var/lib/amavis/
 
 
   app:
@@ -52,7 +51,6 @@ services:
       - outamavis
       - db
     volumes:
-      - amavis:/tmp/amavis
       - applogs:/var/log/agentj
     ports:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
@@ -140,7 +138,8 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
 volumes:
-  amavis:
+  amavis_out:
+  amavis_in:
   applogs:
   db:
   logs:
