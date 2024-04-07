@@ -13,6 +13,7 @@ sed -i "s|\$MY_TOKEN_ENC_SALT|$MY_TOKEN_ENC_SALT|g" /var/www/agentj/.env
 sed -i "s|\$DB_NAME|$DB_NAME|g" /var/www/agentj/.env
 sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
+sed -i "s|\$DB_HOST|$DB_HOST|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
 sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
 sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" /var/www/agentj/.env
