@@ -207,9 +207,10 @@ class MsgsRepository extends ServiceEntityRepository
     {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = 'SELECT m.mail_id,m.from_addr,m.send_captcha,maddr.email,m.partition_tag,m.secret_id,mr.rid FROM msgs m '
+        $sql = 'SELECT m.mail_id,maddr_sender.email as from_addr,m.send_captcha,maddr.email,m.partition_tag,m.secret_id,mr.rid FROM msgs m '
             . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
             . ' LEFT JOIN maddr ON maddr.id = mr.rid '
+            . ' LEFT JOIN maddr maddr_sender ON maddr_sender.id = m.sid '
             . ' LEFT JOIN users u on u.email=maddr.email'
             . ' LEFT JOIN domain d on d.id=u.domain_id'
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
@@ -269,9 +270,9 @@ class MsgsRepository extends ServiceEntityRepository
         $sql = 'SELECT m.time_iso FROM msgs m '
             . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
             . ' LEFT JOIN maddr ON maddr.id = mr.rid '
+            . ' LEFT JOIN maddr maddr_sender ON maddr_sender.id = m.sid '
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE email = "' . $to . '"  AND from_addr = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1'; // AND m.mail_id != "' . $mailId . '"'
-      //. ' GROUP BY email,sid, send_captcha';
+            . ' WHERE maddr.email = "' . $to . '"  AND maddr_sender.email = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1';
 
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':from_addr', $from);
