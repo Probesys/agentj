@@ -51,27 +51,15 @@ class WblistRepository extends ServiceEntityRepository {
 
         if ($searchKey) {
             $dql->andWhere('(s.email like :searchkey or u.email like :searchkey or u.fullname like :searchkey )')
-                    ->setParameter('searchkey', $searchKey);
+                    ->setParameter('searchkey', '%' . $searchKey . '%');
         }
 
         if ($sortPrams) {
             $dql->orderBy($sortPrams['sort'], $sortPrams['direction']);
-//            $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
-        } else {
-//            $sql .= ' ORDER BY wb.datemod desc ';
         }
-        $dql->getQuery()->getScalarResult();
 
         return $dql->getQuery()->getScalarResult();
 
-//        if ($sortPrams) {
-//            $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
-//        } else {
-//            $sql .= ' ORDER BY wb.datemod desc ';
-//        }
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute();
-//        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
     /**
