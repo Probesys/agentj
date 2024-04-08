@@ -16,10 +16,15 @@
             </div>
 
         </div>
+        {% set searchKey = '' %}
+        {% if app.request.query.has('search') %}
+            {% set searchKey = 'test' %}
+        {% endif %}
             <div class="col-md-6 ">
                 <form class="form-inline float-right mt-4">
                     <label for="search" class="mr-2 col-form-label">&nbsp</label><br/>
-                    <input type="text" placeholder="{{'Generics.actions.search'|trans}}" class="form-control form-control input-sm" autocomplete="off" id="search" name="search"  value="">
+                    <input type="text" placeholder="{{'Generics.actions.search'|trans}}"
+                    class="form-control form-control input-sm" autocomplete="off" id="search" name="search"  value="{{ searchKey }}">
                     <button type="submit" class="ml-1 btn btn-danger ">Ok</button>
                 </form>
             </div>
