@@ -112,8 +112,8 @@ class MsgsSendMailTokenCommand extends Command
                     if ($user->getBypassHumanAuth()) {
                           $this->releaseMessage($msgObj, $msgrcpt, $user);
                     } else {
-                                  // Bypass if an authetification has been sent the last day for this sender
-                                  $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
+                        // Bypass if an authetification has been sent the last day for this sender
+                        $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
                         if (count($AuhtentificationAllreadySent) > 0) {
                             $today = new \DateTime();
                             $dateLastSendAuthentification = new \DateTime($AuhtentificationAllreadySent[0]['time_iso']);
@@ -265,9 +265,9 @@ class MsgsSendMailTokenCommand extends Command
         $failedRecipients = [];
       /** Sne dth emessage * */
         try {
+
             $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
             $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
-
             $mailer = new Mailer($transport);
             $mailer->send($message);
             $msgObj->setSendCaptcha(time());
