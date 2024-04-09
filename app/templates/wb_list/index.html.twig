@@ -34,7 +34,7 @@
             {% endif %}
           <th>{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}</th>          
           <th>{{ sortLinkMacro.sortLink('Message.Sender'|trans,'email') }}</th>
-          <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'datemod') }}</th>
+          <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'wb.datemod') }}</th>
           <th>{{ 'Message.Actions.list'|trans() }}</th>
         </tr>
       </thead>
