@@ -136,7 +136,7 @@ class Domain
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DailyStat::class)]
     private Collection $dailyStats;
 
-    #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'])]
+    #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
     public function __construct()

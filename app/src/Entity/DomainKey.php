@@ -111,4 +111,10 @@ class DomainKey
         $this->privatekey = $privatekey;
         return $this;
     }
+
+    public function getDnsEntry(): string
+    {
+	$pubkey = preg_replace('/(-----(BEGIN|END) PUBLIC KEY-----)|[ \n]/', '', $this->publickey);
+	return "v=DKIM1; k=rsa; s={$this->selector}; p={$pubkey}";
+    }
 }

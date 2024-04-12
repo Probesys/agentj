@@ -270,14 +270,6 @@ class DomainController extends AbstractController {
             $em = $this->em;
             $em->remove($domain);
             $em->flush();
-
-            //Delete dkim key of the domain
-            $process = new Process([$this->getParameter('app.dkim_removal'), $domain->getDomain(), $domain->getSrvSmtp()]);
-            try {
-                $process->run();
-            } catch (ProcessFailedException $exception) {
-                $this->addFlash('error deleting dkim', $exception->getMessage());
-            }
         }
 
         return $this->redirectToRoute('domain_index');
@@ -407,7 +399,7 @@ class DomainController extends AbstractController {
 	    $dkim->setPublicKey($pubkey_pem);
 	    // $public_key = openssl_pkey_get_public($public_key_pem);
 
-	    $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getPublicKey());
+	    $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getDnsEntry());
 	    return true;
 	} catch (ProcessFailedException $exception) {
 	    $this->addFlash('error', $exception->getMessage());
