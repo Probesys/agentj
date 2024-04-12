@@ -11,11 +11,9 @@
 
     {% endembed %} 
 
-    {% if type == '1' or type == '3' or type == '6'  %}{# banned delete spam #}
         <p class="text-muted bg-white pb-0 mb-0 pl-3">
             {{'Entities.Message.informationMessage'|trans()}} 
         </p>
-    {% endif %}     
 
 
     {% include 'common/blocActionsAndSearch.html.twig'  %}
