@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Service\CryptEncryptService;
 use App\Service\LogService;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,6 +33,7 @@ class MsgsSendMailTokenCommand extends Command
     private $messageStatusError;
     private $messageStatusAuthorized;
     private $em;
+    private $logger;
     private CryptEncryptService $cryptEncryptService;
 
     protected function configure()
@@ -43,10 +45,15 @@ class MsgsSendMailTokenCommand extends Command
     
 
 
-    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator, CryptEncryptService $cryptEncryptService) {
+    public function __construct(
+            ManagerRegistry $doctrine, 
+            TranslatorInterface $translator, 
+            CryptEncryptService $cryptEncryptService,
+            LoggerInterface $logger) {
         $this->doctrine = $doctrine;
         $this->translator = $translator;
         $this->cryptEncryptService = $cryptEncryptService;
+        $this->logger = $logger;
         parent::__construct();
     }
     
@@ -155,8 +162,6 @@ class MsgsSendMailTokenCommand extends Command
                     return Command::FAILURE;
                 }
             }
-          //update the msgs error
-            $this->em->getRepository(Msgs::class)->updateErrorStatus();
 
             $lock->release();
         }
@@ -241,7 +246,7 @@ class MsgsSendMailTokenCommand extends Command
                         ->html($body['html_body'])->text(strip_tags($body['plain_body']));
                                 
         } catch (\Exception $e) {
-          //catch error and save this in msgs + change status to error
+          //catch error and save this in msgs
             $messageError = $e->getMessage();
             $msgObj->setMessageError($messageError);
             $msgObj->setStatus($this->messageStatusError);
@@ -268,6 +273,7 @@ class MsgsSendMailTokenCommand extends Command
 
             $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
             $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
+            
             $mailer = new Mailer($transport);
             $mailer->send($message);
             $msgObj->setSendCaptcha(time());
@@ -277,10 +283,9 @@ class MsgsSendMailTokenCommand extends Command
             $this->em->flush();
             return true;
         } catch (\Exception $e) {
-          //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
+            $this->logger->alert("Unable to send authentification mail to " . $mailTo . " : " . $messageError );
             $msgObj->setMessageError($messageError);
-            $msgObj->setStatus($this->messageStatusError);
             $this->em->persist($msgObj);
             $this->em->flush();
             return false;
