@@ -33,6 +33,8 @@ send() {
 	swaks_expected="${6:-0}"
 	local_addr='root@smtp.test'
 	test_str=''
+	# app cron which send validation mails run every min
+	wait_time=90
 
 	echo "---- $testname ----" 1>&2
 	echo -n "[$testname] ... "
@@ -41,12 +43,12 @@ send() {
 		"in")
 			swaks --from $local_addr --to $aj_addr --body "sent to agentj" -s 127.0.0.1:26 $swaks_opts > /srv/$testname.log 2>&1
 			swaks_exit_code=$?
-			test_str="From: $local_addr"
+			test_str="From: ${MAIL_FROM:-$local_addr}"
 			;;
 		"out")
 			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s $OUT_SMTP $swaks_opts > /srv/$testname.log 2>&1
 			swaks_exit_code=$?
-			test_str="From: $aj_addr"
+			test_str="From: ${MAIL_FROM:-$aj_addr}"
 			;;
 		*)
 			echo "unknown value '$in_out' for parameter in_out (should be 'in' or 'out')"
@@ -60,17 +62,17 @@ send() {
 	fi
 
 	touch /var/mail/root
-	# wait for all mail to be received, or 10 seconds
+	# wait for all mail to be received
 	secs=0
-	while [ "$(grep -c "$test_str" /var/mail/root)" -ne "$expected_received_count" ] && [ "$secs" -lt "10" ]
+	while [ "$(grep -c "$test_str" /var/mail/root)" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
 	done
-	# if we didn't expect any mail, sleep 10 to be sure nothing is received
+	# if we didn't expect any mail, sleep to be sure nothing is received
 	if [ "$expected_received_count" -eq 0 ]
 	then
-		secs=10
-		sleep 10
+		secs=$wait_time
+		sleep $wait_time
 	fi
 
 	received=$(grep -c "$test_str" /var/mail/root)
@@ -85,7 +87,8 @@ send() {
 	mv /var/mail/root /var/mail/$testname
 }
 
-send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 0
+# expect a validation mail
+MAIL_FROM='noreply@blocnormal.fr' send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
 send 'out_bloc' 'out' 'user@blocnormal.fr' 1
@@ -95,7 +98,7 @@ send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
 send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
 
 send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
-send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
+send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 '--attach /srv/eicar.com.txt'
 
 send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
 send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
