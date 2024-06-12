@@ -46,7 +46,7 @@ send() {
 			test_str="From: ${MAIL_FROM:-$local_addr}"
 			;;
 		"out")
-			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s $OUT_SMTP $swaks_opts > /srv/$testname.log 2>&1
+			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s outsmtp $swaks_opts > /srv/$testname.log 2>&1
 			swaks_exit_code=$?
 			test_str="From: ${MAIL_FROM:-$aj_addr}"
 			;;
@@ -97,27 +97,27 @@ send 'out_pass' 'out' 'user@laissepasser.fr' 1
 send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
 send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
 
-send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
-send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 '--attach /srv/eicar.com.txt'
+send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 '--attach @/srv/eicar.com.txt'
+send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 '--attach @/srv/eicar.com.txt'
 
-send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 '--attach /srv/eicar.com.txt'
-send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 '--attach /srv/eicar.com.txt'
+send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 '--attach @/srv/eicar.com.txt'
+send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 '--attach @/srv/eicar.com.txt'
 
 echo "---- test trigger rate limiting ----" 1>&2
 # trigger rate limit for user@blocnormal.fr which is limited to 1 mail per second
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 # expect swak error 25 and one mail
 send 'out_rate_limit' 'out' 'user@blocnormal.fr' 1 "" 25
 
 echo "---- test trigger rate limiting ----" 1>&2
 # same without rate limit
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server $OUT_SMTP 
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 sleep 10
 # expect no swak error and 5 mails
 send 'out_no_rate_limit' 'out' 'user@laissepasser.fr' 5

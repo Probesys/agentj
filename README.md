@@ -42,6 +42,7 @@ Then the following runtime variables must be configured in the `.env` file:
 |---------------------------|----------------|---------------------------------------------|
 | VERSION                   |                | this AgentJ latest prod version             |
 | COMPOSE_PROJECT_NAME      | local          | this AgentJ instance name                   |
+| DB_HOST                   | db             | database host (container) name              |
 | DB_ROOT_PASSWORD          | secret         | the MariaDB instance root password          |
 | DB_NAME                   | agentj         | the AgentJ database name                    |
 | DB_USER                   | agentj         | the AgentJ database user name               |
@@ -69,10 +70,7 @@ For dev/tests:
 | Variable                  | Default        | Use                                         |
 |---------------------------|----------------|---------------------------------------------|
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
-| IN_SMTP                   | smtp           | host (container) name of in smtp server     |
-| OUT_SMTP                  | outsmtp        | host (container) name of out smtp server    |
 | APP_HOST                  | app            | host (container) name of app                |
-| DB_HOST                   | db             | host (container) name of app                |
 
 ## Use
 
@@ -113,17 +111,18 @@ When started, the AgentJ stack will create the following volumes:
 
 *italics are to be verified*
 
-| from ↓ \ to →              | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        | opendkim      |
-|----------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|---------------|
-| amavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   | -             |
-| outamavis (10024/tcp)      | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* | -             |
-| app (8090/tcp)             | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             | -             |
-| db (3306/tcp)              | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
-| opendkim (8891/tcp)        | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
-| relay (25/tcp)             | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 8891/tcp  |
-| smtp (25/tcp 10025/tcp)    | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 8891/tcp  |
-| outsmtp (26/tcp 10025/tcp) |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 8891/tcp  |
-| syslogng (514/udp)         | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
+| from ↓ \ to →                 | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | syslog        | opendkim      | policyd-rate-limit |
+|-------------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|---------------|--------------------|
+| amavis (10024/tcp)            | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | ? → 514/udp   | -             |
+| outamavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | *? → 514/udp* | -             |
+| app (8090/tcp)                | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | ? → 514/udp   |               | -             | -             |
+| db (3306/tcp)                 | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
+| opendkim (8891/tcp)           | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             | -             |
+| relay (25/tcp)                | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | ? → 8891/tcp  |
+| smtp (25/tcp 10025/tcp)       | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | ? → 514/udp   |               | -             | ? → 8891/tcp  |
+| outsmtp (26/tcp 10025/tcp)    |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               | *? → 514/udp* | -             | ? → 8891/tcp  | ? → 8552/tcp
+| policyd-rate-limit (8552/tcp) |               |                 |              | ? → 3306/tcp |            |               |               |               |               |
+| syslogng (514/udp)            | -             | -               | -            | -            | -          | -             | -             | ? → 514/udp   | -             |
 
 ## Upgrade
 
