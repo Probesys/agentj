@@ -1,4 +1,4 @@
-FROM debian:stable-slim 
+FROM debian:bookworm-slim 
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "Amavis & ClamAV dockerized for AgentJ"
@@ -60,8 +60,6 @@ RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
         --daemon-notify=/etc/clamav/clamd.conf \
         --config-file=/etc/clamav/freshclam.conf
 RUN /usr/bin/sa-update
-
-VOLUME [ "/var/amavis" ]
 
 EXPOSE 10024/tcp
 

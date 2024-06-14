@@ -1,0 +1,22 @@
+---
+
+services:
+  # auto tests
+  smtptest:
+    build:
+      context: tests/
+    env_file:
+      - .env
+    networks:
+      default:
+        aliases:
+          - smtp.test
+    depends_on:
+      - outsmtp
+      - smtp
+      - app
+
+  opendkim:
+    volumes:
+      - ./tests/opendkim.test.conf:/etc/opendkim.test.conf
+      - ./tests/stubdns:/srv/stubdns

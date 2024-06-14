@@ -136,6 +136,8 @@ class Domain
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DailyStat::class)]
     private Collection $dailyStats;
 
+    #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
+    private DomainKey $domain_keys;
 
     public function __construct()
     {
@@ -144,6 +146,7 @@ class Domain
         $this->groups = new ArrayCollection();
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
+        $this->domain_keys = new DomainKey();
     }
 
     public function __toString()
@@ -504,5 +507,15 @@ class Domain
         return $this;
     }
 
-    
+    public function getDomainKeys(): ?DomainKey
+    {
+        return $this->domain_keys;
+    }
+
+    public function setDomainKeys(?DomainKey $domain_keys): self
+    {
+        $this->domain_keys = $domain_keys;
+
+        return $this;
+    }
 }

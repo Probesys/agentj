@@ -1,0 +1,21 @@
+---
+
+services:
+  db:
+    ports:
+      - $DB_EXPOSED_PORT:3306
+    # log queries to a file
+    # docker compose exec -it db tail -f /var/lib/mysql/general.log
+    command: [
+      "--general-log",
+      "--general-log-file=general.log",
+      "--default-authentication-plugin=mysql_native_password"
+    ]
+
+  app:
+    build:
+      context: app/
+    volumes:
+      - ./app/src/:/var/www/agentj/src
+      - ./app/config/:/var/www/agentj/config
+      - ./app/migrations/:/var/www/agentj/migrations

@@ -14,6 +14,7 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     postfix \ 
     postfix-mysql \ 
     postfix-policyd-spf-python \ 
+    postfix-lmdb \
     supervisor  \ 
     rsyslog \ 
     tzdata  \ 
@@ -26,7 +27,5 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
-VOLUME /var/spool/postfix
-
 ENTRYPOINT [ "/entrypoint.sh" ]
-HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
+HEALTHCHECK --start-period=60s CMD postfix status 2>/dev/null || exit 1
