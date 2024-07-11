@@ -31,12 +31,9 @@ class DomainType extends AbstractType {
         $this->imapPorts = $imapPorts;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options) {
-
-
-
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
         $actions = $options['actions'];
-//dd($actions);
         $builder
                 ->add('domain', null, [
                     'label' => 'Entities.Domain.fields.domain'
@@ -112,7 +109,8 @@ class DomainType extends AbstractType {
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver): void
+    {
         $resolver->setDefaults([
             'data_class' => Domain::class,
             'minSpamLevel' => null,
