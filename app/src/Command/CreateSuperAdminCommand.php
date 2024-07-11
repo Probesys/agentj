@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,26 +13,26 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 
-
+#[AsCommand(
+    name: 'agentj:create-super-admin',
+    description: 'Create the first super administrator for the application. If user exist the password will be updated',
+)]
 class CreateSuperAdminCommand extends Command
 {
 
-    private $passwordEncoder;
-    private $em;
-    
 
     protected static $defaultName = 'agentj:create-super-admin';
 
-    public function __construct(UserPasswordHasherInterface $encoder, EntityManagerInterface $em)
+    public function __construct(
+        private UserPasswordHasherInterface $passwordEncoder, 
+        private EntityManagerInterface $em)
     {
         parent::__construct();
-        $this->passwordEncoder = $encoder;
-        $this->em = $em;
+
     }
 
-    protected function configure()
-    {
-        $this->setDescription('Create the first super administrator for the application. If user exist the password will be updated');
+    protected function configure():void
+    {    
         $this->addArgument('userName', InputArgument::REQUIRED, 'Super admin login')
             ->addArgument('password', InputArgument::REQUIRED, 'Super admin password');
     }
