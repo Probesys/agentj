@@ -21,8 +21,6 @@ class CreateSuperAdminCommand extends Command
 {
 
 
-    protected static $defaultName = 'agentj:create-super-admin';
-
     public function __construct(
         private UserPasswordHasherInterface $passwordEncoder, 
         private EntityManagerInterface $em)
