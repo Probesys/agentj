@@ -20,8 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Route("/message")
@@ -482,9 +482,9 @@ class MessageController extends AbstractController {
     }
 
     /**
-     * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")     
      */
+    #[IsGranted('ROLE_ADMIN')]
     public function bannedDomain($partitionTag, $mailId, $rid, Request $request) {
         //B = Black and msg status = 1 is banned
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "B", $rid)) {

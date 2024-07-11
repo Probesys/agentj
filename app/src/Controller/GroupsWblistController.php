@@ -10,18 +10,18 @@ use App\Form\GroupsWblistType;
 use App\Service\GroupService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups/wblist")
  */
+#[IsGranted('ROLE_ADMIN')]
 class GroupsWblistController extends AbstractController {
 
     use ControllerWBListTrait;

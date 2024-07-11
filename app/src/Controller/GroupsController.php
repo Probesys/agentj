@@ -12,19 +12,19 @@ use App\Form\GroupsType;
 use App\Service\GroupService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/groups")
  */
+#[IsGranted('ROLE_ADMIN')]
 class GroupsController extends AbstractController {
 
     use ControllerWBListTrait;
