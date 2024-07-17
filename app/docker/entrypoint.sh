@@ -23,6 +23,11 @@ sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" /var/www/agentj/.env
 sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 
+echo "Installing libraries"
+cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
+cd /var/www/agentj && sudo -u www-data yarnpkg install
+cd /var/www/agentj && sudo -u www-data yarnpkg encore production
+
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php bin/console assets:install
 
@@ -31,10 +36,10 @@ cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create 
 cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+cd /var/www/agentj && sudo -u www-data php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
 
 echo "update groups wblist"
-cd /var/www/agentj && php bin/console agentj:update-groups-wblist
+cd /var/www/agentj && sudo -u www-data php bin/console agentj:update-groups-wblist
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache

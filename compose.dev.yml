@@ -5,7 +5,7 @@ services:
     ports:
       - $DB_EXPOSED_PORT:3306
     # log queries to a file
-    # docker compose exec -it db tail -f /var/lib/mysql/general.log
+    # docker compose exec db tail -f /var/lib/mysql/general.log
     command: [
       "--general-log",
       "--general-log-file=general.log",
@@ -15,7 +15,9 @@ services:
   app:
     build:
       context: app/
+      dockerfile: Dockerfile.dev
+      args:
+        - UID
+        - GID
     volumes:
-      - ./app/src/:/var/www/agentj/src
-      - ./app/config/:/var/www/agentj/config
-      - ./app/migrations/:/var/www/agentj/migrations
+      - ./app/:/var/www/agentj

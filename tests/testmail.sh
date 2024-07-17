@@ -13,8 +13,8 @@ echo ' ok'
 # insert test base
 if [ "$1" = "reinit_db" ];
 then
-	echo 'reinit db'
-	mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
+	echo 'clearing db and insert test data'
+	mariadb -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
 	[ "$?" -eq "0" ] || { echo 'failed to insert test data, exiting'; exit $?; }
 fi 
 
