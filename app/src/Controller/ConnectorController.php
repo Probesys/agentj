@@ -3,20 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Connector;
-use App\Entity\Domain;
-use App\Form\ConnectorType;
 use App\Repository\ConnectorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- * @Security("is_granted('ROLE_ADMIN')")
  * @Route("/connector")
  */
+#[IsGranted('ROLE_ADMIN')]
 class ConnectorController extends AbstractController {
 
     #[Route('/', name: 'app_connector_index', methods: ['GET'])]

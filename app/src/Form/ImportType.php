@@ -14,7 +14,8 @@ class ImportType extends AbstractType {
 
     private DomainRepository $domainRepository;
 
-    public function buildForm(FormBuilderInterface $builder, array $options) {
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
         $builder
                 ->add('attachment', FileType::class, ['label' => false])
                 ->add('domains', EntityType::class, [
@@ -30,7 +31,8 @@ class ImportType extends AbstractType {
         ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver): void
+    {
         $resolver->setDefaults([
             'data_class' => null,
             'user' => null

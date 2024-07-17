@@ -2,22 +2,24 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 
+#[AsCommand(
+    name: 'agentj:truncate-virus-queue',
+    description: 'Truncate amavis quarantine files older than X days (see .ENV file) ',
+)]
 class TruncateVirusMailFiles extends Command
 {
 
-    protected static $defaultName = 'agentj:truncate-virus-queue';
     private $nbDays = 30;
 
-    protected function configure()
+    protected function configure():void
     {
-        $this->setDescription('Truncate amavis quarantine files older than X days (see .ENV file)  ');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output):int

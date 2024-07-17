@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Msgs;
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,22 +17,23 @@ use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
+#[AsCommand(
+    name: 'agentj:report-send-mail',
+    description: 'Send report email',
+)]
 class ReportSendMailCommand extends Command {
 
-    protected static $defaultName = 'agentj:report-send-mail';
-    private $twig;
-    private $doctrine;
-    private $translator;
 
-    public function __construct(Environment $twig, ManagerRegistry $doctrine, TranslatorInterface $translator) {
-        // Inject it in the constructor and update the value on the class
-        $this->twig = $twig;
-        $this->doctrine = $doctrine;
-        $this->translator = $translator;
+
+    public function __construct(
+            private Environment $twig, 
+            private ManagerRegistry $doctrine, 
+            private TranslatorInterface $translator) {
         parent::__construct();
     }
 
-    protected function configure() {
+    protected function configure(): void
+    {
         $this->setDescription('Send report email ');
     }
 
