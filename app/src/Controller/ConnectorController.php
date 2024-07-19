@@ -11,10 +11,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route("/connector")
- */
 #[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/connector')]
 class ConnectorController extends AbstractController {
 
     #[Route('/', name: 'app_connector_index', methods: ['GET'])]

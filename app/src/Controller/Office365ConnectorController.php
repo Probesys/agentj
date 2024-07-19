@@ -21,10 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
-/** 
- * @Route("/office365")
- */
 #[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/office365')]
 class Office365ConnectorController extends AbstractController {
 
     private Application $application;

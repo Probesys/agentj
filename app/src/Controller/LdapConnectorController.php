@@ -27,10 +27,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/** 
- * @Route("/ldap")
- */
 #[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/ldap')]
 class LdapConnectorController extends AbstractController {
 
     private $translator;
