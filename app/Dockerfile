@@ -106,6 +106,7 @@ FROM run as dev
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     ca-certificates \
+    yarnpkg \
     sendmail \
     swaks
 
