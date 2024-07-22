@@ -167,7 +167,7 @@ class MsgsRepository extends ServiceEntityRepository
     {
 
         $conn = $this->getEntityManager()->getConnection();
-        $conn->getConfiguration()->getSQLLogger(null);
+        
 
         $sql = 'SELECT m.mail_id,m.message_error,mr.status_id,ms.name,m.partition_tag,maddr.email,m.subject,m.from_addr,m.time_num,mr.rid, mr.bspam_level '
             . ' FROM msgs m '
