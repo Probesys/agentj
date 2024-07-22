@@ -11,8 +11,7 @@ security:
     # providers:
     #     #in_memory: { memory: ~ }
     #     database_users:
-    #         entity: { class: App\Entity\User, property: username }
-    enable_authenticator_manager: true
+    #         entity: { class: App\Entity\User, property: username }    
     providers:            
         app_user_provider:
             entity:
