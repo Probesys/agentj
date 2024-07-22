@@ -26,9 +26,7 @@ class AccountController extends AbstractController {
         $this->translator = $translator;
     }
 
-    /**
-     * @Route("/account", name="account")
-     */
+    #[Route(path: '/account', name: 'account')]
     public function index(Request $request, GroupsRepository $groupsRepository) {
 
         $groupDefaulWb = null;

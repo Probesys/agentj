@@ -21,10 +21,8 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route("/groups")
- */
 #[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/groups')]
 class GroupsController extends AbstractController {
 
     use ControllerWBListTrait;
@@ -45,9 +43,7 @@ class GroupsController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/", name="groups_index", methods="GET")
-     */
+    #[Route(path: '/', name: 'groups_index', methods: 'GET')]
     public function index(): Response {
         $groups = $this->em
                 ->getRepository(Groups::class)
@@ -56,9 +52,7 @@ class GroupsController extends AbstractController {
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }
 
-    /**
-     * @Route("/new", name="groups_new", methods="GET|POST")
-     */
+    #[Route(path: '/new', name: 'groups_new', methods: 'GET|POST')]
     public function new(Request $request): Response {
         $group = new Groups();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
@@ -108,9 +102,7 @@ class GroupsController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="groups_edit", methods="GET|POST")
-     */
+    #[Route(path: '/{id}/edit', name: 'groups_edit', methods: 'GET|POST')]
     public function edit(Request $request, Groups $group, GroupService $groupService, UserService $userService): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
@@ -179,9 +171,7 @@ class GroupsController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}/users", name="groups_list_users", methods="GET|POST")
-     */
+    #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
     public function listUsers(Request $request, Groups $group) {
         $this->checkAccess($group);
         $users = $group->getUsers();
@@ -191,9 +181,7 @@ class GroupsController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}/removeUser/{user}/", name="group_remove_user", methods="GET")
-     */
+    #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'GET')]
     public function removeUser(Request $request, Groups $group, User $user, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
             $oldGroups = $user->getGroups()->toArray();
@@ -230,9 +218,7 @@ class GroupsController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/{id}/delete", name="groups_delete", methods="GET")
-     */
+    #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'GET')]
     public function delete(Request $request, Groups $group, UserService $userService, GroupService $groupService): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
             $groupUsers = $group->getUsers()->toArray();
@@ -249,9 +235,7 @@ class GroupsController extends AbstractController {
         return $this->redirectToRoute('groups_index');
     }
 
-    /**
-     * @Route("/check-priority", name="groups_check_priority", methods="GET|POST")
-     */
+    #[Route(path: '/check-priority', name: 'groups_check_priority', methods: 'GET|POST')]
     public function checkPriorityExist(Request $request) {
         $domainId = $request->request->get('domainId');
         $domain = $this->em->getRepository(Domain::class)->find($domainId);

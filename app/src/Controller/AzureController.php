@@ -12,9 +12,8 @@ class AzureController extends AbstractController
 {
     /**
      * Action qui démarre le processus d'identification OAuth
-     *
-     * @Route("/connect/azure", name="connect_azure_start")
      */
+    #[Route(path: '/connect/azure', name: 'connect_azure_start')]
     public function connectAction(ClientRegistry $clientRegistry): RedirectResponse
     {
         return $clientRegistry
@@ -28,9 +27,8 @@ class AzureController extends AbstractController
 
     /**
      * Action de retour de l'OAuth (redirect_route dans la conf)
-     *
-     * @Route("/connect/azure/check", name="connect_azure_check")
      */
+    #[Route(path: '/connect/azure/check', name: 'connect_azure_check')]
     public function connectCheckAction(ClientRegistry $clientRegistry): void
     {
     }

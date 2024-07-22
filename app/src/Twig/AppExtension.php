@@ -8,10 +8,12 @@ use App\Entity\Wblist;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Doctrine\DBAL\Connection;
 
 class AppExtension extends AbstractExtension {
 
     private EntityManagerInterface $em;
+    private Connection $conn;
 
     public function __construct(EntityManagerInterface $em) {
         $this->em = $em;
