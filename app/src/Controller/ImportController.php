@@ -41,7 +41,7 @@ class ImportController extends AbstractController {
             'action' => $this->generateUrl('import_user_email'),
         ]);
         $form->remove('domains');
-        
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
@@ -98,97 +98,110 @@ class ImportController extends AbstractController {
         $emails = [];
         $groupWbUpdate = [];
         $domains = [];
-        if (($handle = fopen($pathfile, "r")) !== false) {
-            while (($data = fgetcsv($handle, 1024, $split)) !== false) {
-                //check line nulber of columns
-                if ((count($data) < 2)) {
-                    $errors[] = $row + 1;
-                    continue;
-                }
-
-                if (isset($data[0]) && $data[0] != "" && filter_var($data[0], FILTER_VALIDATE_EMAIL)) {
-                    $email = $data[0];
-                    $domainEmail = strtolower(substr($email, strpos($email, '@') + 1));
-                    if (!isset($domains[$domainEmail])) {
-                        $domains[$domainEmail]['entity'] = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
+        try {
+            if (($handle = fopen($pathfile, "r")) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                    //check line number of columns
+                    if ((count($data) < 2)) {
+                        $errors[] = "Ligne " . ($row + 1) . " : Nombre de colonnes incorrect.";
+                        continue;
                     }
-                    //need domain exist in database
-                    if ($domains[$domainEmail]['entity']) {
-                        //group
-                        $group = false;
-                        if (isset($data[3]) && $data[3] != '') {
-                            $slugGroup = $this->slugify($data[3]);
-                            if (!isset($groups[$domainEmail][$slugGroup])) {
-                                $group = $em->getRepository(Groups::class)->findOneBy(['domain' => $domains[$domainEmail]['entity'], 'name' => trim($data[3])]);
-                                if (!$group) {
-                                    //get rules of domain
-                                    if (!isset($domains[$domainEmail]['wb'])) {
-                                        $wb = $em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domainEmail);
-                                        $domains[$domainEmail]['wb'] = $wb['wb'];
-                                    }
-                                    $group = new Groups();
-                                    $group->setName($data[3]);
-                                    $group->setDomain($domains[$domainEmail]['entity']);
-                                    if ($domains[$domainEmail]['entity']->getPolicy()) {
-                                        $group->setPolicy($domains[$domainEmail]['entity']->getPolicy());
-                                    }
-                                    if (isset($domains[$domainEmail]['wb'])) {
-                                        $group->setWb($domains[$domainEmail]['wb']);
-                                    }
 
-                                    $em->persist($group);
-                                    $em->flush();
-                                    $groups[$domainEmail][$slugGroup] = $group;
-                                } else {
-                                    $groups[$domainEmail][$slugGroup] = $group;
-                                }
-                            } else {
-                                $group = $groups[$domainEmail][$slugGroup];
-                            }
+                    if (isset($data[0]) && $data[0] != "" && filter_var($data[0], FILTER_VALIDATE_EMAIL)) {
+                        $email = $data[0];
+                        $domainEmail = strtolower(substr($email, strpos($email, '@') + 1));
+                        if (!isset($domains[$domainEmail])) {
+                            $domains[$domainEmail]['entity'] = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
                         }
-                        if (!isset($emails[$email])) {
-                            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
-                            if (!$user) {
-                                $user = new User();
-                            }
-                            $user->setEmail($data[0]);
-                            $user->setUsername($data[0]);
-                            if (isset($data[1]) && isset($data[2])) {
-                                $user->setFullname(trim($data[1] . " " . $data[2]));
-                            }
-                            $import++;
-                            $user->setRoles('["ROLE_USER"]');
-                            $domainEmail = strtolower(substr($data[0], strpos($data[0], '@') + 1));
-                            $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
-                            $user->setDomain($domain);
-                            $em->persist($user);
-                            $emails[$user->getEmail()] = $user->getEmail();
-                            if ($group) {
-                                $user->addGroup($group);
-                                $em->persist($group);
+                        //need domain exist in database
+                        if ($domains[$domainEmail]['entity']) {
+                            //group
+                            $group = false;
+                            if (isset($data[3]) && $data[3] != '') {
+                                $slugGroup = $this->slugify($data[3]);
+                                if (!isset($groups[$domainEmail][$slugGroup])) {
+                                    $group = $em->getRepository(Groups::class)->findOneBy(['domain' => $domains[$domainEmail]['entity'], 'name' => trim($data[3])]);
+                                    if (!$group) {
+                                        //get rules of domain
+                                        if (!isset($domains[$domainEmail]['wb'])) {
+                                            $wb = $em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domainEmail);
+                                            $domains[$domainEmail]['wb'] = $wb['wb'];
+                                        }
+                                        $group = new Groups();
+                                        $group->setName($data[3]);
+                                        $group->setDomain($domains[$domainEmail]['entity']);
+                                        if ($domains[$domainEmail]['entity']->getPolicy()) {
+                                            $group->setPolicy($domains[$domainEmail]['entity']->getPolicy());
+                                        }
+                                        if (isset($domains[$domainEmail]['wb'])) {
+                                            $group->setWb($domains[$domainEmail]['wb']);
+                                        }
 
-                                $groupWbUpdate[$group->getid()] = $group->getid();
-                            } else {
-                                if ($domains[$domainEmail]['entity']->getPolicy()) {
-                                    $user->setPolicy($domains[$domainEmail]['entity']->getPolicy());
+                                        $em->persist($group);
+                                        $em->flush();
+                                        $groups[$domainEmail][$slugGroup] = $group;
+                                    } else {
+                                        $groups[$domainEmail][$slugGroup] = $group;
+                                    }
+                                } else {
+                                    $group = $groups[$domainEmail][$slugGroup];
                                 }
                             }
+                            if (!isset($emails[$email])) {
+                                $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+                                if (!$user) {
+                                    $user = new User();
+                                }
+                                $user->setEmail($data[0]);
+                                $user->setUsername($data[0]);
+                                if (isset($data[1]) && isset($data[2])) {
+                                    $user->setFullname(trim($data[1] . " " . $data[2]));
+                                }
+                                $import++;
+                                $user->setRoles('["ROLE_USER"]');
+                                $domainEmail = strtolower(substr($data[0], strpos($data[0], '@') + 1));
+                                $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
+                                $user->setDomain($domain);
+                                if ($domain && $domain->getPolicy()) {
+                                    $user->setPolicy($domain->getPolicy());
+                                }
+                                $em->persist($user);
+                                $emails[$user->getEmail()] = $user->getEmail();
+                                if ($group) {
+                                    $user->addGroup($group);
+                                    $em->persist($group);
+
+                                    $groupWbUpdate[$group->getid()] = $group->getid();
+                                } else {
+                                    if ($domains[$domainEmail]['entity']->getPolicy()) {
+                                        $user->setPolicy($domains[$domainEmail]['entity']->getPolicy());
+                                    }
+                                }
+                            }
+                        } else {
+                            $errors[] = "Ligne " . ($row + 1) . " : Domaine " . $domainEmail . " n'existe pas dans la base de données.";
+                        }
+                        if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
+                            $em->flush();
                         }
                     } else {
-                        //Todo add to $error[]
+                        $errors[] = "Ligne " . ($row + 1) . " : Adresse e-mail invalide.";
                     }
-                    if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
-                        $em->flush();
-                    }
+
+                    $row++;
                 }
 
-                $row++;
+                //Need to flush if user new is inferior $batchSize
+                $em->flush();
+                $this->groupService->updateWblist();
             }
-            //Need to flush if user new is inferior $batchSize
-            $em->flush();
-            $this->groupService->updateWblist();
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Une erreur s\'est produite lors de l\'importation : ' . $e->getMessage());
         }
+
+
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
     }
 
 }
+
