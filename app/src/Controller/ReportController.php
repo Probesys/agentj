@@ -7,9 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/report")
- */
+#[Route(path: '/report')]
 class ReportController extends AbstractController
 {
 
@@ -19,9 +17,7 @@ class ReportController extends AbstractController
         $this->em = $em;
     }
     
-    /**
-   * @Route("/", name="report")
-   */
+    #[Route(path: '/', name: 'report')]
     public function index()
     {
 

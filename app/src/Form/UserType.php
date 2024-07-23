@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Groups;
 use App\Entity\User;
+use App\Form\UserAutocompleteField;
 use App\Repository\GroupsRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -13,8 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Tetranz\Select2EntityBundle\Form\Type\Select2EntityType;
-
 class UserType extends AbstractType
 {
 
@@ -87,22 +86,12 @@ class UserType extends AbstractType
                 ->add('report', null, [
                     'label' => 'Entities.User.fields.report',
                 ])
-                ->add('originalUser', Select2EntityType::class, [
+                ->add('originalUser', UserAutocompleteField::class, [
                     'multiple' => false,
-                    'placeholder' => '',
-                    'label' => 'Entities.User.fields.originalUser',
-                    'class' => 'App\Entity\User',
-                    'primary_key' => 'id',
-                    'remote_route' => 'autocomplete_user',
                     'required' => true,
                 ])
-                ->add('sharedWith', Select2EntityType::class, [
+                ->add('sharedWith', UserAutocompleteField::class, [
                     'multiple' => true,
-                    'placeholder' => '',
-                    'label' => 'Entities.User.fields.sharedBy',
-                    'class' => 'App\Entity\User',
-                    'primary_key' => 'id',
-                    'remote_route' => 'autocomplete_user',
                     'required' => false,
                 ])
         ;

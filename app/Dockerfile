@@ -37,6 +37,10 @@ RUN apt-get update -q --fix-missing && \
     # && yarnpkg add @symfony/webpack-encore \
     && yarnpkg encore production
 
+ 
+
+ 
+
 FROM debian:bookworm-slim AS run
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
@@ -89,10 +93,24 @@ COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
-COPY docker/files/.env /var/www/agentj/.env
+# COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 
 EXPOSE 9000
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+
+FROM run as dev
+
+RUN apt-get update -q --fix-missing && \
+    apt-get -y install --no-install-recommends \
+    ca-certificates \
+    yarnpkg \
+    sendmail \
+    swaks
+
+COPY ./docker/files/install_composer.sh /tmp/install_composer.sh
+RUN /tmp/install_composer.sh && \
+    mv composer.phar /usr/local/bin/composer && \
+    rm /tmp/install_composer.sh   

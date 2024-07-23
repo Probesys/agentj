@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function dd;
 
-/**
- * @Route("/admin/import")
- */
+#[Route(path: '/admin/import')]
 class ImportController extends AbstractController {
 
     use ControllerCommonTrait;
@@ -36,9 +34,7 @@ class ImportController extends AbstractController {
         $this->groupService = $groupService;
     }
 
-    /**
-     * @Route("/users", name="import_user_email", options={"expose"=true})
-     */
+    #[Route(path: '/users', name: 'import_user_email', options: ['expose' => true])]
     public function index(Request $request) {
         $translator = $this->translator;
         $form = $this->createForm(ImportType::class, null, [

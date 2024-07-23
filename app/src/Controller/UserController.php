@@ -20,10 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
-/**
- * @Route("admin/users")
- */
+#[Route(path: 'admin/users')]
 class UserController extends AbstractController {
 
     use ControllerWBListTrait;
@@ -36,33 +33,25 @@ class UserController extends AbstractController {
         $this->em = $em;
     }
 
-    /**
-     * @Route("/local", name="users_local_index", methods="GET")
-     */
+    #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
     public function indexUserLocal(UserRepository $userRepository): Response {
         $users = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
-    /**
-     * @Route("/email", name="users_email_index", methods="GET")
-     */
+    #[Route(path: '/email', name: 'users_email_index', methods: 'GET')]
     public function indexUserEmail(UserRepository $userRepository): Response {
         $users = $userRepository->searchByRole($this->getUser(), '["ROLE_USER"]');
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
-    /**
-     * @Route("/alias", name="users_email_alias_index", methods="GET")
-     */
+    #[Route(path: '/alias', name: 'users_email_alias_index', methods: 'GET')]
     public function indexUserEmailAlias(UserRepository $userRepository): Response {
         $users = $userRepository->searchAlias($this->getUser());
         return $this->render('user/indexAlias.html.twig', ['users' => $users]);
     }
 
-    /**
-     * @Route("/local/new", name="user_local_new", methods="GET|POST")
-     */
+    #[Route(path: '/local/new', name: 'user_local_new', methods: 'GET|POST')]
     public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response {
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -119,10 +108,8 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/local/{id}/edit", name="user_local_edit", methods="GET|POST")
-     *
-     */
+    
+    #[Route(path: '/local/{id}/edit', name: 'user_local_edit', methods: 'GET|POST')]
     public function edit(Request $request, User $user): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
@@ -165,10 +152,8 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/local/{id}/changePassword", name="user_local_change_password", methods="GET|POST")
-     *
-     */
+    
+    #[Route(path: '/local/{id}/changePassword', name: 'user_local_change_password', methods: 'GET|POST')]
     public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_change_password', ['id' => $user->getId()]),
@@ -208,9 +193,7 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/local/{id}/delete", name="user_local_delete", methods="GET")
-     */
+    #[Route(path: '/local/{id}/delete', name: 'user_local_delete', methods: 'GET')]
     public function deleteLocal(Request $request, User $user): Response {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             $this->em->remove($user);
@@ -220,9 +203,7 @@ class UserController extends AbstractController {
         return $this->redirect($referer);
     }
 
-    /**
-     * @Route("/email/{id}/delete", name="user_email_delete", methods="GET")
-     */
+    #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'GET')]
     public function deleteEmail(Request $request, User $user): Response {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             if (in_array('ROLE_USER', $user->getRoles())) {
@@ -234,9 +215,7 @@ class UserController extends AbstractController {
         return $this->redirect($referer);
     }
 
-    /**
-     * @Route("/email/batchDelete", name="user_email_batch_delete", methods="POST")
-     */
+    #[Route(path: '/email/batchDelete', name: 'user_email_batch_delete', methods: 'POST')]
     public function batchDeleteEmail(Request $request): Response {
 
         foreach ($request->request->all('id') as $id) {
@@ -250,9 +229,7 @@ class UserController extends AbstractController {
         return $this->redirect($referer);
     }
 
-    /**
-     * @Route("/email/newUser", name="user_email_new", methods="GET|POST")
-     */
+    #[Route(path: '/email/newUser', name: 'user_email_new', methods: 'GET|POST')]
     public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService): Response {
         $user = new User();
 
@@ -338,9 +315,7 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/newAlias", name="new_user_email_alias", methods="GET|POST")
-     */
+    #[Route(path: '/newAlias', name: 'new_user_email_alias', methods: 'GET|POST')]
     public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response {
         $groups = null;
         $user = new User();
@@ -404,10 +379,8 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/email/{id}/edit", name="user_email_edit", methods="GET|POST")
-     *
-     */
+    
+    #[Route(path: '/email/{id}/edit', name: 'user_email_edit', methods: 'GET|POST')]
     public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService, UserRepository $userRepository): Response {
 
         $oldGroups = $user->getGroups()->toArray();
@@ -486,10 +459,8 @@ class UserController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/alias/{id}/edit", name="user_email_alias_edit", methods="GET|POST")
-     *
-     */
+    
+    #[Route(path: '/alias/{id}/edit', name: 'user_email_alias_edit', methods: 'GET|POST')]
     public function editUserEmailAlias(Request $request, User $user, UserService $userService, GroupService $groupService): Response {
         $userId = null;
         if ($user->getOriginalUser()) {
@@ -598,9 +569,8 @@ class UserController extends AbstractController {
 
     /**
      * autocomplete user action. search in user
-     *
-     * @Route("/user/autocomplete", name="autocomplete_user", options={"expose"=true})
      */
+    #[Route(path: '/user/autocomplete', name: 'autocomplete_user', options: ['expose' => true])]
     public function autocompleteUserAction(UserRepository $userRepository, Request $request) {
 
         $q = $request->query->get('q');
@@ -620,27 +590,16 @@ class UserController extends AbstractController {
         foreach ($entities as $entity) {
             $label = '' . stream_get_contents($entity['email'], -1, 0);
 
-            $items[] = ['id' => $entity['id'], 'text' => $label, 'label' => $label];
+            $items[] = ['value' => $entity['id'], 'text' => $label];
         }
-
-        if ($request->query->get('field_name')) { // from Select2EntityType
-            $return['results'] = $items;
-
-            $return['more'] = true;
-        } else {
-            $return['length'] = count($entities);
-
-            $return['items'] = $items;
-        }
-
+        $return['results'] = $items;
         return new Response(json_encode($return), $return ? 200 : 404);
     }
 
     /**
      * autocomplete user action. search in user in specified domains
-     *
-     * @Route("/user/loadUserDomain", name="load_user_domain", options={"expose"=true})
      */
+    #[Route(path: '/user/loadUserDomain', name: 'load_user_domain', options: ['expose' => true])]
     public function loadUserDomain(UserRepository $userRepository, Request $request) {
         $q = $request->request->get('q');
         $domain = $request->request->get('domain');

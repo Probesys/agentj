@@ -34,7 +34,8 @@ send() {
 	local_addr='root@smtp.test'
 	test_str=''
 	# app cron which send validation mails run every min
-	wait_time=90
+	# if overriden, tests will fails
+	wait_time=${TEST_TIMEOUT:-90}
 
 	echo "---- $testname ----" 1>&2
 	echo -n "[$testname] ... "

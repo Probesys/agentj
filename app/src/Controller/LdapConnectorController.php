@@ -27,10 +27,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/** 
- * @Route("/ldap")
- */
 #[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/ldap')]
 class LdapConnectorController extends AbstractController {
 
     private $translator;
@@ -69,7 +67,7 @@ class LdapConnectorController extends AbstractController {
         }
 
         $form->get("type")->setData(ConnectorTypes::LDAP);
-        return $this->renderForm('connector/new_ldap.html.twig', [
+        return $this->render('connector/new_ldap.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);
@@ -100,7 +98,7 @@ class LdapConnectorController extends AbstractController {
             return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('connector/edit_ldap.html.twig', [
+        return $this->render('connector/edit_ldap.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);
