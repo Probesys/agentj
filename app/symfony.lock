@@ -106,9 +106,6 @@
     "firebase/php-jwt": {
         "version": "v6.2.0"
     },
-    "friendsofphp/proxy-manager-lts": {
-        "version": "v1.0.3"
-    },
     "fzaninotto/faker": {
         "version": "v1.5.0"
     },
@@ -123,24 +120,6 @@
     },
     "guzzlehttp/psr7": {
         "version": "2.4.0"
-    },
-    "illuminate/collections": {
-        "version": "v9.47.0"
-    },
-    "illuminate/conditionable": {
-        "version": "v9.47.0"
-    },
-    "illuminate/contracts": {
-        "version": "v9.47.0"
-    },
-    "illuminate/macroable": {
-        "version": "v9.47.0"
-    },
-    "illuminate/pagination": {
-        "version": "v9.47.0"
-    },
-    "illuminate/support": {
-        "version": "v9.47.0"
     },
     "knplabs/knp-components": {
         "version": "v3.0.2"
@@ -160,9 +139,6 @@
             "config/packages/knpu_oauth2_client.yaml"
         ]
     },
-    "laminas/laminas-code": {
-        "version": "3.4.1"
-    },
     "league/oauth2-client": {
         "version": "2.6.1"
     },
@@ -171,9 +147,6 @@
     },
     "monolog/monolog": {
         "version": "2.2.0"
-    },
-    "nesbot/carbon": {
-        "version": "2.65.0"
     },
     "nikic/php-parser": {
         "version": "v4.10.4"
@@ -225,9 +198,6 @@
     },
     "psr/log": {
         "version": "1.1.3"
-    },
-    "psr/simple-cache": {
-        "version": "3.0.0"
     },
     "ralouphie/getallheaders": {
         "version": "3.0.3"
@@ -504,9 +474,6 @@
     "symfony/property-info": {
         "version": "v5.2.4"
     },
-    "symfony/proxy-manager-bridge": {
-        "version": "v5.2.4"
-    },
     "symfony/routing": {
         "version": "5.1",
         "recipe": {
@@ -641,18 +608,15 @@
         ]
     },
     "symfony/webpack-encore-bundle": {
-        "version": "1.14",
+        "version": "2.1",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "1.10",
-            "ref": "91f4d29f5ebbd2fcccc71ca55a17d14a17b308e8"
+            "version": "2.0",
+            "ref": "082d754b3bd54b3fc669f278f1eea955cfd23cf5"
         },
         "files": [
             "assets/app.js",
-            "assets/bootstrap.js",
-            "assets/controllers.json",
-            "assets/controllers/hello_controller.js",
             "assets/styles/app.css",
             "config/packages/webpack_encore.yaml",
             "package.json",
@@ -661,9 +625,6 @@
     },
     "symfony/yaml": {
         "version": "v5.2.5"
-    },
-    "tetranz/select2entity-bundle": {
-        "version": "v3.1.0"
     },
     "thenetworg/oauth2-azure": {
         "version": "v2.1.1"
@@ -676,12 +637,6 @@
     },
     "twig/twig": {
         "version": "v3.3.0"
-    },
-    "voku/portable-ascii": {
-        "version": "2.0.1"
-    },
-    "webklex/php-imap": {
-        "version": "4.1.2"
     },
     "webmozart/assert": {
         "version": "1.10.0"
