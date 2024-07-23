@@ -12,11 +12,11 @@ use App\Form\CaptchaFormType;
 use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController {
@@ -31,9 +31,7 @@ class DefaultController extends AbstractController {
         $this->security = $security;
     }
 
-    /**
-     * @Route("/", name="homepage")
-     */
+    #[Route(path: '/', name: 'homepage')]
     public function index() {
         $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $this->getUser()->getId()]);
         $nbUntreadtedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::UNTREATED, $alias);
@@ -57,9 +55,7 @@ class DefaultController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/check/{token}", name="check_message", methods="GET|POST")
-     */
+    #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
     public function checkCaptcha($token, Request $request, MessageController $messageController, CryptEncryptService $cryptEncrypt) {
         $em = $this->em;
         $confirm = "";
@@ -143,11 +139,11 @@ class DefaultController extends AbstractController {
     /**
      * Change the locale for the current user.
      *
-     * @Route("/setlocale/{language}", name="setlocale")
      *
      * @param string  $language
      * @return Response
      */
+    #[Route(path: '/setlocale/{language}', name: 'setlocale')]
     public function setLocaleAction(Request $request, EntityManagerInterface $em, $language = null) {
         if (null != $language) {
             $request->getSession()->set('_locale', $language);

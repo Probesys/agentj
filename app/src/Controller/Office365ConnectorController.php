@@ -6,7 +6,6 @@ use App\Command\Office365ImportCommand;
 use App\Entity\Connector;
 use App\Entity\Domain;
 use App\Entity\Office365Connector;
-use App\Form\ConnectorType;
 use App\Form\Office365ConnectorType;
 use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
@@ -18,15 +17,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
-/**
- * @Security("is_granted('ROLE_ADMIN')")
- * @Route("/office365")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/office365')]
 class Office365ConnectorController extends AbstractController {
 
     private Application $application;
@@ -54,7 +50,7 @@ class Office365ConnectorController extends AbstractController {
         }
 
         $form->get("type")->setData(ConnectorTypes::Office365);
-        return $this->renderForm('connector/new.html.twig', [
+        return $this->render('connector/new.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);
@@ -80,7 +76,7 @@ class Office365ConnectorController extends AbstractController {
             return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('connector/edit.html.twig', [
+        return $this->render('connector/edit.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);

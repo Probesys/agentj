@@ -101,8 +101,7 @@ class MsgsRepository extends ServiceEntityRepository
      */
     public function countByType(User $user = null, $type = null, $alias = [])
     {
-        $conn = $this->getEntityManager()->getConnection();
-        $conn->getConfiguration()->getSQLLogger(null);
+        $conn = $this->getEntityManager()->getConnection();        
 
         $sql = 'select count(m.mail_id) as nb_result from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
@@ -132,7 +131,7 @@ class MsgsRepository extends ServiceEntityRepository
     public function countByTypeAndDays(User $user = null, $type = null, $alias = [], \DateTime $day = null, Domain $domain = null)
     {
         $conn = $this->getEntityManager()->getConnection();
-        $conn->getConfiguration()->getSQLLogger(null);
+       
 
         $sql = 'select count(m.mail_id) as nb_result,m.time_iso  from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
@@ -168,7 +167,7 @@ class MsgsRepository extends ServiceEntityRepository
     {
 
         $conn = $this->getEntityManager()->getConnection();
-        $conn->getConfiguration()->getSQLLogger(null);
+        
 
         $sql = 'SELECT m.mail_id,m.message_error,mr.status_id,ms.name,m.partition_tag,maddr.email,m.subject,m.from_addr,m.time_num,mr.rid, mr.bspam_level '
             . ' FROM msgs m '

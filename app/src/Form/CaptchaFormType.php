@@ -10,7 +10,7 @@ use Captcha\Bundle\CaptchaBundle\Form\Type\CaptchaType;
 class CaptchaFormType extends AbstractType
 {
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options):void
     {
 
         $builder->add('email', null, [
@@ -23,7 +23,7 @@ class CaptchaFormType extends AbstractType
     }
 
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver):void
     {
         $resolver->setDefaults([
         'data_class' => null

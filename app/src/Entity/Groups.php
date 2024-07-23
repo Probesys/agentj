@@ -57,9 +57,7 @@ class Groups
     #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
     private $groupsWbLists;    
 
-    /**
-     * @Gedmo\Slug(fields={"name"})
-     */
+    #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 128, unique: true)]
     private $slug;
 

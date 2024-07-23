@@ -498,10 +498,17 @@ Entities:
       typeW: 'Type of validation'
       white: 'White list'
       black: Blacklist
-      typeLabelW: ['Validated by you', 'Validated by captcha', 'Validated by the group',
-        'Validated by the administrator']
-      typeLabelB: ['Blocked by you', 'Blocked by captcha', 'Blocked by the group',
-        'Blocked by the administrator']
+      typeLabelW: 
+        0: Validated by you
+        1: Validated by captcha
+        2: Validated by the group
+        3: Validated by the administrator
+        4: Validated by outgoing mail
+      typeLabelB: 
+        0: Blocked by you
+        1: Blocked by captcha
+        2: Blocked by the group
+        3: Blocked by the administrator
     actions:
       deleteSenderW: 'Delete sender'
       deleteSenderB: 'Unlock the sender'

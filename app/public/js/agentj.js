@@ -117,10 +117,6 @@ document.addEventListener("turbo:load", function () {
                   dropdownParent: $('#empModal')
                 }
         );
-        $('.select2entity').select2entity({
-          width: 'resolve',
-          dropdownParent: $('#empModal')
-        });
         $('#empModal').modal('show');
       }
     });

@@ -76,7 +76,7 @@ class Msgs
     /**
      * @var string
      */
-    #[ORM\Column(name: 'originating', type: 'string', length: 1, nullable: false, options: ['fixed' => true, 'default' => ' '])]
+    #[ORM\Column(name: 'originating', type: 'string', length: 1, nullable: false, options: ['fixed' => true, 'default' => ''])]
     private $originating = '';
 
     /**

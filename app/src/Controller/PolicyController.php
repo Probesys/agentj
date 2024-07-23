@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route("/policy")
- */
+#[Route(path: '/policy')]
 class PolicyController extends AbstractController
 {
 
@@ -26,9 +24,7 @@ class PolicyController extends AbstractController
         $this->em = $em;
     }
 
-    /**
-     * @Route("/", name="policy_index", methods="GET")
-     */
+    #[Route(path: '/', name: 'policy_index', methods: 'GET')]
     public function index(): Response
     {
         $policies = $this->em
@@ -38,9 +34,7 @@ class PolicyController extends AbstractController
         return $this->render('policy/index.html.twig', ['policies' => $policies]);
     }
 
-    /**
-     * @Route("/new", name="policy_new", methods="GET|POST")
-     */
+    #[Route(path: '/new', name: 'policy_new', methods: 'GET|POST')]
     public function new(Request $request): Response
     {
         $policy = new Policy();
@@ -61,17 +55,13 @@ class PolicyController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="policy_show", methods="GET")
-     */
+    #[Route(path: '/{id}', name: 'policy_show', methods: 'GET')]
     public function show(Policy $policy): Response
     {
         return $this->render('policy/show.html.twig', ['policy' => $policy]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="policy_edit", methods="GET|POST")
-     */
+    #[Route(path: '/{id}/edit', name: 'policy_edit', methods: 'GET|POST')]
     public function edit(Request $request, Policy $policy): Response
     {
         $form = $this->createForm(PolicyType::class, $policy);
@@ -89,9 +79,7 @@ class PolicyController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}/delete", name="policy_delete", methods="POST")
-     */
+    #[Route(path: '/{id}/delete', name: 'policy_delete', methods: 'POST')]
     public function delete(Policy $policy): Response
     {
 

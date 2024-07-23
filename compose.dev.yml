@@ -1,0 +1,34 @@
+---
+
+services:
+  db:
+    ports:
+      - $DB_EXPOSED_PORT:3306
+    # log queries to a file
+    # docker compose exec db tail -f /var/lib/mysql/general.log
+    command: [
+      "--general-log",
+      "--general-log-file=general.log",
+      "--default-authentication-plugin=mysql_native_password"
+    ]
+
+  app:
+    build:
+      context: app/
+      dockerfile: Dockerfile.dev
+      args:
+        - UID
+        - GID
+    volumes:
+      - ./app/:/var/www/agentj
+    working_dir: /var/www/agentj
+
+
+  vite:   
+   image: node:18-alpine     
+   user: ${UID}:${GID}
+   working_dir: /app
+   volumes:
+        - ./app:/app
+   restart: unless-stopped
+   command: /bin/sh -c "yarn install && yarn watch"

@@ -20,12 +20,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-/**
- * @Route("/message")
- */
+#[Route(path: '/message')]
 class MessageController extends AbstractController {
 
     private $translator;
@@ -36,9 +34,7 @@ class MessageController extends AbstractController {
         $this->em = $em;
     }
 
-    /**
-     * @Route("/{type}", name="message")
-     */
+    #[Route(path: '/{type}', name: 'message')]
     public function index(Request $request, TranslatorInterface $translator, PaginatorInterface $paginator, $type = null) {
         $subTitle = '';
         $messageActions = [
@@ -163,10 +159,10 @@ class MessageController extends AbstractController {
     /**
      * Show infos about message.
      * @param integer $id
-     * @Route("/{partitionTag}/{mailId}/{rid}/show/", name="message_show",  methods="GET")
      *
      * @return Response
      */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'message_show', methods: 'GET')]
     public function showAction($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
 
@@ -195,10 +191,10 @@ class MessageController extends AbstractController {
     /**
      * Delete a message entity.
      * @param integer $id
-     * @Route("/{partitionTag}/{mailId}/{rid}/delete/", name="message_delete",  methods="GET")
      *
      * @return Response
      */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/delete/', name: 'message_delete', methods: 'GET')]
     public function deleteAction($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
         //    $em->getRepository(Msgs::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED); //status == delete
@@ -213,9 +209,9 @@ class MessageController extends AbstractController {
 
     /**
      *
-     * @Route("/batch/{action}", name="message_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
+    #[Route(path: '/batch/{action}', name: 'message_batch', methods: 'POST', options: ['expose' => true])]
     public function batchMessageAction(Request $request, MsgsRepository $msgRepository, $action = null) {
         $em = $this->em;
         if ($action) {
@@ -251,9 +247,7 @@ class MessageController extends AbstractController {
         return $this->redirect($referer);
     }
 
-    /**
-     * @Route("/{partitionTag}/{mailId}/{rid}/authorized", name="message_authorized")
-     */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
     public function authorized($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
         //W = White and 2 is authorized
@@ -269,9 +263,7 @@ class MessageController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/{partitionTag}/{mailId}/{rid}/banned", name="message_banned")
-     */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
     public function banned($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
 
@@ -292,8 +284,8 @@ class MessageController extends AbstractController {
      * @param type $rid
      * @return RedirectResponse
      * @throws ProcessFailedException
-     * @Route("/{partitionTag}/{mailId}/{rid}/restore", name="message_restore")
      */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/restore', name: 'message_restore')]
     public function restore($partitionTag, $mailId, $rid, Request $request) {
         $em = $this->em;
         //select msgs and msgcpt
@@ -466,9 +458,7 @@ class MessageController extends AbstractController {
         return $state;
     }
 
-    /**
-     * @Route("/{partitionTag}/{mailId}/{rid}/authorizedDomain", name="message_authorized_domain")
-     */
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain($partitionTag, $mailId, $rid, Request $request) {
         //W = White and 2 is authorized
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "W", $rid)) {
@@ -481,10 +471,8 @@ class MessageController extends AbstractController {
         return new RedirectResponse($referer);
     }
 
-    /**
-     * @Route("/{partitionTag}/{mailId}/{rid}/bannedDomain", name="message_banned_domain")
-     * @Security("is_granted('ROLE_ADMIN')")
-     */
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/bannedDomain', name: 'message_banned_domain')]
     public function bannedDomain($partitionTag, $mailId, $rid, Request $request) {
         //B = Black and msg status = 1 is banned
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "B", $rid)) {

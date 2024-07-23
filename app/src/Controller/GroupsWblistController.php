@@ -10,18 +10,16 @@ use App\Form\GroupsWblistType;
 use App\Service\GroupService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Security("is_granted('ROLE_ADMIN')")
- * @Route("/groups/wblist")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/groups/wblist')]
 class GroupsWblistController extends AbstractController {
 
     use ControllerWBListTrait;
@@ -42,9 +40,7 @@ class GroupsWblistController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/{groupId}", name="groups_wblist_index", methods="GET")
-     */
+    #[Route(path: '/{groupId}', name: 'groups_wblist_index', methods: 'GET')]
     public function index($groupId): Response {
         $groupswblists = $this->em->getRepository(GroupsWblist::class)->findBy((['groups' => $groupId]));
 
@@ -54,9 +50,7 @@ class GroupsWblistController extends AbstractController {
         return $this->render('groups_wblist/index.html.twig', ['groups_wblists' => $groupswblists, 'groups' => $groups]);
     }
 
-    /**
-     * @Route("/{groupId}/new", name="groups_wblist_new", methods="GET|POST")
-     */
+    #[Route(path: '/{groupId}/new', name: 'groups_wblist_new', methods: 'GET|POST')]
     public function new($groupId, Request $request, MailaddrService $mailaddrService, GroupService $groupService): Response {
         $groups = $this->em->getRepository(Groups::class)->findOneBy((['id' => $groupId]));
         if (!$groups) {
@@ -112,9 +106,7 @@ class GroupsWblistController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{groupId}/edit/{sid}", name="groups_wblist_edit", methods="GET|POST")
-     */
+    #[Route(path: '/{groupId}/edit/{sid}', name: 'groups_wblist_edit', methods: 'GET|POST')]
     public function edit($groupId, $sid, Request $request, MailaddrService $mailaddrService, GroupService $groupService) {
         $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy(['mailaddr' => $sid, 'groups' => $groupId]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
@@ -166,9 +158,7 @@ class GroupsWblistController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{groupId}/{sid}/delete", name="groups_wblist_delete", methods="GET")
-     */
+    #[Route(path: '/{groupId}/{sid}/delete', name: 'groups_wblist_delete', methods: 'GET')]
     public function delete($groupId, $sid, Request $request, GroupService $groupService) {
         /* @var $group Groups */
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);

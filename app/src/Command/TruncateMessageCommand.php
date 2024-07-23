@@ -4,19 +4,21 @@ namespace App\Command;
 
 use App\Entity\Log;
 use App\Entity\Msgs;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'agentj:truncate-message-since-days',
+    description: 'Truncate tables msgs and msgrcpt since X days in argument, X more than 10, by default it is 30 days',
+)]
 class TruncateMessageCommand extends Command
 {
 
-    protected static $defaultName = 'agentj:truncate-message-since-days';
 
-    protected function configure()
+    protected function configure():void
     {
-        $this->setDescription('Truncate tables msgs and msgrcpt since X days in argument, X more than 10, by default it is 30 days ');
         $this->addArgument('days');
     }
 
