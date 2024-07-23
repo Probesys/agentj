@@ -21,3 +21,14 @@ services:
         - GID
     volumes:
       - ./app/:/var/www/agentj
+    working_dir: /var/www/agentj
+
+
+  vite:   
+   image: node:18-alpine     
+   user: ${UID}:${GID}
+   working_dir: /app
+   volumes:
+        - ./app:/app
+   restart: unless-stopped
+   command: /bin/sh -c "yarn install && yarn watch"
