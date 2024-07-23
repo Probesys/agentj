@@ -102,6 +102,7 @@ t.add("Navigation.banned", "Bannis", "messages", "fr");
 t.add("Navigation.clean", "Propres", "messages", "fr");
 t.add("Navigation.error", "Erreurs", "messages", "fr");
 t.add("Navigation.all", "Tous", "messages", "fr");
+t.add("Navigation.Dashboard", "Tableau de bord", "messages", "fr");
 t.add("Navigation.Messagedelete", "Supprim\u00e9s", "messages", "fr");
 t.add("Navigation.mailBlocked", "Mails Bloqu\u00e9s", "messages", "fr");
 t.add("Navigation.blacklist", "Exp\u00e9diteurs bloqu\u00e9s", "messages", "fr");
