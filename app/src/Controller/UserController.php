@@ -590,19 +590,9 @@ class UserController extends AbstractController {
         foreach ($entities as $entity) {
             $label = '' . stream_get_contents($entity['email'], -1, 0);
 
-            $items[] = ['id' => $entity['id'], 'text' => $label, 'label' => $label];
+            $items[] = ['value' => $entity['id'], 'text' => $label];
         }
-
-        if ($request->query->get('field_name')) { // from Select2EntityType
-            $return['results'] = $items;
-
-            $return['more'] = true;
-        } else {
-            $return['length'] = count($entities);
-
-            $return['items'] = $items;
-        }
-
+        $return['results'] = $items;
         return new Response(json_encode($return), $return ? 200 : 404);
     }
 
