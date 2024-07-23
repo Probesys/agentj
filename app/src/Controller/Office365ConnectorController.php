@@ -50,7 +50,7 @@ class Office365ConnectorController extends AbstractController {
         }
 
         $form->get("type")->setData(ConnectorTypes::Office365);
-        return $this->renderForm('connector/new.html.twig', [
+        return $this->render('connector/new.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);
@@ -76,7 +76,7 @@ class Office365ConnectorController extends AbstractController {
             return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('connector/edit.html.twig', [
+        return $this->render('connector/edit.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);

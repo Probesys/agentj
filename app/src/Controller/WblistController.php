@@ -172,7 +172,7 @@ class WblistController extends AbstractController {
             $referer = $request->headers->get('referer');
             return $this->redirect($referer);
         }
-        return $this->renderForm('import/index_wblist.html.twig', [
+        return $this->render('import/index_wblist.html.twig', [
                     'controller_name' => 'ImportController',
                     'form' => $form,
         ]);
