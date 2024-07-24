@@ -144,7 +144,7 @@ Navigation:
   MessageRestored: Restored
   userlist:
     title: Users
-    localUsers: Local
+    localUsers: Administrator
     emailUsers: 'Email accounts'
     emailAliasUsers: Alias
   grouplist: Groups
@@ -214,7 +214,7 @@ Message:
     confirmRemoveRuleTitle: 'Delete the rule?'
     confirmRemoveRuleContent: 'Are you sure you want to delete this rule?'
     confirmRemoveConnectorTitle: Delete connector.
-    confirmRemoveConnectorContent: Are tou sure you want to delete this connector ?       
+    confirmRemoveConnectorContent: Are tou sure you want to delete this connector ?
   Flash:
     deleteSuccesFull: 'Successful deletion'
     domainCreatd: 'The domain has been successfully created'
@@ -232,10 +232,10 @@ Message:
     senderBanned: 'The address is now banished'
     checkMailUnsuccessful: 'We couldn''t check this email.'
     connectionOk : "Connexion success"
-    connectionKo : "Unable to connect"   
+    connectionKo : "Unable to connect"
     invalidLdapQuery: "Invalid Ldap query"
     ldapNbUserfound: "$NB_USER user(s) found"
-    ldapNbGroupfound: "$NB_GROUP group(s) found"     
+    ldapNbGroupfound: "$NB_GROUP group(s) found"
   http:
     404:
       title: 'Page not found'
@@ -383,7 +383,7 @@ Entities:
     labels:
       infos: "Informations"
       agentJConfig : "AgentJ configuration"
-      connectors : "Connectors"    
+      connectors : "Connectors"
       rules: Rules
       domainrules: 'Rules of the field'
       domaineSender: 'sending domain'
@@ -419,7 +419,7 @@ Entities:
     indexEmail: 'List of email accounts'
     indexAlias: 'List of alias emails'
     labels:
-      defaultDomainParameters: "Default domain parameters"    
+      defaultDomainParameters: "Default domain parameters"
     actions:
       add_new: 'New user'
       add_new_alias: 'Add a new alias'
@@ -466,10 +466,10 @@ Entities:
     labels:
     actions:
       add: "Add Office365 connector"
-      edit: "Edit Office365 connector"    
+      edit: "Edit Office365 connector"
     fields:
-      name: "Connector name"    
-      type: "Connector type" 
+      name: "Connector name"
+      type: "Connector type"
   LdapConnector:
     labels:
     actions:
@@ -489,13 +489,13 @@ Entities:
       ldapEmailField: "LDAP field for email"
       ldapAliasField: "LDAP field for alias (if different from email)"
       ldapUserFilter: "Filter for user"
-      ldapGroupFilter: "Filter for groups"      
+      ldapGroupFilter: "Filter for groups"
   Office365Connector:
     labels:
     fields:
-      tenant: "Tenant Id"    
+      tenant: "Tenant Id"
       client: "Client Id"
-      clientSecret: "Secret client"      
+      clientSecret: "Secret client"
   WBList:
     fields:
       user: User
@@ -503,13 +503,13 @@ Entities:
       typeW: 'Type of validation'
       white: 'White list'
       black: Blacklist
-      typeLabelW: 
+      typeLabelW:
         0: Validated by you
         1: Validated by captcha
         2: Validated by the group
         3: Validated by the administrator
         4: Validated by outgoing mail
-      typeLabelB: 
+      typeLabelB:
         0: Blocked by you
         1: Blocked by captcha
         2: Blocked by the group
