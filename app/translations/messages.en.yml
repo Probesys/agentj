@@ -110,6 +110,11 @@ Generics:
     groupNameAllreadyExist: This group label already exists for this domain. You can't
       use it
     BadFormatcsv: "Bad format file"
+    IncorrectColumns: "Row [ROW]: Incorrect number of columns."
+    InvalidEmail: "Row [ROW]: address e-mail is invalid."
+    NonexistentDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
+    ImportError: "An error occurred during import: [ERROR_MESSAGE]"
+    ImportErrorsList: "Errors occurred during import: <br> [LIST_ROWS_ERROR]"
   units:
     literByDay: litres/day
     hoursByDay: Hours/day

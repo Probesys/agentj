@@ -55,10 +55,11 @@ class ImportController extends AbstractController {
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
                     $message = str_replace('[NB_USER]', $result['user_import'], $message);
-                    if (count($result['errors']) > 0) {
-                        $warningMessage = $translator->trans('Generics.flash.ImportErrors', ['NB_ERRORS' => count($result['errors']), 'LIST_ROWS_ERROR' => implode(',', $result['errors'])]);
-                        $this->addFlash('warning', $warningMessage);
-                    }
+                    // errors sont géré dans la function import
+                    //if (count($result['errors']) > 0) {
+                    //    $warningMessage = $translator->trans('Generics.flash.ImportErrors', ['NB_ERRORS' => count($result['errors']), 'LIST_ROWS_ERROR' => implode(',', $result['errors'])]);
+                    //    $this->addFlash('warning', $warningMessage);
+                    //}
                     $this->addFlash('success', $message);
                 } else {
                     $this->addFlash('warning', 'Generics.flash.NoImport');
@@ -84,6 +85,7 @@ class ImportController extends AbstractController {
      * Import user from file csv columns : email , LastName, FirstName, Group */
 
     function import($pathfile) {
+        $translator = $this->translator;
         $split = ';';
         $nbUser = count(file($pathfile)) - 1;
 
@@ -101,9 +103,9 @@ class ImportController extends AbstractController {
         try {
             if (($handle = fopen($pathfile, "r")) !== false) {
                 while (($data = fgetcsv($handle, 1024, $split)) !== false) {
-                    //check line number of columns
-                    if ((count($data) < 2)) {
-                        $errors[] = "Ligne " . ($row + 1) . " : Nombre de colonnes incorrect.";
+                    //check line number of columns, if empty
+                    if ((count($data) != 4)) {
+                        $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);
                         continue;
                     }
 
@@ -179,13 +181,13 @@ class ImportController extends AbstractController {
                                 }
                             }
                         } else {
-                            $errors[] = "Ligne " . ($row + 1) . " : Domaine " . $domainEmail . " n'existe pas dans la base de données.";
+                            $errors[] = $translator->trans('Generics.flash.NonexistentDomain', ['ROW' => $row + 1, 'DOMAIN' => $domainEmail]);
                         }
                         if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
                             $em->flush();
                         }
                     } else {
-                        $errors[] = "Ligne " . ($row + 1) . " : Adresse e-mail invalide.";
+                        $errors[] =  $translator->trans('Generics.flash.InvalidEmail', ['ROW' => $row + 1]);
                     }
 
                     $row++;
@@ -196,9 +198,18 @@ class ImportController extends AbstractController {
                 $this->groupService->updateWblist();
             }
         } catch (\Exception $e) {
-            $this->addFlash('danger', 'Une erreur s\'est produite lors de l\'importation : ' . $e->getMessage());
+            //$this->addFlash('danger', 'Une erreur s\'est produite lors de l\'importation : ' . $e->getMessage());
+            $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);
+            $this->addFlash('danger', $dangerMessage);
+
         }
 
+        if (count($errors) > 0) {
+            //$this->addFlash('danger', 'Des erreurs se sont produites lors de l\'importation : <br>' . implode('<br> ', $errors));
+            $dangerMessageList = $translator->trans('Generics.flash.ImportErrorsList', ['LIST_ROWS_ERROR' => implode('<br> ', $errors)]);
+            $this->addFlash('danger', $dangerMessageList);
+
+        }
 
         return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
     }
