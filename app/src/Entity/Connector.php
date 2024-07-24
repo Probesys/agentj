@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ConnectorRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
-#[ORM\DiscriminatorMap(['office365' => 'Office365Connector', 'LDAP' => 'LdapConnector'])]
+#[ORM\DiscriminatorMap(['office365' => 'Office365Connector', 'LDAP' => 'LdapConnector', 'Imap' => 'ImapConnector'])]
 class Connector {
 
     use EntityBlameableTrait;
