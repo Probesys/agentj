@@ -8,13 +8,13 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Alter table connector to add imap info
  */
-final class Version20240724130703 extends AbstractMigration
+final class Version20240724130703_create_imap_connector extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Alter table connector to add imap info';
     }
 
     public function up(Schema $schema): void

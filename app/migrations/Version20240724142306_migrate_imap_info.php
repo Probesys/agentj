@@ -7,14 +7,12 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use App\Model\ConnectorTypes;
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
-final class Version20240724145006 extends AbstractMigration
+
+final class Version20240724145006_migrate_imap_info extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'migrate imap info from domain table to connector table';
     }
 
     public function up(Schema $schema): void
