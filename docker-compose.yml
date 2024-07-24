@@ -13,7 +13,7 @@ services:
       - MYSQL_USER=${DB_USER:-agent}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - TZ=${TZ:-Europe/Paris}
-  
+
   amavis:
     build:
       context: amavis/.
@@ -65,8 +65,8 @@ services:
     env_file:
       - .env
     command:  [ "supervisord", "-c", "/etc/conf/relay/supervisor/supervisord.conf" ]
- 
-  
+
+
   smtp:
     #image: probesys38/agentj_smtp:${VERSION}
     build:

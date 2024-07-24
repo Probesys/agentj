@@ -3,7 +3,7 @@
 services:
   db:
     ports:
-      - $DB_EXPOSED_PORT:3306
+      - $DB_EXPOSED_PORT:3307
     # log queries to a file
     # docker compose exec db tail -f /var/lib/mysql/general.log
     command: [
@@ -24,8 +24,8 @@ services:
     working_dir: /var/www/agentj
 
 
-  vite:   
-   image: node:18-alpine     
+  vite:
+   image: node:18-alpine
    user: ${UID}:${GID}
    working_dir: /app
    volumes:
