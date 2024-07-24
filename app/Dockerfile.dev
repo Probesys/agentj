@@ -33,6 +33,7 @@ RUN apt-get update -q --fix-missing && \
     php8.2-opcache \
     php8.2-xml \
     php8.2-zip \
+    php8.2-xdebug \
     tzdata \
     yarnpkg \
     zip \
@@ -49,6 +50,8 @@ RUN apt-get update -q --fix-missing && \
 
 RUN mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid
 
+
+COPY docker/files/docker-php-ext-xdebug.ini /etc/php/8.2/fpm/conf.d/docker-php-ext-xdebug.ini
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
