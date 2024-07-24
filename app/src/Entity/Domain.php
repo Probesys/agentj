@@ -36,28 +36,10 @@ class Domain
     private $srvSmtp;
 
     /**
-     * @var string
-     */
-    #[ORM\Column(name: 'srv_imap', type: 'string', length: 255, nullable: false)]
-    private $srvImap;
-
-    /**
      * @var \DateTime
      */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod;
-
-    /**
-     * @var int
-     */
-    #[ORM\Column(name: 'imap_port', type: 'integer', nullable: false, options: ['default' => 143])]
-    private $imap_port;
-
-    /**
-     * @var string
-     */
-    #[ORM\Column(name: 'imap_flag', type: 'string', length: 255, nullable: false)]
-    private $imap_flag;
 
     /**
      * @var bool
