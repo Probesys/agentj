@@ -23,7 +23,21 @@ document.addEventListener("turbo:load", function () {
   $('.select2').select2();
 
 
+  $(document).scroll(function() {
+    if ($(this).scrollTop() > 100) {
+        $(".scroll-to-top").fadeIn();
+    } else {
+        $(".scroll-to-top").fadeOut();
+    }
+  });
 
+  $(document).on("click", "a.scroll-to-top", function(e) {
+    var target = $(this).attr("href");
+    $("html, body").stop().animate({
+        scrollTop: $(target).offset().top
+    }, 1000, "easeInOutExpo");
+    e.preventDefault();
+  });
 
   /* DataTable*/
   $.extend($.fn.dataTable.defaults, {

@@ -19,41 +19,41 @@
             <ul>
               <li class="{%  if route == 'message' and route_params['type'] == 'untreated'%}active{% endif %}" >
                 <a href="{{path('message',{'type':''})}}">
-                  <span class="badge badge-pill badge-primary">{{ msgs['untreated'] }}</span>
+                  <span class="badge badge-primary" style="min-width: 50px">{{ msgs['untreated'] }}</span>
                   {{'Navigation.untreated'|trans}}
                 </a>
               </li>
 
               <li class="{%  if route == 'message' and route_params['type'] == 'spammed'%}active{% endif %}" >
                 <a href="{{path('message',{'type':'spam'})}}">
-                  <span class="badge  pull-right badge-warning" id="nb-spammed-messages">{{ msgs['spammed'] }}</span>
+                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-spammed-messages">{{ msgs['spammed'] }}</span>
                   {{'Navigation.spammed'|trans}}
                 </a>
               </li>
 
               <li class="{%  if route == 'message' and route_params['type'] == 'virus'%}active{% endif %}" >
                 <a href="{{path('message',{'type':'virus'})}}">
-                  <span class="badge  pull-right badge-warning" id="nb-spammed-messages">{{ msgs['virus'] }}</span>
+                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-spammed-messages">{{ msgs['virus'] }}</span>
                   {{'Navigation.virus'|trans}}
                 </a>
               </li>
 
               <li class="{%  if route == 'message' and route_params['type'] == 'authorized'%}active{% endif %}" >
                 <a href="{{path('message',{'type':'authorized'})}}">
-                  <span class="badge badge-pill badge-success">{{ msgs['authorized'] }}</span>
+                  <span class="badge badge-success" style="min-width: 50px">{{ msgs['authorized'] }}</span>
                   {{'Navigation.authorized'|trans}}
                 </a>
               </li>
               <li class="{%  if route == 'message' and route_params['type'] == 'banned'%}active{% endif %}">
                 <a  href="{{path('message',{'type':'banned'})}}">
-                  <span class="badge  pull-right badge-danger" id="nb-authorized-messages">{{ msgs['banned'] }}</span>
+                  <span class="badge  badge-danger"  style="min-width: 50px"id="nb-authorized-messages">{{ msgs['banned'] }}</span>
                   {{'Navigation.banned'|trans}}
                 </a>
               </li>
 
               <li class="{%  if route == 'message' and route_params['type'] == 'delete'%}active{% endif %}">
                 <a  href="{{path('message',{'type':'delete'})}}">
-                  <span class="badge  pull-right badge-warning" id="nb-deleted-messages">{{ msgs['delete'] }}</span>
+                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-deleted-messages">{{ msgs['delete'] }}</span>
                   {{'Navigation.Messagedelete'|trans}}
                 </a>
               </li>
@@ -61,7 +61,7 @@
 
               <li class="nav-link {%  if route == 'message' and route_params['type'] == 'restored'%}active{% endif %}">
                 <a  href="{{path('message',{'type':'restored'})}}">
-                  <span class="badge  pull-right badge-danger" id="nb-restored-messages">{{ msgs['restored'] }}</span>
+                  <span class="badge  badge-danger"  style="min-width: 50px"id="nb-restored-messages">{{ msgs['restored'] }}</span>
                   {{'Navigation.MessageRestored'|trans}}
                 </a>
               </li>

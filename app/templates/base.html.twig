@@ -38,7 +38,7 @@
       <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
 
-      <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script>
+      {# <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script> #}
       {#      <script type="text/javascript" src="{{ asset('js/node_modules/push.js/bin/push.min.js') }}"></script>#}
 
 
@@ -83,7 +83,7 @@
       </main>
       {% block footer %}
         {% include '_footer.html.twig' %}
-          <a class="scroll-to-top" href="#page-top" style="display: inline;">
+          <a class="scroll-to-top" href="#page-top" style="display: none;">
             <i class="fas fa-sort-up"></i>
           </a>
       {% endblock %}

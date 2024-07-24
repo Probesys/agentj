@@ -128,7 +128,7 @@ t.add("Config.labels.logoSize", "170x45px", "messages", "fr");
 t.add("Message.Object", "Objet", "messages", "fr");
 t.add("Message.Sender", "Exp\u00e9diteur", "messages", "fr");
 t.add("Message.Recipient", "Destinataire", "messages", "fr");
-t.add("Message.Status", "Status", "messages", "fr");
+t.add("Message.Status.title", "Statut", "messages", "fr");
 t.add("Message.Date", "Date", "messages", "fr");
 t.add("Message.ErrorSendCaptcha", "Erreur v\u00e9rification email", "messages", "fr");
 t.add("Message.Actions.list", "Actions", "messages", "fr");

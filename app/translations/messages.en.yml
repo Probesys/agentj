@@ -132,6 +132,7 @@ Navigation:
   clean: Clean
   error: Errors
   all: All
+  Dashboard: Dashboard
   Messagedelete: Deleted
   mailBlocked: 'Mail blocked'
   blacklist: 'Blocked senders'
@@ -162,7 +163,16 @@ Message:
   Object: Subject
   Sender: Sender
   Recipient: 'Recipient'
-  Status: Status
+  Status:
+    title: Status
+    untreated: Untreated
+    authorized: Authorized
+    banned: Banned
+    deleted: Deleted
+    restored: Restored
+    virus: Virus
+    spammed: Spam
+    Error: Error
   Date: Date
   ErrorSendCaptcha: 'Error email verification'
   Actions:

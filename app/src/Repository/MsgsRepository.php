@@ -43,12 +43,12 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($type) {
             switch ($type) {
-                case MessageStatus::SPAMMED: //spam and 
+                case MessageStatus::SPAMMED: //spam and
                     $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" and mr.content != "V"  ';
                     break;
-                case MessageStatus::VIRUS: //spam and 
+                case MessageStatus::VIRUS: //spam and
                     $sqlWhere .= ' and mr.content = "V" ';
-                    break;                
+                    break;
                 case MessageStatus::BANNED:
                     $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"  ';
                     break;
@@ -61,6 +61,9 @@ class MsgsRepository extends ServiceEntityRepository
                     break;
                 case MessageStatus::RESTORED:
                     $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
+                    break;
+                case 'All':
+                    $sqlWhere .= ' ';
                     break;
                 default:
                     $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" and mr.content != "V" and  mr.status_id=' . $type .  ' ';
@@ -143,14 +146,14 @@ class MsgsRepository extends ServiceEntityRepository
         if ($day){
             $sql.= " AND date(m.time_iso) = '" . $day->format('Y-m-d') . "'";
         }
-        
+
         if ($domain){
             $sql.= " AND d.id = '" . $domain->getId() . "'";
-        }        
+        }
 
-        
+
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias);
- 
+
         $sql .= " GROUP BY SUBSTRING(m.time_iso, 1, 8) ";
 
         $stmt = $conn->prepare($sql);
@@ -163,11 +166,11 @@ class MsgsRepository extends ServiceEntityRepository
    * @param type $type
    * @return type
    */
-    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null)
+    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null, $limit = null)
     {
 
         $conn = $this->getEntityManager()->getConnection();
-        
+
 
         $sql = 'SELECT m.mail_id,m.message_error,mr.status_id,ms.name,m.partition_tag,maddr.email,m.subject,m.from_addr,m.time_num,mr.rid, mr.bspam_level '
             . ' FROM msgs m '
@@ -188,6 +191,10 @@ class MsgsRepository extends ServiceEntityRepository
             $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id ';
+        }
+
+        if ($limit !== null && is_numeric($limit) && $limit > 0) {
+            $sql .= ' LIMIT ' . (int)$limit;
         }
 
         $stmt = $conn->prepare($sql);

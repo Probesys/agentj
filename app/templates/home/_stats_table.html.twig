@@ -1,0 +1,29 @@
+<section id="no-more-tables">
+    <table id="table_users" class="table datatable">
+        <thead>
+            <tr>
+                <th>{{ 'Entities.User.fields.email'|trans }}</th>
+                <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
+                <th>{{ 'Entities.User.fields.policy'|trans }}</th>
+                <th>{{ 'Entities.User.fields.groups'|trans }}</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for user in users %}
+                {% set groups = user.id | user_groups  %}
+{#                      {{ dump(groups) }}#}
+                <tr>
+                    <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
+                    <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
+                    <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
+                    <td data-title="{{'Entities.User.fields.groups'|trans }}">
+                        {% for group in groups %}
+                            <span class="badge badge-secondary">{{ group }}</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>

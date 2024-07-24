@@ -39,6 +39,8 @@ class DefaultController extends AbstractController {
         $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::BANNED, $alias);
         $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::DELETED, $alias);
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
+        $msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
+        $users = $this->em->getRepository(User::class)->searchByRole($this->getUser(), '["ROLE_USER"]');
 
         $labels = array_map(function ($item) {
             return $item['time_iso'];
@@ -52,6 +54,8 @@ class DefaultController extends AbstractController {
                     'nbBannedMsgByDay' => $nbBannedMsgByDay,
                     'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
                     'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
+                    'msgs' => $msgs,
+                    'users' => $users
         ]);
     }
 
