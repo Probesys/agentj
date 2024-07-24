@@ -20,12 +20,12 @@ final class Version20240724142425_update_domain extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE domain DROP srv_imap, DROP imap_port, DROP imap_flag');
+        $this->addSql('ALTER TABLE domain DROP srv_imap, DROP imap_port, DROP imap_flag, DROP imap_no_validate_cert');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE domain ADD srv_imap VARCHAR(255) NOT NULL, ADD imap_port INT DEFAULT 143 NOT NULL, ADD imap_flag VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE domain ADD srv_imap VARCHAR(255) NOT NULL, ADD imap_port INT DEFAULT 143 NOT NULL, ADD imap_flag VARCHAR(255) NOT NULL, ADD imap_no_validate_cert TINYINT(1) DEFAULT NULL');
     }
 }

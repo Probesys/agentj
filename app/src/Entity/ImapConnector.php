@@ -22,6 +22,9 @@ class ImapConnector extends Connector
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $imapProtocol = null;
 
+    #[ORM\Column]
+    private ?bool $imapNoValidateCert = null;
+
     public function getImapHost(): ?string
     {
         return $this->imapHost;
@@ -54,6 +57,18 @@ class ImapConnector extends Connector
     public function setImapProtocol(?string $imapProtocol): static
     {
         $this->imapProtocol = $imapProtocol;
+
+        return $this;
+    }
+
+    public function isImapNoValidateCert(): ?bool
+    {
+        return $this->imapNoValidateCert;
+    }
+
+    public function setImapNoValidateCert(bool $imapNoValidateCert): static
+    {
+        $this->imapNoValidateCert = $imapNoValidateCert;
 
         return $this;
     }

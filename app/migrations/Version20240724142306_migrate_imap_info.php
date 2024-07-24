@@ -17,7 +17,7 @@ final class Version20240724142306_migrate_imap_info extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        foreach ($this->connection->fetchAllAssociative('SELECT id, domain, srv_imap, imap_port, imap_flag  FROM domain') as $result) {
+        foreach ($this->connection->fetchAllAssociative('SELECT id, domain, srv_imap, imap_port, imap_flag, imap_no_validate_cert  FROM domain') as $result) {
             $connector = $this->connection->fetchOne('SELECT id FROM connector where discr=\'Imap\' and domain_id=' . $result['id']);
             if (!$connector){
                 $now = new \DateTime();
@@ -27,6 +27,7 @@ final class Version20240724142306_migrate_imap_info extends AbstractMigration
                     'imap_host' => $result['srv_imap'],
                     'imap_port' => $result['imap_port'],
                     'imap_protocol' => $result['imap_flag'],
+                    'imap_no_validate_cert' => $result['imap_no_validate_cert'],
                     'discr' => 'Imap',
                     'type' => ConnectorTypes::IMAP,
                     'active' => 1,
