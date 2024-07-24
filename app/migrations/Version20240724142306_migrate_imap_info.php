@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use App\Model\ConnectorTypes;
 
-final class Version20240724145006_migrate_imap_info extends AbstractMigration
+final class Version20240724142306_migrate_imap_info extends AbstractMigration
 {
     public function getDescription(): string
     {
