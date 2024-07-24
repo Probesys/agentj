@@ -56,7 +56,7 @@ class MessageController extends AbstractController {
                 case 'virus':
                     $subTitle = 'Entities.Message.virus';
                     $type = MessageStatus::VIRUS;
-                    $messageActions = [];                    
+                    $messageActions = [];
                     break;
                 case 'banned':
                     $subTitle = 'Entities.Message.' . $type;

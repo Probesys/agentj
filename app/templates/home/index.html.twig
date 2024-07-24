@@ -3,8 +3,12 @@
 {% block title %}{{ 'Generics.messages.welcome'|trans }} !{% endblock %}
 
 {% block body %}
-   <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
-{#   {% if is_granted('ROLE_ADMIN') %}#}
-  {% include '/home/_stats.html.twig' %}
-{#  {% endif %}#}
+  <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
+  {% if is_granted('ROLE_ADMIN') %}
+    {% include '/home/_latest_messages.html.twig' %}
+    {% include '/home/_stats_table.html.twig' %}
+  {% else %}
+    {% include '/home/_stats.html.twig' %}
+    {% include '/home/_latest_messages.html.twig' %}
+  {% endif %}
 {% endblock %}
