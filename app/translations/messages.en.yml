@@ -375,6 +375,8 @@ Entities:
       mailAuthenticationSender: 'Email address that sends authentication requests'
       imapNoValidateCert: 'Do not validate certificates'
       defaultLang: 'Default language'
+      quotaEmails: 'Email quota'
+      quotaSeconds: 'Quota time'
     labels:
       infos: "Informations"
       agentJConfig : "AgentJ configuration"

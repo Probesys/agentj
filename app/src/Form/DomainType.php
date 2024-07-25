@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class DomainType extends AbstractType {
 
@@ -38,6 +39,14 @@ class DomainType extends AbstractType {
                 ->add('domain', null, [
                     'label' => 'Entities.Domain.fields.domain'
                 ])
+                ->add('quotaEmails', IntegerType::class, [
+                    'label' => 'Entities.Domain.fields.quotaEmails',
+                    'required' => false,
+                ])
+                ->add('quotaSeconds', IntegerType::class, [
+                    'label' => 'Entities.Domain.fields.quotaSeconds',
+                    'required' => false,
+                ])    
                 ->add('srvSmtp', null, [
                     'label' => 'Entities.Domain.fields.srvSmtp'
                 ])

@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Domain
@@ -64,6 +65,18 @@ class Domain
      */
     #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
     private $active;
+
+     /**
+     * @var int
+     */
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $quotaEmails = null;
+
+     /**
+     * @var int
+     */
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $quotaSeconds = null;
 
     /**
      * @var string
@@ -147,6 +160,29 @@ class Domain
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
         $this->domain_keys = new DomainKey();
+    }
+
+
+    public function getQuotaEmails(): ?int
+    {
+        return $this->quotaEmails;
+    }
+
+    public function setQuotaEmails(?int $quotaEmails): self
+    {
+        $this->quotaEmails = $quotaEmails;
+        return $this;
+    }
+
+    public function getQuotaSeconds(): ?int
+    {
+        return $this->quotaSeconds;
+    }
+
+    public function setQuotaSeconds(?int $quotaSeconds): self
+    {
+        $this->quotaSeconds = $quotaSeconds;
+        return $this;
     }
 
     public function __toString()
