@@ -1,13 +1,13 @@
 {% extends 'modalTemplate.html.twig' %}
-{% block modalSize %}modal-xl{% endblock %}
+{% block modalSize %}modal-xl
+{% endblock %}
 {% block modalTitle %}
-  {{ 'Entities.LdapConnector.actions.add'|trans() }}
+	{{ 'Entities.ImapConnector.actions.add'|trans() }}
 {% endblock %}
 
 
 {% block modalContent %}
 
-    {{ include('connector/_form_imap.html.twig') }}
+	{{ include('connector/_form_imap.html.twig') }}
 
 {% endblock %}
-
