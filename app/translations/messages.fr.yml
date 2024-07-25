@@ -116,6 +116,11 @@ Generics:
       Ce groupe existe déjà pour domaine. Vous ne pouvez pas
       utiliser ce nom
     BadFormatcsv: "Mauvais format de fichier"
+    IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect."
+    InvalidEmail: "Ligne [ROW] : Adresse e-mail invalide."
+    NonexistentDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+    ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
+    ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
   units:
     literByDay: litres/jour
     hoursByDay: Heures/jour
@@ -146,7 +151,7 @@ Navigation:
   MessageRestored: Récupérés
   userlist:
     title: Utilisateurs
-    localUsers: Locaux
+    localUsers: Administrateur
     emailUsers: Comptes email
     emailAliasUsers: Alias
   grouplist: Groupes
