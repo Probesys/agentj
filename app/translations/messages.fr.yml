@@ -23,6 +23,7 @@ Generics:
     rememberme: Se souvenir de moi
     import: "Importer"
     importFile: "Importer depuis un fichier"
+    addIpAddress: "Adresse IP"
   fields:
     name: Intitulé
     helpMessage: Message d'aide

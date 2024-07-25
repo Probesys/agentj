@@ -23,6 +23,7 @@ Generics:
     rememberme: 'Remember me'
     import: "Import"
     importFile: "Import from file"
+    addIpAddress: "IP Address"
   fields:
     name: Title
     helpMessage: 'Help message'
