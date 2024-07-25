@@ -66,18 +66,6 @@ class Domain
     #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
     private $active;
 
-     /**
-     * @var int
-     */
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $quotaEmails = null;
-
-     /**
-     * @var int
-     */
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $quotaSeconds = null;
-
     /**
      * @var string
      */
@@ -152,6 +140,9 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
+    #[ORM\Column(name: 'quotas', type: Types::JSON, nullable: true)]
+    private $quotas = [];
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -162,26 +153,29 @@ class Domain
         $this->domain_keys = new DomainKey();
     }
 
-
-    public function getQuotaEmails(): ?int
+    public function getQuotas(): array
     {
-        return $this->quotaEmails;
+        return $this->quotas;
     }
 
-    public function setQuotaEmails(?int $quotaEmails): self
+    public function setQuotas(array $quotas): self
     {
-        $this->quotaEmails = $quotaEmails;
+        $this->quotas = $quotas;
         return $this;
     }
 
-    public function getQuotaSeconds(): ?int
+    public function addQuota(int $emails, int $seconds): self
     {
-        return $this->quotaSeconds;
+        $this->quotas[] = [$emails, $seconds];
+        return $this;
     }
 
-    public function setQuotaSeconds(?int $quotaSeconds): self
+    public function removeQuota(int $index): self
     {
-        $this->quotaSeconds = $quotaSeconds;
+        if (isset($this->quotas[$index])) {
+            unset($this->quotas[$index]);
+            $this->quotas = array_values($this->quotas); // Réindexer le tableau
+        }
         return $this;
     }
 

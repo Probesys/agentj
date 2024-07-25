@@ -17,114 +17,150 @@
 				{{ form_row(form.imapNoValidateCert) }}
 				{{ form_row(form.logoFile) }}
 				{{ form_row(form.defaultLang) }}
-				{{ form_row(form.quotaEmails) }}
-				{{ form_row(form.quotaSeconds) }}
+				<h3>Quotas</h3>
+				<div class="quotas" data-prototype="{{ form_widget(form.quotas.vars.prototype)|e('html_attr') }}">
+					{% for quotaForm in form.quotas %}
+						<div class="quota-item">
+							{{ form_row(quotaForm.emails) }}
+							{{ form_row(quotaForm.seconds) }}
+							<button type="button" class="btn btn-danger btn-sm remove-quota" style="float: right">Supprimer</button>
+							<div style="clear: both; margin-bottom: 1rem"></div>
+						</div>
+				{% endfor %}
 			</div>
+			<button type="button" class="btn btn-primary btn-sm add_quota_link">Ajouter un quota</button>
 		</div>
 	</div>
+</div>
 
-	<div class="col-md-6">
+<div class="col-md-6">
+	<div class="card mb-2">
+		<div class="card-header">
+			{{ 'Entities.Domain.labels.agentJConfig' | trans() }}
+		</div>
+		<div class="card-body">
+			{{ form_row(form.rules) }}
+			{{ form_row(form.policy) }}
+			<div class="form-group row">
+				<label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }}
+					:
+					<span id="domain-spam-level">{{ domainSpamLevel }}</span>
+				</label>
+				<div class="col-sm-12">{{ form_widget(form.level) }}</div>
+			</div>
+			<div class="form-group row">
+				<label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
+					({{ 'Generics.labels.byDefault'|trans }}
+					:
+					{{ domain_mail_authentification_sender }})</label>
+				<div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+			</div>
+
+			{# {{ form_row(form.mailAuthenticationSender) }} #}
+
+		</div>
+	</div>
+	{% if domain.id is not null %}
 		<div class="card mb-2">
 			<div class="card-header">
-				{{ 'Entities.Domain.labels.agentJConfig' | trans() }}
+				{{ 'Entities.Domain.labels.connectors' | trans() }}
+				<div class="dropdown float-right">
+					<a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						{{ 'Entities.Domain.actions.add_connector' | trans() }}
+					</a>
+
+					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+						<a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
+						<a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
+					</div>
+				</div>
 			</div>
 			<div class="card-body">
-				{{ form_row(form.rules) }}
-				{{ form_row(form.policy) }}
-				<div class="form-group row">
-					<label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }}
-						:
-						<span id="domain-spam-level">{{ domainSpamLevel }}</span>
-					</label>
-					<div class="col-sm-12">{{ form_widget(form.level) }}</div>
-				</div>
-				<div class="form-group row">
-					<label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
-						({{ 'Generics.labels.byDefault'|trans }}
-						:
-						{{ domain_mail_authentification_sender }})</label>
-					<div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
-				</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>{{ 'Entities.Connector.fields.name' | trans }}</th>
+							<th>{{ 'Entities.Connector.fields.type' | trans }}</th>
+							<th></th>
+							<th></th>
+						</tr>
 
-				{# {{ form_row(form.mailAuthenticationSender) }} #}
+					</thead>
+					{% for connector in domain.connectors %}
+
+						{% if connector.type == 'LDAP' %}
+							{% set urlEdit =  path('app_connector_ldap_edit', {'id' : connector.id}) %}
+							{% set urlSync =  path('app_ldap_connector_sync', {'id' : connector.id}) %}
+						{% endif %}
+						{% if connector.type == 'Office365' %}
+							{% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
+							{% set urlSync =  path('app_office365_connector_sync', {'id' : connector.id}) %}
+						{% endif %}
+						{#              {{ connector.type }} #}
+						<tr>
+							<td>
+								{{ connector.name }}</td>
+							<td>
+								{{ connector.type }}</td>
+							<td>
+								<a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}" class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
+									<i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+									<span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
+								</a>
+							</td>
+							<td>
+								<a href="#" data-url-modal-content="{{ urlEdit }}" class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
+									<i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+									<span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+								</a>
+								<a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" class='btn btn-sm btn-danger confirmModal' data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}' title="{{ 'Generics.actions.delete'|trans() }}">
+									<i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+									<span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+								</a>
+							</td>
+
+						</tr>
+					{% endfor %}
+				</table>
+
 
 			</div>
 		</div>
-		{% if domain.id is not null %}
-			<div class="card mb-2">
-				<div class="card-header">
-					{{ 'Entities.Domain.labels.connectors' | trans() }}
-					<div class="dropdown float-right">
-						<a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							{{ 'Entities.Domain.actions.add_connector' | trans() }}
-						</a>
+	{% endif %}
+</div></div><div class="d-flex justify-content-center">
+<input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans) }}">&nbsp;
+<a class="btn btn-outline-secondary " href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a></div>{{ form_end(form) }}
+{% block javascripts %}
+<script>
+	// Fonction pour ajouter un nouveau quota
+function addQuotaForm($collectionHolder) {
+var prototype = $collectionHolder.data('prototype');
+var index = $collectionHolder.data('index');
+var newForm = prototype.replace(/__name__/g, index);
+$collectionHolder.data('index', index + 1);
+var $newFormDiv = $('<div class="quota-item"></div>').append(newForm);
+$newFormDiv.append('<button type="button" class="btn btn-danger btn-sm remove-quota" style="float: right">Supprimer</button><div style="clear: both; margin-bottom: 1rem"></div>');
+$collectionHolder.append($newFormDiv);
 
-						<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-							<a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
-							<a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
-						</div>
-					</div>
-				</div>
-				<div class="card-body">
-					<table class="table">
-						<thead>
-							<tr>
-								<th>{{ 'Entities.Connector.fields.name' | trans }}</th>
-								<th>{{ 'Entities.Connector.fields.type' | trans }}</th>
-								<th></th>
-								<th></th>
-							</tr>
+// Ajouter l'écouteur d'événements pour le nouveau bouton de suppression
+$newFormDiv.find('.remove-quota').on('click', function (e) {
+$(this).closest('.quota-item').remove();
+});
+}
 
-						</thead>
-						{% for connector in domain.connectors %}
+jQuery(document).ready(function () {
+var $collectionHolder = $('.quotas');
+var $addQuotaButton = $('.add_quota_link');
 
-							{% if connector.type == 'LDAP' %}
-								{% set urlEdit =  path('app_connector_ldap_edit', {'id' : connector.id}) %}
-								{% set urlSync =  path('app_ldap_connector_sync', {'id' : connector.id}) %}
-							{% endif %}
-							{% if connector.type == 'Office365' %}
-								{% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
-								{% set urlSync =  path('app_office365_connector_sync', {'id' : connector.id}) %}
-							{% endif %}
-							{#              {{ connector.type }} #}
-							<tr>
-								<td>
-									{{ connector.name }}</td>
-								<td>
-									{{ connector.type }}</td>
-								<td>
-									<a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}" class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
-										<i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-										<span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
-									</a>
-								</td>
-								<td>
-									<a href="#" data-url-modal-content="{{ urlEdit }}" class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
-										<i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-										<span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-									</a>
-									<a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" class='btn btn-sm btn-danger confirmModal' data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}' title="{{ 'Generics.actions.delete'|trans() }}">
-										<i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-										<span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-									</a>
-								</td>
+$collectionHolder.data('index', $collectionHolder.find(':input').length);
 
-							</tr>
-						{% endfor %}
-					</table>
+$addQuotaButton.on('click', function (e) {
+addQuotaForm($collectionHolder);
+});
 
-
-				</div>
-			</div>
-		{% endif %}
-	</div>
-
-
-</div>
-
-
-<div class="d-flex justify-content-center">
-	<input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans) }}">&nbsp;
-	<a class="btn btn-outline-secondary " href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
-</div>
-{{ form_end(form) }}
+// Ajouter des écouteurs d'événements pour les boutons de suppression existants
+$('.remove-quota').on('click', function (e) {
+$(this).closest('.quota-item').remove();
+});
+});
+</script>{% endblock %}
