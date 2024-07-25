@@ -93,7 +93,6 @@ COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
-# COPY docker/files/.env /var/www/agentj/.env
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 
 EXPOSE 9000
