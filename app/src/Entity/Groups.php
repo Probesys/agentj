@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 //use Gedmo\
 use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Groups
@@ -79,6 +80,9 @@ class Groups
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapDN;
 
+    #[ORM\Column(name: 'quotas', type: Types::JSON, nullable: true)]
+    private $quotas = [];
+
     public function __toString()
     {
         return $this->name;
@@ -91,6 +95,32 @@ class Groups
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
         $this->groupsWbLists = new ArrayCollection();
+    }
+
+    public function getQuotas(): array
+    {
+        return $this->quotas;
+    }
+
+    public function setQuotas(array $quotas): self
+    {
+        $this->quotas = $quotas;
+        return $this;
+    }
+
+    public function addQuota(int $emails, int $seconds): self
+    {
+        $this->quotas[] = [$emails, $seconds];
+        return $this;
+    }
+
+    public function removeQuota(int $index): self
+    {
+        if (isset($this->quotas[$index])) {
+            unset($this->quotas[$index]);
+            $this->quotas = array_values($this->quotas); // Réindexer le tableau
+        }
+        return $this;
     }
 
     public function getId(): ?int

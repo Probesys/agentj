@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class GroupsType extends AbstractType
 {
@@ -69,6 +70,13 @@ class GroupsType extends AbstractType
             ])
             ->add('active', null, [
                 'label' => 'Generics.fields.active'
+            ])
+            ->add('quotas', CollectionType::class, [
+                'label' => false,
+                'entry_type' => QuotaType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
             ])
 
 

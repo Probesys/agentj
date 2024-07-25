@@ -1,29 +1,50 @@
 {{ form_start(form, {'attr' : { 'data-controller'  : 'form-group', 'data-form-group-url-check-priority-value' : path('groups_check_priority') } }) }}
 
 <div class="row">
-  <div class="col-md-12">
-    {{ form_row(form.name) }}
-    {{ form_row(form.overrideUser) }}
-    {{ form_row(form.policy) }}
-    {{ form_row(form.wb) }}
-    <div class="form-group row">
-      {{ form_label(form.priority) }}
-      <div class="col-sm-10">
-        {{ form_widget(form.priority) }}
-         <small class="d-none form-text text-danger"></small>   
-      </div>
-    </div>    
+	<div class="col-md-12">
+		{{ form_row(form.name) }}
+		{{ form_row(form.overrideUser) }}
+		{{ form_row(form.policy) }}
+		{{ form_row(form.wb) }}
+		<div class="form-group row">
+			{{ form_label(form.priority) }}
+			<div class="col-sm-10">
+				{{ form_widget(form.priority) }}
+				<small class="d-none form-text text-danger"></small>
+			</div>
+		</div>
 
-    {{ form_row(form.domain) }}
-    {{ form_row(form.active) }}
-  </div>
+		{{ form_row(form.domain) }}
+		{{ form_row(form.active) }}
+	</div>
+</div>
+<div data-controller="quota">
+	<div class="quotas" data-quota-target="container">
+		{% for quotaForm in form.quotas %}
+			<div class="quota-item">
+				{{ form_row(quotaForm.emails) }}
+				{{ form_row(quotaForm.seconds) }}
+				<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">Supprimer</button>
+				<div style="clear: both; margin-bottom: 1rem"></div>
+			</div>
+		{% endfor %}
+	</div>
+	<button type="button" class="btn btn-primary btn-sm add_quota_link" data-action="click->quota#addQuota">Ajouter un quota</button>
+	<template data-quota-target="template">
+		<div class="quota-item">
+			{{ form_row(form.quotas.vars.prototype.emails) }}
+			{{ form_row(form.quotas.vars.prototype.seconds) }}
+			<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">Supprimer</button>
+			<div style="clear: both; margin-bottom: 1rem"></div>
+		</div>
+	</template>
 </div>
 {{ form_widget(form) }}
 
 
 <div class="d-flex justify-content-center">
-  <input type="submit" data-form-group-target="btnSubmit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;  
-  <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
-</div>       
+	<input type="submit" data-form-group-target="btnSubmit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}">&nbsp;
+	<a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>
 
 {{ form_end(form) }}
