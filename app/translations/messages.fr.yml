@@ -364,6 +364,7 @@ Entities:
     index: Liste des domaines
     edit: Edition du domaine
     fields:
+      quota: Quota
       mailMessage: Texte du mail de validation de l'email avec le lien captcha
       captachaMessage: Texte de présentation sur la page de captcha
       successCaptchaMessage: Message de validation du captcha
@@ -382,6 +383,7 @@ Entities:
       defaultLang: Langue par défaut
       quota_emails: Quota d'emails sur la période
       quota_seconds: Période du quota (en secondes)
+      addQuota: Ajouter un quota
     labels:
       infos: "Informations"
       agentJConfig : "Paramètres AgentJ"

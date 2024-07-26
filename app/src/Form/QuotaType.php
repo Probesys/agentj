@@ -13,10 +13,10 @@ class QuotaType extends AbstractType
     {
         $builder
             ->add('quota_emails', IntegerType::class, [
-                'label' => 'Quota Emails',
+                'label' => 'Entities.Domain.fields.quota_emails',
             ])
             ->add('quota_seconds', IntegerType::class, [
-                'label' => 'Quota Seconds',
+                'label' => 'Entities.Domain.fields.quota_seconds',
             ]);
     }
 
