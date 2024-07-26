@@ -14,6 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+
 class UserType extends AbstractType
 {
 
@@ -94,7 +96,14 @@ class UserType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                 ])
-        ;
+                ->add('quota', CollectionType::class, [
+                    'entry_type' => QuotaType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                    'label' => false,
+                ])
+                ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

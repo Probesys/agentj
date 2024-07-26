@@ -8,6 +8,9 @@
     </div>
 {% endif %}
 {{ form_widget(form) }}
+
+{% include 'partials/_quota_form.html.twig' with {'form': form} %}
+
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
   <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>

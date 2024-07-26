@@ -140,9 +140,6 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
-    #[ORM\Column(name: 'quotas', type: Types::JSON, nullable: true)]
-    private $quotas = [];
-
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -152,6 +149,11 @@ class Domain
         $this->dailyStats = new ArrayCollection();
         $this->domain_keys = new DomainKey();
     }
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $quotas = [];
 
     public function getQuotas(): array
     {
@@ -164,9 +166,9 @@ class Domain
         return $this;
     }
 
-    public function addQuota(int $emails, int $seconds): self
+    public function addQuota(array $quota): self
     {
-        $this->quotas[] = [$emails, $seconds];
+        $this->quotas[] = $quota;
         return $this;
     }
 
@@ -174,7 +176,7 @@ class Domain
     {
         if (isset($this->quotas[$index])) {
             unset($this->quotas[$index]);
-            $this->quotas = array_values($this->quotas); // Réindexer le tableau
+            $this->quotas = array_values($this->quotas);
         }
         return $this;
     }

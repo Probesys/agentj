@@ -56,7 +56,7 @@ class Groups
 
 
     #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
-    private $groupsWbLists;    
+    private $groupsWbLists;
 
     #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 128, unique: true)]
@@ -80,9 +80,6 @@ class Groups
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapDN;
 
-    #[ORM\Column(name: 'quotas', type: Types::JSON, nullable: true)]
-    private $quotas = [];
-
     public function __toString()
     {
         return $this->name;
@@ -97,6 +94,11 @@ class Groups
         $this->groupsWbLists = new ArrayCollection();
     }
 
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $quotas = [];
+
     public function getQuotas(): array
     {
         return $this->quotas;
@@ -108,9 +110,9 @@ class Groups
         return $this;
     }
 
-    public function addQuota(int $emails, int $seconds): self
+    public function addQuota(array $quota): self
     {
-        $this->quotas[] = [$emails, $seconds];
+        $this->quotas[] = $quota;
         return $this;
     }
 
@@ -118,7 +120,7 @@ class Groups
     {
         if (isset($this->quotas[$index])) {
             unset($this->quotas[$index]);
-            $this->quotas = array_values($this->quotas); // Réindexer le tableau
+            $this->quotas = array_values($this->quotas);
         }
         return $this;
     }
@@ -222,7 +224,7 @@ class Groups
         return $this;
     }
 
-    
+
     public function getSlug(): ?string
     {
         return $this->slug;

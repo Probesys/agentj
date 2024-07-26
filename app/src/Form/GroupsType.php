@@ -72,11 +72,11 @@ class GroupsType extends AbstractType
                 'label' => 'Generics.fields.active'
             ])
             ->add('quotas', CollectionType::class, [
-                'label' => false,
                 'entry_type' => QuotaType::class,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
+                'label' => false,
             ])
 
 

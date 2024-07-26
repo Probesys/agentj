@@ -1,4 +1,3 @@
-// quota_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -25,7 +24,7 @@ export default class extends Controller {
 
   updateIndexes() {
     this.containerTarget.querySelectorAll('.quota-item').forEach((item, index) => {
-      item.querySelectorAll('input, select').forEach(input => {
+      item.querySelectorAll('input').forEach(input => {
         const name = input.getAttribute('name')
         if (name) {
           input.setAttribute('name', name.replace(/\[quotas\]\[\d+\]/, `[quotas][${index}]`))

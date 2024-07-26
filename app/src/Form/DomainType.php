@@ -109,11 +109,11 @@ class DomainType extends AbstractType {
                     'required' => false,
                 ])
                 ->add('quotas', CollectionType::class, [
-                    'label' => false,
                     'entry_type' => QuotaType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
                     'by_reference' => false,
+                    'label' => false,
                 ]);
     }
 
