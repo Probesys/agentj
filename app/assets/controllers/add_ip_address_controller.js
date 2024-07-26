@@ -1,14 +1,10 @@
+// assets/controllers/add_ip_address_controller.js
 import { Controller } from '@hotwired/stimulus';
 
-/*
-* The following line makes this controller "lazy": it won't be downloaded until needed
-* See https://github.com/symfony/stimulus-bridge#lazy-controllers
-*/
-/* stimulusFetch: 'lazy' */
 export default class extends Controller {
-    static targets = ['container', 'prototype'];
+    static targets = ["container", "prototype"];
 
-    connect(){
+    connect() {
         this.index = this.containerTarget.children.length;
     }
 
@@ -20,6 +16,21 @@ export default class extends Controller {
 
         let div = document.createElement('div');
         div.innerHTML = newForm;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.classList.add('btn', 'btn-danger', 'ml-2');
+
+        deleteButton.innerText = 'Delete';
+        
+        deleteButton.setAttribute('data-action', 'click->add-ip-address#remove');
+        div.appendChild(deleteButton);
+
         this.containerTarget.appendChild(div);
+    }
+
+    remove(event) {
+        event.preventDefault();
+        event.target.closest('div').remove();
     }
 }

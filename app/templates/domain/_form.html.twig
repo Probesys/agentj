@@ -99,27 +99,36 @@
   </div>
 </div>
 
+
 <div class="card mt-4">
-  <div class="card-header">
-    {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
-  </div>
-  <div class="card-body">
-    <div id="domain-relays-container">
-      {% for domainRelay in form.domainRelays %}
-        {{ form_row(domainRelay) }}
-      {% endfor %}
+    <div class="card-header">
+        {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
     </div>
-    <div class="form-group mt-2">
-      <button type="button" class="btn btn-success" id="add-ip-address">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
+    <div class="card-body" data-controller="add-ip-address">
+        <div data-add-ip-address-target="container" id="domain-relays-container">
+            {% for domainRelay in form.domainRelays %}
+                 <div class="domain-relay">
+                    {{ form_widget(domainRelay, { attr: { class: 'form-control' } , label: false}) }}
+                    <button type="button" class="btn btn-danger ml-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                </div>
+            {% endfor %}
+        </div>
+        {% set domainRelayPrototype %}
+            {{ form_widget(form.domainRelays.vars.prototype, { attr: { class: 'domain-relay-item' } })|e }}
+        {% endset %}
+        <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype" data-prototype="{{ domainRelayPrototype }}"></div>
+
+
+
+        <div class="form-group mt-2">
+            <button type="button" class="btn btn-success" data-action="add-ip-address#add">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
+        </div>
     </div>
-  </div>
 </div>
 
-{% set domainRelayPrototype %}
-  {{ form_widget(form.domainRelays.vars.prototype)|e }}
-{% endset %}
 
-<div id="domain-relays-prototype" style="display: none;" data-prototype="{{ domainRelayPrototype }}"></div>
+
+
 
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans) }}">
@@ -128,7 +137,7 @@
 {{ form_end(form) }}
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+{# document.addEventListener('DOMContentLoaded', function () {
   var addButton = document.getElementById('add-ip-address');
   var container = document.getElementById('domain-relays-container');
   var prototype = document.getElementById('domain-relays-prototype').dataset.prototype;
@@ -140,5 +149,5 @@ document.addEventListener('DOMContentLoaded', function () {
     div.innerHTML = newForm;
     container.appendChild(div);
   });
-});
+}); #}
 </script>

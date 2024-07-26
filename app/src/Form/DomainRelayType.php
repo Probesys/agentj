@@ -14,7 +14,7 @@ class DomainRelayType extends AbstractType
     {
         $builder
             ->add('ip_address', TextType::class, [
-                'label' => 'IP Address',
+                'label' => 'Entities.DomainRelay.fields.ipAddress',
             ])
         ;
     }

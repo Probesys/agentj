@@ -389,6 +389,7 @@ Entities:
       domainrules: 'Rules of the field'
       domaineSender: 'sending domain'
       domainMessages: 'Messages from the field'
+      ipAddresses: "IP Address"
       dynamicsVariables: {URL_CAPTCHA: 'Link to captcha', EMAIL_DEST: 'Email of recipient',
         URL_MSGS: 'Link to mails pending', NB_AUTHORIZED_MESSAGES: 'Authorized messages',
         NB_UNTREATED_MESSAGES: 'Number of untreated messages', NB_SPAMMED_MESSAGES: 'Number
@@ -548,3 +549,6 @@ Entities:
       banned: 'Banned by user'
       deleted: 'Deleted by user'
       auto: Automatic
+  DomainRelay:
+    fields:
+      ipAddress: 'IP Address'
