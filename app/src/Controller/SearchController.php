@@ -32,8 +32,11 @@ class SearchController extends AbstractController
         $form = $this->createForm(SearchFilterType::class);
         $form->handleRequest($request);
 
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser());
+        $data = $form->getData();
+        $messageType = $data['messageType'] ?? 'incoming';
 
+        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType);
+//dd($allMessages);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();

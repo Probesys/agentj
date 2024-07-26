@@ -198,20 +198,22 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
-    public function advancedSearch(User $user = null)
+    public function advancedSearch(User $user = null, string $messageType = 'incoming')
     {
-
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = 'SELECT m.*, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level '
-            . ' FROM msgs m '
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN message_status ms ON mr.status_id = ms.id '
-            . ' LEFT JOIN users u on u.email = maddr.email '
-            . ' LEFT JOIN domain d on u.domain_id = d.id ';
+        // Switch between tables based on message type
+        $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
 
+        $sql = "SELECT m.*, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level "
+            . " FROM {$table} m "
+            . " LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id "
+            . " LEFT JOIN maddr ON maddr.id = mr.rid "
+            . " LEFT JOIN message_status ms ON mr.status_id = ms.id "
+            . " LEFT JOIN users u on u.email = maddr.email "
+            . " LEFT JOIN domain d on u.domain_id = d.id ";
 
+        // You can add more conditions to the SQL if needed based on the user or other filters
 
         $stmt = $conn->prepare($sql);
 

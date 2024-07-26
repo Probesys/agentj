@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -35,6 +36,15 @@ class SearchFilterType extends AbstractType
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'Date de fin'
+            ])
+            ->add('messageType', ChoiceType::class, [
+                'choices'  => [
+                    'Incoming' => 'incoming',
+                    'Outgoing' => 'outgoing',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label' => 'Message Type',
             ])
             ->add('submit', SubmitType::class, ['label' => 'Filtrer']);
     }
