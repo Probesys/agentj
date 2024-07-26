@@ -172,7 +172,7 @@ Message:
     deleted: Supprimé
     restored: Récupéré
     virus: Virus
-    spammed: Spam
+    spam: Spam
     Error: Erreur
   Date: Date
   ErrorSendCaptcha: Erreur vérification email
@@ -448,6 +448,12 @@ Entities:
       userName: Login
       roles: Rôle
       domain: Domaine
+      incoming: Entrant
+      outgoing: Sortant
+      outMsgCount: Nombre de messages sortants
+      inMsgCount: Nombre de messages entrants
+      outMsgBlockedCount: Nombre de messages sortants bloqués
+      inMsgBlockedCount: Nombre de messages entrants bloqués
       originalUser: Email de référence
       alias: Alias
       sharedBy: Partagée avec
@@ -472,6 +478,9 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
+    labels:
+      infos: "Informations sur les refus"
+      reason: "Type de refus"
   Msgrcpt:
     labels:
       infos: "Informations sur le message"

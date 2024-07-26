@@ -424,7 +424,7 @@ Entities:
     indexEmail: 'List of email accounts'
     indexAlias: 'List of alias emails'
     labels:
-      defaultDomainParameters: "Default domain parameters"    
+      defaultDomainParameters: "Default domain parameters"
     actions:
       add_new: 'New user'
       add_new_alias: 'Add a new alias'
@@ -437,7 +437,13 @@ Entities:
       fullName: Name
       userName: Login
       roles: Role
-      domain: Area
+      domain: Domain
+      incoming: Incoming
+      outgoing: Outgoing
+      outMsgCount: 'Outgoing message count'
+      inMsgCount: 'Incoming message count'
+      outMsgBlockedCount: 'Outgoing message blocked count'
+      inMsgBlockedCount: 'Incoming message blocked count'
       originalUser: 'Reference email'
       alias: Alias
       sharedBy: 'Shared with'
@@ -461,6 +467,8 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: 'Authentication request sent the'
     isMailingList: 'Mailing list? '
+    labels:
+      infos: "Information about the blockage"
   Msgrcpt:
     labels:
       infos: 'Information about the message'

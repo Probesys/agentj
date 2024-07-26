@@ -5,10 +5,17 @@
 {% block body %}
   <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
   {% if is_granted('ROLE_ADMIN') %}
-    {% include '/home/_latest_messages.html.twig' %}
-    {% include '/home/_stats_table.html.twig' %}
+    <div class="card my-2 pt-2">
+      {% include '/home/_latest_messages.html.twig' %}
+    </div>
+    <div class="card my-2">
+      {% include '/home/_stats_table.html.twig' %}
+    </div>
+    <div class="card my-2">
+      {% include '/home/_stats.html.twig' %}
+    </div>
   {% else %}
-    {% include '/home/_stats.html.twig' %}
     {% include '/home/_latest_messages.html.twig' %}
+    {% include '/home/_stats.html.twig' %}
   {% endif %}
 {% endblock %}

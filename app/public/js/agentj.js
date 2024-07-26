@@ -67,7 +67,7 @@ document.addEventListener("turbo:load", function () {
             "language": {
               url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
             },
-            "pageLength": 100,
+            "pageLength": window.location.pathname === "/" ? 10 : 100,
             "stateSave": true
           });
 
