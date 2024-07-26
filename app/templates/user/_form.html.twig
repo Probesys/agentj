@@ -7,10 +7,13 @@
 		</div>
 	</div>
 {% endif %}
-{{ form_row(form.fullname) }}
-{# {{ form_widget(form) }} #}
+{{ form_widget(form) }}
+{# {{ form_row(form.fullname) }} #}
 
-{% include 'partials/_quota_form.html.twig' with {'form': form} %}
+
+{% if form.quota is defined %}
+    {% include 'partials/_quota_form.html.twig' with {'form': form} %}
+{% endif %}
 
 <div class="d-flex justify-content-center">
 	<input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}">
