@@ -6,6 +6,8 @@ use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\Mailaddr;
 use App\Entity\User;
+use App\Entity\Msgs;
+use App\Entity\OutMsgs;
 use App\Entity\Wblist;
 use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -107,7 +109,8 @@ class UserRepository extends ServiceEntityRepository {
     public function searchByRole(User $user, $role = null) {
 
         $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName')
+                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
+                ->leftJoin('u.domain', 'd')
                 ->join('u.policy', 'p')
                 ->where('u.originalUser is null');
 
@@ -302,6 +305,35 @@ class UserRepository extends ServiceEntityRepository {
         $query = $dql->getQuery();
 
         return $query->getScalarResult();
+    }
+
+    public function getUsersWithRoleAndMessageCounts()
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+            SELECT
+                u.email,
+                u.fullname,
+                d.domain,
+                COUNT(DISTINCT om.mail_id) AS outMsgCount,
+                COUNT(DISTINCT m.mail_id) AS msgCount,
+                COUNT(DISTINCT om.mail_id) - SUM(CASE WHEN om.status_id = 2 THEN 1 ELSE 0 END) AS outMsgBlockedCount,
+                COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
+            FROM users u
+            LEFT JOIN domain d ON u.domain_id = d.id
+            LEFT JOIN out_msgs om ON om.from_addr = u.email
+            LEFT JOIN maddr ma ON ma.email = u.email
+            LEFT JOIN msgrcpt mr ON ma.id = mr.rid
+            LEFT JOIN msgs m ON mr.mail_id = m.mail_id
+            WHERE u.roles LIKE :role
+            GROUP BY u.id
+        ';
+
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery(['role' => '%"ROLE_USER"%'])->fetchAllAssociative();
+
+        return $result;
     }
 
 }

@@ -1,21 +1,21 @@
-<h2 class="bg-transparent">Liste des 5 derniers messages bloqués</h2>
-<section id="no-more-tables">
+<h2 class="mx-2">Aperçu des 5 derniers messages bloqués</h2>
+<section>
     <table id ="table_msgs" class="table table-hover">
         <thead>
             <tr>
-                <th>{{ 'Message.Status.title'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Status.title'|trans }}</th>
                 {% if is_granted('ROLE_ADMIN') %}
-                    <th></th>
+                    <th class="bg-transparent"></th>
                 {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
-                    <th>{{ 'Message.Recipient'|trans }}</th>
+                    <th class="bg-transparent">{{ 'Message.Recipient'|trans }}</th>
                 {% endif %}
                     {#            <th>{{ 'Message.Status'|trans() }}</th> #}
-                <th>{{ 'Message.Object'|trans }}</th>
-                <th>{{ 'Message.Sender'|trans }}</th>
-                <th>{{ 'Message.Date'|trans }}</th>
-                <th>{{ 'Entities.Message.spamLevel'|trans }}</th>
-                <th></th>
+                <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Sender'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
+                <th class="bg-transparent">{{ 'Entities.Message.spamLevel'|trans }}</th>
+                <th class="bg-transparent"></th>
             </tr>
         </thead>
         <tbody>
@@ -27,7 +27,8 @@
                     {% set error_badge_detail = msg.message_error %}
                 {% endif %}
                 {% if msg.name is empty %}
-                    {% set status = 'Message.Status.untreated'|trans()  %}
+                    {% set statusKey = 'Message.Status.' ~ msg.status_description %}
+                    {% set status = statusKey|trans %}
                     {% set bold = "bold" %}
                 {% else %}
                     {% set status = msg.name %}
@@ -65,7 +66,8 @@
                     <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | format_datetime('short', 'short') }}">{{msg.time_num | format_datetime('short', 'short')}}</span> </td>
                         <td>{{ msg.bspam_level }}</td>
                     <td>
-                        <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
+                        {% set href = msg.status_description == 'untreated' ? '/message' : '/message/' ~ msg.status_description %}
+                        <a href="{{ href }}" class="btn btn-primary float-right"><i class="fas fa-link"></i></a>
                     </td>
                 </tr>
             {% endfor %}

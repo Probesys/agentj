@@ -1,26 +1,40 @@
-<section id="no-more-tables">
-    <table id="table_users" class="table datatable">
+<h2 class="mx-2">Aperçu des utilisateurs</h2>
+<section id ="no-more-tables">
+    <table class="table datatable">
         <thead>
             <tr>
-                <th>{{ 'Entities.User.fields.email'|trans }}</th>
-                <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
-                <th>{{ 'Entities.User.fields.policy'|trans }}</th>
-                <th>{{ 'Entities.User.fields.groups'|trans }}</th>
+                <th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
+                <th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.fullName'|trans }}</th>
+                <th rowspan="2" class="bg-transparent">{{'Entities.User.fields.domain'|trans }}</th>
+                <th colspan="2" class="bg-transparent">{{'Entities.User.fields.inMsgCount'|trans }}</th>
+                <th colspan="2" class="bg-transparent">{{'Entities.User.fields.outMsgCount'|trans }}</th>
+                <th rowspan="2" class="bg-transparent" data-orderable="false"></th>
+            </tr>
+            <tr>
+                <th class="bg-transparent">{{'Navigation.all'|trans }}</th>
+                <th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
+                <th class="bg-transparent">{{'Navigation.all'|trans }}</th>
+                <th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
             </tr>
         </thead>
         <tbody>
 
             {% for user in users %}
-                {% set groups = user.id | user_groups  %}
-{#                      {{ dump(groups) }}#}
                 <tr>
-                    <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
+                    <td data-title="{{'Entities.User.fields.email'|trans }}">
+                        <a href="{{ path('homepage', {'_switch_user': user.email}) }}" class='btn btn-sm btn-primary' title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
+                            <i class="fas fa-user-ninja"></i>
+                        </a>
+                        {{ user.email }}
+                    </td>
                     <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                    <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
-                    <td data-title="{{'Entities.User.fields.groups'|trans }}">
-                        {% for group in groups %}
-                            <span class="badge badge-secondary">{{ group }}</span>
-                        {% endfor %}
+                    <td data-title="{{'Entities.User.fields.domain'|trans }}">{{ user.domain }}</td>
+                    <td data-title="{{'Entities.User.fields.inMsgCount'|trans }}">{{ user.msgCount }}</td>
+                    <td data-title="{{'Entities.User.fields.inMsgBlockedCount'|trans }}">{{ user.msgBlockedCount }}</td>
+                    <td data-title="{{'Entities.User.fields.outMsgCount'|trans }}">{{ user.outMsgCount }}</td>
+                    <td data-title="{{'Entities.User.fields.outMsgBlockedCount'|trans }}">{{ user.outMsgBlockedCount }}</td>
+                    <td>
+                        <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('messages_stats', {'user_email' : user.email}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
                     </td>
                 </tr>
             {% endfor %}

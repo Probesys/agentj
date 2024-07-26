@@ -3,7 +3,7 @@
 services:
   db:
     ports:
-      - $DB_EXPOSED_PORT:3307
+      - $DB_EXPOSED_PORT:3306
     # log queries to a file
     # docker compose exec db tail -f /var/lib/mysql/general.log
     command: [

@@ -134,7 +134,7 @@ class MsgsRepository extends ServiceEntityRepository
     public function countByTypeAndDays(User $user = null, $type = null, $alias = [], \DateTime $day = null, Domain $domain = null)
     {
         $conn = $this->getEntityManager()->getConnection();
-       
+
 
         $sql = 'select count(m.mail_id) as nb_result,m.time_iso  from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
@@ -172,13 +172,19 @@ class MsgsRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
 
-        $sql = 'SELECT m.mail_id,m.message_error,mr.status_id,ms.name,m.partition_tag,maddr.email,m.subject,m.from_addr,m.time_num,mr.rid, mr.bspam_level '
-            . ' FROM msgs m '
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN message_status ms ON mr.status_id = ms.id '
-            . ' left join users u on u.email=maddr.email '
-            . ' left join domain d on u.domain_id=d.id ';
+        $sql = 'SELECT m.mail_id, m.message_error, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level, '
+                . 'CASE '
+                    . 'WHEN ms.name IS NOT NULL THEN ms.name '
+                    . 'WHEN mr.status_id IS NULL AND mr.bspam_level > d.level AND mr.content != "C" AND mr.content != "V" THEN "spam" '
+                    . 'WHEN mr.content = "V" THEN "virus" '
+                    . 'ELSE "untreated" '
+                . 'END AS status_description '
+                . 'FROM msgs m '
+                . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
+                . 'LEFT JOIN maddr ON maddr.id = mr.rid '
+                . 'LEFT JOIN message_status ms ON mr.status_id = ms.id '
+                . 'LEFT JOIN users u ON u.email = maddr.email '
+                . 'LEFT JOIN domain d ON u.domain_id = d.id';
 
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias, $fromDate);
 
