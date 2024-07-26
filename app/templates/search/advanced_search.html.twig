@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="m-3">
+        <h3 class="mb-3">Recherche Avancée</h3>
+
+        <button id="toggleFilters" class="btn btn-primary mb-3">
+            Filtres
+            <span id="toggleArrow" class="arrow-right"></span>
+        </button>
+
+        <div id="filterContainer" class="filtres mt-3 mb-3 col-md-8">
+
+            {{ form_start(form) }}
+            {{ form_row(form.fromAddr) }}
+            {{ form_row(form.subject) }}
+            {{ form_row(form.messageId) }}
+            {{ form_row(form.startDate) }}
+            {{ form_row(form.endDate) }}
+            {{ form_end(form) }}
+        </div>
+
+
+
+        <table class="table table-hover search">
+            <thead>
+            <tr>
+                <th>Message ID</th>
+                <th>Expéditeur</th>
+                <th>Objet</th>
+                <th>Date</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% include 'search/_messages.html.twig' with { 'msgs': msgs } %}
+            </tbody>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+
+                // Toggle filter visibility
+                const toggleButton = document.getElementById('toggleFilters');
+                const filterContainer = document.getElementById('filterContainer');
+                const toggleArrow = document.getElementById('toggleArrow');
+
+                toggleButton.addEventListener('click', function() {
+                    if (filterContainer.style.display === 'none') {
+                        filterContainer.style.display = 'block';
+                        toggleArrow.classList.remove('arrow-right');
+                        toggleArrow.classList.add('arrow-down');
+                    } else {
+                        filterContainer.style.display = 'none';
+                        toggleArrow.classList.remove('arrow-down');
+                        toggleArrow.classList.add('arrow-right');
+                    }
+                });
+
+                $('form').on('submit', function (e) {
+                    e.preventDefault(); // Prevent the form from submitting normally
+
+                    var $form = $(this);
+                    var url = $form.attr('action');
+
+                    $.ajax({
+                        url: url,
+                        method: $form.attr('method'),
+                        data: $form.serialize(),
+                        success: function (response) {
+                            // Update the table with the new content
+                            $('table.search tbody').html(response.content);
+                        }
+                    });
+                });
+
+                $('.search').DataTable({
+                    searching: true,
+                    paging: true,
+                    language: {
+                        "emptyTable": "Pas de données",
+                        "lengthMenu": "Afficher _MENU_ par page",
+                        "zeroRecords": "Pas d'informations",
+                        "info": "affichage de _PAGE_ sur _PAGES_",
+                        "infoEmpty": "Pas d'informations",
+                        "infoFiltered": "(filtered from _MAX_ total records)",
+                        "decimal": "",
+                        "infoPostFix": "",
+                        "thousands": ",",
+                        "loadingRecords": "Chargement...",
+                        "processing": "Chargement...",
+                        "search": "Rechercher : ",
+                        "paginate": {
+                            "first": "Début",
+                            "last": "Fin",
+                            "next": "Suivant",
+                            "previous": "Précédent"
+                        },
+                        "aria": {
+                            "sortAscending": ": activate to sort column ascending",
+                            "sortDescending": ": activate to sort column descending"
+                        }
+                    },
+                });
+            });
+
+        </script>
+
+        <style>
+            #toggleArrow {
+                display: inline-block;
+                margin-left: 10px;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 6px 4px 0 4px;
+                border-color: #fff transparent transparent transparent;
+                vertical-align: middle;
+            }
+
+            .arrow-right {
+                transform: rotate(0deg);
+            }
+
+            .arrow-down {
+                transform: rotate(270deg);
+            }
+
+        </style>
+
+    </div>
+{% endblock %}

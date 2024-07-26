@@ -198,6 +198,29 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
+    public function advancedSearch(User $user = null)
+    {
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT m.*, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level '
+            . ' FROM msgs m '
+            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
+            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
+            . ' LEFT JOIN message_status ms ON mr.status_id = ms.id '
+            . ' LEFT JOIN users u on u.email = maddr.email '
+            . ' LEFT JOIN domain d on u.domain_id = d.id ';
+
+
+
+        $stmt = $conn->prepare($sql);
+
+        $return = $stmt->executeQuery()->fetchAllAssociative();
+        unset($stmt);
+        unset($conn);
+        return $return;
+    }
+
   /**
    * SELECT only msgs to send email with captch
    * @return type
