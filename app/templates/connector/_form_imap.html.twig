@@ -1,0 +1,39 @@
+{{ form_start(form) }}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="imap_connector_name">{{ 'Entities.Connector.fields.name'|trans }}</label>
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="imap_connector_imapHost">{{ 'Entities.ImapConnector.fields.imapHost'|trans }}</label>
+            {{ form_widget(form.imapHost) }}
+        </div>
+    </div>    
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="imap_connector_imapPort">{{ 'Entities.ImapConnector.fields.imapPort'|trans }}</label>
+            {{ form_widget(form.imapPort) }}
+        </div>
+    </div>          
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="imap_connector_imapAliasField">{{ 'Entities.ImapConnector.fields.imapProtocol'|trans }}</label>
+            {{ form_widget(form.imapProtocol) }}
+        </div>
+    </div>  
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_row(form.imapNoValidateCert) }}
+        </div>
+    </div>          
+</div>
+
+<div class="d-flex justify-content-center">
+    <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
+    <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>
+{{ form_end(form) }}
