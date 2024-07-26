@@ -36,28 +36,10 @@ class Domain
     private $srvSmtp;
 
     /**
-     * @var string
-     */
-    #[ORM\Column(name: 'srv_imap', type: 'string', length: 255, nullable: false)]
-    private $srvImap;
-
-    /**
      * @var \DateTime
      */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod;
-
-    /**
-     * @var int
-     */
-    #[ORM\Column(name: 'imap_port', type: 'integer', nullable: false, options: ['default' => 143])]
-    private $imap_port;
-
-    /**
-     * @var string
-     */
-    #[ORM\Column(name: 'imap_flag', type: 'string', length: 255, nullable: false)]
-    private $imap_flag;
 
     /**
      * @var bool
@@ -121,9 +103,6 @@ class Domain
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $mailAuthenticationSender;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $imapNoValidateCert;
-
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private $defaultLang;
 
@@ -183,18 +162,6 @@ class Domain
         return $this;
     }
 
-    public function getSrvImap(): ?string
-    {
-        return $this->srvImap;
-    }
-
-    public function setSrvImap(string $srvImap): self
-    {
-        $this->srvImap = $srvImap;
-
-        return $this;
-    }
-
     public function getDatemod(): ?\DateTimeInterface
     {
         return $this->datemod;
@@ -203,30 +170,6 @@ class Domain
     public function setDatemod(\DateTimeInterface $datemod): self
     {
         $this->datemod = $datemod;
-
-        return $this;
-    }
-
-    public function getImapPort(): ?int
-    {
-        return $this->imap_port;
-    }
-
-    public function setImapPort(int $imap_port): self
-    {
-        $this->imap_port = $imap_port;
-
-        return $this;
-    }
-
-    public function getImapFlag(): ?string
-    {
-        return $this->imap_flag;
-    }
-
-    public function setImapFlag(string $imap_flag): self
-    {
-        $this->imap_flag = $imap_flag;
 
         return $this;
     }
@@ -407,18 +350,6 @@ class Domain
     public function setMailAuthenticationSender(?string $mailAuthenticationSender): self
     {
         $this->mailAuthenticationSender = $mailAuthenticationSender;
-
-        return $this;
-    }
-
-    public function getImapNoValidateCert(): ?bool
-    {
-        return $this->imapNoValidateCert;
-    }
-
-    public function setImapNoValidateCert(?bool $imapNoValidateCert): self
-    {
-        $this->imapNoValidateCert = $imapNoValidateCert;
 
         return $this;
     }

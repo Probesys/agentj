@@ -8,8 +8,7 @@ MY_TOKEN_ENC_IV=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1
 MY_TOKEN_ENC_SALT=$(openssl rand -base64 32)
 
 env_file=/var/www/agentj/.env
-if [ ! -f $env_file ]
-then
+if [ ! -f $env_file ]; then
     cp /var/www/agentj/.env.example $env_file
     sed -i "s|\$MYAPPSECRET|$MYAPPSECRET|g" /var/www/agentj/.env
     sed -i "s|\$MY_TOKEN_ENC_IV|$MY_TOKEN_ENC_IV|g" /var/www/agentj/.env
@@ -31,7 +30,7 @@ fi
 echo "Installing libraries"
 cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
 cd /var/www/agentj && sudo -u www-data yarnpkg install
-cd /var/www/agentj && sudo -u www-data yarnpkg encore production
+# cd /var/www/agentj && sudo -u www-data yarnpkg encore production
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php bin/console assets:install
@@ -54,8 +53,7 @@ find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 usermod -aG www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 
 echo "Installing crontabs"
-if [ ! -d /var/log/agentj ]
-then
+if [ ! -d /var/log/agentj ]; then
     mkdir /var/log/agentj && chown -R www-data /var/log/agentj
 fi
 

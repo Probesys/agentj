@@ -41,35 +41,9 @@ class DomainType extends AbstractType {
                 ->add('srvSmtp', null, [
                     'label' => 'Entities.Domain.fields.srvSmtp'
                 ])
-                ->add('srvImap', null, [
-                    'label' => 'Entities.Domain.fields.srvImap'
-                ])
-                ->add('imap_port', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_port',
-                    'placeholder' => '',
-                    'choices' => $this->imapPorts::allValues(),
-                    'multiple' => false,
-                    'expanded' => false,
-                ])
                 ->add('smtpPort', TextType::class, [
                     'label' => 'Entities.Domain.fields.smtp_port',
                 ])                
-//                ->add('imap_port', null, [
-//                    'empty_data' => '143',
-//                    'label' => 'Entities.Domain.fields.imap_port'
-//                ])
-                ->add('imap_flag', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_flag',
-                    'required' => false,
-                    'choices' => [
-                        'Generics.labels.none' => '',                        
-                        'SSL' => 'ssl',
-                        'TLS' => 'tls',
-                    ]
-                ])
-                ->add('imapNoValidateCert', null, [
-                    'label' => 'Entities.Domain.fields.imapNoValidateCert'
-                ])
                 ->add('active', null, [
                     'label' => 'Entities.Domain.fields.active'
                 ])

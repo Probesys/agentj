@@ -1,0 +1,12 @@
+{% extends 'modalTemplate.html.twig' %}
+{% block modalSize %}modal-xl{% endblock %}
+{% block modalTitle %}
+  {{ 'Entities.ImapConnector.actions.edit'|trans() }}
+{% endblock %}
+
+{% block modalContent %}
+
+    {{ include('connector/_form_imap.html.twig') }}
+
+
+{% endblock %}
