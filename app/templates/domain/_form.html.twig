@@ -10,10 +10,6 @@
         {{ form_row(form.domain) }}
         {{ form_row(form.srvSmtp) }}
         {{ form_row(form.smtpPort) }}
-        {{ form_row(form.srvImap) }}
-        {{ form_row(form.imap_port) }}
-        {{ form_row(form.imap_flag) }}
-        {{ form_row(form.imapNoValidateCert) }}
         {{ form_row(form.logoFile) }}
         {{ form_row(form.defaultLang) }}
       </div>
@@ -47,8 +43,9 @@
               {{ 'Entities.Domain.actions.add_connector' | trans() }}
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_o365_new', {'domain': domain.id}) }}" href="#">Office 365</a>
-              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{ path('app_connector_ldap_new', {'domain': domain.id}) }}" href="#">LDAP</a>
+              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
+              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
+              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_imap_new', {'domain' : domain.id}) }}" href="#">Imap</a>
             </div>
           </div>
         </div>
@@ -71,14 +68,19 @@
                 {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
                 {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
               {% endif %}
+              {% if connector.type == 'IMAP' %}
+                {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
+              {% endif %}
               <tr>
                 <td>{{ connector.name }}</td>
                 <td>{{ connector.type }}</td>
                 <td>
-                  <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}" class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
+                {% if connector.type != 'IMAP' %}
+                  <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"  class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
                     <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                     <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
                   </a>
+                  {% endif %}
                 </td>
                 <td>
                   <a href="#" data-url-modal-content="{{ urlEdit }}" class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
