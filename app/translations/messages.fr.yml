@@ -391,6 +391,7 @@ Entities:
       messageAlert: Message du rapport
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
+      smtp_port: "Port SMTP"
       active: Domaine actif
       policy: Stratégie pour le domaine
       level: Seuil de spam

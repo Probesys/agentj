@@ -383,6 +383,7 @@ Entities:
       messageAlert: "Message of the report"
       domain: "Domain name"
       srvSmtp: "SMTP server"
+      smtp_port: "SMTP port"
       active: "Active area"
       policy: "Strategy for the field"
       level: "Spam threshold"
