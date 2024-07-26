@@ -25,7 +25,7 @@ services:
 
 
   watcher:   
-   image: node:21-alpine3.19
+   image: node:18-alpine
    user: ${UID}:${GID}
    working_dir: /app
    volumes:
