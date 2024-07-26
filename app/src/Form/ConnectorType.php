@@ -3,13 +3,11 @@
 namespace App\Form;
 
 use App\Entity\Connector;
-use App\Model\ConnectorTypes;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
 class ConnectorType extends AbstractType
 {
 
