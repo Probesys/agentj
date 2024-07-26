@@ -5,6 +5,7 @@ namespace App\Security;
 //use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 
 
+use App\Entity\ImapConnector;
 use App\Entity\User;
 use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -115,27 +116,34 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
     private function getLoginImap(User $user, String $password) {
         $cm = new ClientManager($options = []);
-        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
-        $client = $cm->make([
-            'host' => $user->getDomain()->getSrvImap(),
-            'port' => $user->getDomain()->getImapPort(),
-            'encryption' => $user->getDomain()->getImapFlag(),
-            'validate_cert' => !$user->getDomain()->getImapNoValidateCert(),
-            'username' => $login,
-            'password' => $password,
-            'protocol' => 'imap'
-        ]);
+        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();        
+        foreach ($user->getDomain()->getConnectors() as $connector) {
+            if ($connector instanceof ImapConnector) {
+                /*@var $connector ImapConnector*/
+                $client = $cm->make([
+                    'host' => $connector->getImapHost(),
+                    'port' => $connector->getImapPort(),
+                    'encryption' => $connector->getImapProtocol(),
+                    'validate_cert' => !$connector->isImapNoValidateCert(),
+                    'username' => $login,
+                    'password' => $password,
+                    'protocol' => 'imap'
+                ]);
 
-        try {
-            $client->connect();
-            return $client->isConnected();
-        } catch (ConnectionFailedException $exc) {
-            $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());
-            return false;
-        } catch (ImapServerErrorException $exc) {
-            $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());
-            return false;
+                try {
+                    $client->connect();
+                    if ($client->isConnected()){                        
+                        return true;
+                    }
+                    
+                } catch (ConnectionFailedException $exc) {
+                    $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());                    
+                } catch (ImapServerErrorException $exc) {
+                    $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());                    
+                }
+            }
         }
+        return false;       
     }
 
     private function getLocalUser(String $userName) {
