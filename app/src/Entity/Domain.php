@@ -140,6 +140,9 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -150,36 +153,6 @@ class Domain
         $this->domain_keys = new DomainKey();
     }
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $quotas = [];
-
-    public function getQuotas(): array
-    {
-        return $this->quotas;
-    }
-
-    public function setQuotas(array $quotas): self
-    {
-        $this->quotas = $quotas;
-        return $this;
-    }
-
-    public function addQuota(array $quota): self
-    {
-        $this->quotas[] = $quota;
-        return $this;
-    }
-
-    public function removeQuota(int $index): self
-    {
-        if (isset($this->quotas[$index])) {
-            unset($this->quotas[$index]);
-            $this->quotas = array_values($this->quotas);
-        }
-        return $this;
-    }
 
     public function __toString()
     {
@@ -547,6 +520,18 @@ class Domain
     public function setDomainKeys(?DomainKey $domain_keys): self
     {
         $this->domain_keys = $domain_keys;
+
+        return $this;
+    }
+
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
 
         return $this;
     }
