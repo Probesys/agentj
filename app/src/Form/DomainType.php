@@ -18,18 +18,20 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
-class DomainType extends AbstractType {
+class DomainType extends AbstractType
+{
 
     private $imapPorts;
     private $tabLanguages;
 
-    public function __construct(ImapPorts $imapPorts, ParameterBagInterface $params) {
-//        dd($params->get('app_locales'));
+    public function __construct(ImapPorts $imapPorts, ParameterBagInterface $params)
+    {
+        //        dd($params->get('app_locales'));
         $langs = explode('|', $params->get('app_locales'));
-        foreach($langs as $lang){
+        foreach ($langs as $lang) {
             $this->tabLanguages[$lang] = $lang;
         }
-        
+
         $this->imapPorts = $imapPorts;
     }
 
@@ -37,84 +39,84 @@ class DomainType extends AbstractType {
     {
         $actions = $options['actions'];
         $builder
-                ->add('domain', null, [
-                    'label' => 'Entities.Domain.fields.domain'
-                ])
-                ->add('srvSmtp', null, [
-                    'label' => 'Entities.Domain.fields.srvSmtp'
-                ])
-                ->add('srvImap', null, [
-                    'label' => 'Entities.Domain.fields.srvImap'
-                ])
-                ->add('imap_port', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_port',
-                    'placeholder' => '',
-                    'choices' => $this->imapPorts::allValues(),
-                    'multiple' => false,
-                    'expanded' => false,
-                ])
-                ->add('smtpPort', TextType::class, [
-                    'label' => 'Entities.Domain.fields.smtp_port',
-                ])                
-//                ->add('imap_port', null, [
-//                    'empty_data' => '143',
-//                    'label' => 'Entities.Domain.fields.imap_port'
-//                ])
-                ->add('imap_flag', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_flag',
-                    'required' => false,
-                    'choices' => [
-                        'Generics.labels.none' => '',                        
-                        'SSL' => 'ssl',
-                        'TLS' => 'tls',
-                    ]
-                ])
-                ->add('imapNoValidateCert', null, [
-                    'label' => 'Entities.Domain.fields.imapNoValidateCert'
-                ])
-                ->add('active', null, [
-                    'label' => 'Entities.Domain.fields.active'
-                ])
-                ->add('rules', ChoiceType::class, [
-                    'choices' => $actions,
-                    'mapped' => false,
-                    'label' => 'Form.PolicyDomain',
-                ])
-                ->add('defaultLang', ChoiceType::class, [
-                    'choices' => $this->tabLanguages,
-                    'placeholder' => '',
-                    'label' => 'Entities.Domain.fields.defaultLang',
-                ])                
-                ->add('policy', null, [
-                    'label' => 'Entities.Domain.fields.policy',
-                    'required' => true,
-                    //                'data' => 5, //Normal policy
-                    'placeholder' => ''
-                ])
-                ->add('level', RangeType::class, [
-                    'label' => 'Entities.Domain.fields.level',
-                    'attr' => [
-                        'min' => $options['minSpamLevel'],
-                        'max' => $options['maxSpamLevel'],
-                        'step' => 0.1
-                    ]
-                ])
-                ->add('mailAuthenticationSender', null, [
-                    'label' => 'Entities.Domain.fields.mailAuthenticationSender',
-                    'required' => false,
-                ])
-                ->add('logoFile', FileType::class, [
-                    'label' => 'Logo',
-                    'mapped' => false,
-                    'required' => false,
-                ])
-                ->add('quotas', CollectionType::class, [
-                    'entry_type' => QuotaType::class,
-                    'allow_add' => true,
-                    'allow_delete' => true,
-                    'by_reference' => false,
-                    'label' => false,
-                ]);
+            ->add('domain', null, [
+                'label' => 'Entities.Domain.fields.domain'
+            ])
+            ->add('srvSmtp', null, [
+                'label' => 'Entities.Domain.fields.srvSmtp'
+            ])
+            ->add('srvImap', null, [
+                'label' => 'Entities.Domain.fields.srvImap'
+            ])
+            ->add('imap_port', ChoiceType::class, [
+                'label' => 'Entities.Domain.fields.imap_port',
+                'placeholder' => '',
+                'choices' => $this->imapPorts::allValues(),
+                'multiple' => false,
+                'expanded' => false,
+            ])
+            ->add('smtpPort', TextType::class, [
+                'label' => 'Entities.Domain.fields.smtp_port',
+            ])
+            //                ->add('imap_port', null, [
+            //                    'empty_data' => '143',
+            //                    'label' => 'Entities.Domain.fields.imap_port'
+            //                ])
+            ->add('imap_flag', ChoiceType::class, [
+                'label' => 'Entities.Domain.fields.imap_flag',
+                'required' => false,
+                'choices' => [
+                    'Generics.labels.none' => '',
+                    'SSL' => 'ssl',
+                    'TLS' => 'tls',
+                ]
+            ])
+            ->add('imapNoValidateCert', null, [
+                'label' => 'Entities.Domain.fields.imapNoValidateCert'
+            ])
+            ->add('active', null, [
+                'label' => 'Entities.Domain.fields.active'
+            ])
+            ->add('rules', ChoiceType::class, [
+                'choices' => $actions,
+                'mapped' => false,
+                'label' => 'Form.PolicyDomain',
+            ])
+            ->add('defaultLang', ChoiceType::class, [
+                'choices' => $this->tabLanguages,
+                'placeholder' => '',
+                'label' => 'Entities.Domain.fields.defaultLang',
+            ])
+            ->add('policy', null, [
+                'label' => 'Entities.Domain.fields.policy',
+                'required' => true,
+                //                'data' => 5, //Normal policy
+                'placeholder' => ''
+            ])
+            ->add('level', RangeType::class, [
+                'label' => 'Entities.Domain.fields.level',
+                'attr' => [
+                    'min' => $options['minSpamLevel'],
+                    'max' => $options['maxSpamLevel'],
+                    'step' => 0.1
+                ]
+            ])
+            ->add('mailAuthenticationSender', null, [
+                'label' => 'Entities.Domain.fields.mailAuthenticationSender',
+                'required' => false,
+            ])
+            ->add('logoFile', FileType::class, [
+                'label' => 'Logo',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('quotas', CollectionType::class, [
+                'entry_type' => QuotaType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -125,20 +127,5 @@ class DomainType extends AbstractType {
             'maxSpamLevel' => null,
             'actions' => null,
         ]);
-    }
-
-}
-
-class QuotaType extends AbstractType
-{
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
-        $builder
-            ->add('emails', IntegerType::class, [
-                'label' => 'Quota Emails',
-            ])
-            ->add('seconds', IntegerType::class, [
-                'label' => 'Quota Seconds',
-            ]);
     }
 }

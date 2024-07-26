@@ -4,7 +4,7 @@
 		{% for quotaField in form.quota %}
 			<div class="quota-item">
 				{{ form_row(quotaField.quota_emails) }}
-				{# {{ form_row(quotaField.quota_seconds) }} #}
+				{{ form_row(quotaField.quota_seconds) }}
 				<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota">
 					{{ 'Generics.actions.delete'|trans }}</button>
 			</div>
@@ -13,11 +13,11 @@
 	<button type="button" class="btn btn-primary btn-sm add_quota_link mt-2" data-action="click->quota#addQuota">{{ 'Entities.actions.addQuota'|trans }}</button>
 	<template data-quota-target="template">
 		<div class="quota-item">
-			{{ dump( form.quota.vars.prototype )}}
-			{{ form_row(form.quota.vars.prototype.emails) }}
-			{# {{ form.quota.vars.prototype.email }} #}
-			{# {{ form.quota.vars.prototype.seconds }} #}
-				<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota"> {{ 'Generics.actions.delete'|trans }}</button>
+
+			{{ form_row(form.quota.vars.prototype.quota_emails) }}
+			{{ form_row(form.quota.vars.prototype.quota_seconds) }}
+			<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota">
+				{{ 'Generics.actions.delete'|trans }}</button>
 		</div>
 	</template>
 </div>

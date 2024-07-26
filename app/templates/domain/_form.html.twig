@@ -17,28 +17,7 @@
 				{{ form_row(form.imapNoValidateCert) }}
 				{{ form_row(form.logoFile) }}
 				{{ form_row(form.defaultLang) }}
-				<h3>Quotas</h3>
-				<div data-controller="quota">
-					<div class="quotas" data-quota-target="container">
-						{% for quotaForm in form.quotas %}
-							<div class="quota-item">
-								{{ form_row(quotaForm.emails) }}
-								{{ form_row(quotaForm.seconds) }}
-								<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">Supprimer</button>
-								<div style="clear: both; margin-bottom: 1rem"></div>
-							</div>
-						{% endfor %}
-					</div>
-					<button type="button" class="btn btn-primary btn-sm add_quota_link" data-action="click->quota#addQuota">Ajouter un quota</button>
-					<template data-quota-target="template">
-						<div class="quota-item">
-							{{ form_row(form.quotas.vars.prototype.emails) }}
-							{{ form_row(form.quotas.vars.prototype.seconds) }}
-							<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">Supprimer</button>
-							<div style="clear: both; margin-bottom: 1rem"></div>
-						</div>
-					</template>
-				</div>
+				{% include 'partials/_quota_form.html.twig' with {'form': form} %}
 			</div>
 		</div>
 	</div>
