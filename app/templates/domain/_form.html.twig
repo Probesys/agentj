@@ -1,20 +1,17 @@
 {{ form_start(form) }}
 <div class="row">
   <div class="col-md-6 mb-2">
-
     <div class="card">
       <div class="card-header">
-        {{ 'Entities.Domain.labels.infos' | trans()  }}
+        {{ 'Entities.Domain.labels.infos' | trans() }}
       </div>
-
       <div class="card-body">
-
         {{ form_row(form.active) }}
         {{ form_row(form.domain) }}
         {{ form_row(form.srvSmtp) }}
         {{ form_row(form.smtpPort) }}
         {{ form_row(form.logoFile) }}
-        {{ form_row(form.defaultLang) }}        
+        {{ form_row(form.defaultLang) }}
 		{% include 'partials/_quota_form.html.twig' with {'form': form} %}
       </div>
     </div>
@@ -23,8 +20,8 @@
   <div class="col-md-6">
     <div class="card mb-2">
       <div class="card-header">
-        {{ 'Entities.Domain.labels.agentJConfig' | trans()  }}
-      </div>  
+        {{ 'Entities.Domain.labels.agentJConfig' | trans() }}
+      </div>
       <div class="card-body">
         {{ form_row(form.rules) }}
         {{ form_row(form.policy) }}
@@ -36,95 +33,112 @@
           <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})</label>
           <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
         </div>
-
-        {#{{ form_row(form.mailAuthenticationSender) }}#}
-
-      </div>      
+      </div>
     </div>
     {% if domain.id is not null %}
       <div class="card mb-2">
         <div class="card-header">
-          {{ 'Entities.Domain.labels.connectors' | trans()  }}
+          {{ 'Entities.Domain.labels.connectors' | trans() }}
           <div class="dropdown float-right">
             <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {{ 'Entities.Domain.actions.add_connector' | trans()  }}
+              {{ 'Entities.Domain.actions.add_connector' | trans() }}
             </a>
-
             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
               <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
               <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
               <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_imap_new', {'domain' : domain.id}) }}" href="#">Imap</a>
             </div>
-          </div>          
-        </div>  
+          </div>
+        </div>
         <div class="card-body">
           <table class="table">
             <thead>
               <tr>
                 <th>{{ 'Entities.Connector.fields.name' | trans }}</th>
-                <th>{{ 'Entities.Connector.fields.type' | trans }}</th>   
+                <th>{{ 'Entities.Connector.fields.type' | trans }}</th>
                 <th></th>
                 <th></th>
               </tr>
-
             </thead>
             {% for connector in domain.connectors %}
-              
               {% if connector.type == 'LDAP' %}
-                {% set urlEdit =  path('app_connector_ldap_edit', {'id' : connector.id}) %}
-                {% set urlSync =  path('app_ldap_connector_sync', {'id' : connector.id}) %}
+                {% set urlEdit = path('app_connector_ldap_edit', {'id': connector.id}) %}
+                {% set urlSync = path('app_ldap_connector_sync', {'id': connector.id}) %}
               {% endif %}
               {% if connector.type == 'Office365' %}
-                {% set urlEdit =  path('app_connector_o365_edit', {'id' : connector.id}) %}
-                {% set urlSync =  path('app_office365_connector_sync', {'id' : connector.id}) %}
+                {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
+                {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
               {% endif %}
               {% if connector.type == 'IMAP' %}
                 {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
               {% endif %}
               <tr>
-                <td> {{ connector.name }}</td>
-                <td> {{ connector.type }}</td>
+                <td>{{ connector.name }}</td>
+                <td>{{ connector.type }}</td>
                 <td>
                 {% if connector.type != 'IMAP' %}
                   <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"  class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
-                    <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i> 
+                    <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                     <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
                   </a>
                   {% endif %}
                 </td>
-                <td>   
-                  <a href="#" data-url-modal-content="{{ urlEdit }}"  class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
+                <td>
+                  <a href="#" data-url-modal-content="{{ urlEdit }}" class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
                     <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                     <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                  </a> 
-                  <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" 
-                     class='btn btn-sm btn-danger confirmModal' 
-                     data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' 
-                     data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
-                     title="{{ 'Generics.actions.delete'|trans() }}">
+                  </a>
+                  <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" class='btn btn-sm btn-danger confirmModal' data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}' title="{{ 'Generics.actions.delete'|trans() }}">
                     <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                     <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                  </a>                                    
+                  </a>
                 </td>
-
               </tr>
             {% endfor %}
           </table>
-
-
-        </div>      
-      </div> 
+        </div>
+      </div>
     {% endif %}
   </div>
-
-
-
-
 </div>
 
 
+<div class="card mt-4">
+    <div class="card-header">
+        {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
+    </div>
+    <div class="card-body" data-controller="add-ip-address">
+        <div data-add-ip-address-target="container" id="domain-relays-container">
+            {% for domainRelay in form.domainRelays %}
+                 <div>
+                   
+                    {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
+                    <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% set domainRelayPrototype %}
+        <br>
+            {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp' } })|e }}
+
+            <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+        {% endset %}
+
+        <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype" data-prototype="{{ domainRelayPrototype }}"></div>
+
+        <div class="form-group mt-2">
+            <button type="button" class="btn btn-success" data-action="add-ip-address#add">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 <div class="d-flex justify-content-center">
-  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;
-  <a class="btn btn-outline-secondary " href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
-</div>   
+  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans) }}">
+  <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>
 {{ form_end(form) }}

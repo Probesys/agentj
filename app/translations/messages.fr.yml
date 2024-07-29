@@ -23,6 +23,7 @@ Generics:
     rememberme: Se souvenir de moi
     import: "Importer"
     importFile: "Importer depuis un fichier"
+    addIpAddress: "Adresse IP"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -189,6 +190,7 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
+    ipAddressInvalid: Le format l'adresse IP est incorrect.
     massiveActionContent:
       Êtes-vous sûr de vouloir effectuer cette action sur tous
       les éléments sélectionnés ?
@@ -410,6 +412,7 @@ Entities:
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
       domainMessages: Messages du domaine
+      ipAddresses: "L'adressse IP"
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire
@@ -591,3 +594,6 @@ Entities:
       banned: Bannis par l'utilisateur
       deleted: Supprimé par l'utilisateur
       auto: Automatique
+  DomainRelay:
+    fields:
+      ipAddress: 'Adresse IP'

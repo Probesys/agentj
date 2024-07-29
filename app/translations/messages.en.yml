@@ -23,6 +23,7 @@ Generics:
     rememberme: "Remember me"
     import: "Import"
     importFile: "Import from file"
+    addIpAddress: "IP Address"
   fields:
     name: Title
     helpMessage: "Help message"
@@ -187,6 +188,7 @@ Message:
     DeleteMessage: "Delete the message"
     Restore: Recover
     RestoreMessage: "Recover the message"
+    ipAddressInvalid: "Invalid IP address."
     massiveActionContent:
       "Are you sure you want to perform this action on all the
       selected items?"
@@ -401,6 +403,7 @@ Entities:
       domainrules: "Rules of the field"
       domaineSender: "sending domain"
       domainMessages: "Messages from the field"
+      ipAddresses: "IP Address"
       dynamicsVariables:
         {
           URL_CAPTCHA: "Link to captcha",
@@ -581,3 +584,6 @@ Entities:
       banned: "Banned by user"
       deleted: "Deleted by user"
       auto: Automatic
+  DomainRelay:
+    fields:
+      ipAddress: 'IP Address'
