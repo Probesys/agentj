@@ -19,10 +19,10 @@ export default class extends Controller {
 
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
-        deleteButton.classList.add('btn', 'btn-danger', 'ml-2');
+        deleteButton.classList.add('btn', 'btn-danger', 'col-sm-2');
 
-        deleteButton.innerText = 'Delete';
-        
+        deleteButton.innerText = Translator.trans('Message.Actions.Delete');
+
         deleteButton.setAttribute('data-action', 'click->add-ip-address#remove');
         div.appendChild(deleteButton);
 
@@ -32,5 +32,22 @@ export default class extends Controller {
     remove(event) {
         event.preventDefault();
         event.target.closest('div').remove();
+    }
+
+    validateIp(event) {
+        const input = event.target;
+        const ip = input.value;
+        const ipPattern = /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$/;
+
+        if (!ipPattern.test(ip) && ip != "") {
+
+            $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
+            $('#dialog-confirm').data("type-action-confirm", "form");
+            $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
+            $("#dialog-content").html(Translator.trans('Message.Actions.ipAddressInvalid'));
+
+            $("#dialog-confirm").dialog("open");
+            input.value = '';
+        } 
     }
 }

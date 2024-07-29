@@ -109,18 +109,20 @@
     <div class="card-body" data-controller="add-ip-address">
         <div data-add-ip-address-target="container" id="domain-relays-container">
             {% for domainRelay in form.domainRelays %}
-                 <div class="domain-relay">
-                    {{ form_widget(domainRelay, { attr: { class: 'form-control' } , label: false}) }}
-                    <button type="button" class="btn btn-danger ml-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                 <div class="domain-relay row">
+                    {{ form_label(domainRelay.ip_address)}}
+                    {{ form_widget(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
+                    <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
                 </div>
             {% endfor %}
         </div>
+
         {% set domainRelayPrototype %}
-            {{ form_widget(form.domainRelays.vars.prototype, { attr: { class: 'domain-relay-item' } })|e }}
+        <br>
+            {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp' } })|e }}
         {% endset %}
+        
         <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype" data-prototype="{{ domainRelayPrototype }}"></div>
-
-
 
         <div class="form-group mt-2">
             <button type="button" class="btn btn-success" data-action="add-ip-address#add">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
@@ -137,19 +139,3 @@
   <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
 </div>
 {{ form_end(form) }}
-
-<script>
-{# document.addEventListener('DOMContentLoaded', function () {
-  var addButton = document.getElementById('add-ip-address');
-  var container = document.getElementById('domain-relays-container');
-  var prototype = document.getElementById('domain-relays-prototype').dataset.prototype;
-
-  addButton.addEventListener('click', function () {
-    var index = container.children.length;
-    var newForm = prototype.replace(/__name__/g, index);
-    var div = document.createElement('div');
-    div.innerHTML = newForm;
-    container.appendChild(div);
-  });
-}); #}
-</script>

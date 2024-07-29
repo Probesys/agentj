@@ -190,6 +190,7 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
+    ipAddressInvalid: Le format l'adresse IP est incorrect.
     massiveActionContent:
       Êtes-vous sûr de vouloir effectuer cette action sur tous
       les éléments sélectionnés ?
