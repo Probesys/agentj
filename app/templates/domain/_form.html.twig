@@ -15,6 +15,7 @@
         {{ form_row(form.smtpPort) }}
         {{ form_row(form.logoFile) }}
         {{ form_row(form.defaultLang) }}        
+		{% include 'partials/_quota_form.html.twig' with {'form': form} %}
       </div>
     </div>
   </div>

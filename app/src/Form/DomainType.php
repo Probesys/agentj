@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class DomainType extends AbstractType {
 
@@ -80,7 +82,13 @@ class DomainType extends AbstractType {
                     'mapped' => false,
                     'required' => false,
                 ])
-        ;
+                ->add('quota', CollectionType::class, [
+                    'entry_type' => QuotaType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                    'label' => false,
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -389,6 +389,10 @@ Entities:
       level: "Spam threshold"
       mailAuthenticationSender: "Email address that sends authentication requests"
       defaultLang: "Default language"
+      quota: "Email quota"
+      quota_emails: "Email quota"
+      quota_seconds: "Quota time"
+      addQuota: "Add a quota"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"
