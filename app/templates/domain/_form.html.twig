@@ -12,6 +12,7 @@
         {{ form_row(form.smtpPort) }}
         {{ form_row(form.logoFile) }}
         {{ form_row(form.defaultLang) }}
+		{% include 'partials/_quota_form.html.twig' with {'form': form} %}
       </div>
     </div>
   </div>
@@ -109,9 +110,9 @@
     <div class="card-body" data-controller="add-ip-address">
         <div data-add-ip-address-target="container" id="domain-relays-container">
             {% for domainRelay in form.domainRelays %}
-                 <div class="domain-relay row">
-                    {{ form_label(domainRelay.ip_address)}}
-                    {{ form_widget(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
+                 <div>
+                   
+                    {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
                     <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
                 </div>
             {% endfor %}
@@ -120,8 +121,10 @@
         {% set domainRelayPrototype %}
         <br>
             {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp' } })|e }}
+
+            <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
         {% endset %}
-        
+
         <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype" data-prototype="{{ domainRelayPrototype }}"></div>
 
         <div class="form-group mt-2">

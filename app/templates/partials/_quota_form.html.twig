@@ -1,0 +1,25 @@
+<div data-controller="quota">
+	<h5>{{ 'Entities.Domain.fields.quota'|trans }}</h5>
+	<div class="quota" data-quota-target="container">
+		{% for quotaField in form.quota %}
+			<div class="quota-item">
+				{{ form_row(quotaField.quota_emails) }}
+				{{ form_row(quotaField.quota_seconds) }}
+				<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">
+					{{ 'Generics.actions.delete'|trans }}</button>
+			</div>
+			<div style="clear:both"></div>
+		{% endfor %}
+	</div>
+	
+	<button type="button" class="btn btn-primary btn-sm add_quota_link mt-2" data-action="click->quota#addQuota">{{ 'Entities.Domain.fields.addQuota'|trans }}</button>
+	<template data-quota-target="template">
+		<div class="quota-item">
+			{{ form_row(form.quota.vars.prototype.quota_emails) }}
+			{{ form_row(form.quota.vars.prototype.quota_seconds) }}
+			<button type="button" class="btn btn-danger btn-sm remove-quota" data-action="click->quota#removeQuota" style="float: right">
+				{{ 'Generics.actions.delete'|trans }}</button>
+				<div style="clear:both"></div>
+		</div>
+	</template>
+</div>

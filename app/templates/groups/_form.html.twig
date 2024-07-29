@@ -1,29 +1,28 @@
 {{ form_start(form, {'attr' : { 'data-controller'  : 'form-group', 'data-form-group-url-check-priority-value' : path('groups_check_priority') } }) }}
 
 <div class="row">
-  <div class="col-md-12">
-    {{ form_row(form.name) }}
-    {{ form_row(form.overrideUser) }}
-    {{ form_row(form.policy) }}
-    {{ form_row(form.wb) }}
-    <div class="form-group row">
-      {{ form_label(form.priority) }}
-      <div class="col-sm-10">
-        {{ form_widget(form.priority) }}
-         <small class="d-none form-text text-danger"></small>   
-      </div>
-    </div>    
+	<div class="col-md-12">
+		{{ form_row(form.name) }}
+		{{ form_row(form.overrideUser) }}
+		{{ form_row(form.policy) }}
+		{{ form_row(form.wb) }}
+		<div class="form-group">
+			{{ form_label(form.priority) }}
+			{{ form_widget(form.priority) }}
+			<small class="d-none form-text text-danger"></small>
+		</div>
 
-    {{ form_row(form.domain) }}
-    {{ form_row(form.active) }}
-  </div>
+		{{ form_row(form.domain) }}
+		{{ form_row(form.active) }}
+	</div>
 </div>
+{% include 'partials/_quota_form.html.twig' with {'form': form} %}
 {{ form_widget(form) }}
 
 
 <div class="d-flex justify-content-center">
-  <input type="submit" data-form-group-target="btnSubmit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}" >&nbsp;  
-  <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
-</div>       
+	<input type="submit" data-form-group-target="btnSubmit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans)}}">&nbsp;
+	<a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
+</div>
 
 {{ form_end(form) }}

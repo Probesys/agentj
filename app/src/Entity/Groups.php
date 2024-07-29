@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 //use Gedmo\
 use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Groups
@@ -55,7 +56,7 @@ class Groups
 
 
     #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
-    private $groupsWbLists;    
+    private $groupsWbLists;
 
     #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 128, unique: true)]
@@ -79,6 +80,9 @@ class Groups
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $ldapDN;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
+
     public function __toString()
     {
         return $this->name;
@@ -92,6 +96,8 @@ class Groups
         $this->users = new ArrayCollection();
         $this->groupsWbLists = new ArrayCollection();
     }
+
+   
 
     public function getId(): ?int
     {
@@ -192,7 +198,7 @@ class Groups
         return $this;
     }
 
-    
+
     public function getSlug(): ?string
     {
         return $this->slug;
@@ -340,6 +346,18 @@ class Groups
     public function setLdapDN(?string $ldapDN): self
     {
         $this->ldapDN = $ldapDN;
+
+        return $this;
+    }
+
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
 
         return $this;
     }

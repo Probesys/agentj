@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Domain
@@ -118,11 +119,11 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
-    /**
-     * @var Collection<int, DomainRelay>
-     */
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $domainRelays;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
 
     public function __construct()
     {
@@ -134,6 +135,7 @@ class Domain
         $this->domain_keys = new DomainKey();
         $this->domainRelays = new ArrayCollection(); # ip addresses
     }
+
 
     public function __toString()
     {
@@ -457,9 +459,6 @@ class Domain
         return $this;
     }
 
-    /**
-     * @return Collection<int, DomainRelay>
-     */
     public function getDomainRelays(): Collection
     {
         return $this->domainRelays;
@@ -483,7 +482,16 @@ class Domain
                 $domainRelay->setDomain(null);
             }
         }
+    }
 
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
         return $this;
     }
 }

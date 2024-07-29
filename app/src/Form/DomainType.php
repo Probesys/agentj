@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class DomainType extends AbstractType {
 
@@ -23,12 +24,11 @@ class DomainType extends AbstractType {
     private $tabLanguages;
 
     public function __construct(ImapPorts $imapPorts, ParameterBagInterface $params) {
-//        dd($params->get('app_locales'));
         $langs = explode('|', $params->get('app_locales'));
         foreach($langs as $lang){
             $this->tabLanguages[$lang] = $lang;
         }
-        
+
         $this->imapPorts = $imapPorts;
     }
 
@@ -44,7 +44,7 @@ class DomainType extends AbstractType {
                 ])
                 ->add('smtpPort', TextType::class, [
                     'label' => 'Entities.Domain.fields.smtp_port',
-                ])                
+                ])
                 ->add('active', null, [
                     'label' => 'Entities.Domain.fields.active'
                 ])
@@ -57,7 +57,7 @@ class DomainType extends AbstractType {
                     'choices' => $this->tabLanguages,
                     'placeholder' => '',
                     'label' => 'Entities.Domain.fields.defaultLang',
-                ])                
+                ])
                 ->add('policy', null, [
                     'label' => 'Entities.Domain.fields.policy',
                     'required' => true,
@@ -89,7 +89,13 @@ class DomainType extends AbstractType {
                     'by_reference' => false,
                     'label' => false,
                 ])
-        ;
+                ->add('quota', CollectionType::class, [
+                    'entry_type' => QuotaType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                    'label' => false,
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
