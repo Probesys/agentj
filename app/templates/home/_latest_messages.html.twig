@@ -10,7 +10,6 @@
                 {% if is_granted('ROLE_ADMIN') %}
                     <th class="bg-transparent">{{ 'Message.Recipient'|trans }}</th>
                 {% endif %}
-                    {#            <th>{{ 'Message.Status'|trans() }}</th> #}
                 <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
                 <th class="bg-transparent">{{ 'Message.Sender'|trans }}</th>
                 <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
@@ -64,7 +63,7 @@
                         {% endif %}
                     </td>
                     <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | format_datetime('short', 'short') }}">{{msg.time_num | format_datetime('short', 'short')}}</span> </td>
-                        <td>{{ msg.bspam_level }}</td>
+                    <td>{{ msg.bspam_level }}</td>
                     <td>
                         {% set href = msg.status_description == 'untreated' ? '/message' : '/message/' ~ msg.status_description %}
                         <a href="{{ href }}" class="btn btn-primary float-right"><i class="fas fa-link"></i></a>
