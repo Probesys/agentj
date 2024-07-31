@@ -39,12 +39,12 @@ class SearchFilterType extends AbstractType
             ])
             ->add('messageType', ChoiceType::class, [
                 'choices'  => [
-                    'Incoming' => 'incoming',
-                    'Outgoing' => 'outgoing',
+                    'Reçu' => 'incoming',
+                    'Envoyé' => 'outgoing',
                 ],
                 'expanded' => true,
                 'multiple' => false,
-                'label' => 'Message Type',
+                'label' => 'Type de message',
             ])
             ->add('submit', SubmitType::class, ['label' => 'Filtrer']);
     }

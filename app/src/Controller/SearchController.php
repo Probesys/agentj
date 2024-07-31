@@ -73,6 +73,7 @@ class SearchController extends AbstractController
             return new JsonResponse([
                 'content' => $this->renderView('search/_messages.html.twig', [
                     'msgs' => $paginatedMessages,
+                    'messageType' => $messageType,
                 ]),
             ]);
         }
@@ -82,6 +83,7 @@ class SearchController extends AbstractController
             'current_page' => $page,
             'total_pages' => ceil($totalMessages / $limit),
             'form' => $form->createView(),
+            'messageType' => $messageType,
         ]);
     }
 
