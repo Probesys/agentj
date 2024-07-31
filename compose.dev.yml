@@ -24,8 +24,8 @@ services:
     working_dir: /var/www/agentj
 
 
-  vite:   
-   image: node:18-alpine     
+  watcher:   
+   image: node:18-alpine
    user: ${UID}:${GID}
    working_dir: /app
    volumes:

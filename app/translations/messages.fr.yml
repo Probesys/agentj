@@ -23,6 +23,7 @@ Generics:
     rememberme: Se souvenir de moi
     import: "Importer"
     importFile: "Importer depuis un fichier"
+    addIpAddress: "Adresse IP"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -51,11 +52,13 @@ Generics:
     list: "Liste"
   messages:
     no_records_found: Aucun résultat trouvé
-    confirmationDeleteMessageQuestion: Êtes vous certain de vouloir supprimer cet
+    confirmationDeleteMessageQuestion:
+      Êtes vous certain de vouloir supprimer cet
       élément ?
     welcome: Bienvenue
     welcomeAgentJ: Bienvenue sur AgentJ
-    welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br>\
+    welcomeHomeMessage:
+      "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br>\
       \ veuillez vous authentifier"
     formNotComplete: Veuillez renseigner les informations obligatoire
     UserExist: L'utilisateur existe déjà dans la base de données
@@ -63,7 +66,7 @@ Generics:
     BadColumnsFile: Le nombre de colonne est incorrecte. Vérifier votre fichier.
     azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
     incorrectCredential: Identifiants incorrects
-    groupWithPriorityExists: 'Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'
+    groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
   labels:
     filters: Filtres
     item_per_page: Nombre d'éléments par page (sur %totalItemFound% trouvés)
@@ -83,7 +86,8 @@ Generics:
       choose_action: Choisir une action
     flash:
       deleteSuccess: La suppression en masse a été effectuée avec succès !
-      noSelectedItemError: Vous devez sélectionner au moins un item pour réaliser
+      noSelectedItemError:
+        Vous devez sélectionner au moins un item pour réaliser
         cette opération !
   flash:
     genericFormError: Une erreur s'est produite lors du traitement du formulaire
@@ -95,9 +99,11 @@ Generics:
     addSuccess: Ajout effectué avec succès !
     addFailure: Une erreur est survenue lors d'ajout !
     ImportSuccess: Il y a [NB_USER] comptes emails qui ont été importés avec succès !
-    ImportErrors: "NB_ERRORS ligne(s) ont été ignorées car elles contiennent des erreurs\
+    ImportErrors:
+      "NB_ERRORS ligne(s) ont été ignorées car elles contiennent des erreurs\
       \ (numéros de ligne : LIST_ROWS_ERROR)."
-    UserAlreadyPresent: Il y a [NB_USER] comptes emails qui étaient déjà présents
+    UserAlreadyPresent:
+      Il y a [NB_USER] comptes emails qui étaient déjà présents
       dans la base, aucune action n'a été faite sur ces comptes.
     BadColumnsFile: Mauvais nombre de colonnes pour le fichier.
     NoImport: Aucun compte email n'a été importé.
@@ -107,10 +113,11 @@ Generics:
     aliasAllreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
     userNameAllreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
     passwordNotMatching: La confirmation du mot de passe n'est pas valide
-    groupNameAllreadyExist: Ce groupe existe déjà pour domaine. Vous ne pouvez pas
+    groupNameAllreadyExist:
+      Ce groupe existe déjà pour domaine. Vous ne pouvez pas
       utiliser ce nom
     BadFormatcsv: "Mauvais format de fichier"
-    IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect." 
+    IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect."
     InvalidEmail: "Ligne [ROW] : Adresse e-mail invalide."
     NonexistentDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
     ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
@@ -183,7 +190,9 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
-    massiveActionContent: Êtes-vous sûr de vouloir effectuer cette action sur tous
+    ipAddressInvalid: Le format l'adresse IP est incorrect.
+    massiveActionContent:
+      Êtes-vous sûr de vouloir effectuer cette action sur tous
       les éléments sélectionnés ?
   Dialogs:
     confirmDeleteUserTitle: Supprimer l'utilisateur
@@ -195,20 +204,24 @@ Message:
     confirmAuthorizedMsgtitle: Autoriser l'expéditeur
     confirmAuthorizedDomainMsgtitle: Autoriser l'expéditeur pour tous les utilisateurs
     confirmAuthorizedMsgContent: Êtes-vous sur d'autoriser l'expéditeur ?
-    confirmAuthorizedDomainMsgContent: Êtes-vous sur d'autoriser l'expéditeur pour
+    confirmAuthorizedDomainMsgContent:
+      Êtes-vous sur d'autoriser l'expéditeur pour
       tous les utilisateurs ?
     confirmBannedMsgtitle: Bannir l'expéditeur
     confirmBannedMsgContent: Êtes-vous sur de bannir l'expéditeur ?
     confirmBannedDomainMsgtitle: Bannir l'expéditeur pour tous les utilisateurs
-    confirmBannedDomainMsgContent: Êtes-vous sur de bannir l'expéditeur pour tous
+    confirmBannedDomainMsgContent:
+      Êtes-vous sur de bannir l'expéditeur pour tous
       les utilisateurs ?
     confirmRestoreMsgtitle: Récupérer le message
     confirmRestoreMsgContent: Êtes-vous sur de vouloir récupérer le message ?
     confirmDeleteSenderTitleW: Supprimer cet expéditeur ?
     confirmDeleteSenderTitleB: Débloquer cet expéditeur ?
-    confirmDeleteSenderContentW: Êtes-vous sûr de vouloir supprimer cet expéditeur
+    confirmDeleteSenderContentW:
+      Êtes-vous sûr de vouloir supprimer cet expéditeur
       ?
-    confirmDeleteSenderContentB: Êtes-vous sûr de vouloir débloquer cet expéditeur
+    confirmDeleteSenderContentB:
+      Êtes-vous sûr de vouloir débloquer cet expéditeur
       ?
     confirmDeleteGroupTitle: Supprimer ce groupe ?
     confirmDeleteGroupContent: Êtes-vous sûr de vouloir supprimer ce groupe ?
@@ -234,22 +247,24 @@ Message:
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
-    connectionOk : "Connexion établie"
-    connectionKo : "Connexion échouée"
+    connectionOk: "Connexion établie"
+    connectionKo: "Connexion échouée"
     invalidLdapQuery: "Requête Ldap incorrecte"
     ldapNbUserfound: "$NB_USER utilisateur(s) trouvé(s)"
     ldapNbGroupfound: "$NB_GROUP groupe(s) trouvé(s)"
   http:
     404:
       title: Page non trouvée
-      description: La page demandée n'a pas été trouvée. Vérifiez l'url ou retournez
+      description:
+        La page demandée n'a pas été trouvée. Vérifiez l'url ou retournez
         sur la page d'accueil.
     403:
       title: Accès non autorisé
       description: Vous n'avez pas les droits suffisants pour afficher cette page.
     500:
       title: Une erreur s'est produite
-      description: "Une erreur s'est produite qui empêche l'affichage de cette page.\
+      description:
+        "Une erreur s'est produite qui empêche l'affichage de cette page.\
         \ <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement\
         \ possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
   Connector:
@@ -262,18 +277,21 @@ Message:
     newUntreatedMessage: nouveau(x) messages non traités
   Report:
     defaultMailSubject: "Messages en attente sur AgentJ pour "
-    defaultAlertMailContent: "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails\
+    defaultAlertMailContent:
+      "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails\
       \ qui sont en attentes de validation.<br /><br /> Et [NB_BLOCKED_MESSAGES] messages\
       \ qui ont été bloqués grâce à AgentJ. <br /><br /> Vous pouvez les traiter sur\
       \ <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br /> Merci et bonne journée. "
   Captcha:
     defaultMailSubject: "Vérification Email"
-    defaultMailContent: "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à\
+    defaultMailContent:
+      "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à\
       \ destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous\
       \ sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre\
       \ email en cliquant sur le lien suivant : <br /> <a href='[URL_CAPTCHA]'>[URL_CAPTCHA]</a>\
       \ <br /><br /> Merci et bonne journée "
-    defaultCaptchaPageContent: "<strong>Vérification de votre email</strong> <br />\
+    defaultCaptchaPageContent:
+      "<strong>Vérification de votre email</strong> <br />\
       \ Merci de valider votre email en validant le captcha ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
 Form:
@@ -375,24 +393,26 @@ Entities:
       messageAlert: Message du rapport
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
-      srvImap: Serveur IMAP
-      imap_port: Port IMAP
-      smtp_port: Port SMTP
-      imap_flag: "Sécurisation IMAP"
+      smtp_port: "Port SMTP"
       active: Domaine actif
       policy: Stratégie pour le domaine
       level: Seuil de spam
       mailAuthenticationSender: Adresse mail qui envoie les demandes d'authentification
       imapNoValidateCert: Ne pas valider les certificats
       defaultLang: Langue par défaut
+      quota: Quota
+      quota_emails: Quota d'emails sur la période
+      quota_seconds: Période du quota (en secondes)
+      addQuota: Ajouter un quota
     labels:
       infos: "Informations"
-      agentJConfig : "Paramètres AgentJ"
-      connectors : "Connecteurs"
+      agentJConfig: "Paramètres AgentJ"
+      connectors: "Connecteurs"
       rules: Règles
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
       domainMessages: Messages du domaine
+      ipAddresses: "L'adressse IP"
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire
@@ -405,7 +425,7 @@ Entities:
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
     actions:
-      add_connector : Ajouter un connecteur
+      add_connector: Ajouter un connecteur
       importUserAndAliases: "Importer les utilisateurs et les alias"
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
@@ -462,7 +482,8 @@ Entities:
     restored: Récupérés
     virus: avec virus
     spammedDetect: spammés détectés automatiquement
-    informationMessage: Les messages seront automatiquement effacés au bout de 30
+    informationMessage:
+      Les messages seront automatiquement effacés au bout de 30
       jours.
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
@@ -499,6 +520,16 @@ Entities:
       ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
       ldapUserFilter: "Filtre pour les utilisateur"
       ldapGroupFilter: "Filtre pour les groupes"
+  ImapConnector:
+    labels:
+    actions:
+      add: "Ajouter un connecteur Imap"
+      edit: "Editer le connecteur Imap"
+    fields:
+      imapHost: "Hôte"
+      imapPort: "Port"
+      imapProtocol: "Sécurisation IMAP"
+      imapNoValidateCert: "Ne pas valider les certificats"
   Office365Connector:
     labels:
     actions:
@@ -532,13 +563,15 @@ Entities:
   Import:
     Wbliste:
       title: "Liste blanche : importer une liste"
-      description: "Le fichier doit être encodé en utf8 au format texte ou csv.<br\
+      description:
+        "Le fichier doit être encodé en utf8 au format texte ou csv.<br\
         \ /> Chaque ligne doit comporter une adresse mail valide<br />"
     Users:
       title: Importer des utilisateurs
       labels:
         titleInfo: Information
-      description: "Le fichier doit être encodé en utf8 au format csv séparé par des\
+      description:
+        "Le fichier doit être encodé en utf8 au format csv séparé par des\
         \ points virgules.<br /> La structure est la suivante : email ; LastName;\
         \ FirstName; Group<br />"
     WhiteListe:
@@ -561,3 +594,6 @@ Entities:
       banned: Bannis par l'utilisateur
       deleted: Supprimé par l'utilisateur
       auto: Automatique
+  DomainRelay:
+    fields:
+      ipAddress: 'Adresse IP'

@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Domain
@@ -36,28 +37,10 @@ class Domain
     private $srvSmtp;
 
     /**
-     * @var string
-     */
-    #[ORM\Column(name: 'srv_imap', type: 'string', length: 255, nullable: false)]
-    private $srvImap;
-
-    /**
      * @var \DateTime
      */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private $datemod;
-
-    /**
-     * @var int
-     */
-    #[ORM\Column(name: 'imap_port', type: 'integer', nullable: false, options: ['default' => 143])]
-    private $imap_port;
-
-    /**
-     * @var string
-     */
-    #[ORM\Column(name: 'imap_flag', type: 'string', length: 255, nullable: false)]
-    private $imap_flag;
 
     /**
      * @var bool
@@ -121,9 +104,6 @@ class Domain
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $mailAuthenticationSender;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private $imapNoValidateCert;
-
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private $defaultLang;
 
@@ -139,6 +119,12 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
+    #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $domainRelays;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -147,7 +133,9 @@ class Domain
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
         $this->domain_keys = new DomainKey();
+        $this->domainRelays = new ArrayCollection(); # ip addresses
     }
+
 
     public function __toString()
     {
@@ -183,18 +171,6 @@ class Domain
         return $this;
     }
 
-    public function getSrvImap(): ?string
-    {
-        return $this->srvImap;
-    }
-
-    public function setSrvImap(string $srvImap): self
-    {
-        $this->srvImap = $srvImap;
-
-        return $this;
-    }
-
     public function getDatemod(): ?\DateTimeInterface
     {
         return $this->datemod;
@@ -203,30 +179,6 @@ class Domain
     public function setDatemod(\DateTimeInterface $datemod): self
     {
         $this->datemod = $datemod;
-
-        return $this;
-    }
-
-    public function getImapPort(): ?int
-    {
-        return $this->imap_port;
-    }
-
-    public function setImapPort(int $imap_port): self
-    {
-        $this->imap_port = $imap_port;
-
-        return $this;
-    }
-
-    public function getImapFlag(): ?string
-    {
-        return $this->imap_flag;
-    }
-
-    public function setImapFlag(string $imap_flag): self
-    {
-        $this->imap_flag = $imap_flag;
 
         return $this;
     }
@@ -411,18 +363,6 @@ class Domain
         return $this;
     }
 
-    public function getImapNoValidateCert(): ?bool
-    {
-        return $this->imapNoValidateCert;
-    }
-
-    public function setImapNoValidateCert(?bool $imapNoValidateCert): self
-    {
-        $this->imapNoValidateCert = $imapNoValidateCert;
-
-        return $this;
-    }
-
     public function getDefaultLang(): ?string
     {
         return $this->defaultLang;
@@ -516,6 +456,42 @@ class Domain
     {
         $this->domain_keys = $domain_keys;
 
+        return $this;
+    }
+
+    public function getDomainRelays(): Collection
+    {
+        return $this->domainRelays;
+    }
+
+    public function addDomainRelay(DomainRelay $domainRelay): static
+    {
+        if (!$this->domainRelays->contains($domainRelay)) {
+            $this->domainRelays->add($domainRelay);
+            $domainRelay->setDomain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDomainRelay(DomainRelay $domainRelay): static
+    {
+        if ($this->domainRelays->removeElement($domainRelay)) {
+            // set the owning side to null (unless already changed)
+            if ($domainRelay->getDomain() === $this) {
+                $domainRelay->setDomain(null);
+            }
+        }
+    }
+
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
         return $this;
     }
 }
