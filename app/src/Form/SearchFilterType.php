@@ -27,6 +27,10 @@ class SearchFilterType extends AbstractType
                 'required' => false,
                 'label' => 'Message ID'
             ])
+            ->add('email', TextType::class, [
+                'required' => false,
+                'label' => 'Déstinataire'
+            ])
             ->add('startDate', DateType::class, [
                 'required' => false,
                 'widget' => 'single_text',
@@ -45,6 +49,7 @@ class SearchFilterType extends AbstractType
                 'expanded' => true,
                 'multiple' => false,
                 'label' => 'Type de message',
+                'attr' => ['class' => 'switch-toggle'],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Filtrer']);
     }

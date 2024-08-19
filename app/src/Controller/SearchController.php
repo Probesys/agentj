@@ -36,13 +36,16 @@ class SearchController extends AbstractController
         $messageType = $data['messageType'] ?? 'incoming';
 
         $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType);
-//dd($allMessages);
+//         dd($allMessages);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $allMessages = array_filter($allMessages, function ($message) use ($data) {
                 if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
+                    return false;
+                }
+                if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
                     return false;
                 }
                 if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {

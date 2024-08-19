@@ -13,11 +13,19 @@
 
             {{ form_start(form) }}
             {{ form_row(form.fromAddr) }}
+            {{ form_row(form.email) }}
             {{ form_row(form.subject) }}
             {{ form_row(form.messageId) }}
             {{ form_row(form.startDate) }}
             {{ form_row(form.endDate) }}
-            {{ form_row(form.messageType) }}
+
+            <div class="form-group switch-container">
+                <label>{{ form_label(form.messageType) }}</label>
+                <div class="switch-toggle">
+                    {{ form_widget(form.messageType) }}
+                </div>
+            </div>
+
             {{ form_end(form) }}
         </div>
 
@@ -28,6 +36,7 @@
             <tr>
                 <th>Message ID</th>
                 <th>Expéditeur</th>
+                <th>Déstinataire</th>
                 <th>Objet</th>
                 <th>Date</th>
                 <th></th>
@@ -125,6 +134,11 @@
 
             .arrow-down {
                 transform: rotate(270deg);
+            }
+
+            .switch-container {
+                display: flex;
+                align-items: center;
             }
 
         </style>
