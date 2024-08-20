@@ -14,10 +14,7 @@
 			<span class="input-group-text" id="{{ aria_describedby }}">{{ attr['input_addon']|trans() }}</span>
 		</div>
 	</div>
-{%- endif -%}
-{%- endblock form_widget_simple %}
-
-{% block form_row %}
+{%- endif -%}{%- endblock form_widget_simple %}{% block form_row %}
 <div class="form-group">
 	{{ form_label(form, null, {'label_attr': {'class': 'toto'}}) }}
 	{{ form_widget(form, {'attr': {'class': 'form-control'}}) }}
@@ -26,8 +23,22 @@
 			{{ form_errors(form) }}
 		</div>
 	{% endif %}
-</div>{% endblock form_row %}
+</div>
+{% endblock form_row %}
 
 
-
-
+{% block form_label %}
+{%- if label is same as(false) -%}
+        <div class="{{ block('form_label_class') }}"></div>
+    {%- else -%}
+        {%- set row_class = row_class|default(row_attr.class|default('')) -%}
+        {%- if 'form-floating' not in row_class and 'input-group' not in row_class -%}
+            {%- if expanded is not defined or not expanded -%}
+                {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' col-form-label')|trim}) -%}
+            {%- endif -%}
+            {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' ' ~ block('form_label_class'))|trim}) -%}
+        {% endif %}
+		{{ dump(label_attr) }}
+        {{- parent() -}}
+    {%- endif -%}
+{% endblock form_label %}
