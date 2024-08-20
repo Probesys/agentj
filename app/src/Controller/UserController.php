@@ -57,6 +57,7 @@ class UserController extends AbstractController {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_new'),
             'attr' => ['class' => 'modal-ajax-form'],
+            'include_quota' => false,
         ]);
         $form->remove('groups');
         $form->remove('email');
@@ -113,7 +114,8 @@ class UserController extends AbstractController {
     public function edit(Request $request, User $user): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
-            'attr' => ['class' => 'modal-ajax-form']
+            'attr' => ['class' => 'modal-ajax-form'],
+            'include_quota' => false,
         ]);
         $form->remove('groups');
         $form->remove('email');
@@ -322,7 +324,8 @@ class UserController extends AbstractController {
         $form = $this->createForm(UserType::class, $user, [
             'alias' => true,
             'action' => $this->generateUrl('new_user_email_alias'),
-            'attr' => ['class' => 'modal-ajax-form']
+            'attr' => ['class' => 'modal-ajax-form'],
+            'include_quota' => false,
         ]);
         $form->remove('fullname');
         $form->remove('groups');
@@ -470,7 +473,8 @@ class UserController extends AbstractController {
         $oldAliasGroups = $user->getGroups()->toArray();
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_email_alias_edit', ['id' => $user->getId()]),
-            'attr' => ['class' => 'modal-ajax-form']
+            'attr' => ['class' => 'modal-ajax-form'],
+            'include_quota' => false,
         ]);
 
         $form->remove('fullname');

@@ -14,6 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+
 class UserType extends AbstractType
 {
 
@@ -25,76 +27,85 @@ class UserType extends AbstractType
         }
         $allowedomainIds = $options['allowedomainIds'];
         $builder
-                ->add('email', EmailType::class, [
-                    'label' => $labelEmail,
-                    'required' => true,
-                ])
-                ->add('imapLogin', null, [
-                    'label' => 'Entities.User.fields.imapLogin',
-                    'required' => false,
-                ])                  
-                ->add('emailRecovery', EmailType::class, [
-                    'label' => 'Entities.User.fields.emailRecovery',
-                    'required' => false,
-                ])
-                ->add('fullname', null, [
-                    'label' => 'Entities.User.fields.fullName',
-                ])
-                ->add('username', null, [
-                    'label' => 'Entities.User.fields.userName',
-                    'required' => true,
-                    'trim' => true,
-                ])
-                ->add('roles', ChoiceType::class, [
-                    'label' => 'Entities.User.fields.roles',
-                    'attr' => ['class' => 'select2'],
-                    'choices' => ['Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'],
-                    'mapped' => false
-                ])
-                ->add('password', RepeatedType::class, [
-                    'type' => PasswordType::class,
-                    'label' => 'Entities.User.fields.password',
-                    'invalid_message' => 'The password fields must match.',
-                    'options' => ['attr' => ['class' => 'password-field']],
-                    'first_options' => ['label' => 'Entities.User.fields.password'],
-                    'second_options' => ['label' => 'Entities.User.fields.repeatPassword'],
-                    'mapped' => false,
-                ])
-                ->add('groups', EntityType::class, [
-                    'label' => 'Entities.User.fields.groups',
-                    'class' => Groups::class,
-                    'multiple' => true,
-                    'attr' => ['class' => 'select2'],
-                    'placeholder' => ' ',
-                    'required' => false,
-                    'choice_label' => function ($group, $key, $index) {
-                        return $group->getName() . ' (' . $group->getDomain() . ')';
-                    },
-                    'query_builder' => function (GroupsRepository $rep) use ($allowedomainIds) {
-                        $retRepo = $rep->createQueryBuilder('g')
-                                ->leftJoin('g.domain', 'd');
-                        if ($allowedomainIds) {
-                            $retRepo->where('d.id in (' . implode(',', $allowedomainIds) . ')');
-                        }
-                        return $retRepo;
-                    },
-                ])
-                ->add('domains', null, [
-                    'attr' => ['class' => 'select2'],
-                    'label' => 'Entities.User.fields.domain',
-                ])
-                ->add('report', null, [
-                    'label' => 'Entities.User.fields.report',
-                ])
-                ->add('originalUser', UserAutocompleteField::class, [
-                    'multiple' => false,
-                    'required' => true,
-                ])
-                ->add('sharedWith', UserAutocompleteField::class, [
-                    'multiple' => true,
-                    'required' => false,
-                ])
-        ;
+            ->add('email', EmailType::class, [
+                'label' => $labelEmail,
+                'required' => true,
+            ])
+            ->add('imapLogin', null, [
+                'label' => 'Entities.User.fields.imapLogin',
+                'required' => false,
+            ])
+            ->add('emailRecovery', EmailType::class, [
+                'label' => 'Entities.User.fields.emailRecovery',
+                'required' => false,
+            ])
+            ->add('fullname', null, [
+                'label' => 'Entities.User.fields.fullName',
+            ])
+            ->add('username', null, [
+                'label' => 'Entities.User.fields.userName',
+                'required' => true,
+                'trim' => true,
+            ])
+            ->add('roles', ChoiceType::class, [
+                'label' => 'Entities.User.fields.roles',
+                'attr' => ['class' => 'select2'],
+                'choices' => ['Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'],
+                'mapped' => false
+            ])
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'label' => 'Entities.User.fields.password',
+                'invalid_message' => 'The password fields must match.',
+                'options' => ['attr' => ['class' => 'password-field']],
+                'first_options' => ['label' => 'Entities.User.fields.password'],
+                'second_options' => ['label' => 'Entities.User.fields.repeatPassword'],
+                'mapped' => false,
+            ])
+            ->add('groups', EntityType::class, [
+                'label' => 'Entities.User.fields.groups',
+                'class' => Groups::class,
+                'multiple' => true,
+                'attr' => ['class' => 'select2'],
+                'placeholder' => ' ',
+                'required' => false,
+                'choice_label' => function ($group, $key, $index) {
+                    return $group->getName() . ' (' . $group->getDomain() . ')';
+                },
+                'query_builder' => function (GroupsRepository $rep) use ($allowedomainIds) {
+                    $retRepo = $rep->createQueryBuilder('g')
+                        ->leftJoin('g.domain', 'd');
+                    if ($allowedomainIds) {
+                        $retRepo->where('d.id in (' . implode(',', $allowedomainIds) . ')');
+                    }
+                    return $retRepo;
+                },
+            ])
+            ->add('domains', null, [
+                'attr' => ['class' => 'select2'],
+                'label' => 'Entities.User.fields.domain',
+            ])
+            ->add('report', null, [
+                'label' => 'Entities.User.fields.report',
+            ])
+            ->add('originalUser', UserAutocompleteField::class, [
+                'multiple' => false,
+                'required' => true,
+            ])
+            ->add('sharedWith', UserAutocompleteField::class, [
+                'multiple' => true,
+                'required' => false,
+            ]);
+
+        if ($options['include_quota']) {
+            $builder->add('quota', CollectionType::class, [
+                'entry_type' => QuotaType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -102,7 +113,8 @@ class UserType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'alias' => false,
-            'allowedomainIds' => []
+            'allowedomainIds' => [],
+            'include_quota' => true,
         ]);
     }
 }

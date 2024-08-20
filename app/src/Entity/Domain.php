@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Domain
@@ -118,6 +119,12 @@ class Domain
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private DomainKey $domain_keys;
 
+    #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $domainRelays;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -126,7 +133,9 @@ class Domain
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
         $this->domain_keys = new DomainKey();
+        $this->domainRelays = new ArrayCollection(); # ip addresses
     }
+
 
     public function __toString()
     {
@@ -447,6 +456,42 @@ class Domain
     {
         $this->domain_keys = $domain_keys;
 
+        return $this;
+    }
+
+    public function getDomainRelays(): Collection
+    {
+        return $this->domainRelays;
+    }
+
+    public function addDomainRelay(DomainRelay $domainRelay): static
+    {
+        if (!$this->domainRelays->contains($domainRelay)) {
+            $this->domainRelays->add($domainRelay);
+            $domainRelay->setDomain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDomainRelay(DomainRelay $domainRelay): static
+    {
+        if ($this->domainRelays->removeElement($domainRelay)) {
+            // set the owning side to null (unless already changed)
+            if ($domainRelay->getDomain() === $this) {
+                $domainRelay->setDomain(null);
+            }
+        }
+    }
+
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
         return $this;
     }
 }
