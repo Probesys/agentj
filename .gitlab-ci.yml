@@ -39,7 +39,7 @@ app_build:
   variables:
     IMG: app
   script:
-    - sed -i "s|agentj_version|$TAG|g" $CI_PROJECT_DIR/$IMG/.env
+    - sed -i "s|agentj_version|$TAG|g" $CI_PROJECT_DIR/$IMG/.env.example
     - cd $CI_PROJECT_DIR/$IMG && docker build
         --target base
         --build-arg BUILDKIT_INLINE_CACHE=1
