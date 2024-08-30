@@ -29,7 +29,7 @@ services:
       - amavis_in:/var/lib/amavis/
 
   outamavis:
-    image: probesys38/agentj_outamavis:${VERSION}
+    image: probesys38/agentj_amavis:${VERSION}
     build:
       context: amavis/.
     restart: always
