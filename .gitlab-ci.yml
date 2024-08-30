@@ -23,23 +23,13 @@ stages:
 
 before_script:
   - |-
-        if [ $CI_COMMIT_BRANCH == "main" ] ; then
-            TAG="main"
-            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [ $CI_COMMIT_BRANCH == "preprod" ] ; then
-            TAG="preprod"
-            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-        elif [ $CI_COMMIT_BRANCH == "prod" ] ; then
-            TAG="prod"
-            REGISTRY=$CI_REGISTRY/$CI_PROJECT_NAME
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
+        if [ "$(echo $CI_COMMIT_BRANCH | grep -cE '^(main|prod|preprod)$')" -eq 1 ] ; then
+            TAG=$CI_COMMIT_BRANCH
         else
             TAG=$CI_COMMIT_REF_NAME
-            REGISTRY=$CI_REGISTRY/$CI_PROJECT_PATH
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         fi
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         echo $TAG
 
 app_build:
@@ -49,7 +39,7 @@ app_build:
   variables:
     IMG: app
   script:
-    - sed -i "s|agentj_version|$TAG|g" $CI_PROJECT_DIR/$IMG/docker/files/.env
+    - sed -i "s|agentj_version|$TAG|g" $CI_PROJECT_DIR/$IMG/.env.example
     - cd $CI_PROJECT_DIR/$IMG && docker build
         --target base
         --build-arg BUILDKIT_INLINE_CACHE=1
@@ -94,6 +84,34 @@ smtp_build:
       - smtp/*
       - smtp/**/*
 
+opendkim_build:
+  stage: build
+  variables:
+    IMG: opendkim
+  script:
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
+    - docker push $REGISTRY/agentj_$IMG:$TAG
+  only:
+    changes:
+      - opendkim/*
+
+policyd-rate-limit_build:
+  stage: build
+  variables:
+    IMG: policyd-rate-limit
+  script:
+    - cd $CI_PROJECT_DIR/$IMG && docker build
+        --cache-from $REGISTRY/agentj_$IMG:$TAG
+        --build-arg BUILDKIT_INLINE_CACHE=1
+        -t $REGISTRY/agentj_$IMG:$TAG .
+    - docker push $REGISTRY/agentj_$IMG:$TAG
+  only:
+    changes:
+      - policyd-rate-limit/*
+
 syslogng_build:
   stage: build
   variables:
@@ -113,7 +131,7 @@ syslogng_build:
 mass_build:
   stage: build
   script:
-    - for DIR in amavis app relay smtp syslogng ;
+    - for DIR in amavis app smtp opendkim policyd-rate-limit syslogng ;
         do cd $CI_PROJECT_DIR/$DIR && docker build
         --cache-from $REGISTRY/agentj_$DIR:main
         --build-arg BUILDKIT_INLINE_CACHE=1
