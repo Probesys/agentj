@@ -15,6 +15,8 @@ services:
       - outsmtp
       - smtp
       - app
+    volumes:
+      - ./tests:/tests
 
   opendkim:
     volumes:

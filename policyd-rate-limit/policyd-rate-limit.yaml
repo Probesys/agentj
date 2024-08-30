@@ -43,24 +43,28 @@ limits_by_id: {}
 # Use custom rate limit for every user, if you have sql backend for your mail server.
 # There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
 # You should set for your users a rate_limit id to map users <-> rate_limits tables. 
-sql_limits_by_id: "SELECT 
-  COALESCE(
-    json_agg(
-      json_build_array(
-        (COALESCE(u.quota->>'quota_emails', g.quota->>'quota_emails', d.quota->>'quota_emails'))::int,
-        (COALESCE(u.quota->>'quota_seconds', g.quota->>'quota_seconds', d.quota->>'quota_seconds'))::int
-      )
-    ),
-    '[]'::json
-  ) as quota_array
-FROM 
-  users u
-LEFT JOIN users_domains ud ON u.id = ud.user_id
-LEFT JOIN domains d ON ud.domain_id = d.id
-LEFT JOIN users_groups ug ON u.id = ug.user_id
-LEFT JOIN groups g ON ug.group_id = g.id
-WHERE 
-  u.email = %s;"
+sql_limits_by_id: "SELECT
+             COALESCE(
+               JSON_ARRAYAGG(
+                 JSON_ARRAY(
+                   GREATEST(
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_emails')) AS SIGNED),
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_emails')) AS SIGNED)
+                   ),
+                   GREATEST(
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_seconds')) AS SIGNED),
+                     CAST(JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_seconds')) AS SIGNED)
+                   )
+                 )
+               ),
+               '[]'
+             ) as quota_array
+           FROM
+             users u
+           LEFT JOIN user_groups ug ON u.id = ug.user_id
+           LEFT JOIN groups g ON ug.groups_id = g.id
+           WHERE
+             u.email = 'user@laissepasser.fr';"
 
 # Apply limits by sasl usernames.
 limit_by_sasl: True

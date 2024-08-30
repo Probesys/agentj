@@ -10,4 +10,5 @@ COPY eicar.com.txt /srv/eicar.com.txt
 COPY sql/*.sql /srv/sql/
 COPY testmail.sh /usr/local/sbin/testmail.sh
 
-CMD sh /usr/local/sbin/testmail.sh reinit_db | tee /srv/general.log & smtpd -d
+#CMD sh /usr/local/sbin/testmail.sh reinit_db | tee /srv/general.log & smtpd -d
+#CMD sh /usr/local/sbin/fasttest_mail.sh reinit_db | tee /srv/general.log & smtpd -d

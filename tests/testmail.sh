@@ -14,8 +14,7 @@ echo ' ok'
 if [ "$1" = "reinit_db" ];
 then
 	echo 'clearing db and insert test data'
-	#mariadb -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
-	mariadb -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/test.sql
+	mariadb -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_NAME < /srv/sql/blocnormal_laissepasser.sql
 	[ "$?" -eq "0" ] || { echo 'failed to insert test data, exiting'; exit $?; }
 fi 
 
