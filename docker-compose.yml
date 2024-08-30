@@ -42,7 +42,9 @@ services:
 
 
   app:
-    image: probesys38/agentj_app:${VERSION}
+    #image: probesys38/agentj_app:${VERSION}
+    build:
+      context: ./app
     restart: always
     env_file:
       - .env
