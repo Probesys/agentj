@@ -28,7 +28,7 @@ if [ ! -f $env_file ]; then
 fi
 
 echo "Installing libraries"
-if [ -x "$(which composer)" ] ; then
+if [ -x "$(which composer)" && -x "$(which yarnpkg)" ] ; then
 	cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
 	cd /var/www/agentj && sudo -u www-data yarnpkg install
 fi
