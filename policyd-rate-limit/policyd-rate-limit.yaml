@@ -27,8 +27,8 @@ SOCKET: ["0.0.0.0", 8552]
 # exeeded (more than 'number of emails' on 'number of seconds' for an ip address or an sasl
 # username), postfix will return a temporary failure.
 limits:
-    - [10, 60] # limit to 10 mails by minutes
-    - [15, 86400] # limits to 150 mails by days
+    - [99, 60] # limit to 10 mails by minutes
+    - [150, 86400] # limits to 150 mails by days
 
 # dict of id -> limit list. Used to override limits and use custom limits for
 # a particular id. Use an empty list for no limits for a particular id.
@@ -64,7 +64,7 @@ sql_limits_by_id: "SELECT
            LEFT JOIN user_groups ug ON u.id = ug.user_id
            LEFT JOIN groups g ON ug.groups_id = g.id
            WHERE
-             u.email = 'user@laissepasser.fr';"
+             u.email ='%s';"
 
 # Apply limits by sasl usernames.
 limit_by_sasl: True
@@ -80,10 +80,10 @@ limit_by_ip: False
 
 # If no limits are reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-success_action: "dunno"
+success_action: "dunno TOTOTITU"
 # If a limit is reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-fail_action: "defer_if_permit Rate limit reach, retry later"
+fail_action: "defer_if_permit Rate limit reach, retry later TOTOTOTOTO"
 # If we are unable to to contect the database backend, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
 db_error_action: "dunno"
