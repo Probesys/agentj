@@ -18,6 +18,7 @@ cache:
 
 stages:
   - build
+  - test
   - deploy
   - publish
 
@@ -249,3 +250,21 @@ deploy-tags:
   except:
     - branches
     - merge_requests
+
+# don't seems to be runnable as is
+#test-mail:
+#  stage: test
+#  before_script:
+#    - UID="1829"
+#    - GID="1829"
+#    - echo "$UID:$GID"
+#  script:
+#    - cp .env.example .env
+#    - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
+#    - sed -i "s|#UID=.*|UID=$UID|g" .env
+#    - sed -i "s|#GID=.*|GID=$GID|g" .env
+#    - sed -i "s|example.com|agentj.local|g" .env
+#    - docker compose up -d --build
+#    - docker compose exec -T -u www-data app ./docker/tests/testmail.sh
+#  only:
+#    - merge_requests

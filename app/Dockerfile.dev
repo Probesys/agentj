@@ -46,7 +46,8 @@ RUN apt-get update -q --fix-missing && \
     rsyslog \
     sudo \
     supervisor \
-    tzdata
+    tzdata \
+    swaks
 
 RUN mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid
 

@@ -43,7 +43,8 @@ limits_by_id: {}
 # Use custom rate limit for every user, if you have sql backend for your mail server.
 # There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
 # You should set for your users a rate_limit id to map users <-> rate_limits tables. 
-sql_limits_by_id: "SELECT `limits` FROM `rate_limits` WHERE `id` IN (SELECT `sender_rate_limit_id` FROM `users` WHERE `email`=%s)"
+#sql_limits_by_id: "SELECT `limits` FROM `rate_limits` WHERE `id` IN (SELECT `sender_rate_limit_id` FROM `users` WHERE `email`=%s)"
+sql_limits_by_id: "select quota from domain where id = (select domain_id from users where email = %s)"
 
 # Apply limits by sasl usernames.
 limit_by_sasl: True
@@ -62,7 +63,7 @@ limit_by_ip: False
 success_action: "dunno"
 # If a limit is reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-fail_action: "defer_if_permit Rate limit reach, retry later"
+fail_action: "defer_if_permit Retry later"
 # If we are unable to to contect the database backend, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
 db_error_action: "dunno"
