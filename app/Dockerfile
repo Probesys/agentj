@@ -32,10 +32,12 @@ RUN apt-get update -q --fix-missing && \
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/
-COPY . /var/www/
+COPY --chown=www-data:www-data . /var/www/
+RUN chown www-data:www-data /var/www
 
-RUN composer install --ignore-platform-reqs --no-scripts 
-RUN yarnpkg install 
+USER www-data:www-data
+RUN composer install --ignore-platform-reqs --no-scripts --no-cache
+RUN yarnpkg install
 # RUN yarnpkg add @symfony/webpack-encore
 RUN yarnpkg encore production
 
