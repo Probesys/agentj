@@ -42,7 +42,7 @@ limits_by_id: {}
 
 # Use custom rate limit for every user, if you have sql backend for your mail server.
 # There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
-# You should set for your users a rate_limit id to map users <-> rate_limits tables. 
+# You should set for your users a rate_limit id to map users <-> rate_limits tables.
 sql_limits_by_id: "SELECT
              COALESCE(
                JSON_ARRAYAGG(
@@ -64,7 +64,7 @@ sql_limits_by_id: "SELECT
            LEFT JOIN user_groups ug ON u.id = ug.user_id
            LEFT JOIN groups g ON ug.groups_id = g.id
            WHERE
-             u.email ='%s';"
+             u.email = %s;"
 
 # Apply limits by sasl usernames.
 limit_by_sasl: True

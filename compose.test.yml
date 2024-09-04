@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - ./tests/results:/var/mail/
+      - ./tests:/tests
     networks:
       testnet:
         ipv4_address: 172.28.2.5
@@ -20,8 +21,6 @@ services:
       - outsmtp
       - smtp
       - app
-    volumes:
-      - ./tests:/tests
 
   badrelay:
     build:
