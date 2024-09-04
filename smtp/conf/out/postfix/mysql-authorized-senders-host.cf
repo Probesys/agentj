@@ -1,0 +1,5 @@
+hosts = $DB_HOST
+user = $DB_USER
+password = $DB_PASSWORD 
+dbname = $DB_NAME 
+query = select 'OK' from domain a join domain_relay b on a.id = b.domain_id where b.ip_address = '%s'
