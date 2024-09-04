@@ -69,8 +69,10 @@ For dev/tests:
 
 | Variable                  | Default        | Use                                         |
 |---------------------------|----------------|---------------------------------------------|
+| COMPOSE_FILE              |                | to use test/dev setup                       |
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
-| APP_HOST                  | app            | host (container) name of app                |
+| UID                       |                | host user id                                |
+| GID                       |                | host user group id                          |
 
 ## Use
 
