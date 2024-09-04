@@ -71,8 +71,8 @@ For dev/tests:
 |---------------------------|----------------|---------------------------------------------|
 | COMPOSE_FILE              |                | to use test/dev setup                       |
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
-| UID                       |                | host user id                                |
-| GID                       |                | host user group id                          |
+| UID                       |                | host user id, for test compose file         |
+| GID                       |                | host user group id, for test compose file   |
 
 ## Use
 
