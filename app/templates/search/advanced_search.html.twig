@@ -12,12 +12,16 @@
         <div id="filterContainer" class="filtres mt-3 mb-3 col-md-8">
 
             {{ form_start(form) }}
+            {{ form_row(form.startDate) }}
+            {{ form_row(form.endDate) }}
             {{ form_row(form.fromAddr) }}
             {{ form_row(form.email) }}
             {{ form_row(form.subject) }}
-            {{ form_row(form.messageId) }}
-            {{ form_row(form.startDate) }}
-            {{ form_row(form.endDate) }}
+            {{ form_row(form.mailId) }}
+            {{ form_row(form.replyTo) }}
+            {{ form_row(form.amavisOutput) }}
+            {{ form_row(form.size) }}
+            {{ form_row(form.host) }}
 
             <div class="form-group switch-container">
                 <label>{{ form_label(form.messageType) }}</label>
@@ -29,16 +33,17 @@
             {{ form_end(form) }}
         </div>
 
-
-
-        <table class="table table-hover search">
+        <table id="message-table" class="table table-hover search" style="margin: 3rem 0 5rem 0" data-active-filters="{{ activeFilters|json_encode }}">
             <thead>
-            <tr>
-                <th>Message ID</th>
-                <th>Expéditeur</th>
-                <th>Déstinataire</th>
-                <th>Objet</th>
-                <th>Date</th>
+            <tr class="table-header">
+                <th>{{ 'Search.MailId'|trans }}</th>
+                <th>{{ 'Search.Sender'|trans }}</th>
+                <th>{{ 'Search.Recipient'|trans }}</th>
+                <th>{{ 'Search.Subject'|trans }}</th>
+                <th>{{ 'Search.Date'|trans }}</th>
+                <th class="amavis-header" style="display: none;">{{ 'Search.AmavisOutput'|trans }}</th>
+                <th class="size-header" style="display: none;">{{ 'Search.Size'|trans }}</th>
+                <th class="host-header" style="display: none;">{{ 'Search.Host'|trans }}</th>
                 <th></th>
             </tr>
             </thead>
@@ -48,73 +53,60 @@
         </table>
 
         <script>
-            $(document).ready(function () {
-
-                // Toggle filter visibility
+            document.addEventListener('DOMContentLoaded', function () {
                 const toggleButton = document.getElementById('toggleFilters');
                 const filterContainer = document.getElementById('filterContainer');
                 const toggleArrow = document.getElementById('toggleArrow');
 
-                toggleButton.addEventListener('click', function() {
-                    if (filterContainer.style.display === 'none') {
-                        filterContainer.style.display = 'block';
-                        toggleArrow.classList.remove('arrow-right');
-                        toggleArrow.classList.add('arrow-down');
-                    } else {
-                        filterContainer.style.display = 'none';
-                        toggleArrow.classList.remove('arrow-down');
-                        toggleArrow.classList.add('arrow-right');
-                    }
+                // Toggle filter visibility
+                toggleButton.addEventListener('click', function () {
+                    filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
+                    toggleArrow.classList.toggle('arrow-down');
+                    toggleArrow.classList.toggle('arrow-right');
                 });
 
+                // Mapping of form fields to their corresponding table header classes
+                const columnMapping = {
+                    'amavisOutput': '.amavis-header',       // Form field name -> Header class
+                    'size': '.size-header',
+                    'host': '.host-header',
+                    // Add more mappings as needed
+                };
+
+                // Handle form submission via Ajax
                 $('form').on('submit', function (e) {
-                    e.preventDefault(); // Prevent the form from submitting normally
+                    e.preventDefault();
 
                     var $form = $(this);
                     var url = $form.attr('action');
+
+                    // Iterate over the column mapping to check each form field
+                    Object.keys(columnMapping).forEach(function (fieldName) {
+                        const headerSelector = columnMapping[fieldName];
+                        const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val(); // Adjust the selector based on form structure
+
+                        // Toggle header visibility based on field value
+                        if (fieldValue) {
+                            document.querySelector(headerSelector).style.display = '';
+                        } else {
+                            document.querySelector(headerSelector).style.display = 'none';
+                        }
+                    });
 
                     $.ajax({
                         url: url,
                         method: $form.attr('method'),
                         data: $form.serialize(),
                         success: function (response) {
-                            // Update the table with the new content
+                            // Update the table body with new content
                             $('table.search tbody').html(response.content);
                         }
                     });
                 });
-
-                $('.search').DataTable({
-                    searching: false,
-                    paging: true,
-                    language: {
-                        "emptyTable": "Pas de données",
-                        "lengthMenu": "Afficher _MENU_ par page",
-                        "zeroRecords": "Pas d'informations",
-                        "info": "affichage de _PAGE_ sur _PAGES_",
-                        "infoEmpty": "Pas d'informations",
-                        "infoFiltered": "(filtered from _MAX_ total records)",
-                        "decimal": "",
-                        "infoPostFix": "",
-                        "thousands": ",",
-                        "loadingRecords": "Chargement...",
-                        "processing": "Chargement...",
-                        "search": "Rechercher : ",
-                        "paginate": {
-                            "first": "Début",
-                            "last": "Fin",
-                            "next": "Suivant",
-                            "previous": "Précédent"
-                        },
-                        "aria": {
-                            "sortAscending": ": activate to sort column ascending",
-                            "sortDescending": ": activate to sort column descending"
-                        }
-                    },
-                });
             });
 
         </script>
+
 
         <style>
             #toggleArrow {

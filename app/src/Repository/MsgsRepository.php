@@ -198,30 +198,68 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
-    public function advancedSearch(User $user = null, string $messageType = 'incoming')
-    {
-        $conn = $this->getEntityManager()->getConnection();
+public function advancedSearch(User $user = null, string $messageType = 'incoming')
+{
+    $conn = $this->getEntityManager()->getConnection();
 
-        // Switch between tables based on message type
-        $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
+    // Switch between tables based on message type
+    $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
+    $msgrcptTable = $messageType === 'outgoing' ? 'out_msgrcpt' : 'msgrcpt';
 
-        $sql = "SELECT m.*, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level "
-            . " FROM {$table} m "
-            . " LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id "
-            . " LEFT JOIN maddr ON maddr.id = mr.rid "
-            . " LEFT JOIN message_status ms ON mr.status_id = ms.id "
-            . " LEFT JOIN users u on u.email = maddr.email "
-            . " LEFT JOIN domain d on u.domain_id = d.id ";
+    // Original SQL query
+    $sql = "
+        SELECT
+            m.*,
+            mr.status_id,
+            ms.name,
+            m.partition_tag,
+            maddr.email,
+            m.subject,
+            m.from_addr,
+            m.time_num,
+            mr.rid,
+            mr.bspam_level,
+            mr.amavis_output
+        FROM {$table} m
+        LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
+        LEFT JOIN maddr ON maddr.id = mr.rid
+        LEFT JOIN message_status ms ON mr.status_id = ms.id
+        LEFT JOIN users u ON u.email = maddr.email
+        LEFT JOIN domain d ON u.domain_id = d.id
+    ";
 
-        // You can add more conditions to the SQL if needed based on the user or other filters
+    // Execute the original query
+    $stmt = $conn->prepare($sql);
+    $allMessages = $stmt->executeQuery()->fetchAllAssociative();
 
-        $stmt = $conn->prepare($sql);
+    // Add replyTo status to each message based on m.sid
+    foreach ($allMessages as &$message) {
+        // Fetch the correct email using m.sid
+        $sid = $message['sid'];
+        $emailQuery = "
+            SELECT email
+            FROM maddr
+            WHERE id = :sid
+        ";
 
-        $return = $stmt->executeQuery()->fetchAllAssociative();
-        unset($stmt);
-        unset($conn);
-        return $return;
+        // Prepare and execute the email lookup query
+        $emailStmt = $conn->prepare($emailQuery);
+        $emailStmt->bindValue('sid', $sid);
+        $emailResult = $emailStmt->executeQuery()->fetchOne();
+
+        // Determine the replyTo status
+        $message['replyTo'] = ($message['from_addr'] !== $emailResult) ? 'yes' : 'no';
     }
+
+    // Clean up resources
+    unset($stmt);
+    unset($conn);
+
+    return $allMessages;
+}
+
+
+
 
   /**
    * SELECT only msgs to send email with captch

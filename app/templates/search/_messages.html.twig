@@ -1,10 +1,19 @@
 {% for msg in msgs %}
     <tr>
-        <td>{{ msg.message_id }}</td>
+        <td>{{ msg.mail_id }}</td>
         <td>{{ msg.from_addr }}</td>
         <td>{{ msg.email }}</td>
         <td>{{ msg.subject }}</td>
         <td>{{ msg.time_iso|date('d-m-Y') }}</td>
+        {% if activeFilters['amavisOutput'] is defined %}
+            <td class="amavis-output-column">{{ msg.amavis_output }}</td>
+        {% endif %}
+        {% if activeFilters['size'] is defined %}
+            <td class="size-column">{{ msg.size }}</td>
+        {% endif %}
+        {% if activeFilters['host'] is defined %}
+            <td class="host-column">{{ msg.host }}</td>
+        {% endif %}
         <td>
             {% if messageType == 'incoming' %}
             <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>

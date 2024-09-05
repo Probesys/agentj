@@ -23,9 +23,9 @@ class SearchFilterType extends AbstractType
                 'required' => false,
                 'label' => 'Objet'
             ])
-            ->add('messageId', TextType::class, [
+            ->add('mailId', TextType::class, [
                 'required' => false,
-                'label' => 'Message ID'
+                'label' => 'Mail ID'
             ])
             ->add('email', TextType::class, [
                 'required' => false,
@@ -40,6 +40,26 @@ class SearchFilterType extends AbstractType
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'Date de fin'
+            ])
+            ->add('amavisOutput', TextType::class, [
+                'required' => false,
+                'label' => 'Score Amavis'
+            ])
+            ->add('size', TextType::class, [
+                'required' => false,
+                'label' => 'Taille'
+            ])
+            ->add('replyTo', ChoiceType::class, [
+                'required' => false,
+                'label' => 'Réponse à un message',
+                'choices'  => [
+                    'Oui' => 'yes',
+                    'Non' => 'no',
+                ],
+            ])
+            ->add('host', TextType::class, [
+                'required' => false,
+                'label' => "Domaine de l'epéditeur"
             ])
             ->add('messageType', ChoiceType::class, [
                 'choices'  => [
