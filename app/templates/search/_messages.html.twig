@@ -5,8 +5,9 @@
         <td>{{ msg.email }}</td>
         <td>{{ msg.subject }}</td>
         <td>{{ msg.time_iso|date('d-m-Y') }}</td>
-        {% if activeFilters['amavisOutput'] is defined %}
-            <td class="amavis-output-column">{{ msg.amavis_output }}</td>
+        {% if (activeFilters.bspamLevelMin is defined and activeFilters.bspamLevelMin|default('') != '' and activeFilters.bspamLevelMin != 0)
+            or (activeFilters.bspamLevelMax is defined and activeFilters.bspamLevelMax|default('') != '' and activeFilters.bspamLevelMax != 0) %}
+            <td>{{ msg.bspam_level }}</td>
         {% endif %}
         {% if activeFilters['size'] is defined %}
             <td class="size-column">{{ msg.size }}</td>

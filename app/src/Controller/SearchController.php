@@ -65,9 +65,12 @@ class SearchController extends AbstractController
                if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
                    return false;
                }
-               if (!empty($data['amavisOutput']) && stripos($message['amavis_output'], $data['amavisOutput']) === false) {
-                   return false;
-               }
+                if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
+                    return false;
+                }
+                if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
+                    return false;
+                }
                if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
                    return false;
                }

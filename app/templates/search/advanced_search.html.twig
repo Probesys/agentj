@@ -19,7 +19,14 @@
             {{ form_row(form.subject) }}
             {{ form_row(form.mailId) }}
             {{ form_row(form.replyTo) }}
-            {{ form_row(form.amavisOutput) }}
+            <div class="form-group">
+                <label>Score Amavis</label>
+                <div class="d-flex">
+                    {{ form_widget(form.bspamLevelMin, { 'attr': { 'placeholder': 'Min' } }) }}
+                    {{ form_widget(form.bspamLevelMax, { 'attr': { 'placeholder': 'Max', 'class': 'ml-2' } }) }}
+                </div>
+            </div>
+
             {{ form_row(form.size) }}
             {{ form_row(form.host) }}
 
@@ -67,10 +74,11 @@
 
                 // Mapping of form fields to their corresponding table header classes
                 const columnMapping = {
-                    'amavisOutput': '.amavis-header',       // Form field name -> Header class
+                    'bspamLevelMin': '.amavis-header',
+                    'bspamLevelMax': '.amavis-header',
                     'size': '.size-header',
                     'host': '.host-header',
-                    // Add more mappings as needed
+                    // Add more mappings as needed for future fields
                 };
 
                 // Handle form submission via Ajax
@@ -80,16 +88,32 @@
                     var $form = $(this);
                     var url = $form.attr('action');
 
-                    // Iterate over the column mapping to check each form field
-                    Object.keys(columnMapping).forEach(function (fieldName) {
-                        const headerSelector = columnMapping[fieldName];
-                        const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val(); // Adjust the selector based on form structure
+                    // Handle visibility for bspamLevelMin and bspamLevelMax explicitly
+                    const bspamMin = $form.find(`[name="search_filter[bspamLevelMin]"]`).val();
+                    const bspamMax = $form.find(`[name="search_filter[bspamLevelMax]"]`).val();
 
-                        // Toggle header visibility based on field value
-                        if (fieldValue) {
-                            document.querySelector(headerSelector).style.display = '';
-                        } else {
-                            document.querySelector(headerSelector).style.display = 'none';
+                    // Check if either min or max is not null or an empty string (including 0)
+                    const bspamActive = bspamMin !== null && bspamMin !== '' || bspamMax !== null && bspamMax !== '';
+
+                    // Toggle amavis-header visibility based on bspam level fields
+                    if (bspamActive) {
+                        document.querySelector('.amavis-header').style.display = '';
+                    } else {
+                        document.querySelector('.amavis-header').style.display = 'none';
+                    }
+
+                    // Iterate over the column mapping to check each form field except bspamLevelMin and bspamLevelMax
+                    Object.keys(columnMapping).forEach(function (fieldName) {
+                        if (fieldName !== 'bspamLevelMin' && fieldName !== 'bspamLevelMax') {
+                            const headerSelector = columnMapping[fieldName];
+                            const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val();
+
+                            // Toggle header visibility based on field value (including zero)
+                            if (fieldValue !== null && fieldValue !== '') {
+                                document.querySelector(headerSelector).style.display = '';
+                            } else {
+                                document.querySelector(headerSelector).style.display = 'none';
+                            }
                         }
                     });
 
@@ -104,8 +128,8 @@
                     });
                 });
             });
-
         </script>
+
 
 
         <style>

@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 class SearchFilterType extends AbstractType
 {
@@ -41,9 +43,13 @@ class SearchFilterType extends AbstractType
                 'widget' => 'single_text',
                 'label' => 'Date de fin'
             ])
-            ->add('amavisOutput', TextType::class, [
+            ->add('bspamLevelMin', NumberType::class, [
                 'required' => false,
-                'label' => 'Score Amavis'
+                'label' => 'Score Amavis Min',
+            ])
+            ->add('bspamLevelMax', NumberType::class, [
+                'required' => false,
+                'label' => 'Score Amavis Max',
             ])
             ->add('size', TextType::class, [
                 'required' => false,
