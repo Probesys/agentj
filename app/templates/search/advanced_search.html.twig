@@ -10,7 +10,6 @@
         </button>
 
         <div id="filterContainer" class="filtres mt-3 mb-3 col-md-8">
-
             {{ form_start(form) }}
             {{ form_row(form.startDate) }}
             {{ form_row(form.endDate) }}
@@ -18,17 +17,23 @@
             {{ form_row(form.email) }}
             {{ form_row(form.subject) }}
             {{ form_row(form.mailId) }}
-            {{ form_row(form.replyTo) }}
-            <div class="form-group">
-                <label>Score Amavis</label>
-                <div class="d-flex">
-                    {{ form_widget(form.bspamLevelMin, { 'attr': { 'placeholder': 'Min' } }) }}
-                    {{ form_widget(form.bspamLevelMax, { 'attr': { 'placeholder': 'Max', 'class': 'ml-2' } }) }}
-                </div>
-            </div>
 
-            {{ form_row(form.size) }}
-            {{ form_row(form.host) }}
+            <!-- Button to toggle advanced filters -->
+            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-3">Filtres avancée</button>
+
+            <!-- Advanced filters section -->
+            <div id="advancedFilters" style="display: none;">
+                {{ form_row(form.replyTo) }}
+                <div class="form-group">
+                    <label>Score Amavis</label>
+                    <div class="d-flex">
+                        {{ form_widget(form.bspamLevelMin, { 'attr': { 'placeholder': 'Min' } }) }}
+                        {{ form_widget(form.bspamLevelMax, { 'attr': { 'placeholder': 'Max', 'class': 'ml-2' } }) }}
+                    </div>
+                </div>
+                {{ form_row(form.size) }}
+                {{ form_row(form.host) }}
+            </div>
 
             <div class="form-group switch-container">
                 <label>{{ form_label(form.messageType) }}</label>
@@ -40,7 +45,9 @@
             {{ form_end(form) }}
         </div>
 
-        <table id="message-table" class="table table-hover search" style="margin: 3rem 0 5rem 0" data-active-filters="{{ activeFilters|json_encode }}">
+
+        <table class="table table-hover search" style="margin: 3rem 0 5rem 0"
+               data-active-filters="{{ activeFilters|json_encode }}">
             <thead>
             <tr class="table-header">
                 <th>{{ 'Search.MailId'|trans }}</th>
@@ -64,6 +71,8 @@
                 const toggleButton = document.getElementById('toggleFilters');
                 const filterContainer = document.getElementById('filterContainer');
                 const toggleArrow = document.getElementById('toggleArrow');
+                const toggleAdvancedButton = document.getElementById('toggleAdvancedFilters');
+                const advancedFilters = document.getElementById('advancedFilters');
 
                 // Toggle filter visibility
                 toggleButton.addEventListener('click', function () {
@@ -72,6 +81,25 @@
                     toggleArrow.classList.toggle('arrow-right');
                 });
 
+                // Toggle advanced filters visibility
+                toggleAdvancedButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
+                });
+
+                function initializeDataTable() {
+                    $('.search').DataTable({
+                        processing: true,
+                        serverSide: false,
+                        searching: false,
+                        paging: true,
+                        ordering: true,
+                        autoWidth: false,
+                        pageLength: 50,
+                    });
+                }
+
+                initializeDataTable();
                 // Mapping of form fields to their corresponding table header classes
                 const columnMapping = {
                     'bspamLevelMin': '.amavis-header',
@@ -117,6 +145,12 @@
                         }
                     });
 
+                    // Destroy the existing DataTable before updating the table
+                    if ($.fn.DataTable.isDataTable('.search')) {
+                        $('.search').DataTable().destroy();
+                    }
+
+
                     $.ajax({
                         url: url,
                         method: $form.attr('method'),
@@ -124,12 +158,29 @@
                         success: function (response) {
                             // Update the table body with new content
                             $('table.search tbody').html(response.content);
+                            initializeDataTable();
                         }
                     });
-                });
-            });
-        </script>
 
+                });
+
+                $(document).on('click', '.pagination-link', function (e) {
+                    e.preventDefault();
+                    const page = $(this).data('page');
+                    $('form').find('input[name="page"]').val(page);
+
+                    // Destroy and reinitialize DataTables to refresh with new page data
+                    if ($.fn.DataTable.isDataTable('.search')) {
+                        $('.search').DataTable().destroy();
+                    }
+
+                    $('form').submit(); // This will trigger the form submission handled above
+                });
+
+            });
+
+
+        </script>
 
 
         <style>

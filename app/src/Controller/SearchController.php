@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Driver\Result;
+
 
 class SearchController extends AbstractController
 {
@@ -27,7 +30,7 @@ class SearchController extends AbstractController
     }
 
    #[Route(path: '/advanced-search', name: 'advanced_search', methods: ['GET', 'POST'])]
-   public function advancedSearch(Request $request, EntityManagerInterface $entityManager): Response
+   public function advancedSearch(Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
    {
        $form = $this->createForm(SearchFilterType::class);
        $form->handleRequest($request);
@@ -36,7 +39,7 @@ class SearchController extends AbstractController
        $messageType = $data['messageType'] ?? 'incoming';
 
        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType);
-// dd($allMessages);
+        // dd($allMessages);
 
        // Initialize active filters
        $activeFilters = [];
@@ -119,6 +122,56 @@ class SearchController extends AbstractController
            'activeFilters' => $activeFilters, // Pass the activeFilters to the main view
        ]);
    }
+
+#[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'out_message_show', methods: ['GET'])]
+public function showAction($partitionTag, $mailId, $rid, Request $request)
+{
+    $conn = $this->em->getConnection();
+
+    // Fetching the OutMsgrcpt data using raw SQL
+    $sqlOutMsgrcpt = '
+        SELECT * FROM out_msgrcpt
+        WHERE partition_tag = :partitionTag
+        AND mail_id = :mailId
+        AND rid = :rid
+    ';
+
+    // Execute the query and fetch data as an associative array
+    $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
+        'partitionTag' => $partitionTag,
+        'mailId' => $mailId,
+        'rid' => $rid,
+    ]);
+    $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
+
+    // Fetching the OutMsgs data using raw SQL
+    $sqlOutMsgs = '
+        SELECT * FROM out_msgs
+        WHERE partition_tag = :partitionTag
+        AND mail_id = :mailId
+    ';
+
+    // Execute the query and fetch data as an associative array
+    $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
+        'partitionTag' => $partitionTag,
+        'mailId' => $mailId,
+    ]);
+    $outMsg = $stmtOutMsgs->fetchAssociative();
+
+    $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), 'outgoing');
+
+    $ms = array_filter($allMessages, function($msg) use ($outMsg) {
+        return $msg['mail_id'] === $outMsg['mail_id'];
+    });
+
+    return $this->render('message/out_show.html.twig', [
+        'controller_name' => 'MessageController',
+        'outMsg' => $outMsg,
+        'outMsgRcpt' => $outMsgRcpt,
+        'message' => $ms,
+    ]);
+}
+
 
 
 }
