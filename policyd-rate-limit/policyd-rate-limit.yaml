@@ -27,7 +27,7 @@ SOCKET: ["0.0.0.0", 8552]
 # exeeded (more than 'number of emails' on 'number of seconds' for an ip address or an sasl
 # username), postfix will return a temporary failure.
 limits:
-    - [99, 60] # limit to 10 mails by minutes
+    - [10, 60] # limit to 10 mails by minutes
     - [150, 86400] # limits to 150 mails by days
 
 # dict of id -> limit list. Used to override limits and use custom limits for
@@ -156,10 +156,10 @@ limit_by_ip: False
 
 # If no limits are reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-success_action: "dunno TOTOTITU"
+success_action: "dunno"
 # If a limit is reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-fail_action: "defer_if_permit Rate limit reach, retry later TOTOTOTOTO"
+fail_action: "defer_if_permit Rate limit reach, retry later"
 # If we are unable to to contect the database backend, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
 db_error_action: "dunno"
