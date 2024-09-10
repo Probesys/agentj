@@ -191,6 +191,7 @@ Message:
     Restore: Récupérer
     RestoreMessage: Récupérer le message
     ipAddressInvalid: Le format l'adresse IP est incorrect.
+    ipAddressDuplicated: l'adresse IP est en double.
     massiveActionContent:
       Êtes-vous sûr de vouloir effectuer cette action sur tous
       les éléments sélectionnés ?
