@@ -28,7 +28,7 @@ SOCKET: ["0.0.0.0", 8552]
 # username), postfix will return a temporary failure.
 limits:
     - [10, 60] # limit to 10 mails by minutes
-    - [15, 86400] # limits to 150 mails by days
+    - [150, 86400] # limits to 150 mails by days
 
 # dict of id -> limit list. Used to override limits and use custom limits for
 # a particular id. Use an empty list for no limits for a particular id.
@@ -42,8 +42,105 @@ limits_by_id: {}
 
 # Use custom rate limit for every user, if you have sql backend for your mail server.
 # There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
-# You should set for your users a rate_limit id to map users <-> rate_limits tables. 
-sql_limits_by_id: "SELECT `limits` FROM `rate_limits` WHERE `id` IN (SELECT `sender_rate_limit_id` FROM `users` WHERE `email`=%s)"
+# You should set for your users a rate_limit id to map users <-> rate_limits tables.
+sql_limits_by_id: "
+           WITH email_cte AS (
+             SELECT %s AS email
+           )
+           SELECT
+             COALESCE(
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS user_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS group_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS domain_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               '[]'
+             ) as quota_array;"
 
 # Apply limits by sasl usernames.
 limit_by_sasl: True

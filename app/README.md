@@ -1,9 +1,9 @@
 
 # AgentJ -Antispam with human authentification
 
-AgentJ is an open source web application,written inPHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
+AgentJ is an open source web application, written in PHP and based on the symfony framework. This web application is designed to configure and manage Amavisd-new.
 
-Amavisd-new is an interface between an MTA (Mail Trasnport Agent such as PostFix) and various content filter (antivirus, antispam,..) such as SpamAssassin an ClamAV
+Amavisd-new is an interface between an MTA (Mail Transport Agent such as Postfix) and various content filter (antivirus, antispam,..) such as SpamAssassin an ClamAV
 
 ---
 

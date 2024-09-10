@@ -10,26 +10,28 @@ MY_TOKEN_ENC_SALT=$(openssl rand -base64 32)
 env_file=/var/www/agentj/.env
 if [ ! -f $env_file ]; then
     cp /var/www/agentj/.env.example $env_file
-    sed -i "s|\$MYAPPSECRET|$MYAPPSECRET|g" /var/www/agentj/.env
-    sed -i "s|\$MY_TOKEN_ENC_IV|$MY_TOKEN_ENC_IV|g" /var/www/agentj/.env
-    sed -i "s|\$MY_TOKEN_ENC_SALT|$MY_TOKEN_ENC_SALT|g" /var/www/agentj/.env
-    sed -i "s|\$DB_NAME|$DB_NAME|g" /var/www/agentj/.env
-    sed -i "s|\$DB_USER|$DB_USER|g" /var/www/agentj/.env
-    sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" /var/www/agentj/.env
-    sed -i "s|\$DB_HOST|$DB_HOST|g" /var/www/agentj/.env
-    sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" /var/www/agentj/.env
-    sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" /var/www/agentj/.env
-    sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" /var/www/agentj/.env
-    sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" /var/www/agentj/.env
-    sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" /var/www/agentj/.env
-    sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" /var/www/agentj/.env
-    sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
+    sed -i "s|\$MYAPPSECRET|$MYAPPSECRET|g" $env_file
+    sed -i "s|\$MY_TOKEN_ENC_IV|$MY_TOKEN_ENC_IV|g" $env_file
+    sed -i "s|\$MY_TOKEN_ENC_SALT|$MY_TOKEN_ENC_SALT|g" $env_file
+    sed -i "s|\$DB_NAME|$DB_NAME|g" $env_file
+    sed -i "s|\$DB_USER|$DB_USER|g" $env_file
+    sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" $env_file
+    sed -i "s|\$DB_HOST|$DB_HOST|g" $env_file
+    sed -i "s|\$MAIL_HOSTNAME|$MAIL_HOSTNAME|g" $env_file
+    sed -i "s|\$MAIL_DOMAINNAME|$MAIL_DOMAINNAME|g" $env_file
+    sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" $env_file
+    sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" $env_file
+    sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" $env_file
+    sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" $env_file
+    sed -i "s|\$TZ|$TZ|g" $env_file
     sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 fi
 
 echo "Installing libraries"
-cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
-cd /var/www/agentj && sudo -u www-data yarnpkg install
+if [ -x "$(which composer)" && -x "$(which yarnpkg)" ] ; then
+	cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
+	cd /var/www/agentj && sudo -u www-data yarnpkg install
+fi
 # cd /var/www/agentj && sudo -u www-data yarnpkg encore production
 
 echo "Installing assets"

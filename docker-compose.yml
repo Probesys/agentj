@@ -15,6 +15,7 @@ services:
       - TZ=${TZ:-Europe/Paris}
 
   amavis:
+    image: probesys38/agentj_amavis:${VERSION}
     build:
       context: amavis/.
     restart: always
@@ -28,6 +29,7 @@ services:
       - amavis_in:/var/lib/amavis/
 
   outamavis:
+    image: probesys38/agentj_amavis:${VERSION}
     build:
       context: amavis/.
     restart: always
@@ -40,9 +42,10 @@ services:
     volumes:
       - amavis_out:/var/lib/amavis/
 
-
   app:
     image: probesys38/agentj_app:${VERSION}
+    build:
+      context: ./app
     restart: always
     env_file:
       - .env
@@ -56,7 +59,7 @@ services:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
   relay:
-    #image: probesys38/agentj_relay:${VERSION}
+    image: probesys38/agentj_smtp:${VERSION}
     build:
       context: ./smtp/.
     restart: always
@@ -66,9 +69,8 @@ services:
       - .env
     command:  [ "supervisord", "-c", "/etc/conf/relay/supervisor/supervisord.conf" ]
 
-
   smtp:
-    #image: probesys38/agentj_smtp:${VERSION}
+    image: probesys38/agentj_smtp:${VERSION}
     build:
       context: ./smtp/.
     restart: always
@@ -86,6 +88,7 @@ services:
     command:  [ "supervisord", "-c", "/etc/conf/in/supervisor/supervisord.conf" ]
 
   outsmtp:
+    image: probesys38/agentj_smtp:${VERSION}
     build:
       context: ./smtp/.
     restart: always
@@ -103,6 +106,7 @@ services:
     command:  [ "supervisord", "-c", "/etc/conf/out/supervisor/supervisord.conf" ]
 
   opendkim:
+    image: probesys38/agentj_opendkim:${VERSION}
     build:
       context: ./opendkim/
     restart: unless-stopped
@@ -112,14 +116,19 @@ services:
       - db
 
   policyd-rate-limit:
+    image: probesys38/agentj_policyd-rate-limit:${VERSION}
     build:
       context: ./policyd-rate-limit
     env_file:
       - .env
     restart: unless-stopped
+    volumes:
+      - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
 
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}
+    build:
+      context: ./syslogng
     restart: always
     env_file:
       - .env
