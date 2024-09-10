@@ -394,6 +394,9 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form']
         ]);
         $form->remove('password');
+        // $form->remove('domains');
+        // $form->remove('roles');
+        // $form->remove('username');
         $form->remove('originalUser');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
         $form->handleRequest($request);
