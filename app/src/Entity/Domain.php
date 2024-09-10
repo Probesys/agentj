@@ -482,6 +482,8 @@ class Domain
                 $domainRelay->setDomain(null);
             }
         }
+
+        return $this;
     }
 
     public function getQuota(): ?array

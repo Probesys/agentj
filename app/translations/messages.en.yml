@@ -204,6 +204,7 @@ Message:
     Restore: Recover
     RestoreMessage: "Recover the message"
     ipAddressInvalid: "Invalid IP address."
+    ipAddressDuplicated: "This IP address is already in the list."
     massiveActionContent:
       "Are you sure you want to perform this action on all the
       selected items?"

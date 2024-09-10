@@ -45,21 +45,22 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     patch  
 
 
-
-COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
-COPY conf/amavis/*.conf /etc/
-COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
-COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
-COPY conf/spamassassin/local.cf /etc/mail/spamassassin/local.cf
-COPY entrypoint.sh /entrypoint.sh
-COPY healthcheck.sh /healthcheck.sh
 COPY amavisd.patch /root/amavisd.patch
-
 RUN cd /usr/share/perl5/Amavis && patch -p1 < /root/amavisd.patch
+
+COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
 RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
         --daemon-notify=/etc/clamav/clamd.conf \
         --config-file=/etc/clamav/freshclam.conf
+
+COPY conf/spamassassin/local.cf /etc/mail/spamassassin/local.cf
 RUN /usr/bin/sa-update
+
+COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY conf/amavis/*.conf /etc/
+COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
+COPY entrypoint.sh /entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
 
 EXPOSE 10024/tcp
 

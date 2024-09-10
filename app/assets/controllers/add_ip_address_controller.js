@@ -49,5 +49,28 @@ export default class extends Controller {
             $("#dialog-confirm").dialog("open");
             input.value = '';
         } 
+
+        const allInputs = this.containerTarget.querySelectorAll('input');
+
+        let duplicateFound = false;
+
+        allInputs.forEach(function (ipInput) {
+            if (ipInput !== input && ipInput.value.trim() === ip) {
+                duplicateFound = true;
+            }
+        });
+
+        if (duplicateFound) {
+            $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
+            $('#dialog-confirm').data("type-action-confirm", "form");
+            $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
+            $("#dialog-content").html(Translator.trans('Message.Actions.ipAddressDuplicated'));
+
+            $("#dialog-confirm").dialog("open");
+            input.value = '';
+        } else {
+            input.setCustomValidity('');
+        }
+
     }
 }

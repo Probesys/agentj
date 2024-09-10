@@ -16,16 +16,16 @@ export default class extends Controller {
   }
 
   removeQuota(event) {
-    event.preventDefault()
-    const item = event.target.closest('.quota-item')
-    item.remove()
-    this.updateIndexes()
+    event.preventDefault();
+    const item = event.target.closest('.quota-item');
+    item.remove();
+    this.updateIndexes();
   }
 
   updateIndexes() {
     this.containerTarget.querySelectorAll('.quota-item').forEach((item, index) => {
       item.querySelectorAll('input').forEach(input => {
-        const name = input.getAttribute('name')
+        const name = input.getAttribute('name');
         if (name) {
           input.setAttribute('name', name.replace(/\[quotas\]\[\d+\]/, `[quotas][${index}]`))
         }

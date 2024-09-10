@@ -1,8 +1,5 @@
 FROM debian:bookworm-slim AS base
 
-WORKDIR /var/www/
-COPY . /var/www/
-
 SHELL [ "/bin/sh", "-e", "-c" ]
 
 RUN apt-get update -q --fix-missing && \
@@ -30,25 +27,26 @@ RUN apt-get update -q --fix-missing && \
     php8.2-zip \
     tzdata \
     yarnpkg \
-    zip \
-    && rm -rf /var/lib/apt/lists/* \
-    && composer install --ignore-platform-reqs --no-scripts \
-    && yarnpkg install \
-    # && yarnpkg add @symfony/webpack-encore \
-    && yarnpkg encore production
+    zip
 
- 
+RUN rm -rf /var/lib/apt/lists/*
 
- 
+WORKDIR /var/www/
+COPY --chown=www-data:www-data . /var/www/
+RUN chown www-data:www-data /var/www
+
+USER www-data:www-data
+RUN composer install --ignore-platform-reqs --no-scripts --no-cache
+RUN yarnpkg install
+# RUN yarnpkg add @symfony/webpack-encore
+RUN yarnpkg encore production
+
 
 FROM debian:bookworm-slim AS run
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "AgentJ web app"
 LABEL description = "AgentJ frontend to manage mails and senders white/black lists"
-
-COPY --chown=www-data:www-data --from=base /var/www/ /var/www/agentj
-WORKDIR /var/www/agentj
 
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
@@ -83,10 +81,15 @@ RUN apt-get update -q --fix-missing && \
     rsyslog \
     sudo \
     supervisor \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid \
-    && rm -rf node_modules
+    tzdata
+
+
+COPY --chown=www-data:www-data --from=base /var/www/ /var/www/agentj
+WORKDIR /var/www/agentj
+
+RUN rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid
+RUN rm -rf node_modules
 
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
@@ -99,17 +102,3 @@ EXPOSE 9000
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
-
-FROM run as dev
-
-RUN apt-get update -q --fix-missing && \
-    apt-get -y install --no-install-recommends \
-    ca-certificates \
-    yarnpkg \
-    sendmail \
-    swaks
-
-COPY ./docker/files/install_composer.sh /tmp/install_composer.sh
-RUN /tmp/install_composer.sh && \
-    mv composer.phar /usr/local/bin/composer && \
-    rm /tmp/install_composer.sh   

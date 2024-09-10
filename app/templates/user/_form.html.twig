@@ -11,6 +11,11 @@
 {{ form_row(form.emailRecovery) }}
 {{ form_row(form.username) }}
 {{ form_row(form.roles) }}
+{{ form_row(form.groups) }}
+{{ form_row(form.email) }}
+{{ form_row(form.imapLogin) }}
+{{ form_row(form.sharedWith) }}
+{{ form_row(form.report) }}
 {% if form.password is defined %}
 	{{ form_row(form.password.first, {'label': 'Entities.User.fields.password'|trans}) }}
 	{{ form_row(form.password.second, {'label': 'Entities.User.fields.repeatPassword'|trans}) }}
