@@ -104,7 +104,7 @@ class MsgsRepository extends ServiceEntityRepository
      */
     public function countByType(User $user = null, $type = null, $alias = [])
     {
-        $conn = $this->getEntityManager()->getConnection();        
+        $conn = $this->getEntityManager()->getConnection();
 
         $sql = 'select count(m.mail_id) as nb_result from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '

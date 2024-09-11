@@ -110,7 +110,9 @@ class DefaultController extends AbstractController {
             if (!isset($statusCounts[$status])) {
                 $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
             }
-            $statusCounts[$status]['qty_out']++;
+            if ($status != 'untreated') {
+                $statusCounts[$status]['qty_out']++;
+            }
         }
 
         // Convert to array and return to view
