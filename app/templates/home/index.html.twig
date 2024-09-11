@@ -4,18 +4,18 @@
 
 {% block body %}
   <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
+  <div class="card my-2 pt-2">
+    {% include '/home/_latest_messages.html.twig' %}
+  </div>
   {% if is_granted('ROLE_ADMIN') %}
-    <div class="card my-2 pt-2">
-      {% include '/home/_latest_messages.html.twig' %}
-    </div>
     <div class="card my-2 pt-2">
       {% include '/home/_stats_table.html.twig' %}
     </div>
-    <div class="card my-2 pt-2">
-      {% include '/home/_stats.html.twig' %}
-    </div>
-  {% else %}
-    {% include '/home/_latest_messages.html.twig' %}
-    {% include '/home/_stats.html.twig' %}
   {% endif %}
+  <div class="card my-2 pt-2">
+    {% include '/home/_alerts.html.twig' %}
+  </div>
+  <div class="card my-2 pt-2">
+    {% include '/home/_stats.html.twig' %}
+  </div>
 {% endblock %}
