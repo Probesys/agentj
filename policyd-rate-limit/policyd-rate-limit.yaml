@@ -41,8 +41,12 @@ limits:
 limits_by_id: {}
 
 # Use custom rate limit for every user, if you have sql backend for your mail server.
-# There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
-# You should set for your users a rate_limit id to map users <-> rate_limits tables.
+# There is a quota column in users, groups and domain tables.
+# The quota column is a json array of up to 3 json objects. Each json object is a rate limit.
+# The rate limit is a json object with two keys: quota_emails and quota_seconds that we transform into an array of two integers.
+# The following SQL query is used to get the rate limit for a specific mail by
+# first looking in the users table. If there is no rate limit, it will look in the groups table
+# and finally in the domain table.
 sql_limits_by_id: "
            WITH email_cte AS (
              SELECT %s AS email
