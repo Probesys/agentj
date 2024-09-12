@@ -266,5 +266,9 @@ test-mail:
     - sed -i "s|example.com|agentj.local|g" .env
     - docker compose up -d --build
     - ./tests/test-from-host.sh
+    - cat tests/results/*
+  artifacts:
+    paths:
+      - tests/results/*
   only:
     - merge_requests
