@@ -23,12 +23,12 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "@babel/core": "^7.19.1",
-        "@babel/preset-env": "^7.19.1",
+        "@babel/core": "^7.23.2",
+        "@babel/preset-env": "^7.23.2",
         "@symfony/webpack-encore": "^4.0.0",
         "axios": "^0.27.2",
         "jquery": "^3.6.0",
         "loader-utils": "^2.0.4",
-        "webpack": "^5.74.0"
+        "webpack": "^5.76.0"
     }
 }

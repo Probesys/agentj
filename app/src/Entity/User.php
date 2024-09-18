@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * Users
@@ -94,8 +95,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
     private $domain;
 
-  #[ORM\ManyToOne(targetEntity: 'Groups', inversedBy: 'users')]
+  #[ORM\ManyToMany(targetEntity: 'Groups', inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[OrderBy(['priority' => 'DESC'])]
     private $groups;
 
   #[ORM\ManyToOne(targetEntity: 'User')]
@@ -123,12 +125,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $uid;
 
+    #[ORM\OneToMany(targetEntity: 'App\Entity\Wblist', mappedBy: 'rid')]
+    private $wbLists;
+
+    #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'users')]
+    private $originConnector;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $ldapDN;       
+
     public function __construct()
     {
 
         $this->domains = new ArrayCollection();
         $this->sharedWith = new ArrayCollection();
         $this->owners = new ArrayCollection();
+        $this->groups = new ArrayCollection();
+        $this->ownedSharedBoxes = new ArrayCollection();
+        $this->wbLists = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -216,7 +230,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles = json_decode($this->roles);
 
@@ -328,18 +342,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
-    public function getGroups(): ?Groups
-    {
-        return $this->groups;
-    }
-
-    public function setGroups(?Groups $groups): self
-    {
-        $this->groups = $groups;
-
-        return $this;
-    }
-
     public function getEmailRecovery(): ?string
     {
         return $this->emailRecovery;
@@ -414,29 +416,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-  /**
-   * @return Collection|self[]
-   */
+ 
+    /**
+     * @return Collection<int, User>
+     */
     public function getOwnedSharedBoxes(): Collection
     {
         return $this->ownedSharedBoxes;
     }
 
-    public function addOwnedSharedBox(self $ownedSharedBox): self
+    public function addOwnedSharedBox(User $ownedSharedBox): self
     {
         if (!$this->ownedSharedBoxes->contains($ownedSharedBox)) {
-            $this->ownedSharedBoxes[] = $ownedSharedBox;
-            $owner->addSharedWith($this);
+            $this->ownedSharedBoxes->add($ownedSharedBox);
+            $ownedSharedBox->addSharedWith($this);
         }
 
         return $this;
     }
 
-    public function removeOwnedSharedBox(self $ownedSharedBox): self
+    public function removeOwnedSharedBox(User $ownedSharedBox): self
     {
-        if ($this->owners->contains($ownedSharedBox)) {
-            $this->owners->removeElement($ownedSharedBox);
-            $ownedSharedBoxes->removeSharedWith($this);
+        if ($this->ownedSharedBoxes->removeElement($ownedSharedBox)) {
+            $ownedSharedBox->removeSharedWith($this);
         }
 
         return $this;
@@ -486,6 +488,94 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUid(?string $uid): self
     {
         $this->uid = $uid;
+
+        return $this;
+    }
+
+    public function isReport(): ?bool
+    {
+        return $this->report;
+    }
+
+    public function isBypassHumanAuth(): ?bool
+    {
+        return $this->bypassHumanAuth;
+    }
+
+    /**
+     * @return Collection<int, Groups>
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Groups $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Groups $group): self
+    {
+        $this->groups->removeElement($group);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wblist>
+     */
+    public function getWbLists(): Collection
+    {
+        return $this->wbLists;
+    }
+
+    public function addWbList(Wblist $wbList): self
+    {
+        if (!$this->wbLists->contains($wbList)) {
+            $this->wbLists[] = $wbList;
+            $wbList->setRid($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWbList(Wblist $wbList): self
+    {
+        if ($this->wbLists->removeElement($wbList)) {
+            // set the owning side to null (unless already changed)
+            if ($wbList->getRid() === $this) {
+                $wbList->setRid(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOriginConnector(): ?Connector
+    {
+        return $this->originConnector;
+    }
+
+    public function setOriginConnector(?Connector $originConnector): self
+    {
+        $this->originConnector = $originConnector;
+
+        return $this;
+    }
+
+    public function getLdapDN(): ?string
+    {
+        return $this->ldapDN;
+    }
+
+    public function setLdapDN(?string $ldapDN): self
+    {
+        $this->ldapDN = $ldapDN;
 
         return $this;
     }

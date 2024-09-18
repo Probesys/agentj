@@ -24,8 +24,6 @@ services:
       - .env
     depends_on:
       - db
-    networks:
-      - ajnet
     volumes:
       - amavis:/var/amavis/
     networks:

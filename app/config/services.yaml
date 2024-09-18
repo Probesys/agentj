@@ -15,8 +15,7 @@ parameters:
     app.amavisd-release: '%env(AMAVIS_RELEASE__PATH)%'
     app.dkim_generator: '%env(DKIM_GENERATOR)%'
     app.dkim_removal: '%env(DKIM_REMOVAL)%'
-    app.smtp-transport: '%env(SMTP_TRANSPORT)%'
-    app.smtp-transport_report: '%env(SMTP_TRANSPORT_REPORT)%'
+    app.smtp-transport: '%env(SMTP_TRANSPORT)%'    
     app.upload_directory: '%kernel.project_dir%/public/files/upload/'
     app.amavis_quarantine_dir: '%env(AMAVIS_QUARANTINE_DIR)%'
     app.amavis_quarantine_nbdays_before_delete: '%env(AMAVIS_QUARANTINE_NBDAYS_BEFORE_DELETE)%'
@@ -49,18 +48,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App.crypt_encrypt:
-       class: App\Service\CryptEncrypt
-       public: true   
-#    App\Twig\AppExtension:
-#        lazy:  true        
-#    twig.extension.text:
-#            class: Twig_Extensions_Extension_Text
-#            tags:
-#                - { name: twig.extension }  
-#    twig.extension.intl:
-#        class: Twig_Extensions_Extension_Intl
-#        tags:
-#            - { name: twig.extension } 
+#    App.crypt_encrypt:
+#       class: App\Service\CryptEncrypt
+#       public: true   
     App\Service\FileUploader:
         arguments: ['%app.upload_directory%', "@doctrine.orm.entity_manager"]   
