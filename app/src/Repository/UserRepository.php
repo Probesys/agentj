@@ -52,6 +52,16 @@ class UserRepository extends ServiceEntityRepository {
                         ->getOneOrNullResult();
     }
 
+    public function findOneByPrincipalName(string $principalName): ?User {
+        return $this->createQueryBuilder('u')
+                        ->join('u.domain', 'd')
+                        ->andWhere('u.office365PrincipalName = :principalName')
+                        ->andWhere('d.active=1')
+                        ->setParameter('principalName', $principalName)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }    
+
     /**
      * Return all users from active domains
      * @param boolean $withAlias

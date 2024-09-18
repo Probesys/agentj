@@ -1,4 +1,12 @@
 {{ form_start(form) }}
+{% if user.office365PrincipalName is not null %}
+<div class="form-group row">
+  <div class="col-form-label col-sm-2 required">{{ 'Entities.User.fields.office365PrincipalName' | trans }}</div>
+  <div class="col-sm-10">
+  {{ user.office365PrincipalName }}
+  </div>
+    </div>
+{% endif %}
 {{ form_widget(form) }}
 <div class="d-flex justify-content-center">
   <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >

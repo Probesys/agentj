@@ -38,17 +38,17 @@ sed -i "s|\$TZ|$TZ|g" /var/www/agentj/.env
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php81/php.ini
 
 echo "Installing assets"
-cd /var/www/agentj && sudo -u www-data php bin/console assets:install
+cd /var/www/agentj && sudo -u www-data php81 bin/console assets:install
 
 echo "Create database if not exists and update schemas"
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:database:create --if-not-exists
-cd /var/www/agentj && sudo -u www-data php bin/console doctrine:migration:migrate
+cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:database:create --if-not-exists
+cd /var/www/agentj && sudo -u www-data php81 bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-cd /var/www/agentj && php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+cd /var/www/agentj && php81 bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
 
 echo "update groups wblist"
-cd /var/www/agentj && php bin/console agentj:update-groups-wblist
+cd /var/www/agentj && php81 bin/console agentj:update-groups-wblist
 
 # Allow web server user to write Symphony logs
 rm -rf /var/www/agentj/var/cache

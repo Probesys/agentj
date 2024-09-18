@@ -1,4 +1,4 @@
-FROM alpine:latest AS base
+FROM alpine:3.18.5 AS base
 
 WORKDIR /var/www/
 COPY . /var/www/
@@ -31,10 +31,10 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repos
     zip \
     && composer install --ignore-platform-reqs --no-scripts \
     && yarn install \
-    && yarn add @symfony/webpack-encore \
+    # && yarn add @symfony/webpack-encore \
     && yarn encore production
 
-FROM alpine:latest AS run
+FROM alpine:3.18.5 AS run
 
 LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
 LABEL name = "AgentJ web app"
