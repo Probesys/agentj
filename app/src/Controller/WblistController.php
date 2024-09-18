@@ -28,9 +28,7 @@ class WblistController extends AbstractController {
         $this->translator = $translator;
     }
 
-    /**
-     * @Route("/wblist/{type}", name="wblist")
-     */
+    #[Route(path: '/wblist/{type}', name: 'wblist')]
     public function index($type, Request $request, PaginatorInterface $paginator) {
 
         $sortParams = [];
@@ -73,10 +71,10 @@ class WblistController extends AbstractController {
 
     /**
      * @param integer $id
-     * @Route("/WBlist/{rid}/{sid}/{priority}/delete", name="wblist_delete",  methods="GET")
      *
      * @return Response
      */
+    #[Route(path: '/WBlist/{rid}/{sid}/{priority}/delete', name: 'wblist_delete', methods: 'GET')]
     public function deleteAction($rid, $sid,$priority, WblistRepository $WblistRepository, Request $request) {
         if ($this->isCsrfTokenValid('delete_wblist' . $rid . $sid, $request->query->get('_token'))) {
             $this->deleteWbList($rid, $sid,$priority, $WblistRepository);
@@ -114,9 +112,9 @@ class WblistController extends AbstractController {
 
     /**
      *
-     * @Route("/WBlist/batch/delete/", name="wblist_batch_delete",  methods="POST" , options={"expose"=true})
      * @return Response
      */
+    #[Route(path: '/WBlist/batch/delete/', name: 'wblist_batch_delete', methods: 'POST', options: ['expose' => true])]
     public function batchDeleteAction(Request $request, MsgsRepository $msgRepository) {
         $em = $this->em;
 
@@ -131,9 +129,9 @@ class WblistController extends AbstractController {
 
     /**
      *
-     * @Route("/batch/{action}", name="wblist_batch",  methods="POST" , options={"expose"=true})
      * @return Response
      */
+    #[Route(path: '/batch/{action}', name: 'wblist_batch', methods: 'POST', options: ['expose' => true])]
     public function batchWbListAction(Request $request, MsgsRepository $msgRepository, $action = null) {
         $em = $this->em;
         if ($action) {
@@ -155,9 +153,7 @@ class WblistController extends AbstractController {
         return $this->redirect($referer);
     }
 
-    /**
-     * @Route("/wblist/admin/import", name="import_wblist" , options={"expose"=true})
-     */
+    #[Route(path: '/wblist/admin/import', name: 'import_wblist', options: ['expose' => true])]
     public function importWbListAction(Request $request) {
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_wblist'),
@@ -176,7 +172,7 @@ class WblistController extends AbstractController {
             $referer = $request->headers->get('referer');
             return $this->redirect($referer);
         }
-        return $this->renderForm('import/index_wblist.html.twig', [
+        return $this->render('import/index_wblist.html.twig', [
                     'controller_name' => 'ImportController',
                     'form' => $form,
         ]);

@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class DomainType extends AbstractType {
 
@@ -22,21 +24,17 @@ class DomainType extends AbstractType {
     private $tabLanguages;
 
     public function __construct(ImapPorts $imapPorts, ParameterBagInterface $params) {
-//        dd($params->get('app_locales'));
         $langs = explode('|', $params->get('app_locales'));
         foreach($langs as $lang){
             $this->tabLanguages[$lang] = $lang;
         }
-        
+
         $this->imapPorts = $imapPorts;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options) {
-
-
-
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
         $actions = $options['actions'];
-//dd($actions);
         $builder
                 ->add('domain', null, [
                     'label' => 'Entities.Domain.fields.domain'
@@ -44,34 +42,8 @@ class DomainType extends AbstractType {
                 ->add('srvSmtp', null, [
                     'label' => 'Entities.Domain.fields.srvSmtp'
                 ])
-                ->add('srvImap', null, [
-                    'label' => 'Entities.Domain.fields.srvImap'
-                ])
-                ->add('imap_port', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_port',
-                    'placeholder' => '',
-                    'choices' => $this->imapPorts::allValues(),
-                    'multiple' => false,
-                    'expanded' => false,
-                ])
                 ->add('smtpPort', TextType::class, [
                     'label' => 'Entities.Domain.fields.smtp_port',
-                ])                
-//                ->add('imap_port', null, [
-//                    'empty_data' => '143',
-//                    'label' => 'Entities.Domain.fields.imap_port'
-//                ])
-                ->add('imap_flag', ChoiceType::class, [
-                    'label' => 'Entities.Domain.fields.imap_flag',
-                    'required' => false,
-                    'choices' => [
-                        'Generics.labels.none' => '',                        
-                        'SSL' => 'ssl',
-                        'TLS' => 'tls',
-                    ]
-                ])
-                ->add('imapNoValidateCert', null, [
-                    'label' => 'Entities.Domain.fields.imapNoValidateCert'
                 ])
                 ->add('active', null, [
                     'label' => 'Entities.Domain.fields.active'
@@ -85,7 +57,7 @@ class DomainType extends AbstractType {
                     'choices' => $this->tabLanguages,
                     'placeholder' => '',
                     'label' => 'Entities.Domain.fields.defaultLang',
-                ])                
+                ])
                 ->add('policy', null, [
                     'label' => 'Entities.Domain.fields.policy',
                     'required' => true,
@@ -109,10 +81,25 @@ class DomainType extends AbstractType {
                     'mapped' => false,
                     'required' => false,
                 ])
-        ;
+                ->add('domainRelays', CollectionType::class, [
+                    'entry_type' => DomainRelayType::class,
+                    'entry_options' => ['label' => false],
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                    'label' => false,
+                ])
+                ->add('quota', CollectionType::class, [
+                    'entry_type' => QuotaType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                    'label' => false,
+                ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
+    public function configureOptions(OptionsResolver $resolver): void
+    {
         $resolver->setDefaults([
             'data_class' => Domain::class,
             'minSpamLevel' => null,

@@ -12,7 +12,6 @@ use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -25,12 +24,11 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Exception\LdapException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Security("is_granted('ROLE_ADMIN')")
- * @Route("/ldap")
- */
+#[IsGranted('ROLE_ADMIN')]
+#[Route(path: '/ldap')]
 class LdapConnectorController extends AbstractController {
 
     private $translator;
@@ -69,7 +67,7 @@ class LdapConnectorController extends AbstractController {
         }
 
         $form->get("type")->setData(ConnectorTypes::LDAP);
-        return $this->renderForm('connector/new_ldap.html.twig', [
+        return $this->render('connector/new_ldap.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);
@@ -100,7 +98,7 @@ class LdapConnectorController extends AbstractController {
             return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('connector/edit_ldap.html.twig', [
+        return $this->render('connector/edit_ldap.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
         ]);

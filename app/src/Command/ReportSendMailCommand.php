@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Msgs;
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,22 +17,23 @@ use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
+#[AsCommand(
+    name: 'agentj:report-send-mail',
+    description: 'Send report email',
+)]
 class ReportSendMailCommand extends Command {
 
-    protected static $defaultName = 'agentj:report-send-mail';
-    private $twig;
-    private $doctrine;
-    private $translator;
 
-    public function __construct(Environment $twig, ManagerRegistry $doctrine, TranslatorInterface $translator) {
-        // Inject it in the constructor and update the value on the class
-        $this->twig = $twig;
-        $this->doctrine = $doctrine;
-        $this->translator = $translator;
+
+    public function __construct(
+            private Environment $twig, 
+            private ManagerRegistry $doctrine, 
+            private TranslatorInterface $translator) {
         parent::__construct();
     }
 
-    protected function configure() {
+    protected function configure(): void
+    {
         $this->setDescription('Send report email ');
     }
 
@@ -51,21 +53,24 @@ class ReportSendMailCommand extends Command {
 
         // Get users to send report
         $allUsers = $em->getRepository(User::class)->activeUsers();
-
+        
         foreach ($allUsers as $userId) {
             /* @var $user User */
             $user = $em->getRepository(User::class)->find($userId);
             if ($user && $user->getReport()) {
-
                 /**
                  * Récupérer les liste des messages non traités depuis le dernier envoie du rapport
                  * N'envoyer le rapport que si ce nombre est > 0
                  */
                 $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user]);
                 $untreatedMsgs = $em->getRepository(Msgs::class)->search($user, null, $alias, null, null, $user->getDateLastReport());
-                if (count($untreatedMsgs) == 0) {
+                $totalUnread = count($untreatedMsgs);
+
+                if ($totalUnread == 0) {
                     continue;
                 }
+
+                $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
                 $nbAuthorized = $em->getRepository(Msgs::class)->countByType($user, 2, $alias);
                 $nbBanned = $em->getRepository(Msgs::class)->countByType($user, 1, $alias);
                 $nbDeleted = $em->getRepository(Msgs::class)->countByType($user, 3, $alias);
@@ -82,7 +87,11 @@ class ReportSendMailCommand extends Command {
                 $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
                 $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
 
-                $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs, 'url' => $url]);
+                $tableMsgs = $this->twig->render(
+                    'report/table_mail_msgs.html.twig', [
+                        'untreatedMsgs' => $untreatedMsgs,
+                        'url' => $url
+                    ]);
                 //        $tableMsgs = $this->renderView('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs]);
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
@@ -123,9 +132,8 @@ class ReportSendMailCommand extends Command {
                     $i++;
                 } catch (\Exception $e) {
                     //catch error and save this in msgs + change status to error
-                    $messageError = $e->getMessage();
-                    $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
-                    return Command::FAILURE;
+                    $messageError = $e->getMessage();   
+                    $io->note(sprintf('Error  %s : [%s]', $user->getEmailFromRessource(), $messageError));
                 }
             }
         }

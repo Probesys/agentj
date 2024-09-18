@@ -1,0 +1,204 @@
+# Make policyd-rate-limit output logs to stderr
+debug: True
+
+# path where the program will try to write its pid to.
+pidfile: "/var/run/policyd-rate-limit/policyd-rate-limit.pid"
+
+# The user policyd-rate-limit will use to drop privileges.
+user: "policyd-rate-limit"
+# The group policyd-rate-limit will use to drop privileges.
+group: "policyd-rate-limit"
+
+# The config to connect to a mysql server.
+mysql_config:
+    user: "$DB_USER"
+    passwd: "$DB_PASSWORD"
+    db: "$DB_NAME"
+    host: "$DB_HOST"
+    charset: 'utf8'
+
+# 0 for sqlite3, 1 for mysql and 2 for postgresql.
+backend: 1
+
+# The socket to bind to. Can be a path to an unix socket or a couple [ip, port].
+SOCKET: ["0.0.0.0", 8552]
+
+# A list of couple [number of emails, number of seconds]. If one of the element of the list is
+# exeeded (more than 'number of emails' on 'number of seconds' for an ip address or an sasl
+# username), postfix will return a temporary failure.
+limits:
+    - [10, 60] # limit to 10 mails by minutes
+    - [150, 86400] # limits to 150 mails by days
+
+# dict of id -> limit list. Used to override limits and use custom limits for
+# a particular id. Use an empty list for no limits for a particular id.
+# ids are sasl usernames or ip addresses
+# limits_by_id:
+#     foo: []
+#     192.168.0.254:
+#         - [1000, 86400] # limits to 1000 mails by days
+#     2a01:240:fe3d:4:219:bbff:fe3c:4f76: []
+limits_by_id: {}
+
+# Use custom rate limit for every user, if you have sql backend for your mail server.
+# There is a `rate_limit` table which has id -> limits_by_id-like strings for custom limits.
+# You should set for your users a rate_limit id to map users <-> rate_limits tables.
+sql_limits_by_id: "
+           WITH email_cte AS (
+             SELECT %s AS email
+           )
+           SELECT
+             COALESCE(
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(u.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS user_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(g.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN user_groups ug ON u.id = ug.user_id
+                  JOIN groups g ON ug.groups_id = g.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS group_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               (SELECT JSON_ARRAYAGG(JSON_ARRAY(CAST(quota_emails AS SIGNED), CAST(quota_seconds AS SIGNED)))
+                FROM (
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[0].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[0].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[1].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[1].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                  UNION ALL
+                  SELECT
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[2].quota_emails')) AS quota_emails,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.quota, '$[2].quota_seconds')) AS quota_seconds
+                  FROM
+                    users u
+                  JOIN domain d ON u.domain_id = d.id, email_cte e
+                  WHERE
+                    u.email = e.email
+                ) AS domain_quota
+                WHERE quota_emails IS NOT NULL AND quota_seconds IS NOT NULL),
+               '[]'
+             ) as quota_array;"
+
+# Apply limits by sasl usernames.
+limit_by_sasl: True
+# If no sasl username is found, or limit by sasl usernames disabled,
+# apply limits by sender addresses.
+limit_by_sender: True
+# If sasl username and sender address not found or disabled, apply limits by ip addresses.
+limit_by_ip: False
+
+# A list of ip networks in cidr notation on which limits are applied. An empty list is equal
+# to limit_by_ip: False, put "0.0.0.0/0" and "::/0" for every ip addresses.
+#limited_networks: ["0.0.0.0/0", "::/0"]
+
+# If no limits are reach, which action postfix should do.
+# see http://www.postfix.org/access.5.html for a list of actions.
+success_action: "dunno"
+# If a limit is reach, which action postfix should do.
+# see http://www.postfix.org/access.5.html for a list of actions.
+fail_action: "defer_if_permit Rate limit reach, retry later"
+# If we are unable to to contect the database backend, which action postfix should do.
+# see http://www.postfix.org/access.5.html for a list of actions.
+db_error_action: "dunno"
+
+# If True, send a report to report_to about users reaching limits each time --clean is called
+report: False
+# from who to send emails reports. Must be defined if report: True
+report_from: null
+# Address to send emails reports to. Must be defined if report: True
+# If can be a single email address:
+# report_to: foo@example.com
+# or a list of email addresses:
+# report_to:
+#     - foo@example.com
+#     - bar@example.com
+report_to: null
+# Subject of the report email
+report_subject: "policyd-rate-limit report"
+# List of number of seconds from the limits list for which you want to be reported.
+report_limits: [86400]
+# Only send a report if some users have reach a reported limit.
+# Otherwise, empty reports may be sent.
+report_only_if_needed: True
+
+# The smtp server to use to send emails [host, port]
+#smtp_server: [$SMTP_RELAY, 25]
+# Should we use starttls (you should set this to True if you use smtp_credentials)
+smtp_starttls: False
+# Should we use credentials to connect to smtp_server ? if yes set ["user", "password"], else null
+smtp_credentials: null
+
+# The time in seconds before an unused socket gets closed
+delay_to_close: 300
+
+# How sent mail are counted:
+# * 0 each RCPT TO are counted individualy. This is the how it was done historically. If set to 0,
+#   the postfix check_policy_service must be set in smtpd_recipient_restrictions.
+#   This is deprecated and should not be used anymore
+# * 1 recipient are counted in the DATA stage. The postfix parameter check_policy_service must be
+#   defined in smtpd_data_restrictions.
+#   This is the new default.
+count_mode: 1

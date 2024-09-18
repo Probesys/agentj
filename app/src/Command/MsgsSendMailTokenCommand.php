@@ -9,7 +9,8 @@ use App\Entity\Msgs;
 use App\Entity\User;
 use App\Service\CryptEncryptService;
 use App\Service\LogService;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,31 +23,28 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
+#[AsCommand(
+    name: 'agentj:msgs-send-mail-token',
+    description: 'Send email with url token to validate email sender address',
+)]
 class MsgsSendMailTokenCommand extends Command
 {
 
-    protected static $defaultName = 'agentj:msgs-send-mail-token';
-    private $translator;
-    private $doctrine;
     private $messageStatusError;
     private $messageStatusAuthorized;
-    private $em;
-    private CryptEncryptService $cryptEncryptService;
+   
 
-    protected function configure()
+    protected function configure():void
     {
-        $this
-            ->setDescription('Send email with url token to validate email with captcha')
-        ;
+
     }
     
 
+    public function __construct(
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator,
+        private CryptEncryptService $cryptEncryptService) {
 
-    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator, CryptEncryptService $cryptEncryptService) {
-        $this->doctrine = $doctrine;
-        $this->translator = $translator;
-        $this->cryptEncryptService = $cryptEncryptService;
         parent::__construct();
     }
     
@@ -65,9 +63,7 @@ class MsgsSendMailTokenCommand extends Command
         $factory = new LockFactory($store);
         $lock = $factory->createLock('msgs-send-mail-token', 1800);
 
-        if ($lock->acquire()) {
-
-            $this->em = $this->doctrine->getManager();
+        if ($lock->acquire()) {            
             $this->messageStatusError = $this->em->getRepository(MessageStatus::class)->find(4); //status error
             $this->messageStatusAuthorized = $this->em->getRepository(MessageStatus::class)->find(2); //status authorized
             $this->em->getRepository(Msgs::class)->updateErrorStatus();
@@ -112,8 +108,8 @@ class MsgsSendMailTokenCommand extends Command
                     if ($user->getBypassHumanAuth()) {
                           $this->releaseMessage($msgObj, $msgrcpt, $user);
                     } else {
-                                  // Bypass if an authetification has been sent the last day for this sender
-                                  $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
+                        // Bypass if an authetification has been sent the last day for this sender
+                        $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
                         if (count($AuhtentificationAllreadySent) > 0) {
                             $today = new \DateTime();
                             $dateLastSendAuthentification = new \DateTime($AuhtentificationAllreadySent[0]['time_iso']);
@@ -163,13 +159,15 @@ class MsgsSendMailTokenCommand extends Command
         return Command::SUCCESS;
     }
 
-  /**
-     *
+
+    /**
+     * 
+     * @param Domain $destDomain
      * @param type $msg
      * @param type $destEmail
-     * @return type
+     * @return array
      */
-    private function createAuthMessageContent(Domain $destDomain, $msg, $destEmail)
+    private function createAuthMessageContent(Domain $destDomain, $msg, $destEmail): array
     {
         $domain = $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
         $scheme = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
@@ -189,22 +187,27 @@ class MsgsSendMailTokenCommand extends Command
         $bodyTextPlain = preg_replace("/\r|\n|\t/", "", $body);
         $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $bodyTextPlain);
         $bodyTextPlain = preg_replace_callback("/(&#[0-9]+;)/", function ($m) {
+            
             return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
+            
         }, $bodyTextPlain);
         $bodyTextPlain = html_entity_decode($bodyTextPlain);
         $bodyTextPlain = strip_tags($bodyTextPlain);
         $bodyTextPlain .= "\n" . $url;
+        
         return [
-        'html_body' => $body,
-        'plain_body' => $bodyTextPlain,
+            'html_body' => $body,
+            'plain_body' => $bodyTextPlain,
         ];
     }
 
-  /**
+  
+    /**
      * Set the subject of the mail send captcha from original subject
-     * @return type
+     * @param Msgs $msgObj
+     * @return string
      */
-    private function getSubject(Msgs $msgObj)
+    private function getSubject(Msgs $msgObj): string
     {
         if ($msgObj->getSubject() && strlen($msgObj->getSubject()) > 0) {
             $subject = 'Re : ' . $msgObj->getSubject();
@@ -214,13 +217,16 @@ class MsgsSendMailTokenCommand extends Command
         return $subject;
     }
 
-  /**
+  
+    /**
      * create message instance
-     * @param type $fromName
-     * @param String $body
+     * @param Msgs $msgObj
+     * @param string $mailFrom
+     * @param string $fromName
+     * @param array $body
      * @return Email
      */
-    private function createAuthMessage(Msgs $msgObj, string $mailFrom, string $fromName, array $body)
+    private function createAuthMessage(Msgs $msgObj, string $mailFrom, string $fromName, array $body): Email
     {
 
 
@@ -258,16 +264,16 @@ class MsgsSendMailTokenCommand extends Command
      * @param type $msgrcpt
      * @return boolean
      */
-    private function sendAuthMessage(Msgs $msgObj, Email $message, $msgrcpt)
+    private function sendAuthMessage(Msgs $msgObj, Email $message, $msgrcpt): bool
     {
 
         $mailTo = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
         $failedRecipients = [];
       /** Sne dth emessage * */
         try {
+
             $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
             $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
-
             $mailer = new Mailer($transport);
             $mailer->send($message);
             $msgObj->setSendCaptcha(time());
@@ -287,14 +293,15 @@ class MsgsSendMailTokenCommand extends Command
         }
     }
 
-    private function releaseMessage(Msgs $msgObj, Msgrcpt $msgRcpt, User $user)
+    private function releaseMessage(Msgs $msgObj, Msgrcpt $msgRcpt, User $user): void
     {
         $cmd = (string) $this->getApplication()->getKernel()->getContainer()->getParameter('app.amavisd-release');
-        $process = new Process([
-        $cmd,
-        stream_get_contents($msgObj->getQuarLoc(), -1, 0),
-        stream_get_contents($msgObj->getSecretId(), -1, 0),
-        $user->getEmailFromRessource()
+        $process = new Process(
+                [
+            $cmd,
+            stream_get_contents($msgObj->getQuarLoc(), -1, 0),
+            stream_get_contents($msgObj->getSecretId(), -1, 0),
+            $user->getEmailFromRessource()
         ]);
      // $process->getCommandLine();
         $process->run(

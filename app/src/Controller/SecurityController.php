@@ -14,9 +14,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
 
-  /**
-   * @Route("/login", name="app_login")
-   */
+  #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
       // get the login error if there is one
@@ -27,7 +25,7 @@ class SecurityController extends AbstractController
       // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
         $logoUploaded = file_exists($this->getParameter('app.upload_directory') . 'logo.png');
-        return $this->renderForm('security/login.html.twig', [
+        return $this->render('security/login.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
                 'logoUploaded' => $logoUploaded
@@ -36,9 +34,7 @@ class SecurityController extends AbstractController
     
    
 
-  /**
-   * @Route("/logout", name="app_logout")
-   */
+  #[Route(path: '/logout', name: 'app_logout')]
     public function logout()
     {
         return $this->redirectToRoute('homepage');

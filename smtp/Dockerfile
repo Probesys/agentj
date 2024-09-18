@@ -6,27 +6,26 @@ LABEL description = "Postfix server to relay incoming mails to anti-spam stack"
 
 SHELL [ "/bin/sh", "-e", "-c" ]
 
-RUN apt-get update -q --fix-missing && \
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
+    apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
-    postfix \
-    postfix-mysql \
-    postfix-policyd-spf-python \
-    supervisor \
-    rsyslog \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/* \
-    && sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf
+    postfix \ 
+    postfix-mysql \ 
+    postfix-policyd-spf-python \ 
+    postfix-lmdb \
+    supervisor  \ 
+    rsyslog \ 
+    tzdata  \ 
+    iproute2   
 
-COPY conf/postfix/* /etc/postfix/
-COPY conf/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
-COPY conf/postifx-policyd-spf-python/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
+RUN mkdir -p /etc/conf
+COPY conf /etc/conf 
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
-VOLUME /var/spool/postfix
-
 ENTRYPOINT [ "/entrypoint.sh" ]
-HEALTHCHECK --start-period=60s CMD postfix status >/dev/null || exit 1
-CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
+HEALTHCHECK --start-period=60s CMD postfix status 2>/dev/null || exit 1

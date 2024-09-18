@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class CryptEncryptService
 {
 
-  //  private $params;
+    private $params;
 
     public function __construct(ParameterBagInterface $params)
     {

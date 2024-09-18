@@ -6,16 +6,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @Route("/admin/config")
- */
+#[Route(path: '/admin/config')]
 class AdminController extends AbstractController
 {
 
 
-  /**
-   * @Route("/delete-logo", name="delete_logo",  methods="GET", options={"expose"=true})
-   */
+  #[Route(path: '/delete-logo', name: 'delete_logo', methods: 'GET', options: ['expose' => true])]
     public function deleteLogo()
     {
 

@@ -2,7 +2,8 @@
     "devDependencies": {
         "@hotwired/stimulus": "^3.0.0",
         "@hotwired/turbo": "^7.0.1",
-        "@symfony/stimulus-bridge": "^2.0.0",
+        "@symfony/stimulus-bridge": "^3.2.0",
+        "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets",
         "@symfony/ux-chartjs": "file:vendor/symfony/ux-chartjs/assets",
         "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
         "chart.js": "^3.4.1",
@@ -11,6 +12,7 @@
         "sass": "^1.51.0",
         "sass-loader": "^12.0.0",
         "stimulus": "^2.0.0",
+        "tom-select": "^2.2.2",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.6.0"
     },
@@ -26,7 +28,7 @@
         "@babel/core": "^7.23.2",
         "@babel/preset-env": "^7.23.2",
         "@symfony/webpack-encore": "^4.0.0",
-        "axios": "^0.27.2",
+        "axios": "^0.28.0",
         "jquery": "^3.6.0",
         "loader-utils": "^2.0.4",
         "webpack": "^5.76.0"

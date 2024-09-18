@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Users
@@ -19,7 +20,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
-  /**
+    /**
      * @var int
      */
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
@@ -27,96 +28,100 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private $id;
 
-  /**
+    /**
      * @var int
      */
     #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
     private $priority = '7';
 
-  /**
+    /**
      * @var binary
      */
     #[ORM\Column(name: 'email', type: 'binary', nullable: true, unique: true)]
     private $email;
 
-  /**
+    /**
      * @var string|null
      */
     #[ORM\Column(name: 'fullname', type: 'string', length: 255, nullable: true)]
     private $fullname;
 
-  /**
+    /**
      * @var string|null
      */
     #[ORM\Column(name: 'username', type: 'string', length: 255, nullable: true)]
     private $username;
 
-  /**
+    /**
      * @var string|null
      */
     #[ORM\Column(name: 'local', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private $local;
 
-  /**
+    /**
      * @var string
      */
     #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
     private $password;
 
-  /**
+    /**
      * @var string
      */
     #[ORM\Column(name: 'roles', type: 'text', length: 0, nullable: true)]
     private $roles;
 
-  /**
+    /**
      * @var string|null
      */
     #[ORM\Column(name: 'emailRecovery', type: 'string', length: 255, nullable: true)]
     private $emailRecovery;
 
-  /**
+    /**
      * @var string|null
      */
     #[ORM\Column(name: 'imapLogin', type: 'string', length: 255, nullable: true)]
     private $imapLogin;
 
 
-  #[ORM\ManyToOne(targetEntity: 'Policy')]
+    #[ORM\ManyToOne(targetEntity: 'Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private $policy;
 
+    #[ORM\ManyToOne(targetEntity: 'Policy')]
+    #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
+    private $outPolicy;
 
-  #[ORM\JoinTable(name: 'users_domains')]
+
+    #[ORM\JoinTable(name: 'users_domains')]
     #[ORM\ManyToMany(targetEntity: 'Domain', inversedBy: 'users')]
     private $domains;
 
-  #[ORM\ManyToOne(targetEntity: 'Domain')]
+    #[ORM\ManyToOne(targetEntity: 'Domain')]
     #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
     private $domain;
 
-  #[ORM\ManyToMany(targetEntity: 'Groups', inversedBy: 'users')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\ManyToMany(targetEntity: 'Groups', inversedBy: 'users')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     #[OrderBy(['priority' => 'DESC'])]
     private $groups;
 
-  #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\ManyToOne(targetEntity: 'User')]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
     private $originalUser;
 
-  #[ORM\Column(type: 'boolean', nullable: true)]
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $report;
 
-  #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'ownedSharedBoxes')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'ownedSharedBoxes')]
     private $sharedWith;
 
-  #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'sharedWith')]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'sharedWith')]
     private $ownedSharedBoxes;
 
-  #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private $dateLastReport;
 
-  #[ORM\Column(type: 'boolean', nullable: true)]
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $bypassHumanAuth;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
@@ -135,7 +140,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $ldapDN;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $office365PrincipalName = null;       
+    private ?string $office365PrincipalName = null;
+
+    #[ORM\OneToOne(targetEntity: 'App\Entity\SenderRateLimit')]
+    private ?SenderRateLimit $sender_rate_limit = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $quota = null;
 
     public function __construct()
     {
@@ -166,7 +177,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string) $this->username;
-    }    
+    }
 
     public function getPriority(): ?int
     {
@@ -237,7 +248,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = json_decode($this->roles);
 
-      // Afin d'être sûr qu'un user a toujours au moins 1 rôle
+        // Afin d'être sûr qu'un user a toujours au moins 1 rôle
         if (empty($roles)) {
             $roles[] = 'ROLE_USER';
         }
@@ -252,30 +263,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-  /**
-   * Retour le salt qui a servi à coder le mot de passe
-   *
-   * {@inheritdoc}
-   */
+    /**
+     * Retour le salt qui a servi à coder le mot de passe
+     *
+     * {@inheritdoc}
+     */
     public function getSalt(): ?string
     {
-      // See "Do you need to use a Salt?" at https://symfony.com/doc/current/cookbook/security/entity_provider.html
-      // we're using bcrypt in security.yml to encode the password, so
-      // the salt value is built-in and you don't have to generate one
+        // See "Do you need to use a Salt?" at https://symfony.com/doc/current/cookbook/security/entity_provider.html
+        // we're using bcrypt in security.yml to encode the password, so
+        // the salt value is built-in and you don't have to generate one
 
         return null;
     }
 
-  /**
-   * Removes sensitive data from the user.
-   *
-   * {@inheritdoc}
-   */
+    /**
+     * Removes sensitive data from the user.
+     *
+     * {@inheritdoc}
+     */
     public function eraseCredentials(): void
     {
-      // Nous n'avons pas besoin de cette methode car nous n'utilions pas de plainPassword
-      // Mais elle est obligatoire car comprise dans l'interface UserInterface
-      // $this->plainPassword = null;
+        // Nous n'avons pas besoin de cette methode car nous n'utilions pas de plainPassword
+        // Mais elle est obligatoire car comprise dans l'interface UserInterface
+        // $this->plainPassword = null;
     }
 
     public function getUsername(): ?string
@@ -305,6 +316,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getOutPolicy(): ?Policy
+    {
+        return $this->outPolicy;
+    }
+
+    public function setOutPolicy(?Policy $outPolicy): self
+    {
+        $this->outPolicy = $outPolicy;
+
+        return $this;
+    }
+
 
     public function getDomain(): ?Domain
     {
@@ -318,9 +341,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-  /**
-   * @return Collection|Domain[]
-   */
+    /**
+     * @return Collection|Domain[]
+     */
     public function getDomains(): Collection
     {
         return $this->domains;
@@ -393,9 +416,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-  /**
-   * @return Collection|self[]
-   */
+    /**
+     * @return Collection|self[]
+     */
     public function getSharedWith(): Collection
     {
         return $this->sharedWith;
@@ -419,7 +442,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
- 
+
     /**
      * @return Collection<int, User>
      */
@@ -591,6 +614,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setOffice365PrincipalName(?string $office365PrincipalName): static
     {
         $this->office365PrincipalName = $office365PrincipalName;
+
+        return $this;
+    }
+
+    public function getSenderRateLimit(): ?SenderRateLimit
+    {
+        return $this->sender_rate_limit;
+    }
+
+    public function setSenderRateLimit(SenderRateLimit $limits): self
+    {
+        $this->sender_rate_limit = $limits;
+
+        return $this;
+    }
+
+    public function getQuota(): ?array
+    {
+        return $this->quota;
+    }
+
+    public function setQuota(?array $quota): static
+    {
+        $this->quota = $quota;
 
         return $this;
     }

@@ -11,7 +11,7 @@ use KnpU\OAuth2ClientBundle\Security\Exception\IdentityProviderAuthenticationExc
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -31,9 +31,8 @@ class OAuthAuthenticator extends OAuth2Authenticator {
             private UserRepository $userRepository,
             private EntityManagerInterface $entityManager,
             private RouterInterface $router,
-            private FlashBagInterface $flashBag,
+//            private SessionInterface $session,
     ) {
-        
     }
 
     public function supports(Request $request): ?bool {
@@ -99,10 +98,11 @@ class OAuthAuthenticator extends OAuth2Authenticator {
 //        $loginUrl = $this->router->generate('app_login', [], UrlGeneratorInterface::ABSOLUTE_URL);
 //        $microsoftLogoutUrl = "https://login.windows.net/common/oauth2/logout?post_logout_redirect_uri=$loginUrl";
 
-        $this->flashBag->add(
-                'error',
-                new TranslatableMessage($exception->getMessage())
-        );
+        
+//        $this->flashBag->add(
+//                'error',
+//                new TranslatableMessage($exception->getMessage())
+//        );
 
         throw $exception->getPrevious() ?? $exception;
     }

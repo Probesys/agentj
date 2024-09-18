@@ -1,5 +1,4 @@
 ---
-version: '3.7'
 
 services:
   db:
@@ -14,71 +13,125 @@ services:
       - MYSQL_USER=${DB_USER:-agent}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - TZ=${TZ:-Europe/Paris}
-    networks:
-      - ajnet
 
   amavis:
     image: probesys38/agentj_amavis:${VERSION}
+    build:
+      context: amavis/.
     restart: always
+    environment:
+      - AMAVIS_CONF=amavisd.conf
     env_file:
       - .env
     depends_on:
       - db
     volumes:
-      - amavis:/var/amavis/
-    networks:
-      ajnet:
-        ipv4_address: ${IPV4_NETWORK:-172.24.42}.252
+      - amavis_in:/var/lib/amavis/
+
+  outamavis:
+    image: probesys38/agentj_amavis:${VERSION}
+    build:
+      context: amavis/.
+    restart: always
+    environment:
+      - AMAVIS_CONF=amavisd_out.conf
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - amavis_out:/var/lib/amavis/
 
   app:
     image: probesys38/agentj_app:${VERSION}
+    build:
+      context: ./app
     restart: always
     env_file:
       - .env
     depends_on:
       - amavis
+      - outamavis
       - db
     volumes:
-      - amavis:/tmp/amavis
       - applogs:/var/log/agentj
-      - opendkim:/var/db/dkim
-    networks:
-      ajnet:
-        ipv4_address: ${IPV4_NETWORK:-172.24.42}.240
     ports:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
   relay:
-    image: probesys38/agentj_relay:${VERSION}
+    image: probesys38/agentj_smtp:${VERSION}
+    build:
+      context: ./smtp/.
     restart: always
+    environment:
+      - SMTP_TYPE=relay
     env_file:
       - .env
-    networks:
-      ajnet:
-        ipv4_address: ${IPV4_NETWORK:-172.24.42}.251
+    command:  [ "supervisord", "-c", "/etc/conf/relay/supervisor/supervisord.conf" ]
 
   smtp:
     image: probesys38/agentj_smtp:${VERSION}
+    build:
+      context: ./smtp/.
     restart: always
+    environment:
+      - SMTP_TYPE=in
     env_file:
       - .env
     depends_on:
       - db
+      - opendkim
     volumes:
       - postqueue:/var/spool/postfix
     ports:
       - ${SMTP_LISTEN_ADDR:-0.0.0.0}:${SMTP_PORT:-25}:25
-    networks:
-      ajnet:
-        ipv4_address: ${IPV4_NETWORK:-172.24.42}.250
+    command:  [ "supervisord", "-c", "/etc/conf/in/supervisor/supervisord.conf" ]
+
+  outsmtp:
+    image: probesys38/agentj_smtp:${VERSION}
+    build:
+      context: ./smtp/.
+    restart: always
+    environment:
+      - SMTP_TYPE=out
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - opendkim
+    volumes:
+      - outpostqueue:/var/spool/postfix
+    ports:
+      - ${SMTP_LISTEN_ADDR:-0.0.0.0}:$SMTP_OUT_PORT:25
+    command:  [ "supervisord", "-c", "/etc/conf/out/supervisor/supervisord.conf" ]
+
+  opendkim:
+    image: probesys38/agentj_opendkim:${VERSION}
+    build:
+      context: ./opendkim/
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  policyd-rate-limit:
+    image: probesys38/agentj_policyd-rate-limit:${VERSION}
+    build:
+      context: ./policyd-rate-limit
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
 
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}
+    build:
+      context: ./syslogng
     restart: always
     env_file:
       - .env
-    networks:
-      - ajnet
     volumes:
       - logs:/var/log/syslogng
 
@@ -90,23 +143,15 @@ services:
     depends_on:
       - syslogng
     command: syslog+udp://syslogng:514?filter.name=${COMPOSE_PROJECT_NAME}*
-    networks:
-      - ajnet
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
 volumes:
-  amavis:
+  amavis_out:
+  amavis_in:
   applogs:
   db:
   logs:
-  opendkim:
   postqueue:
+  outpostqueue:
 
-networks:
-  ajnet:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: ${IPV4_NETWORK:-172.24.42}.0/24

@@ -28,9 +28,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route("/domain")
- */
+#[Route(path: '/domain')]
 class DomainController extends AbstractController {
 
     use ControllerWBListTrait;
@@ -57,9 +55,7 @@ class DomainController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/", name="domain_index", methods="GET")
-     */
+    #[Route(path: '/', name: 'domain_index', methods: 'GET')]
     public function index(): Response {
 
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
@@ -76,9 +72,7 @@ class DomainController extends AbstractController {
         return $this->render('domain/index.html.twig', ['domains' => $domains]);
     }
 
-    /**
-     * @Route("/new", name="domain_new", methods="GET|POST")
-     */
+    #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
     public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
@@ -110,6 +104,7 @@ class DomainController extends AbstractController {
                 $domain->setMessageAlert($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_report'])->getValue());
             }
 
+            $this->generateOpenDkim($domain);
 
 
 
@@ -150,9 +145,8 @@ class DomainController extends AbstractController {
                 }
             }
 
-            $em->flush();
 
-            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
+            $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_index');
         } elseif ($form->isSubmitted()) {
@@ -174,16 +168,12 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="domain_show", methods="GET")
-     */
+    #[Route(path: '/{id}', name: 'domain_show', methods: 'GET')]
     public function show(Domain $domain): Response {
         return $this->render('domain/show.html.twig', ['domain' => $domain]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="domain_edit", methods="GET|POST")
-     */
+    #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
     public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response {
 
         $this->checkAccess($domain);
@@ -232,7 +222,8 @@ class DomainController extends AbstractController {
                 }
             }
 
-            $this->generateOpenDkim($domain->getSrvSmtp(), $domain->getDomain());
+	    if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
+		    $this->generateOpenDkim($domain);
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -260,31 +251,21 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}/delete", name="domain_delete", methods="GET")
-     */
+    #[Route(path: '/{id}/delete', name: 'domain_delete', methods: 'GET')]
     public function delete(Request $request, Domain $domain): Response {
         $this->checkAccess($domain);
         if ($this->isCsrfTokenValid('delete' . $domain->getId(), $request->query->get('_token'))) {
             $em = $this->em;
             $em->remove($domain);
             $em->flush();
-
-            //Delete dkim key of the domain
-            $process = new Process([$this->getParameter('app.dkim_removal'), $domain->getDomain(), $domain->getSrvSmtp()]);
-            try {
-                $process->run();
-            } catch (ProcessFailedException $exception) {
-                $this->addFlash('error deleting dkim', $exception->getMessage());
-            }
         }
 
         return $this->redirectToRoute('domain_index');
     }
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     * @Route("/{rid}/wblist/delete/{sid}", name="domain_wblist_delete", methods="GET|POST")
      */
+    #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'GET|POST')]
     public function deleteWblist($rid, $sid, Request $request): Response {
         $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
@@ -298,9 +279,7 @@ class DomainController extends AbstractController {
         return $this->redirectToRoute('domain_index');
     }
 
-    /**
-     * @Route("/{id}/wblist", name="domain_wblist", methods="GET")
-     */
+    #[Route(path: '/{id}/wblist', name: 'domain_wblist', methods: 'GET')]
     public function domainwblist(Domain $domain): Response {
         $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
@@ -313,8 +292,8 @@ class DomainController extends AbstractController {
     }
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     * @Route("/{domainId}/wblist/new", name="domain_wblist_new", methods="GET|POST")
      */
+    #[Route(path: '/{domainId}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
     public function newwblist($domainId, Request $request, MailaddrService $mailaddrService): Response {
         $em = $this->em;
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
@@ -371,9 +350,7 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/{id}/messages", name="domain_messages", methods="GET|POST")
-     */
+    #[Route(path: '/{id}/messages', name: 'domain_messages', methods: 'GET|POST')]
     public function domainMessages(Request $request, Domain $domain): Response {
         $this->checkAccess($domain);
         $form = $this->createForm(DomainMessageType::class, $domain);
@@ -391,21 +368,26 @@ class DomainController extends AbstractController {
         ]);
     }
 
-    
+    /* Generate private and public keys for DKIM */
+    private function generateOpenDkim(Domain $domain): bool {
+	$dkim = $domain->getDomainKeys();
+	$dkim->setDomainName($domain->getDomain());
+	$dkim->setSelector('agentj');
+	try {
+	    $private_key = openssl_pkey_new();
+	    $privkey_pem = null;
+	    openssl_pkey_export($private_key, $privkey_pem);
+	    $dkim->setPrivateKey($privkey_pem);
 
-    private function generateOpenDkim(string $smtpServer, string $domainName): bool {
-        $process = new Process([$this->getParameter('app.dkim_generator'), $domainName, $smtpServer]);
-//        $process->run();
+	    $pubkey_pem = openssl_pkey_get_details($private_key)['key'];
+	    $dkim->setPublicKey($pubkey_pem);
+	    // $public_key = openssl_pkey_get_public($public_key_pem);
 
-        try {
-            $process->run();
-
-            $this->addFlash('info', $smtpServer . ' : ' . $process->getOutput());
-            return true;
-        } catch (ProcessFailedException $exception) {
-            $this->addFlash('error', $exception->getMessage());
-            return false;
-        }
+	    $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getDnsEntry());
+	    return true;
+	} catch (ProcessFailedException $exception) {
+	    $this->addFlash('error', $exception->getMessage());
+	    return false;
+	}
     }
-
 }

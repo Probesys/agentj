@@ -2,6 +2,6 @@
 set -e
 
 echo "Installing crontabs"
-crond
+cron
 
 exec "$@"
