@@ -122,6 +122,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    volumes:
+      - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
 
   syslogng:
     image: probesys38/agentj_syslogng:${VERSION}

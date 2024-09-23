@@ -59,12 +59,8 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form'],
             'include_quota' => false,
         ]);
-        $form->remove('groups');
-        $form->remove('email');
+        
         $form->remove('originalUser');
-        $form->remove('report');
-        $form->remove('sharedWith');
-        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -117,13 +113,8 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form'],
             'include_quota' => false,
         ]);
-        $form->remove('groups');
-        $form->remove('email');
-        $form->remove('password');
+        
         $form->remove('originalUser');
-        $form->remove('report');
-        $form->remove('sharedWith');
-        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -325,9 +316,8 @@ class UserController extends AbstractController {
             'include_quota' => false,
         ]);
         
-        $form->remove('groups');
+        
         $form->remove('password');
-        $form->remove('sharedWith');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -467,9 +457,8 @@ class UserController extends AbstractController {
             'include_quota' => false,
         ]);
 
-        $form->remove('groups');
+        
         $form->remove('password');
-        $form->remove('sharedWith');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
         $form->handleRequest($request);
 
