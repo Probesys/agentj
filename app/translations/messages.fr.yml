@@ -308,6 +308,7 @@ Search:
   AmavisOutput: Score Amavis
   Size: Taille
   Host: Domaine de l'expéditeur
+  ReplyTo: Réponse à un message
 
 Entities:
   Group:

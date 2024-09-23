@@ -25,6 +25,12 @@
             <td class="host-column" style="display: none;"></td>
         {% endif %}
 
+        {% if activeFilters['replyTo'] is defined %}
+            <td class="reply-to-column">{{ msg.replyTo }}</td>
+        {% else %}
+            <td class="reply-to-column" style="display: none;"></td>
+        {% endif %}
+
         <td>
             {% if messageType == 'incoming' %}
                 <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}" class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>

@@ -58,6 +58,7 @@
                 <th class="amavis-header" style="display: none;">{{ 'Search.AmavisOutput'|trans }}</th>
                 <th class="size-header" style="display: none;">{{ 'Search.Size'|trans }}</th>
                 <th class="host-header" style="display: none;">{{ 'Search.Host'|trans }}</th>
+                <th class="reply-to-header" style="display: none;">{{ 'Search.ReplyTo'|trans }}</th>
                 <th></th>
             </tr>
             </thead>
@@ -87,26 +88,13 @@
                     advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
                 });
 
-                function initializeDataTable() {
-                    $('.search').DataTable({
-                        processing: true,
-                        serverSide: false,
-                        searching: false,
-                        paging: true,
-                        ordering: true,
-                        autoWidth: false,
-                        pageLength: 50,
-                    });
-                }
-
-                initializeDataTable();
                 // Mapping of form fields to their corresponding table header classes
                 const columnMapping = {
                     'bspamLevelMin': '.amavis-header',
                     'bspamLevelMax': '.amavis-header',
                     'size': '.size-header',
                     'host': '.host-header',
-                    // Add more mappings as needed for future fields
+                    'replyTo': '.reply-to-header',
                 };
 
                 // Handle form submission via Ajax
@@ -116,41 +104,20 @@
                     var $form = $(this);
                     var url = $form.attr('action');
 
-                    // Handle visibility for bspamLevelMin and bspamLevelMax explicitly
-                    const bspamMin = $form.find(`[name="search_filter[bspamLevelMin]"]`).val();
-                    const bspamMax = $form.find(`[name="search_filter[bspamLevelMax]"]`).val();
-
-                    // Check if either min or max is not null or an empty string (including 0)
-                    const bspamActive = bspamMin !== null && bspamMin !== '' || bspamMax !== null && bspamMax !== '';
-
-                    // Toggle amavis-header visibility based on bspam level fields
-                    if (bspamActive) {
-                        document.querySelector('.amavis-header').style.display = '';
-                    } else {
-                        document.querySelector('.amavis-header').style.display = 'none';
-                    }
-
-                    // Iterate over the column mapping to check each form field except bspamLevelMin and bspamLevelMax
+                    // Check for active advanced filters and update header visibility accordingly
                     Object.keys(columnMapping).forEach(function (fieldName) {
-                        if (fieldName !== 'bspamLevelMin' && fieldName !== 'bspamLevelMax') {
-                            const headerSelector = columnMapping[fieldName];
-                            const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val();
+                        const headerSelector = columnMapping[fieldName];
+                        const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val();
 
-                            // Toggle header visibility based on field value (including zero)
-                            if (fieldValue !== null && fieldValue !== '') {
-                                document.querySelector(headerSelector).style.display = '';
-                            } else {
-                                document.querySelector(headerSelector).style.display = 'none';
-                            }
+                        // Toggle header visibility based on field value
+                        if (fieldValue !== null && fieldValue !== '') {
+                            document.querySelector(headerSelector).style.display = '';
+                        } else {
+                            document.querySelector(headerSelector).style.display = 'none';
                         }
                     });
 
-                    // Destroy the existing DataTable before updating the table
-                    if ($.fn.DataTable.isDataTable('.search')) {
-                        $('.search').DataTable().destroy();
-                    }
-
-
+                    // Send AJAX request to update the table
                     $.ajax({
                         url: url,
                         method: $form.attr('method'),
@@ -158,27 +125,13 @@
                         success: function (response) {
                             // Update the table body with new content
                             $('table.search tbody').html(response.content);
-                            initializeDataTable();
+                        },
+                        error: function () {
+                            console.error('Error occurred while fetching data.');
                         }
                     });
-
                 });
-
-                $(document).on('click', '.pagination-link', function (e) {
-                    e.preventDefault();
-                    const page = $(this).data('page');
-                    $('form').find('input[name="page"]').val(page);
-
-                    // Destroy and reinitialize DataTables to refresh with new page data
-                    if ($.fn.DataTable.isDataTable('.search')) {
-                        $('.search').DataTable().destroy();
-                    }
-
-                    $('form').submit(); // This will trigger the form submission handled above
-                });
-
             });
-
 
         </script>
 

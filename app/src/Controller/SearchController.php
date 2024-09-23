@@ -39,59 +39,64 @@ class SearchController extends AbstractController
        $messageType = $data['messageType'] ?? 'incoming';
 
        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType);
-        // dd($allMessages);
+// dd($allMessages);
 
        // Initialize active filters
        $activeFilters = [];
 
        // If form is submitted and valid, set active filters and filter messages
-       if ($form->isSubmitted() && $form->isValid()) {
-           $data = $form->getData();
+if ($form->isSubmitted() && $form->isValid()) {
+    $data = $form->getData();
 
-           // Track which filters are active
-           foreach ($data as $key => $value) {
-               if (!empty($value)) {
-                   $activeFilters[$key] = true;
-               }
-           }
+    // Track which filters are active
+    foreach ($data as $key => $value) {
+        if (!empty($value)) {
+            $activeFilters[$key] = true;
+        }
+    }
 
-           $allMessages = array_filter($allMessages, function ($message) use ($data) {
-               if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
-                   return false;
-               }
-               if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
-                   return false;
-               }
-               if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {
-                   return false;
-               }
-               if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
-                   return false;
-               }
-                if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
-                    return false;
-                }
-                if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
-                    return false;
-                }
-               if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
-                   return false;
-               }
-               if (!empty($data['endDate']) && $message['time_iso'] > $data['endDate']->format('Ymd\THis\Z')) {
-                   return false;
-               }
-               if (!empty($data['size']) && stripos($message['size'], $data['size']) === false) {
-                   return false;
-              }
-                if (!empty($data['host']) && stripos($message['host'], $data['host']) === false) {
-                     return false;
-                }
-              if (!empty($data['replyTo']) && $message['replyTo'] !== $data['replyTo']) {
-                   return false;
-              }
-              return true;
-           });
-       }
+    // Apply all active filters to the messages
+    $allMessages = array_filter($allMessages, function ($message) use ($data) {
+        // Basic filters
+        if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
+            return false;
+        }
+        if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
+            return false;
+        }
+        if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {
+            return false;
+        }
+        if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
+            return false;
+        }
+
+        // Advanced filters
+        if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
+            return false;
+        }
+        if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
+            return false;
+        }
+        if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
+            return false;
+        }
+        if (!empty($data['endDate']) && $message['time_iso'] > $data['endDate']->format('Ymd\THis\Z')) {
+            return false;
+        }
+        if (!empty($data['size']) && stripos($message['size'], $data['size']) === false) {
+            return false;
+        }
+        if (!empty($data['host']) && stripos($message['host'], $data['host']) === false) {
+            return false;
+        }
+        if (!empty($data['replyTo']) && $message['replyTo'] !== $data['replyTo']) {
+            return false;
+        }
+        return true;
+    });
+}
+
 
        // Pagination logic
        $page = $request->query->getInt('page', 1);

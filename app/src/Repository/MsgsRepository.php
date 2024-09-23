@@ -248,7 +248,7 @@ public function advancedSearch(User $user = null, string $messageType = 'incomin
         $emailResult = $emailStmt->executeQuery()->fetchOne();
 
         // Determine the replyTo status
-        $message['replyTo'] = ($message['from_addr'] !== $emailResult) ? 'yes' : 'no';
+        $message['replyTo'] = ($message['from_addr'] !== $emailResult) ? 'oui' : 'non';
     }
 
     // Clean up resources
