@@ -67,7 +67,7 @@ services:
       - SMTP_TYPE=relay
     env_file:
       - .env
-    command:  [ "supervisord", "-c", "/etc/conf/relay/supervisor/supervisord.conf" ]
+    command:  [ "/usr/sbin/postfix", "-c", "/etc/conf/relay/postfix", "start-fg" ]
 
   smtp:
     image: probesys38/agentj_smtp:${VERSION}
@@ -85,7 +85,7 @@ services:
       - postqueue:/var/spool/postfix
     ports:
       - ${SMTP_LISTEN_ADDR:-0.0.0.0}:${SMTP_PORT:-25}:25
-    command:  [ "supervisord", "-c", "/etc/conf/in/supervisor/supervisord.conf" ]
+    command:  [ "/usr/sbin/postfix", "-c", "/etc/conf/in/postfix", "start-fg" ]
 
   outsmtp:
     image: probesys38/agentj_smtp:${VERSION}
@@ -103,7 +103,7 @@ services:
       - outpostqueue:/var/spool/postfix
     ports:
       - ${SMTP_LISTEN_ADDR:-0.0.0.0}:$SMTP_OUT_PORT:25
-    command:  [ "supervisord", "-c", "/etc/conf/out/supervisor/supervisord.conf" ]
+    command:  [ "/usr/sbin/postfix", "-c", "/etc/conf/out/postfix", "start-fg" ]
 
   opendkim:
     image: probesys38/agentj_opendkim:${VERSION}
