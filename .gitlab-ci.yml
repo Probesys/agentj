@@ -256,6 +256,9 @@ test-mail:
   before_script:
     - UID="1829"
     - GID="1829"
+    - apk add bash curl perl
+    - curl -O https://jetmore.org/john/code/swaks/files/swaks-20240103.0/swaks --output-dir /usr/local/bin/
+    - chmod +x /usr/local/bin/swaks
   script:
     - cp .env.example .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
