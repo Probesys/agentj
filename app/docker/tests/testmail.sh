@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd /var/www/agentj/
+
 test_results=/tmp/test_mails
 
 # wait for app to be started (for db migrations)

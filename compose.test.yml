@@ -19,10 +19,6 @@ services:
         ipv4_address: 172.28.2.5
         aliases:
           - smtp.test
-    depends_on:
-      - outsmtp
-      - smtp
-      - app
 
   badrelay:
     build:
