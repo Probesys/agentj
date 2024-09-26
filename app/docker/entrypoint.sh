@@ -27,12 +27,11 @@ if [ ! -f $env_file ]; then
     sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 fi
 
-echo "Installing libraries"
-if [ -x "$(which composer)" && -x "$(which yarnpkg)" ] ; then
+if [ -x "$(which composer)" ] && [ -x "$(which yarnpkg)" ] ; then
+	echo "Installing libraries"
 	cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
 	cd /var/www/agentj && sudo -u www-data yarnpkg install
 fi
-# cd /var/www/agentj && sudo -u www-data yarnpkg encore production
 
 echo "Installing assets"
 cd /var/www/agentj && sudo -u www-data php bin/console assets:install

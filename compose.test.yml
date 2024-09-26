@@ -11,6 +11,9 @@ services:
       - .env
     volumes:
       - ./tests/results:/var/mail/
+    ports:
+      - $SMTPTEST_TO_AGENTJ:26
+      - $SMTPTEST_VIA_AGENTJ:27
     networks:
       testnet:
         ipv4_address: 172.28.2.5
@@ -80,6 +83,13 @@ services:
     networks:
       testnet:
 
+  syslogng:
+    networks:
+      testnet:
+
+  logspout:
+    networks:
+      testnet:
 
 networks:
   testnet:

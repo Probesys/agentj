@@ -38,7 +38,6 @@ RUN chown www-data:www-data /var/www
 USER www-data:www-data
 RUN composer install --ignore-platform-reqs --no-scripts --no-cache
 RUN yarnpkg install
-# RUN yarnpkg add @symfony/webpack-encore
 RUN yarnpkg encore production
 
 
