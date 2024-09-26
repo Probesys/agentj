@@ -261,7 +261,7 @@ test-mail:
     - chmod +x /usr/local/bin/swaks
   script:
     - cp .env.example .env
-    - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
+    - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
     - sed -i "s|example.com|agentj.local|g" .env
     - echo "PROXY_PORT=9819" >> .env
     - echo "UID=$UID" >> .env
@@ -271,8 +271,7 @@ test-mail:
     - echo "SMTPTEST_VIA_AGENTJ=2985" >> .env
     - echo "SMTPTEST_VIA_AGENTJ_BADRELAY=2988" >> .env
     - docker compose up -d --build
-    - ./tests/test-from-host.sh
-    - cat tests/results/*
+    - while test ! -f tests/results/TESTS_DONE ; do echo wait ; sleep 30 ; done
   artifacts:
     paths:
       - tests/results/*
