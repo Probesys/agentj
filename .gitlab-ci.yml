@@ -257,11 +257,14 @@ test-mail:
   script:
     - cp .env.example .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
-    - sed -i "s|#UID=.*|UID=$UID|g" .env
-    - sed -i "s|#GID=.*|GID=$GID|g" .env
     - sed -i "s|example.com|agentj.local|g" .env
+    - echo "PROXY_PORT=9819" >> .env
     - echo "UID=$(id -u)" >> .env
     - echo "GID=$(id -g)" >> .env
+    - echo "SMTP_OUT_PORT=2687" >> .env
+    - echo "SMTPTEST_TO_AGENTJ=2983" >> .env
+    - echo "SMTPTEST_VIA_AGENTJ=2985" >> .env
+    - echo "SMTPTEST_VIA_AGENTJ_BADRELAY=2988" >> .env
     - docker compose up -d --build
     - ./tests/test-from-host.sh
     - cat tests/results/*
