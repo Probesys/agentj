@@ -260,6 +260,8 @@ test-mail:
   script:
     - cp .env.example .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
+    - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
+    - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD|g" .env
     - sed -i "s|example.com|agentj.local|g" .env
     - echo "UID=1829" >> .env
     - echo "GID=1829" >> .env
