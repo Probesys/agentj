@@ -142,6 +142,9 @@ sql_limits_by_id: "
                '[]'
              ) as quota_array;"
 
+# Record limits hits in db
+sql_report: True
+
 # Apply limits by sasl usernames.
 limit_by_sasl: True
 # If no sasl username is found, or limit by sasl usernames disabled,
