@@ -116,4 +116,4 @@ This work is made available under the GNU Affero General Public License v3.0.
 
 ### Development
 
-AgentJ is a [Probesys](https://www.probesys.com) project.
+AgentJ is a [Probesys](https://www.probesys.coop) project.
