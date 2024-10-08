@@ -60,11 +60,13 @@ class CreateAlertMessageHandler
                 $fromAddr = $outMsg->getFromAddr();
                 $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
 
+                $timezone = new \DateTimeZone('Europe/Paris');
+
                 foreach ($users as $user) {
                     $alert = new Alert();
                     $alert->setAlertType('out_msgs');
                     $alert->setRefId($mailId);
-                    $alert->setDate(new \DateTime());
+                    $alert->setDate(new \DateTime('now', $timezone));
                     $alert->setSubject('New out_msg with content "V"');
                     $alert->setIsRead(false);
                     $alert->setUser($user);
@@ -79,7 +81,7 @@ class CreateAlertMessageHandler
                     $alert = new Alert();
                     $alert->setAlertType('out_msgs');
                     $alert->setRefId($mailId);
-                    $alert->setDate(new \DateTime());
+                    $alert->setDate(new \DateTime('now', $timezone));
                     $alert->setSubject('New out_msg with content "V"');
                     $alert->setIsRead(false);
                     $alert->setUser($senderUser);

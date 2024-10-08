@@ -490,6 +490,10 @@ Entities:
       bypassHumanAuth: Désactiver l'authentification humaine
       policy: "Stratégie"
       office365PrincipalName: "Nom principal M365"
+  Alert:
+    actions:
+      read: Marquer comme lu
+      delete: Supprimer
   Message:
     index: Liste des messages
     untreated: Non traités
