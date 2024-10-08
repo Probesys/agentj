@@ -59,8 +59,8 @@ class SearchFilterType extends AbstractType
                 'required' => false,
                 'label' => 'Réponse à un message',
                 'choices'  => [
-                    'Oui' => 'yes',
-                    'Non' => 'no',
+                    'Oui' => 'oui',
+                    'Non' => 'non',
                 ],
             ])
             ->add('host', TextType::class, [
@@ -76,6 +76,7 @@ class SearchFilterType extends AbstractType
                 'multiple' => false,
                 'label' => 'Type de message',
                 'attr' => ['class' => 'switch-toggle'],
+                'data' => 'incoming',
             ])
             ->add('submit', SubmitType::class, ['label' => 'Filtrer']);
     }

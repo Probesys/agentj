@@ -198,7 +198,7 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
-public function advancedSearch(User $user = null, string $messageType = 'incoming')
+public function advancedSearch(User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
 {
     $conn = $this->getEntityManager()->getConnection();
 
@@ -227,6 +227,18 @@ public function advancedSearch(User $user = null, string $messageType = 'incomin
         LEFT JOIN users u ON u.email = maddr.email
         LEFT JOIN domain d ON u.domain_id = d.id
     ";
+
+    if ($searchKey) {
+        $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+    }
+
+
+    if ($sortParams) {
+        $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
+    } else {
+        $sql .= ' ORDER BY m.time_num desc, m.status_id ';
+    }
+
 
     // Execute the original query
     $stmt = $conn->prepare($sql);

@@ -1,10 +1,10 @@
 {% for msg in msgs %}
     <tr>
-        <td>{{ msg.mail_id }}</td>
-        <td>{{ msg.from_addr }}</td>
-        <td>{{ msg.email }}</td>
-        <td>{{ msg.subject }}</td>
-        <td>{{ msg.time_iso|date('d-m-Y') }}</td>
+        <td data-title="{{'Search.MailId'|trans }}">{{ msg.mail_id }}</td>
+        <td data-title="{{'Search.Sender'|trans}}">{{ msg.from_addr }}</td>
+        <td data-title="{{'Search.Recipient'|trans}}">{{ msg.email }}</td>
+        <td data-title="{{'Search.Subject'|trans}}">{{ msg.subject }}</td>
+        <td data-title="{{'Search.Date'|trans}}">{{ msg.time_iso|date('d-m-Y') }}</td>
 
         {% if (activeFilters.bspamLevelMin is defined and activeFilters.bspamLevelMin|default('') != '' and activeFilters.bspamLevelMin != 0)
             or (activeFilters.bspamLevelMax is defined and activeFilters.bspamLevelMax|default('') != '' and activeFilters.bspamLevelMax != 0) %}

@@ -2,9 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
-use App\Entity\User;
 use App\Form\SearchFilterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Driver\Result;
 
-
+#[Route(path: '/advanced_search')]
 class SearchController extends AbstractController
 {
 
@@ -29,73 +27,88 @@ class SearchController extends AbstractController
         $this->em = $em;
     }
 
-   #[Route(path: '/advanced-search', name: 'advanced_search', methods: ['GET', 'POST'])]
-   public function advancedSearch(Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
+   #[Route(path: '/{type}', name: 'advanced_search', methods: ['GET', 'POST'])]
+   public function advancedSearch( Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator, $type = null): Response
    {
-       $form = $this->createForm(SearchFilterType::class);
+        $form = $this->createForm(SearchFilterType::class);
        $form->handleRequest($request);
 
        $data = $form->getData();
        $messageType = $data['messageType'] ?? 'incoming';
 
-       $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType);
+
+    $sortParams = [];
+    if ($request->request->has('sortField') && $request->request->has('sortDirection')) {
+        $sortParams['sort'] = $request->request->get('sortField');
+        $sortParams['direction'] = $request->request->get('sortDirection');
+    }
+
+    // Si votre formulaire est en méthode GET, utilisez $request->query
+    /*
+    if ($request->query->has('sortField') && $request->query->has('sortDirection')) {
+        $sortParams['sort'] = $request->query->get('sortField');
+        $sortParams['direction'] = $request->query->get('sortDirection');
+    }
+    */
+
+       $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType, null, $sortParams);
 // dd($allMessages);
 
        // Initialize active filters
        $activeFilters = [];
 
        // If form is submitted and valid, set active filters and filter messages
-if ($form->isSubmitted() && $form->isValid()) {
-    $data = $form->getData();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
 
-    // Track which filters are active
-    foreach ($data as $key => $value) {
-        if (!empty($value)) {
-            $activeFilters[$key] = true;
-        }
-    }
+            // Track which filters are active
+            foreach ($data as $key => $value) {
+                if (!empty($value)) {
+                    $activeFilters[$key] = true;
+                }
+            }
 
-    // Apply all active filters to the messages
-    $allMessages = array_filter($allMessages, function ($message) use ($data) {
-        // Basic filters
-        if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
-            return false;
-        }
-        if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
-            return false;
-        }
-        if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {
-            return false;
-        }
-        if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
-            return false;
-        }
+            // Apply all active filters to the messages
+            $allMessages = array_filter($allMessages, function ($message) use ($data) {
+                // Basic filters
+                if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
+                    return false;
+                }
+                if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
+                    return false;
+                }
+                if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {
+                    return false;
+                }
+                if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
+                    return false;
+                }
 
-        // Advanced filters
-        if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
-            return false;
+                // Advanced filters
+                if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
+                    return false;
+                }
+                if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
+                    return false;
+                }
+                if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
+                    return false;
+                }
+                if (!empty($data['endDate']) && $message['time_iso'] > $data['endDate']->format('Ymd\THis\Z')) {
+                    return false;
+                }
+                if (!empty($data['size']) && stripos($message['size'], $data['size']) === false) {
+                    return false;
+                }
+                if (!empty($data['host']) && stripos($message['host'], $data['host']) === false) {
+                    return false;
+                }
+                if (!empty($data['replyTo']) && $message['replyTo'] !== $data['replyTo']) {
+                    return false;
+                }
+                return true;
+            });
         }
-        if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
-            return false;
-        }
-        if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
-            return false;
-        }
-        if (!empty($data['endDate']) && $message['time_iso'] > $data['endDate']->format('Ymd\THis\Z')) {
-            return false;
-        }
-        if (!empty($data['size']) && stripos($message['size'], $data['size']) === false) {
-            return false;
-        }
-        if (!empty($data['host']) && stripos($message['host'], $data['host']) === false) {
-            return false;
-        }
-        if (!empty($data['replyTo']) && $message['replyTo'] !== $data['replyTo']) {
-            return false;
-        }
-        return true;
-    });
-}
 
 
        // Pagination logic

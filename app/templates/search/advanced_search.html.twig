@@ -1,3 +1,5 @@
+{% import 'macro/_sortLink.html.twig' as sortLinkMacro %}
+
 {% extends 'base.html.twig' %}
 
 {% block body %}
@@ -19,7 +21,7 @@
             {{ form_row(form.mailId) }}
 
             <!-- Button to toggle advanced filters -->
-            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-3">Filtres avancée</button>
+            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-3">Filtres avancés</button>
 
             <!-- Advanced filters section -->
             <div id="advancedFilters" style="display: none;">
@@ -45,16 +47,15 @@
             {{ form_end(form) }}
         </div>
 
-
         <table class="table table-hover search" style="margin: 3rem 0 5rem 0"
                data-active-filters="{{ activeFilters|json_encode }}">
             <thead>
             <tr class="table-header">
-                <th>{{ 'Search.MailId'|trans }}</th>
-                <th>{{ 'Search.Sender'|trans }}</th>
-                <th>{{ 'Search.Recipient'|trans }}</th>
-                <th>{{ 'Search.Subject'|trans }}</th>
-                <th>{{ 'Search.Date'|trans }}</th>
+                <th><a href="#" class="sort-link" data-sort-field="mail_id">{{ 'Search.MailId'|trans }}</a></th>
+                <th><a href="#" class="sort-link" data-sort-field="from_addr">{{ 'Search.Sender'|trans }}</a></th>
+                <th><a href="#" class="sort-link" data-sort-field="email">{{ 'Search.Recipient'|trans }}</a></th>
+                <th><a href="#" class="sort-link" data-sort-field="subject">{{ 'Search.Subject'|trans }}</a></th>
+                <th><a href="#" class="sort-link" data-sort-field="time_iso">{{ 'Search.Date'|trans }}</a></th>
                 <th class="amavis-header" style="display: none;">{{ 'Search.AmavisOutput'|trans }}</th>
                 <th class="size-header" style="display: none;">{{ 'Search.Size'|trans }}</th>
                 <th class="host-header" style="display: none;">{{ 'Search.Host'|trans }}</th>
@@ -131,10 +132,45 @@
                         }
                     });
                 });
+
+                // Handle sort link clicks
+                $('.sort-link').on('click', function (e) {
+                    e.preventDefault();
+
+                    var sortField = $(this).data('sort-field');
+                    var currentSortDirection = $(this).data('sort-direction') || 'asc';
+                    var newSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+
+                    // Update data attributes
+                    $(this).data('sort-direction', newSortDirection);
+
+                    var $form = $('form');
+                    var formData = $form.serializeArray();
+
+                    // Append sort parameters to form data
+                    formData.push({ name: 'sortField', value: sortField });
+                    formData.push({ name: 'sortDirection', value: newSortDirection });
+
+                    // Send AJAX request to update the table
+                    $.ajax({
+                        url: $form.attr('action'),
+                        method: $form.attr('method'),
+                        data: $.param(formData),
+                        success: function (response) {
+                            // Update the table body with new content
+                            $('table.search tbody').html(response.content);
+                        },
+                        error: function () {
+                            console.error('Error occurred while fetching data.');
+                        }
+                    });
+
+                    // Optionally update the URL without reloading the page
+                    var newUrl = advanced_search + '?' + $.param(formData);
+                    history.pushState(null, '', newUrl);
+                });
             });
-
         </script>
-
 
         <style>
             #toggleArrow {
@@ -160,7 +196,6 @@
                 display: flex;
                 align-items: center;
             }
-
         </style>
 
     </div>
