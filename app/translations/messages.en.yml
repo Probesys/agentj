@@ -173,8 +173,6 @@ Config:
 Message:
   Object: Subject
   Sender: Sender
-<<<<<<< HEAD
-  Recipient: 'Recipient'
   Status:
     title: Status
     untreated: Untreated
@@ -185,10 +183,7 @@ Message:
     virus: Virus
     spammed: Spam
     Error: Error
-=======
   Recipient: "Recipient"
-  Status: Status
->>>>>>> 45bc2f6104ae5f469920a13ab99df2943230abfb
   Date: Date
   ErrorSendCaptcha: "Error email verification"
   Actions:
@@ -501,15 +496,10 @@ Entities:
     spammedDetect: "spammed detected automatically"
     informationMessage: "The messages will be automatically deleted after 30 days."
     spamLevel: Note
-<<<<<<< HEAD
-    dateAuthRequestAt: 'Authentication request sent the'
-    isMailingList: 'Mailing list? '
     labels:
       infos: "Information about the blockage"
-=======
     dateAuthRequestAt: "Authentication request sent the"
     isMailingList: "Mailing list? "
->>>>>>> 45bc2f6104ae5f469920a13ab99df2943230abfb
   Msgrcpt:
     labels:
       infos: "Information about the message"
