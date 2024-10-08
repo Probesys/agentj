@@ -485,6 +485,10 @@ Entities:
       bypassHumanAuth: "Deactivate human authentication"
       policy: "Policy"
       office365PrincipalName: "M365 principal mail"
+  Alert:
+    actions:
+      read: Read
+      delete: Delete
   Message:
     index: "List of messages"
     untreated: "No treaties"
