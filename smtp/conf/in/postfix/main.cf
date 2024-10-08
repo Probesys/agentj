@@ -63,3 +63,5 @@ milter_default_action = tempfail
 milter_protocol = 6
 smtpd_milters = inet:opendkim:8891
 non_smtpd_milters = inet:opendkim:8891
+
+maillog_file = /dev/stdout

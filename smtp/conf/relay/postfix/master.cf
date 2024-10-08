@@ -44,3 +44,5 @@ slow      unix  -       -       -       -       -       smtp
     -o slow_destination_recipient_limit=3
     -o slow_destination_rate_delay=30s
     -o slow_destination_concurrency_failed_cohort_limit=10
+
+postlog   unix-dgram n  -       n       -       1       postlogd
