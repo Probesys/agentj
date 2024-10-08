@@ -4,7 +4,8 @@
         <thead>
             <tr>
                 <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
-                <th class="bg-transparent">{{ 'Message.Subject'|trans }}</th>
+                <th class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
                 <th class="bg-transparent"></th>
                 <th class="bg-transparent"></th>
             </tr>
@@ -17,7 +18,10 @@
                             {{ alert.date|format_datetime('short', 'short') }}
                         </span>
                     </td>
-                    <td data-title="{{ 'Message.Subject'|trans }}">
+                    <td data-title="{{ 'Entities.User.fields.email'|trans }}">
+                        <span title="{{ alert.refUser }}">{{ alert.refUser }}</span>
+                    </td>
+                    <td data-title="{{ 'Message.Object'|trans }}">
                         <span title="{{ alert.subject }}">{{ alert.subject|slice(0, 30) }}</span>
                     </td>
                     <td>

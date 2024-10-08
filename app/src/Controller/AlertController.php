@@ -11,25 +11,21 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AlertController extends AbstractController
 {
-    /**
-     * @Route("/alert/read/{id}", name="alert_read")
-     */
+    #[Route('/alert/read/{id}', name: 'alert_read')]
     public function read(Alert $alert, EntityManagerInterface $entityManager): Response
     {
         $alert->setIsRead(true);
         $entityManager->flush();
 
-        return $this->redirectToRoute('home');
+        return $this->redirectToRoute('homepage');
     }
 
-    /**
-     * @Route("/alert/delete/{id}", name="alert_delete")
-     */
+    #[Route('/alert/delete/{id}', name: 'alert_delete')]
     public function delete(Alert $alert, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($alert);
         $entityManager->flush();
 
-        return $this->redirectToRoute('home');
+        return $this->redirectToRoute('homepage');
     }
 }

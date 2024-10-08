@@ -8,6 +8,7 @@ use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Entity\Alert;
 use App\Form\CaptchaFormType;
 use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,6 +42,7 @@ class DefaultController extends AbstractController {
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
         $msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
         $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts();
+        $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
 
         $labels = array_map(function ($item) {
             return $item['time_iso'];
@@ -55,7 +57,8 @@ class DefaultController extends AbstractController {
                     'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
                     'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
                     'msgs' => $msgs,
-                    'users' => $users
+                    'users' => $users,
+                    'alerts' => $alerts
         ]);
     }
 
