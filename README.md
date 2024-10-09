@@ -16,7 +16,7 @@ The AgentJ Docker stack is composed of the following services:
 - **relay**: an other Postfix instance, needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
 - **opendkim**: handle DKIM signature verification for incoming mail, and signing when the domain privkey is found in **db**
 - **policyd-rate-limit**: policy service used by `outsmtp` which can read differents rate limits policy by user from the **db**
-- *for tests only* **smtptest**: see [tests](#tests) below
+- *for tests only* **smtptest** and **badrelay**: see [tests](#tests) below
 
 ## Get the sources
 
@@ -51,6 +51,7 @@ Then the following runtime variables must be configured in the `.env` file:
 | MAIL_DOMAINNAME           | example.com    | the domain name used in relay configuration |
 | SUPER_ADMIN_USERNAME      | admin          | default super admin login                   |
 | SUPER_ADMIN_PASSWORD      | Sup3rZECR37    | default super admin password                |
+| DEFAULT_LOCALE            | Europe/Paris   | the containers default timezone             |
 | TZ                        | Europe/Paris   | the containers default timezone             |
 | PROXY_PORT                | 8090           | default listening port for web interface    |
 | PROXY_LISTEN_ADDR         | 127.0.0.1      | default listening address for web interface |
@@ -64,6 +65,9 @@ Then the following runtime variables must be configured in the `.env` file:
 | CLAMAV_AUTOSTART          | true           | use the ClamAV instance of this stack       |
 | CLAMAV_TCPADDRESS         | 0.0.0.0        | remote ClamAV server IP address             |
 | CLAMAV_TCPPORT            | 3310           | remote ClamAV server TCP port               |
+| SF_MYAPPSECRET            |                | Symfony token for CSRF                      |
+| SF_MY_TOKEN_ENC_IV        |                | Symfony token for encryption                |
+| SF_MY_TOKEN_ENC_SALT      |                | Symfony token for encryption                |
 
 For dev/tests:
 
@@ -86,15 +90,11 @@ The default login is `admin` and the default password is `Sup3rZECR37`.
 
 ### Development
 
-To mount app src, config and migrations directories in the running container and expose database on host (for this, set `DB_EXPOSED_PORT` in .env) :
-`docker compose -f docker-compose.yml -f dev.yml up -d`
+In .env set `COMPOSE_FILE=docker-compose.yml:compose.dev.yml`, and `DB_EXPOSED_PORT`.
 
 ### Tests
 
-The `smtptest` container spawn a smtp server and a shell script which send mails to/through the agentj stack.  
-Currently **the test script erase the database**
-
-
+Set `COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml`, then run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
 
 ## Details
 
