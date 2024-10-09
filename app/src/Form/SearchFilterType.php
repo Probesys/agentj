@@ -58,7 +58,7 @@ class SearchFilterType extends AbstractType
             ->add('replyTo', ChoiceType::class, [
                 'required' => false,
                 'label' => 'Réponse à un message',
-                'choices'  => [
+                'choices' => [
                     'Oui' => 'oui',
                     'Non' => 'non',
                 ],
@@ -68,9 +68,9 @@ class SearchFilterType extends AbstractType
                 'label' => "Domaine de l'epéditeur"
             ])
             ->add('messageType', ChoiceType::class, [
-                'choices'  => [
-                    'Reçu' => 'incoming',
-                    'Envoyé' => 'outgoing',
+                'choices' => [
+                    'REÇU' => 'incoming',
+                    'ENVOYÉ' => 'outgoing',
                 ],
                 'expanded' => true,
                 'multiple' => false,

@@ -27,29 +27,29 @@ class SearchController extends AbstractController
         $this->em = $em;
     }
 
-   #[Route(path: '/{type}', name: 'advanced_search', methods: ['GET', 'POST'])]
-   public function advancedSearch( Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator, $type = null): Response
-   {
+    #[Route(path: '/{type}', name: 'advanced_search', methods: ['GET', 'POST'])]
+    public function advancedSearch(Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator, $type = null): Response
+    {
         $form = $this->createForm(SearchFilterType::class);
-       $form->handleRequest($request);
+        $form->handleRequest($request);
 
-       $data = $form->getData();
-       $messageType = $data['messageType'] ?? 'incoming';
+        $data = $form->getData();
+        $messageType = $data['messageType'] ?? 'incoming';
 
 
-    $sortParams = [];
-    if ($request->request->has('sortField') && $request->request->has('sortDirection')) {
-        $sortParams['sort'] = $request->request->get('sortField');
-        $sortParams['direction'] = $request->request->get('sortDirection');
-    }
+        $sortParams = [];
+        if ($request->request->has('sortField') && $request->request->has('sortDirection')) {
+            $sortParams['sort'] = $request->request->get('sortField');
+            $sortParams['direction'] = $request->request->get('sortDirection');
+        }
 
-       $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType, null, $sortParams);
-// dd($allMessages);
+        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType, null, $sortParams);
 
-       // Initialize active filters
-       $activeFilters = [];
 
-       // If form is submitted and valid, set active filters and filter messages
+        // Initialize active filters
+        $activeFilters = [];
+
+        // If form is submitted and valid, set active filters and filter messages
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
@@ -102,75 +102,74 @@ class SearchController extends AbstractController
             });
         }
 
-       // Handle AJAX requests
-       if ($request->isXmlHttpRequest()) {
-           return new JsonResponse([
-               'content' => $this->renderView('search/_messages.html.twig', [
-                   'msgs' => $allMessages,
-                   'messageType' => $messageType,
-                   'activeFilters' => $activeFilters,
-               ]),
-           ]);
-       }
+        // Handle AJAX requests
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'content' => $this->renderView('search/_messages.html.twig', [
+                    'msgs' => $allMessages,
+                    'messageType' => $messageType,
+                    'activeFilters' => $activeFilters,
+                ]),
+            ]);
+        }
 
-       // Render the main template
-       return $this->render('search/advanced_search.html.twig', [
-           'msgs' => $allMessages,
-           'form' => $form->createView(),
-           'messageType' => $messageType,
-           'activeFilters' => $activeFilters, // Pass the activeFilters to the main view
-       ]);
-   }
+        // Render the main template
+        return $this->render('search/advanced_search.html.twig', [
+            'msgs' => $allMessages,
+            'form' => $form->createView(),
+            'messageType' => $messageType,
+            'activeFilters' => $activeFilters, // Pass the activeFilters to the main view
+        ]);
+    }
 
-#[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'out_message_show', methods: ['GET'])]
-public function showAction($partitionTag, $mailId, $rid, Request $request)
-{
-    $conn = $this->em->getConnection();
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'out_message_show', methods: ['GET'])]
+    public function showAction($partitionTag, $mailId, $rid, Request $request)
+    {
+        $conn = $this->em->getConnection();
 
-    // Fetching the OutMsgrcpt data using raw SQL
-    $sqlOutMsgrcpt = '
+        // Fetching the OutMsgrcpt data using raw SQL
+        $sqlOutMsgrcpt = '
         SELECT * FROM out_msgrcpt
         WHERE partition_tag = :partitionTag
         AND mail_id = :mailId
         AND rid = :rid
     ';
 
-    // Execute the query and fetch data as an associative array
-    $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
-        'partitionTag' => $partitionTag,
-        'mailId' => $mailId,
-        'rid' => $rid,
-    ]);
-    $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
+        // Execute the query and fetch data as an associative array
+        $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+        ]);
+        $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
 
-    // Fetching the OutMsgs data using raw SQL
-    $sqlOutMsgs = '
+        // Fetching the OutMsgs data using raw SQL
+        $sqlOutMsgs = '
         SELECT * FROM out_msgs
         WHERE partition_tag = :partitionTag
         AND mail_id = :mailId
     ';
 
-    // Execute the query and fetch data as an associative array
-    $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
-        'partitionTag' => $partitionTag,
-        'mailId' => $mailId,
-    ]);
-    $outMsg = $stmtOutMsgs->fetchAssociative();
+        // Execute the query and fetch data as an associative array
+        $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+        ]);
+        $outMsg = $stmtOutMsgs->fetchAssociative();
 
-    $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), 'outgoing');
+        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), 'outgoing');
 
-    $ms = array_filter($allMessages, function($msg) use ($outMsg) {
-        return $msg['mail_id'] === $outMsg['mail_id'];
-    });
+        $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
+            return $msg['mail_id'] === $outMsg['mail_id'];
+        });
 
-    return $this->render('message/out_show.html.twig', [
-        'controller_name' => 'MessageController',
-        'outMsg' => $outMsg,
-        'outMsgRcpt' => $outMsgRcpt,
-        'message' => $ms,
-    ]);
-}
-
+        return $this->render('message/out_show.html.twig', [
+            'controller_name' => 'MessageController',
+            'outMsg' => $outMsg,
+            'outMsgRcpt' => $outMsgRcpt,
+            'message' => $ms,
+        ]);
+    }
 
 
 }

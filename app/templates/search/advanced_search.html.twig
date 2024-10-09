@@ -11,7 +11,7 @@
             <span id="toggleArrow" class="arrow-right"></span>
         </button>
 
-        <div id="filterContainer" class="filtres mt-3 mb-3 col-md-8">
+        <div id="filterContainer" class="filtres mt-3 mb-5 col-md-8">
             {{ form_start(form) }}
             {{ form_row(form.startDate) }}
             {{ form_row(form.endDate) }}
@@ -21,7 +21,7 @@
             {{ form_row(form.mailId) }}
 
             <!-- Button to toggle advanced filters -->
-            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-3">Filtres avancés</button>
+            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">Filtres avancés</button>
 
             <!-- Advanced filters section -->
             <div id="advancedFilters" style="display: none;">
@@ -37,13 +37,19 @@
                 {{ form_row(form.host) }}
             </div>
 
-            <div class="form-group switch-container">
-                <label>{{ form_label(form.messageType) }}</label>
-                <div class="switch-toggle">
-                    {{ form_widget(form.messageType) }}
+            <div class="form-group">
+                <label id="label_messagetype">{{ form_label(form.messageType) }}</label>
+                <div class="toggle-button-group">
+                    {% for choice in form.messageType %}
+                        <div class="toggle-label">
+                            {{ form_widget(choice, {'attr': {'class': 'toggle-input'}}) }}
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
-
+            <div id="submit" class="ml-5">
+                {{ form_widget(form.submit) }}
+            </div>
             {{ form_end(form) }}
         </div>
 
@@ -56,10 +62,16 @@
                 <th><a href="#" class="sort-link" data-sort-field="email">{{ 'Search.Recipient'|trans }}</a></th>
                 <th><a href="#" class="sort-link" data-sort-field="subject">{{ 'Search.Subject'|trans }}</a></th>
                 <th><a href="#" class="sort-link" data-sort-field="time_iso">{{ 'Search.Date'|trans }}</a></th>
-                <th class="amavis-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="bspam_level">{{ 'Search.AmavisOutput'|trans }}</th>
-                <th class="size-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="size">{{ 'Search.Size'|trans }}</th>
-                <th class="host-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="host">{{ 'Search.Host'|trans }}</th>
-                <th class="reply-to-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="replyTo">{{ 'Search.ReplyTo'|trans }}</th>
+                <th class="amavis-header" style="display: none;"><a href="#" class="sort-link"
+                                                                    data-sort-field="bspam_level">{{ 'Search.AmavisOutput'|trans }}
+                </th>
+                <th class="size-header" style="display: none;"><a href="#" class="sort-link"
+                                                                  data-sort-field="size">{{ 'Search.Size'|trans }}</th>
+                <th class="host-header" style="display: none;"><a href="#" class="sort-link"
+                                                                  data-sort-field="host">{{ 'Search.Host'|trans }}</th>
+                <th class="reply-to-header" style="display: none;"><a href="#" class="sort-link"
+                                                                      data-sort-field="replyTo">{{ 'Search.ReplyTo'|trans }}
+                </th>
                 <th></th>
             </tr>
             </thead>
@@ -69,7 +81,8 @@
         </table>
 
         <script>
-            document.addEventListener('turbo:load', function () {
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log('turbo:load')
                 const toggleButton = document.getElementById('toggleFilters');
                 const filterContainer = document.getElementById('filterContainer');
                 const toggleArrow = document.getElementById('toggleArrow');
@@ -89,7 +102,31 @@
                     advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
                 });
 
-                var dataTable = $('.search').DataTable({
+                function updateToggleButtons() {
+                    const inputs = document.querySelectorAll('.toggle-input');
+                    inputs.forEach(function (input) {
+                        const toggleLabelDiv = input.closest('.toggle-label');
+                        if (input.checked) {
+                            toggleLabelDiv.classList.add('active');
+                        } else {
+                            toggleLabelDiv.classList.remove('active');
+                        }
+                    });
+                }
+
+                // Initialize the buttons on page load
+                updateToggleButtons();
+
+                // Add event listeners to the inputs
+                const inputs = document.querySelectorAll('.toggle-input');
+                inputs.forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        updateToggleButtons();
+                    });
+                });
+
+
+                let dataTable = $('.search').DataTable({
                     paging: true,
                     searching: false,
                     ordering: false,
@@ -165,8 +202,8 @@
                     var formData = $form.serializeArray();
 
                     // Append sort parameters to form data
-                    formData.push({ name: 'sortField', value: sortField });
-                    formData.push({ name: 'sortDirection', value: newSortDirection });
+                    formData.push({name: 'sortField', value: sortField});
+                    formData.push({name: 'sortDirection', value: newSortDirection});
 
                     // Send AJAX request to update the table
                     $.ajax({
@@ -210,6 +247,66 @@
                 display: flex;
                 align-items: center;
             }
+
+            #search_filter_submit {
+                font-size: 1.2rem;
+            }
+
+            .toggle-button-group {
+                display: inline-flex;
+                border-radius: 4px;
+                overflow: hidden;
+                border: 1px solid #ccc;
+            }
+
+            .toggle-label {
+                margin: 0;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .toggle-label .form-check {
+                margin: 0;
+            }
+
+            .toggle-label .form-check-label {
+                padding: 10px 20px;
+                background-color: #e0e0e0;
+                color: #000;
+                border-right: 1px solid #ccc;
+                display: inline-block;
+            }
+
+            .toggle-label:last-child .form-check-label {
+                border-right: none;
+            }
+
+            .toggle-label.active .form-check-label {
+                background-color: #6de7da;
+                color: #000000;
+            }
+
+            .form-check {
+                padding: 0;
+            }
+
+            .form-check-label {
+                cursor: pointer;
+            }
+
+            .form-check-input {
+                display: none;
+            }
+
+            #label_messagetype {
+                width: 100%;
+            }
+
+            #label_messagetype legend {
+                width: 100%;
+                font-size: 0.9rem;
+            }
+
         </style>
 
     </div>
