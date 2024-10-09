@@ -43,14 +43,6 @@ class SearchController extends AbstractController
         $sortParams['direction'] = $request->request->get('sortDirection');
     }
 
-    // Si votre formulaire est en méthode GET, utilisez $request->query
-    /*
-    if ($request->query->has('sortField') && $request->query->has('sortDirection')) {
-        $sortParams['sort'] = $request->query->get('sortField');
-        $sortParams['direction'] = $request->query->get('sortDirection');
-    }
-    */
-
        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType, null, $sortParams);
 // dd($allMessages);
 
@@ -110,20 +102,11 @@ class SearchController extends AbstractController
             });
         }
 
-
-       // Pagination logic
-       $page = $request->query->getInt('page', 1);
-       $limit = 50;
-       $totalMessages = count($allMessages);
-       $offset = ($page - 1) * $limit;
-
-       $paginatedMessages = array_slice($allMessages, $offset, $limit);
-
        // Handle AJAX requests
        if ($request->isXmlHttpRequest()) {
            return new JsonResponse([
                'content' => $this->renderView('search/_messages.html.twig', [
-                   'msgs' => $paginatedMessages,
+                   'msgs' => $allMessages,
                    'messageType' => $messageType,
                    'activeFilters' => $activeFilters,
                ]),
@@ -132,9 +115,7 @@ class SearchController extends AbstractController
 
        // Render the main template
        return $this->render('search/advanced_search.html.twig', [
-           'msgs' => $paginatedMessages,
-           'current_page' => $page,
-           'total_pages' => ceil($totalMessages / $limit),
+           'msgs' => $allMessages,
            'form' => $form->createView(),
            'messageType' => $messageType,
            'activeFilters' => $activeFilters, // Pass the activeFilters to the main view

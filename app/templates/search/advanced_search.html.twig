@@ -56,10 +56,10 @@
                 <th><a href="#" class="sort-link" data-sort-field="email">{{ 'Search.Recipient'|trans }}</a></th>
                 <th><a href="#" class="sort-link" data-sort-field="subject">{{ 'Search.Subject'|trans }}</a></th>
                 <th><a href="#" class="sort-link" data-sort-field="time_iso">{{ 'Search.Date'|trans }}</a></th>
-                <th class="amavis-header" style="display: none;">{{ 'Search.AmavisOutput'|trans }}</th>
-                <th class="size-header" style="display: none;">{{ 'Search.Size'|trans }}</th>
-                <th class="host-header" style="display: none;">{{ 'Search.Host'|trans }}</th>
-                <th class="reply-to-header" style="display: none;">{{ 'Search.ReplyTo'|trans }}</th>
+                <th class="amavis-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="bspam_level">{{ 'Search.AmavisOutput'|trans }}</th>
+                <th class="size-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="size">{{ 'Search.Size'|trans }}</th>
+                <th class="host-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="host">{{ 'Search.Host'|trans }}</th>
+                <th class="reply-to-header" style="display: none;"><a href="#" class="sort-link" data-sort-field="replyTo">{{ 'Search.ReplyTo'|trans }}</th>
                 <th></th>
             </tr>
             </thead>
@@ -69,7 +69,7 @@
         </table>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('turbo:load', function () {
                 const toggleButton = document.getElementById('toggleFilters');
                 const filterContainer = document.getElementById('filterContainer');
                 const toggleArrow = document.getElementById('toggleArrow');
@@ -89,6 +89,14 @@
                     advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
                 });
 
+                var dataTable = $('.search').DataTable({
+                    paging: true,
+                    searching: false,
+                    ordering: false,
+                    "language": {
+                        url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json'
+                    },
+                });
                 // Mapping of form fields to their corresponding table header classes
                 const columnMapping = {
                     'bspamLevelMin': '.amavis-header',
@@ -124,8 +132,17 @@
                         method: $form.attr('method'),
                         data: $form.serialize(),
                         success: function (response) {
+                            dataTable.destroy();
                             // Update the table body with new content
                             $('table.search tbody').html(response.content);
+                            dataTable = $('.search').DataTable({
+                                paging: true,
+                                searching: false,
+                                ordering: false,
+                                "language": {
+                                    url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json'
+                                },
+                            });
                         },
                         error: function () {
                             console.error('Error occurred while fetching data.');
@@ -165,9 +182,6 @@
                         }
                     });
 
-                    // Optionally update the URL without reloading the page
-                    var newUrl = advanced_search + '?' + $.param(formData);
-                    history.pushState(null, '', newUrl);
                 });
             });
         </script>
