@@ -105,7 +105,7 @@ class CreateAlertMessageHandler
                             $mailer = new Mailer($transport);
 
                             $email = (new Email())
-                                ->from('no-reply@example.com')
+                                ->from('no-reply@agent-j.com')
                                 ->to($stream_get_contents($user->getEmail(), -1, 0))
                                 ->subject('Mail sortant contenant un virus bloqué')
                                 ->text('Une nouvelle entrée out_msgs a été créée. Utilisateur concerné: ' . $fromAddr);
@@ -199,7 +199,7 @@ class CreateAlertMessageHandler
                         $mailer = new Mailer($transport);
 
                         $email = (new Email())
-                            ->from('no-reply@example.com')
+                            ->from('no-reply@agent-j.com')
                             ->to($stream_get_contents($user->getEmail(), -1, 0))
                             ->subject('Limite de quota franchie')
                             ->text('Une nouvelle entrée sql_limit_report a été créée. Utilisateurs concernés: ' . implode(', ', $senderEmails));
@@ -239,7 +239,7 @@ class CreateAlertMessageHandler
 
                             // Send email to sender user
                             $email = (new Email())
-                                ->from('no-reply@example.com')
+                                ->from('no-reply@agent-j.com')
                                 ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
                                 ->subject('Vous avez dépassé le quota')
                                 ->text('Vous avez dépassé le quota. Votre mail n\'a pas été distribué.');
