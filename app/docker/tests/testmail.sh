@@ -128,7 +128,7 @@ swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-sleep 10
+# sleep 10
 # expect no swak error and 5 mails
 # send 'out_no_rate_limit' 'out' 'user@laissepasser.fr' 5
 

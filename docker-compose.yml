@@ -116,7 +116,7 @@ services:
       - db
 
   policyd-rate-limit:
-    image: probesys38/agentj_policyd-rate-limit:${VERSION}
+    image: local/policyd-rate-limit
     build:
       context: ./policyd-rate-limit
     env_file:
