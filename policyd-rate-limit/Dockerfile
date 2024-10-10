@@ -1,4 +1,4 @@
-FROM local/policyd-rate-limit:latest
+FROM gitlab.probesys.com:5050/agentj/policyd-rate-limit
 COPY policyd-rate-limit.yaml .config/policyd-rate-limit.yaml
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
