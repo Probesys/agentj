@@ -5,18 +5,30 @@ namespace App\Message;
 
 class CreateAlertMessage
 {
-    private string $mailId;
+    private string $type;
+    private string $id;
+    private string $target;
 
-    public function __construct(string $mailId)
+    public function __construct(string $type, string $id, string $target)
     {
-        $this->mailId = $mailId;
-        $this->log('CreateAlertMessage instantiated with mailId: ' . $mailId);
+        $this->type = $type;
+        $this->id = $id;
+        $this->target = $target;
     }
 
-    public function getMailId(): string
+    public function getId(): string
     {
-        $this->log('getMailId called, returning: ' . $this->mailId);
-        return $this->mailId;
+        return $this->id;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getTarget(): string
+    {
+        return $this->target;
     }
 
     private function log(string $message): void

@@ -1,11 +1,10 @@
 <?php
-// src/Entity/OutMsg.php
 
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\OutMsgRepository')]
+#[ORM\Entity]
 #[ORM\Table(name: 'out_msgs')]
 class OutMsg
 {
@@ -86,8 +85,11 @@ class OutMsg
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $is_mlist;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private $processed;
+    #[ORM\Column(type: 'boolean')]
+    private bool $processed_user = false;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $processed_admin = false;
 
     // Getters and setters for the fields you need
 
@@ -222,14 +224,25 @@ class OutMsg
         return $this->is_mlist;
     }
 
-    public function isProcessed(): ?bool
+    public function isProcessedUser(): ?bool
     {
-        return $this->processed;
+        return $this->processed_user;
     }
 
-    public function setProcessed(bool $processed): self
+    public function setProcessedUser(bool $processed_user): self
     {
-        $this->processed = $processed;
+        $this->processed_user = $processed_user;
+        return $this;
+    }
+
+    public function isProcessedAdmin(): ?bool
+    {
+        return $this->processed_admin;
+    }
+
+    public function setProcessedAdmin(bool $processed_admin): self
+    {
+        $this->processed_admin = $processed_admin;
         return $this;
     }
 }
