@@ -54,7 +54,7 @@ services:
       - outamavis
       - db
     volumes:
-      - applogs:/var/log/agentj
+      - applogs:/var/log/
     ports:
       - ${PROXY_LISTEN_ADDR:-127.0.0.1}:${PROXY_PORT:-8090}:80
 
