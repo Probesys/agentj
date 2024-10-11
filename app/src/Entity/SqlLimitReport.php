@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class SqlLimitReport
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 40)]
+    #[ORM\Column(type: 'string', length: 320)]
     private string $id;
 
     #[ORM\Column(type: 'datetime')]

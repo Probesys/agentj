@@ -106,9 +106,9 @@ class CreateAlertMessageHandler
 
                             $email = (new Email())
                                 ->from('no-reply@agent-j.com')
-                                ->to($stream_get_contents($user->getEmail(), -1, 0))
+                                ->to(stream_get_contents($user->getEmail(), -1, 0))
                                 ->subject('Mail sortant contenant un virus bloqué')
-                                ->text('Une nouvelle entrée out_msgs a été créée. Utilisateur concerné: ' . $fromAddr);
+                                ->text('Un virus a été détecté dans un mail sortant. Utilisateur concerné: ' . $fromAddr);
 
                             $mailer->send($email);
                         } else {
@@ -117,19 +117,14 @@ class CreateAlertMessageHandler
                     }
 
                     // Mark the OutMsg as processed
-                    $outMsg->setProcessedAdmin(true);
-                    $this->entityManager->persist($outMsg);
-                    $this->output->writeln('OutMsg marked as processed: ' . ($outMsg->isProcessedAdmin() ? 'Yes' : 'No'));
-
-                    // Check the state of the entity
-                    $unitOfWork = $this->entityManager->getUnitOfWork();
-                    $entityState = $unitOfWork->getEntityState($outMsg);
-                    $this->output->writeln('Entity state before flush: ' . $entityState);
+                    $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+                    $outMsgToSave->setProcessedAdmin(true);
+                    $this->output->writeln('OutMsg marked as processed: ' . ($outMsgToSave->isProcessedAdmin() ? 'Yes' : 'No'));
+                    $this->entityManager->persist($outMsgToSave);
+                    $this->entityManager->flush();
+                    $this->output->writeln('EntityManager flushed successfully');
+                    $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
                 }
-
-                $this->entityManager->flush();
-                $this->output->writeln('EntityManager flushed successfully');
-                $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
             } else {
                 $this->output->writeln('OutMsg content is not "V"');
             }
@@ -200,9 +195,9 @@ class CreateAlertMessageHandler
 
                         $email = (new Email())
                             ->from('no-reply@agent-j.com')
-                            ->to($stream_get_contents($user->getEmail(), -1, 0))
+                            ->to(stream_get_contents($user->getEmail(), -1, 0))
                             ->subject('Limite de quota franchie')
-                            ->text('Une nouvelle entrée sql_limit_report a été créée. Utilisateurs concernés: ' . implode(', ', $senderEmails));
+                            ->text('Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: ' . implode(', ', $senderEmails));
 
                         $mailer->send($email);
                     } else {

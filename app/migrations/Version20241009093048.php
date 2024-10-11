@@ -17,7 +17,7 @@ final class Version20241009093048 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql('CREATE TABLE IF NOT EXISTS sql_limit_report (
-            id VARCHAR(40) NOT NULL,
+            id VARCHAR(320) NOT NULL,
             date DATETIME NOT NULL,
             recipient_count INT DEFAULT 1,
             delta INT NOT NULL
