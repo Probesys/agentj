@@ -30,9 +30,9 @@ class UserFixture extends Fixture
 	$manager->persist($user);
 
 	$user = new User();
-	$user->setEmail('userDomainQuota@blocnormal.fr');
+	$user->setEmail('user.domain.quota@blocnormal.fr');
 	$user->setFullname('userDomainQuota blocnormal');
-	$user->setUsername('userDomainQuota@blocnormal.fr');
+	$user->setUsername('user.domain.quota@blocnormal.fr');
 	$user->setRoles('["ROLE_USER"]');
 	$user->setDomain($this->em
 		->getRepository(Domain::class)
@@ -42,9 +42,9 @@ class UserFixture extends Fixture
 	$manager->persist($user);
 
 	$user = new User();
-	$user->setEmail('userGroup1Quota@blocnormal.fr');
+	$user->setEmail('user.group1.quota@blocnormal.fr');
 	$user->setFullname('userGroup1Quota blocnormal');
-	$user->setUsername('userGroup1Quota@blocnormal.fr');
+	$user->setUsername('user.group1.quota@blocnormal.fr');
 	$user->setRoles('["ROLE_USER"]');
 	$user->setDomain($this->em
 		->getRepository(Domain::class)
@@ -57,9 +57,9 @@ class UserFixture extends Fixture
 	$manager->persist($user);
 
 	$user = new User();
-	$user->setEmail('userGroup1PersoSmallQuota@blocnormal.fr');
+	$user->setEmail('user.group1.perso.small.quota@blocnormal.fr');
 	$user->setFullname('userGroup1PersoSmallQuota blocnormal');
-	$user->setUsername('userGroup1PersoSmallQuota@blocnormal.fr');
+	$user->setUsername('user.group1.perso.small.quota@blocnormal.fr');
 	$user->setRoles('["ROLE_USER"]');
 	$user->setDomain($this->em
 		->getRepository(Domain::class)
@@ -73,9 +73,9 @@ class UserFixture extends Fixture
 	$manager->persist($user);
 
 	$user = new User();
-	$user->setEmail('userGroup1PersoLargeQuota@blocnormal.fr');
+	$user->setEmail('user.group1.perso.large.quota@blocnormal.fr');
 	$user->setFullname('userGroup1PersoLargeQuota blocnormal');
-	$user->setUsername('userGroup1PersoLargeQuota@blocnormal.fr');
+	$user->setUsername('user.group1.perso.large.quota@blocnormal.fr');
 	$user->setRoles('["ROLE_USER"]');
 	$user->setDomain($this->em
 		->getRepository(Domain::class)
