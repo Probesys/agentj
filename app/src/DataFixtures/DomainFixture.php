@@ -34,7 +34,7 @@ class DomainFixture extends Fixture
 	$blocnormal->setPolicy($this->em
 		->getRepository(Policy::class)
 		->findOneBy(['policyName' => 'Normale']));
-	$blocnormal->setQuota([["quota_emails" => 1, "quota_seconds" => 1]]);
+	$blocnormal->setQuota([["quota_emails" => 2, "quota_seconds" => 1]]);
 	foreach(['172.28.2.5', '172.28.2.1'] as $ip) {
 		$authorized_sender = new DomainRelay();
 		$authorized_sender->setIpAddress($ip);
