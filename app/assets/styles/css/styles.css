@@ -8314,7 +8314,10 @@ h1 {
   background-color: #E5E5E5; }
 
 #topnav {
-  height: 85px; }
+  height: 85px;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
 
 .bold {
   font-weight: bold; }
@@ -8322,10 +8325,14 @@ h1 {
 .nav-item .nav-link.active {
   font-weight: bold; }
 
-a.navbar-brand img.logo {
-  max-height: 85px;
-  margin-top: -15px;
-  margin-left: 50px; }
+  a.navbar-brand img.logo {
+    max-height: 85px;
+    top: 0;
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0; }
 
 .page-content {
   padding-top: 60px; }

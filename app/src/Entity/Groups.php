@@ -97,7 +97,7 @@ class Groups
         $this->groupsWbLists = new ArrayCollection();
     }
 
-   
+
 
     public function getId(): ?int
     {

@@ -646,7 +646,7 @@ $font-family-base:              "Roboto"; // font de base*/
 
 .default-theme.sidebar-bg .sidebar-wrapper a:not(.dropdown-item):hover,
 .default-theme.sidebar-bg .sidebar-wrapper .sidebar-menu li.active > a {
-  color: #f2f2f2; }
+  color: #31B1BF; }
 
 .default-theme.sidebar-bg .sidebar-wrapper .sidebar-menu li.active > a {
   font-weight: bold; }
@@ -8324,8 +8324,12 @@ h1 {
 
 a.navbar-brand img.logo {
   max-height: 85px;
-  margin-top: -15px;
-  margin-left: 50px; }
+  top: 0;
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0; }
 
 .page-content {
   padding-top: 60px; }

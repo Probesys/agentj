@@ -145,6 +145,7 @@ Navigation:
   clean: Propres
   error: Erreurs
   all: Tous
+  Dashboard: Tableau de bord
   Messagedelete: Supprimés
   mailBlocked: Mails bloqués
   blacklist: Expéditeurs bloqués
@@ -175,7 +176,16 @@ Message:
   Object: Objet
   Sender: Expéditeur
   Recipient: Destinataire
-  Status: Status
+  Status:
+    title: Statut
+    untreated: Non traité
+    authorized: Autorisé
+    banned: Banni
+    deleted: Supprimé
+    restored: Récupéré
+    virus: Virus
+    spam: Spam
+    Error: Erreur
   Date: Date
   ErrorSendCaptcha: Erreur vérification email
   Actions:
@@ -475,6 +485,12 @@ Entities:
       userName: Login
       roles: Rôle
       domain: Domaine
+      incoming: Entrant
+      outgoing: Sortant
+      outMsgCount: Nombre de messages sortants
+      inMsgCount: Nombre de messages entrants
+      outMsgBlockedCount: Nombre de messages sortants bloqués
+      inMsgBlockedCount: Nombre de messages entrants bloqués
       originalUser: Email de référence
       alias: Alias
       sharedBy: Partagée avec
@@ -485,6 +501,10 @@ Entities:
       bypassHumanAuth: Désactiver l'authentification humaine
       policy: "Stratégie"
       office365PrincipalName: "Nom principal M365"
+  Alert:
+    actions:
+      read: Marquer comme lu
+      delete: Supprimer
   Message:
     index: Liste des messages
     untreated: Non traités
@@ -500,6 +520,9 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
+    labels:
+      infos: "Informations sur les refus"
+      reason: "Type de refus"
   Msgrcpt:
     labels:
       infos: "Informations sur le message"
