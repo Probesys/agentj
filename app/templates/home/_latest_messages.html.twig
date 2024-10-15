@@ -1,0 +1,75 @@
+<h2 class="mx-2">Aperçu des 5 derniers mails bloqués</h2>
+<section>
+    <table id ="table_msgs" class="table table-hover">
+        <thead>
+            <tr>
+                <th class="bg-transparent">{{ 'Message.Status.title'|trans }}</th>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th class="bg-transparent"></th>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th class="bg-transparent">{{ 'Message.Recipient'|trans }}</th>
+                {% endif %}
+                <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Sender'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
+                <th class="bg-transparent">{{ 'Entities.Message.spamLevel'|trans }}</th>
+                <th class="bg-transparent"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in msgs %}
+                {% set error_badge = "" %}
+                {% set error_badge_detail = "" %}
+                {% if msg.status_id == 4 %}
+                    {% set error_badge = 'Message.ErrorSendCaptcha' %}
+                    {% set error_badge_detail = msg.message_error %}
+                {% endif %}
+                {% if msg.name is empty %}
+                    {% set statusKey = 'Message.Status.' ~ msg.status_description %}
+                    {% set status = statusKey|trans %}
+                    {% set bold = "bold" %}
+                {% else %}
+                    {% set status = msg.name %}
+                    {% set bold = "" %}
+                {% endif %}
+                {% set keyPairMessage =  [msg.partition_tag, msg.mail_id,msg.rid] %}
+                <tr class="{{bold}} ">
+                    <td data-title="{{'Message.Status.title'|trans }}"><span title="{{status}}">{{status}}</span></td>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td><span title="{{ msg.mail_id }}">{{ msg.mail_id }}</span></td>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td data-title="{{'Message.Recipient'|trans }}"><span title="{{msg.email}}">{{msg.email}}</span></td>
+                    {% endif %}
+                    <td data-title="{{'Message.Object'|trans }}"><span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{msg.subject|replace({'_':' '})}}">{{msg.subject|slice(0,30)|replace({'_':' '})}}</span></td>
+                    <td  data-title="{{'Message.Sender'|trans }}">
+                        {% if msg.from_addr | length > 35 %}
+                            <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msg.from_addr }}">
+                                {% for senderSplit in  msg.from_addr |split('<') %}
+                                    {% if (senderSplit | length > 35) and ('@' in senderSplit ) %}
+                                        {% set email = senderSplit |split('@') %}
+                                        {{ email.0 }}<br/>@{{ email.1 |replace({'>':''})}}
+                                    {% else %}
+                                        {{ senderSplit|replace({'>':''}) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        {% else %}
+                            <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msg.from_addr }}">{{  msg.from_addr }}</span>
+                        {% endif %}
+                        {% if error_badge %}
+                            <span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
+                        {% endif %}
+                    </td>
+                    <td data-title="{{'Message.Date'|trans }}"><span title="{{'Message.Date'|trans  ~ ' : ' ~ msg.time_num | format_datetime('short', 'short') }}">{{msg.time_num | format_datetime('short', 'short')}}</span> </td>
+                    <td>{{ msg.bspam_level }}</td>
+                    <td>
+                        {% set href = msg.status_description == 'untreated' ? '/message' : '/message/' ~ msg.status_description %}
+                        <a href="{{ href }}" class="btn btn-primary float-right"><i class="fas fa-link"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
