@@ -43,12 +43,12 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($type) {
             switch ($type) {
-                case MessageStatus::SPAMMED: //spam and 
+                case MessageStatus::SPAMMED: //spam and
                     $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" and mr.content != "V"  ';
                     break;
-                case MessageStatus::VIRUS: //spam and 
+                case MessageStatus::VIRUS: //spam and
                     $sqlWhere .= ' and mr.content = "V" ';
-                    break;                
+                    break;
                 case MessageStatus::BANNED:
                     $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"  ';
                     break;
@@ -61,6 +61,9 @@ class MsgsRepository extends ServiceEntityRepository
                     break;
                 case MessageStatus::RESTORED:
                     $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
+                    break;
+                case 'All':
+                    $sqlWhere .= ' ';
                     break;
                 default:
                     $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" and mr.content != "V" and  mr.status_id=' . $type .  ' ';
@@ -101,7 +104,7 @@ class MsgsRepository extends ServiceEntityRepository
      */
     public function countByType(User $user = null, $type = null, $alias = [])
     {
-        $conn = $this->getEntityManager()->getConnection();        
+        $conn = $this->getEntityManager()->getConnection();
 
         $sql = 'select count(m.mail_id) as nb_result from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
@@ -131,7 +134,7 @@ class MsgsRepository extends ServiceEntityRepository
     public function countByTypeAndDays(User $user = null, $type = null, $alias = [], \DateTime $day = null, Domain $domain = null)
     {
         $conn = $this->getEntityManager()->getConnection();
-       
+
 
         $sql = 'select count(m.mail_id) as nb_result,m.time_iso  from msgs m '
             . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
@@ -143,14 +146,14 @@ class MsgsRepository extends ServiceEntityRepository
         if ($day){
             $sql.= " AND date(m.time_iso) = '" . $day->format('Y-m-d') . "'";
         }
-        
+
         if ($domain){
             $sql.= " AND d.id = '" . $domain->getId() . "'";
-        }        
+        }
 
-        
+
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias);
- 
+
         $sql .= " GROUP BY SUBSTRING(m.time_iso, 1, 8) ";
 
         $stmt = $conn->prepare($sql);
@@ -163,19 +166,25 @@ class MsgsRepository extends ServiceEntityRepository
    * @param type $type
    * @return type
    */
-    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null)
+    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null, $limit = null)
     {
 
         $conn = $this->getEntityManager()->getConnection();
-        
 
-        $sql = 'SELECT m.mail_id,m.message_error,mr.status_id,ms.name,m.partition_tag,maddr.email,m.subject,m.from_addr,m.time_num,mr.rid, mr.bspam_level '
-            . ' FROM msgs m '
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN message_status ms ON mr.status_id = ms.id '
-            . ' left join users u on u.email=maddr.email '
-            . ' left join domain d on u.domain_id=d.id ';
+
+        $sql = 'SELECT m.mail_id, m.message_error, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level, '
+                . 'CASE '
+                    . 'WHEN ms.name IS NOT NULL THEN ms.name '
+                    . 'WHEN mr.status_id IS NULL AND mr.bspam_level > d.level AND mr.content != "C" AND mr.content != "V" THEN "spam" '
+                    . 'WHEN mr.content = "V" THEN "virus" '
+                    . 'ELSE "untreated" '
+                . 'END AS status_description '
+                . 'FROM msgs m '
+                . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
+                . 'LEFT JOIN maddr ON maddr.id = mr.rid '
+                . 'LEFT JOIN message_status ms ON mr.status_id = ms.id '
+                . 'LEFT JOIN users u ON u.email = maddr.email '
+                . 'LEFT JOIN domain d ON u.domain_id = d.id';
 
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias, $fromDate);
 
@@ -188,6 +197,10 @@ class MsgsRepository extends ServiceEntityRepository
             $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id ';
+        }
+
+        if ($limit !== null && is_numeric($limit) && $limit > 0) {
+            $sql .= ' LIMIT ' . (int)$limit;
         }
 
         $stmt = $conn->prepare($sql);

@@ -8,6 +8,7 @@ use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Entity\Alert;
 use App\Form\CaptchaFormType;
 use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,6 +40,9 @@ class DefaultController extends AbstractController {
         $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::BANNED, $alias);
         $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::DELETED, $alias);
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
+        $msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
+        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts();
+        $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
 
         $labels = array_map(function ($item) {
             return $item['time_iso'];
@@ -52,7 +56,86 @@ class DefaultController extends AbstractController {
                     'nbBannedMsgByDay' => $nbBannedMsgByDay,
                     'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
                     'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
+                    'msgs' => $msgs,
+                    'users' => $users,
+                    'alerts' => $alerts
         ]);
+    }
+
+    #[Route(path: '{user_email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
+    public function showMessagesStats($user_email, Request $request) {
+        $connection = $this->em->getConnection();
+
+        // Fetch domain_id from user table
+        $sqlUser = 'SELECT domain_id FROM users WHERE email = :user_email';
+        $stmtUser = $connection->executeQuery($sqlUser, ['user_email' => $user_email]);
+        $user = $stmtUser->fetchAssociative();
+        $domain_id = $user['domain_id'];
+
+        // Fetch messages with status
+        $sqlMessages = '
+            SELECT msgs.*, ms.name AS status_name, mr.status_id, mr.bspam_level, mr.content, d.level
+            FROM msgs
+            JOIN msgrcpt AS mr ON msgs.mail_id = mr.mail_id
+            JOIN maddr ON mr.rid = maddr.id
+            LEFT JOIN message_status AS ms ON msgs.status_id = ms.id
+            JOIN domain AS d ON d.id = :domain_id
+            WHERE maddr.email = :user_email
+        ';
+        $stmtMessages = $connection->executeQuery($sqlMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
+        $messages = $stmtMessages->fetchAllAssociative();
+
+        // Fetch out messages with status
+        $sqlOutMessages = '
+            SELECT out_msgs.*, ms.name AS status_name, mr.status_id, mr.bspam_level, mr.content, d.level
+            FROM out_msgs
+            JOIN out_msgrcpt AS mr ON out_msgs.mail_id = mr.mail_id
+            LEFT JOIN message_status AS ms ON out_msgs.status_id = ms.id
+            JOIN domain AS d ON d.id = :domain_id
+            WHERE out_msgs.from_addr = :user_email
+        ';
+        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
+        $outMessages = $stmtOutMessages->fetchAllAssociative();
+
+        // Determine status using provided logic
+        $statusCounts = [];
+
+        foreach ($messages as $message) {
+            $status = $this->determineStatus($message);
+            if (!isset($statusCounts[$status])) {
+                $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
+            }
+            $statusCounts[$status]['qty']++;
+        }
+
+        foreach ($outMessages as $outMessage) {
+            $status = $this->determineStatus($outMessage);
+            if (!isset($statusCounts[$status])) {
+                $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
+            }
+            if ($status != 'untreated') {
+                $statusCounts[$status]['qty_out']++;
+            }
+        }
+
+        // Convert to array and return to view
+        $msgs_status = array_values($statusCounts);
+
+        return $this->render('home/messages_stats.html.twig', [
+            'msgs_status' => $msgs_status
+        ]);
+    }
+
+    private function determineStatus($message) {
+        if ($message['status_name'] !== null) {
+            return $message['status_name'];
+        } elseif ($message['status_id'] === null && $message['bspam_level'] > $message['level'] && $message['content'] !== 'C' && $message['content'] !== 'V') {
+            return 'spam';
+        } elseif ($message['content'] === 'V') {
+            return 'virus';
+        } else {
+            return 'untreated';
+        }
     }
 
     #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
@@ -122,7 +205,7 @@ class DefaultController extends AbstractController {
                 } else {
                     $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
                 }
-   
+
         } else {
             $form->get('email')->setData($senderEmail);
         }

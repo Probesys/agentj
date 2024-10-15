@@ -6,7 +6,7 @@
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
   <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
     <i class="fas fa-bars fa-lg"></i>
-  </a>  
+  </a>
   <a class="navbar-brand m-auto" href="{{ path('homepage') }}">
     <img src="{{ logoPath }}" class="logo">
   </a>
@@ -17,7 +17,7 @@
         <a href="mailto:support@probesys.com" class="nav-link">
           <i class="fas fa-ambulance text-success">&nbsp;</i>
         </a>
-      </li>        
+      </li>
       {% if locales|length > 1 %}
         <li class="nav-item dropdown no-arrow mx-1">
           <a  data-turbo="false" class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -36,26 +36,26 @@
         </a>
         <a  data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-block d-sm-none" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           @
-        </a>        
+        </a>
         <div class="dropdown-menu dropdown-menu-right " aria-labelledby="userDropdown">
           {% if not is_granted('ROLE_ADMIN') %}
             <a class="dropdown-item" href="{{path('account')}}"><i class="fas fa-user-circle"></i> {{'Navigation.user_profil'|trans}}</a>
             <div class="dropdown-divider"></div>
-          {% endif %}          
+          {% endif %}
           {% if is_granted('IS_IMPERSONATOR') %}
             <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': '_exit'}) }}">&nbsp;<i class="fas fa-random"></i> {{'Generics.actions.exitImpersonation'|trans}} {{ app.session.get('originalUser') }}</a>
             <div class="dropdown-divider"></div>
-          {% endif %}  
+          {% endif %}
           {% if sharedBoxes|length > 0%}
             <div class="dropdown-header">Autres boîtes mails</div>
             {% for sharedBox in sharedBoxes %}
               <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedBox.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedBox.username}}" ><i class="fas fa-envelope"></i> {{ sharedBox.username }}</a>
             {% endfor %}
             <div class="dropdown-divider"></div>
-          {% endif %}          
+          {% endif %}
           <a class="dropdown-item"  href="{{path('app_logout')}}"><i class="fas fa-sign-out-alt fa-fw"></i> {{'Navigation.logout'|trans}}</a>
         </div>
       </li>
-    </ul>      
+    </ul>
   </div>
 </nav>
