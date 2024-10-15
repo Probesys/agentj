@@ -19,45 +19,43 @@ class SearchFilterType extends AbstractType
         $builder
             ->add('fromAddr', TextType::class, [
                 'required' => false,
-                'label' => 'Expéditeur'
+                'label' => 'Search.Sender'
             ])
             ->add('subject', TextType::class, [
                 'required' => false,
-                'label' => 'Objet'
+                'label' => 'Search.Subject'
             ])
             ->add('mailId', TextType::class, [
                 'required' => false,
-                'label' => 'Mail ID'
+                'label' => 'Search.MailId'
             ])
             ->add('email', TextType::class, [
                 'required' => false,
-                'label' => 'Déstinataire'
+                'label' => 'Search.Recipient'
             ])
             ->add('startDate', DateType::class, [
                 'required' => false,
                 'widget' => 'single_text',
-                'label' => 'Date de début'
+                'label' => 'Search.StartDate'
             ])
             ->add('endDate', DateType::class, [
                 'required' => false,
                 'widget' => 'single_text',
-                'label' => 'Date de fin'
+                'label' => 'Search.EndDate'
             ])
             ->add('bspamLevelMin', NumberType::class, [
                 'required' => false,
-                'label' => 'Score Amavis Min',
             ])
             ->add('bspamLevelMax', NumberType::class, [
                 'required' => false,
-                'label' => 'Score Amavis Max',
             ])
             ->add('size', TextType::class, [
                 'required' => false,
-                'label' => 'Taille'
+                'label' => 'Search.Size'
             ])
             ->add('replyTo', ChoiceType::class, [
                 'required' => false,
-                'label' => 'Réponse à un message',
+                'label' => 'Search.ReplyTo',
                 'choices' => [
                     'Oui' => 'oui',
                     'Non' => 'non',
@@ -65,20 +63,20 @@ class SearchFilterType extends AbstractType
             ])
             ->add('host', TextType::class, [
                 'required' => false,
-                'label' => "Domaine de l'epéditeur"
+                'label' => "Search.Host"
             ])
             ->add('messageType', ChoiceType::class, [
                 'choices' => [
-                    'REÇU' => 'incoming',
-                    'ENVOYÉ' => 'outgoing',
+                    'Search.Incoming' => 'incoming',
+                    'Search.Outgoing' => 'outgoing',
                 ],
                 'expanded' => true,
                 'multiple' => false,
-                'label' => 'Type de message',
+                'label' => 'Search.MessageType',
                 'attr' => ['class' => 'switch-toggle'],
                 'data' => 'incoming',
             ])
-            ->add('submit', SubmitType::class, ['label' => 'Filtrer']);
+            ->add('submit', SubmitType::class, ['label' => 'Search.Filter']);
     }
 
     public function configureOptions(OptionsResolver $resolver)

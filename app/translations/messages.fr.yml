@@ -309,6 +309,14 @@ Search:
   Size: Taille
   Host: Domaine de l'expéditeur
   ReplyTo: Réponse à un message
+  StartDate: Date de début
+  EndDate: Date de fin
+  BSpamLevel: Score Amavis
+  Incoming: REÇU
+  Outgoing: ENVOYÉ
+  MessageType: Type de message
+  Filter: Filtrer
+
 
 Entities:
   Group:

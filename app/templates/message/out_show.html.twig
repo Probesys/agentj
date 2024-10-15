@@ -12,7 +12,7 @@
     </div>
     <div class="col-md-8">
       {{ outMsg.time_iso | format_datetime('short', 'short') }}
-    </div>      
+    </div>
     <div class="col-md-4">
        {{ 'Generics.fields.sender' | trans }}
     </div>
@@ -24,29 +24,29 @@
     </div>
     <div class="col-md-8">
       {{ m.email }}
-    </div>    
+    </div>
     <div class="col-md-4">
-     {{ 'Entities.MsgRcpt.fields.bspamLevel' | trans }}
+     {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
     </div>
     <div class="col-md-8">
       {{ outMsgRcpt.bspam_level }}
-    </div>    
-    
+    </div>
+
     {% if outMsgRcpt.send_captcha > 0 %}
     <div class="col-md-4">
-      {{ 'Entities.Message.dateAuthRequestAt' | trans }} : 
+      {{ 'Entities.Message.dateAuthRequestAt' | trans }} :
     </div>
     <div class="col-md-8">
        {{ outMsgRcpt.send_captcha | format_datetime('short', 'short') }}
-    </div>   
+    </div>
     {% endif %}
-    
+
     <div class="col-md-4">
       {{ 'Entities.Message.isMailingList' | trans }}
     </div>
     <div class="col-md-8">
        {%  if outMsg.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
-    </div>    
+    </div>
     <div class="col-md-4">
       {{ 'Message.status_id' | trans }}
     </div>
@@ -60,7 +60,7 @@
           {% set deferredSatusClass = 'text-success' %}
         {% else %}
           {% set deferredSatusClass = 'text-danger' %}
-        {% endif %}        
+        {% endif %}
       {% else %}
         {% set msgsStatus = msgDeferredStatus[outMsgRcpt.ds] %}
         {% set response = outMsgRcpt.smtp_resp %}
@@ -75,7 +75,7 @@
       <em>{{ response }}</em>
     </div>
     <div class="col-md-12">
-       {{ 'Entities.MsgRcpt.labels.appliedRule' | trans }}
+       {{ 'Entities.Msgrcpt.labels.appliedRule' | trans }}
     </div>
     <div class="col-md-12">
       <table class="table table-sm">
@@ -93,9 +93,9 @@
             <td>{{ m.email }}</td>
             <td>{{ m.from_addr }}</td>
           </tr>
-        {% endfor %}        
+        {% endfor %}
       </table>
-    </div>      
+    </div>
   </div>
 
 {% endblock %}

@@ -49,7 +49,7 @@
             <div id="advancedFilters" style="display: none;">
                 {{ form_row(form.replyTo) }}
                 <div class="form-group">
-                    <label>Score Amavis</label>
+                    <label>{{ 'Search.BSpamLevel'|trans }}</label>
                     <div class="d-flex">
                         {{ form_widget(form.bspamLevelMin, { 'attr': { 'placeholder': 'Min' } }) }}
                         {{ form_widget(form.bspamLevelMax, { 'attr': { 'placeholder': 'Max', 'class': 'ml-2' } }) }}
