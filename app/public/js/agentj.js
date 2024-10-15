@@ -23,7 +23,21 @@ document.addEventListener("turbo:load", function () {
   $('.select2').select2();
 
 
+  $(document).scroll(function() {
+    if ($(this).scrollTop() > 100) {
+        $(".scroll-to-top").fadeIn();
+    } else {
+        $(".scroll-to-top").fadeOut();
+    }
+  });
 
+  $(document).on("click", "a.scroll-to-top", function(e) {
+    var target = $(this).attr("href");
+    $("html, body").stop().animate({
+        scrollTop: $(target).offset().top
+    }, 1000, "easeInOutExpo");
+    e.preventDefault();
+  });
 
   /* DataTable*/
   $.extend($.fn.dataTable.defaults, {
@@ -53,7 +67,7 @@ document.addEventListener("turbo:load", function () {
             "language": {
               url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
             },
-            "pageLength": 100,
+            "pageLength": window.location.pathname === "/" ? 10 : 100,
             "stateSave": true
           });
 
