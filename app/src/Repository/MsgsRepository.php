@@ -211,6 +211,81 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
+public function advancedSearch(User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
+{
+    $conn = $this->getEntityManager()->getConnection();
+
+    // Switch between tables based on message type
+    $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
+    $msgrcptTable = $messageType === 'outgoing' ? 'out_msgrcpt' : 'msgrcpt';
+
+    // Original SQL query
+    $sql = "
+        SELECT
+            m.*,
+            mr.status_id,
+            ms.name,
+            m.partition_tag,
+            maddr.email,
+            m.subject,
+            m.from_addr,
+            m.time_num,
+            mr.rid,
+            mr.bspam_level,
+            mr.amavis_output
+        FROM {$table} m
+        LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
+        LEFT JOIN maddr ON maddr.id = mr.rid
+        LEFT JOIN message_status ms ON mr.status_id = ms.id
+        LEFT JOIN users u ON u.email = maddr.email
+        LEFT JOIN domain d ON u.domain_id = d.id
+    ";
+
+    if ($searchKey) {
+        $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+    }
+
+
+    if ($sortParams) {
+        $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
+    } else {
+        $sql .= ' ORDER BY m.time_num desc, m.status_id ';
+    }
+
+
+    // Execute the original query
+    $stmt = $conn->prepare($sql);
+    $allMessages = $stmt->executeQuery()->fetchAllAssociative();
+
+    // Add replyTo status to each message based on m.sid
+    foreach ($allMessages as &$message) {
+        // Fetch the correct email using m.sid
+        $sid = $message['sid'];
+        $emailQuery = "
+            SELECT email
+            FROM maddr
+            WHERE id = :sid
+        ";
+
+        // Prepare and execute the email lookup query
+        $emailStmt = $conn->prepare($emailQuery);
+        $emailStmt->bindValue('sid', $sid);
+        $emailResult = $emailStmt->executeQuery()->fetchOne();
+
+        // Determine the replyTo status
+        $message['replyTo'] = ($message['from_addr'] !== $emailResult) ? 'oui' : 'non';
+    }
+
+    // Clean up resources
+    unset($stmt);
+    unset($conn);
+
+    return $allMessages;
+}
+
+
+
+
   /**
    * SELECT only msgs to send email with captch
    * @return type

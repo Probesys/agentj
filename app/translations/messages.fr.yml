@@ -309,6 +309,25 @@ Form:
   PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer
 
+Search:
+  MailId: Mail ID
+  Sender: Expéditeur
+  Recipient: Destinataire
+  Subject: Objet
+  Date: Date
+  AmavisOutput: Score Amavis
+  Size: Taille
+  Host: Domaine de l'expéditeur
+  ReplyTo: Réponse à un message
+  StartDate: Date de début
+  EndDate: Date de fin
+  BSpamLevel: Score Amavis
+  Incoming: REÇU
+  Outgoing: ENVOYÉ
+  MessageType: Type de message
+  Filter: Filtrer
+
+
 Entities:
   Group:
     Title: Gérer les groupes
