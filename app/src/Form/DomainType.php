@@ -37,26 +37,30 @@ class DomainType extends AbstractType {
         $actions = $options['actions'];
         $builder
                 ->add('domain', null, [
-                    'label' => 'Entities.Domain.fields.domain'
+                    'label' => 'Entities.Domain.fields.domain',
                 ])
                 ->add('srvSmtp', null, [
-                    'label' => 'Entities.Domain.fields.srvSmtp'
+                    'label' => 'Entities.Domain.fields.srvSmtp',
+                    'required' => false,
                 ])
                 ->add('smtpPort', TextType::class, [
                     'label' => 'Entities.Domain.fields.smtp_port',
                 ])
                 ->add('active', null, [
-                    'label' => 'Entities.Domain.fields.active'
+                    'label' => 'Entities.Domain.fields.active',
+                    'required' => false,
                 ])
                 ->add('rules', ChoiceType::class, [
                     'choices' => $actions,
                     'mapped' => false,
                     'label' => 'Form.PolicyDomain',
+                    'required' => false,
                 ])
                 ->add('defaultLang', ChoiceType::class, [
                     'choices' => $this->tabLanguages,
                     'placeholder' => '',
                     'label' => 'Entities.Domain.fields.defaultLang',
+                    'required' => false,
                 ])
                 ->add('policy', null, [
                     'label' => 'Entities.Domain.fields.policy',
@@ -88,6 +92,7 @@ class DomainType extends AbstractType {
                     'allow_delete' => true,
                     'by_reference' => false,
                     'label' => false,
+                    'required' => false,
                 ])
                 ->add('quota', CollectionType::class, [
                     'entry_type' => QuotaType::class,
@@ -95,6 +100,7 @@ class DomainType extends AbstractType {
                     'allow_delete' => true,
                     'by_reference' => false,
                     'label' => false,
+                    'required' => false,
                 ]);
     }
 

@@ -23,7 +23,7 @@ Generics:
     rememberme: Se souvenir de moi
     import: "Importer"
     importFile: "Importer depuis un fichier"
-    addIpAddress: "Adresse IP"
+    addIpAddress: "Valider/enregistrer"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -442,7 +442,7 @@ Entities:
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
       domainMessages: Messages du domaine
-      ipAddresses: "L'adressse IP"
+      ipAddresses: "IP du serveur d'envoi"
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire
