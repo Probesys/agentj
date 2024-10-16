@@ -112,7 +112,7 @@
             {% for domainRelay in form.domainRelays %}
                  <div>
 
-                    {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
+                    {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
                     <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
                 </div>
             {% endfor %}
