@@ -167,10 +167,13 @@ h1{
 }
 
 a.navbar-brand img.logo {
-    max-height: 85px;
-    margin-top: -15px;
-    margin-left: 50px;
-}
+  max-height: 85px;
+  top: 0;
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0; }
 
 .page-content{
   padding-top: 60px;
@@ -243,6 +246,7 @@ div[id^="dropzone-"] {
 
   footer.sticky-footer {
     width: calc(100% - 225px);
+      z-index:2;
   }  
 
   body.sidebar-toggled footer.sticky-footer {

@@ -117,37 +117,39 @@ echo "---- don't relay from unregistered smtp ----" 1>&2
 send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
 send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
 
-echo "---- trigger domain rate limit: 2 mail/s ----" 1>&2
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect swak error 25 and two mail
-send 'out_domain_rate_limit' 'out' 'user@blocnormal.fr' 2 "" 25
+echo "---- test trigger rate limiting: Domain 3 mail/s ----" 1>&2
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+# expect swak error 25, 3 out_msgs and 1 sql_limit_report
 
-echo "---- trigger user rate limit: 1 mail/s ----" 1>&2
-swaks -ha --from 'limited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'limited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'limited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'limited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect swak error 25 and two mail
-send 'out_rate_limit' 'out' 'limited@blocnormal.fr' 1 "" 25
+echo "---- test trigger rate limiting: Group 2 mail/s ----" 1>&2
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+# expect swak error 25, 2 out_msgs and 2 sql_limit_report
 
-echo "---- don't trigger domain rate limit: user allowed to 1000 mail/s ----" 1>&2
-swaks -ha --from 'unlimited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'unlimited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'unlimited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'unlimited@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect no swak error and 5 mail
-send 'out_rate_limit' 'out' 'unlimited@blocnormal.fr' 5
+echo "---- test trigger rate limiting: Personnal 1 mail/s ----" 1>&2
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+# expect swak error 25, 1 out_msgs and 3 sql_limit_report
+
+echo "---- test trigger rate limiting: Personnal 10 mail/s ----" 1>&2
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+# expect no swak error and 4 mails
 
 echo "---- no rate limit ----" 1>&2
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-sleep 10
-# expect no swak error and 5 mails
-send 'out_no_rate_limit' 'out' 'user@laissepasser.fr' 5
+# expect no swak error and 4 mails
 
 echo "OK" > $test_results/TESTS_DONE

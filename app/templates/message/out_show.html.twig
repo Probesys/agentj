@@ -4,67 +4,67 @@
   {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
   {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
-
 {% block modalContent %}
-  <div class="row">
+    {% for m in message %}
+        <div class="row">
     <div class="col-md-4">
       {{ 'Generics.fields.date' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msg.timeiso | format_datetime('short', 'short') }}
-    </div>      
+      {{ outMsg.time_iso | format_datetime('short', 'short') }}
+    </div>
     <div class="col-md-4">
        {{ 'Generics.fields.sender' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msg.sid.getEmailClear }}    
+      {{ m.from_addr }}
     </div>
     <div class="col-md-4">
       {{ 'Generics.fields.recipient' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msgRcpt.rid.getEmailClear }}
-    </div>    
+      {{ m.email }}
+    </div>
     <div class="col-md-4">
      {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
     </div>
     <div class="col-md-8">
-      {{ msgRcpt.bspamLevel }}
-    </div>    
-    
-    {% if msgRcpt.sendCaptcha > 0 %}
+      {{ outMsgRcpt.bspam_level }}
+    </div>
+
+    {% if outMsgRcpt.send_captcha > 0 %}
     <div class="col-md-4">
-      {{ 'Entities.Message.dateAuthRequestAt' | trans }} : 
+      {{ 'Entities.Message.dateAuthRequestAt' | trans }} :
     </div>
     <div class="col-md-8">
-       {{ msgRcpt.sendCaptcha | format_datetime('short', 'short') }}
-    </div>   
+       {{ outMsgRcpt.send_captcha | format_datetime('short', 'short') }}
+    </div>
     {% endif %}
-    
+
     <div class="col-md-4">
       {{ 'Entities.Message.isMailingList' | trans }}
     </div>
     <div class="col-md-8">
-       {%  if msg.isMlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
-    </div>    
+       {%  if outMsg.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
+    </div>
     <div class="col-md-4">
-      {{ 'Message.Status.title' | trans }}
+      {{ 'Message.status_id' | trans }}
     </div>
     <div class="col-md-8">
       {# If the message as an agentJ status #}
-      {% if msgRcpt.status is not null %}
+      {% if outMsgRcpt.status_id is not null %}
         {#   authorized or restored status     #}
-        {% set msgsStatus = msgRcpt.status.name %}
-        {% set response = msgRcpt.amavisOutput %}
-        {% if msgRcpt.status.id == 2 or msgRcpt.status.id == 5  %}
+        {% set msgsStatus = outMsgRcpt.status.name %}
+        {% set response = outMsgRcpt.amavisOutput %}
+        {% if outMsgRcpt.status.id == 2 or outMsgRcpt.status.id == 5  %}
           {% set deferredSatusClass = 'text-success' %}
         {% else %}
           {% set deferredSatusClass = 'text-danger' %}
-        {% endif %}        
+        {% endif %}
       {% else %}
-        {% set msgsStatus = msgDeferredStatus[msgRcpt.ds] %}
-        {% set response = msgRcpt.smtpResp %}
-        {% if msgRcpt.ds == 'P' %}
+        {% set msgsStatus = msgDeferredStatus[outMsgRcpt.ds] %}
+        {% set response = outMsgRcpt.smtp_resp %}
+        {% if outMsgRcpt.ds == 'P' %}
           {% set deferredSatusClass = 'text-success' %}
         {% else %}
           {% set deferredSatusClass = 'text-danger' %}
@@ -83,26 +83,19 @@
           <tr>
             <th>{{ 'Generics.fields.recipient' | trans }}</th>
             <th>{{ 'Generics.fields.sender' | trans }}</th>
-            <th>{{ 'Generics.fields.list' | trans }}</th>
-            <th>{{ 'Generics.fields.priority' | trans }}</th>
-            <th>{{ 'Entities.User.fields.groups' | trans }}</th>
           </tr>
         </thead>
-        {% for wb in wblistInfo %}
-          {% set classTr = "" %}
-          {% if loop.index == 1 %}
+            {% set classTr = "" %}
+            {% if loop.index == 1 %}
             {% set classTr = "bg-success text-white" %}
-          {% endif %}
+            {% endif %}
           <tr class="{{ classTr }} ">
-            <td>{{ wb.recipient.getEmailFromRessource }}</td>
-            <td>{{ wb.sender.email }}</td>
-            <td>{{ wb.wb }}</td>
-            <td>{{ wb.priority }}</td>
-            <td>{{ wb.group }}</td>
+            <td>{{ m.email }}</td>
+            <td>{{ m.from_addr }}</td>
           </tr>
-        {% endfor %}        
+        {% endfor %}
       </table>
-    </div>      
+    </div>
   </div>
 
 {% endblock %}

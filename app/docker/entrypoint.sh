@@ -22,19 +22,12 @@ sed -i "s|\$TZ|$TZ|g" $env_file
 sed -i "s|\$DEFAULT_LOCALE|$DEFAULT_LOCALE|g" $env_file
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 
-<<<<<<< HEAD
-if [ -x "$(which composer)" ] && [ -x "$(which yarnpkg)" ] ; then
-	echo "Installing libraries"
-	cd /var/www/agentj && sudo -u www-data composer install --ignore-platform-reqs --no-scripts
-	cd /var/www/agentj && sudo -u www-data yarnpkg install
-=======
 cd /var/www/agentj || exit 4
 
 if [ -x "$(which composer)" ] && [ -x "$(which yarnpkg)" ] ; then
 	echo "Installing libraries"
 	sudo -u www-data composer install --ignore-platform-reqs --no-scripts
 	sudo -u www-data yarnpkg install
->>>>>>> main
 fi
 
 echo "Installing assets"
