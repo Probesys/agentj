@@ -2,4 +2,4 @@
 
 services:
   app:
-    command: bash -c "supervisord -c /etc/supervisord.conf & su -l www-data -c /var/www/agentj/docker/tests/testmail.sh"
+    command: bash -c "supervisord -c /etc/supervisord.conf & su -l www-data -c /var/www/agentj/docker/tests/testmail.sh | tee /tmp/test_mails/general.log"
