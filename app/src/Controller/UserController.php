@@ -330,7 +330,7 @@ class UserController extends AbstractController {
         
         $form->remove('password');
         $form->remove('emailRecovery');
-        $form->remove('originalUser');
+        $form->remove('groups');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -484,6 +484,8 @@ class UserController extends AbstractController {
 
         
         $form->remove('password');
+        $form->remove('emailRecovery');
+        $form->remove('groups');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
         $form->handleRequest($request);
 

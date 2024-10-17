@@ -20,7 +20,9 @@
 
 {{ form_row(form.email) }}
 
-{{ form_row(form.groups) }}	
+{% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') %}
+	{{ form_row(form.groups) }}	
+{% endif %}	
 
 {{ form_row(form.sharedWith) }}
 
@@ -36,7 +38,12 @@
 </div>
 
 
-		
+
+{% if (app.request.get('_route') == 'new_user_email_alias') or (app.request.get('_route') == 'user_email_alias_edit') %}
+
+	{{ form_row(form.originalUser) }}
+
+{% endif %}
 
 
 {% if form.quota is defined %}
