@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Repository\DomainRepository;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 #[Route(path: 'admin/users')]
@@ -61,6 +62,7 @@ class UserController extends AbstractController {
         ]);
         
         $form->remove('originalUser');
+        $form->remove('emailRecovery');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -115,6 +117,7 @@ class UserController extends AbstractController {
         ]);
         
         $form->remove('originalUser');
+        $form->remove('emailRecovery');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -223,7 +226,7 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/email/newUser', name: 'user_email_new', methods: 'GET|POST')]
-    public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService): Response {
+    public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService, DomainRepository $domainRepository): Response {
         $user = new User();
 
         $allowedomainIds = array_map(function ($entity) {
@@ -232,6 +235,9 @@ class UserController extends AbstractController {
                 return $entity->getId();
             }
         }, $this->getAlloweDomains());
+
+
+        $imapDomains = $domainRepository->findDomainsWithIMAPConnectors(); 
 
         $form = $this->createForm(
                 UserType::class,
@@ -244,6 +250,10 @@ class UserController extends AbstractController {
         );
         $form->remove('password');
         $form->remove('originalUser');
+        $form->remove('roles');
+        $form->remove('emailRecovery');
+        $form->remove('username');
+
 
         $form->handleRequest($request);
 
@@ -302,6 +312,7 @@ class UserController extends AbstractController {
         return $this->render('user/new.html.twig', [
                     'user' => $user,
                     'form' => $form->createView(),
+                    'imapDomains' => $imapDomains
         ]);
     }
 
@@ -318,6 +329,8 @@ class UserController extends AbstractController {
         
         
         $form->remove('password');
+        $form->remove('emailRecovery');
+        $form->remove('originalUser');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -367,7 +380,7 @@ class UserController extends AbstractController {
 
     
     #[Route(path: '/email/{id}/edit', name: 'user_email_edit', methods: 'GET|POST')]
-    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService, UserRepository $userRepository): Response {
+    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService, UserRepository $userRepository, DomainRepository $domainRepository): Response {
 
         $oldGroups = $user->getGroups()->toArray();
 
@@ -378,6 +391,14 @@ class UserController extends AbstractController {
             }
         }, $this->getAlloweDomains());
 
+        $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
+
+        $domainHasIMAPConnector = false;
+
+        if ($user->getDomain() && $user->getDomain()->hasIMAPConnector()) {
+            $domainHasIMAPConnector = true;
+        }
+
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_email_edit', ['id' => $user->getId()]),
             'allowedomainIds' => $allowedomainIds,
@@ -385,16 +406,18 @@ class UserController extends AbstractController {
         ]);
         $form->remove('password');
         $form->remove('originalUser');
+        $form->remove('roles');
+
+        $form->remove('emailRecovery');
+        $form->remove('username');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
-            //Check, if user email was changed, if the new mail does not allready exist
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
 
-//            $newDomainName = explode('@', $form->get('email')->getData())[1];
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
 
             $imapLoginExist = !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
@@ -439,6 +462,8 @@ class UserController extends AbstractController {
         return $this->render('user/edit.html.twig', [
                     'user' => $user,
                     'form' => $form->createView(),
+                    'imapDomains' => $imapDomains,
+                    'domainHasIMAPConnector' => $domainHasIMAPConnector,
         ]);
     }
 

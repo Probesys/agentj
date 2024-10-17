@@ -1,3 +1,4 @@
+{% set controller = app.request.attributes.get('_controller') %}
 {{ form_start(form) }}
 {% if user.office365PrincipalName is not null %}
 	<div class="form-group row">
@@ -8,27 +9,76 @@
 	</div>
 {% endif %}
 {{ form_row(form.fullname) }}
-{{ form_row(form.emailRecovery) }}
-{{ form_row(form.username) }}
-{{ form_row(form.roles) }}
-{{ form_row(form.groups) }}
+
+
+
+
+{% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') %}
+	{{ form_row(form.username) }}
+	{{ form_row(form.roles) }}
+{% endif %}
+
 {{ form_row(form.email) }}
-{{ form_row(form.imapLogin) }}
+
+{{ form_row(form.groups) }}	
+
 {{ form_row(form.sharedWith) }}
-{{ form_row(form.report) }}
+
 {% if form.password is defined %}
 	{{ form_row(form.password.first, {'label': 'Entities.User.fields.password'|trans}) }}
 	{{ form_row(form.password.second, {'label': 'Entities.User.fields.repeatPassword'|trans}) }}
 {% endif %}
-{{ form_row(form.domains) }}
+{{ form_row(form.domain) }}
+
+
+<div class="form-row form-row-imap-login" style="{% if domainHasIMAPConnector|default(false) == false or domainHasIMAPConnector|default(null) is null %}display:none;{% endif %}">
+    {{ form_row(form.imapLogin) }}
+</div>
+
+
+		
 
 
 {% if form.quota is defined %}
 	{% include 'partials/_quota_form.html.twig' with {'form': form} %}
 {% endif %}
 
+
+<div class="form-group">
+    {{ form_widget(form.report, {'attr': {'class': 'form-check-input'}}) }}
+    <label class="form-check-label" for="{{ form.report.vars.id }}">
+        {{ form_label(form.report, 'Envoyer le rapport') }}
+    </label>
+    {{ form_errors(form.report) }}
+</div>
+
+
 <div class="d-flex justify-content-center">
 	<input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}">
 	<a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans() }}</a>
 </div>
 {{ form_end(form) }}
+
+
+
+
+
+{% if (app.request.get('_route') == 'user_email_new') or (app.request.get('_route') == 'user_email_edit') %}
+<script>
+    function toggleImapLogin(selectElement) {
+        
+        const imapDomains = {{ imapDomains|json_encode|raw }}.map(domain => domain.id);
+
+        const selectedDomain = parseInt(selectElement.value);
+        const imapLoginRow = document.querySelector('.form-row-imap-login');  
+
+        if (imapDomains.includes(selectedDomain)) {
+            imapLoginRow.style.display = 'block';  
+        } else {
+            imapLoginRow.style.display = 'none';  
+        }
+    }
+
+    
+</script>
+{% endif %}
