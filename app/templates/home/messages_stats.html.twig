@@ -1,0 +1,34 @@
+{% extends 'modalTemplate.html.twig' %}
+{% block modalTitle %}
+  {{ 'Entities.Message.labels.infos' | trans }}
+{% endblock %}
+
+{% block modalContent %}
+    <table class="table table-sm">
+    <thead>
+        <tr>
+            <th>{{ 'Entities.Message.labels.reason' | trans }}</th>
+            <th>{{ 'Entities.User.fields.incoming' | trans }}</th>
+            <th>{{ 'Entities.User.fields.outgoing' | trans }}</th>
+        </tr>
+    </thead>
+    {% set nbMsg = 0 %}
+    {% set nbMsgOut = 0 %}
+    {% for status in msgs_status %}
+        <tr>
+            {% set statusKey = 'Message.Status.' ~ status.name %}
+            {% set status_description = statusKey|trans %}
+            <td>{{ status_description }}</td>
+            <td>{{ status.qty }}</td>
+            <td>{{ status.qty_out }}</td>
+            {% set nbMsg = nbMsg + status.qty %}
+            {% set nbMsgOut = nbMsgOut + status.qty_out %}
+        </tr>
+    {% endfor %}
+        <tr>
+            <td>{{'Navigation.all'|trans }}</td>
+            <td>{{nbMsg}}</td>
+            <td>{{nbMsgOut}}</td>
+        </tr>
+    </table>
+{% endblock %}
