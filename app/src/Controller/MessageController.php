@@ -56,7 +56,7 @@ class MessageController extends AbstractController {
                 case 'virus':
                     $subTitle = 'Entities.Message.virus';
                     $type = MessageStatus::VIRUS;
-                    $messageActions = [];                    
+                    $messageActions = [];
                     break;
                 case 'banned':
                     $subTitle = 'Entities.Message.' . $type;
@@ -518,7 +518,7 @@ class MessageController extends AbstractController {
             $mailaddr->setEmail($emailSenderToWb);
             $mailaddr->setPriority('6'); //priority for email by default
             $em->persist($mailaddr);
-        }  
+        }
         $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
         if (!$wblist) {
             $wblist = new Wblist($userDomain, $mailaddr);

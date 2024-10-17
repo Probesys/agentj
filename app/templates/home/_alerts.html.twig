@@ -1,0 +1,41 @@
+<h2 class="mx-2">Alertes récentes</h2>
+<section>
+    <table id="table_alerts" class="table table-hover">
+        <thead>
+            <tr>
+                <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
+                <th class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
+                <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
+                <th class="bg-transparent"></th>
+                <th class="bg-transparent"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alert in alerts %}
+                <tr class="{{ alert.isRead ? '' : 'font-weight-bold' }}">
+                    <td data-title="{{ 'Message.Date'|trans }}">
+                        <span title="{{ 'Message.Date'|trans ~ ' : ' ~ alert.date|format_datetime('short', 'short') }}">
+                            {{ alert.date|format_datetime('short', 'short') }}
+                        </span>
+                    </td>
+                    <td data-title="{{ 'Entities.User.fields.email'|trans }}">
+                        <span title="{{ alert.refUser }}">{{ alert.refUser }}</span>
+                    </td>
+                    <td data-title="{{ 'Message.Object'|trans }}">
+                        <span title="{{ alert.subject }}">{{ alert.subject|slice(0, 30) }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ path('alert_read', { 'id': alert.id }) }}" class="btn btn-primary float-right" title="{{ 'Entities.Alert.actions.read'|trans }}">
+                            <i class="fas fa-check"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('alert_delete', { 'id': alert.id }) }}" class="btn btn-danger float-right" title="{{ 'Entities.Alert.actions.delete'|trans }}">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>

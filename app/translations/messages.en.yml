@@ -143,6 +143,7 @@ Navigation:
   clean: Clean
   error: Errors
   all: All
+  Dashboard: Dashboard
   Messagedelete: Deleted
   mailBlocked: "Mail blocked"
   blacklist: "Blocked senders"
@@ -172,8 +173,17 @@ Config:
 Message:
   Object: Subject
   Sender: Sender
+  Status:
+    title: Status
+    untreated: Untreated
+    authorized: Authorized
+    banned: Banned
+    deleted: Deleted
+    restored: Restored
+    virus: Virus
+    spammed: Spam
+    Error: Error
   Recipient: "Recipient"
-  Status: Status
   Date: Date
   ErrorSendCaptcha: "Error email verification"
   Actions:
@@ -458,7 +468,13 @@ Entities:
       fullName: Name
       userName: Login
       roles: Role
-      domain: Area
+      domain: Domain
+      incoming: Incoming
+      outgoing: Outgoing
+      outMsgCount: 'Outgoing message count'
+      inMsgCount: 'Incoming message count'
+      outMsgBlockedCount: 'Outgoing message blocked count'
+      inMsgBlockedCount: 'Incoming message blocked count'
       originalUser: "Reference email"
       alias: Alias
       sharedBy: "Shared with"
@@ -469,6 +485,10 @@ Entities:
       bypassHumanAuth: "Deactivate human authentication"
       policy: "Policy"
       office365PrincipalName: "M365 principal mail"
+  Alert:
+    actions:
+      read: Read
+      delete: Delete
   Message:
     index: "List of messages"
     untreated: "No treaties"
@@ -480,6 +500,8 @@ Entities:
     spammedDetect: "spammed detected automatically"
     informationMessage: "The messages will be automatically deleted after 30 days."
     spamLevel: Note
+    labels:
+      infos: "Information about the blockage"
     dateAuthRequestAt: "Authentication request sent the"
     isMailingList: "Mailing list? "
   Msgrcpt:

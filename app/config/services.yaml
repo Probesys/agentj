@@ -51,3 +51,6 @@ services:
 #       public: true   
     App\Service\FileUploader:
         arguments: ['%app.upload_directory%', "@doctrine.orm.entity_manager"]   
+
+    App\MessageHandler\CreateAlertMessageHandler:
+        tags: ['messenger.message_handler']
