@@ -267,7 +267,7 @@ test-mail:
     - echo "GID=1829" >> .env
     - chown -R 1829:1829 .
     - docker compose up -d --build
-    - while test ! -f tests/results/TESTS_DONE ; do tail tests/results/general.log ; sleep 5 ; done
+    - while test ! -f tests/results/TESTS_DONE ; do test -f tests/results/general.log && tail tests/results/general.log ; sleep 5 ; done
   artifacts:
     paths:
       - tests/results/*
