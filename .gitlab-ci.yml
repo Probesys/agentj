@@ -271,6 +271,6 @@ test-mail:
     - exit $(cat `find tests/results -name '*.result'` | grep -c failed)
   artifacts:
     expose_as: 'general_log'
-    paths: ['tests/results/general.log', 'tests/results/']
+    paths: ['tests/results/general.log']
   only:
     - merge_requests
