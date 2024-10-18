@@ -90,8 +90,10 @@ send() {
 	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok ${secs}s"
+		echo 'ok' > $test_results/$testname.result
 	else
 		echo "failed ${secs}s, received $received mail with '$test_str', expected $expected_received_count. agentj address $aj_addr, mail from $mail_from, swaks options '$swaks_opts'"
+		echo 'failed' > $test_results/$testname.result
 	fi
 
 	mv $test_results/mailtester $test_results/mailbox_$testname

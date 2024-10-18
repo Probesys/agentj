@@ -256,8 +256,8 @@ test-mail:
   script:
     - cp .env.example .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
-    - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
-    - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD|g" .env
+    - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=`openssl rand -hex 16`|g" .env
+    - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=`openssl rand -hex 16`|g" .env
     - sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
     - token=`openssl rand -hex 16` ; sed -i "s|SF_MYAPPSECRET=.*|SF_MYAPPSECRET=$token|" .env
     - token=`openssl rand -hex 8` ; sed -i "s|SF_MY_TOKEN_ENC_IV=.*|SF_MY_TOKEN_ENC_IV=$token|" .env
@@ -268,14 +268,10 @@ test-mail:
     - chown -R 1829:1829 .
     - docker compose up -d --build
     - tail -F tests/results/general.log & while test ! -f tests/results/TESTS_DONE ; do sleep 30 ; done ; pkill tail
-    - exit $(cat tests/results/*.result | grep -c failed)
+    - exit $(cat `find tests/results -name '*.result'` | grep -c failed)
   artifacts:
     expose_as: general.log
     paths:
       - tests/results/general.log
-  artifacts:
-    expose_as: details
-    paths:
-      - tests/results/
   only:
     - merge_requests
