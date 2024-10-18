@@ -255,8 +255,10 @@ test-mail:
   stage: test
   variables:
     TAG: $CI_COMMIT_BRANCH
+    REGISTRY: $CI_REGISTRY/$CI_PROJECT_PATH
   script:
     - cp .env.example .env
+    - sed -i "s|probesys38|$REGISTRY|g" docker-compose.yml
     - sed -i "s|VERSION=.*|VERSION=$TAG|" .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
     - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
@@ -272,8 +274,12 @@ test-mail:
     - docker compose up -d
     - while test ! -f tests/results/TESTS_DONE ; do test -f tests/results/general.log && tail tests/results/general.log ; sleep 30 ; done
   artifacts:
+    expose_as: general.log
     paths:
-      - tests/results/*
       - tests/results/general.log
+  artifacts:
+    expose_as: details
+    paths:
+      - tests/results/
   only:
     - merge_requests
