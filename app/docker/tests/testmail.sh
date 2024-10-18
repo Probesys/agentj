@@ -152,6 +152,6 @@ swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 # expect no swak error and 4 mails
-send 'rate_limit_user_10_mail_s' 'out' 'user@laissepasser.fr' 4
+send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 4
 
 echo "OK" > $test_results/TESTS_DONE

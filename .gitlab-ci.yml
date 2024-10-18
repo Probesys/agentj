@@ -259,6 +259,7 @@ test-mail:
     - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
     - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD|g" .env
     - sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
+    - sed -i "s/VERSION=.*/VERSION=$CI_COMMIT_BRANCH/" .env
     - token=`openssl rand -hex 16` ; sed -i "s|SF_MYAPPSECRET=.*|SF_MYAPPSECRET=$token|" .env
     - token=`openssl rand -hex 8` ; sed -i "s|SF_MY_TOKEN_ENC_IV=.*|SF_MY_TOKEN_ENC_IV=$token|" .env
     - token=`openssl rand -base64 32` ; sed -i "s|SF_MY_TOKEN_ENC_SALT=.*|SF_MY_TOKEN_ENC_SALT=$token|" .env
