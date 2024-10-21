@@ -53,11 +53,17 @@ class WblistController extends AbstractController {
                 break;
         }
         $totalItemFound = count($wblist);
-        $per_page = $this->getParameter('app.per_page_global');
+
+        // Retrieve per_page from the request or use the default value
+        $per_page = $request->query->getInt('per_page', $this->getParameter('app.per_page_global'));
+
+        // Set the initial value of per_page in the form
+        $filterForm->get('per_page')->setData($per_page);
+
         $wblist2Show = $paginator->paginate(
                 $wblist,
                 $request->query->getInt('page', 1)/* page number */,
-                $request->query->getInt('per_page', $per_page)
+                $per_page
         );
         return $this->render('wb_list/index.html.twig', [
                     'controller_name' => 'WBListController',
