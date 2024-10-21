@@ -8498,4 +8498,8 @@ body.sidebar-toggled footer.sticky-footer {
 .opacity-50{
   opacity: 50;
 }
+
+.hidden {
+    display: none;
+}
 /*# sourceMappingURL=styles.css.map */
