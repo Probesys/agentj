@@ -273,8 +273,7 @@ test-mail:
     - tail -F tests/results/general.log & while test ! -f tests/results/TESTS_DONE ; do sleep 30 ; done ; pkill tail
     - exit $(cat `find tests/results -name '*.result'` | grep -c failed)
   artifacts:
-    expose_as: results
     paths: 
-      - tests/results/
+      - tests/results/*
   only:
     - merge_requests
