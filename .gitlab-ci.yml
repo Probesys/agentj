@@ -253,8 +253,9 @@ deploy-tags:
 
 test-mail:
   stage: test
-  environment:
+  variables:
     DB_PASSWORD: glass keyboard
+    DB_ROOT_PASSWORD: glass keyboard
   script:
     - cp .env.example .env
     - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
