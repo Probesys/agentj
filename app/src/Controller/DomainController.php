@@ -82,6 +82,7 @@ class DomainController extends AbstractController {
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
             'actions' => $this->getWBListDomainActions(),
+            'is_edit' => false,
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
@@ -180,6 +181,7 @@ class DomainController extends AbstractController {
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
             'actions' => $this->getWBListDomainActions(),
+            'is_edit' => true,
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
