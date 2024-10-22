@@ -496,4 +496,15 @@ class Domain
         $this->quota = $quota;
         return $this;
     }
+
+
+    public function hasIMAPConnector(): bool
+    {
+        foreach ($this->getConnectors() as $connector) {
+            if ($connector->getType() === 'IMAP') {
+                return true;
+            }
+        }
+        return false;
+    }
 }
