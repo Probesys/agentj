@@ -19,13 +19,13 @@ final class Version20241022092208 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE agentj_outmail.mail_count MODIFY COLUMN id varchar(320)');
+        $this->addSql('ALTER TABLE mail_count MODIFY COLUMN id varchar(320)');
 
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE agentj_outmail.mail_count MODIFY COLUMN id varchar(40)');
+        $this->addSql('ALTER TABLE mail_count MODIFY COLUMN id varchar(40)');
 
     }
 }
