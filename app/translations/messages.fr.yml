@@ -443,6 +443,7 @@ Entities:
       domaineSender: domaine d'envoi
       domainMessages: Messages du domaine
       ipAddresses: "IP du serveur d'envoi"
+      dns: "DNS"
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire
