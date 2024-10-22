@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Groups;
 use App\Entity\User;
+use APP\Entity\Domain;
 use App\Form\UserAutocompleteField;
 use App\Repository\GroupsRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -26,14 +27,15 @@ class UserType extends AbstractType
             $labelEmail = 'Entities.User.fields.alias';
         }
         $allowedomainIds = $options['allowedomainIds'];
+
+
+        $domainHasIMAPConnector = $options['domainHasIMAPConnector'] ?? false;
+
+
         $builder
             ->add('email', EmailType::class, [
                 'label' => $labelEmail,
                 'required' => true,
-            ])
-            ->add('imapLogin', null, [
-                'label' => 'Entities.User.fields.imapLogin',
-                'required' => false,
             ])
             ->add('emailRecovery', EmailType::class, [
                 'label' => 'Entities.User.fields.emailRecovery',
@@ -65,9 +67,8 @@ class UserType extends AbstractType
             ->add('groups', EntityType::class, [
                 'label' => 'Entities.User.fields.groups',
                 'class' => Groups::class,
-                'multiple' => true,
-                'attr' => ['class' => 'select2'],
-                'placeholder' => ' ',
+                'multiple' => true,           // This allows multiple checkboxes to be checked
+                'expanded' => true,           // This makes it render as checkboxes
                 'required' => false,
                 'choice_label' => function ($group, $key, $index) {
                     return $group->getName() . ' (' . $group->getDomain() . ')';
@@ -76,14 +77,19 @@ class UserType extends AbstractType
                     $retRepo = $rep->createQueryBuilder('g')
                         ->leftJoin('g.domain', 'd');
                     if ($allowedomainIds) {
-                        $retRepo->where('d.id in (' . implode(',', $allowedomainIds) . ')');
+                        $retRepo->where('d.id in (:allowedomainIds)')
+                            ->setParameter('allowedomainIds', $allowedomainIds);
                     }
                     return $retRepo;
                 },
-            ])
-            ->add('domains', null, [
+                'attr' => ['style' => 'height:auto;']
+            ])            
+            ->add('domain', null, [
                 'attr' => ['class' => 'select2'],
                 'label' => 'Entities.User.fields.domain',
+                'attr' => [
+                    'onChange' => 'toggleImapLogin(this)'  // JavaScript function for handling changes
+                ]
             ])
             ->add('report', null, [
                 'label' => 'Entities.User.fields.report',
@@ -96,6 +102,19 @@ class UserType extends AbstractType
                 'multiple' => true,
                 'required' => false,
             ]);
+
+
+
+        $builder->add('imapLogin', null, [
+            'label' => 'IMAP Login',
+            'required' => false,
+            'attr' => [
+                'class' => 'imap-login-field',
+            ]
+        ]);
+   
+
+
 
         if ($options['include_quota']) {
             $builder->add('quota', CollectionType::class, [
@@ -115,6 +134,7 @@ class UserType extends AbstractType
             'alias' => false,
             'allowedomainIds' => [],
             'include_quota' => true,
+            'domainHasIMAPConnector' => false
         ]);
     }
 }

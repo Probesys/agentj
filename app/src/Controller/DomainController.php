@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
+use App\Entity\DomainKey;
 use App\Entity\Mailaddr;
 use App\Entity\Settings;
 use App\Entity\User;
@@ -82,6 +83,7 @@ class DomainController extends AbstractController {
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
             'actions' => $this->getWBListDomainActions(),
+            'is_edit' => false,
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
@@ -148,7 +150,7 @@ class DomainController extends AbstractController {
 
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
-            return $this->redirectToRoute('domain_index');
+            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
         } elseif ($form->isSubmitted()) {
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
@@ -180,6 +182,7 @@ class DomainController extends AbstractController {
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
             'actions' => $this->getWBListDomainActions(),
+            'is_edit' => true,
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
@@ -243,8 +246,12 @@ class DomainController extends AbstractController {
             return $this->redirectToRoute('domain_index');
         }
 
+        $dkim = $this->em->getRepository(DomainKey::class)->find($domain->getDomainKeys()->getId());
+        $dnsInfo = $dkim->getDnsinfo();
         return $this->render('domain/edit.html.twig', [
                     'domain' => $domain,
+                    'dkim' => $dkim,
+                    'dnsInfo' => $dnsInfo,
                     'connectorTypes' => ConnectorTypes::all(),
                     'form' => $form->createView(),
                     'domainSpamLevel' => $domain->getLevel()
