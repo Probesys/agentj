@@ -277,7 +277,7 @@ test-mail:
     paths: 
       - tests/results/general.log
   artifacts:
-    when: on-failure
+    when: on_failure
     paths: 
       - tests/results/*
   only:
