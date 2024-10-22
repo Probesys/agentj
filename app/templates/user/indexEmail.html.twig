@@ -6,20 +6,20 @@
     {% set _title = 'Entities.User.indexEmail'|trans %}
     {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-        {% block content_button_actions %} 
+        {% block content_button_actions %}
                 {% if is_granted('ROLE_ADMIN') %}
                     <a href="#" data-turbo="false" data-url-modal-content="{{ path('import_user_email') }}" class="btn-open-modal btn btn-success float-right ml-2  col-sm-12 col-md-4 mb-1"><i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}</a>
                 {% endif %}
                 <a href="#" data-url-modal-content="{{ path('user_email_new') }}"  class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 "><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new'|trans() }}</a>
 
-        {% endblock %}          
+        {% endblock %}
 
-    {% endembed %}     
+    {% endembed %}
 
 
     <form id="massive-actions-form" action="{{ path('user_email_batch_delete') }}" method="post">
         <section id="no-more-tables">
-            <table id="table_users" class="table  datatable">
+            <table id="table_users" class="table datatable hidden">
                 <thead>
                     <tr>
                         <th>
@@ -48,7 +48,7 @@
                             <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
                             <td data-title="{{'Entities.User.fields.groups'|trans }}">
                               {% for group in groups %}
-                                
+
                                 <span class="badge badge-secondary">{{ group }}</span>
                               {% endfor %}
                               </td>
@@ -67,14 +67,14 @@
                                            title="{{ 'Generics.actions.delete'|trans() }}">
                                             <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                        </a> 
+                                        </a>
 
                                         <a href="{{ path('homepage', {'_switch_user': user.email | stream_get_contents}) }}" 
-                                           class='btn btn-sm btn-primary' 
+                                           class='btn btn-sm btn-primary'
                                            title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
                                             <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
-                                        </a> 
+                                        </a>
 
 
                                     </li>

@@ -4,20 +4,18 @@
 
 {% block title %}{{title}}{% endblock %}
 
-
 {% block body %}
-
 
   {% set _title = title ~ ' : ' ~  totalItemFound %}
   {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-    {% block content_button_actions %} 
+    {% block content_button_actions %}
       {%  if app.request.get('_route_params')['type'] == 'W' and is_granted('ROLE_ADMIN')%}
         <a href="#" data-url-modal-content="{{ path('import_wblist') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6"><i class="fas fa-plus"></i>&nbsp;Importer depuis un fichier</a>
       {% endif %}
-    {% endblock %}          
+    {% endblock %}
 
-  {% endembed %} 
+  {% endembed %}
 
   {% include 'common/blocActionsAndSearch.html.twig'  %}
   {{ form_start(filter_form, {'attr': {'id': 'massive-actions-form'}}) }}
@@ -32,7 +30,7 @@
           {% if is_granted('ROLE_ADMIN') %}
             <th>{{ sortLinkMacro.sortLink('Message.Recipient'|trans,'emailuser') }}</th>
             {% endif %}
-          <th>{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}</th>          
+          <th>{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}</th>
           <th>{{ sortLinkMacro.sortLink('Message.Sender'|trans,'email') }}</th>
           <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'wb.datemod') }}</th>
           <th>{{ 'Message.Actions.list'|trans() }}</th>
@@ -40,10 +38,10 @@
       </thead>
       <tbody>
         {% for wb in wblist %}
-          
+
           {% set classLine = wb | wblist_is_overridden ? 'opacity-50' : '' %}
           {% set keyPairMessage =  [wb.rid, wb.sid, wb.priority] %}
-          <tr class="{{ classLine }}">  
+          <tr class="{{ classLine }}">
             <td>
               {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
@@ -60,8 +58,8 @@
             {% set typeLabel = typeLabel | trans %}
               {% if  wb.type == 2 %}
                 {% set typeLabel = typeLabel ~ ' ' ~ wb.group %}
-              {% endif %}            
-            
+              {% endif %}
+
             <td data-title="{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}">{{  typeLabel}} </td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
@@ -71,12 +69,12 @@
                   {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList %}
                   {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList %}
                   <a href="{{path('wblist_delete',{'rid':wb.rid,'sid':wb.sid,'priority' : wb.priority})}}?_token={{ csrf_token('delete_wblist' ~ wb.rid ~ wb.sid)}}" class='btn btn-sm btn-danger confirmModal' 
-                     data-dialog-title='{{ deleteConfirmTitle|trans }}' 
-                     data-dialog-content='{{ deleteConfirmContent|trans }}'                   
+                     data-dialog-title='{{ deleteConfirmTitle|trans }}'
+                     data-dialog-content='{{ deleteConfirmContent|trans }}'
                      title="{{ deleteLabel|trans() }}">
-                    <i class="fas fa-trash-alt  d-md-block d-lg-none"></i>          
-                     
-                    <span class="d-md-none d-lg-block">{{ deleteLabel |trans() }}</span>                                
+                    <i class="fas fa-trash-alt  d-md-block d-lg-none"></i>
+
+                    <span class="d-md-none d-lg-block">{{ deleteLabel |trans() }}</span>
                   </a>
               {% endif %}
             </td>
@@ -88,7 +86,7 @@
   {{ form_end(filter_form) }}
   <div class="navigation text-center">
     {{ knp_pagination_render(wblist) }}
-  </div>   
-  {% include 'alertsPopup.html.twig' %}         
+  </div>
+  {% include 'alertsPopup.html.twig' %}
 
 {% endblock %}

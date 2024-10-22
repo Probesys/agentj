@@ -71,6 +71,10 @@ document.addEventListener("turbo:load", function () {
             "stateSave": true
           });
 
+  table.on('init', function() {
+      $('.datatable').removeClass('hidden');
+  });
+
 //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
     e.preventDefault();
