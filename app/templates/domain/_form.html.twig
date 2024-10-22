@@ -108,6 +108,7 @@
   </div>
 </div>
 
+{% if domain.id is not null %}
 <div class="card">
     <div class="card-header">
         {{ 'Entities.Domain.labels.dns' | trans() }}
@@ -156,7 +157,7 @@
 
 
 </div>
-
+{% endif %}
 
 <div class="card mt-4">
     <div class="card-header">
