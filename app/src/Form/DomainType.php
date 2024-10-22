@@ -35,9 +35,12 @@ class DomainType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $actions = $options['actions'];
+        $isEdit = $options['is_edit'];
+
         $builder
                 ->add('domain', null, [
                     'label' => 'Entities.Domain.fields.domain',
+                    'disabled' => $isEdit, // Make the field read-only if in edit mode
                 ])
                 ->add('srvSmtp', null, [
                     'label' => 'Entities.Domain.fields.srvSmtp',
@@ -111,7 +114,10 @@ class DomainType extends AbstractType {
             'minSpamLevel' => null,
             'maxSpamLevel' => null,
             'actions' => null,
+            'is_edit' => false,
         ]);
+
+        $resolver->setDefined('is_edit');
     }
 
 }
