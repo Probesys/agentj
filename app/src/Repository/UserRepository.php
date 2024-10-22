@@ -120,9 +120,7 @@ class UserRepository extends ServiceEntityRepository {
         }
 
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = array_map(function ($entity) {
-                return $entity->getId();
-            }, $user->getDomains()->toArray());
+            $domainsIds = [$user->getDomain()->getId()];
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
@@ -152,9 +150,7 @@ class UserRepository extends ServiceEntityRepository {
 
         //todo finir les droits sur les domaines
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = array_map(function ($entity) {
-                return $entity->getId();
-            }, $user->getDomains()->toArray());
+            $domainsIds = [$user->getDomain()->getId()];
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
