@@ -73,4 +73,17 @@ class DomainRepository extends ServiceEntityRepository
             return null;
         }
     }
+
+
+
+    public function findDomainsWithIMAPConnectors(): array
+    {
+        return $this->createQueryBuilder('d')
+            ->join('d.connectors', 'c')
+            ->where('c.type = :imap')
+            ->setParameter('imap', 'IMAP')
+            ->select('d.id')
+            ->getQuery()
+            ->getArrayResult();  // Returns array of domain IDs that have IMAP connectors
+    }
 }
