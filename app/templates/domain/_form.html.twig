@@ -35,11 +35,12 @@
         </div>
       </div>
     </div>
-    {% if domain.id is not null %}
+
       <div class="card mb-2">
         <div class="card-header">
           {{ 'Entities.Domain.labels.connectors' | trans() }}
           <div class="dropdown float-right">
+              {% if domain.id is not null %}
             <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               {{ 'Entities.Domain.actions.add_connector' | trans() }}
             </a>
@@ -48,9 +49,14 @@
               <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
               <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_imap_new', {'domain' : domain.id}) }}" href="#">Imap</a>
             </div>
+                {% endif %}
           </div>
         </div>
         <div class="card-body">
+            {% if domain.id is null %}
+            Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
+            {% endif %}
+            {% if domain.id is not null %}
           <table class="table">
             <thead>
               <tr>
@@ -96,10 +102,59 @@
               </tr>
             {% endfor %}
           </table>
+            {% endif %}
         </div>
       </div>
-    {% endif %}
   </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        {{ 'Entities.Domain.labels.dns' | trans() }}
+    </div>
+    <div class="card-body">
+        <pre  style="white-space: pre-wrap; word-break: break-word;"><code class="language-css" style="width: 1rem">{{ dkim.selector ~ '._domainkey.' ~ domain.domain }} {{ dnsInfo }}</code></pre>
+    </div>
+
+    <script>
+        document.addEventListener('turbo:load', function () {
+
+        const copyButtonLabel = "Copier";
+
+        // use a class selector if available
+        let blocks = document.querySelectorAll("pre");
+
+        blocks.forEach((block) => {
+            // only add button if browser supports Clipboard API
+            if (navigator.clipboard) {
+                let button = document.createElement("button");
+                button.type="button";
+                button.innerText = copyButtonLabel;
+                block.appendChild(button);
+
+                button.addEventListener("click", async () => {
+                    await copyCode(block, button);
+                });
+            }
+        });
+
+        async function copyCode(block, button) {
+            let code = block.querySelector("code");
+            let text = code.innerText;
+
+            await navigator.clipboard.writeText(text);
+
+            // visual feedback that task is completed
+            button.innerText = "Text Copié";
+
+            setTimeout(() => {
+                button.innerText = copyButtonLabel;
+            }, 700);
+        }
+        });
+    </script>
+
+
 </div>
 
 
@@ -141,3 +196,34 @@
   <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
 </div>
 {{ form_end(form) }}
+
+<style>
+    pre {
+        position: relative;
+        overflow: none;
+
+        /* make space  */
+        margin: 5px 0;
+        padding: 1.75rem 0 1.75rem 1rem;
+        border-radius: 10px;
+    }
+
+    pre button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+
+        font-size: 0.9rem;
+        padding: 0.30rem;
+        background-color: rgba(193, 193, 193, 0.68);
+
+        border: ridge 1px #7b7b7c;
+        border-radius: 5px;
+        text-shadow: #c4c4c4 0 0 2px;
+    }
+
+    pre button:hover {
+        cursor: pointer;
+        background-color: #bcbabb;
+    }
+</style>
