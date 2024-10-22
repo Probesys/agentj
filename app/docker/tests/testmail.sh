@@ -120,6 +120,7 @@ send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
 send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
 
 echo "---- rate limit ----" 1>&2
+# Domain 3 mail/s
 swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
@@ -127,6 +128,7 @@ swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --serve
 # expect swak error 25, 3 out_msgs and 1 sql_limit_report
 send 'rate_limit_domain_3_mail_s' 'out' 'user.domain.quota@blocnormal.fr' 3 '' 25 
 
+# Group 2 mail/s
 swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
@@ -134,6 +136,7 @@ swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --serve
 # expect swak error 25, 2 out_msgs and 2 sql_limit_report
 send 'rate_limit_group_2_mail_s' 'out' 'user.group1.quota@blocnormal.fr' 2 '' 25 
 
+# Personnal 1 mail/s
 swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
@@ -141,6 +144,7 @@ swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.t
 # expect swak error 25, 1 out_msgs and 3 sql_limit_report
 send 'rate_limit_user_1_mail_s' 'out' 'user.group1.perso.small.quota@blocnormal.fr' 1 '' 25 
 
+# Personnal 10 mail/s
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
