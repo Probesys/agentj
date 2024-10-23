@@ -444,6 +444,10 @@ Entities:
       domainMessages: Messages du domaine
       ipAddresses: "IP du serveur d'envoi"
       dns: "DNS"
+      domain: DOMAINE
+      auth: AUTH, UTILISATEURS & ALIAS
+      filters: FILTRES & QUOTAS
+      saveBeforeConnectors: Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire

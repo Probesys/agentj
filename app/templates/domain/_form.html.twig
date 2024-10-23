@@ -1,22 +1,22 @@
 <ul class="nav nav-tabs" id="policyTab" role="tablist">
     <li class="nav-item">
         <a class="nav-link active" id="policy-tab" data-toggle="tab" href="#domain" role="tab" aria-controls="domain"
-           aria-selected="true">DOMAINE</a>
+           aria-selected="true">{{ 'Entities.Domain.labels.domain' | trans() }}</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" id="quarantine-tab" data-toggle="tab" href="#auth" role="tab" aria-controls="auth"
-           aria-selected="false">AUTH, UTILISATEURS & ALIAS
+           aria-selected="false">{{ 'Entities.Domain.labels.auth' | trans() }}
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" id="tagLevel-tab" data-toggle="tab" href="#filter" role="tab" aria-controls="filter"
-           aria-selected="false">FILTRES & QUOTAS</a>
+           aria-selected="false">{{ 'Entities.Domain.labels.filters' | trans() }}</a>
     </li>
 </ul>
 
 {{ form_start(form) }}
 <div class="tab-content" id="policyTabContent">
-    <div class="tab-pane fade show active" id="domain" role="tabpanel" aria-labelledby="domain-tab">
+    <div class="tab-pane fade show active p-3" id="domain" role="tabpanel" aria-labelledby="domain-tab">
         <p>
             {{ form_row(form.active) }}
             {{ form_row(form.domain) }}
@@ -111,8 +111,8 @@
     </div>
 
     <div class="tab-pane fade mb-3" id="auth" role="tabpanel" aria-labelledby="auth-tab">
-            <div class="card-header" style="background-color: #ffffff; font-size: 1.25rem">
-                {{ 'Entities.Domain.labels.connectors' | trans() }}
+            <div class="card-header mt-2" style="background-color: #ffffff; font-size: 1.25rem">
+                <h5>{{ 'Entities.Domain.labels.connectors' | trans() }}</h5>
                 <div class="dropdown float-right">
                     {% if domain.id is not null %}
                         <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink"
@@ -135,7 +135,7 @@
             </div>
             <div class="card-body">
                 {% if domain.id is null %}
-                    Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
+                    {{ 'Entities.Domain.labels.saveBeforeConnectors' | trans() }}
                 {% endif %}
                 {% if domain.id is not null %}
                     <table class="table">
@@ -196,7 +196,7 @@
 
     </div>
 
-    <div class="tab-pane fade p-2 mb-3" id="filter" role="tabpanel" aria-labelledby="filter-tab">
+    <div class="tab-pane fade p-3 mb-3" id="filter" role="tabpanel" aria-labelledby="filter-tab">
 
         <div class="filter mt-4">
             <h5>{{ 'Generics.labels.filters' | trans() }}</h5>
