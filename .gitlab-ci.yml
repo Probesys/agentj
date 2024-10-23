@@ -251,20 +251,33 @@ deploy-tags:
     - branches
     - merge_requests
 
-# don't seems to be runnable as is
-#test-mail:
-#  stage: test
-#  before_script:
-#    - UID="1829"
-#    - GID="1829"
-#    - echo "$UID:$GID"
-#  script:
-#    - cp .env.example .env
-#    - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
-#    - sed -i "s|#UID=.*|UID=$UID|g" .env
-#    - sed -i "s|#GID=.*|GID=$GID|g" .env
-#    - sed -i "s|example.com|agentj.local|g" .env
-#    - docker compose up -d --build
-#    - docker compose exec -T -u www-data app ./docker/tests/testmail.sh
-#  only:
-#    - merge_requests
+test-mail:
+  stage: test
+  variables:
+    DB_PASSWORD: glass keyboard
+    DB_ROOT_PASSWORD: glass keyboard
+  script:
+    - cp .env.example .env
+    - sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml:compose.ci.yml|g" .env
+    - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
+    - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD|g" .env
+    - sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
+    - sed -i "s|SF_MYAPPSECRET=.*|SF_MYAPPSECRET=`openssl rand -hex 16`|" .env
+    - sed -i "s|SF_MY_TOKEN_ENC_IV=.*|SF_MY_TOKEN_ENC_IV=`openssl rand -hex 8`|" .env
+    - sed -i "s|SF_MY_TOKEN_ENC_SALT=.*|SF_MY_TOKEN_ENC_SALT=`openssl rand -base64 32`|" .env
+    - sed -i "s|example.com|agentj.local|g" .env
+    - echo "UID=1829" >> .env
+    - echo "GID=1829" >> .env
+    - chown -R 1829:1829 .
+    - chmod 644 app/docker/conf/cron/agentj
+    - docker compose up -d --build
+    - tail -F tests/results/general.log & while test ! -f tests/results/TESTS_DONE ; do sleep 30 ; done ; pkill tail
+    - docker compose logs > compose.log 2>&1
+    - exit $(cat `find tests/results -name '*.result'` | grep -c failed)
+  artifacts:
+    when: always
+    paths:
+      - tests/results/*
+      - compose.log
+  only:
+    - merge_requests

@@ -1,20 +1,6 @@
 
 ## Contenu de la base test nécessaire pour ce script
 
-- domaine blocnormal.fr
-smtp: smtp.test, port 25
-seuil de filtrage: bloquer tous les mails
-stratégie: normale
-adresse d'auth: will@blocnormal.fr
-quota: 1 mail par seconde
-
-- domaine laissepasser.fr
-smtp: smtp.test, port 25
-seuil de filtrage: autoriser tous les mails
-stratégie: pas de censure
-pas d'adresse d'auth (laisser celle par défaut)
-pas de quota
-
-Pour chaque domaine il faut un compte mail `user@<domain>` sans configuration particulière
+Voir app/src/DataFixtures/
 
 Le fichier tests/stubdns doit contenir pour blocnormal.fr et laissepasser.fr les clefs dkim correspondantes aux domaines (affichées à la création du domaine ou trouvable dans la table dkim). La clef pour agentj._domainkey.smtp.test reste la même
