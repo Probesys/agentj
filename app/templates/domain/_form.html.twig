@@ -1,207 +1,237 @@
+<ul class="nav nav-tabs" id="policyTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="policy-tab" data-toggle="tab" href="#domain" role="tab" aria-controls="domain"
+           aria-selected="true">{{ 'Entities.Domain.labels.domain' | trans() }}</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="quarantine-tab" data-toggle="tab" href="#auth" role="tab" aria-controls="auth"
+           aria-selected="false">{{ 'Entities.Domain.labels.auth' | trans() }}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="tagLevel-tab" data-toggle="tab" href="#filter" role="tab" aria-controls="filter"
+           aria-selected="false">{{ 'Entities.Domain.labels.filters' | trans() }}</a>
+    </li>
+</ul>
+
 {{ form_start(form) }}
-<div class="row">
-  <div class="col-md-6 mb-2">
-    <div class="card">
-      <div class="card-header">
-        {{ 'Entities.Domain.labels.infos' | trans() }}
-      </div>
-      <div class="card-body">
-        {{ form_row(form.active) }}
-        {{ form_row(form.domain) }}
-        {{ form_row(form.srvSmtp) }}
-        {{ form_row(form.smtpPort) }}
-        {{ form_row(form.logoFile) }}
-        {{ form_row(form.defaultLang) }}
-		{% include 'partials/_quota_form.html.twig' with {'form': form} %}
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="policyTabContent">
+    <div class="tab-pane fade show active p-3" id="domain" role="tabpanel" aria-labelledby="domain-tab">
+        <p>
+            {{ form_row(form.active) }}
+            {{ form_row(form.domain) }}
+            {{ form_row(form.srvSmtp) }}
+            {{ form_row(form.smtpPort) }}
+            {{ form_row(form.logoFile) }}
+            {{ form_row(form.defaultLang) }}
+        </p>
 
-  <div class="col-md-6">
-    <div class="card mb-2">
-      <div class="card-header">
-        {{ 'Entities.Domain.labels.agentJConfig' | trans() }}
-      </div>
-      <div class="card-body">
-        {{ form_row(form.rules) }}
-        {{ form_row(form.policy) }}
-        <div class="form-group row">
-          <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }} : <span id="domain-spam-level">{{ domainSpamLevel }}</span></label>
-          <div class="col-sm-12">{{ form_widget(form.level) }}</div>
-        </div>
-        <div class="form-group row">
-          <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }} ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})</label>
-          <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
-        </div>
-      </div>
-    </div>
-
-      <div class="card mb-2">
-        <div class="card-header">
-          {{ 'Entities.Domain.labels.connectors' | trans() }}
-          <div class="dropdown float-right">
-              {% if domain.id is not null %}
-            <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {{ 'Entities.Domain.actions.add_connector' | trans() }}
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_o365_new', {'domain' : domain.id}) }}" href="#">Office 365</a>
-              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_ldap_new', {'domain' : domain.id}) }}" href="#">LDAP</a>
-              <a class="dropdown-item btn-open-modal" data-url-modal-content="{{  path('app_connector_imap_new', {'domain' : domain.id}) }}" href="#">Imap</a>
+        <div class="card mt-4">
+            <div class="card-header">
+                {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
             </div>
-                {% endif %}
-          </div>
-        </div>
-        <div class="card-body">
-            {% if domain.id is null %}
-            Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
-            {% endif %}
-            {% if domain.id is not null %}
-          <table class="table">
-            <thead>
-              <tr>
-                <th>{{ 'Entities.Connector.fields.name' | trans }}</th>
-                <th>{{ 'Entities.Connector.fields.type' | trans }}</th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            {% for connector in domain.connectors %}
-              {% if connector.type == 'LDAP' %}
-                {% set urlEdit = path('app_connector_ldap_edit', {'id': connector.id}) %}
-                {% set urlSync = path('app_ldap_connector_sync', {'id': connector.id}) %}
-              {% endif %}
-              {% if connector.type == 'Office365' %}
-                {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
-                {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
-              {% endif %}
-              {% if connector.type == 'IMAP' %}
-                {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
-              {% endif %}
-              <tr>
-                <td>{{ connector.name }}</td>
-                <td>{{ connector.type }}</td>
-                <td>
-                {% if connector.type != 'IMAP' %}
-                  <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"  class='btn btn-sm btn-success' title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
-                    <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                    <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
-                  </a>
-                  {% endif %}
-                </td>
-                <td>
-                  <a href="#" data-url-modal-content="{{ urlEdit }}" class='btn btn-sm btn-success btn-open-modal' title="{{ 'Generics.actions.edit'|trans() }}">
-                    <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                    <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                  </a>
-                  <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}" class='btn btn-sm btn-danger confirmModal' data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}' title="{{ 'Generics.actions.delete'|trans() }}">
-                    <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                    <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                  </a>
-                </td>
-              </tr>
-            {% endfor %}
-          </table>
-            {% endif %}
-        </div>
-      </div>
-  </div>
-</div>
-
-{% if domain.id is not null %}
-<div class="card">
-    <div class="card-header">
-        {{ 'Entities.Domain.labels.dns' | trans() }}
-    </div>
-    <div class="card-body">
-        <pre  style="white-space: pre-wrap; word-break: break-word;"><code class="language-css" style="width: 1rem">{{ dkim.selector ~ '._domainkey.' ~ domain.domain }} {{ dnsInfo }}</code></pre>
-    </div>
-
-    <script>
-        document.addEventListener('turbo:load', function () {
-
-        const copyButtonLabel = "Copier";
-
-        // use a class selector if available
-        let blocks = document.querySelectorAll("pre");
-
-        blocks.forEach((block) => {
-            // only add button if browser supports Clipboard API
-            if (navigator.clipboard) {
-                let button = document.createElement("button");
-                button.type="button";
-                button.innerText = copyButtonLabel;
-                block.appendChild(button);
-
-                button.addEventListener("click", async () => {
-                    await copyCode(block, button);
-                });
-            }
-        });
-
-        async function copyCode(block, button) {
-            let code = block.querySelector("code");
-            let text = code.innerText;
-
-            await navigator.clipboard.writeText(text);
-
-            // visual feedback that task is completed
-            button.innerText = "Text Copié";
-
-            setTimeout(() => {
-                button.innerText = copyButtonLabel;
-            }, 700);
-        }
-        });
-    </script>
-
-
-</div>
-{% endif %}
-
-<div class="card mt-4">
-    <div class="card-header">
-        {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
-    </div>
-    <div class="card-body" data-controller="add-ip-address">
-        <div data-add-ip-address-target="container" id="domain-relays-container">
-            {% for domainRelay in form.domainRelays %}
-                 <div>
-
-                    {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
-                    <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+            <div class="card-body" data-controller="add-ip-address">
+                <div data-add-ip-address-target="container" id="domain-relays-container">
+                    {% for domainRelay in form.domainRelays %}
+                        <div>
+                            {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
+                            <button type="button" class="btn btn-danger col-sm-2"
+                                    data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+
+                {% set domainRelayPrototype %}
+                    <br>
+                    {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%" } })|e }}
+                    <button type="button" class="btn btn-danger col-sm-2"
+                            data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                {% endset %}
+
+                <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype"
+                     data-prototype="{{ domainRelayPrototype }}"></div>
+
+                <div class="form-group mt-2">
+                    <button type="button" class="btn btn-success col-sm-2"
+                            data-action="add-ip-address#add">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
+                </div>
+            </div>
         </div>
+        {#    DNS    #}
+        {% if domain.id is not null %}
+            <div class="card mt-4 mb-4">
+                <div class="card-header">
+                    {{ 'Entities.Domain.labels.dns' | trans() }}
+                </div>
+                <div class="card-body">
+                    <pre style="white-space: pre-wrap; word-break: break-word;"><code class="language-css"
+                                                                                      style="width: 1rem">{{ dkim.selector ~ '._domainkey.' ~ domain.domain }} {{ dnsInfo }}</code></pre>
+                </div>
 
-        {% set domainRelayPrototype %}
-        <br>
-            {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%" } })|e }}
-            <button type="button" class="btn btn-danger col-sm-2" data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
-        {% endset %}
+                <script>
+                    document.addEventListener('turbo:load', function () {
 
-        <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype" data-prototype="{{ domainRelayPrototype }}"></div>
+                        const copyButtonLabel = "Copier";
 
-        <div class="form-group mt-2">
-            <button type="button" class="btn btn-success col-sm-2" data-action="add-ip-address#add">{{ 'Generics.actions.addIpAddress' | trans() }}</button>
+                        // use a class selector if available
+                        let blocks = document.querySelectorAll("pre");
+
+                        blocks.forEach((block) => {
+                            // only add button if browser supports Clipboard API
+                            if (navigator.clipboard) {
+                                let button = document.createElement("button");
+                                button.type = "button";
+                                button.innerText = copyButtonLabel;
+                                block.appendChild(button);
+
+                                button.addEventListener("click", async () => {
+                                    await copyCode(block, button);
+                                });
+                            }
+                        });
+
+                        async function copyCode(block, button) {
+                            let code = block.querySelector("code");
+                            let text = code.innerText;
+
+                            await navigator.clipboard.writeText(text);
+
+                            // visual feedback that task is completed
+                            button.innerText = "Text Copié";
+
+                            setTimeout(() => {
+                                button.innerText = copyButtonLabel;
+                            }, 700);
+                        }
+                    });
+                </script>
+
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade mb-3" id="auth" role="tabpanel" aria-labelledby="auth-tab">
+            <div class="card-header mt-2" style="background-color: #ffffff; font-size: 1.25rem">
+                <h5>{{ 'Entities.Domain.labels.connectors' | trans() }}</h5>
+                <div class="dropdown float-right">
+                    {% if domain.id is not null %}
+                        <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ 'Entities.Domain.actions.add_connector' | trans() }}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item btn-open-modal"
+                               data-url-modal-content="{{ path('app_connector_o365_new', {'domain' : domain.id}) }}"
+                               href="#">Office 365</a>
+                            <a class="dropdown-item btn-open-modal"
+                               data-url-modal-content="{{ path('app_connector_ldap_new', {'domain' : domain.id}) }}"
+                               href="#">LDAP</a>
+                            <a class="dropdown-item btn-open-modal"
+                               data-url-modal-content="{{ path('app_connector_imap_new', {'domain' : domain.id}) }}"
+                               href="#">Imap</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if domain.id is null %}
+                    {{ 'Entities.Domain.labels.saveBeforeConnectors' | trans() }}
+                {% endif %}
+                {% if domain.id is not null %}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>{{ 'Entities.Connector.fields.name' | trans }}</th>
+                            <th>{{ 'Entities.Connector.fields.type' | trans }}</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        {% for connector in domain.connectors %}
+                            {% if connector.type == 'LDAP' %}
+                                {% set urlEdit = path('app_connector_ldap_edit', {'id': connector.id}) %}
+                                {% set urlSync = path('app_ldap_connector_sync', {'id': connector.id}) %}
+                            {% endif %}
+                            {% if connector.type == 'Office365' %}
+                                {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
+                                {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
+                            {% endif %}
+                            {% if connector.type == 'IMAP' %}
+                                {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
+                            {% endif %}
+                            <tr>
+                                <td>{{ connector.name }}</td>
+                                <td>{{ connector.type }}</td>
+                                <td>
+                                    {% if connector.type != 'IMAP' %}
+                                        <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
+                                           class='btn btn-sm btn-success'
+                                           title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
+                                            <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                            <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="#" data-url-modal-content="{{ urlEdit }}"
+                                       class='btn btn-sm btn-success btn-open-modal'
+                                       title="{{ 'Generics.actions.edit'|trans() }}">
+                                        <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                        <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                    </a>
+                                    <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}"
+                                       class='btn btn-sm btn-danger confirmModal'
+                                       data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}'
+                                       data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
+                                       title="{{ 'Generics.actions.delete'|trans() }}">
+                                        <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                        <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+
+    </div>
+
+    <div class="tab-pane fade p-3 mb-3" id="filter" role="tabpanel" aria-labelledby="filter-tab">
+
+        <div class="filter mt-4">
+            <h5>{{ 'Generics.labels.filters' | trans() }}</h5>
+
+
+            {{ form_row(form.rules) }}
+            {{ form_row(form.policy) }}
+            <div class="form-group row">
+                <label for="domain_level" class="col-sm-12">{{ 'Entities.Domain.fields.level'|trans }} : <span
+                            id="domain-spam-level">{{ domainSpamLevel }}</span></label>
+                <div class="col-sm-12">{{ form_widget(form.level) }}</div>
+            </div>
+            <div class="form-group row">
+                <label for="domain_level"
+                       class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
+                    ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})</label>
+                <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+            </div>
+
         </div>
+        {% include 'partials/_quota_form.html.twig' with {'form': form} %}
+
     </div>
 </div>
-
-
-
-
-
-<div class="d-flex justify-content-center">
-  <input type="submit" class="btn btn-primary" value="{{ button_label|default('Generics.actions.save'|trans) }}">
-  <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">{{ 'Generics.actions.cancel'|trans() }}</a>
+{{ form_rest(form) }}
+<div class="d-flex justify-content-center mb-3">
+    <input type="submit" class="btn btn-primary" value="{{ 'Generics.actions.save'|trans() }}">&nbsp;
+    <a class="btn btn-outline-secondary"
+       href="{{ path('domain_index') }}">{{ 'Generics.actions.backToTheList'|trans() }}</a>
 </div>
 {{ form_end(form) }}
 
 <style>
     pre {
         position: relative;
-        overflow: none;
 
         /* make space  */
         margin: 5px 0;
