@@ -271,14 +271,16 @@ test-mail:
     - chown -R 1829:1829 .
     - docker compose up -d --build
     - tail -F tests/results/general.log & while test ! -f tests/results/TESTS_DONE ; do sleep 30 ; done ; pkill tail
+    - docker compose logs > compose.log 2>&1
     - exit $(cat `find tests/results -name '*.result'` | grep -c failed)
   artifacts:
     expose_as: 'general log'
     paths: 
       - tests/results/general.log
   artifacts:
-    when: on_failure
+    when: always
     paths: 
       - tests/results/*
+      - compose.log
   only:
     - merge_requests
