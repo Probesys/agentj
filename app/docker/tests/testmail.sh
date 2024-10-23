@@ -100,6 +100,7 @@ send() {
 }
 
 echo "---- captcha/block/allow/virus/relay ----" 1>&2
+sleep 10 & php bin/console agentj:msgs
 send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
 send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
