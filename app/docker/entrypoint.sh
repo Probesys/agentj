@@ -56,6 +56,5 @@ if [ ! -d /var/log/agentj ]; then
 fi
 
 cd /
-cron
 
 exec "$@"
