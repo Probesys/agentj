@@ -269,6 +269,7 @@ test-mail:
     - echo "UID=1829" >> .env
     - echo "GID=1829" >> .env
     - chown -R 1829:1829 .
+    - chmod 644 app/docker/conf/cron/agentj
     - docker compose up -d --build
     - tail -F tests/results/general.log & while test ! -f tests/results/TESTS_DONE ; do sleep 30 ; done ; pkill tail
     - docker compose logs > compose.log 2>&1
