@@ -53,11 +53,16 @@ class CreateAlertForAdminCommand extends Command
                 continue;
             }
 
-            // Detach the entity to avoid conflicts
-            $this->entityManager->detach($outMsg);
-
             $output->writeln('Dispatching message for mail ID: ' . $mailId);
             $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'admin'));
+
+            $binaryMailId = hex2bin($mailId);
+
+            // Mark the outmsg as processed_admin
+            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+            $outMsgToSave->setProcessedAdmin(true);
+            $this->entityManager->persist($outMsgToSave);
+            $this->entityManager->flush();
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
@@ -78,6 +83,12 @@ class CreateAlertForAdminCommand extends Command
         foreach ($reports as $report) {
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
             $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'admin'));
+
+            // Mark the report as processed_admin
+            $sqlLimitReport = $this->entityManager->getRepository(SqlLimitReport::class)->find($report['id']);
+            $sqlLimitReport->setProcessedAdmin(true);
+            $this->entityManager->persist($sqlLimitReport);
+            $this->entityManager->flush();
         }
 
         $output->writeln('Finished create-alert-for-admin command.');

@@ -6,6 +6,7 @@ use App\Entity\OutMsg;
 use App\Entity\SqlLimitReport;
 use App\Entity\Alert;
 use App\Entity\User;
+use App\Entity\Domain;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Doctrine\ORM\UnitOfWork;
@@ -116,14 +117,60 @@ class CreateAlertMessageHandler
                         }
                     }
 
-                    // Mark the OutMsg as processed
-                    $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
-                    $outMsgToSave->setProcessedAdmin(true);
-                    $this->output->writeln('OutMsg marked as processed: ' . ($outMsgToSave->isProcessedAdmin() ? 'Yes' : 'No'));
-                    $this->entityManager->persist($outMsgToSave);
+                    // // Mark the OutMsg as processed
+                    // $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+                    // $outMsgToSave->setProcessedAdmin(true);
+                    // $this->output->writeln('OutMsg marked as processed: ' . ($outMsgToSave->isProcessedAdmin() ? 'Yes' : 'No'));
+                    // $this->entityManager->persist($outMsgToSave);
                     $this->entityManager->flush();
-                    $this->output->writeln('EntityManager flushed successfully');
+                    // $this->output->writeln('EntityManager flushed successfully');
                     $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
+
+                } elseif ($target === 'user') {
+                    if ($senderUser) {
+                        if ($senderUser->getDomain()->getSendUserAlerts() === false) {
+                            $this->output->writeln('Alerts disabled for user: ' . $senderUser->getId());
+                        } else {
+                            $alert = new Alert();
+                            $alert->setAlertType('out_msgs');
+                            $alert->setRefId($mailId);
+                            $alert->setDate(new \DateTime('now', $timezone));
+                            $alert->setSubject('Votre mail sortant a été bloqué');
+                            $alert->setIsRead(false);
+                            $alert->setUser($senderUser);
+                            $alert->setRefUser($fromAddr);
+
+                            $this->entityManager->persist($alert);
+                        }
+
+                        // Send email to sender user
+                        if ($senderUser->getDomain()->getSendUserMailAlerts() === false) {
+                            $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
+                        } else {
+                            $email = (new Email())
+                                ->from('no-reply@agent-j.com')
+                                ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
+                                ->subject('Votre mail sortant a été bloqué')
+                                ->text('Un virus a été détecté dans votre mail sortant.');
+
+                            $smtpServer = $senderUser->getDomain()->getSrvSmtp();
+                            $smtpPort = $senderUser->getDomain()->getSmtpPort();
+                            $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
+                            $mailer = new Mailer($transport);
+                            $mailer->send($email);
+                        }
+
+                        // // Mark the OutMsg as processed
+                        // $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+                        // $outMsgToSave->setProcessedUser(true);
+                        // $this->output->writeln('OutMsg marked as processed for user: ' . ($outMsgToSave->isProcessedUser() ? 'Yes' : 'No'));
+                        // $this->entityManager->persist($outMsgToSave);
+                        $this->entityManager->flush();
+                        // $this->output->writeln('EntityManager flushed successfully');
+                        $this->output->writeln('Alerts created and persisted for sender user');
+                    } else {
+                        $this->output->writeln('No user found with email: ' . $fromAddr);
+                    }
                 }
             } else {
                 $this->output->writeln('OutMsg content is not "V"');
@@ -205,10 +252,12 @@ class CreateAlertMessageHandler
                     }
                 }
 
-                // Mark the SqlLimitReport as processed for admin
-                $report->setProcessedAdmin(true);
-                $this->entityManager->persist($report);
-                $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedAdmin() ? 'Yes' : 'No'));
+                // // Mark the SqlLimitReport as processed for admin
+                // foreach ($reports as $report) {
+                //     $report->setProcessedAdmin(true);
+                //     $this->entityManager->persist($report);
+                //     $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedAdmin() ? 'Yes' : 'No'));
+                // }
 
             } elseif ($target === 'user') {
 
@@ -221,43 +270,51 @@ class CreateAlertMessageHandler
                         if ($senderUser) {
                             $processedSenders[$fromAddr] = true;
 
-                            $alert = new Alert();
-                            $alert->setAlertType('sql_limit_report');
-                            $alert->setRefId($id);
-                            $alert->setDate(new \DateTime('now', $timezone));
-                            $alert->setSubject('Vous avez dépassé le quota');
-                            $alert->setIsRead(false);
-                            $alert->setUser($senderUser);
-                            $alert->setRefUser($fromAddr);
+                            if ($senderUser->getDomain()->getSendUserAlerts() === false) {
+                                $this->output->writeln('Alerts disabled for user: ' . $senderUser->getId());
+                            } else {
+                                $alert = new Alert();
+                                $alert->setAlertType('sql_limit_report');
+                                $alert->setRefId($id);
+                                $alert->setDate(new \DateTime('now', $timezone));
+                                $alert->setSubject('Vous avez dépassé le quota');
+                                $alert->setIsRead(false);
+                                $alert->setUser($senderUser);
+                                $alert->setRefUser($fromAddr);
 
-                            $this->entityManager->persist($alert);
+                                $this->entityManager->persist($alert);
+                            }
 
                             // Send email to sender user
-                            $email = (new Email())
-                                ->from('no-reply@agent-j.com')
-                                ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
-                                ->subject('Vous avez dépassé le quota')
-                                ->text('Vous avez dépassé le quota. Votre mail n\'a pas été distribué.');
+                            if ($senderUser->getDomain()->getSendUserMailAlerts() === false) {
+                                $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
+                            } else {
+                                $email = (new Email())
+                                    ->from('no-reply@agent-j.com')
+                                    ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
+                                    ->subject('Vous avez dépassé le quota')
+                                    ->text('Vous avez dépassé le quota. Votre mail n\'a pas été distribué.');
 
-                            $smtpServer = $senderUser->getDomain()->getSrvSmtp();
-                            $smtpPort = $senderUser->getDomain()->getSmtpPort();
-                            $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                            $mailer = new Mailer($transport);
-                            $mailer->send($email);
+                                $smtpServer = $senderUser->getDomain()->getSrvSmtp();
+                                $smtpPort = $senderUser->getDomain()->getSmtpPort();
+                                $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
+                                $mailer = new Mailer($transport);
+                                $mailer->send($email);
+                            }
                         } else {
                             $this->output->writeln('No user found with email: ' . $fromAddr);
                         }
                     }
 
-                    // Mark the SqlLimitReport as processed for user
-                    $report->setProcessedUser(true);
-                    $this->entityManager->persist($report);
-                    $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedUser() ? 'Yes' : 'No'));
+                    // // Mark the SqlLimitReport as processed for user
+                    // $report->setProcessedUser(true);
+                    // $this->entityManager->persist($report);
+                    // $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedUser() ? 'Yes' : 'No'));
                 }
             }
 
             $this->entityManager->flush();
-            $this->output->writeln('EntityManager flushed successfully');
+            // $this->output->writeln('EntityManager flushed successfully');
             $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
         } else {
             $this->output->writeln('No SqlLimitReport entries found for Date: ' . $reportDate->format('Y-m-d H:i:s'));
