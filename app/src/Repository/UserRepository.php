@@ -308,42 +308,49 @@ class UserRepository extends ServiceEntityRepository {
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = '
-                    SELECT
-                        u.email,
-                        u.fullname,
-                        d.domain,
-                        outMsgCounts.outMsgCount,
-                        msgCounts.msgCount,
-                        outMsgCounts.outMsgBlockedCount,
-                        msgCounts.msgBlockedCount
-                    FROM users u
-                    LEFT JOIN domain d ON u.domain_id = d.id
-                    LEFT JOIN (
-                        SELECT
-                            om.from_addr,
-                            COUNT(DISTINCT om.mail_id) AS outMsgCount,
-                            COUNT(DISTINCT om.mail_id) - SUM(CASE
-                                WHEN om.status_id = 2 OR om.content = \'C\' OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\')) THEN 1
-                                ELSE 0
-                            END) AS outMsgBlockedCount
-                        FROM out_msgs om
-                        LEFT JOIN users u ON om.from_addr = u.email
-                        LEFT JOIN domain d ON u.domain_id = d.id
-                        GROUP BY om.from_addr
-                    ) AS outMsgCounts ON outMsgCounts.from_addr = u.email
-                    LEFT JOIN (
-                        SELECT
-                            ma.email,
-                            COUNT(DISTINCT m.mail_id) AS msgCount,
-                            COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
-                        FROM maddr ma
-                        LEFT JOIN msgrcpt mr ON ma.id = mr.rid
-                        LEFT JOIN msgs m ON mr.mail_id = m.mail_id
-                        GROUP BY ma.email
-                    ) AS msgCounts ON msgCounts.email = u.email
-                    WHERE u.roles LIKE :role
-                    GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount
-                ';
+            SELECT
+                u.email,
+                u.fullname,
+                d.domain,
+                outMsgCounts.outMsgCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgCount,
+                msgCounts.msgCount,
+                outMsgCounts.outMsgBlockedCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgBlockedCount,
+                msgCounts.msgBlockedCount
+            FROM users u
+            LEFT JOIN domain d ON u.domain_id = d.id
+            LEFT JOIN (
+                SELECT
+                    om.from_addr,
+                    COUNT(DISTINCT om.mail_id) AS outMsgCount,
+                    COUNT(DISTINCT om.mail_id) - SUM(CASE
+                        WHEN om.status_id = 2 OR om.content = \'C\' OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\')) THEN 1
+                        ELSE 0
+                    END) AS outMsgBlockedCount
+                FROM out_msgs om
+                LEFT JOIN users u ON om.from_addr = u.email
+                LEFT JOIN domain d ON u.domain_id = d.id
+                GROUP BY om.from_addr
+            ) AS outMsgCounts ON outMsgCounts.from_addr = u.email
+            LEFT JOIN (
+                SELECT
+                    ma.email,
+                    COUNT(DISTINCT m.mail_id) AS msgCount,
+                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
+                FROM maddr ma
+                LEFT JOIN msgrcpt mr ON ma.id = mr.rid
+                LEFT JOIN msgs m ON mr.mail_id = m.mail_id
+                GROUP BY ma.email
+            ) AS msgCounts ON msgCounts.email = u.email
+            LEFT JOIN (
+                SELECT
+                    slr.id,
+                    COUNT(slr.id) AS sqlLimitReportCount
+                FROM sql_limit_report slr
+                GROUP BY slr.id
+            ) AS sqlLimitReportCounts ON sqlLimitReportCounts.id = u.email
+            WHERE u.roles LIKE :role
+            GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount
+        ';
 
         $stmt = $conn->prepare($sql);
         $result = $stmt->executeQuery(['role' => '%"ROLE_USER"%'])->fetchAllAssociative();

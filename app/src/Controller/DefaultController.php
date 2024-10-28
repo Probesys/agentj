@@ -121,8 +121,25 @@ class DefaultController extends AbstractController {
         // Convert to array and return to view
         $msgs_status = array_values($statusCounts);
 
+        // Get the count of sql_limit_report entries where id = $user_email
+        $sqlLimitReports = '
+            SELECT COUNT(*) AS count
+            FROM sql_limit_report
+            WHERE id = :user_email
+        ';
+        $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['user_email' => $user_email]);
+        $limitReports = $stmtLimitReports->fetchAssociative();
+
+        // Add Sql_Limit_Report to $msgs_status
+        $msgs_status[] = [
+            'name' => 'quota',
+            'qty' => 0,
+            'qty_out' => $limitReports['count']
+        ];
+
         return $this->render('home/messages_stats.html.twig', [
-            'msgs_status' => $msgs_status
+            'msgs_status' => $msgs_status,
+            'outMessages' => $outMessages,
         ]);
     }
 
