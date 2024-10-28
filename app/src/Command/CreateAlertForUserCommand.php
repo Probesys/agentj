@@ -84,10 +84,20 @@ class CreateAlertForUserCommand extends Command
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
             $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'user'));
 
-            // Mark the sql_limit_report as processed_user
-            $sqlLimitReport = $this->entityManager->getRepository(SqlLimitReport::class)->find($report['id']);
-            $sqlLimitReport->setProcessedUser(true);
-            $this->entityManager->persist($sqlLimitReport);
+            // Find all SqlLimitReport records with the same date as $report
+            $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
+                ->where('r.date = :date')
+                ->setParameter('date', $report['date'])
+                ->getQuery()
+                ->getResult();
+
+            // Mark each report as processed_user
+            foreach ($sqlLimitReports as $sqlLimitReport) {
+                $sqlLimitReport->setProcessedUser(true);
+                $this->entityManager->persist($sqlLimitReport);
+            }
+
+            // Flush once after all updates
             $this->entityManager->flush();
         }
 

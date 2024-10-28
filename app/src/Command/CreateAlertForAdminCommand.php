@@ -84,10 +84,20 @@ class CreateAlertForAdminCommand extends Command
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
             $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'admin'));
 
-            // Mark the report as processed_admin
-            $sqlLimitReport = $this->entityManager->getRepository(SqlLimitReport::class)->find($report['id']);
-            $sqlLimitReport->setProcessedAdmin(true);
-            $this->entityManager->persist($sqlLimitReport);
+            // Find all SqlLimitReport records with the same date as $report
+            $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
+                ->where('r.date = :date')
+                ->setParameter('date', $report['date'])
+                ->getQuery()
+                ->getResult();
+
+            // Mark each report as processed_admin
+            foreach ($sqlLimitReports as $sqlLimitReport) {
+                $sqlLimitReport->setProcessedAdmin(true);
+                $this->entityManager->persist($sqlLimitReport);
+            }
+
+            // Flush once after all updates
             $this->entityManager->flush();
         }
 
