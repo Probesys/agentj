@@ -9,26 +9,23 @@ use App\Entity\User;
 use App\Entity\Domain;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Doctrine\ORM\UnitOfWork;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-// to run the job type this in the docker :
-//  /usr/bin/php /var/www/agentj/bin/console app:create-alert-for-admin
-//  /usr/bin/php /var/www/agentj/bin/console app:create-alert-for-user
-// and this in another docker :
-// php bin/console messenger:consume doctrine --time-limit=3600 --memory-limit=128M -vv
 class CreateAlertMessageHandler
 {
     private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
     private Mailer $mailer;
+    private string $defaultMailFrom;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
     {
         $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
+        $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
     }
 
     public function __invoke(CreateAlertMessage $message)
@@ -98,16 +95,21 @@ class CreateAlertMessageHandler
                         $this->entityManager->persist($alert);
 
                         // Send email to admin/superadmin
-                        $emailAddress = $user->getEmail();
+                        $emailAddress = $user->getEmailFromRessource();
                         if ($emailAddress !== null) {
                             $smtpServer = $user->getDomain()->getSrvSmtp();
                             $smtpPort = $user->getDomain()->getSmtpPort();
                             $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
                             $mailer = new Mailer($transport);
 
+                            $mailFrom = $user->getDomain()->getMailAuthenticationSender();
+                            if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
+                                $mailFrom = $this->defaultMailFrom;
+                            }
+
                             $email = (new Email())
-                                ->from('no-reply@agent-j.com')
-                                ->to(stream_get_contents($user->getEmail(), -1, 0))
+                                ->from($mailFrom)
+                                ->to($emailAddress)
                                 ->subject('Mail sortant contenant un virus bloqué')
                                 ->text('Un virus a été détecté dans un mail sortant. Utilisateur concerné: ' . $fromAddr);
 
@@ -117,13 +119,7 @@ class CreateAlertMessageHandler
                         }
                     }
 
-                    // // Mark the OutMsg as processed
-                    // $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
-                    // $outMsgToSave->setProcessedAdmin(true);
-                    // $this->output->writeln('OutMsg marked as processed: ' . ($outMsgToSave->isProcessedAdmin() ? 'Yes' : 'No'));
-                    // $this->entityManager->persist($outMsgToSave);
                     $this->entityManager->flush();
-                    // $this->output->writeln('EntityManager flushed successfully');
                     $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
 
                 } elseif ($target === 'user') {
@@ -147,9 +143,13 @@ class CreateAlertMessageHandler
                         if ($senderUser->getDomain()->getSendUserMailAlerts() === false) {
                             $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
                         } else {
+                            $mailFrom = $senderUser->getDomain()->getMailAuthenticationSender();
+                            if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
+                                $mailFrom = $this->defaultMailFrom;
+                            }
                             $email = (new Email())
-                                ->from('no-reply@agent-j.com')
-                                ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
+                                ->from($mailFrom)
+                                ->to($senderUser->getEmailFromRessource())
                                 ->subject('Votre mail sortant a été bloqué')
                                 ->text('Un virus a été détecté dans votre mail sortant.');
 
@@ -160,13 +160,7 @@ class CreateAlertMessageHandler
                             $mailer->send($email);
                         }
 
-                        // // Mark the OutMsg as processed
-                        // $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
-                        // $outMsgToSave->setProcessedUser(true);
-                        // $this->output->writeln('OutMsg marked as processed for user: ' . ($outMsgToSave->isProcessedUser() ? 'Yes' : 'No'));
-                        // $this->entityManager->persist($outMsgToSave);
                         $this->entityManager->flush();
-                        // $this->output->writeln('EntityManager flushed successfully');
                         $this->output->writeln('Alerts created and persisted for sender user');
                     } else {
                         $this->output->writeln('No user found with email: ' . $fromAddr);
@@ -233,16 +227,21 @@ class CreateAlertMessageHandler
                     $this->entityManager->persist($alert);
 
                     // Send email to admin/superadmin
-                    $emailAddress = $user->getEmail();
+                    $emailAddress = $user->getEmailFromRessource();
                     if ($emailAddress !== null) {
                         $smtpServer = $user->getDomain()->getSrvSmtp();
                         $smtpPort = $user->getDomain()->getSmtpPort();
                         $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
                         $mailer = new Mailer($transport);
 
+                        $mailFrom = $user->getDomain()->getMailAuthenticationSender();
+                        if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
+                            $mailFrom = $this->defaultMailFrom;
+                        }
+
                         $email = (new Email())
-                            ->from('no-reply@agent-j.com')
-                            ->to(stream_get_contents($user->getEmail(), -1, 0))
+                            ->from($mailFrom)
+                            ->to($emailAddress)
                             ->subject('Limite de quota franchie')
                             ->text('Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: ' . implode(', ', $senderEmails));
 
@@ -251,13 +250,6 @@ class CreateAlertMessageHandler
                         $this->output->writeln('No email address found for user: ' . $user->getId());
                     }
                 }
-
-                // // Mark the SqlLimitReport as processed for admin
-                // foreach ($reports as $report) {
-                //     $report->setProcessedAdmin(true);
-                //     $this->entityManager->persist($report);
-                //     $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedAdmin() ? 'Yes' : 'No'));
-                // }
 
             } elseif ($target === 'user') {
 
@@ -289,9 +281,13 @@ class CreateAlertMessageHandler
                             if ($senderUser->getDomain()->getSendUserMailAlerts() === false) {
                                 $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
                             } else {
+                                $mailFrom = $senderUser->getDomain()->getMailAuthenticationSender();
+                                if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
+                                    $mailFrom = $this->defaultMailFrom;
+                                }
                                 $email = (new Email())
-                                    ->from('no-reply@agent-j.com')
-                                    ->to(stream_get_contents($senderUser->getEmail(), -1, 0))
+                                    ->from($mailFrom)
+                                    ->to($senderUser->getEmailFromRessource())
                                     ->subject('Vous avez dépassé le quota')
                                     ->text('Vous avez dépassé le quota. Votre mail n\'a pas été distribué.');
 
@@ -305,16 +301,10 @@ class CreateAlertMessageHandler
                             $this->output->writeln('No user found with email: ' . $fromAddr);
                         }
                     }
-
-                    // // Mark the SqlLimitReport as processed for user
-                    // $report->setProcessedUser(true);
-                    // $this->entityManager->persist($report);
-                    // $this->output->writeln('SqlLimitReport marked as processed: ' . ($report->isProcessedUser() ? 'Yes' : 'No'));
                 }
             }
 
             $this->entityManager->flush();
-            // $this->output->writeln('EntityManager flushed successfully');
             $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
         } else {
             $this->output->writeln('No SqlLimitReport entries found for Date: ' . $reportDate->format('Y-m-d H:i:s'));
