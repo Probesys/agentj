@@ -6,6 +6,8 @@ use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\Mailaddr;
 use App\Entity\User;
+use App\Entity\Msgs;
+use App\Entity\OutMsgs;
 use App\Entity\Wblist;
 use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -107,7 +109,8 @@ class UserRepository extends ServiceEntityRepository {
     public function searchByRole(User $user, $role = null) {
 
         $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName')
+                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
+                ->leftJoin('u.domain', 'd')
                 ->join('u.policy', 'p')
                 ->where('u.originalUser is null');
 
@@ -117,9 +120,7 @@ class UserRepository extends ServiceEntityRepository {
         }
 
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = array_map(function ($entity) {
-                return $entity->getId();
-            }, $user->getDomains()->toArray());
+            $domainsIds = [$user->getDomain()->getId()];
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
@@ -149,9 +150,7 @@ class UserRepository extends ServiceEntityRepository {
 
         //todo finir les droits sur les domaines
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = array_map(function ($entity) {
-                return $entity->getId();
-            }, $user->getDomains()->toArray());
+            $domainsIds = [$user->getDomain()->getId()];
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
@@ -302,6 +301,54 @@ class UserRepository extends ServiceEntityRepository {
         $query = $dql->getQuery();
 
         return $query->getScalarResult();
+    }
+
+    public function getUsersWithRoleAndMessageCounts()
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = '
+                    SELECT
+                        u.email,
+                        u.fullname,
+                        d.domain,
+                        outMsgCounts.outMsgCount,
+                        msgCounts.msgCount,
+                        outMsgCounts.outMsgBlockedCount,
+                        msgCounts.msgBlockedCount
+                    FROM users u
+                    LEFT JOIN domain d ON u.domain_id = d.id
+                    LEFT JOIN (
+                        SELECT
+                            om.from_addr,
+                            COUNT(DISTINCT om.mail_id) AS outMsgCount,
+                            COUNT(DISTINCT om.mail_id) - SUM(CASE
+                                WHEN om.status_id = 2 OR om.content = \'C\' OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\')) THEN 1
+                                ELSE 0
+                            END) AS outMsgBlockedCount
+                        FROM out_msgs om
+                        LEFT JOIN users u ON om.from_addr = u.email
+                        LEFT JOIN domain d ON u.domain_id = d.id
+                        GROUP BY om.from_addr
+                    ) AS outMsgCounts ON outMsgCounts.from_addr = u.email
+                    LEFT JOIN (
+                        SELECT
+                            ma.email,
+                            COUNT(DISTINCT m.mail_id) AS msgCount,
+                            COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
+                        FROM maddr ma
+                        LEFT JOIN msgrcpt mr ON ma.id = mr.rid
+                        LEFT JOIN msgs m ON mr.mail_id = m.mail_id
+                        GROUP BY ma.email
+                    ) AS msgCounts ON msgCounts.email = u.email
+                    WHERE u.roles LIKE :role
+                    GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount
+                ';
+
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery(['role' => '%"ROLE_USER"%'])->fetchAllAssociative();
+
+        return $result;
     }
 
 }

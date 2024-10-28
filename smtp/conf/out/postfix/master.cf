@@ -39,9 +39,6 @@ maildrop  unix  -       n       n       -       -       pipe
 uucp      unix  -       n       n       -       -       pipe
   flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)
 
-policyd-spf  unix  -       n       n       -       0       spawn
-          user=policyd-spf argv=/usr/bin/python3 /usr/bin/policyd-spf
-
 # Amavis config
 amavisfeed unix    -       -       n        -      2     lmtp
     -o lmtp_data_done_timeout=1200
@@ -67,3 +64,5 @@ amavisfeed unix    -       -       n        -      2     lmtp
     -o smtpd_client_connection_rate_limit=0
     -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks,no_milters
     -o local_header_rewrite_clients=
+
+postlog   unix-dgram n  -       n       -       1       postlogd

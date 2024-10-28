@@ -23,7 +23,7 @@ Generics:
     rememberme: Se souvenir de moi
     import: "Importer"
     importFile: "Importer depuis un fichier"
-    addIpAddress: "Adresse IP"
+    addIpAddress: "Ajouter une adresse IP"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -145,6 +145,7 @@ Navigation:
   clean: Propres
   error: Erreurs
   all: Tous
+  Dashboard: Tableau de bord
   Messagedelete: Supprimés
   mailBlocked: Mails bloqués
   blacklist: Expéditeurs bloqués
@@ -175,7 +176,16 @@ Message:
   Object: Objet
   Sender: Expéditeur
   Recipient: Destinataire
-  Status: Status
+  Status:
+    title: Statut
+    untreated: Non traité
+    authorized: Autorisé
+    banned: Banni
+    deleted: Supprimé
+    restored: Récupéré
+    virus: Virus
+    spam: Spam
+    Error: Erreur
   Date: Date
   ErrorSendCaptcha: Erreur vérification email
   Actions:
@@ -299,6 +309,25 @@ Form:
   PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer
 
+Search:
+  MailId: Mail ID
+  Sender: Expéditeur
+  Recipient: Destinataire
+  Subject: Objet
+  Date: Date
+  AmavisOutput: Score Amavis
+  Size: Taille
+  Host: Domaine de l'expéditeur
+  ReplyTo: Réponse à un message
+  StartDate: Date de début
+  EndDate: Date de fin
+  BSpamLevel: Score Amavis
+  Incoming: REÇU
+  Outgoing: ENVOYÉ
+  MessageType: Type de message
+  Filter: Filtrer
+
+
 Entities:
   Group:
     Title: Gérer les groupes
@@ -413,7 +442,12 @@ Entities:
       domainrules: Règles du domaine
       domaineSender: domaine d'envoi
       domainMessages: Messages du domaine
-      ipAddresses: "L'adressse IP"
+      ipAddresses: "IP du serveur d'envoi"
+      dns: "DNS"
+      domain: DOMAINE
+      auth: AUTH, UTILISATEURS & ALIAS
+      filters: FILTRES & QUOTAS
+      saveBeforeConnectors: Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
         EMAIL_DEST: Email du destinataire
@@ -464,6 +498,12 @@ Entities:
       userName: Login
       roles: Rôle
       domain: Domaine
+      incoming: Entrant
+      outgoing: Sortant
+      outMsgCount: Nombre de messages sortants
+      inMsgCount: Nombre de messages entrants
+      outMsgBlockedCount: Nombre de messages sortants bloqués
+      inMsgBlockedCount: Nombre de messages entrants bloqués
       originalUser: Email de référence
       alias: Alias
       sharedBy: Partagée avec
@@ -474,6 +514,10 @@ Entities:
       bypassHumanAuth: Désactiver l'authentification humaine
       policy: "Stratégie"
       office365PrincipalName: "Nom principal M365"
+  Alert:
+    actions:
+      read: Marquer comme lu
+      delete: Supprimer
   Message:
     index: Liste des messages
     untreated: Non traités
@@ -489,6 +533,9 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
+    labels:
+      infos: "Informations sur les refus"
+      reason: "Type de refus"
   Msgrcpt:
     labels:
       infos: "Informations sur le message"

@@ -1,4 +1,3 @@
-{% set values = [10, 25, 50, 100, 200, 500,1000,3000] %}
 <div class="col mb-3 bg-white pb-3">
     <div class="row">
         <div class="col-md-6">
@@ -6,6 +5,7 @@
                 <div class="col-md-6 col-sm-12">
                     <label class="col-form-label">{{'Generics.actions.display'|trans}}</label>
                     {{ form_widget(filter_form.per_page) }}
+                    {% set per_page = filter_form.per_page.vars.value %}
                 </div>
                 <div class="col-md-6 col-sm-12">
                     {% if filter_form.actions is defined %}
@@ -14,11 +14,10 @@
                     {% endif %}
                 </div>
             </div>
-
         </div>
         {% set searchKey = '' %}
         {% if app.request.query.has('search') %}
-            {% set searchKey = 'test' %}
+            {% set searchKey = app.request.query.get('search') %}
         {% endif %}
             <div class="col-md-6 ">
                 <form class="form-inline float-right mt-4">
@@ -30,5 +29,4 @@
             </div>
     </div>
 </div>
-
 

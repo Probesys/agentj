@@ -32,11 +32,19 @@
 
       <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
       <script src="{{ path('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
-      <script src="{{ asset('js/translations/config.js') }}"></script>              
+      <script src="{{ asset('js/translations/config.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
       <script type="text/javascript" src="{{ asset('lib/select2/select2.full.min.js') }}"></script>
       <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+
+      {# <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script> #}
+      {#      <script type="text/javascript" src="{{ asset('js/node_modules/push.js/bin/push.min.js') }}"></script>#}
+
+
+
+{#      <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>#}
+{#      <script type="text/javascript" src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>#}
     {% endblock %}
 
 <script type="text/javascript" src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
@@ -52,17 +60,17 @@
     {% block topnav %}
 
         {{ render(controller(
-                      'App\\Controller\\MenuController::renderHeader'                   
-                  )) }}    
+                      'App\\Controller\\MenuController::renderHeader'
+                  )) }}
     {% endblock %}
     <div class="page-wrapper default-theme sidebar-bg bg1 toggled">
       {% block leftnav %}
           {{ render(controller(
                     'App\\Controller\\MenuController::renderSlideMenu',{'route':app.request.get('_route'),'route_params':app.request.get('_route_params')}                   
-                )) }}              
-      {% endblock %}   
+                )) }}
+      {% endblock %}
       <main class="page-content">
-        <div id="overlay" class="overlay"></div>         
+        <div id="overlay" class="overlay"></div>
 
         <div class="container-fluid mb-5 mt-5">
           {% include 'alerts.html.twig' %}
@@ -75,10 +83,10 @@
       </main>
       {% block footer %}
         {% include '_footer.html.twig' %}
-          <a class="scroll-to-top" href="#page-top" style="display: inline;">
+          <a class="scroll-to-top" href="#page-top" style="display: none;">
             <i class="fas fa-sort-up"></i>
-          </a>          
-      {% endblock %}        
+          </a>
+      {% endblock %}
     </div>
 
     {#  </div>
@@ -93,7 +101,7 @@
     {% include '_toast.html.twig' %}
     <div id="dialog-confirm" title="" style="display:none;">
       <div id="dialog-content"></div>
-    </div>  
+    </div>
 
 
     <div id="empModal" class="modal" tabindex="-1" role="dialog">

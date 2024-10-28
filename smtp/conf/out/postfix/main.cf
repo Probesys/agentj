@@ -37,3 +37,5 @@ smtpd_milters = inet:opendkim:8891
 non_smtpd_milters = inet:opendkim:8891
 
 smtpd_data_restrictions = check_policy_service { inet:[policyd-rate-limit]:8552, default_action=DUNNO }
+
+maillog_file = /dev/stdout
