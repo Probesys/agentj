@@ -138,8 +138,7 @@ class DefaultController extends AbstractController {
         ];
 
         return $this->render('home/messages_stats.html.twig', [
-            'msgs_status' => $msgs_status,
-            'outMessages' => $outMessages,
+            'msgs_status' => $msgs_status
         ]);
     }
 
