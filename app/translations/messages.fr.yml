@@ -80,6 +80,7 @@ Generics:
     no: Non
     none: Aucun
     byDefault: par défaut
+    alerts: Alertes
   batch:
     labels:
       for_selection: Pour la selection
@@ -434,6 +435,8 @@ Entities:
       quota_emails: Quota d'emails sur la période
       quota_seconds: Période du quota (en secondes)
       addQuota: Ajouter un quota
+      sendUserAlerts: Envoyer les alertes aux utilisateurs sur le Dashboard AgentJ
+      sendUserMailAlerts: Envoyer les alertes aux utilisateurs par mail
     labels:
       infos: "Informations"
       agentJConfig: "Paramètres AgentJ"
@@ -447,6 +450,7 @@ Entities:
       domain: DOMAINE
       auth: AUTH, UTILISATEURS & ALIAS
       filters: FILTRES & QUOTAS
+      alerts: ALERTES
       saveBeforeConnectors: Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
       dynamicsVariables:
         URL_CAPTCHA: Lien vers le captcha
