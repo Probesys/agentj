@@ -198,6 +198,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmailFromRessource()
     {
+        if ($this->email === null) {
+            return null;
+        }
+
         return stream_get_contents($this->email, -1, 0);
     }
 
