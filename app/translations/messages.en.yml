@@ -79,6 +79,7 @@ Generics:
     "no": No.
     none: None
     byDefault: default
+    alerts: Alerts
   batch:
     labels:
       for_selection: "For the selection"
@@ -406,6 +407,8 @@ Entities:
       quota_emails: "Email quota"
       quota_seconds: "Quota time"
       addQuota: "Add a quota"
+      sendUserAlerts: "Send alerts to users dashboard in AgentJ"
+      sendUserMailAlerts: "Send alerts to users by email"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"
@@ -415,6 +418,11 @@ Entities:
       domaineSender: "sending domain"
       domainMessages: "Messages from the field"
       ipAddresses: "IP Address"
+      dns: "DNS"
+      domain: DOMAIN
+      auth: AUTH, USERS & ALIAS
+      filters: FILTERS & RATES
+      alerts: ALERTS
       dynamicsVariables:
         {
           URL_CAPTCHA: "Link to captcha",

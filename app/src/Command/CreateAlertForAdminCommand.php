@@ -53,11 +53,16 @@ class CreateAlertForAdminCommand extends Command
                 continue;
             }
 
-            // Detach the entity to avoid conflicts
-            $this->entityManager->detach($outMsg);
-
             $output->writeln('Dispatching message for mail ID: ' . $mailId);
             $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'admin'));
+
+            $binaryMailId = hex2bin($mailId);
+
+            // Mark the outmsg as processed_admin
+            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+            $outMsgToSave->setProcessedAdmin(true);
+            $this->entityManager->persist($outMsgToSave);
+            $this->entityManager->flush();
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
@@ -78,6 +83,22 @@ class CreateAlertForAdminCommand extends Command
         foreach ($reports as $report) {
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
             $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'admin'));
+
+            // Find all SqlLimitReport records with the same date as $report
+            $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
+                ->where('r.date = :date')
+                ->setParameter('date', $report['date'])
+                ->getQuery()
+                ->getResult();
+
+            // Mark each report as processed_admin
+            foreach ($sqlLimitReports as $sqlLimitReport) {
+                $sqlLimitReport->setProcessedAdmin(true);
+                $this->entityManager->persist($sqlLimitReport);
+            }
+
+            // Flush once after all updates
+            $this->entityManager->flush();
         }
 
         $output->writeln('Finished create-alert-for-admin command.');
