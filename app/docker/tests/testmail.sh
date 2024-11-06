@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-cd /var/www/agentj/
+cd /var/www/agentj/ || exit
 
 test_results=/tmp/test_mails
 
 # wait for app to be started (for db migrations)
 echo "waiting app"
-while [ $(curl -so /dev/null -w '%{http_code}' http://localhost/login) -ne "200" ];
+while [ "$(curl -so /dev/null -w '%{http_code}' http://localhost/login)" -ne 200 ];
 do
 	echo -n '.'
 	sleep 1
@@ -61,7 +61,7 @@ send() {
 			test_str="From $aj_addr"
 			;;
 		*)
-			echo "unknown value '$in_out' for parameter in_out (should be 'in' or 'out')"
+			echo "unknown value '$in_out' for parameter in_out"
 			return
 			;;
 	esac
@@ -92,7 +92,7 @@ send() {
 		echo "ok ${secs}s"
 		echo 'ok' > $test_results/$testname.result
 	else
-		echo "failed ${secs}s, received $received mail with '$test_str', expected $expected_received_count. agentj address $aj_addr, mail from $mail_from, swaks options '$swaks_opts'"
+		echo "failed ${secs}s, received $received mail with '$test_str', expected $expected_received_count, agentj addr '$aj_addr', remote addr '$mail_from', swaks options '$swaks_opts'"
 		echo 'failed' > $test_results/$testname.result
 	fi
 
@@ -149,8 +149,8 @@ swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.t
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-send 'rate_limit_user_10_mail_s' 'out' 'user.group1.perso.large.quota@blocnormal.fr' 4
 # expect no swak error and 4 mails
+send 'rate_limit_user_10_mail_s' 'out' 'user.group1.perso.large.quota@blocnormal.fr' 4
 
 echo "---- no rate limit ----" 1>&2
 swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
