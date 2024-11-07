@@ -125,6 +125,12 @@ class Domain
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    private bool $send_user_alerts = false;
+
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    private bool $send_user_mail_alerts = false;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -497,6 +503,27 @@ class Domain
         return $this;
     }
 
+    public function getSendUserAlerts(): bool
+    {
+        return $this->send_user_alerts;
+    }
+
+    public function setSendUserAlerts(bool $send_user_alerts): static
+    {
+        $this->send_user_alerts = $send_user_alerts;
+        return $this;
+    }
+
+    public function getSendUserMailAlerts(): bool
+    {
+        return $this->send_user_mail_alerts;
+    }
+
+    public function setSendUserMailAlerts(bool $send_user_mail_alerts): static
+    {
+        $this->send_user_mail_alerts = $send_user_mail_alerts;
+        return $this;
+    }
 
     public function hasIMAPConnector(): bool
     {
