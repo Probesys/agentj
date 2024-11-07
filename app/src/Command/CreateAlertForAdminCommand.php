@@ -66,7 +66,7 @@ class CreateAlertForAdminCommand extends Command
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-            ->select('r.id, r.date, r.recipientCount, r.delta, r.processed_admin, COUNT(r) as reportCount')
+            ->select('r.id, r.mail_id, r.date, r.recipientCount, r.delta, r.processed_admin, COUNT(r) as reportCount')
             ->where('r.processed_admin = :processed_admin')
             ->setParameter('processed_admin', false)
             ->groupBy('r.date')
@@ -83,10 +83,13 @@ class CreateAlertForAdminCommand extends Command
         foreach ($reports as $report) {
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
 
-            // Find all SqlLimitReport records with the same date as $report
-            $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-                ->where('r.date = :date')
-                ->setParameter('date', $report['date'])
+            // Find all SqlLimitReport records with the same datetime as $report
+            $queryBuilder = $this->entityManager->createQueryBuilder()
+                ->add('select', 'r')
+                ->add('from', 'App\Entity\SqlLimitReport r')
+                ->add('where', 'r.date = :date');
+
+            $sqlLimitReports = $queryBuilder->setParameter('date', $report['date'])
                 ->getQuery()
                 ->getResult();
 

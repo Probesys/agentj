@@ -66,7 +66,7 @@ class CreateAlertForUserCommand extends Command
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-            ->select('r.id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
+            ->select('r.id, r.mail_id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
             ->where('r.processed_user = :processed_user')
             ->setParameter('processed_user', false)
             ->groupBy('r.date')
