@@ -195,7 +195,7 @@ class CreateAlertMessageHandler
             // Collect all sender users' email addresses
             $senderEmails = [];
             foreach ($reports as $report) {
-                $fromAddr = $report->getId();
+                $fromAddr = $report->getMailId();
                 if (!in_array($fromAddr, $senderEmails)) {
                     $senderEmails[] = $fromAddr;
                 }
@@ -256,7 +256,7 @@ class CreateAlertMessageHandler
                 // Create an alert for each senderUser
                 $processedSenders = [];
                 foreach ($reports as $report) {
-                    $fromAddr = $report->getId();
+                    $fromAddr = $report->getMailId();
                     if (!isset($processedSenders[$fromAddr])) {
                         $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
                         if ($senderUser) {
