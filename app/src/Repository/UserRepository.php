@@ -335,7 +335,7 @@ class UserRepository extends ServiceEntityRepository {
                 SELECT
                     ma.email,
                     COUNT(DISTINCT m.mail_id) AS msgCount,
-                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
+                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.quar_type = "" THEN 1 ELSE 0 END) AS msgBlockedCount
                 FROM maddr ma
                 LEFT JOIN msgrcpt mr ON ma.id = mr.rid
                 LEFT JOIN msgs m ON mr.mail_id = m.mail_id

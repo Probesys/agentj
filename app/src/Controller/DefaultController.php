@@ -81,6 +81,7 @@ class DefaultController extends AbstractController {
             LEFT JOIN message_status AS ms ON msgs.status_id = ms.id
             JOIN domain AS d ON d.id = :domain_id
             WHERE maddr.email = :user_email
+            AND msgs.quar_type != ""
         ';
         $stmtMessages = $connection->executeQuery($sqlMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
         $messages = $stmtMessages->fetchAllAssociative();
