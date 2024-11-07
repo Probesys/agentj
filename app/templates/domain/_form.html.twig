@@ -12,6 +12,10 @@
         <a class="nav-link" id="tagLevel-tab" data-toggle="tab" href="#filter" role="tab" aria-controls="filter"
            aria-selected="false">{{ 'Entities.Domain.labels.filters' | trans() }}</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" id="alert-tab" data-toggle="tab" href="#alert" role="tab" aria-controls="filter"
+           aria-selected="false">{{ 'Entities.Domain.labels.alerts' | trans() }}</a>
+    </li>
 </ul>
 
 {{ form_start(form) }}
@@ -218,6 +222,16 @@
 
         </div>
         {% include 'partials/_quota_form.html.twig' with {'form': form} %}
+
+    </div>
+
+    <div class="tab-pane fade p-3 mb-3" id="alert" role="tabpanel" aria-labelledby="alert-tab">
+
+        <div class="filter mt-4">
+            <h5>{{ 'Generics.labels.alerts' | trans() }}</h5>
+            {{ form_row(form.sendUserAlerts) }}
+            {{ form_row(form.sendUserMailAlerts) }}
+        </div>
 
     </div>
 </div>

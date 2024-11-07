@@ -33,7 +33,37 @@ class CreateAlertForUserCommand extends Command
     {
         $output->writeln('Starting create-alert-for-user command...');
 
-        // No alert for a user when he send a message with virus, only admin
+        $outMsgs = $this->entityManager->getRepository(OutMsg::class)->createQueryBuilder('o')
+            ->where('o.content = :content')
+            ->andWhere('o.processed_user = :processed_user')
+            ->setParameter('content', 'V')
+            ->setParameter('processed_user', false)
+            ->getQuery()
+            ->getResult();
+
+        $output->writeln('Number of messages found: ' . count($outMsgs));
+
+        foreach ($outMsgs as $outMsg) {
+            $mailId = $outMsg->getMailId();
+            $output->writeln('Retrieved mail ID: ' . $mailId);
+
+            // Add a check to ensure mailId is not empty
+            if (empty($mailId)) {
+                $output->writeln('Error: mailId is empty for OutMsg with ID: ' . $outMsg->getId());
+                continue;
+            }
+
+            $output->writeln('Dispatching message for mail ID: ' . $mailId);
+            $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'user'));
+
+            $binaryMailId = hex2bin($mailId);
+
+            // Mark the outmsg as processed_user
+            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+            $outMsgToSave->setProcessedUser(true);
+            $this->entityManager->persist($outMsgToSave);
+            $this->entityManager->flush();
+        }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
             ->select('r.id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
@@ -53,6 +83,22 @@ class CreateAlertForUserCommand extends Command
         foreach ($reports as $report) {
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
             $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'user'));
+
+            // Find all SqlLimitReport records with the same date as $report
+            $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
+                ->where('r.date = :date')
+                ->setParameter('date', $report['date'])
+                ->getQuery()
+                ->getResult();
+
+            // Mark each report as processed_user
+            foreach ($sqlLimitReports as $sqlLimitReport) {
+                $sqlLimitReport->setProcessedUser(true);
+                $this->entityManager->persist($sqlLimitReport);
+            }
+
+            // Flush once after all updates
+            $this->entityManager->flush();
         }
 
         $output->writeln('Finished create-alert-for-user command.');
