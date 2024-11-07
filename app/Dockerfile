@@ -49,6 +49,7 @@ LABEL description = "AgentJ frontend to manage mails and senders white/black lis
 
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
+    ca-certificates \
     cron \
     libssl3 \
     mariadb-client \
