@@ -40,13 +40,60 @@ class DefaultController extends AbstractController {
         $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::BANNED, $alias);
         $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::DELETED, $alias);
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
-        $msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
-        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts();
+        $latest_msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
+        $unreadAlertsCount = count(array_filter($alerts, function($alert) {
+            return !$alert->getIsRead();
+        }));
 
         $labels = array_map(function ($item) {
             return $item['time_iso'];
         }, $nbUntreadtedMsgByDay);
+
+        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::UNTREATED, $alias);
+        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::AUTHORIZED, $alias);
+        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::BANNED, $alias);
+        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::DELETED, $alias);
+        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::RESTORED, $alias);
+        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::ERROR, $alias);
+        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
+        $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::VIRUS, $alias);
+
+        $domains = $this->em->getRepository(Domain::class)->findAll();
+        foreach ($domains as $domain) {
+            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($domain->getId());
+
+            $data[$domain->getId()] = [
+                'totalMsgCount' => array_reduce($users, function($carry, $user) {
+                    return $carry + $user['msgCount'];
+                }, 0),
+                'totalMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                    return $carry + $user['msgBlockedCount'];
+                }, 0),
+                'totalOutMsgCount' => array_reduce($users, function($carry, $user) {
+                    return $carry + $user['outMsgCount'];
+                }, 0),
+                'totalOutMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                    return $carry + $user['outMsgBlockedCount'];
+                }, 0),
+            ];
+        }
+        // Add data for "All" option
+        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts();
+        $data['All'] = [
+            'totalMsgCount' => array_reduce($users, function($carry, $user) {
+                return $carry + $user['msgCount'];
+            }, 0),
+            'totalMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                return $carry + $user['msgBlockedCount'];
+            }, 0),
+            'totalOutMsgCount' => array_reduce($users, function($carry, $user) {
+                return $carry + $user['outMsgCount'];
+            }, 0),
+            'totalOutMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                return $carry + $user['outMsgBlockedCount'];
+            }, 0),
+        ];
 
         return $this->render('home/index.html.twig', [
                     'controller_name' => 'DefaultController',
@@ -56,9 +103,13 @@ class DefaultController extends AbstractController {
                     'nbBannedMsgByDay' => $nbBannedMsgByDay,
                     'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
                     'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
-                    'msgs' => $msgs,
+                    'latest_msgs' => $latest_msgs,
                     'users' => $users,
-                    'alerts' => $alerts
+                    'alerts' => $alerts,
+                    'unreadAlertsCount' => $unreadAlertsCount,
+                    'msgs' => $msgs,
+                    'domains' => $domains,
+                    'data' => $data
         ]);
     }
 
