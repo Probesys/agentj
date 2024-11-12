@@ -20,7 +20,7 @@ class ImportType extends AbstractType {
                 ->add('attachment', FileType::class, ['label' => false])
                 ->add('domains', EntityType::class, [
                     'class' => Domain::class,
-                    'multiple' => true,
+                    'multiple' => false,
                     'attr' => ['class' => 'select2'],
                     'query_builder' => function (DomainRepository $rep) {
                         return $rep->createQueryBuilder('d')
