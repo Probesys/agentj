@@ -1,93 +1,88 @@
-{# empty Twig template #}
+{# templates/_stats.html.twig #}
 <style>
-  canvas{
-
-    {#  width:1000px !important;#}
-    {#  height:calc(100%- 250px)!important;#}
-
+  canvas {
+    /* width:1000px !important; */
+    /* height:calc(100%- 250px)!important; */
   }
 </style>
 
-<canvas id="statsChart" style="height:calc(100%- 300px)"></canvas>
+<canvas class="statsChart" style="height:calc(100%- 300px)"></canvas>
 <script>
   document.addEventListener("turbo:load", function () {
-    if (document.getElementById('statsChart') !== null ) {
-      var ctx = document.getElementById('statsChart').getContext('2d');
+    var charts = document.querySelectorAll('.statsChart');
+    charts.forEach(function(chart) {
+      var ctx = chart.getContext('2d');
       const myLineChart = new Chart(ctx, {
         type: 'line',
         responsive: true,
         data: {
           labels: [
-  {% for day in listDay %}
-              '{{day | format_datetime('short', 'short')}}',
-  {% endfor %}
-            ],
-            // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: Translator.trans('Navigation.untreated'),
-                data: [
-  {% for day in nbUntreadtedMsgByDay %}
-                  '{{day.nb_result}}',
-  {% endfor %}
-                ],
-                borderColor: 'blue',
-                borderWidth: 1
-              },
-              {
-                label: Translator.trans('Navigation.authorized'),
-                data: [
-  {% for day in nbAutorizeMsgByDay %}
-                  '{{day.nb_result}}',
-  {% endfor %}
-                ],
-                borderColor: 'green',
-                borderWidth: 1
-              },
-              {
-                label: Translator.trans('Navigation.banned'),
-                data: [
-  {% for day in nbBannedMsgByDay %}
-                  '{{day.nb_result}}',
-  {% endfor %}
-                ],
-                borderColor: 'red',
-                borderWidth: 1
-              },
-              {
-                label: Translator.trans('Navigation.Messagedelete'),
-                data: [
-  {% for day in nbDeletedMsgByDay %}
-                  '{{day.nb_result}}',
-  {% endfor %}
-                ],
-                borderColor: 'orange',
-                borderWidth: 1
-              },
-              {
-                label: Translator.trans('Navigation.MessageRestored'),
-                data: [
-  {% for day in nbRestoredMsgByDay %}
-                  '{{day.nb_result}}',
-  {% endfor %}
-                ],
-                borderColor: 'green',
-                borderWidth: 1
-              }
-            ]
-          },
-          options: {
-            scales: {
-              yAxes: [{
-                  ticks: {
-                    beginAtZero: true
-                  }
-                }]
+            {% for day in listDay %}
+              '{{ day | format_datetime('short', 'short') }}',
+            {% endfor %}
+          ],
+          datasets: [{
+              label: Translator.trans('Navigation.untreated'),
+              data: [
+                {% for day in nbUntreadtedMsgByDay %}
+                  '{{ day.nb_result }}',
+                {% endfor %}
+              ],
+              borderColor: 'blue',
+              borderWidth: 1
+            },
+            {
+              label: Translator.trans('Navigation.authorized'),
+              data: [
+                {% for day in nbAutorizeMsgByDay %}
+                  '{{ day.nb_result }}',
+                {% endfor %}
+              ],
+              borderColor: 'green',
+              borderWidth: 1
+            },
+            {
+              label: Translator.trans('Navigation.banned'),
+              data: [
+                {% for day in nbBannedMsgByDay %}
+                  '{{ day.nb_result }}',
+                {% endfor %}
+              ],
+              borderColor: 'red',
+              borderWidth: 1
+            },
+            {
+              label: Translator.trans('Navigation.Messagedelete'),
+              data: [
+                {% for day in nbDeletedMsgByDay %}
+                  '{{ day.nb_result }}',
+                {% endfor %}
+              ],
+              borderColor: 'orange',
+              borderWidth: 1
+            },
+            {
+              label: Translator.trans('Navigation.MessageRestored'),
+              data: [
+                {% for day in nbRestoredMsgByDay %}
+                  '{{ day.nb_result }}',
+                {% endfor %}
+              ],
+              borderColor: 'green',
+              borderWidth: 1
             }
-          },
-        });
-      }
-
+          ]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
     });
-
-
+  });
 </script>
