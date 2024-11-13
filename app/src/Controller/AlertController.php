@@ -18,7 +18,7 @@ class AlertController extends AbstractController
         $alert->setIsRead(true);
         $entityManager->flush();
 
-        return $this->redirectToRoute('alert_index');
+        return $this->redirectToRoute('homepage');
     }
 
     #[Route('/alert/delete/{id}', name: 'alert_delete')]
@@ -27,7 +27,7 @@ class AlertController extends AbstractController
         $entityManager->remove($alert);
         $entityManager->flush();
 
-        return $this->redirectToRoute('alert_index');
+        return $this->redirectToRoute('homepage');
     }
 
     #[Route('/alerts', name: 'alert_index')]
