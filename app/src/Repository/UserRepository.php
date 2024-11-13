@@ -313,10 +313,10 @@ class UserRepository extends ServiceEntityRepository {
                 u.fullname,
                 d.id AS domain_id,
                 d.domain AS domain,
-                outMsgCounts.outMsgCount,
                 msgCounts.msgCount,
-                outMsgCounts.outMsgBlockedCount,
-                msgCounts.msgBlockedCount
+                msgCounts.msgBlockedCount,
+                outMsgCounts.outMsgCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgCount,
+                outMsgCounts.outMsgBlockedCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgBlockedCount
             FROM users u
             LEFT JOIN domain d ON u.domain_id = d.id
             LEFT JOIN (
@@ -336,12 +336,19 @@ class UserRepository extends ServiceEntityRepository {
                 SELECT
                     ma.email,
                     COUNT(DISTINCT m.mail_id) AS msgCount,
-                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.status_id = 2 THEN 1 ELSE 0 END) AS msgBlockedCount
+                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.quar_type = "" THEN 1 ELSE 0 END) AS msgBlockedCount
                 FROM maddr ma
                 LEFT JOIN msgrcpt mr ON ma.id = mr.rid
                 LEFT JOIN msgs m ON mr.mail_id = m.mail_id
                 GROUP BY ma.email
             ) AS msgCounts ON msgCounts.email = u.email
+            LEFT JOIN (
+                SELECT
+                    slr.id,
+                    COUNT(slr.id) AS sqlLimitReportCount
+                FROM sql_limit_report slr
+                GROUP BY slr.id
+            ) AS sqlLimitReportCounts ON sqlLimitReportCounts.id = u.email
             WHERE u.roles LIKE :role
         ';
 
@@ -349,7 +356,7 @@ class UserRepository extends ServiceEntityRepository {
             $sql .= ' AND u.domain_id = :domainId';
         }
 
-        $sql .= ' GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount';
+        $sql .= ' GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount';
 
         $stmt = $conn->prepare($sql);
         $params = ['role' => '%"ROLE_USER"%'];

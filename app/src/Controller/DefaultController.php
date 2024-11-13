@@ -132,6 +132,7 @@ class DefaultController extends AbstractController {
             LEFT JOIN message_status AS ms ON msgs.status_id = ms.id
             JOIN domain AS d ON d.id = :domain_id
             WHERE maddr.email = :user_email
+            AND msgs.quar_type != ""
         ';
         $stmtMessages = $connection->executeQuery($sqlMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
         $messages = $stmtMessages->fetchAllAssociative();
@@ -171,6 +172,22 @@ class DefaultController extends AbstractController {
 
         // Convert to array and return to view
         $msgs_status = array_values($statusCounts);
+
+        // Get the count of sql_limit_report entries where id = $user_email
+        $sqlLimitReports = '
+            SELECT COUNT(*) AS count
+            FROM sql_limit_report
+            WHERE id = :user_email
+        ';
+        $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['user_email' => $user_email]);
+        $limitReports = $stmtLimitReports->fetchAssociative();
+
+        // Add Sql_Limit_Report to $msgs_status
+        $msgs_status[] = [
+            'name' => 'quota',
+            'qty' => 0,
+            'qty_out' => $limitReports['count']
+        ];
 
         return $this->render('home/messages_stats.html.twig', [
             'msgs_status' => $msgs_status
