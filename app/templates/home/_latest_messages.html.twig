@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for msg in msgs %}
+            {% for msg in latest_msgs %}
                 {% set error_badge = "" %}
                 {% set error_badge_detail = "" %}
                 {% if msg.status_id == 4 %}

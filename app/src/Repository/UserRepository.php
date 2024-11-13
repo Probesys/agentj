@@ -303,7 +303,7 @@ class UserRepository extends ServiceEntityRepository {
         return $query->getScalarResult();
     }
 
-    public function getUsersWithRoleAndMessageCounts()
+    public function getUsersWithRoleAndMessageCounts($domainId = null)
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -311,11 +311,12 @@ class UserRepository extends ServiceEntityRepository {
             SELECT
                 u.email,
                 u.fullname,
-                d.domain,
-                outMsgCounts.outMsgCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgCount,
+                d.id AS domain_id,
+                d.domain AS domain,
                 msgCounts.msgCount,
-                outMsgCounts.outMsgBlockedCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgBlockedCount,
-                msgCounts.msgBlockedCount
+                msgCounts.msgBlockedCount,
+                outMsgCounts.outMsgCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgCount,
+                outMsgCounts.outMsgBlockedCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgBlockedCount
             FROM users u
             LEFT JOIN domain d ON u.domain_id = d.id
             LEFT JOIN (
@@ -349,11 +350,20 @@ class UserRepository extends ServiceEntityRepository {
                 GROUP BY slr.id
             ) AS sqlLimitReportCounts ON sqlLimitReportCounts.id = u.email
             WHERE u.roles LIKE :role
-            GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount
         ';
 
+        if ($domainId !== null) {
+            $sql .= ' AND u.domain_id = :domainId';
+        }
+
+        $sql .= ' GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount';
+
         $stmt = $conn->prepare($sql);
-        $result = $stmt->executeQuery(['role' => '%"ROLE_USER"%'])->fetchAllAssociative();
+        $params = ['role' => '%"ROLE_USER"%'];
+        if ($domainId !== null) {
+            $params['domainId'] = $domainId;
+        }
+        $result = $stmt->executeQuery($params)->fetchAllAssociative();
 
         return $result;
     }
