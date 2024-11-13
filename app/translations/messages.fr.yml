@@ -620,7 +620,7 @@ Entities:
     Wbliste:
       title: "Liste blanche : importer une liste"
       description:
-        "Le fichier doit être encodé en utf8 au format texte ou csv.<br\
+        "Le fichier au format texte.<br\
         \ /> Chaque ligne doit comporter une adresse mail valide<br />"
     Users:
       title: Importer des utilisateurs
