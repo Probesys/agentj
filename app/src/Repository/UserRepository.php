@@ -344,11 +344,11 @@ class UserRepository extends ServiceEntityRepository {
             ) AS msgCounts ON msgCounts.email = u.email
             LEFT JOIN (
                 SELECT
-                    slr.id,
-                    COUNT(slr.id) AS sqlLimitReportCount
+                    slr.mail_id,
+                    COUNT(slr.mail_id) AS sqlLimitReportCount
                 FROM sql_limit_report slr
-                GROUP BY slr.id
-            ) AS sqlLimitReportCounts ON sqlLimitReportCounts.id = u.email
+                GROUP BY slr.mail_id
+            ) AS sqlLimitReportCounts ON sqlLimitReportCounts.mail_id = u.email
             WHERE u.roles LIKE :role
         ';
 
