@@ -156,43 +156,52 @@
     </div>
   {% endif %}
   {% block javascripts %}
-      <script>
-        var ctx = document.getElementById('messagesChart').getContext('2d');
-        var data = {
-          labels: [Translator.trans('Navigation.untreated'), Translator.trans('Navigation.authorized'), Translator.trans('Navigation.banned'), Translator.trans('Navigation.Messagedelete'), Translator.trans('Navigation.MessageRestored'), 'Error', 'Spam', 'Virus'],
-          datasets: [{
-            data: [
-              {{ msgs.untreated }},
-              {{ msgs.authorized }},
-              {{ msgs.banned }},
-              {{ msgs.delete }},
-              {{ msgs.restored }},
-              {{ msgs.error }},
-              {{ msgs.spammed }},
-              {{ msgs.virus }}
-            ],
-            backgroundColor: [
-                '#36A2EB', // Blue
-                '#77DD77', // Green
-                '#FF9F40', // Orange
-                '#9966FF', // Purple
-                '#4BC0C0', // Teal
-                '#C9CBCF', // Light Gray
-                '#FF5733',  // Dark Orange
-                '#FF6384' // Red
-            ]
-          }]
-        };
+    <script>
+      var ctx = document.getElementById('messagesChart').getContext('2d');
+      var data = {
+        labels: [Translator.trans('Navigation.untreated'), Translator.trans('Navigation.authorized'), Translator.trans('Navigation.banned'), Translator.trans('Navigation.Messagedelete'), Translator.trans('Navigation.MessageRestored'), 'Error', 'Spam', 'Virus'],
+        datasets: [{
+          data: [
+            {{ msgs.untreated }},
+            {{ msgs.authorized }},
+            {{ msgs.banned }},
+            {{ msgs.delete }},
+            {{ msgs.restored }},
+            {{ msgs.error }},
+            {{ msgs.spammed }},
+            {{ msgs.virus }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#77DD77', // Green
+            '#FF9F40', // Orange
+            '#9966FF', // Purple
+            '#4BC0C0', // Teal
+            '#C9CBCF', // Light Gray
+            '#FF5733',  // Dark Orange
+            '#FF6384' // Red
+          ]
+        }]
+      };
 
-        // Filter out labels and data points that are zero
-        var filteredData = {
-          labels: data.labels.filter((label, index) => data.datasets[0].data[index] > 0),
-          datasets: [{
-            data: data.datasets[0].data.filter(value => value > 0),
-            backgroundColor: data.datasets[0].backgroundColor.filter((color, index) => data.datasets[0].data[index] > 0)
-          }]
-        };
+      // Filter out labels and data points that are zero
+      var filteredData = {
+        labels: data.labels.filter((label, index) => data.datasets[0].data[index] > 0),
+        datasets: [{
+          data: data.datasets[0].data.filter(value => value > 0),
+          backgroundColor: data.datasets[0].backgroundColor.filter((color, index) => data.datasets[0].data[index] > 0)
+        }]
+      };
 
+      if (filteredData.datasets[0].data.length === 0) {
+        // Display a message if there is no data
+        document.getElementById('messagesChart').style.display = 'none';
+        var noDataMessage = document.createElement('p');
+        noDataMessage.textContent = 'Aucun message bloqué';
+        noDataMessage.style.textAlign = 'center';
+        noDataMessage.style.marginTop = '20px';
+        document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
+      } else {
         var messagesChart = new Chart(ctx, {
           type: 'doughnut',
           data: filteredData,
@@ -200,7 +209,7 @@
             responsive: true,
             maintainAspectRatio: false,
             legend: {
-              position: 'right',
+              position: 'right'
             },
             title: {
               display: true,
@@ -208,82 +217,83 @@
             }
           }
         });
+      }
 
-        var ctxMsgs = document.getElementById('msgsChart').getContext('2d');
-        var msgsData = {
-          labels: ['Messages non bloqués', 'Messages bloqués'],
-          datasets: [{
-            data: [
-              {{ data['All'].totalMsgCount - data['All'].totalMsgBlockedCount }},
-              {{ data['All'].totalMsgBlockedCount }}
-            ],
-            backgroundColor: [
-              '#36A2EB', // Blue
-              '#FF6384'  // Red
-            ]
-          }]
-        };
+      var ctxMsgs = document.getElementById('msgsChart').getContext('2d');
+      var msgsData = {
+        labels: ['Messages non bloqués', 'Messages bloqués'],
+        datasets: [{
+          data: [
+            {{ data['All'].totalMsgCount - data['All'].totalMsgBlockedCount }},
+            {{ data['All'].totalMsgBlockedCount }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#FF6384'  // Red
+          ]
+        }]
+      };
 
-        var msgsChart = new Chart(ctxMsgs, {
-          type: 'doughnut',
-          data: msgsData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: {
-              position: 'right'
-            },
-            title: {
-              display: true,
-              text: 'Mails entrants'
-            }
+      var msgsChart = new Chart(ctxMsgs, {
+        type: 'doughnut',
+        data: msgsData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Mails entrants'
           }
-        });
+        }
+      });
 
-        var ctxOutMsgs = document.getElementById('outMsgsChart').getContext('2d');
-        var outMsgsData = {
-          labels: ['Messages non bloqués', 'Messages bloqués'],
-          datasets: [{
-            data: [
-              {{ data['All'].totalOutMsgCount - data['All'].totalOutMsgBlockedCount }},
-              {{ data['All'].totalOutMsgBlockedCount }}
-            ],
-            backgroundColor: [
-              '#36A2EB', // Blue
-              '#FF6384'  // Red
-            ]
-          }]
-        };
+      var ctxOutMsgs = document.getElementById('outMsgsChart').getContext('2d');
+      var outMsgsData = {
+        labels: ['Messages non bloqués', 'Messages bloqués'],
+        datasets: [{
+          data: [
+            {{ data['All'].totalOutMsgCount - data['All'].totalOutMsgBlockedCount }},
+            {{ data['All'].totalOutMsgBlockedCount }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#FF6384'  // Red
+          ]
+        }]
+      };
 
-        var outMsgsChart = new Chart(ctxOutMsgs, {
-          type: 'doughnut',
-          data: outMsgsData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: {
-              position: 'right'
-            },
-            title: {
-              display: true,
-              text: 'Mails sortants'
-            }
+      var outMsgsChart = new Chart(ctxOutMsgs, {
+        type: 'doughnut',
+        data: outMsgsData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Mails sortants'
           }
-        });
+        }
+      });
 
-        var data = {{ data|json_encode|raw }};
+      var data = {{ data|json_encode|raw }};
 
-        document.getElementById('domainSelect').addEventListener('change', function() {
-          var selectedDomain = this.value;
-          var domainData = data[selectedDomain];
+      document.getElementById('domainSelect').addEventListener('change', function() {
+        var selectedDomain = this.value;
+        var domainData = data[selectedDomain];
 
-          // Update the charts with the new data
-          msgsChart.data.datasets[0].data = [domainData.totalMsgCount - domainData.totalMsgBlockedCount, domainData.totalMsgBlockedCount];
-          msgsChart.update();
+        // Update the charts with the new data
+        msgsChart.data.datasets[0].data = [domainData.totalMsgCount - domainData.totalMsgBlockedCount, domainData.totalMsgBlockedCount];
+        msgsChart.update();
 
-          outMsgsChart.data.datasets[0].data = [domainData.totalOutMsgCount, domainData.totalOutMsgBlockedCount];
-          outMsgsChart.update();
-        });
-      </script>
-    {% endblock %}
+        outMsgsChart.data.datasets[0].data = [domainData.totalOutMsgCount, domainData.totalOutMsgBlockedCount];
+        outMsgsChart.update();
+      });
+    </script>
+  {% endblock %}
 {% endblock %}

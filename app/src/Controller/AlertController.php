@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class AlertController extends AbstractController
 {
@@ -17,7 +18,7 @@ class AlertController extends AbstractController
         $alert->setIsRead(true);
         $entityManager->flush();
 
-        return $this->redirectToRoute('homepage');
+        return $this->redirectToRoute('alert_index');
     }
 
     #[Route('/alert/delete/{id}', name: 'alert_delete')]
@@ -26,6 +27,16 @@ class AlertController extends AbstractController
         $entityManager->remove($alert);
         $entityManager->flush();
 
-        return $this->redirectToRoute('homepage');
+        return $this->redirectToRoute('alert_index');
+    }
+
+    #[Route('/alerts', name: 'alert_index')]
+    public function index(EntityManagerInterface $entityManager, UserInterface $user): Response
+    {
+        $alerts = $entityManager->getRepository(Alert::class)->findBy(['user' => $user]);
+
+        return $this->render('alert/index.html.twig', [
+            'alerts' => $alerts,
+        ]);
     }
 }
