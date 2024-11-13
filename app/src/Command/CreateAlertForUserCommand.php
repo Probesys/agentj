@@ -66,7 +66,7 @@ class CreateAlertForUserCommand extends Command
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-            ->select('r.id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
+            ->select('r.id, r.mail_id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
             ->where('r.processed_user = :processed_user')
             ->setParameter('processed_user', false)
             ->groupBy('r.date')
@@ -82,7 +82,6 @@ class CreateAlertForUserCommand extends Command
 
         foreach ($reports as $report) {
             $reportDateString = $report['date']->format('Y-m-d H:i:s');
-            $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'user'));
 
             // Find all SqlLimitReport records with the same date as $report
             $sqlLimitReports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
@@ -91,14 +90,26 @@ class CreateAlertForUserCommand extends Command
                 ->getQuery()
                 ->getResult();
 
+            if (empty($sqlLimitReports)) {
+                $output->writeln('No SqlLimitReport records found for date: ' . $reportDateString);
+                continue;
+            }
+
             // Mark each report as processed_user
             foreach ($sqlLimitReports as $sqlLimitReport) {
                 $sqlLimitReport->setProcessedUser(true);
                 $this->entityManager->persist($sqlLimitReport);
             }
 
-            // Flush once after all updates
-            $this->entityManager->flush();
+            try {
+                // Flush once after all updates
+                $this->entityManager->flush();
+                $output->writeln('Reports for date ' . $reportDateString . ' marked as processed_user.');
+
+                $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'user'));
+            } catch (\Exception $e) {
+                $output->writeln('Failed to mark reports as processed_user for date ' . $reportDateString . ': ' . $e->getMessage());
+            }
         }
 
         $output->writeln('Finished create-alert-for-user command.');

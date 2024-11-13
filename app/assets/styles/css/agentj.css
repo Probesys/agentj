@@ -387,3 +387,11 @@ body.sidebar-toggled footer.sticky-footer {
 .opacity-50 {
   opacity: 0.5;
 }
+
+table thead tr {
+  background-color: #ffffff;
+}
+
+table thead tr th {
+  background-color: transparent !important;
+}
