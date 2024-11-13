@@ -40,6 +40,9 @@ class DefaultController extends AbstractController {
         $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::BANNED, $alias);
         $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::DELETED, $alias);
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
+        $nbErrorMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::ERROR, $alias);
+        $nbSpammedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::SPAMMED, $alias);
+        $nbVirusMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::VIRUS, $alias);
         $latest_msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
         $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC']);
@@ -49,7 +52,7 @@ class DefaultController extends AbstractController {
 
         $labels = array_map(function ($item) {
             return $item['time_iso'];
-        }, $nbUntreadtedMsgByDay);
+        }, $nbAutorizeMsgByDay);
 
         $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::UNTREATED, $alias);
         $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::AUTHORIZED, $alias);
@@ -104,6 +107,9 @@ class DefaultController extends AbstractController {
                     'nbBannedMsgByDay' => $nbBannedMsgByDay,
                     'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
                     'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
+                    'nbErrorMsgByDay' => $nbErrorMsgByDay,
+                    'nbSpammedMsgByDay' => $nbSpammedMsgByDay,
+                    'nbVirusMsgByDay' => $nbVirusMsgByDay,
                     'latest_msgs' => $latest_msgs,
                     'users' => $users,
                     'alerts' => $alerts,
