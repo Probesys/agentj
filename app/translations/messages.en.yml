@@ -184,6 +184,7 @@ Message:
     virus: Virus
     spammed: Spam
     Error: Error
+    quota: Rate Limit exceeded
   Recipient: "Recipient"
   Date: Date
   ErrorSendCaptcha: "Error email verification"
