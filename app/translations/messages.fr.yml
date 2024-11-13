@@ -45,6 +45,7 @@ Generics:
     recipient: Destinataire
     user: Utilisateur
     userName: Nom d'utilisateur
+    attachments: Pièce(s) jointe(s)
     type: Type
     active: Actif
     inactive: Inactif
@@ -329,7 +330,6 @@ Search:
   MessageType: Type de message
   Filter: Filtrer
 
-
 Entities:
   Group:
     Title: Gérer les groupes
@@ -540,6 +540,9 @@ Entities:
     isMailingList: "Mailing liste ? "
     labels:
       infos: "Informations sur les refus"
+      preview: "Aperçu du message"
+      linkDisabled: "Lien désactivé"
+      imgDisabled: "Image désactivée"
       reason: "Type de refus"
   Msgrcpt:
     labels:
@@ -649,4 +652,4 @@ Entities:
       auto: Automatique
   DomainRelay:
     fields:
-      ipAddress: 'Adresse IP'
+      ipAddress: "Adresse IP"
