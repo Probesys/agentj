@@ -1,8 +1,12 @@
-<h2 class="mx-2 d-flex justify-content-between">Alertes récentes 
-    <a href="{{ path('alert_index') }}" class="btn btn-secondary">{{ 'Voir plus'|trans }}</a>
-</h2>
-<section>
-    <table id="table_alerts" class="table table-hover">
+{# templates/alert/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Alertes{% endblock %}
+
+{% block body %}
+    <h1>Alertes</h1>
+
+    <table class="table datatable hidden">
         <thead>
             <tr>
                 <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
@@ -37,7 +41,11 @@
                         </a>
                     </td>
                 </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">No alerts found.</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
-</section>
+{% endblock %}
