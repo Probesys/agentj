@@ -179,6 +179,10 @@
 												<span class="fas fa-user-check "></span>
 												{{ 'Message.Actions.Autorized'|trans() }}
 											</a>
+											<a href="{{path('message_banned',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" class='dropdown-item confirmModal' data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}' title="{{ 'Message.Actions.BannedSender'|trans() }}">
+												<span class="fas fa-user-slash "></span>
+												{{ 'Message.Actions.Banned'|trans() }}
+											</a>
 										{% endif %}
 										{% if type == '3' %}
 											<a href="{{path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" class='dropdown-item confirmModal text-primary' data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}' title='{{ 'Message.Actions.RestoreMessage'|trans }}'>

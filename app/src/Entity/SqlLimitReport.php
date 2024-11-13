@@ -9,8 +9,12 @@ use Doctrine\ORM\Mapping as ORM;
 class SqlLimitReport
 {
     #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private $id;
+
     #[ORM\Column(type: 'string', length: 320)]
-    private string $id;
+    private string $mail_id;
 
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $date;
@@ -29,14 +33,19 @@ class SqlLimitReport
 
     // Getters and setters for each property
 
-    public function getId(): ?string
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(string $id): self
+    public function getMailId(): ?string
     {
-        $this->id = $id;
+        return $this->mail_id;
+    }
+
+    public function setMailId(string $mail_id): self
+    {
+        $this->mail_id = $mail_id;
         return $this;
     }
 

@@ -405,3 +405,11 @@ body.sidebar-toggled footer.sticky-footer {
 .ui-dialog {
   z-index: 1060 !important;
 }
+
+table thead tr {
+  background-color: #ffffff;
+}
+
+table thead tr th {
+  background-color: transparent !important;
+}

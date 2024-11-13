@@ -188,6 +188,7 @@ Message:
     virus: Virus
     spam: Spam
     Error: Erreur
+    quota: Quota dépassé
   Date: Date
   ErrorSendCaptcha: Erreur vérification email
   Actions:

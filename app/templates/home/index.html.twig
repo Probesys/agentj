@@ -3,19 +3,297 @@
 {% block title %}{{ 'Generics.messages.welcome'|trans }} !{% endblock %}
 
 {% block body %}
+
+  {% block stylesheets %}
+      <style>
+          .card .fa-expand-arrows-alt {
+              visibility: hidden;
+              opacity: 0;
+              transition: visibility 0s, opacity 0.3s ease;
+          }
+          .card:hover .fa-expand-arrows-alt {
+              visibility: visible;
+              opacity: 1;
+              color: #212529;
+          }
+      </style>
+  {% endblock %}
+
   <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
-  <div class="card my-2 pt-2">
-    {% include '/home/_alerts.html.twig' %}
-  </div>
-  <div class="card my-2 pt-2">
-    {% include '/home/_latest_messages.html.twig' %}
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card my-2" style="height: 300px; position: relative;">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <p class="display-1 text-danger">{{ unreadAlertsCount }}</p>
+          <p class="h5">{{ 'Alerte non lue|Alertes non lues'|trans({'%count%': unreadAlertsCount}, 'messages') }}</p>
+          <a href="#" data-toggle="modal" data-target="#alertsModal" style="position: absolute; top: 10px; right: 10px;">
+            <i class="fas fa-expand-arrows-alt fa-2x"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card my-2" style="height: 300px; position: relative;">
+        <div class="card-body">
+          <canvas id="messagesChart"></canvas>
+          <a href="#" data-toggle="modal" data-target="#latestMessagesModal" style="position: absolute; top: 10px; right: 10px;">
+            <i class="fas fa-expand-arrows-alt fa-2x"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card my-2" style="height: 300px; position: relative;">
+        <div class="card-body">
+          {% include '/home/_stats.html.twig' %}
+          <a href="#" data-toggle="modal" data-target="#statsModal" style="position: absolute; top: 10px; right: 10px;">
+            <i class="fas fa-expand-arrows-alt fa-2x"></i>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
   {% if is_granted('ROLE_ADMIN') %}
-    <div class="card my-2 pt-2">
-      {% include '/home/_stats_table.html.twig' %}
+    <div class="row">
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
+        <div class="card my-2" style="height: 300px; position: relative;">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-2 d-flex align-items-center">
+                <form id="domainForm">
+                  <div class="form-group">
+                    <label for="domainSelect">Domaine :</label>
+                    <select class="form-control" id="domainSelect" name="domain">
+                      <option value="All">Tous</option>
+                      {% for domain in domains %}
+                        <option value="{{ domain.id }}">{{ domain.domain }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </form>
+              </div>
+              <div class="col-md-5" style="height: 250px;">
+                <canvas id="msgsChart"></canvas>
+              </div>
+              <div class="col-md-5" style="height: 250px;">
+                <canvas id="outMsgsChart"></canvas>
+              </div>
+            </div>
+            <a href="#" data-toggle="modal" data-target="#statsTableModal" style="position: absolute; top: 10px; right: 10px;">
+              <i class="fas fa-expand-arrows-alt fa-2x"></i>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   {% endif %}
-  <div class="card my-2 pt-2">
-    {% include '/home/_stats.html.twig' %}
+
+  <!-- Modals -->
+  <div class="modal fade" id="alertsModal" tabindex="-1" role="dialog" aria-labelledby="alertsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertsModalLabel">Alerts</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% include '/home/_alerts.html.twig' %}
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div class="modal fade" id="latestMessagesModal" tabindex="-1" role="dialog" aria-labelledby="latestMessagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="latestMessagesModalLabel">Latest Messages</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% include '/home/_latest_messages.html.twig' %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="statsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="statsModalLabel">Stats</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% include '/home/_stats.html.twig' %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if is_granted('ROLE_ADMIN') %}
+    <div class="modal fade" id="statsTableModal" tabindex="-1" role="dialog" aria-labelledby="statsTableModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" style="max-width: fit-content;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statsTableModalLabel">Stats Table</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            {% include '/home/_stats_table.html.twig' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  {% block javascripts %}
+    <script>
+      var ctx = document.getElementById('messagesChart').getContext('2d');
+      var data = {
+        labels: [Translator.trans('Navigation.untreated'), Translator.trans('Navigation.authorized'), Translator.trans('Navigation.banned'), Translator.trans('Navigation.Messagedelete'), Translator.trans('Navigation.MessageRestored'), 'Error', 'Spam', 'Virus'],
+        datasets: [{
+          data: [
+            {{ msgs.untreated }},
+            {{ msgs.authorized }},
+            {{ msgs.banned }},
+            {{ msgs.delete }},
+            {{ msgs.restored }},
+            {{ msgs.error }},
+            {{ msgs.spammed }},
+            {{ msgs.virus }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#77DD77', // Green
+            '#FF9F40', // Orange
+            '#9966FF', // Purple
+            '#4BC0C0', // Teal
+            '#C9CBCF', // Light Gray
+            '#FF5733',  // Dark Orange
+            '#FF6384' // Red
+          ]
+        }]
+      };
+
+      // Filter out labels and data points that are zero
+      var filteredData = {
+        labels: data.labels.filter((label, index) => data.datasets[0].data[index] > 0),
+        datasets: [{
+          data: data.datasets[0].data.filter(value => value > 0),
+          backgroundColor: data.datasets[0].backgroundColor.filter((color, index) => data.datasets[0].data[index] > 0)
+        }]
+      };
+
+      if (filteredData.datasets[0].data.length === 0) {
+        // Display a message if there is no data
+        document.getElementById('messagesChart').style.display = 'none';
+        var noDataMessage = document.createElement('p');
+        noDataMessage.textContent = 'Aucun message bloqué';
+        noDataMessage.style.textAlign = 'center';
+        noDataMessage.style.marginTop = '20px';
+        document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
+      } else {
+        var messagesChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: filteredData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: 'right'
+            },
+            title: {
+              display: true,
+              text: Translator.trans('Navigation.mailBlocked')
+            }
+          }
+        });
+      }
+
+      var ctxMsgs = document.getElementById('msgsChart').getContext('2d');
+      var msgsData = {
+        labels: ['Messages non bloqués', 'Messages bloqués'],
+        datasets: [{
+          data: [
+            {{ data['All'].totalMsgCount - data['All'].totalMsgBlockedCount }},
+            {{ data['All'].totalMsgBlockedCount }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#FF6384'  // Red
+          ]
+        }]
+      };
+
+      var msgsChart = new Chart(ctxMsgs, {
+        type: 'doughnut',
+        data: msgsData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Mails entrants'
+          }
+        }
+      });
+
+      var ctxOutMsgs = document.getElementById('outMsgsChart').getContext('2d');
+      var outMsgsData = {
+        labels: ['Messages non bloqués', 'Messages bloqués'],
+        datasets: [{
+          data: [
+            {{ data['All'].totalOutMsgCount - data['All'].totalOutMsgBlockedCount }},
+            {{ data['All'].totalOutMsgBlockedCount }}
+          ],
+          backgroundColor: [
+            '#36A2EB', // Blue
+            '#FF6384'  // Red
+          ]
+        }]
+      };
+
+      var outMsgsChart = new Chart(ctxOutMsgs, {
+        type: 'doughnut',
+        data: outMsgsData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Mails sortants'
+          }
+        }
+      });
+
+      var data = {{ data|json_encode|raw }};
+
+      document.getElementById('domainSelect').addEventListener('change', function() {
+        var selectedDomain = this.value;
+        var domainData = data[selectedDomain];
+
+        // Update the charts with the new data
+        msgsChart.data.datasets[0].data = [domainData.totalMsgCount - domainData.totalMsgBlockedCount, domainData.totalMsgBlockedCount];
+        msgsChart.update();
+
+        outMsgsChart.data.datasets[0].data = [domainData.totalOutMsgCount, domainData.totalOutMsgBlockedCount];
+        outMsgsChart.update();
+      });
+    </script>
+  {% endblock %}
 {% endblock %}
