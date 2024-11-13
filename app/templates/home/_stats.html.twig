@@ -12,74 +12,174 @@
     var charts = document.querySelectorAll('.statsChart');
     charts.forEach(function(chart) {
       var ctx = chart.getContext('2d');
-      const myLineChart = new Chart(ctx, {
-        type: 'line',
-        responsive: true,
-        data: {
-          labels: [
-            {% for day in listDay %}
-              '{{ day | format_datetime('short', 'short') }}',
+
+      // Original datasets
+      var datasets = [
+        {
+          label: Translator.trans('Navigation.untreated'),
+          data: [
+            {% for day in nbUntreadtedMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
-          datasets: [{
-              label: Translator.trans('Navigation.untreated'),
-              data: [
-                {% for day in nbUntreadtedMsgByDay %}
-                  '{{ day.nb_result }}',
-                {% endfor %}
-              ],
-              borderColor: 'blue',
-              borderWidth: 1
-            },
-            {
-              label: Translator.trans('Navigation.authorized'),
-              data: [
-                {% for day in nbAutorizeMsgByDay %}
-                  '{{ day.nb_result }}',
-                {% endfor %}
-              ],
-              borderColor: 'green',
-              borderWidth: 1
-            },
-            {
-              label: Translator.trans('Navigation.banned'),
-              data: [
-                {% for day in nbBannedMsgByDay %}
-                  '{{ day.nb_result }}',
-                {% endfor %}
-              ],
-              borderColor: 'red',
-              borderWidth: 1
-            },
-            {
-              label: Translator.trans('Navigation.Messagedelete'),
-              data: [
-                {% for day in nbDeletedMsgByDay %}
-                  '{{ day.nb_result }}',
-                {% endfor %}
-              ],
-              borderColor: 'orange',
-              borderWidth: 1
-            },
-            {
-              label: Translator.trans('Navigation.MessageRestored'),
-              data: [
-                {% for day in nbRestoredMsgByDay %}
-                  '{{ day.nb_result }}',
-                {% endfor %}
-              ],
-              borderColor: 'green',
-              borderWidth: 1
-            }
-          ]
+          borderColor: '#36A2EB', // Blue
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: Translator.trans('Navigation.authorized'),
+          data: [
+            {% for day in nbAutorizeMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#77DD77', // Green
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: Translator.trans('Navigation.banned'),
+          data: [
+            {% for day in nbBannedMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#FF9F40', // Orange
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: Translator.trans('Navigation.Messagedelete'),
+          data: [
+            {% for day in nbDeletedMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#9966FF', // Purple
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: Translator.trans('Navigation.MessageRestored'),
+          data: [
+            {% for day in nbRestoredMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#4BC0C0', // Teal
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: 'Error',
+          data: [
+            {% for day in nbErrorMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#C9CBCF', // Light Gray
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: 'Spam',
+          data: [
+            {% for day in nbSpammedMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#FF5733',  // Dark Orange
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        },
+        {
+          label: 'Virus',
+          data: [
+            {% for day in nbVirusMsgByDay %}
+              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+            {% endfor %}
+          ],
+          borderColor: '#FF6384', // Red
+          borderWidth: 1,
+          fill: false,
+          tension: 0.4
+        }
+      ];
+
+      // Extract all unique dates
+      var allDates = [];
+      datasets.forEach(function(dataset) {
+        dataset.data.forEach(function(point) {
+          if (!allDates.includes(point.date)) {
+            allDates.push(point.date);
+          }
+        });
+      });
+
+      // Sort dates
+      allDates.sort(function(a, b) {
+        return new Date(a) - new Date(b);
+      });
+
+      // Align datasets with the dates and add 0 values for missing dates
+      datasets.forEach(function(dataset) {
+        var alignedData = [];
+        allDates.forEach(function(date) {
+          var point = dataset.data.find(function(point) {
+            return point.date === date;
+          });
+          alignedData.push(point ? point.value : 0);
+        });
+        dataset.data = alignedData;
+      });
+
+      // Filter out datasets with no values
+      var filteredDatasets = datasets.filter(function(dataset) {
+        return dataset.data.some(function(value) {
+          return value > 0;
+        });
+      });
+
+      const myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: allDates.map(function(date) {
+            var d = new Date(date);
+            return d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0') + '/' + d.getFullYear();
+          }),
+          datasets: filteredDatasets
         },
         options: {
           scales: {
             yAxes: [{
               ticks: {
-                beginAtZero: true
+                beginAtZero: true,
+                stepSize: 1,
+                callback: function(value) {
+                  if (Number.isInteger(value)) {
+                    return value;
+                  }
+                }
               }
             }]
+          },
+          legend: {
+            display: true,
+            labels: {
+              filter: function(legendItem, chartData) {
+                var dataset = chartData.datasets[legendItem.datasetIndex];
+                return dataset.data.some(function(value) {
+                  return value > 0;
+                });
+              }
+            }
           }
         }
       });
