@@ -42,8 +42,9 @@ class DefaultController extends AbstractController {
         $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
         $latest_msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
-        $unreadAlertsCount = count(array_filter($alerts, function($alert) {
-            return !$alert->getIsRead();
+        $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC']);
+        $unreadAlertsCount = count(array_filter($all_alerts, function($all_alert) {
+            return !$all_alert->getIsRead();
         }));
 
         $labels = array_map(function ($item) {
@@ -177,7 +178,7 @@ class DefaultController extends AbstractController {
         $sqlLimitReports = '
             SELECT COUNT(*) AS count
             FROM sql_limit_report
-            WHERE id = :user_email
+            WHERE mail_id = :user_email
         ';
         $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['user_email' => $user_email]);
         $limitReports = $stmtLimitReports->fetchAssociative();

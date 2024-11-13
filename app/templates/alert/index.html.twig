@@ -6,7 +6,7 @@
 {% block body %}
     <h1>Alertes</h1>
 
-    <table class="table datatable hidden">
+    <table id="alertsTable" class="table hidden">
         <thead>
             <tr>
                 <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
@@ -48,4 +48,17 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#alertsTable').DataTable({
+                "order": [[0, "desc"]], // Order by the first column (date) in descending order
+                "language": {
+                url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
+                },
+                "pageLength": window.location.pathname === "/" ? 10 : 100,
+                "stateSave": true
+            });
+        });
+    </script>
 {% endblock %}
