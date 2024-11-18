@@ -45,6 +45,7 @@ Generics:
     recipient: Destinataire
     user: Utilisateur
     userName: Nom d'utilisateur
+    attachments: Pièce(s) jointe(s)
     type: Type
     active: Actif
     inactive: Inactif
@@ -187,6 +188,7 @@ Message:
     virus: Virus
     spam: Spam
     Error: Erreur
+    quota: Quota dépassé
   Date: Date
   ErrorSendCaptcha: Erreur vérification email
   Actions:
@@ -327,7 +329,6 @@ Search:
   Outgoing: ENVOYÉ
   MessageType: Type de message
   Filter: Filtrer
-
 
 Entities:
   Group:
@@ -539,6 +540,9 @@ Entities:
     isMailingList: "Mailing liste ? "
     labels:
       infos: "Informations sur les refus"
+      preview: "Aperçu du message"
+      linkDisabled: "Lien désactivé"
+      imgDisabled: "Image désactivée"
       reason: "Type de refus"
   Msgrcpt:
     labels:
@@ -616,7 +620,7 @@ Entities:
     Wbliste:
       title: "Liste blanche : importer une liste"
       description:
-        "Le fichier doit être encodé en utf8 au format texte ou csv.<br\
+        "Le fichier au format texte.<br\
         \ /> Chaque ligne doit comporter une adresse mail valide<br />"
     Users:
       title: Importer des utilisateurs
@@ -648,4 +652,4 @@ Entities:
       auto: Automatique
   DomainRelay:
     fields:
-      ipAddress: 'Adresse IP'
+      ipAddress: "Adresse IP"

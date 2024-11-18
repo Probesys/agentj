@@ -1,10 +1,10 @@
 function $_GET(param) {
   var vars = {};
   window.location.href.replace(location.hash, '').replace(
-          /[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
-          function (m, key, value) { // callback
-            vars[key] = value !== undefined ? value : '';
-          }
+    /[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
+    function (m, key, value) { // callback
+      vars[key] = value !== undefined ? value : '';
+    }
   );
 
   if (param) {
@@ -23,18 +23,18 @@ document.addEventListener("turbo:load", function () {
   $('.select2').select2();
 
 
-  $(document).scroll(function() {
+  $(document).scroll(function () {
     if ($(this).scrollTop() > 100) {
-        $(".scroll-to-top").fadeIn();
+      $(".scroll-to-top").fadeIn();
     } else {
-        $(".scroll-to-top").fadeOut();
+      $(".scroll-to-top").fadeOut();
     }
   });
 
-  $(document).on("click", "a.scroll-to-top", function(e) {
+  $(document).on("click", "a.scroll-to-top", function (e) {
     var target = $(this).attr("href");
     $("html, body").stop().animate({
-        scrollTop: $(target).offset().top
+      scrollTop: $(target).offset().top
     }, 1000, "easeInOutExpo");
     e.preventDefault();
   });
@@ -42,53 +42,49 @@ document.addEventListener("turbo:load", function () {
   /* DataTable*/
   $.extend($.fn.dataTable.defaults, {
     dom:
-            "<'col mb-3 bg-white pb-3'<'row'<'col-sm-10 col-md-6'l><'col-sm-12 col-md-6'f>>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      "<'col mb-3 bg-white pb-3'<'row'<'col-sm-10 col-md-6'l><'col-sm-12 col-md-6'f>>>" +
+      "<'row'<'col-sm-12'tr>>" +
+      "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
     renderer: 'bootstrap'
   });
 
   var table = $('.datatable').DataTable(
-          {
-            "initComplete": function (settings, json) {
-              var domDropDownActions = "";
-              if ($(this).prop("id") == 'table_users')
-              {
-                domDropDownActions = '<div class="ml-2 bg-white float-left">' +
-                        '<label>Actions' +
-                        '<select id="massive-actions-select" class="custom-select custom-select-sm form-control form-control-sm">' +
-                        '<option value="">Actions</option>' +
-                        '<option data-dialog-title="' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
-                domDropDownActions += '</select></label></div>';
-                $(domDropDownActions).insertAfter("#" + $(this).prop("id") + "_length ");
-              }
+    {
+      "initComplete": function (settings, json) {
+        var domDropDownActions = "";
+        if ($(this).prop("id") == 'table_users') {
+          domDropDownActions = '<div class="ml-2 bg-white float-left">' +
+            '<label>Actions' +
+            '<select id="massive-actions-select" class="custom-select custom-select-sm form-control form-control-sm">' +
+            '<option value="">Actions</option>' +
+            '<option data-dialog-title="' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
+          domDropDownActions += '</select></label></div>';
+          $(domDropDownActions).insertAfter("#" + $(this).prop("id") + "_length ");
+        }
 
-            },
-            "language": {
-              url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
-            },
-            "pageLength": window.location.pathname === "/" ? 10 : 100,
-            "stateSave": true
-          });
+      },
+      "language": {
+        url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
+      },
+      "pageLength": window.location.pathname === "/" ? 10 : 100,
+      "stateSave": true
+    });
 
-  table.on('init', function() {
-      $('.datatable').removeClass('hidden');
+  table.on('init', function () {
+    $('.datatable').removeClass('hidden');
   });
 
-//massive form action confirm submission
+  //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
     e.preventDefault();
     e.stopImmediatePropagation();
     var select = $(this);
-    if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0)
-    {
+    if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0) {
       var curFormAction = $("#massive-actions-form").prop("action");
-      if ($(this).val() != '')
-      {
+      if ($(this).val() != '') {
         $("#massive-actions-form").prop("action", curFormAction + "/" + $(this).val());
       }
-    } else
-    {
+    } else {
       $(this).val('');
     }
 
@@ -111,29 +107,29 @@ document.addEventListener("turbo:load", function () {
     $('.' + $(this).data('target-checkall-class')).attr('checked', $(this).is(':checked'));
     e.stopImmediatePropagation();
   });
-  
+
   $(document).on('click', '.for-cb:not(.check-all)', function (e) {
     console.log('click');
     var cb = $(this).prev();
     var isChecked = $(cb).is(':checked');
     cb.attr('checked', isChecked ? false : true);
     e.stopImmediatePropagation();
-  });  
+  });
 
   $(document).on('click', '.btn-open-modal', function (e) {
     e.stopImmediatePropagation();
     $.ajax({
       url: $(this).data('url-modal-content'),
       type: $(this).data('modal-method-type') ? $(this).data('modal-method-type') : 'post',
-//      data: {userid: userid},
+      //      data: {userid: userid},
       success: function (response) {
         $('#empModal').html(response);
 
         $('.select2').select2(
-                {
-                  width: 'resolve',
-                  dropdownParent: $('#empModal')
-                }
+          {
+            width: 'resolve',
+            dropdownParent: $('#empModal')
+          }
         );
         $('#empModal').modal('show');
       }
@@ -203,7 +199,7 @@ document.addEventListener("turbo:load", function () {
 
   });
 
-// Update the current slider value (each time you drag the slider handle)
+  // Update the current slider value (each time you drag the slider handle)
   slider.oninput = function () {
     output.innerHTML = this.value;
   }
@@ -238,11 +234,9 @@ document.addEventListener("turbo:load", function () {
         click: function () {
 
 
-          if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm"))
-          {
+          if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm")) {
             window.location.href = $(this).data("link-to-confirm");
-          } else if ($(this).data('type-action-confirm') == 'form')
-          {
+          } else if ($(this).data('type-action-confirm') == 'form') {
             $('#' + $(this).data('form-to-confirm')).submit();
           }
           $(this).dialog("close");
@@ -259,7 +253,7 @@ document.addEventListener("turbo:load", function () {
   });
 
 
-  $("a.confirmModal").click(function (e) {
+  $(document).on('click', 'a.confirmModal', function (e) {
     e.preventDefault();
     $('#dialog-confirm').dialog('option', 'title', $(this).data('dialog-title'));
     $('#dialog-confirm').data("type-action-confirm", "link");
@@ -281,8 +275,7 @@ document.addEventListener("turbo:load", function () {
       $.ajax({
         type: 'POST',
         url: $(this).data('target'),
-        success: function ()
-        {
+        success: function () {
           message = Translator.trans('Generics.flash.deleteSuccess');
           parent.hide('slow', function () {
             parent.remove();
@@ -295,8 +288,7 @@ document.addEventListener("turbo:load", function () {
           }
           showAlertMessage('success', message);
         },
-        failure: function ()
-        {
+        failure: function () {
           message = Translator.trans('Generics.flash.deleteFailure');
           showAlertMessage('error', message);
         }
