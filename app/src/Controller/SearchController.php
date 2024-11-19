@@ -9,11 +9,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Driver\Result;
-
+#[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/advanced_search')]
 class SearchController extends AbstractController
 {
