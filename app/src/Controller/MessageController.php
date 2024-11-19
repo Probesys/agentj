@@ -26,6 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Webklex\PHPIMAP\Message;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route(path: '/message')]
 class MessageController extends AbstractController
@@ -180,6 +181,10 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
             'rid' => $rid
         ]);
+        if (!$msgRcpt) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
+        $this->checkMailAccess($msgRcpt);
 
         /* @var $msg Msgs */
         $msg = $em->getRepository(Msgs::class)->findOneBy([
@@ -206,14 +211,21 @@ class MessageController extends AbstractController
     public function deleteAction($partitionTag, $mailId, $rid, Request $request)
     {
         $em = $this->em;
+        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+        if (!$msgRcpt) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
+        $this->checkMailAccess($msgRcpt);
         //    $em->getRepository(Msgs::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED); //status == delete
         $em->getRepository(Msgrcpt::class)->changeStatus($partitionTag, $mailId, MessageStatus::DELETED, $rid); //status == delete
         $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
         $logService = new LogService($em);
         $logService->addLog('delete', $mailId);
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-        //    return $this->redirectToRoute('message', ['type' => $type]);
+        if (!empty($request->headers->get('referer'))) {
+            return new RedirectResponse($request->headers->get('referer'));
+        } else {
+            return $this->redirectToRoute("message");
+        }
     }
 
     /**
@@ -239,6 +251,8 @@ class MessageController extends AbstractController
                         $logService->addLog('banned batch', $mailInfo[1]);
                         break;
                     case 'delete':
+                        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $mailInfo[0], 'mailId' => $mailInfo[1], 'rid' => $mailInfo[2]]);
+                        $this->checkMailAccess($msgRcpt);
                         $em->getRepository(Msgs::class)->changeStatus($mailInfo[0], $mailInfo[1], MessageStatus::DELETED);
                         $em->getRepository(Msgrcpt::class)->changeStatus($mailInfo[0], $mailInfo[1], MessageStatus::DELETED, $mailInfo[2]);
                         $logService = new LogService($em);
@@ -277,16 +291,18 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
     public function banned($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->em;
 
         //B = Black and msg status = 1 is banned
         if ($this->msgsToWblist($partitionTag, $mailId, "B", MessageStatus::BANNED, 0, $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService = new LogService($em);
+            $logService = new LogService($this->em);
             $logService->addLog('banned', $mailId);
         }
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        if (!empty($request->headers->get('referer'))) {
+            return new RedirectResponse($request->headers->get('referer'));
+        } else {
+            return $this->redirectToRoute("message");
+        }
     }
 
     /**
@@ -300,14 +316,15 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/restore', name: 'message_restore')]
     public function restore($partitionTag, $mailId, $rid, Request $request)
     {
-        $em = $this->em;
         //select msgs and msgcpt
-        $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
+        $msgs = $this->em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
 
         /* @var $msgrcpt Msgrcpt */
-        $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+        $msgrcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+
 
         if ($msgrcpt && $msgs->getQuarLoc() && $msgs->getSecretId()) {
+            $this->checkMailAccess($msgrcpt);
             $mailRcpt = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
             $process = new Process([$this->getParameter('app.amavisd-release'), stream_get_contents($msgs->getQuarLoc(), -1, 0), stream_get_contents($msgs->getSecretId(), -1, 0), $mailRcpt]);
             $process->run(
@@ -322,16 +339,16 @@ class MessageController extends AbstractController
             //      $logService = new LogService($em);
             //      $logService->addLog('restored', $mailId);
 
-            $msgStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::RESTORED);
+            $msgStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::RESTORED);
             $msgs->setStatus($msgStatus);
-            $em->persist($msgs);
+            $this->em->persist($msgs);
 
             $msgrcpt->setStatus($msgStatus);
-            $em->persist($msgrcpt);
+            $this->em->persist($msgrcpt);
 
-            $em->flush();
+            $this->em->flush();
 
-            $logService = new LogService($em);
+            $logService = new LogService($this->em);
             $logService->addLog('restore', $mailId);
         }
         if (!empty($request->headers->get('referer'))) {
@@ -366,11 +383,19 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The message does not exist.');
         }
 
+
         if ($rid) {
             $msgrcpt = $em->getRepository(Msgrcpt::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
         } else {
             $msgrcpt = $em->getRepository(Msgrcpt::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         }
+
+
+        if (!$msgrcpt) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
+
+
 
         //check if sender exists in the database
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
@@ -396,6 +421,8 @@ class MessageController extends AbstractController
 
         $userAndAliases = [];
         foreach ($msgrcpt as $messageRecipient) {
+            $this->checkMailAccess($messageRecipient);
+
             $emailReceipt = stream_get_contents($messageRecipient->getRid()->getEmail(), -1, 0);
             $mainUser = $em->getRepository(User::class)->findOneBy(['email' => $emailReceipt]);
 
@@ -502,7 +529,6 @@ class MessageController extends AbstractController
     }
 
     /* Create rules of domain and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate ) */
-
     public function msgsToWblistDomain($partitionTag, $mailId, $wb, $rid)
     {
         $em = $this->em;
@@ -512,6 +538,7 @@ class MessageController extends AbstractController
         if (!$msgs) {
             throw $this->createNotFoundException('The message does not exist.');
         }
+
         $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
@@ -580,10 +607,16 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
-    public function showDetailMsgs($partitionTag, $mailId, $rid, Request $request)
+    public function showDetailMsgs($partitionTag, $mailId, $rid)
     {
         $mail_chunks = $this->em->getRepository(Quarantine::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
+        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+
+        if (!$msgRcpt) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
+
+        $this->checkMailAccess($msgRcpt);
 
         if (!$mail_chunks) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -640,5 +673,12 @@ class MessageController extends AbstractController
             'attachments' => $attachments,
             'msg' => $msgRcpt,
         ]);
+    }
+
+    private function checkMailAccess(Msgrcpt $msgRcpt)
+    {
+        if (!$this->isGranted("ROLE_ADMIN") && $msgRcpt->getRid()->getEmailClear() != $this->getUser()->getEmailFromRessource()) {
+            throw new AccessDeniedException();
+        }
     }
 }
