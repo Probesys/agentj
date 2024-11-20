@@ -322,6 +322,7 @@ class MessageController extends AbstractController
         /* @var $msgrcpt Msgrcpt */
         $msgrcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
+
         if ($msgrcpt && $msgs->getQuarLoc() && $msgs->getSecretId()) {
             $this->checkMailAccess($msgrcpt);
             $mailRcpt = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
@@ -624,7 +625,7 @@ class MessageController extends AbstractController
         ]);
     }
 
-    
+
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs($partitionTag, $mailId, $rid)
     {
