@@ -68,6 +68,7 @@ Generics:
     azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
     incorrectCredential: Identifiants incorrects
     groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
+    cannotPreviewMailWithvirus: "Vous ne pouvez pas visualilser ce message car il contient un virus"
   labels:
     filters: Filtres
     item_per_page: Nombre d'éléments par page (sur %totalItemFound% trouvés)

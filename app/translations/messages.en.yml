@@ -66,6 +66,7 @@ Generics:
     azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
     groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
+    cannotPreviewMailWithvirus: "You cannot view this message because it contains a virus."
   labels:
     filters: Filters
     item_per_page: "Number of items per page (sur %totalItemFound% found)"
