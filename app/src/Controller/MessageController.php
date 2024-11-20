@@ -499,6 +499,7 @@ class MessageController extends AbstractController
         return $state;
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain($partitionTag, $mailId, $rid, Request $request)
     {
