@@ -20,7 +20,7 @@
 	{% include 'common/blocActionsAndSearch.html.twig'  %}
 
 	{{ form_start(filter_form, {'attr': {'id': 'massive-actions-form'}}) }}
-
+        <div class="table-responsive">
 	<section id="no-more-tables">
 		<table id="table_msgs" data-type-list-msgs="{{ type }}" class="table table-hover">
 			<thead>
@@ -231,6 +231,7 @@
 			</tbody>
 		</table>
 	</section>
+        </div>
 	{{ form_end(filter_form) }}
 	<div class="navigation text-center">
 		{{ knp_pagination_render(msgs) }}

@@ -81,7 +81,7 @@
             </div>
             {{ form_end(form) }}
         </div>
-
+ <div class="table-responsive">
         <table class="table table-hover search" style="margin: 3rem 0 5rem 0"
                data-active-filters="{{ activeFilters|json_encode }}">
             <thead>
@@ -108,6 +108,7 @@
             {% include 'search/_messages.html.twig' with { 'msgs': msgs } %}
             </tbody>
         </table>
+ </div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
