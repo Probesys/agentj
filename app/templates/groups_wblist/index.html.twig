@@ -26,7 +26,7 @@
 {#        Users : <span class="badge badge-primary badge-pill">{{ groups.users | length}}</span>                #}
       </div>
     </div>
-
+ <div class="table-responsive">
     <section id="no-more-tables">
       <table  class="table datatable hidden">
         <thead>
@@ -76,6 +76,7 @@
         </tbody>
       </table>
     </section>
+ </div>
     <div class="d-flex justify-content-center">
       <a class="btn btn-outline-secondary"  href="{{ path('groups_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
 
