@@ -499,6 +499,7 @@ class MessageController extends AbstractController
         return $state;
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain($partitionTag, $mailId, $rid, Request $request)
     {
@@ -609,6 +610,26 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
     public function showDetailMsgs($partitionTag, $mailId, $rid)
     {
+        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+
+        if (!$msgRcpt) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
+
+        $this->checkMailAccess($msgRcpt);
+
+        return $this->render('message/content.html.twig', [
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+            'msgRcpt' => $msgRcpt
+        ]);
+    }
+
+
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
+    public function showIframeDetailMsgs($partitionTag, $mailId, $rid)
+    {
         $mail_chunks = $this->em->getRepository(Quarantine::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
@@ -665,13 +686,13 @@ class MessageController extends AbstractController
             $htmlBody
         );
 
-        return $this->render('message/content.html.twig', [
+        return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
             'htmlBody' => $htmlBody,
             'from' => $from,
             'subject' => $subject,
             'attachments' => $attachments,
-            'msg' => $msgRcpt,
+            'msgRcpt' => $msgRcpt
         ]);
     }
 

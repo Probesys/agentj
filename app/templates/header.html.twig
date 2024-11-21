@@ -1,66 +1,75 @@
 {% if logoUploaded %}
-  {% set logoPath = asset('files/upload/') ~ logoImg %}
+	{% set logoPath = asset('files/upload/') ~ logoImg %}
 {% else %}
-  {% set logoPath = asset('img/') ~ logoImg %}
+	{% set logoPath = asset('img/') ~ logoImg %}
 {% endif %}
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
-  <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
-    <i class="fas fa-bars fa-lg"></i>
-  </a>
-  {% if is_granted('ROLE_ADMIN') %}
-    <a class="ml-2 btn" href="{{ path('advanced_search') }}" data-turbo="false">
-        <i class="fa fa-search" aria-hidden="true"></i>
-    </a>
-  {% endif %}
-  <a class="navbar-brand m-auto" href="{{ path('homepage') }}">
-    <img src="{{ logoPath }}" class="logo">
-  </a>
+	<a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
+		<i class="fas fa-bars fa-lg"></i>
+	</a>
+	{% if is_granted('ROLE_ADMIN') %}
+		<a class="ml-2 btn" href="{{ path('advanced_search') }}" data-turbo="false">
+			<i class="fa fa-search" aria-hidden="true"></i>
+		</a>
+	{% endif %}
+	<a class="navbar-brand m-auto" href="{{ path('homepage') }}">
+		<img src="{{ logoPath }}" class="logo">
+	</a>
 
-  <div class="d-md-inline-block">
-    <ul class="navbar-nav ml-auto ml-md-0">
-      <li class="nav-item ">
-        <a href="mailto:support@probesys.com" class="nav-link">
-          <i class="fas fa-ambulance text-success">&nbsp;</i>
-        </a>
-      </li>
-      {% if locales|length > 1 %}
-        <li class="nav-item dropdown no-arrow mx-1">
-          <a  data-turbo="false" class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="far fa-flag"></i><span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span></i>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
-            {% for locale in locales %}
-              <a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}" data-turbo="false" href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
-            {% endfor %}
-          </div>
-        </li>
-      {% endif %}
-      <li class="nav-item dropdown no-arrow">
-        <a  data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-none d-md-block" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{app.user.username}}
-        </a>
-        <a  data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-block d-sm-none" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          @
-        </a>
-        <div class="dropdown-menu dropdown-menu-right " aria-labelledby="userDropdown">
-          {% if not is_granted('ROLE_ADMIN') %}
-            <a class="dropdown-item" href="{{path('account')}}"><i class="fas fa-user-circle"></i> {{'Navigation.user_profil'|trans}}</a>
-            <div class="dropdown-divider"></div>
-          {% endif %}
-          {% if is_granted('IS_IMPERSONATOR') %}
-            <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': '_exit'}) }}">&nbsp;<i class="fas fa-random"></i> {{'Generics.actions.exitImpersonation'|trans}} {{ app.session.get('originalUser') }}</a>
-            <div class="dropdown-divider"></div>
-          {% endif %}
-          {% if sharedBoxes|length > 0%}
-            <div class="dropdown-header">Autres boîtes mails</div>
-            {% for sharedBox in sharedBoxes %}
-              <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedBox.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedBox.username}}" ><i class="fas fa-envelope"></i> {{ sharedBox.username }}</a>
-            {% endfor %}
-            <div class="dropdown-divider"></div>
-          {% endif %}
-          <a class="dropdown-item"  href="{{path('app_logout')}}"><i class="fas fa-sign-out-alt fa-fw"></i> {{'Navigation.logout'|trans}}</a>
-        </div>
-      </li>
-    </ul>
-  </div>
-</nav>
+	<div class="d-md-inline-block">
+		<ul class="navbar-nav ml-auto ml-md-0">
+			<li class="nav-item ">
+				<a href="mailto:support@probesys.coop" class="nav-link">
+					<i class="fas fa-ambulance text-success">&nbsp;</i>
+				</a>
+			</li>
+			{% if locales|length > 1 %}
+				<li class="nav-item dropdown no-arrow mx-1">
+					<a data-turbo="false" class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="far fa-flag"></i>
+						<span class="libelle">&nbsp;{{ app.request.getLocale()|upper }}</span>
+					</i>
+				</li>
+			</a>
+			<div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
+				{% for locale in locales %}
+					<a class="dropdown-item {% if locale == app.request.locale %}active{% endif %}" data-turbo="false" href="{{ path('setlocale', {'language': locale}) }}">{{locale|upper}}</a>
+				{% endfor %}
+			</div>
+		</li>
+	{% endif %}
+	<li class="nav-item dropdown no-arrow">
+		<a data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-none d-md-block" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			{{app.user.username}}
+		</a>
+		<a data-turbo="false" class="nav-link dropdown-toggle font-weight-bolder d-block d-sm-none" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			@
+		</a>
+		<div class="dropdown-menu dropdown-menu-right " aria-labelledby="userDropdown">
+			{% if not is_granted('ROLE_ADMIN') %}
+				<a class="dropdown-item" href="{{path('account')}}">
+					<i class="fas fa-user-circle"></i>
+					{{'Navigation.user_profil'|trans}}</a>
+				<div class="dropdown-divider"></div>
+			{% endif %}
+			{% if is_granted('IS_IMPERSONATOR') %}
+				<a class="dropdown-item" href="{{ path('homepage', {'_switch_user': '_exit'}) }}">&nbsp;<i class="fas fa-random"></i>
+					{{'Generics.actions.exitImpersonation'|trans}}
+					{{ app.session.get('originalUser') }}</a>
+				<div class="dropdown-divider"></div>
+			{% endif %}
+			{% if sharedBoxes|length > 0%}
+				<div class="dropdown-header">Autres boîtes mails</div>
+				{% for sharedBox in sharedBoxes %}
+					<a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedBox.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedBox.username}}">
+						<i class="fas fa-envelope"></i>
+						{{ sharedBox.username }}</a>
+				{% endfor %}
+				<div class="dropdown-divider"></div>
+			{% endif %}
+			<a class="dropdown-item" href="{{path('app_logout')}}">
+				<i class="fas fa-sign-out-alt fa-fw"></i>
+				{{'Navigation.logout'|trans}}</a>
+		</div>
+	</li>
+</ul></div></nav>
