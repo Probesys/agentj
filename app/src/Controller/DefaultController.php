@@ -99,6 +99,12 @@ class DefaultController extends AbstractController {
             }, 0),
         ];
 
+        $showAlertWidget = true;
+        if ($this->getUser()->getDomain() && $this->getUser()->getDomain()->getSendUserAlerts() == false)
+        {
+            $showAlertWidget = false;
+        }
+        
         return $this->render('home/index.html.twig', [
                     'controller_name' => 'DefaultController',
                     'listDay' => $labels,
@@ -116,7 +122,8 @@ class DefaultController extends AbstractController {
                     'unreadAlertsCount' => $unreadAlertsCount,
                     'msgs' => $msgs,
                     'domains' => $domains,
-                    'data' => $data
+                    'data' => $data,
+                    'showAlert' => $showAlertWidget
         ]);
     }
 

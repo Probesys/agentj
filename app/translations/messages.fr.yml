@@ -68,7 +68,9 @@ Generics:
     azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
     incorrectCredential: Identifiants incorrects
     groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
+    helpAlert : "Alertes sur les mails sortant bloqués (quota dépassé, etc...)"
   labels:
+    all: Tous
     filters: Filtres
     item_per_page: Nombre d'éléments par page (sur %totalItemFound% trouvés)
     lastModificationOn: Dernière modification le
@@ -82,6 +84,16 @@ Generics:
     none: Aucun
     byDefault: par défaut
     alerts: Alertes
+    recentAlerts: Alertes récentes
+    latestMessages: Derniers messages
+    previewLatestMessages: Aperçu des 5 derniers mails bloqués
+    statistics: Statistiques
+    statTable: Tableau des statistiques
+    previewUsers: Aperçu des utilisateurs
+    outgoingMails: Mail sortants
+    incomingMails: Mails entrants
+    unblockedMessages: Messages non bloqués
+    blockedMessages: Messages bloqués
   batch:
     labels:
       for_selection: Pour la selection

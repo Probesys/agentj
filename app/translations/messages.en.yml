@@ -65,8 +65,10 @@ Generics:
     azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
     azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
-    groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
+    groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"    
+    helpAlert : "Alerts on blocked outgoing emails (quota exceeded, etc.)"
   labels:
+    all: All
     filters: Filters
     item_per_page: "Number of items per page (sur %totalItemFound% found)"
     lastModificationOn: "Last modification"
@@ -80,6 +82,16 @@ Generics:
     none: None
     byDefault: default
     alerts: Alerts
+    recentAlerts: Recent alerts
+    latestMessages: Latest messages
+    previewLatestMessages: Preview of the last 5 blocked emails
+    statistics: Statistics
+    statTable: Stats Table
+    previewUsers: Overview of Users
+    outgoingMails: Outgoing mails
+    incomingMails: Incomings mails
+    unblockedMessages: Non-blocked messages
+    blockedMessages: Blocked messages
   batch:
     labels:
       for_selection: "For the selection"
@@ -388,7 +400,7 @@ Entities:
     actions:
       add_new: "Add a new strategy"
   Domain:
-    Name: Area
+    Name: Domain
     index: "List of domains"
     edit: "Edit domain"
     fields:
@@ -399,7 +411,7 @@ Entities:
       domain: "Domain name"
       srvSmtp: "SMTP server"
       smtp_port: "SMTP port"
-      active: "Active area"
+      active: "Active domain"
       policy: "Strategy for the field"
       level: "Spam threshold"
       mailAuthenticationSender: "Email address that sends authentication requests"
