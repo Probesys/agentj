@@ -68,7 +68,8 @@ Generics:
     azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
     incorrectCredential: Identifiants incorrects
     groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
-    helpAlert : "Alertes sur les mails sortant bloqués (quota dépassé, etc...)"
+    helpAlert: "Alertes sur les mails sortant bloqués (quota dépassé, etc...)"
+    cannotPreviewMailWithvirus: "Vous ne pouvez pas visualilser ce message car il contient un virus"
   labels:
     all: Tous
     filters: Filtres
@@ -631,8 +632,7 @@ Entities:
   Import:
     Wbliste:
       title: "Liste blanche : importer une liste"
-      description:
-        "Le fichier au format texte.<br\
+      description: "Le fichier au format texte.<br\
         \ /> Chaque ligne doit comporter une adresse mail valide<br />"
     Users:
       title: Importer des utilisateurs

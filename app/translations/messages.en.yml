@@ -65,8 +65,9 @@ Generics:
     azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
     azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
-    groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"    
-    helpAlert : "Alerts on blocked outgoing emails (quota exceeded, etc.)"
+    groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
+    helpAlert: "Alerts on blocked outgoing emails (quota exceeded, etc.)"
+    cannotPreviewMailWithvirus: "You cannot view this message because it contains a virus."
   labels:
     all: All
     filters: Filters
@@ -492,10 +493,10 @@ Entities:
       domain: Domain
       incoming: Incoming
       outgoing: Outgoing
-      outMsgCount: 'Outgoing message count'
-      inMsgCount: 'Incoming message count'
-      outMsgBlockedCount: 'Outgoing message blocked count'
-      inMsgBlockedCount: 'Incoming message blocked count'
+      outMsgCount: "Outgoing message count"
+      inMsgCount: "Incoming message count"
+      outMsgBlockedCount: "Outgoing message blocked count"
+      inMsgBlockedCount: "Incoming message blocked count"
       originalUser: "Reference email"
       alias: Alias
       sharedBy: "Shared with"
@@ -630,4 +631,4 @@ Entities:
       auto: Automatic
   DomainRelay:
     fields:
-      ipAddress: 'IP Address'
+      ipAddress: "IP Address"
