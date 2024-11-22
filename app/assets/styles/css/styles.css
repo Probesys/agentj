@@ -8431,7 +8431,9 @@ div[id^="dropzone-"] {
     position: relative;
     /*padding-left: 50%;*/
     white-space: normal;
-    text-align: left; }
+    text-align: left; 
+    word-wrap: break-word;
+  }
 
   #no-more-tables td:last-child {
     text-align: center; }

@@ -117,6 +117,7 @@ document.addEventListener("turbo:load", function () {
   });
 
   $(document).on('click', '.btn-open-modal', function (e) {
+    e.preventDefault();
     e.stopImmediatePropagation();
     $.ajax({
       url: $(this).data('url-modal-content'),
