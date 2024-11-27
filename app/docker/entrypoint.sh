@@ -5,9 +5,9 @@ env_file=/var/www/agentj/.env
 cp /var/www/agentj/.env.example $env_file
 sed -i "s|\$AGENTJ_VERSION|$VERSION|g" $env_file
 sed -i "s|\$SF_APP_ENV|$SF_APP_ENV|g" $env_file
-sed -i "s|\$MYAPPSECRET|$SF_MYAPPSECRET|g" $env_file
-sed -i "s|\$MY_TOKEN_ENC_IV|$SF_MY_TOKEN_ENC_IV|g" $env_file
-sed -i "s|\$MY_TOKEN_ENC_SALT|$SF_MY_TOKEN_ENC_SALT|g" $env_file
+sed -i "s|\$SF_APP_SECRET|$SF_APP_SECRET|g" $env_file
+sed -i "s|\$SF_TOKEN_ENCRYPTION_IV|$SF_TOKEN_ENCRYPTION_IV|g" $env_file
+sed -i "s|\$SF_TOKEN_ENCRYPTION_SALT|$SF_TOKEN_ENCRYPTION_SALT|g" $env_file
 sed -i "s|\$DB_NAME|$DB_NAME|g" $env_file
 sed -i "s|\$DB_USER|$DB_USER|g" $env_file
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" $env_file
@@ -38,7 +38,7 @@ sudo -u www-data php bin/console doctrine:database:create --if-not-exists
 sudo -u www-data php bin/console doctrine:migration:migrate
 
 echo "Create or update super admin user"
-sudo -u www-data php bin/console agentj:create-super-admin $SUPER_ADMIN_USERNAME $SUPER_ADMIN_PASSWORD
+sudo -u www-data php bin/console agentj:create-super-admin "$SUPER_ADMIN_USERNAME" "$SUPER_ADMIN_PASSWORD"
 
 echo "update groups wblist"
 sudo -u www-data php bin/console agentj:update-groups-wblist

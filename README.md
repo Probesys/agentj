@@ -65,9 +65,10 @@ Then the following runtime variables must be configured in the `.env` file:
 | CLAMAV_AUTOSTART          | true           | use the ClamAV instance of this stack       |
 | CLAMAV_TCPADDRESS         | 0.0.0.0        | remote ClamAV server IP address             |
 | CLAMAV_TCPPORT            | 3310           | remote ClamAV server TCP port               |
-| SF_MYAPPSECRET            |                | Symfony token for CSRF                      |
-| SF_MY_TOKEN_ENC_IV        |                | Symfony token for encryption                |
-| SF_MY_TOKEN_ENC_SALT      |                | Symfony token for encryption                |
+| SF_APP_ENV                | prod           | Symfony env: prod or dev                    |
+| SF_APP_SECRET             |                | Symfony token for CSRF                      |
+| SF_TOKEN_ENCRYPTION_IV    |                | Symfony token for encryption                |
+| SF_TOKEN_ENCRYPTION_SALT  |                | Symfony token for encryption                |
 
 For dev/tests:
 
@@ -75,8 +76,8 @@ For dev/tests:
 |---------------------------|----------------|---------------------------------------------|
 | COMPOSE_FILE              |                | to use test/dev setup                       |
 | DB_EXPOSED_PORT           |                | if using dev compose file                   |
-| UID                       |                | host user id, for test compose file         |
-| GID                       |                | host user group id, for test compose file   |
+| UID                       |                | host user id                                |
+| GID                       |                | host user group id                          |
 
 ## Use
 
