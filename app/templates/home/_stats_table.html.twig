@@ -1,43 +1,45 @@
-<h2 class="mx-2">Aperçu des utilisateurs</h2>
-<section id ="no-more-tables">
-    <table class="table datatable hidden">
-        <thead>
-            <tr>
-                <th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
-                <th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.fullName'|trans }}</th>
-                <th rowspan="2" class="bg-transparent">{{'Entities.User.fields.domain'|trans }}</th>
-                <th colspan="2" class="bg-transparent">{{'Entities.User.fields.inMsgCount'|trans }}</th>
-                <th colspan="2" class="bg-transparent">{{'Entities.User.fields.outMsgCount'|trans }}</th>
-                <th rowspan="2" class="bg-transparent" data-orderable="false"></th>
-            </tr>
-            <tr>
-                <th class="bg-transparent">{{'Navigation.all'|trans }}</th>
-                <th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
-                <th class="bg-transparent">{{'Navigation.all'|trans }}</th>
-                <th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
-            </tr>
-        </thead>
-        <tbody>
+<h2 class="mx-2">{{ 'Generics.labels.previewUsers'|trans }}</h2>
+<section id="no-more-tables">
+	<table class="table datatable hidden">
+		<thead>
+			<tr>
+				<th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
+				<th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.fullName'|trans }}</th>
+				<th rowspan="2" class="bg-transparent">{{'Entities.User.fields.domain'|trans }}</th>
+				<th colspan="2" class="bg-transparent">{{'Entities.User.fields.inMsgCount'|trans }}</th>
+				<th colspan="2" class="bg-transparent">{{'Entities.User.fields.outMsgCount'|trans }}</th>
+				<th rowspan="2" class="bg-transparent" data-orderable="false"></th>
+			</tr>
+			<tr>
+				<th class="bg-transparent">{{'Navigation.all'|trans }}</th>
+				<th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
+				<th class="bg-transparent">{{'Navigation.all'|trans }}</th>
+				<th class="bg-transparent">{{'Navigation.mailBlocked'|trans }}</th>
+			</tr>
+		</thead>
+		<tbody>
 
-            {% for user in users %}
-                <tr>
-                    <td data-title="{{'Entities.User.fields.email'|trans }}">
-                        <a href="{{ path('homepage', {'_switch_user': user.email}) }}" class='btn btn-sm btn-primary' title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
-                            <i class="fas fa-user-ninja"></i>
-                        </a>
-                        {{ user.email }}
-                    </td>
-                    <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                    <td data-title="{{'Entities.User.fields.domain'|trans }}">{{ user.domain }}</td>
-                    <td data-title="{{'Entities.User.fields.inMsgCount'|trans }}">{{ user.msgCount }}</td>
-                    <td data-title="{{'Entities.User.fields.inMsgBlockedCount'|trans }}">{{ user.msgBlockedCount }}</td>
-                    <td data-title="{{'Entities.User.fields.outMsgCount'|trans }}">{{ user.outMsgCount }}</td>
-                    <td data-title="{{'Entities.User.fields.outMsgBlockedCount'|trans }}">{{ user.outMsgBlockedCount }}</td>
-                    <td>
-                        <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('messages_stats', {'user_email' : user.email}) }}"  class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+			{% for user in users %}
+				<tr>
+					<td data-title="{{'Entities.User.fields.email'|trans }}">
+						<a href="{{ path('homepage', {'_switch_user': user.email}) }}" class='btn btn-sm btn-primary' title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
+							<i class="fas fa-user-ninja"></i>
+						</a>
+						{{ user.email }}
+					</td>
+					<td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
+					<td data-title="{{'Entities.User.fields.domain'|trans }}">{{ user.domain }}</td>
+					<td data-title="{{'Entities.User.fields.inMsgCount'|trans }}">{{ user.msgCount }}</td>
+					<td data-title="{{'Entities.User.fields.inMsgBlockedCount'|trans }}">{{ user.msgBlockedCount }}</td>
+					<td data-title="{{'Entities.User.fields.outMsgCount'|trans }}">{{ user.outMsgCount }}</td>
+					<td data-title="{{'Entities.User.fields.outMsgBlockedCount'|trans }}">{{ user.outMsgBlockedCount }}</td>
+					<td>
+						<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('messages_stats', {'user_email' : user.email}) }}" class="btn-open-modal btn btn-info float-right">
+							<i class="fas fa-info"></i>
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </section>

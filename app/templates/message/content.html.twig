@@ -1,67 +1,37 @@
 {% extends 'modalTemplate.html.twig' %}
 
-{% set msgDeferredStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
 {% block modalTitle %}
 	{#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
 	{{ 'Entities.Message.labels.preview' | trans }}
 {% endblock %}
 
 {% block modalContent %}
-	<div class="row">
-		<div class="col-md-3 font-weight-bold">
-			{{ 'Generics.fields.sender' | trans }}
-		</div>
-		<div class="col-md-9">
-			{{ from }}
-		</div>
-		<div class="col-md-3  font-weight-bold">
-			{{ 'Generics.fields.object' | trans }}
-		</div>
-		<div class="col-md-9">
-			{{ subject}}
-		</div>
-		{% if attachments | length > 0 %}
-			<div class="col-md-3  font-weight-bold">
-				{{ 'Generics.fields.attachments' | trans }}
-			</div>
-			<div class="col-md-9">
-				{% for attachment in attachments %}
-					{{ attachment.getName() }}
-					<br>
-				{% endfor %}
-			</div>
-		{% endif %}
-		<div class="col-md-12">
-			{% if htmlBody %}
-				{{ htmlBody | raw}}
-			{% else %}
-				{{ textBody }}
-			{% endif %}
-		</div>
+	{% if msgRcpt.content != 'V' %}
+		<iframe style="width:100%;min-height:400px;border:none" src="{{ path('message_show_iframe_content', { 'partitionTag' : partitionTag, 'mailId' : mailId, 'rid' : rid, }) }}"></iframe>
+		<div class="col-md-12 text-center">
+			<a href="{{path('message_restore',{'partitionTag':msgRcpt.partitionTag,'mailId':msgRcpt.mailId | stream_get_contents ,'rid':msgRcpt.rid.id})}}" class='btn confirmModal btn-primary mr-2' data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}' title='{{ 'Message.Actions.RestoreMessage'|trans }}'>
+				<span class="fas fa-download"></span>
+				{{ 'Message.Actions.Restore'|trans() }}
+			</a>
 
-		{% if msg.content != 'V' %}
-			<div class="col-md-12 text-center">
-				<a href="{{path('message_restore',{'partitionTag':msg.partitionTag,'mailId':msg.mailId | stream_get_contents ,'rid':msg.rid.id})}}" class='btn confirmModal btn-primary mr-2' data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}' title='{{ 'Message.Actions.RestoreMessage'|trans }}'>
-					<span class="fas fa-download"></span>
-					{{ 'Message.Actions.Restore'|trans() }}
-				</a>
+			<a href="{{path('message_authorized',{'partitionTag':msgRcpt.partitionTag,'mailId':msgRcpt.mailId | stream_get_contents,'rid':msgRcpt.rid.id})}}" class='btn confirmModal btn-success' data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}' title='{{ 'Message.Actions.AutorizedSender'|trans }}'>
+				<span class="fas fa-user-check "></span>
+				{{ 'Message.Actions.Autorized'|trans() }}
+			</a>
 
-				<a href="{{path('message_authorized',{'partitionTag':msg.partitionTag,'mailId':msg.mailId | stream_get_contents,'rid':msg.rid.id})}}" class='btn confirmModal btn-success' data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}' title='{{ 'Message.Actions.AutorizedSender'|trans }}'>
-					<span class="fas fa-user-check "></span>
-					{{ 'Message.Actions.Autorized'|trans() }}
-				</a>
+			<a href="{{path('message_banned',{'partitionTag':msgRcpt.partitionTag,'mailId':msgRcpt.mailId | stream_get_contents,'rid':msgRcpt.rid.id})}}" class='btn confirmModal btn-dark' data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}' title="{{ 'Message.Actions.BannedSender'|trans() }}">
+				<span class="fas fa-user-slash "></span>
+				{{ 'Message.Actions.Banned'|trans() }}
+			</a>
 
-				<a href="{{path('message_banned',{'partitionTag':msg.partitionTag,'mailId':msg.mailId | stream_get_contents,'rid':msg.rid.id})}}" class='btn confirmModal btn-dark' data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}' title="{{ 'Message.Actions.BannedSender'|trans() }}">
-					<span class="fas fa-user-slash "></span>
-					{{ 'Message.Actions.Banned'|trans() }}
-				</a>
-
-				<a href="{{path('message_delete',{'partitionTag':msg.partitionTag,'mailId':msg.mailId | stream_get_contents,'rid':msg.rid.id })}}" class='btn  confirmModal btn-danger' data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}' data-target='delete' title="{{ 'Message.Actions.DeleteMessage'|trans() }}">
-					<span class="fas fa-trash-alt "></span>
-					{{ 'Message.Actions.Delete'|trans() }}
-				</a>
-			</div>
-		{% endif %}
-	</div>
-
+			<a href="{{path('message_delete',{'partitionTag':msgRcpt.partitionTag,'mailId':msgRcpt.mailId | stream_get_contents,'rid':msgRcpt.rid.id })}}" class='btn  confirmModal btn-danger' data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}' data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}' data-target='delete' title="{{ 'Message.Actions.DeleteMessage'|trans() }}">
+				<span class="fas fa-trash-alt "></span>
+				{{ 'Message.Actions.Delete'|trans() }}
+			</a>
+		</div>
+	{% else %}
+		<p class="text-center">
+			{{ 'Generics.messages.cannotPreviewMailWithvirus' | trans }}
+		</p>
+	{% endif %}
 {% endblock %}
