@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\MessageController;
+use App\Model\ValidationSource;
 use App\Entity\Domain;
 use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
@@ -276,7 +277,7 @@ class DefaultController extends AbstractController {
             }
                 if (!$msgs->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
                     if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                        $messageController->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, 1, $rid); // 2 : authorized and 1 : captcha validate
+                        $messageController->msgsToWblist($partitionTag, $mailId, "W", MessageStatus::AUTHORIZED, ValidationSource::captcha, $rid);
                         $msgs->setValidateCaptcha(time());
                         $em->persist($msgs);
                         $em->flush();

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Model\ValidationSource;
 use App\Entity\Mailaddr;
 use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
@@ -322,7 +323,6 @@ class MessageController extends AbstractController
         /* @var $msgrcpt Msgrcpt */
         $msgrcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
-
         if ($msgrcpt && $msgs->getQuarLoc() && $msgs->getSecretId()) {
             $this->checkMailAccess($msgrcpt);
             $mailRcpt = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
@@ -364,16 +364,15 @@ class MessageController extends AbstractController
      * @param type $mailId
      * @param type $wb
      * @param type $status
-     * @param type $type
+     * @param ValidationSource|int $type
      * @param type $rid
      * @return boolean
      * @throws type
      * @throws ProcessFailedException
      */
-    public function msgsToWblist($partitionTag, $mailId, $wb, $status, $type = 0, $rid = null)
+    public function msgsToWblist($partitionTag, $mailId, $wb, $status, ValidationSource|int $type = ValidationSource::user, $rid = null)
     {
         $state = false;
-        //    $successReleasedMsgs = [];
         $em = $this->em;
 
         //select msgs and msgcpt
@@ -383,19 +382,15 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The message does not exist.');
         }
 
-
         if ($rid) {
             $msgrcpt = $em->getRepository(Msgrcpt::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
         } else {
             $msgrcpt = $em->getRepository(Msgrcpt::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
         }
 
-
         if (!$msgrcpt) {
             throw $this->createNotFoundException('The message does not exist.');
         }
-
-
 
         //check if sender exists in the database
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
@@ -411,7 +406,7 @@ class MessageController extends AbstractController
 
         $mailaddrSender = $em->getRepository(Mailaddr::class)->findOneBy(['email' => $emailSenderToWb]);
 
-        //if notwe create email in Mailaddr
+        //if not we create email in Mailaddr
         if (!$mailaddrSender) {
             $mailaddrSender = new Mailaddr();
             $mailaddrSender->setEmail($emailSenderToWb);
@@ -421,7 +416,8 @@ class MessageController extends AbstractController
 
         $userAndAliases = [];
         foreach ($msgrcpt as $messageRecipient) {
-            $this->checkMailAccess($messageRecipient);
+	    if ($type !== ValidationSource::captcha)
+	        $this->checkMailAccess($messageRecipient);
 
             $emailReceipt = stream_get_contents($messageRecipient->getRid()->getEmail(), -1, 0);
             $mainUser = $em->getRepository(User::class)->findOneBy(['email' => $emailReceipt]);
@@ -491,11 +487,6 @@ class MessageController extends AbstractController
             return true;
         }
 
-
-
-
-
-
         return $state;
     }
 
@@ -550,7 +541,6 @@ class MessageController extends AbstractController
             $emailSenderToWb = $emailSender != $fromAddr ? $fromAddr : $emailSender;
         }
 
-
         $emailRecipient = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
         $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
 
@@ -593,7 +583,6 @@ class MessageController extends AbstractController
                 $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::BANNED);
             }
 
-
             $oneMsgRcptObj->setStatus($messageStatus);
             $em->persist($oneMsgRcptObj);
             $em->flush();
@@ -625,7 +614,6 @@ class MessageController extends AbstractController
             'msgRcpt' => $msgRcpt
         ]);
     }
-
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs($partitionTag, $mailId, $rid)
