@@ -262,9 +262,9 @@ test-mail:
     - sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|g" .env
     - sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD|g" .env
     - sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
-    - sed -i "s|SF_MYAPPSECRET=.*|SF_MYAPPSECRET=`openssl rand -hex 16`|" .env
-    - sed -i "s|SF_MY_TOKEN_ENC_IV=.*|SF_MY_TOKEN_ENC_IV=`openssl rand -hex 8`|" .env
-    - sed -i "s|SF_MY_TOKEN_ENC_SALT=.*|SF_MY_TOKEN_ENC_SALT=`openssl rand -base64 32`|" .env
+    - sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
+    - sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
+    - sed -i "s|SF_TOKEN_ENCRYPTION_SALT=.*|SF_TOKEN_ENCRYPTION_SALT=`openssl rand -base64 32`|" .env
     - sed -i "s|example.com|agentj.local|g" .env
     - echo "UID=1829" >> .env
     - echo "GID=1829" >> .env
