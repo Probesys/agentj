@@ -13,3 +13,9 @@ monolog:
             # log error-level messages and higher
             level: error
  
+        sentry:
+            type: sentry
+            level: !php/const Monolog\Logger::ERROR
+            hub_id: Sentry\State\HubInterface
+            fill_extra_context: true
+            process_psr_3_messages: false
