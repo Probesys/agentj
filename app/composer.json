@@ -16,6 +16,7 @@
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "microsoft/microsoft-graph": "^1.70",
         "phpdocumentor/reflection-docblock": "^5.2",
+        "sentry/sentry-symfony": "^5.1",
         "stof/doctrine-extensions-bundle": "^1.6",
         "symfony/asset": "7.1.*",
         "symfony/console": "7.1.*",
