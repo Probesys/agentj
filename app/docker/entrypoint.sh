@@ -8,6 +8,7 @@ sed -i "s|\$SF_APP_ENV|$SF_APP_ENV|g" $env_file
 sed -i "s|\$SF_APP_SECRET|$SF_APP_SECRET|g" $env_file
 sed -i "s|\$SF_TOKEN_ENCRYPTION_IV|$SF_TOKEN_ENCRYPTION_IV|g" $env_file
 sed -i "s|\$SF_TOKEN_ENCRYPTION_SALT|$SF_TOKEN_ENCRYPTION_SALT|g" $env_file
+sed -i "s|\$SF_SENTRY_DSN|$SF_SENTRY_DSN|g" $env_file
 sed -i "s|\$DB_NAME|$DB_NAME|g" $env_file
 sed -i "s|\$DB_USER|$DB_USER|g" $env_file
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" $env_file
