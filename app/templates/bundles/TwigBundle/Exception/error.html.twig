@@ -1,0 +1,20 @@
+{% extends 'base_security.html.twig' %}
+
+{% block body %}
+
+    <div class="h-100 ">
+        <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+            <div class="mb-3"><img class="logo" src="{{ asset('img/agent-j-logo-desktop.svg') }}" /></div>
+            <h1>{{ status_code }} {{ status_text }}</h1>
+            <p>
+                {% if exception.message %}
+                    {{ exception.message }}
+                {% else %}
+                    {{ 'Message.http.error.description'|trans }}
+                {% endif %}
+            </p>
+            <button onclick="window.history.back();" class="btn btn-primary mt-3">Return to Previous Page</button>
+        </div>
+    </div>
+
+{% endblock %}
