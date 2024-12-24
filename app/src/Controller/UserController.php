@@ -37,6 +37,7 @@ class UserController extends AbstractController {
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
     public function indexUserLocal(UserRepository $userRepository): Response {
         $users = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
+        $users += $userRepository->searchByRole($this->getUser(), '["ROLE_SUPER_ADMIN"]');
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
@@ -60,21 +61,30 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form'],
             'include_quota' => false,
         ]);
-        
+
         $form->remove('originalUser');
         $form->remove('groups');
         $form->remove('emailRecovery');
+        $form->remove('sharedWith');
+        $form->remove('domain');
+        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
+            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
 //            dd($form->get('password')->get('first')->getData());
             if ($userNameExist) {
                 //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAllreadyExist'));
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
+                ];
+            } elseif ($emailExist) {
+                $return = [
+                    'status' => 'danger',
+                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
             } elseif ($form->get('password')->get('first')->getData() != $form->get('password')->get('second')->getData()) {
                 $return = [
@@ -124,6 +134,10 @@ class UserController extends AbstractController {
         $form->remove('originalUser');
         $form->remove('emailRecovery');
         $form->remove('groups');
+        $form->remove('sharedWith');
+        $form->remove('domain');
+        $form->remove('password');
+        $form->remove('imapLogin');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -159,6 +173,7 @@ class UserController extends AbstractController {
     public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_change_password', ['id' => $user->getId()]),
+            'include_quota' => false,
         ]);
         $form->remove('fullname');
         $form->remove('username');
