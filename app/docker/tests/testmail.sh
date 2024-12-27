@@ -59,6 +59,7 @@ send() {
 			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s badrelay:27 $swaks_opts > $test_results/$testname.log 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
+			wait_time=5
 			;;
 		*)
 			echo "unknown value '$in_out' for parameter in_out"
@@ -121,43 +122,43 @@ send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
 
 echo "---- rate limit ----" 1>&2
 # Domain 3 mail/s
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect swak error 25, 3 out_msgs and 1 sql_limit_report
-send 'rate_limit_domain_3_mail_s' 'out' 'user.domain.quota@blocnormal.fr' 3 '' 25 
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+# 3 out_msgs and 1 sql_limit_report
+send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 ''
 
 # Group 2 mail/s
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect swak error 25, 2 out_msgs and 2 sql_limit_report
-send 'rate_limit_group_2_mail_s' 'out' 'user.group1.quota@blocnormal.fr' 2 '' 25 
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+# 2 out_msgs and 2 sql_limit_report
+send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 ''
 
 # Personnal 1 mail/s
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect swak error 25, 1 out_msgs and 3 sql_limit_report
-send 'rate_limit_user_1_mail_s' 'out' 'user.group1.perso.small.quota@blocnormal.fr' 1 '' 25 
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+# 1 out_msgs and 3 sql_limit_report
+send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 ''
 
 # Personnal 10 mail/s
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect no swak error and 4 mails
-send 'rate_limit_user_10_mail_s' 'out' 'user.group1.perso.large.quota@blocnormal.fr' 4
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+# expect no swak error and 5 mails
+send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
 
 echo "---- no rate limit ----" 1>&2
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-# expect no swak error and 4 mails
-send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 4
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+# expect no swak error and 5 mails
+send 'rate_limit_unlimited' 'outviarelay' 'user@laissepasser.fr' 5
 
 echo "OK" > $test_results/TESTS_DONE
