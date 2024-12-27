@@ -7,12 +7,14 @@ services:
     restart: always
     volumes:
       - db:/var/lib/mysql
+      - ./mariadb-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME:-agent}
       - MYSQL_USER=${DB_USER:-agent}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - TZ=${TZ:-Europe/Paris}
+      - DB_OPENDKIM_PASSWORD
 
   amavis:
     image: probesys38/agentj_amavis:${VERSION}
@@ -110,8 +112,12 @@ services:
     build:
       context: ./opendkim/
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      - DB_USER=opendkim
+      - MAIL_HOSTNAME
+      - DB_HOST
+      - DB_NAME
+      - DB_OPENDKIM_PASSWORD
     depends_on:
       - db
 
