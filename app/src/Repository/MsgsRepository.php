@@ -255,6 +255,11 @@ public function advancedSearch(User $user = null, string $messageType = 'incomin
     $stmt = $conn->prepare($sql);
     $allMessages = $stmt->executeQuery()->fetchAllAssociative();
 
+    // Take out messages that dont have a rid
+    $allMessages = array_filter($allMessages, function ($message) {
+        return $message['rid'] !== null;
+    });
+
     // Add replyTo status to each message based on m.sid
     foreach ($allMessages as &$message) {
         // Fetch the correct email using m.sid
