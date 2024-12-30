@@ -7,13 +7,16 @@ use App\Entity\DomainRelay;
 use App\Entity\User;
 use App\Entity\Policy;
 use App\Entity\Mailaddr;
-use App\Entity\WbList;
+use App\Entity\Wblist;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 class DomainFixture extends Fixture
 {
+    private EntityManagerInterface $em;
+    private ObjectManager $manager;
+
     public function __construct(EntityManagerInterface $em) {
         $this->em = $em;
     }
@@ -71,7 +74,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoXwmTVkrNKdJQOYVXz2ILt/CGoNw0K2NySAi
 	$manager->flush();
     }
 
-    public function fillDomainCommon(Domain $domain, Mailaddr $mailaddr, string $wb_list) {
+    public function fillDomainCommon(Domain $domain, Mailaddr $mailaddr, string $wb_list): void {
 	$domain->setLevel(0.5);
 	$domain->setSrvSmtp('smtp.test');
 	$domain->setSmtpPort(25);
