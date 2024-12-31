@@ -21,7 +21,7 @@ class WblistRepository extends ServiceEntityRepository {
      * @param type $type
      * @return type
      */
-    public function search($type = null, User $user = null, $searchKey = null, $sortPrams = null) {
+    public function search($type = null, ?User $user = null, $searchKey = null, $sortPrams = null) {
 
         $dql = $this->createQueryBuilder('wb')
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')

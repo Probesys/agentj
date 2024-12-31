@@ -17,6 +17,7 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
 
 stages:
+  - lint
   - build
   - test
   - deploy
@@ -32,6 +33,20 @@ before_script:
         fi
         docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         echo $TAG
+
+lint:app:
+  stage: lint
+  image: composer
+  before_script:
+    - cd app/
+    - composer install --ignore-platform-reqs --no-scripts --no-cache
+  script:
+    - ./vendor/bin/phpstan analyse --error-format=junit src > phpstan.report.xml
+  artifacts:
+    reports:
+      junit: app/phpstan.report.xml
+  only:
+    - merge_requests
 
 app_build:
   stage: build
