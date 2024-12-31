@@ -61,6 +61,10 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.6",
         "fzaninotto/faker": "^1.5",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^1.12",
+        "phpstan/phpstan-doctrine": "^1.5",
+        "phpstan/phpstan-symfony": "^1.4",
         "rector/rector": "^1.2",
         "symfony/browser-kit": "^7.1",
         "symfony/css-selector": "^7.1",
@@ -80,7 +84,8 @@
             "rector/rector-installer": true,
             "symfony/flex": true,
             "rector/extension-installer": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "phpstan/extension-installer": true
         }
     },
     "autoload": {

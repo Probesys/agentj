@@ -8,31 +8,31 @@
 		</div>
 	</div>
 {% endif %}
-{{ form_row(form.fullname) }}
+{% if form.fullname is defined %}
+    {{ form_row(form.fullname) }}
+{% endif %}
 
-
-
-
-{% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') %}
+{# {% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') %} #}
+{% if form.username is defined %}
 	{{ form_row(form.username) }}
 {% endif %}
 
-
-{% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%}
+{# {% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%} #}
+{% if form.roles is defined %}
 	{{ form_row(form.roles) }}
 {% endif %}
 
+{% if form.email is defined %}
+    {{ form_row(form.email) }}
+{% endif %}
 
+{# {% if (app.request.get('_route') == 'user_email_new') or (app.request.get('_route') == 'user_email_edit') %} #}
+{% if form.groups is defined %}
+	{{ form_row(form.groups) }}
+{% endif %}
 
-   
-
-{{ form_row(form.email) }}
-
-{% if (app.request.get('_route') == 'user_email_new') or (app.request.get('_route') == 'user_email_edit') %}
-	{{ form_row(form.groups) }}	
-{% endif %}	
-
-{% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') %}
+{# {% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') and (app.request.get('_route') != 'user_local_new') %} #}
+{% if form.sharedWith is defined %}
     {{ form_row(form.sharedWith) }}
 {% endif %}
 
@@ -41,20 +41,20 @@
 	{{ form_row(form.password.second, {'label': 'Entities.User.fields.repeatPassword'|trans}) }}
 {% endif %}
 
-{% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') %}
+{# {% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') and (app.request.get('_route') != 'user_local_new') %} #}
+{% if form.domain is defined %}
     {{ form_row(form.domain) }}
 {% endif %}
 
-<div class="form-row form-row-imap-login" style="{% if domainHasIMAPConnector|default(false) == false or domainHasIMAPConnector|default(null) is null %}display:none;{% endif %}">
-    {{ form_row(form.imapLogin) }}
-</div>
+{% if form.imapLogin is defined %}
+    <div class="form-row form-row-imap-login" style="{% if domainHasIMAPConnector|default(false) == false or domainHasIMAPConnector|default(null) is null %}display:none;{% endif %}">
+        {{ form_row(form.imapLogin) }}
+    </div>
+{% endif %}
 
-
-
-{% if (app.request.get('_route') == 'new_user_email_alias') or (app.request.get('_route') == 'user_email_alias_edit') %}
-
+{# {% if (app.request.get('_route') == 'new_user_email_alias') or (app.request.get('_route') == 'user_email_alias_edit') %} #}
+{% if form.originalUser is defined %}
 	{{ form_row(form.originalUser) }}
-
 {% endif %}
 
 
@@ -62,15 +62,15 @@
 	{% include 'partials/_quota_form.html.twig' with {'form': form} %}
 {% endif %}
 
-
-<div class="form-group">
-    {{ form_widget(form.report, {'attr': {'class': 'form-check-input'}}) }}
-    <label class="form-check-label" for="{{ form.report.vars.id }}">
-        {{ form_label(form.report, 'Envoyer le rapport') }}
-    </label>
-    {{ form_errors(form.report) }}
-</div>
-
+{% if form.report is defined %}
+    <div class="form-group">
+        {{ form_widget(form.report, {'attr': {'class': 'form-check-input'}}) }}
+        <label class="form-check-label" for="{{ form.report.vars.id }}">
+            {{ form_label(form.report, 'Envoyer le rapport') }}
+        </label>
+        {{ form_errors(form.report) }}
+    </div>
+{% endif %}
 
 <div class="d-flex justify-content-center">
 	<input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}">
@@ -78,26 +78,21 @@
 </div>
 {{ form_end(form) }}
 
+{# {% if (app.request.get('_route') == 'user_email_new') or (app.request.get('_route') == 'user_email_edit') %} #}
+{% if form.imapLogin is defined %}
+    <script>
+        function toggleImapLogin(selectElement) {
 
+            const imapDomains = {{ imapDomains|json_encode|raw }}.map(domain => domain.id);
 
+            const selectedDomain = parseInt(selectElement.value);
+            const imapLoginRow = document.querySelector('.form-row-imap-login');
 
-
-{% if (app.request.get('_route') == 'user_email_new') or (app.request.get('_route') == 'user_email_edit') %}
-<script>
-    function toggleImapLogin(selectElement) {
-        
-        const imapDomains = {{ imapDomains|json_encode|raw }}.map(domain => domain.id);
-
-        const selectedDomain = parseInt(selectElement.value);
-        const imapLoginRow = document.querySelector('.form-row-imap-login');  
-
-        if (imapDomains.includes(selectedDomain)) {
-            imapLoginRow.style.display = 'block';  
-        } else {
-            imapLoginRow.style.display = 'none';  
+            if (imapDomains.includes(selectedDomain)) {
+                imapLoginRow.style.display = 'block';
+            } else {
+                imapLoginRow.style.display = 'none';
+            }
         }
-    }
-
-    
-</script>
+    </script>
 {% endif %}
