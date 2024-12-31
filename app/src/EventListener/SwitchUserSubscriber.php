@@ -66,6 +66,8 @@ class SwitchUserSubscriber implements EventSubscriberInterface
             }
             return true;
         }
+
+        return false;
     }
 
     public static function getSubscribedEvents():array

@@ -36,6 +36,7 @@ services:
       - ./tests/stubdns:/srv/stubdns
 
   app:
+    dns: 172.28.2.5
     networks:
       testnet:
         ipv4_address: 172.28.2.1
@@ -61,14 +62,17 @@ services:
       testnet:
 
   smtp:
+    dns: 172.28.2.5
     networks:
       testnet:
 
   outsmtp:
+    dns: 172.28.2.5
     networks:
       testnet:
 
   relay:
+    dns: 172.28.2.5
     networks:
       testnet:
 
