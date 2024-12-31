@@ -143,6 +143,8 @@ class LdapConnectorController extends AbstractController {
                 return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
             }
         }
+
+        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
     }
 
     #[Route('/check-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
@@ -180,6 +182,8 @@ class LdapConnectorController extends AbstractController {
                 return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
             }
         }
+
+        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
     }
 
     #[Route('/check-groups-filter/{domain}', name: 'app_connector_ldap_check_groups_filter', methods: ['GET', 'POST'])]
@@ -218,6 +222,8 @@ class LdapConnectorController extends AbstractController {
                 return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
             }
         }
+
+        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
     }
 
 }
