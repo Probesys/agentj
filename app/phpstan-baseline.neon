@@ -1,0 +1,1046 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$token$#"
+			count: 2
+			path: src/Command/LDAPImportCommand.php
+
+		-
+			message: "#^Variable \\$nbUserCreated might not be defined\\.$#"
+			count: 1
+			path: src/Command/LDAPImportCommand.php
+
+		-
+			message: "#^Variable \\$nbUserUpdated might not be defined\\.$#"
+			count: 1
+			path: src/Command/LDAPImportCommand.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Console\\\\Application\\:\\:getKernel\\(\\)\\.$#"
+			count: 5
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Call to method getRid\\(\\) on an unknown class App\\\\Repository\\\\Msgs\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Call to method setSendCaptcha\\(\\) on an unknown class App\\\\Command\\\\type\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Call to sprintf contains 0 placeholders, 1 value given\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$message with type App\\\\Command\\\\type is not subtype of native type Symfony\\\\Component\\\\Mime\\\\Email\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Parameter \\$destEmail of method App\\\\Command\\\\MsgsSendMailTokenCommand\\:\\:createAuthMessageContent\\(\\) has invalid type App\\\\Command\\\\type\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Parameter \\$message of method App\\\\Command\\\\MsgsSendMailTokenCommand\\:\\:sendAuthMessage\\(\\) has invalid type App\\\\Command\\\\type\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Parameter \\$msg of method App\\\\Command\\\\MsgsSendMailTokenCommand\\:\\:createAuthMessageContent\\(\\) has invalid type App\\\\Command\\\\type\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Parameter \\$msgrcpt of method App\\\\Command\\\\MsgsSendMailTokenCommand\\:\\:sendAuthMessage\\(\\) has invalid type App\\\\Command\\\\type\\.$#"
+			count: 1
+			path: src/Command/MsgsSendMailTokenCommand.php
+
+		-
+			message: "#^Method App\\\\Entity\\\\Groups\\:\\:isActive\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: src/Command/Office365ImportCommand.php
+
+		-
+			message: "#^Variable \\$nbGroupCreated might not be defined\\.$#"
+			count: 1
+			path: src/Command/Office365ImportCommand.php
+
+		-
+			message: "#^Variable \\$nbGroupUpdated might not be defined\\.$#"
+			count: 1
+			path: src/Command/Office365ImportCommand.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Console\\\\Application\\:\\:getKernel\\(\\)\\.$#"
+			count: 4
+			path: src/Command/ReportSendMailCommand.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Console\\\\Application\\:\\:getKernel\\(\\)\\.$#"
+			count: 1
+			path: src/Command/TruncateMessageCommand.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Console\\\\Application\\:\\:getKernel\\(\\)\\.$#"
+			count: 4
+			path: src/Command/TruncateVirusMailFiles.php
+
+		-
+			message: "#^Call to method getDomain\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Command/UpdateGroupsWblistCommand.php
+
+		-
+			message: "#^Call to method getWb\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Command/UpdateGroupsWblistCommand.php
+
+		-
+			message: "#^Call to method setGroups\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Command/UpdateGroupsWblistCommand.php
+
+		-
+			message: "#^Call to method setPriority\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Command/UpdateGroupsWblistCommand.php
+
+		-
+			message: "#^Call to method setWb\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Command/UpdateGroupsWblistCommand.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\AccountController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/AccountController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomain\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/AccountController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getGroups\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/AccountController.php
+
+		-
+			message: "#^Method KnpU\\\\OAuth2ClientBundle\\\\Client\\\\OAuth2ClientInterface\\:\\:redirect\\(\\) invoked with 1 parameter, 2 required\\.$#"
+			count: 1
+			path: src/Controller/AzureController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomain\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getId\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/DefaultController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:setPreferedLang\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: "#^Variable \\$msg might not be defined\\.$#"
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: "#^Variable \\$partitionTag might not be defined\\.$#"
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\DomainController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/DomainController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getId\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/DomainController.php
+
+		-
+			message: "#^Method Symfony\\\\Component\\\\Form\\\\FormInterface\\<mixed\\>\\:\\:getData\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: src/Controller/DomainController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\GroupsController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/GroupsController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomains\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/GroupsController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\GroupsWblistController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method getId\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 2
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method getMailaddr\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 2
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method getWb\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method setGroups\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method setMailaddr\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Call to method setWb\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 1
+			path: src/Controller/GroupsWblistController.php
+
+		-
+			message: "#^Attribute class App\\\\Controller\\\\IsGranted does not exist\\.$#"
+			count: 1
+			path: src/Controller/ImapConnectorController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\ImportController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/ImportController.php
+
+		-
+			message: "#^Call to method getPolicy\\(\\) on an unknown class App\\\\Repository\\\\User\\.$#"
+			count: 6
+			path: src/Controller/ImportController.php
+
+		-
+			message: "#^Call to method getid\\(\\) on an unknown class App\\\\Repository\\\\Captcha\\.$#"
+			count: 2
+			path: src/Controller/ImportController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomain\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/MenuController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getId\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/MenuController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getOwnedSharedBoxes\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/MenuController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getEmail\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getEmailFromRessource\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getId\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Comparison operation \"\\=\\=\" between 0\\|0\\.0\\|1\\|2\\|3\\|5\\|6\\|7\\|''\\|'0'\\|array\\{\\}\\|false\\|null and 3 results in an error\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Comparison operation \"\\=\\=\" between 0\\|0\\.0\\|1\\|2\\|3\\|5\\|6\\|7\\|''\\|'0'\\|array\\{\\}\\|false\\|null and 7 results in an error\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$id$#"
+			count: 2
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^PHPDoc tag @throws with type App\\\\Controller\\\\type\\|Symfony\\\\Component\\\\Process\\\\Exception\\\\ProcessFailedException is not subtype of Throwable$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$mailId of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$mailId of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$partitionTag of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$partitionTag of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$rid of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$rid of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$status of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Parameter \\$wb of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Variable \\$emailSenderToWb might not be defined\\.$#"
+			count: 2
+			path: src/Controller/MessageController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getEmail\\(\\)\\.$#"
+			count: 1
+			path: src/Controller/ReportController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Controller\\\\UserController\\:\\:getDoctrine\\(\\)\\.$#"
+			count: 3
+			path: src/Controller/UserController.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getId\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/UserController.php
+
+		-
+			message: "#^Variable \\$return might not be defined\\.$#"
+			count: 3
+			path: src/Controller/UserController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\WblistController\\:\\:batchDeleteAction\\(\\) has invalid return type App\\\\Controller\\\\Response\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\WblistController\\:\\:batchWbListAction\\(\\) has invalid return type App\\\\Controller\\\\Response\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Method App\\\\Controller\\\\WblistController\\:\\:deleteAction\\(\\) has invalid return type App\\\\Controller\\\\Response\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$id$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$users$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Parameter \\$pathfile of method App\\\\Controller\\\\WblistController\\:\\:importWbList\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Variable \\$title might not be defined\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Variable \\$userAndAliases might not be defined\\.$#"
+			count: 1
+			path: src/Controller/WblistController.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Domain\\:\\:\\$mailmessage has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/Domain.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Domain\\:\\:\\$message has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/Domain.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Domain\\:\\:\\$message_alert has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/Domain.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\DomainKey\\:\\:\\$privatekey has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/DomainKey.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\DomainKey\\:\\:\\$publickey has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/DomainKey.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Maddr\\:\\:\\$email has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Maddr.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Mailaddr\\:\\:\\$email has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Mailaddr.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgrcpt\\:\\:\\$mailId has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgrcpt.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgs\\:\\:\\$mailId has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgs.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgs\\:\\:\\$messageError has unknown class App\\\\Entity\\\\text as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgs.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgs\\:\\:\\$quarLoc has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgs.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgs\\:\\:\\$secretId has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgs.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Msgs\\:\\:\\$sid has unknown class Maddr as its type\\.$#"
+			count: 1
+			path: src/Entity/Msgs.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\Quarantine\\:\\:\\$mailId has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/Quarantine.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Entity\\\\User\\:\\:\\$owners\\.$#"
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: "#^Property App\\\\Entity\\\\User\\:\\:\\$email has unknown class App\\\\Entity\\\\binary as its type\\.$#"
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomain\\(\\)\\.$#"
+			count: 1
+			path: src/EventListener/SwitchUserSubscriber.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomains\\(\\)\\.$#"
+			count: 1
+			path: src/EventListener/SwitchUserSubscriber.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getEmail\\(\\)\\.$#"
+			count: 1
+			path: src/EventListener/SwitchUserSubscriber.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getOriginalUser\\(\\)\\.$#"
+			count: 2
+			path: src/EventListener/SwitchUserSubscriber.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getSharedWith\\(\\)\\.$#"
+			count: 1
+			path: src/EventListener/SwitchUserSubscriber.php
+
+		-
+			message: "#^Array has 2 duplicate keys with value 'attr' \\('attr', 'attr'\\)\\.$#"
+			count: 1
+			path: src/Form/UserType.php
+
+		-
+			message: "#^Class App\\\\Entity\\\\Domain referenced with incorrect case\\: APP\\\\Entity\\\\Domain\\.$#"
+			count: 1
+			path: src/Form/UserType.php
+
+		-
+			message: "#^Call to an undefined method Doctrine\\\\DBAL\\\\Statement\\:\\:fetchColumn\\(\\)\\.$#"
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\DomainRepository\\:\\:getDomainWblist\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\DomainRepository\\:\\:getListByUserId\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: "#^Parameter \\$defaultMailAddr of method App\\\\Repository\\\\DomainRepository\\:\\:getDomainWblist\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: "#^Parameter \\$userID of method App\\\\Repository\\\\DomainRepository\\:\\:getListByUserId\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class App\\\\Repository\\\\type\\.$#"
+			count: 2
+			path: src/Repository/GroupsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\GroupsRepository\\:\\:findByDomain\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/GroupsRepository.php
+
+		-
+			message: "#^Parameter \\$domains of method App\\\\Repository\\\\GroupsRepository\\:\\:findByDomain\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/GroupsRepository.php
+
+		-
+			message: "#^Parameter \\$nbDays of method App\\\\Repository\\\\LogRepository\\:\\:truncateOlder\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/LogRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgrcptRepository\\:\\:getAllMessageDomainRecipientsFromSender\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$emailRecipient$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^Parameter \\$emailSender of method App\\\\Repository\\\\MsgrcptRepository\\:\\:getAllMessageDomainRecipientsFromSender\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^Parameter \\$mailId of method App\\\\Repository\\\\MsgrcptRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^Parameter \\$partitiontag of method App\\\\Repository\\\\MsgrcptRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^Parameter \\$status of method App\\\\Repository\\\\MsgrcptRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: "#^Default value of the parameter \\#3 \\$alias \\(array\\) of method App\\\\Repository\\\\MsgsRepository\\:\\:countByType\\(\\) is incompatible with type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Default value of the parameter \\#3 \\$alias \\(array\\) of method App\\\\Repository\\\\MsgsRepository\\:\\:countByTypeAndDays\\(\\) is incompatible with type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Default value of the parameter \\#3 \\$alias \\(array\\) of method App\\\\Repository\\\\MsgsRepository\\:\\:getSearchMsgSqlWhere\\(\\) is incompatible with type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:checkLastRequestSent\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageReceipientForReport\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageRecipient\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:getMsgsToTreat\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:search\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\MsgsRepository\\:\\:searchMsgsToSendAuthToken\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$mailId$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$alias of method App\\\\Repository\\\\MsgsRepository\\:\\:countByType\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$alias of method App\\\\Repository\\\\MsgsRepository\\:\\:countByTypeAndDays\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$alias of method App\\\\Repository\\\\MsgsRepository\\:\\:getSearchMsgSqlWhere\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$date of method App\\\\Repository\\\\MsgsRepository\\:\\:truncateMessageOlder\\(\\) has invalid type App\\\\Repository\\\\timestamp\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$emailReceipient of method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageReceipientForReport\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$emailRecipient of method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageRecipient\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$emailRecipient of method App\\\\Repository\\\\MsgsRepository\\:\\:updateMessageSender\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$emailSender of method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageRecipient\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$emailSender of method App\\\\Repository\\\\MsgsRepository\\:\\:updateMessageSender\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$end of method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageReceipientForReport\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$from of method App\\\\Repository\\\\MsgsRepository\\:\\:checkLastRequestSent\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$mailId of method App\\\\Repository\\\\MsgsRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$partitiontag of method App\\\\Repository\\\\MsgsRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$start of method App\\\\Repository\\\\MsgsRepository\\:\\:getAllMessageReceipientForReport\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$status of method App\\\\Repository\\\\MsgsRepository\\:\\:changeStatus\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$status of method App\\\\Repository\\\\MsgsRepository\\:\\:updateMessageSender\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$to of method App\\\\Repository\\\\MsgsRepository\\:\\:checkLastRequestSent\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$type of method App\\\\Repository\\\\MsgsRepository\\:\\:countByType\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$type of method App\\\\Repository\\\\MsgsRepository\\:\\:countByTypeAndDays\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$type of method App\\\\Repository\\\\MsgsRepository\\:\\:getSearchMsgSqlWhere\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Parameter \\$type of method App\\\\Repository\\\\MsgsRepository\\:\\:search\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/MsgsRepository.php
+
+		-
+			message: "#^Call to method slugify\\(\\) on an unknown class Cocur\\\\Slugify\\\\Slugify\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Default value of the parameter \\#3 \\$page_limit \\(int\\) of method App\\\\Repository\\\\UserRepository\\:\\:searchInDomains\\(\\) is incompatible with type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Instantiated class Cocur\\\\Slugify\\\\Slugify not found\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:activeUsers\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:autocomplete\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:search\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:searchAlias\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:searchByRole\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:searchInDomains\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:updatePolicyForGroup\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\UserRepository\\:\\:updatePolicyFromGroupToDomain\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$user with type App\\\\Repository\\\\type is not subtype of native type App\\\\Entity\\\\User\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$all$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$domains$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$roles$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$groupId of method App\\\\Repository\\\\UserRepository\\:\\:updatePolicyForGroup\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$groupId of method App\\\\Repository\\\\UserRepository\\:\\:updatePolicyFromGroupToDomain\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$login of method App\\\\Repository\\\\UserRepository\\:\\:search\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$page of method App\\\\Repository\\\\UserRepository\\:\\:searchInDomains\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$page_limit of method App\\\\Repository\\\\UserRepository\\:\\:searchInDomains\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$q of method App\\\\Repository\\\\UserRepository\\:\\:autocomplete\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$q of method App\\\\Repository\\\\UserRepository\\:\\:searchInDomains\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\$user of method App\\\\Repository\\\\UserRepository\\:\\:createDefaultWbListFromdomain\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Variable \\$login in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:delete\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:deleteFromGroup\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:deleteUserWbListFromUserGroups\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:getDefaultDomainWBList\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:getWbListInfoForSender\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:insertFromGroup\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:insertFromGroup\\(\\) should return App\\\\Repository\\\\type but return statement is missing\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:search\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Method App\\\\Repository\\\\WblistRepository\\:\\:searchByReceiptDomain\\(\\) has invalid return type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$group with type App\\\\Repository\\\\Group is not subtype of native type App\\\\Entity\\\\Groups\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$groupId$#"
+			count: 3
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$sid$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$type$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^PHPDoc tag @return with type bool is incompatible with native type App\\\\Entity\\\\Wblist\\|null\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Parameter \\$group of method App\\\\Repository\\\\WblistRepository\\:\\:deleteUserWbListFromGroup\\(\\) has invalid type App\\\\Repository\\\\Group\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Parameter \\$rid of method App\\\\Repository\\\\WblistRepository\\:\\:findOneByRidAndSid\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Parameter \\$senderAdress of method App\\\\Repository\\\\WblistRepository\\:\\:getWbListInfoForSender\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Parameter \\$type of method App\\\\Repository\\\\WblistRepository\\:\\:search\\(\\) has invalid type App\\\\Repository\\\\type\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Variable \\$senderAdress in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: src/Repository/WblistRepository.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getDomain\\(\\)\\.$#"
+			count: 3
+			path: src/Security/LoginFormAuthenticator.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getPreferedLang\\(\\)\\.$#"
+			count: 2
+			path: src/Security/LoginFormAuthenticator.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface\\:\\:getUsername\\(\\)\\.$#"
+			count: 1
+			path: src/Security/LoginFormAuthenticator.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CryptEncryptService\\:\\:decrypt\\(\\) has invalid return type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/CryptEncryptService.php
+
+		-
+			message: "#^Method App\\\\Service\\\\CryptEncryptService\\:\\:encrypt\\(\\) has invalid return type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/CryptEncryptService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$token$#"
+			count: 1
+			path: src/Service/CryptEncryptService.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$url$#"
+			count: 1
+			path: src/Service/CryptEncryptService.php
+
+		-
+			message: "#^Default value of the parameter \\#2 \\$mailId \\(string\\) of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) is incompatible with type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/LogService.php
+
+		-
+			message: "#^Default value of the parameter \\#3 \\$details \\(string\\) of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) is incompatible with type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/LogService.php
+
+		-
+			message: "#^Parameter \\$action of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) has invalid type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/LogService.php
+
+		-
+			message: "#^Parameter \\$details of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) has invalid type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/LogService.php
+
+		-
+			message: "#^Parameter \\$mailId of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) has invalid type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/LogService.php
+
+		-
+			message: "#^Default value of the parameter \\#1 \\$email \\(string\\) of method App\\\\Service\\\\MailaddrService\\:\\:computePriority\\(\\) is incompatible with type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/MailaddrService.php
+
+		-
+			message: "#^Parameter \\$email of method App\\\\Service\\\\MailaddrService\\:\\:computePriority\\(\\) has invalid type App\\\\Service\\\\type\\.$#"
+			count: 1
+			path: src/Service/MailaddrService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Service\\\\Office365Service\\:\\:\\$params\\.$#"
+			count: 1
+			path: src/Service/Office365Service.php
+
+		-
+			message: "#^Cannot access property \\$access_token on array\\|bool\\|float\\|int\\|object\\|string\\.$#"
+			count: 1
+			path: src/Service/Office365Service.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$rid$#"
+			count: 1
+			path: src/Twig/AppExtension.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$sid$#"
+			count: 1
+			path: src/Twig/AppExtension.php
