@@ -55,3 +55,10 @@ services:
 
     App\MessageHandler\CreateAlertMessageHandler:
         tags: ["messenger.message_handler"]
+
+    App\Controller\CustomExceptionController:
+        public: true
+        arguments:
+            $twig: '@twig'
+        tags:
+            - { name: 'controller.service_arguments' }
