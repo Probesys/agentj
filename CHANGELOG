@@ -11,6 +11,7 @@ Others improvments/bugfixes have been made, details below.
 
 Improvments
 
+* preview untreated mails
 * handle outgoing mails: AgentJ can now be set as a relay on a SMTP server
 * block outgoing virus/spam (with a different amavis configuration than incoming mails)
 * send quota: domain administrator can configure quota for domains, groups or users
