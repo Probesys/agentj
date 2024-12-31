@@ -29,7 +29,7 @@ class MsgsRepository extends ServiceEntityRepository
      * @param type $alias
      * @return string
      */
-    private function getSearchMsgSqlWhere(User $user = null, $type = null, $alias = [], $fromDate = null)
+    private function getSearchMsgSqlWhere(?User $user = null, $type = null, $alias = [], $fromDate = null)
     {
         $email = null;
         $sqlWhere = ' WHERE d.active=1  '; // and mr.content != "C" AND mr.content != "Y" AND mr.bl = "N" AND mr.bl != "V" AND mr.wl = "N" ';
@@ -100,7 +100,7 @@ class MsgsRepository extends ServiceEntityRepository
      * @param type $alias
      * @return int
      */
-    public function countByType(User $user = null, $type = null, $alias = [])
+    public function countByType(?User $user = null, $type = null, $alias = [])
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -129,7 +129,7 @@ class MsgsRepository extends ServiceEntityRepository
      * @param type $alias
      * @return int
      */
-    public function countByTypeAndDays(User $user = null, $type = null, $alias = [], \DateTime $day = null, Domain $domain = null)
+    public function countByTypeAndDays(?User $user = null, $type = null, $alias = [], ?\DateTime $day = null, ?Domain $domain = null)
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -164,7 +164,7 @@ class MsgsRepository extends ServiceEntityRepository
    * @param type $type
    * @return type
    */
-    public function search(User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null, $limit = null)
+    public function search(?User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null, $limit = null)
     {
 
         $conn = $this->getEntityManager()->getConnection();
@@ -209,7 +209,7 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
-public function advancedSearch(User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
+public function advancedSearch(?User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
 {
     $conn = $this->getEntityManager()->getConnection();
 

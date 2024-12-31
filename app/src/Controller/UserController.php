@@ -36,7 +36,9 @@ class UserController extends AbstractController {
 
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
     public function indexUserLocal(UserRepository $userRepository): Response {
-        $users = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
+        $adminUsers = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
+        $superAdminUsers = $userRepository->searchByRole($this->getUser(), '["ROLE_SUPER_ADMIN"]');
+        $users = array_merge($adminUsers, $superAdminUsers);
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
@@ -60,21 +62,31 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form'],
             'include_quota' => false,
         ]);
-        
+
         $form->remove('originalUser');
         $form->remove('groups');
         $form->remove('emailRecovery');
+        $form->remove('sharedWith');
+        $form->remove('domain');
+        $form->remove('imapLogin');
+        $form->remove('report');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
+            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
 //            dd($form->get('password')->get('first')->getData());
             if ($userNameExist) {
                 //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAllreadyExist'));
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
+                ];
+            } elseif ($emailExist) {
+                $return = [
+                    'status' => 'danger',
+                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
                 ];
             } elseif ($form->get('password')->get('first')->getData() != $form->get('password')->get('second')->getData()) {
                 $return = [
@@ -87,7 +99,7 @@ class UserController extends AbstractController {
                 $policy = $this->em->getRepository(Policy::class)->find(5);
                 $user->setPassword($encoded);
                 $user->setPolicy($policy);
-                $user->setUsername($user->getFullname());
+                // $user->setUsername($user->getFullname());
                 $user->setRoles($role);
 
                 $this->em->persist($user);
@@ -108,11 +120,8 @@ class UserController extends AbstractController {
         ]);
     }
 
-    
     #[Route(path: '/local/{id}/edit', name: 'user_local_edit', methods: 'GET|POST')]
     public function edit(Request $request, User $user): Response {
-
-       
 
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
@@ -120,10 +129,15 @@ class UserController extends AbstractController {
             'include_quota' => false,
         ]);
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
-        
+
         $form->remove('originalUser');
         $form->remove('emailRecovery');
         $form->remove('groups');
+        $form->remove('sharedWith');
+        $form->remove('domain');
+        $form->remove('password');
+        $form->remove('imapLogin');
+        $form->remove('report');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -159,6 +173,7 @@ class UserController extends AbstractController {
     public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_change_password', ['id' => $user->getId()]),
+            'include_quota' => false,
         ]);
         $form->remove('fullname');
         $form->remove('username');

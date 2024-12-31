@@ -686,7 +686,13 @@ class MessageController extends AbstractController
 
     private function checkMailAccess(Msgrcpt $msgRcpt)
     {
-        if (!$this->isGranted("ROLE_ADMIN") && $msgRcpt->getRid()->getEmailClear() != $this->getUser()->getEmailFromRessource()) {
+        $listAliases = $this->em->getRepository(User::class)->getListAliases($this->getUser());
+        $accessibleRecipientEmails = array_map(function ($item) {
+            return stream_get_contents($item->getEmail(), -1, 0);
+        }, $listAliases);
+        $accessibleRecipientEmails = array_merge([$this->getUser()->getEmailFromRessource()], $accessibleRecipientEmails);
+
+        if (!$this->isGranted("ROLE_ADMIN") && !in_array($msgRcpt->getRid()->getEmailClear(), $accessibleRecipientEmails)) {
             throw new AccessDeniedException();
         }
     }
