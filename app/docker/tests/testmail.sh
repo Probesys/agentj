@@ -105,7 +105,7 @@ send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
 send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
 send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
-send 'out_pass' 'outviarelay' 'user@laissepasser.fr' 1
+send 'out_pass' 'out' 'user@laissepasser.fr' 1
 
 send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
 send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
@@ -114,11 +114,13 @@ send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/e
 send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
 
 send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-send 'out_pass_virus' 'outviarelay' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
+send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
 
 echo "---- don't relay from unregistered smtp ----" 1>&2
-send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
-send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
+send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
+send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
+send 'out_bloc_bad_relay2' 'out' 'user@blocnormal.fr' 0 "" 24
+send 'out_pass_bad_relay2' 'outviarelay' 'user@laissepasser.fr' 0
 
 echo "---- rate limit ----" 1>&2
 # Domain 3 mail/s
@@ -154,11 +156,11 @@ swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.t
 send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
 
 echo "---- no rate limit ----" 1>&2
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 # expect no swak error and 5 mails
-send 'rate_limit_unlimited' 'outviarelay' 'user@laissepasser.fr' 5
+send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5
 
 echo "OK" > $test_results/TESTS_DONE
