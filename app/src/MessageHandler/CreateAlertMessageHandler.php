@@ -86,6 +86,15 @@ class CreateAlertMessageHandler
                         ->getResult();
 
                     foreach ($users as $user) {
+                        // Set the locale for the translator
+                        if ($user->getPreferedLang() !== null) {
+                            $this->translator->setLocale($user->getPreferedLang());
+                        } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
+                            $this->translator->setLocale($user->getDomain()->getDefaultLang());
+                        } else {
+                            $this->translator->setLocale('fr');
+                        }
+
                         $alert = new Alert();
                         $alert->setAlertType('out_msgs');
                         $alert->setRefId($mailId);
@@ -113,8 +122,8 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
-                                ->subject('Mail sortant contenant un virus bloqué')
-                                ->text('Un virus a été détecté dans un mail sortant. Utilisateur concerné: ' . $fromAddr);
+                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title'))
+                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content') . $fromAddr);
 
                             $mailer->send($email);
                         } else {
@@ -127,6 +136,15 @@ class CreateAlertMessageHandler
 
                 } elseif ($target === 'user') {
                     if ($senderUser) {
+                        // Set the locale for the translator
+                        if ($senderUser->getPreferedLang() !== null) {
+                            $this->translator->setLocale($senderUser->getPreferedLang());
+                        } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
+                            $this->translator->setLocale($senderUser->getDomain()->getDefaultLang());
+                        } else {
+                            $this->translator->setLocale('fr');
+                        }
+
                         if ($senderUser->getDomain()->getSendUserAlerts() === false) {
                             $this->output->writeln('Alerts disabled for user: ' . $senderUser->getId());
                         } else {
@@ -218,6 +236,15 @@ class CreateAlertMessageHandler
 
                 // Create a single alert for all admins and superadmins
                 foreach ($users as $user) {
+                    // Set the locale for the translator
+                    if ($user->getPreferedLang() !== null) {
+                        $this->translator->setLocale($user->getPreferedLang());
+                    } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
+                        $this->translator->setLocale($user->getDomain()->getDefaultLang());
+                    } else {
+                        $this->translator->setLocale('fr');
+                    }
+
                     $alert = new Alert();
                     $alert->setAlertType('sql_limit_report');
                     $alert->setRefId($id);
@@ -263,6 +290,15 @@ class CreateAlertMessageHandler
                     if (!isset($processedSenders[$fromAddr])) {
                         $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
                         if ($senderUser) {
+                            // Set the locale for the translator
+                            if ($senderUser->getPreferedLang() !== null) {
+                                $this->translator->setLocale($senderUser->getPreferedLang());
+                            } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
+                                $this->translator->setLocale($senderUser->getDomain()->getDefaultLang());
+                            } else {
+                                $this->translator->setLocale('fr');
+                            }
+
                             $processedSenders[$fromAddr] = true;
 
                             if ($senderUser->getDomain()->getSendUserAlerts() === false) {
