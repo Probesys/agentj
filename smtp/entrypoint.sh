@@ -11,11 +11,14 @@ then
 	sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/conf/$SMTP_TYPE/postfix/main.cf
 	echo $MAIL_HOSTNAME > /etc/mailname
 
-	# Configure transport map
-	sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
-	sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
-	sed -i "s/\$DB_USER/$DB_USER/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
-	sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
+	if [ $SMTP_TYPE != "out" ]
+	then
+		# Configure transport map
+		sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
+		sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
+		sed -i "s/\$DB_USER/$DB_USER/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
+		sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
+	fi
 
 else
 	# Set mailname
