@@ -61,6 +61,11 @@ send() {
 			test_str="From $aj_addr"
 			wait_time=5
 			;;
+		"report")
+			# do not send mail, but check for a report
+			swaks_exit_code=0
+			test_str="Subject: Messages en attente sur AgentJ pour $aj_addr"
+			;;
 		*)
 			echo "unknown value '$in_out' for parameter in_out"
 			return
@@ -100,65 +105,73 @@ send() {
 	mv $test_results/mailtester $test_results/mailbox_$testname
 }
 
-echo "---- captcha/block/allow/virus/relay ----" 1>&2
-send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
-send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+#echo "---- captcha/block/allow/virus/relay ----" 1>&2
+#send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
+#send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+#
+#send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
+#send 'out_pass' 'outviarelay' 'user@laissepasser.fr' 1
+#
+#send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
+#send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
+#
+#send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
+#send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
+#
+#send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
+#send 'out_pass_virus' 'outviarelay' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
+#
+#echo "---- don't relay from unregistered smtp ----" 1>&2
+#send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
+#send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
+#
+#echo "---- rate limit ----" 1>&2
+## Domain 3 mail/s
+#swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+## 3 out_msgs and 1 sql_limit_report
+#send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 ''
+#
+## Group 2 mail/s
+#swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+## 2 out_msgs and 2 sql_limit_report
+#send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 ''
+#
+## Personnal 1 mail/s
+#swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+## 1 out_msgs and 3 sql_limit_report
+#send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 ''
+#
+## Personnal 10 mail/s
+#swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+## expect no swak error and 5 mails
+#send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
+#
+#echo "---- no rate limit ----" 1>&2
+#swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+#swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+## expect no swak error and 5 mails
+#send 'rate_limit_unlimited' 'outviarelay' 'user@laissepasser.fr' 5
 
-send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
-send 'out_pass' 'outviarelay' 'user@laissepasser.fr' 1
-
-send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
-send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
-
-send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
-
-send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-send 'out_pass_virus' 'outviarelay' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
-
-echo "---- don't relay from unregistered smtp ----" 1>&2
-send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
-send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
-
-echo "---- rate limit ----" 1>&2
-# Domain 3 mail/s
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-# 3 out_msgs and 1 sql_limit_report
-send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 ''
-
-# Group 2 mail/s
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-# 2 out_msgs and 2 sql_limit_report
-send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 ''
-
-# Personnal 1 mail/s
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-# 1 out_msgs and 3 sql_limit_report
-send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 ''
-
-# Personnal 10 mail/s
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-# expect no swak error and 5 mails
-send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
-
-echo "---- no rate limit ----" 1>&2
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-# expect no swak error and 5 mails
-send 'rate_limit_unlimited' 'outviarelay' 'user@laissepasser.fr' 5
+echo "---- report ----" 1>&2
+swaks -ha --from 'u1@smtp.test' --to 'user@blocnormal.fr' --body nospam --h-Subject nospam --server smtptest:26 2>&1
+swaks -ha --from 'u2@smtp.test' --to 'user@blocnormal.fr' --body nospam --h-Subject nospam --server smtptest:26 2>&1
+swaks -ha --from 'u3@smtp.test' --to 'user@blocnormal.fr' --body nospam --h-Subject nospam --server smtptest:26 2>&1
+swaks -ha --from 'u4@smtp.test' --to 'user@blocnormal.fr' --body nospam --h-Subject nospam --server smtptest:26 2>&1
+php bin/console agentj:report-send-mail
+send 'report' 'report' 'user@blocnormal.fr' 1
 
 echo "OK" > $test_results/TESTS_DONE

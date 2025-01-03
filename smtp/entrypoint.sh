@@ -5,12 +5,13 @@ IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/conf/$SMTP_TYPE/postfix/main.cf
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/conf/$SMTP_TYPE/postfix/master.cf
 
+# Set mailname
+sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/conf/$SMTP_TYPE/postfix/main.cf
+echo $MAIL_HOSTNAME > /etc/mailname
+
+
 if [ $SMTP_TYPE != "relay" ] 
 then
-	# Set mailname
-	sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/conf/$SMTP_TYPE/postfix/main.cf
-	echo $MAIL_HOSTNAME > /etc/mailname
-
 	# Configure transport map
 	sed -i "s/\$DB_NAME/$DB_NAME/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
 	sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
@@ -18,10 +19,6 @@ then
 	sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
 
 else
-	# Set mailname
-	sed -i "s/\$MAIL_DOMAINNAME/$MAIL_DOMAINNAME/g" /etc/conf/$SMTP_TYPE/postfix/main.cf
-	echo relay.$MAIL_DOMAINNAME > /etc/mailname
-
 	if [ -n "$RELAYHOST" ]
 	then
 	    echo "relayhost = $RELAYHOST" >> /etc/conf/$SMTP_TYPE/postfix/main.cf

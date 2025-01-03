@@ -23,6 +23,7 @@ class UserFixture extends Fixture
 	$user->setEmail('user@blocnormal.fr');
 	$user->setFullname('user blocnormal');
 	$user->setUsername('user@blocnormal.fr');
+	$user->setReport(true);
 	$user->setRoles('["ROLE_USER"]');
 	$user->setDomain($this->em
 		->getRepository(Domain::class)

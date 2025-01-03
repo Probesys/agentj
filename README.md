@@ -48,7 +48,6 @@ Then the following runtime variables must be configured in the `.env` file:
 | DB_USER                   | agentj         | the AgentJ database user name               |
 | DB_PASSWORD               | secret         | the AgentJ database password                |
 | MAIL_HOSTNAME             | aj.example.com | the mailname used in postfix configuration  |
-| MAIL_DOMAINNAME           | example.com    | the domain name used in relay configuration |
 | SUPER_ADMIN_USERNAME      | admin          | default super admin login                   |
 | SUPER_ADMIN_PASSWORD      | Sup3rZECR37    | default super admin password                |
 | DEFAULT_LOCALE            | Europe/Paris   | the containers default timezone             |
