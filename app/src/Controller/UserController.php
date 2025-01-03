@@ -67,7 +67,6 @@ class UserController extends AbstractController {
         $form->remove('groups');
         $form->remove('emailRecovery');
         $form->remove('sharedWith');
-        $form->remove('domain');
         $form->remove('imapLogin');
         $form->remove('report');
         $form->handleRequest($request);
@@ -97,9 +96,11 @@ class UserController extends AbstractController {
                 $role = $form->get('roles')->getData();
                 $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
                 $policy = $this->em->getRepository(Policy::class)->find(5);
+                $username = $form->get('username')->getData();
+                $username = $username ? $username : $form->get('fullname')->getData();
+                $user->setUsername($username);
                 $user->setPassword($encoded);
                 $user->setPolicy($policy);
-                // $user->setUsername($user->getFullname());
                 $user->setRoles($role);
 
                 $this->em->persist($user);
@@ -134,7 +135,6 @@ class UserController extends AbstractController {
         $form->remove('emailRecovery');
         $form->remove('groups');
         $form->remove('sharedWith');
-        $form->remove('domain');
         $form->remove('password');
         $form->remove('imapLogin');
         $form->remove('report');
