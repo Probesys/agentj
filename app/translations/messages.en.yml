@@ -11,6 +11,7 @@ Generics:
     filter: Filter
     close: Close
     backToTheList: "Back to list"
+    backToPreviousPage: "Back to the previous page"
     createAndContinue: "Create and continue"
     confirmDelete: "Are you sure you want to make this deletion?"
     changePassword: "Change password"
@@ -511,6 +512,21 @@ Entities:
     actions:
       read: Read
       delete: Delete
+    messages:
+      admin:
+        virus:
+          title: Outgoing mail containing a virus blocked
+          content: 'A virus was detected in an outgoing mail. Affected user: '
+        quota:
+          title: Quota limit exceeded
+          content: 'Mails have been blocked due to exceeded quotas. Affected users: '
+      user:
+        virus:
+          title: Your outgoing mail has been blocked
+          content: 'A virus was detected in a mail you sent.'
+        quota:
+          title: You have exceeded the quota
+          content: 'You have exceeded the quota. Your mail was not delivered.'
   Message:
     index: "List of messages"
     untreated: "No treaties"
