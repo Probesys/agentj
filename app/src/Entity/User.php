@@ -295,7 +295,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUsername(): ?string
     {
-        if ($this->username == '') {
+        if ($this->username === null) {
             return (string) $this->fullname;
         }
         return $this->username;

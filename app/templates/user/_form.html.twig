@@ -19,7 +19,23 @@
 
 {# {% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%} #}
 {% if form.roles is defined %}
-	{{ form_row(form.roles) }}
+    <div data-role='["{{ user.roles[0] }}"]'>
+        {{ form_row(form.roles) }}
+    </div>
+    <script>
+        $(document).on('shown.bs.modal', function() {
+            const roleContainer = document.querySelector('[data-role]');
+            const role = roleContainer.getAttribute('data-role');
+            const selectElement = roleContainer.querySelector('select');
+
+            $(selectElement).val(role).trigger('change');
+        });
+
+        // Initialize select2 plugin
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+    </script>
 {% endif %}
 
 {% if form.email is defined %}
