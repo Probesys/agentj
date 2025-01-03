@@ -11,6 +11,7 @@ Generics:
     filter: Filtrer
     close: Fermer
     backToTheList: Retour à la liste
+    backToPreviousPage: Retour à la page précédente
     createAndContinue: Créer et continuer
     confirmDelete: Êtes vous certain de vouloir réaliser cette suppression ?
     changePassword: Changer de mot de passe
@@ -536,6 +537,21 @@ Entities:
     actions:
       read: Marquer comme lu
       delete: Supprimer
+    messages:
+      admin:
+        virus:
+          title: Mail sortant contenant un virus bloqué
+          content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné: '
+        quota:
+          title: Limite de quota franchie
+          content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: '
+      user:
+        virus:
+          title: Votre mail sortant a été bloqué
+          content: 'Un virus a été détecté dans un mail que vous avez envoyé.'
+        quota:
+          title: Vous avez dépassé le quota
+          content: "Vous avez dépassé le quota. Votre mail n'a pas été distribué."
   Message:
     index: Liste des messages
     untreated: Non traités
