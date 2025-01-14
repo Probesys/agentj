@@ -4,7 +4,7 @@ namespace App\Form;
 
 use App\Entity\Groups;
 use App\Entity\User;
-use APP\Entity\Domain;
+use App\Entity\Domain;
 use App\Form\UserAutocompleteField;
 use App\Repository\GroupsRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -31,6 +31,7 @@ class UserType extends AbstractType
 
         $domainHasIMAPConnector = $options['domainHasIMAPConnector'] ?? false;
 
+        $adminForm = $options['adminForm'] ?? false;
 
         $builder
             ->add('email', EmailType::class, [
@@ -83,7 +84,7 @@ class UserType extends AbstractType
                     return $retRepo;
                 },
                 'attr' => ['style' => 'height:auto;']
-            ])            
+            ])
             ->add('domain', null, [
                 'attr' => ['class' => 'select2'],
                 'label' => 'Entities.User.fields.domain',
@@ -104,6 +105,16 @@ class UserType extends AbstractType
             ]);
 
 
+        if ($adminForm) {
+            $builder->add('domains', EntityType::class, [
+                'class' => Domain::class,
+                'multiple' => true,
+                'expanded' => true,
+                'required' => true,
+                'label' => 'Entities.User.fields.domain',
+                'attr' => ['style' => 'height:auto;']
+            ]);
+        }
 
         $builder->add('imapLogin', null, [
             'label' => 'IMAP Login',
@@ -134,6 +145,7 @@ class UserType extends AbstractType
             'alias' => false,
             'allowedomainIds' => [],
             'include_quota' => true,
+            'adminForm' => false,
             'domainHasIMAPConnector' => false
         ]);
     }
