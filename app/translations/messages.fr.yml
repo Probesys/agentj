@@ -137,6 +137,7 @@ Generics:
     IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect."
     InvalidEmail: "Ligne [ROW] : Adresse e-mail invalide."
     NonexistentDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+    NonexistentUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
     ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
     ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
   units:
@@ -659,6 +660,14 @@ Entities:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
         \ points virgules.<br /> La structure est la suivante : email ; LastName;\
         \ FirstName; Group<br />"
+    Alias:
+      title: Importer des alias
+      labels:
+        titleInfo: Information
+      description:
+        "Le fichier doit être encodé en utf8 au format csv séparé par des\
+        \ points virgules.<br /> La structure est la suivante : FirstName ; AlLastName;\
+        \ email ; email de l'alias<br />"
     WhiteListe:
       title: Importer une liste d'adresses à autoriser
     actions:

@@ -135,6 +135,7 @@ Generics:
     IncorrectColumns: "Row [ROW]: Incorrect number of columns."
     InvalidEmail: "Row [ROW]: address e-mail is invalid."
     NonexistentDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
+    NonexistantUser: "Row [ROW]: User [EMAIL] does not exist in the database."
     ImportError: "An error occurred during import: [ERROR_MESSAGE]"
     ImportErrorsList: "Errors occurred during import: <br> [LIST_ROWS_ERROR]"
   units:
@@ -626,6 +627,12 @@ Entities:
       description:
         "The file must be encoded in utf8 in csv format separated by comma
         points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+    Alias:
+      title: "Import alias"
+      labels: { titleInfo: Information }
+      description:
+        "The file must be encoded in utf8 in csv format separated by comma
+        points.<br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
     WhiteListe:
       title: "Import a list of addresses to allow"
     actions:
