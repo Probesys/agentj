@@ -120,7 +120,18 @@ class UserRepository extends ServiceEntityRepository {
         }
 
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = [$user->getDomain()->getId()];
+            $domain = $user->getDomain();
+            if ($domain !== null) {
+                $domainsIds = [$domain->getId()];
+            } else {
+                $domainsIds = [];
+            }
+            $domains = $user->getDomains();
+            if ($domains !== null && !$domains->isEmpty()) {
+                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
+                    return $domain->getId();
+                })->toArray());
+            }
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
@@ -150,7 +161,18 @@ class UserRepository extends ServiceEntityRepository {
 
         //todo finir les droits sur les domaines
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = [$user->getDomain()->getId()];
+            $domain = $user->getDomain();
+            if ($domain !== null) {
+                $domainsIds = [$domain->getId()];
+            } else {
+                $domainsIds = [];
+            }
+            $domains = $user->getDomains();
+            if ($domains !== null && !$domains->isEmpty()) {
+                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
+                    return $domain->getId();
+                })->toArray());
+            }
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 

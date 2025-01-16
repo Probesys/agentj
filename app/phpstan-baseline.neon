@@ -506,11 +506,6 @@ parameters:
 			path: src/Form/UserType.php
 
 		-
-			message: "#^Class App\\\\Entity\\\\Domain referenced with incorrect case\\: APP\\\\Entity\\\\Domain\\.$#"
-			count: 1
-			path: src/Form/UserType.php
-
-		-
 			message: "#^Call to an undefined method Doctrine\\\\DBAL\\\\Statement\\:\\:fetchColumn\\(\\)\\.$#"
 			count: 1
 			path: src/Repository/DomainRepository.php
