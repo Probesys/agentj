@@ -34,7 +34,18 @@ class MsgsRepository extends ServiceEntityRepository
         $email = null;
         $sqlWhere = ' WHERE d.active=1  '; // and mr.content != "C" AND mr.content != "Y" AND mr.bl = "N" AND mr.bl != "V" AND mr.wl = "N" ';
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = [$user->getDomain()->getId()];
+            $domain = $user->getDomain();
+            if ($domain !== null) {
+                $domainsIds = [$domain->getId()];
+            } else {
+                $domainsIds = [];
+            }
+            $domains = $user->getDomains();
+            if ($domains !== null && !$domains->isEmpty()) {
+                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
+                    return $domain->getId();
+                })->toArray());
+            }
 
             $sqlWhere .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
         }
