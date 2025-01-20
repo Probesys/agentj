@@ -625,14 +625,14 @@ Entities:
       title: "Import users"
       labels: { titleInfo: Information }
       description:
-        "The file must be encoded in utf8 in csv format separated by comma
-        points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
     Alias:
       title: "Import alias"
       labels: { titleInfo: Information }
       description:
-        "The file must be encoded in utf8 in csv format separated by comma
-        points.<br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
     WhiteListe:
       title: "Import a list of addresses to allow"
     actions:
