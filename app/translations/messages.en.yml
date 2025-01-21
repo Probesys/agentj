@@ -134,10 +134,12 @@ Generics:
     BadFormatcsv: "Bad format file"
     IncorrectColumns: "Row [ROW]: Incorrect number of columns."
     InvalidEmail: "Row [ROW]: address e-mail is invalid."
-    NonexistentDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
+    NonexistantDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
     NonexistantUser: "Row [ROW]: User [EMAIL] does not exist in the database."
+    ExistingUser: "Row [ROW] : User [EMAIL] already exist and is not an alias."
     ImportError: "An error occurred during import: [ERROR_MESSAGE]"
     ImportErrorsList: "Errors occurred during import: <br> [LIST_ROWS_ERROR]"
+    ImportExisting: "The following users already existed and were updated : <br> [LIST_DUPES]"
   units:
     literByDay: litres/day
     hoursByDay: Hours/day
@@ -627,12 +629,18 @@ Entities:
       description:
         "The file must be encoded in utf8 in csv format separated by comma
         points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+      warning:
+        "Warning : The already existing users will be updated with the new
+        information."
     Alias:
       title: "Import alias"
       labels: { titleInfo: Information }
       description:
         "The file must be encoded in utf8 in csv format separated by comma
         points.<br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
+      warning:
+        "Warning : The already existing users will be updated with the new
+        information."
     WhiteListe:
       title: "Import a list of addresses to allow"
     actions:
