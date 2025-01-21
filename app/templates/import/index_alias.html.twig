@@ -1,7 +1,7 @@
 {% extends 'modalTemplate.html.twig' %}
 
 {% block modalTitle %}
-    {{'Entities.Import.Users.title'|trans}}
+    {{'Entities.Import.Alias.title'|trans}}
 {% endblock %}
 
 
@@ -9,10 +9,10 @@
     {{ form_start(form) }}
     <h5>{{ 'Form.ImportFile'|trans() }}  </h5>
     <span class="text-info">
-        {{ 'Entities.Import.Users.description'|trans()| raw }}
+        {{ 'Entities.Import.Alias.description'|trans()| raw }}
     </span>
     <span class="text-warning">
-        {{ 'Entities.Import.Users.warning'|trans()| raw }}
+        {{ 'Entities.Import.Alias.warning'|trans()| raw }}
     </span>
     {{ form_widget(form) }}
     <div class="d-flex justify-content-center">

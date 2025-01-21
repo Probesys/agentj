@@ -55,17 +55,9 @@ class ImportController extends AbstractController {
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
                     $message = str_replace('[NB_USER]', $result['user_import'], $message);
-                    // errors sont géré dans la function import
-                    //if (count($result['errors']) > 0) {
-                    //    $warningMessage = $translator->trans('Generics.flash.ImportErrors', ['NB_ERRORS' => count($result['errors']), 'LIST_ROWS_ERROR' => implode(',', $result['errors'])]);
-                    //    $this->addFlash('warning', $warningMessage);
-                    //}
                     $this->addFlash('success', $message);
                 } else {
                     $this->addFlash('warning', 'Generics.flash.NoImport');
-                }
-                if ($result['user_already_exist'] > 0) {
-                    //TODO
                 }
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
@@ -91,7 +83,7 @@ class ImportController extends AbstractController {
 
         $row = 0;
         $import = 0;
-        $already_exist = 0;
+        $already_exist = [];
         $errors = [];
         $batchSize = 20;
 
@@ -153,6 +145,8 @@ class ImportController extends AbstractController {
                                 $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
                                 if (!$user) {
                                     $user = new User();
+                                } else {
+                                    $already_exist[] = $email;
                                 }
                                 $user->setEmail($data[0]);
                                 $user->setUsername($data[0]);
@@ -181,7 +175,7 @@ class ImportController extends AbstractController {
                                 }
                             }
                         } else {
-                            $errors[] = $translator->trans('Generics.flash.NonexistentDomain', ['ROW' => $row + 1, 'DOMAIN' => $domainEmail]);
+                            $errors[] = $translator->trans('Generics.flash.NonexistantDomain', ['ROW' => $row + 1, 'DOMAIN' => $domainEmail]);
                         }
                         if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
                             $em->flush();
@@ -208,11 +202,160 @@ class ImportController extends AbstractController {
             //$this->addFlash('danger', 'Des erreurs se sont produites lors de l\'importation : <br>' . implode('<br> ', $errors));
             $dangerMessageList = $translator->trans('Generics.flash.ImportErrorsList', ['LIST_ROWS_ERROR' => implode('<br> ', $errors)]);
             $this->addFlash('danger', $dangerMessageList);
+        }
+
+        if (count($already_exist) > 0) {
+            $warningMessage = $translator->trans('Generics.flash.ImportExisting', ['LIST_DUPES' => implode(', ', $already_exist)]);
+            $this->addFlash('warning', $warningMessage);
+        }
+
+        return ['user_import' => $import];
+    }
+
+    #[Route(path: '/users_alias', name: 'import_user_alias', options: ['expose' => true])]
+    public function index_alias(Request $request) {
+        $translator = $this->translator;
+        $form = $this->createForm(ImportType::class, null, [
+            'action' => $this->generateUrl('import_user_alias'),
+        ]);
+        $form->remove('domains');
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $fileUpload = $form['attachment']->getData();
+            if ($fileUpload->getClientMimeType() == "text/csv") {
+                $filename = 'import-agentj-alias-' . time() . ".csv";
+                $file = $fileUpload->move('/tmp/', $filename);
+                $result = $this->import_alias($file->getPathname());
+                //delete file after import
+                $fileSystem = new Filesystem();
+                $fileSystem->remove([$file->getPathname()]);
+                if ($result['user_import'] > 0) {
+                    $message = $translator->trans('Generics.flash.ImportSuccess');
+                    $message = str_replace('[NB_USER]', $result['user_import'], $message);
+                    $this->addFlash('success', $message);
+                } else {
+                    $this->addFlash('warning', 'Generics.flash.NoImport');
+                }
+            } else {
+                $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
+            }
+            $referer = $request->headers->get('referer');
+            return $this->redirect($referer);
+        }
+
+        return $this->render('import/index_alias.html.twig', [
+                    'controller_name' => 'ImportController',
+                    'form' => $form->createView(),
+        ]);
+    }
+
+
+    /*
+     *
+     * Import alias from file csv columns : FirstName , LastName, email, email of alias */
+
+    function import_alias($pathfile) {
+        $translator = $this->translator;
+        $split = ';';
+        $nbUser = count(file($pathfile)) - 1;
+
+        $row = 0;
+        $import = 0;
+        $already_exist = [];
+        $errors = [];
+        $batchSize = 20;
+
+        $em = $this->em;
+        $groups = [];
+        $emails = [];
+        $groupWbUpdate = [];
+        $domains = [];
+        try {
+            if (($handle = fopen($pathfile, "r")) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                    //check line number of columns, if empty
+                    if ((count($data) != 4)) {
+                        $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);
+                        continue;
+                    }
+
+                    if (isset($data[3]) && $data[3] != "" && filter_var($data[3], FILTER_VALIDATE_EMAIL)) {
+                        $email = $data[3];
+                        $domainEmail = strtolower(substr($email, strpos($email, '@') + 1));
+                        if (!isset($domains[$domainEmail])) {
+                            $domains[$domainEmail]['entity'] = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
+                        }
+                        //need domain exist in database
+                        if ($domains[$domainEmail]['entity']) {
+                            if (!isset($emails[$email])) {
+                                //check if original email's user exist
+                                $original_user = $em->getRepository(User::class)->findOneBy(['email' => $data[2]]);
+                                if ($original_user) {
+                                    $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+                                    //check if user already exist and is not an alias
+                                    if ($user and $user->getOriginalUser() == null) {
+                                        $errors[] = $translator->trans('Generics.flash.ExistingUser', ['ROW' => $row + 1, 'EMAIL' => $data[3]]);
+                                    } else {
+                                        if (!$user) {
+                                            $user = new User();
+                                        } else {
+                                            $already_exist[] = $email;
+                                        }
+                                        $user->setEmail($data[3]);
+                                        $user->setUsername($data[3]);
+                                        if (isset($data[1]) && isset($data[0])) {
+                                            $user->setFullname(trim($data[1] . " " . $data[0]));
+                                        }
+                                        $import++;
+                                        $user->setRoles('["ROLE_USER"]');
+                                        $domainEmail = strtolower(substr($data[3], strpos($data[3], '@') + 1));
+                                        $domain = $em->getRepository(Domain::class)->findOneBy(['domain' => $domainEmail]);
+                                        $user->setDomain($domain);
+                                        $user->setOriginalUser($original_user);
+                                        $user->setPolicy($original_user->getPolicy());
+                                        $em->persist($user);
+                                    }
+                                } else {
+                                    $errors[] = $translator->trans('Generics.flash.NonexistantUser', ['ROW' => $row + 1, 'EMAIL' => $data[2]]);
+                                }
+                            }
+                        } else {
+                            $errors[] = $translator->trans('Generics.flash.NonexistantDomain', ['ROW' => $row + 1, 'DOMAIN' => $domainEmail]);
+                        }
+                        if ((($row % $batchSize) === 0) || ($row == $nbUser)) {
+                            $em->flush();
+                        }
+                    } else {
+                        $errors[] =  $translator->trans('Generics.flash.InvalidEmail', ['ROW' => $row + 1]);
+                    }
+
+                    $row++;
+                }
+
+                //Need to flush if user new is inferior $batchSize
+                $em->flush();
+                $this->groupService->updateWblist();
+            }
+        } catch (\Exception $e) {
+            //$this->addFlash('danger', 'Une erreur s\'est produite lors de l\'importation : ' . $e->getMessage());
+            $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);
+            $this->addFlash('danger', $dangerMessage);
 
         }
 
-        return ['user_import' => $import, 'errors' => $errors, 'user_already_exist' => $already_exist];
-    }
+        if (count($errors) > 0) {
+            //$this->addFlash('danger', 'Des erreurs se sont produites lors de l\'importation : <br>' . implode('<br> ', $errors));
+            $dangerMessageList = $translator->trans('Generics.flash.ImportErrorsList', ['LIST_ROWS_ERROR' => implode('<br> ', $errors)]);
+            $this->addFlash('danger', $dangerMessageList);
+        }
 
+        if (count($already_exist) > 0) {
+            $warningMessage = $translator->trans('Generics.flash.ImportExisting', ['LIST_DUPES' => implode(', ', $already_exist)]);
+            $this->addFlash('warning', $warningMessage);
+        }
+
+        return ['user_import' => $import];
+    }
 }
 
