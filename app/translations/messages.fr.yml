@@ -11,6 +11,7 @@ Generics:
     filter: Filtrer
     close: Fermer
     backToTheList: Retour à la liste
+    backToPreviousPage: Retour à la page précédente
     createAndContinue: Créer et continuer
     confirmDelete: Êtes vous certain de vouloir réaliser cette suppression ?
     changePassword: Changer de mot de passe
@@ -70,6 +71,7 @@ Generics:
     groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
     helpAlert: "Alertes sur les mails sortant bloqués (quota dépassé, etc...)"
     cannotPreviewMailWithvirus: "Vous ne pouvez pas visualilser ce message car il contient un virus"
+    selectAtLeastOneDomain: "Veuillez sélectionner au moins un domaine"
   labels:
     all: Tous
     filters: Filtres
@@ -134,9 +136,12 @@ Generics:
     BadFormatcsv: "Mauvais format de fichier"
     IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect."
     InvalidEmail: "Ligne [ROW] : Adresse e-mail invalide."
-    NonexistentDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+    NonexistantDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+    NonexistantUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+    ExistingUser: "Ligne [ROW] : Utilisateur [EMAIL] existe déjà dans la base de données et n'est pas un alias."
     ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
     ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
+    ImportExisting: "Les utilisateurs suivants existaient déjà dans la base de données et ont été mis à jours : <br> [LIST_DUPES]"
   units:
     literByDay: litres/jour
     hoursByDay: Heures/jour
@@ -536,6 +541,21 @@ Entities:
     actions:
       read: Marquer comme lu
       delete: Supprimer
+    messages:
+      admin:
+        virus:
+          title: Mail sortant contenant un virus bloqué
+          content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné: '
+        quota:
+          title: Limite de quota franchie
+          content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: '
+      user:
+        virus:
+          title: Votre mail sortant a été bloqué
+          content: 'Un virus a été détecté dans un mail que vous avez envoyé.'
+        quota:
+          title: Vous avez dépassé le quota
+          content: "Vous avez dépassé le quota. Votre mail n'a pas été distribué."
   Message:
     index: Liste des messages
     untreated: Non traités
@@ -642,6 +662,20 @@ Entities:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
         \ points virgules.<br /> La structure est la suivante : email ; LastName;\
         \ FirstName; Group<br />"
+      warning:
+        "Attention : les utilisateurs importés existant déjà dans la base de données\
+        \ seront mis à jour."
+    Alias:
+      title: Importer des alias
+      labels:
+        titleInfo: Information
+      description:
+        "Le fichier doit être encodé en utf8 au format csv séparé par des\
+        \ points virgules.<br /> La structure est la suivante : FirstName ; AlLastName;\
+        \ email ; email de l'alias<br />"
+      warning:
+        "Attention : les utilisateurs importés existant déjà dans la base de données\
+        \ seront mis à jour."
     WhiteListe:
       title: Importer une liste d'adresses à autoriser
     actions:

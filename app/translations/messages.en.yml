@@ -11,6 +11,7 @@ Generics:
     filter: Filter
     close: Close
     backToTheList: "Back to list"
+    backToPreviousPage: "Back to the previous page"
     createAndContinue: "Create and continue"
     confirmDelete: "Are you sure you want to make this deletion?"
     changePassword: "Change password"
@@ -68,6 +69,7 @@ Generics:
     groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
     helpAlert: "Alerts on blocked outgoing emails (quota exceeded, etc.)"
     cannotPreviewMailWithvirus: "You cannot view this message because it contains a virus."
+    selectAtLeastOneDomain: "You must select at least one domain"
   labels:
     all: All
     filters: Filters
@@ -132,9 +134,12 @@ Generics:
     BadFormatcsv: "Bad format file"
     IncorrectColumns: "Row [ROW]: Incorrect number of columns."
     InvalidEmail: "Row [ROW]: address e-mail is invalid."
-    NonexistentDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
+    NonexistantDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
+    NonexistantUser: "Row [ROW]: User [EMAIL] does not exist in the database."
+    ExistingUser: "Row [ROW] : User [EMAIL] already exist and is not an alias."
     ImportError: "An error occurred during import: [ERROR_MESSAGE]"
     ImportErrorsList: "Errors occurred during import: <br> [LIST_ROWS_ERROR]"
+    ImportExisting: "The following users already existed and were updated : <br> [LIST_DUPES]"
   units:
     literByDay: litres/day
     hoursByDay: Hours/day
@@ -511,6 +516,21 @@ Entities:
     actions:
       read: Read
       delete: Delete
+    messages:
+      admin:
+        virus:
+          title: Outgoing mail containing a virus blocked
+          content: 'A virus was detected in an outgoing mail. Affected user: '
+        quota:
+          title: Quota limit exceeded
+          content: 'Mails have been blocked due to exceeded quotas. Affected users: '
+      user:
+        virus:
+          title: Your outgoing mail has been blocked
+          content: 'A virus was detected in a mail you sent.'
+        quota:
+          title: You have exceeded the quota
+          content: 'You have exceeded the quota. Your mail was not delivered.'
   Message:
     index: "List of messages"
     untreated: "No treaties"
@@ -607,8 +627,20 @@ Entities:
       title: "Import users"
       labels: { titleInfo: Information }
       description:
-        "The file must be encoded in utf8 in csv format separated by comma
-        points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+      warning:
+        "Warning : The already existing users will be updated with the new
+        information."
+    Alias:
+      title: "Import alias"
+      labels: { titleInfo: Information }
+      description:
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
+      warning:
+        "Warning : The already existing users will be updated with the new
+        information."
     WhiteListe:
       title: "Import a list of addresses to allow"
     actions:
