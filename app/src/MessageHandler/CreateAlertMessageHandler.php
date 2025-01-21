@@ -13,6 +13,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CreateAlertMessageHandler
 {
@@ -20,12 +21,14 @@ class CreateAlertMessageHandler
     private ConsoleOutput $output;
     private Mailer $mailer;
     private string $defaultMailFrom;
+    private $translator;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TranslatorInterface $translator)
     {
         $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
         $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
+        $this->translator = $translator;
     }
 
     public function __invoke(CreateAlertMessage $message)
@@ -83,11 +86,20 @@ class CreateAlertMessageHandler
                         ->getResult();
 
                     foreach ($users as $user) {
+                        // Set the locale for the translator
+                        if ($user->getPreferedLang() !== null) {
+                            $this->translator->setLocale($user->getPreferedLang());
+                        } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
+                            $this->translator->setLocale($user->getDomain()->getDefaultLang());
+                        } else {
+                            $this->translator->setLocale('fr');
+                        }
+
                         $alert = new Alert();
                         $alert->setAlertType('out_msgs');
                         $alert->setRefId($mailId);
                         $alert->setDate(new \DateTime('now', $timezone));
-                        $alert->setSubject('Mail sortant contenant un virus bloqué');
+                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title'));
                         $alert->setIsRead(false);
                         $alert->setUser($user);
                         $alert->setRefUser($fromAddr);
@@ -96,7 +108,7 @@ class CreateAlertMessageHandler
 
                         // Send email to admin/superadmin
                         $emailAddress = $user->getEmailFromRessource();
-                        if ($emailAddress !== null) {
+                        if ($emailAddress !== null && $user->getDomain() !== null) {
                             $smtpServer = $user->getDomain()->getSrvSmtp();
                             $smtpPort = $user->getDomain()->getSmtpPort();
                             $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
@@ -110,8 +122,8 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
-                                ->subject('Mail sortant contenant un virus bloqué')
-                                ->text('Un virus a été détecté dans un mail sortant. Utilisateur concerné: ' . $fromAddr);
+                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title'))
+                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content') . $fromAddr);
 
                             $mailer->send($email);
                         } else {
@@ -124,6 +136,15 @@ class CreateAlertMessageHandler
 
                 } elseif ($target === 'user') {
                     if ($senderUser) {
+                        // Set the locale for the translator
+                        if ($senderUser->getPreferedLang() !== null) {
+                            $this->translator->setLocale($senderUser->getPreferedLang());
+                        } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
+                            $this->translator->setLocale($senderUser->getDomain()->getDefaultLang());
+                        } else {
+                            $this->translator->setLocale('fr');
+                        }
+
                         if ($senderUser->getDomain()->getSendUserAlerts() === false) {
                             $this->output->writeln('Alerts disabled for user: ' . $senderUser->getId());
                         } else {
@@ -131,7 +152,7 @@ class CreateAlertMessageHandler
                             $alert->setAlertType('out_msgs');
                             $alert->setRefId($mailId);
                             $alert->setDate(new \DateTime('now', $timezone));
-                            $alert->setSubject('Votre mail sortant a été bloqué');
+                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title'));
                             $alert->setIsRead(false);
                             $alert->setUser($senderUser);
                             $alert->setRefUser($fromAddr);
@@ -150,8 +171,8 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($senderUser->getEmailFromRessource())
-                                ->subject('Votre mail sortant a été bloqué')
-                                ->text('Un virus a été détecté dans votre mail sortant.');
+                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title'))
+                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content'));
 
                             $smtpServer = $senderUser->getDomain()->getSrvSmtp();
                             $smtpPort = $senderUser->getDomain()->getSmtpPort();
@@ -215,11 +236,20 @@ class CreateAlertMessageHandler
 
                 // Create a single alert for all admins and superadmins
                 foreach ($users as $user) {
+                    // Set the locale for the translator
+                    if ($user->getPreferedLang() !== null) {
+                        $this->translator->setLocale($user->getPreferedLang());
+                    } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
+                        $this->translator->setLocale($user->getDomain()->getDefaultLang());
+                    } else {
+                        $this->translator->setLocale('fr');
+                    }
+
                     $alert = new Alert();
                     $alert->setAlertType('sql_limit_report');
                     $alert->setRefId($id);
                     $alert->setDate(new \DateTime('now', $timezone));
-                    $alert->setSubject('Limite de quota franchie');
+                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title'));
                     $alert->setIsRead(false);
                     $alert->setUser($user);
                     $alert->setRefUser(implode(', ', $senderEmails));
@@ -228,7 +258,7 @@ class CreateAlertMessageHandler
 
                     // Send email to admin/superadmin
                     $emailAddress = $user->getEmailFromRessource();
-                    if ($emailAddress !== null) {
+                    if ($emailAddress !== null && $user->getDomain() !== null) {
                         $smtpServer = $user->getDomain()->getSrvSmtp();
                         $smtpPort = $user->getDomain()->getSmtpPort();
                         $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
@@ -242,8 +272,8 @@ class CreateAlertMessageHandler
                         $email = (new Email())
                             ->from($mailFrom)
                             ->to($emailAddress)
-                            ->subject('Limite de quota franchie')
-                            ->text('Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: ' . implode(', ', $senderEmails));
+                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title'))
+                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content') . implode(', ', $senderEmails));
 
                         $mailer->send($email);
                     } else {
@@ -260,6 +290,15 @@ class CreateAlertMessageHandler
                     if (!isset($processedSenders[$fromAddr])) {
                         $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
                         if ($senderUser) {
+                            // Set the locale for the translator
+                            if ($senderUser->getPreferedLang() !== null) {
+                                $this->translator->setLocale($senderUser->getPreferedLang());
+                            } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
+                                $this->translator->setLocale($senderUser->getDomain()->getDefaultLang());
+                            } else {
+                                $this->translator->setLocale('fr');
+                            }
+
                             $processedSenders[$fromAddr] = true;
 
                             if ($senderUser->getDomain()->getSendUserAlerts() === false) {
@@ -269,7 +308,7 @@ class CreateAlertMessageHandler
                                 $alert->setAlertType('sql_limit_report');
                                 $alert->setRefId($id);
                                 $alert->setDate(new \DateTime('now', $timezone));
-                                $alert->setSubject('Vous avez dépassé le quota');
+                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title'));
                                 $alert->setIsRead(false);
                                 $alert->setUser($senderUser);
                                 $alert->setRefUser($fromAddr);
@@ -288,8 +327,8 @@ class CreateAlertMessageHandler
                                 $email = (new Email())
                                     ->from($mailFrom)
                                     ->to($senderUser->getEmailFromRessource())
-                                    ->subject('Vous avez dépassé le quota')
-                                    ->text('Vous avez dépassé le quota. Votre mail n\'a pas été distribué.');
+                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title'))
+                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content'));
 
                                 $smtpServer = $senderUser->getDomain()->getSrvSmtp();
                                 $smtpPort = $senderUser->getDomain()->getSmtpPort();
