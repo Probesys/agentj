@@ -627,8 +627,8 @@ Entities:
       title: "Import users"
       labels: { titleInfo: Information }
       description:
-        "The file must be encoded in utf8 in csv format separated by comma
-        points.<br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
       warning:
         "Warning : The already existing users will be updated with the new
         information."
@@ -636,8 +636,8 @@ Entities:
       title: "Import alias"
       labels: { titleInfo: Information }
       description:
-        "The file must be encoded in utf8 in csv format separated by comma
-        points.<br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
+        "The file must be encoded in utf8 in csv format separated by semicolon.
+        <br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
       warning:
         "Warning : The already existing users will be updated with the new
         information."
