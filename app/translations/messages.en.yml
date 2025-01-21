@@ -69,6 +69,7 @@ Generics:
     groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
     helpAlert: "Alerts on blocked outgoing emails (quota exceeded, etc.)"
     cannotPreviewMailWithvirus: "You cannot view this message because it contains a virus."
+    selectAtLeastOneDomain: "You must select at least one domain"
   labels:
     all: All
     filters: Filters

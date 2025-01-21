@@ -60,14 +60,15 @@ class UserController extends AbstractController {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_new'),
             'attr' => ['class' => 'modal-ajax-form'],
+            'adminForm' => true,
             'include_quota' => false,
         ]);
 
         $form->remove('originalUser');
         $form->remove('groups');
+        $form->remove('domain');
         $form->remove('emailRecovery');
         $form->remove('sharedWith');
-        $form->remove('domain');
         $form->remove('imapLogin');
         $form->remove('report');
         $form->handleRequest($request);
@@ -97,9 +98,11 @@ class UserController extends AbstractController {
                 $role = $form->get('roles')->getData();
                 $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
                 $policy = $this->em->getRepository(Policy::class)->find(5);
+                $username = $form->get('username')->getData();
+                $username = $username ? $username : $form->get('fullname')->getData();
+                $user->setUsername($username);
                 $user->setPassword($encoded);
                 $user->setPolicy($policy);
-                // $user->setUsername($user->getFullname());
                 $user->setRoles($role);
 
                 $this->em->persist($user);
@@ -126,6 +129,7 @@ class UserController extends AbstractController {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form'],
+            'adminForm' => true,
             'include_quota' => false,
         ]);
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
@@ -133,8 +137,8 @@ class UserController extends AbstractController {
         $form->remove('originalUser');
         $form->remove('emailRecovery');
         $form->remove('groups');
-        $form->remove('sharedWith');
         $form->remove('domain');
+        $form->remove('sharedWith');
         $form->remove('password');
         $form->remove('imapLogin');
         $form->remove('report');
@@ -269,7 +273,7 @@ class UserController extends AbstractController {
         $form->remove('roles');
         $form->remove('emailRecovery');
         $form->remove('username');
-
+        $form->remove('domain');
 
         $form->handleRequest($request);
 
@@ -342,14 +346,14 @@ class UserController extends AbstractController {
             'attr' => ['class' => 'modal-ajax-form'],
             'include_quota' => false,
         ]);
-        
-        
+
         $form->remove('password');
         $form->remove('emailRecovery');
         $form->remove('groups');
         $form->remove('roles');
         $form->remove('domain');
         $form->remove('sharedWith');
+        $form->remove('imapLogin');
         $form->remove('');
         $form->handleRequest($request);
 
@@ -422,7 +426,7 @@ class UserController extends AbstractController {
         $form->remove('password');
         $form->remove('originalUser');
         $form->remove('roles');
-
+        $form->remove('domain');
         $form->remove('emailRecovery');
         $form->remove('username');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
@@ -497,13 +501,13 @@ class UserController extends AbstractController {
             'include_quota' => false,
         ]);
 
-        
         $form->remove('password');
         $form->remove('emailRecovery');
         $form->remove('groups');
         $form->remove('roles');
         $form->remove('domain');
         $form->remove('sharedWith');
+        $form->remove('imapLogin');
         $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
         $form->handleRequest($request);
 
