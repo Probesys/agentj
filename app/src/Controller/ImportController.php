@@ -83,7 +83,7 @@ class ImportController extends AbstractController {
 
         $row = 0;
         $import = 0;
-        $already_exist = 0;
+        $already_exist = [];
         $errors = [];
         $batchSize = 20;
 
