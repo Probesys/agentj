@@ -45,18 +45,19 @@
     {{ form_row(form.password.second, {'label': 'Entities.User.fields.repeatPassword'|trans}) }}
 {% endif %}
 
-{ {% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%} #}
-{% if form.roles is defined %}
-    <div data-role='["{{ user.roles[0] }}"]'>
-        {{ form_row(form.roles, {'attr': {'id': 'roles'}}) }}
-    </div>
-{% endif %}
+{% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%} #}
+    {% if form.roles is defined %}
+        <div data-role='["{{ user.roles[0] }}"]'>
+            {{ form_row(form.roles, {'attr': {'id': 'roles'}}) }}
+        </div>
+    {% endif %}
 {% endif %}
 
-{# {% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') and (app.request.get('_route') != 'user_local_new') %} #}
-{% if form.domain is defined %}
-    {{ form_row(form.domain) }}
-{% endif %}
+ {% if (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit') and (app.request.get('_route') != 'user_local_new') %}
+     {% if form.domain is defined %}
+         {{ form_row(form.domain) }}
+     {% endif %}
+ {% endif %}
 
 {% if form.domains is defined %}
     {{ form_row(form.domains) }}
