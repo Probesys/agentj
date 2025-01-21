@@ -136,10 +136,12 @@ Generics:
     BadFormatcsv: "Mauvais format de fichier"
     IncorrectColumns: "Ligne [ROW] : Nombre de colonnes incorrect."
     InvalidEmail: "Ligne [ROW] : Adresse e-mail invalide."
-    NonexistentDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
-    NonexistentUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+    NonexistantDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+    NonexistantUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+    ExistingUser: "Ligne [ROW] : Utilisateur [EMAIL] existe déjà dans la base de données et n'est pas un alias."
     ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
     ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
+    ImportExisting: "Les utilisateurs suivants existaient déjà dans la base de données et ont été mis à jours : <br> [LIST_DUPES]"
   units:
     literByDay: litres/jour
     hoursByDay: Heures/jour
@@ -660,6 +662,9 @@ Entities:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
         \ points virgules.<br /> La structure est la suivante : email ; LastName;\
         \ FirstName; Group<br />"
+      warning:
+        "Attention : les utilisateurs importés existant déjà dans la base de données\
+        \ seront mis à jour."
     Alias:
       title: Importer des alias
       labels:
@@ -668,6 +673,9 @@ Entities:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
         \ points virgules.<br /> La structure est la suivante : FirstName ; AlLastName;\
         \ email ; email de l'alias<br />"
+      warning:
+        "Attention : les utilisateurs importés existant déjà dans la base de données\
+        \ seront mis à jour."
     WhiteListe:
       title: Importer une liste d'adresses à autoriser
     actions:
