@@ -28,22 +28,26 @@ send() {
 
 	echo -n "[$testname] ... "
 
-	case $in_out in
+	case "$in_out" in
+		# to agentj, from external smtp server
 		"in")
 			swaks --from $local_addr --to "$aj_addr" --body "sent to agentj" -s smtptest:26 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $mail_from"
 			;;
+		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
 		"out")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s outsmtp $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
 			;;
+		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
 		"outviarelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s smtptest:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
 			;;
+		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
 		"outviabadrelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s badrelay:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
@@ -61,7 +65,7 @@ send() {
 		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, mail_from '$mail_from', aj_addr '$aj_addr', options: '$swaks_opts' "
 	fi
 
-	touch $test_results/mailtester
+	touch "$test_results/mailtester"
 	# wait for all mail to be received
 	secs=0
 	while [ "$(grep -c "$test_str" $test_results/mailtester)" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
@@ -71,12 +75,12 @@ send() {
 	# if we didn't expect any mail, sleep to be sure nothing is received
 	if [ "$expected_received_count" -eq 0 ]
 	then
-		secs=$wait_time
+		secs="$wait_time"
 		sleep "$wait_time"
 	fi
 
-	received=$(grep -c "$test_str" $test_results/mailtester)
-	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' $test_results/mailtester)" && echo -n "(missing DKIM signature) "
+	received=$(grep -c "$test_str" "$test_results/mailtester")
+	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' "$test_results/mailtester")" && echo -n "(missing DKIM signature) "
 	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok ${secs}s"
@@ -97,7 +101,6 @@ then
 
 	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
 	send 'out_pass' 'out' 'user@laissepasser.fr' 1
-	send 'out_pass' 'outviarelay' 'user@laissepasser.fr' 1
 
 	send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
@@ -106,7 +109,6 @@ fi
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2
-
 	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
 	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
 
@@ -117,7 +119,7 @@ then
 	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
 
 	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 "--body docker/tests/gtube"
-	send 'out_pass_spam' 'outviarelay' 'user@laissepasser.fr' 0 "--body docker/tests/gtube"
+	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 "--body docker/tests/gtube"
 fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
