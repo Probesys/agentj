@@ -19,7 +19,7 @@ final class Version20240327151737 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE `mail_count` (`id` varchar(40) NOT NULL, `date` bigint(20) NOT NULL, `recipient_count` int(11) DEFAULT 1, `instance` varchar(40) NOT NULL, `protocol_state` varchar(10) NOT NULL, KEY `mail_count_index` (`id`,`date`)) ENGINE=InnoDB');
+        $this->addSql('CREATE TABLE if not exists `mail_count` (`id` varchar(40) NOT NULL, `date` bigint(20) NOT NULL, `recipient_count` int(11) DEFAULT 1, `instance` varchar(40) NOT NULL, `protocol_state` varchar(10) NOT NULL, KEY `mail_count_index` (`id`,`date`)) ENGINE=InnoDB');
         $this->addSql('CREATE TABLE rate_limits (id INT AUTO_INCREMENT NOT NULL, limits VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE users ADD sender_rate_limit_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E9211063FF FOREIGN KEY (sender_rate_limit_id) REFERENCES rate_limits (id)');
