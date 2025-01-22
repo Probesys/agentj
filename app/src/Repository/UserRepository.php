@@ -192,6 +192,7 @@ class UserRepository extends ServiceEntityRepository {
                 ->select('u.id, u.email')
                 ->andWhere(" u.originalUser is null")// filter only email user without alias
                 ->andWhere(" u.roles !='[\"ROLE_SUPER_ADMIN\"]'")// filter only email user without alias
+                ->andWhere(" u.roles !='[\"ROLE_ADMIN\"]'")
                 ->andWhere(" u.email NOT LIKE '@%' ")// filter only email user without domain
         ;
 
