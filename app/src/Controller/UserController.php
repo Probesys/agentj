@@ -600,7 +600,7 @@ class UserController extends AbstractController {
     #[Route(path: '/user/autocomplete', name: 'autocomplete_user', options: ['expose' => true])]
     public function autocompleteUserAction(UserRepository $userRepository, Request $request) {
 
-        $q = $request->query->get('q');
+        $q = $request->query->get('query');
 
         $return = [];
 
