@@ -1,4 +1,5 @@
 #!/bin/sh
+# SMTP_TYPE is relay|in|out
 # shellcheck disable=SC2086
 set -e
 
@@ -7,8 +8,8 @@ sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/conf/$SMTP_TYPE/postfix/main.cf"
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/conf/$SMTP_TYPE/postfix/master.cf"
 
 # Set mailname
-sed -i "s/\$DOMAIN/$DOMAIN/g" "/etc/conf/$SMTP_TYPE/postfix/main.cf"
-echo "$DOMAIN" > /etc/mailname
+sed -i "s/\$DOMAIN/${EHLO_DOMAIN:-$DOMAIN}/g" "/etc/conf/$SMTP_TYPE/postfix/main.cf"
+echo "${EHLO_DOMAIN:-$DOMAIN}" > /etc/mailname
 
 if [ "$SMTP_TYPE" != "relay" ]
 then
@@ -17,7 +18,6 @@ then
 	sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
 	sed -i "s/\$DB_USER/$DB_USER/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
 	sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/conf/$SMTP_TYPE/postfix/mysql-*.cf
-
 else
 	postmap "lmdb:/etc/conf/$SMTP_TYPE/postfix/slow_dest_domains_transport"
 fi
