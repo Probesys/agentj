@@ -8,6 +8,6 @@ sed -i "s/\$DB_OPENDKIM_PASSWORD/$DB_OPENDKIM_PASSWORD/g" /etc/opendkim.conf
 
 IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/trusted.opendkim.conf
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/trusted.opendkim.conf
+sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/trusted.opendkim.conf
 
 exec "$@"
