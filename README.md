@@ -1,5 +1,5 @@
-#####################################################################################
-CAUTION
+#################### CAUTION ############
+
 
 This document is not up to date with the new features existing in the V2 of AgentJ
 
@@ -8,7 +8,7 @@ You can see the change ins changelog for the moment
 The Document will be update till the end of february
 
 
-####################################################################################
+############################################
 
 
 
