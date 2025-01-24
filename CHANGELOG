@@ -1,4 +1,4 @@
-# v2.0.1
+# v2.0.0
 
 This release brings a main new feature: outgoing mails management. AgentJ
 can now be set as relay of an SMTP server, which allows to
