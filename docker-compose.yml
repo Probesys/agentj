@@ -114,7 +114,7 @@ services:
     restart: unless-stopped
     environment:
       - DB_USER=opendkim
-      - MAIL_HOSTNAME
+      - DOMAIN
       - DB_HOST
       - DB_NAME
       - DB_OPENDKIM_PASSWORD

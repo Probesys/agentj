@@ -8,10 +8,10 @@ sed -i "s/\$DB_USER/$DB_USER/g" /etc/$AMAVIS_CONF
 sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/$AMAVIS_CONF
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/$AMAVIS_CONF
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/$AMAVIS_CONF
-sed -i "s/\$MAIL_HOSTNAME/$MAIL_HOSTNAME/g" /etc/$AMAVIS_CONF
+sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/$AMAVIS_CONF
 sed -i "s~\$inet_socket_bind = \[.*\]~\$inet_socket_bind = ['127.0.0.1', '$IPV4']~g" /etc/$AMAVIS_CONF
 sed -i "s/\$CLAMAV_AUTOSTART/$CLAMAV_AUTOSTART/g" /etc/supervisord.conf
-echo "$MAIL_HOSTNAME" > /etc/mailname
+echo "$DOMAIN" > /etc/mailname
 chmod 644 /etc/$AMAVIS_CONF
 if [ ! -d /var/run/amavis ]
 then
