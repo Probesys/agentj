@@ -14,22 +14,22 @@ jobs:
       matrix:
         include:
           - dockerfile: app/Dockerfile
-            image: probesys38/agentj_app:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_app:${{ env.GITHUB_HEAD_REF }}
             context: app/
           - dockerfile: amavis/Dockerfile
-            image: probesys38/agentj_amavis:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_amavis:${{ env.GITHUB_HEAD_REF }}
             context: amavis/
           - dockerfile: opendkim/Dockerfile
-            image: probesys38/agentj_opendkim:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_opendkim:${{ env.GITHUB_HEAD_REF }}
             context: opendkim/
           - dockerfile: policyd-rate-limit/Dockerfile
-            image: probesys38/agentj_policyd-rate-limit:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_policyd-rate-limit:${{ env.GITHUB_HEAD_REF }}
             context: policyd-rate-limit/
           - dockerfile: smtp/Dockerfile
-            image: probesys38/agentj_smtp:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_smtp:${{ env.GITHUB_HEAD_REF }}
             context: smtp/
           - dockerfile: syslogng/Dockerfile
-            image: probesys38/agentj_syslogng:${{ GITHUB_HEAD_REF }}
+            image: probesys38/agentj_syslogng:${{ env.GITHUB_HEAD_REF }}
             context: syslogng/
 
     permissions:
