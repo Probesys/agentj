@@ -51,7 +51,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ matrix.image }}
+          images: ${{ matrix.image }}:${{ env.GITHUB_HEAD_REF }}
 
       - name: Build and push Docker image
         id: push
@@ -60,7 +60,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ matrix.image }}:${{ env.GITHUB_HEAD_REF }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
