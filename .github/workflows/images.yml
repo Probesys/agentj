@@ -51,7 +51,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ matrix.image }}:${{ env.GITHUB_HEAD_REF }}
+          images: ${{ matrix.image }}:${{ github.ref }}
 
       - name: Build and push Docker image
         id: push
@@ -66,7 +66,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: docker.io/${{ matrix.image }}
+          subject-name: docker.io/${{ matrix.image }}:${{ github.ref }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
