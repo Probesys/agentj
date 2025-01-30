@@ -14,22 +14,22 @@ jobs:
       matrix:
         include:
           - dockerfile: app/Dockerfile
-            image: probesys38/agentj_app:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_app
             context: app/
           - dockerfile: amavis/Dockerfile
-            image: probesys38/agentj_amavis:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_amavis
             context: amavis/
           - dockerfile: opendkim/Dockerfile
-            image: probesys38/agentj_opendkim:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_opendkim
             context: opendkim/
           - dockerfile: policyd-rate-limit/Dockerfile
-            image: probesys38/agentj_policyd-rate-limit:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_policyd-rate-limit
             context: policyd-rate-limit/
           - dockerfile: smtp/Dockerfile
-            image: probesys38/agentj_smtp:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_smtp
             context: smtp/
           - dockerfile: syslogng/Dockerfile
-            image: probesys38/agentj_syslogng:${{ env.GITHUB_HEAD_REF }}
+            image: probesys38/agentj_syslogng
             context: syslogng/
 
     permissions:
@@ -60,7 +60,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ matrix.image }}:${{ env.GITHUB_HEAD_REF }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
