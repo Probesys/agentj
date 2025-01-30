@@ -14,22 +14,22 @@ jobs:
       matrix:
         include:
           - dockerfile: app/Dockerfile
-            image: probesys38/agentj_app
+            image: probesys38/agentj_app:${{ GITHUB_HEAD_REF }}
             context: app/
           - dockerfile: amavis/Dockerfile
-            image: probesys38/agentj_amavis
+            image: probesys38/agentj_amavis:${{ GITHUB_HEAD_REF }}
             context: amavis/
           - dockerfile: opendkim/Dockerfile
-            image: probesys38/agentj_opendkim
+            image: probesys38/agentj_opendkim:${{ GITHUB_HEAD_REF }}
             context: opendkim/
           - dockerfile: policyd-rate-limit/Dockerfile
-            image: probesys38/agentj_policyd-rate-limit
+            image: probesys38/agentj_policyd-rate-limit:${{ GITHUB_HEAD_REF }}
             context: policyd-rate-limit/
           - dockerfile: smtp/Dockerfile
-            image: probesys38/agentj_smtp
+            image: probesys38/agentj_smtp:${{ GITHUB_HEAD_REF }}
             context: smtp/
           - dockerfile: syslogng/Dockerfile
-            image: probesys38/agentj_syslogng
+            image: probesys38/agentj_syslogng:${{ GITHUB_HEAD_REF }}
             context: syslogng/
 
     permissions:
@@ -66,7 +66,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ matrix.image }}
+          subject-name: docker.io/${{ matrix.image }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
