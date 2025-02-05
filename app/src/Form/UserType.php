@@ -103,6 +103,7 @@ class UserType extends AbstractType
             ->add('sharedWith', UserAutocompleteField::class, [
                 'multiple' => true,
                 'required' => false,
+                'label' => 'Entities.User.fields.sharedWith',
             ]);
 
 

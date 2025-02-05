@@ -28,6 +28,7 @@ Generics:
     chooseUser: "Choisir un utilisateur"
     chooseDomain: "Choisir un domaine"
     choosePolicy: "Choisir une stratégie"
+    showMore: "Voir plus"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -531,6 +532,7 @@ Entities:
       outMsgBlockedCount: Nombre de messages sortants bloqués
       inMsgBlockedCount: Nombre de messages entrants bloqués
       originalUser: Email de référence
+      sharedWith: Partagé avec
       alias: Alias
       sharedBy: Partagée avec
       groups: Groupe
