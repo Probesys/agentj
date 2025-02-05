@@ -71,7 +71,7 @@ class GroupsController extends AbstractController {
             if ($labelExists) {
                 return new Response(json_encode([
                             'status' => 'danger',
-                            'message' => $this->translator->trans('Generics.flash.groupNameAllreadyExist'),
+                            'message' => $this->translator->trans('Generics.flash.groupNameAlreadyExist'),
                 ]));
             }
 
@@ -130,7 +130,7 @@ class GroupsController extends AbstractController {
                 if ($labelExists) {
                     return new Response(json_encode([
                                 'status' => 'danger',
-                                'message' => $this->translator->trans('Generics.flash.groupNameAllreadyExist'),
+                                'message' => $this->translator->trans('Generics.flash.groupNameAlreadyExist'),
                     ]));
                 }
             }
@@ -202,7 +202,7 @@ class GroupsController extends AbstractController {
     }
 
     /**
-     * Vérify if a group with lable allready exists for a domain
+     * Vérify if a group with lable already exists for a domain
      */
     public function checkNameforDomain(string $name, Domain $domain): bool {
 

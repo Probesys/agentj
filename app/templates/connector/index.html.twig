@@ -1,17 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connector index{% endblock %}
+{% block title %}{{ 'Entities.Connector.index'|trans() }}{% endblock %}
 
 {% block body %}
-    <h1>Connector index</h1>
+    <h1>{{ 'Entities.Connector.index'|trans() }}</h1>
 
     <table class="table">
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Name</th>
-                <th>Active</th>
-                <th>actions</th>
+                <th>{{ 'Entitites.Connector.fields.name'|trans() }}</th>
+                <th>{{ 'Entitites.Connector.fields.active'|trans() }}</th>
+                <th>{{ 'Generics.labels.actions'|trans() }}</th>
             </tr>
         </thead>
         <tbody>
@@ -19,19 +19,19 @@
             <tr>
                 <td>{{ connector.id }}</td>
                 <td>{{ connector.name }}</td>
-                <td>{{ connector.active ? 'Yes' : 'No' }}</td>
+                <td>{{ connector.active ? 'Generics.labels.yes'|trans() : 'Generics.labels.no'|trans() }}</td>
                 <td>
-                    <a href="{{ path('app_connector_show', {'id': connector.id}) }}">show</a>
-                    <a href="{{ path('app_connector_edit', {'id': connector.id}) }}">edit</a>
+                    <a href="{{ path('app_connector_show', {'id': connector.id}) }}">{{ 'Generics.actions.show'|trans() }}</a>
+                    <a href="{{ path('app_connector_edit', {'id': connector.id}) }}">{{ 'Generics.actions.edit'|trans() }}</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4">{{ 'Generics.messages.no_records_found'|trans() }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_connector_new') }}">Create new</a>
+    <a href="{{ path('app_connector_new') }}">{{ 'Generics.actions.create'|trans() }}</a>
 {% endblock %}

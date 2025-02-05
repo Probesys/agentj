@@ -6,7 +6,7 @@
   {% set _title = 'Navigation.user_profil'|trans() %}
   {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-  {% endembed %}   
+  {% endembed %}
   <div class="col bg-white p-2">
     <div class="col-md-12">
       <ul class="nav nav-tabs" id="accountTab" role="tablist">
@@ -22,23 +22,23 @@
           {{ form_start(form) }}
           <div class="row">
             <div class="col-md-2">
-              Nom :  
+              {{ 'Entities.User.fields.fullName'|trans() }}
             </div>
             <div class="col-md-10">
               {{ app.user.fullName }}
-            </div>          
+            </div>
             <div class="col-md-2">
-              Email : 
+              {{ 'Entities.User.fields.email'|trans() }}
             </div>
             <div class="col-md-10">
               {{ app.user.getEmailFromRessource() }}
-            </div>     
+            </div>
             <div class="col-md-2">
-              Groupe :  
+              {{ 'Entities.User.fields.groups'|trans() }}
             </div>
             <div class="col-md-10">
 {#              {{ app.user.groups }}#}
-            </div>            
+            </div>
             <div class="col-md-2">
               {{ 'Entities.User.fields.report'|trans() }}
               {#              {{ form_label(form.report) }}#}
@@ -46,7 +46,7 @@
             <div class="col-md-10">
               {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
               {{ form_widget(form.report) }}
-            </div>           
+            </div>
             <div class="col-md-2">
               {{ 'Entities.User.fields.bypassHumanAuth'|trans() }}
               {#              {{ form_label(form.report) }}#}
@@ -54,15 +54,15 @@
             <div class="col-md-10">
               {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
               {{ form_widget(form.bypassHumanAuth) }}
-            </div>               
+            </div>
           </div>
 
 
           <div class="d-flex justify-content-center">
             <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
             <a class="btn btn-outline-secondary " href="/">{{ 'Generics.actions.cancel'|trans() }}</a>
-          </div>            
-          {{ form_end(form) }}            
+          </div>
+          {{ form_end(form) }}
         </div>
         <div class="tab-pane fade" id="account-rules" role="tabpanel" aria-labelledby="account-rules-tab">
           <div class="row">
@@ -80,7 +80,7 @@
             <div class="col-md-8">
               {{ app.user.policy|trans() }}
             </div>
-          </div>            
+          </div>
           {% if app.user.groups and groupDefaulWb is not null %}
           <div class="row">
             <div class="col-md-4">
@@ -94,7 +94,7 @@
 
 
         </div>
-      </div>    
+      </div>
     </div>
 
 

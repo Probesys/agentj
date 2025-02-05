@@ -78,9 +78,9 @@ t.add("Generics.flash.UserAlreadyPresent", "Il y a [NB_USER] comptes emails qui 
 t.add("Generics.flash.BadColumnsFile", "Mauvais nombre de colonnes pour le fichier.", "messages", "fr");
 t.add("Generics.flash.NoImport", "Aucun compte email n'a \u00e9t\u00e9 import\u00e9.", "messages", "fr");
 t.add("Generics.flash.domainNotExist", "Le domaine n'existe pas", "messages", "fr");
-t.add("Generics.flash.emailAllreadyExist", "Cet email est d\u00e9j\u00e0 utilis\u00e9. Vous ne pouvez pas l'utiliser", "messages", "fr");
-t.add("Generics.flash.aliasAllreadyExist", "Cet alias est d\u00e9j\u00e0 utilis\u00e9. Vous ne pouvez pas l'utiliser", "messages", "fr");
-t.add("Generics.flash.userNameAllreadyExist", "Ce login existe d\u00e9j\u00e0. Vous ne pouvez pas l'utiliser", "messages", "fr");
+t.add("Generics.flash.emailAlreadyExist", "Cet email est d\u00e9j\u00e0 utilis\u00e9. Vous ne pouvez pas l'utiliser", "messages", "fr");
+t.add("Generics.flash.aliasAlreadyExist", "Cet alias est d\u00e9j\u00e0 utilis\u00e9. Vous ne pouvez pas l'utiliser", "messages", "fr");
+t.add("Generics.flash.userNameAlreadyExist", "Ce login existe d\u00e9j\u00e0. Vous ne pouvez pas l'utiliser", "messages", "fr");
 t.add("Generics.flash.passwordNotMatching", "La confirmation du mot de passe n'est pas valide", "messages", "fr");
 t.add("Generics.units.literByDay", "litres\/jour", "messages", "fr");
 t.add("Generics.units.hoursByDay", "Heures\/jour", "messages", "fr");
