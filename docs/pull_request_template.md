@@ -1,4 +1,3 @@
-```
 ## Related issue(s)
 <!-- Copy-paste the URL to the related issue(s) if any ("N/A" if not applicable).
   -->
