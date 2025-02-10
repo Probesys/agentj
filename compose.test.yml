@@ -88,6 +88,10 @@ services:
     networks:
       testnet:
 
+  senderverifmilter:
+    networks:
+      testnet:
+
 networks:
   testnet:
     ipam:
