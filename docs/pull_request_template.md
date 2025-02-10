@@ -13,7 +13,6 @@
   -- reviewer to make sure to not forget important things.
   -- Reviewer: if you think one of the item isn’t applicable to this PR,
   -- please check it anyway.
-  -- Get help: https://github.com/Probesys/agentj/blob/main/docs/developers/review.md
   -->
 
 - [ ] Code is manually tested
