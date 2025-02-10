@@ -19,7 +19,7 @@ class UserAutocompleteField extends AbstractType
     {
         $resolver->setDefaults([
             'class' => User::class,
-            'placeholder' => 'Choose a User',
+            'placeholder' => 'Generics.actions.chooseUser',
             'autocomplete_url' => $this->router->generate('autocomplete_user'),
             // 'choice_label' => 'name',
 

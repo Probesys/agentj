@@ -9,10 +9,10 @@
 
 {% block body %}
     <div class="m-4">
-        <h3 class="mb-3">Recherche Avancée</h3>
+        <h3 class="mb-3">{{ 'Search.Title'|trans }}</h3>
 
         <button id="toggleFilters" class="btn btn-primary mb-3">
-            Filtres
+            {{ 'Generics.labels.filters'|trans }}
             <span id="toggleArrow" class="arrow-right"></span>
         </button>
 
@@ -48,7 +48,7 @@
             </div>
 
             <!-- Button to toggle advanced filters -->
-            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">Filtres avancés</button>
+            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">{{ 'Search.AdvancedFilter'|trans }}</button>
 
             <!-- Advanced filters section -->
             <div id="advancedFilters" style="display: none;">

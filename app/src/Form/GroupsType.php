@@ -36,7 +36,7 @@ class GroupsType extends AbstractType
             ->add('policy', null, [
                 'label' => 'Entities.Group.fields.policy',
                 'required' => true,
-                'placeholder' => 'Select a policy'
+                'placeholder' => 'Generics.actions.choosePolicy'
             ])
             ->add('wb', ChoiceType::class, [
                 'choices' => $actions,
@@ -53,7 +53,7 @@ class GroupsType extends AbstractType
                 'class' => Domain::class,
                 'multiple' => false,
                 'attr' => ['data-form-group-target' =>  'domain', 'data-action' => 'change->form-group#checkPriorityValidity'],
-                'placeholder' => 'Select Domain',
+                'placeholder' => 'Generics.actions.chooseDomain',
                 'required' => true,
                 'query_builder' => function (DomainRepository $rep) use ($user) {
                     $builder = $rep->createQueryBuilder('d')

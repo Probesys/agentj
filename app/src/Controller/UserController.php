@@ -79,15 +79,15 @@ class UserController extends AbstractController {
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
 //            dd($form->get('password')->get('first')->getData());
             if ($userNameExist) {
-                //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAllreadyExist'));
+                //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAlreadyExist'));
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.userNameAlreadyExist'),
                 ];
             } elseif ($emailExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
             } elseif ($form->get('password')->get('first')->getData() != $form->get('password')->get('second')->getData()) {
                 $return = [
@@ -150,7 +150,7 @@ class UserController extends AbstractController {
             if ($oldUser['username'] != $form->get('username')->getData() && $userNameExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.userNameAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.userNameAlreadyExist'),
                 ];
             } else {
                 $role = $form->get('roles')->getData();
@@ -293,12 +293,12 @@ class UserController extends AbstractController {
             } elseif ($emailExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
             } elseif ($imapLoginExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
                 $user->setRoles('["ROLE_USER"]');
@@ -369,7 +369,7 @@ class UserController extends AbstractController {
             } elseif ($aliaslExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.aliasAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.aliasAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
                 $user->setRoles('["ROLE_USER"]');
@@ -448,12 +448,12 @@ class UserController extends AbstractController {
             } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
             } elseif ($oldUserData['imapLogin'] != $form->get('imapLogin')->getData() && $imapLoginExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.imapLoginAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
 
@@ -518,7 +518,7 @@ class UserController extends AbstractController {
             if (stream_get_contents($oldUser['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
                 $return = [
                     'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.emailAllreadyExist'),
+                    'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
                 $user->setUsername($user->getEmail());

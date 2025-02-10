@@ -20,8 +20,8 @@ class PolicyType extends AbstractType
             ->add('spamLover', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.spamLover'])
             ->add('bannedFilesLover', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bannedFilesLover'])
             ->add('badHeaderLover', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.badHeaderLover'])
-            ->add('bypassVirusChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bannedFilesLover'])
-            ->add('bypassSpamChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bypassVirusChecks'])
+            ->add('bypassVirusChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bypassVirusChecks'])
+            ->add('bypassSpamChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bypassSpamChecks'])
             ->add('bypassBannedChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bypassBannedChecks'])
             ->add('bypassHeaderChecks', ChoiceType::class, ['choices' =>  $choicesYesNo,'mapped' => true,'label' => 'Entities.Policy.fields.bypassHeaderChecks'])
 

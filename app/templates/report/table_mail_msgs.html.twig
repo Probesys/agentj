@@ -14,7 +14,7 @@
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
               <a href="{{url ~ path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
-                 title="Autoriser l'expéditeur" style="font-size:16px;
+                 title={{ 'Message.Actions.AutorizedSender'|trans() }} style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
                  border-radius: 5px;
@@ -25,14 +25,14 @@
                  color: #fff;
                  text-decoration: none;
                  ">
-                Autoriser
+                {{ 'Message.Actions.Autorized'|trans() }}
               </a>              
             </div>
 
           </td>
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
-              <a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title="Récupérer le mail" style="font-size:16px;
+              <a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title={{ 'Message.Actions.RestoreMessage'|trans() }} style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
                  border-radius: 5px;
@@ -43,7 +43,7 @@
                  text-decoration: none;
                  ">
 
-                Récupérer</a>              
+                {{ 'Message.Actions.Restore'|trans() }}</a>              
             </div>  
 
 

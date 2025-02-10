@@ -109,10 +109,10 @@ class MsgsSendMailTokenCommand extends Command
                           $this->releaseMessage($msgObj, $msgrcpt, $user);
                     } else {
                         // Bypass if an authetification has been sent the last day for this sender
-                        $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
-                        if (count($AuhtentificationAllreadySent) > 0) {
+                        $AuhtentificationAlreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
+                        if (count($AuhtentificationAlreadySent) > 0) {
                             $today = new \DateTime();
-                            $dateLastSendAuthentification = new \DateTime($AuhtentificationAllreadySent[0]['time_iso']);
+                            $dateLastSendAuthentification = new \DateTime($AuhtentificationAlreadySent[0]['time_iso']);
                             $interval = $today->diff($dateLastSendAuthentification)->format('%a');
                             if ($interval <= 0) {
                                   continue;

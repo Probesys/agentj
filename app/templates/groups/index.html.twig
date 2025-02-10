@@ -60,7 +60,7 @@
                                     <a href="{{ path('groups_delete',{'id' : group.id}) }}?_token={{ csrf_token('delete' ~ group.id) }}" class='btn btn-sm btn-danger confirmModal' 
                                        data-dialog-title='{{ 'Message.Dialogs.confirmDeleteGroupTitle'|trans }}' 
                                        data-dialog-content='{{ 'Message.Dialogs.confirmDeleteGroupContent'|trans }}'                   
-                                       title="{{ 'Group.Actions.Delete'|trans() }}">
+                                       title="{{ 'Entities.Group.Actions.Delete'|trans() }}">
                                         <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
                                         <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Delete'|trans() }}</span>
                                     </a>
