@@ -21,4 +21,3 @@
 - [ ] Tests are up to date
 - [ ] Documentation is up to date
 - [ ] Pull request has been reviewed and approved
-```
