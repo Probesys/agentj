@@ -25,11 +25,14 @@ jobs:
       - name: Setup env
         run: |
           cp .env.example .env
-          sed -i "s|#UID=.*|UID=`id -u`|g" .env
-          sed -i "s|#GID=.*|GID=`id -g`|g" .env
+          sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
+          sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
           sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
           sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
           sed -i "s|SF_TOKEN_ENCRYPTION_SALT=.*|SF_TOKEN_ENCRYPTION_SALT=`openssl rand -base64 32`|" .env
+          sed -i "s|example.com|agentj.local|g" .env
+          sed -i "s|#UID=.*|UID=`id -u`|g" .env
+          sed -i "s|#GID=.*|GID=`id -g`|g" .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
@@ -45,8 +48,6 @@ jobs:
           down-flags: --volumes
 
       - name: Run tests
-        env:
-          COMPOSE_FILE: docker-compose.yml:compose.dev.yml:compose.test.yml
         run: |
           docker compose exec -u www-data app ./docker/tests/testmail.sh
           exit $(cat `find tests/results -name '*.result'` | grep -c failed)
