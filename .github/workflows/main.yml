@@ -32,9 +32,9 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         env:
           APP_ENV: dev
-          SF_APP_SECRET: "bb28b55e5a458aabcc88f0ec26dec02c"
-          SF_TOKEN_ENCRYPTION_IV: "d5e98e7144a5740a"
-          SF_TOKEN_ENCRYPTION_SALT: "UYMj/1dfUApF+OEbc5JAptACw9eAvRcj3J8p2n+bF3Q="
+          SF_APP_SECRET: "thisisnotasecretaaaaaaaaaaaaaaaa"
+          SF_TOKEN_ENCRYPTION_IV: "thisneitherbbbbb"
+          SF_TOKEN_ENCRYPTION_SALT: "/and+neither+plz+gitguardiannnnnnnnnnnnnnnn="
           DOMAIN: agentj.local
         with:
           compose-file: |
