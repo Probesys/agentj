@@ -27,14 +27,14 @@ jobs:
           cp .env.example .env
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
+          sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
+          sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
+          sed -i "s|SF_TOKEN_ENCRYPTION_SALT=.*|SF_TOKEN_ENCRYPTION_SALT=`openssl rand -base64 32`|" .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         env:
           APP_ENV: dev
-          SF_APP_SECRET: "thisisnotasecretaaaaaaaaaaaaaaaa"
-          SF_TOKEN_ENCRYPTION_IV: "thisneitherbbbbb"
-          SF_TOKEN_ENCRYPTION_SALT: "/and+neither+plz+gitguardiannnnnnnnnnnnnnnn="
           DOMAIN: agentj.local
         with:
           compose-file: |
