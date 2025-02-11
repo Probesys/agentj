@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   phpstan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ./app
@@ -16,28 +16,26 @@ jobs:
       - run: composer install --no-scripts --no-cache
 
       - name: PHPStan Static Analysis
-        run: ./vendor/bin/phpstan analyse src/
+        run: ./vendor/bin/phpstan -v
 
   testmail:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup env
         run: |
           cp .env.example .env
-          sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
-          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=strangeci|g" .env
-          sed -i "s|DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=strangeci|g" .env
-          sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
-          sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
-          sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
-          sed -i "s|SF_TOKEN_ENCRYPTION_SALT=.*|SF_TOKEN_ENCRYPTION_SALT=`openssl rand -base64 32`|" .env
-          sed -i "s|example.com|agentj.local|g" .env
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
+        env:
+          APP_ENV: dev
+          SF_APP_SECRET: "bb28b55e5a458aabcc88f0ec26dec02c"
+          SF_TOKEN_ENCRYPTION_IV: "d5e98e7144a5740a"
+          SF_TOKEN_ENCRYPTION_SALT: "UYMj/1dfUApF+OEbc5JAptACw9eAvRcj3J8p2n+bF3Q="
+          DOMAIN: agentj.local
         with:
           compose-file: |
             docker-compose.yml
@@ -47,6 +45,8 @@ jobs:
           down-flags: --volumes
 
       - name: Run tests
+        env:
+          COMPOSE_FILE: docker-compose.yml:compose.dev.yml:compose.test.yml
         run: |
           docker compose exec -u www-data app ./docker/tests/testmail.sh
           exit $(cat `find tests/results -name '*.result'` | grep -c failed)
