@@ -7,11 +7,6 @@ monolog:
             path: 'php://stderr'
             # log *all* messages (debug is lowest level)
             level: error
-
-        syslog_handler:
-            type: syslog
-            # log error-level messages and higher
-            level: error
  
         sentry:
             type: sentry

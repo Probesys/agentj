@@ -80,14 +80,6 @@ services:
     networks:
       testnet:
 
-  syslogng:
-    networks:
-      testnet:
-
-  logspout:
-    networks:
-      testnet:
-
 networks:
   testnet:
     ipam:

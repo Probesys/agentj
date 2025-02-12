@@ -55,8 +55,6 @@ services:
       - amavis
       - outamavis
       - db
-    volumes:
-      - applogs:/var/log/
     ports:
       - $PROXY_LISTEN_ADDR:$PROXY_PORT:80
 
@@ -131,31 +129,9 @@ services:
     volumes:
       - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
 
-  syslogng:
-    image: probesys38/agentj_syslogng:$VERSION
-    build:
-      context: ./syslogng
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - logs:/var/log/syslogng
-
-  logspout:
-    image: gliderlabs/logspout
-    restart: always
-    environment:
-      - TZ=${TZ}
-    depends_on:
-      - syslogng
-    command: syslog+udp://syslogng:514?filter.name=${COMPOSE_PROJECT_NAME}*
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
 volumes:
   amavis_out:
   amavis_in:
-  applogs:
   db:
   logs:
   postqueue:

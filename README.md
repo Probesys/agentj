@@ -33,7 +33,6 @@ The AgentJ Docker stack is composed of the following services:
 - **outamavis**: same as **amavis** but used for outgoing e-mails sent by local users
 - **opendkim**: verify incoming mail DKIM signature for incoming mail, and append signature for outgoing mail
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
-- *wip* **logspout + syslogng**: a Syslog-NG instance that will collect and centralize logs from the other containers
 - *for tests only* **smtptest** and **badrelay**: see [tests](#tests) below
 
 ## Get the sources
@@ -77,9 +76,7 @@ Set `COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml`, then run
 When started, the AgentJ stack will create the following volumes:
 
 - *amavis_in*/*amavis_out* : Amavis databases
-- *applogs* : application logs (cron, web server logs …)
 - *db* : MariaDB databases files
-- wip *logs*: log files from all containers, centralized by the **syslogng** container
 - *postqueue* : the incoming mail queue (for **smtp**)
 - *outpostqueue* : the outgoing mail queue (for **outsmtp**)
 
