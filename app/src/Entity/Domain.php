@@ -117,7 +117,7 @@ class Domain
     private Collection $dailyStats;
 
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
-    private DomainKey $domain_keys;
+    private ?DomainKey $domain_keys = null;
 
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $domainRelays;
@@ -138,7 +138,7 @@ class Domain
         $this->groups = new ArrayCollection();
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
-        $this->domain_keys = new DomainKey();
+        // $this->domain_keys = new DomainKey();
         $this->domainRelays = new ArrayCollection(); # ip addresses
     }
 

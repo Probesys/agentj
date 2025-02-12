@@ -239,8 +239,8 @@ class DomainController extends AbstractController
                 }
             }
 
-            if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
-                $this->generateOpenDkim($domain);
+        if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
+            $this->generateOpenDkim($domain);
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -260,8 +260,12 @@ class DomainController extends AbstractController
             return $this->redirectToRoute('domain_index');
         }
 
-        $dkim = $this->em->getRepository(DomainKey::class)->find($domain->getDomainKeys()->getId());
-        $dnsInfo = $dkim->getDnsinfo();
+        $dkim = null;
+        $dnsInfo = null;
+        if ($domain->getDomainKeys() !== null) {
+            $dkim = $this->em->getRepository(DomainKey::class)->find($domain->getDomainKeys()->getId());
+            $dnsInfo = $dkim->getDnsinfo();
+        }
         return $this->render('domain/edit.html.twig', [
             'domain' => $domain,
             'dkim' => $dkim,
