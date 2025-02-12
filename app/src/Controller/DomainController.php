@@ -239,8 +239,8 @@ class DomainController extends AbstractController
                 }
             }
 
-        if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
-            $this->generateOpenDkim($domain);
+            if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
+                $this->generateOpenDkim($domain);
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -402,6 +402,10 @@ class DomainController extends AbstractController
     private function generateOpenDkim(Domain $domain): bool
     {
         $dkim = $domain->getDomainKeys();
+        if ($dkim === null) {
+            $dkim = new DomainKey();
+            $domain->setDomainKeys($dkim);
+        }
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');
         try {
