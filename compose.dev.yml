@@ -23,6 +23,15 @@ services:
       - ./app/:/var/www/agentj
     working_dir: /var/www/agentj
 
+  watcher:
+   image: node:18-alpine
+   user: ${UID}:${GID}
+   working_dir: /app
+   volumes:
+        - ./app:/app
+   restart: unless-stopped
+   command: /bin/sh -c "yarn install && yarn watch"
+
   senderverifmilter:
     build:
       context: senderverifmilter
@@ -33,11 +42,13 @@ services:
       - ./senderverifmilter/:/app
     command: bash -c "pip install --user -r requirements.txt ; python -u main.py"
 
-  watcher:
-   image: node:18-alpine
-   user: ${UID}:${GID}
-   working_dir: /app
-   volumes:
-        - ./app:/app
-   restart: unless-stopped
-   command: /bin/sh -c "yarn install && yarn watch"
+  mailpit:
+    image: axllent/mailpit:v1.22
+    ports:
+      - $MAILPIT_WEB_PORT:8025
+      - $MAILPIT_SMTP_PORT:1025
+    environment:
+      - TZ
+      - MP_DATABASE=/data/mailpit.db
+    volumes:
+      - ./mailpit/data:/data

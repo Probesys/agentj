@@ -4,3 +4,4 @@ docker-compose.override.yml
 __pycache__/
 .cache/
 .local/
+mailpit/

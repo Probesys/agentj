@@ -84,6 +84,13 @@ services:
     networks:
       testnet:
 
+  mailpit:
+    networks:
+      testnet:
+        aliases:
+          - mailpit.test
+
+
 networks:
   testnet:
     ipam:
