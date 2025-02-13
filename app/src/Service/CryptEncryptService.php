@@ -25,6 +25,9 @@ class CryptEncryptService
         $salt = $this->params->get('salt');
         $iv = $this->params->get('iv');
         $crypt = openssl_encrypt($str, 'aes-256-cbc', $salt, 0, $iv);
+        // TODO DON'T USE THIS DATE AS IT'S NOT RELIABLE
+        // The date is not encrypted and just added to the base64 hash. It
+        // means an attacker can change the date himself.
         //add date for revocation
         $date = time() + 7 * 24 * 3600;
         return base64_encode($date . $crypt);

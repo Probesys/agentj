@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Service;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,9 +27,11 @@ class ReportSendMailCommand extends Command {
 
 
     public function __construct(
-            private Environment $twig, 
-            private ManagerRegistry $doctrine, 
-            private TranslatorInterface $translator) {
+        private Environment $twig,
+        private ManagerRegistry $doctrine,
+        private TranslatorInterface $translator,
+        private Service\CryptEncryptService $cryptEncryptService,
+    ) {
         parent::__construct();
     }
 
@@ -87,12 +90,14 @@ class ReportSendMailCommand extends Command {
                 $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
                 $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
 
-                $tableMsgs = $this->twig->render(
-                    'report/table_mail_msgs.html.twig', [
-                        'untreatedMsgs' => $untreatedMsgs,
-                        'url' => $url
-                    ]);
-                //        $tableMsgs = $this->renderView('report/table_mail_msgs.html.twig', ['untreatedMsgs' => $untreatedMsgs]);
+                // TODO set validity to max 48h
+                $token = $this->cryptEncryptService->encrypt($user->getId());
+
+                $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
+                    'untreatedMsgs' => $untreatedMsgs,
+                    'url' => $url,
+                    'token' => $token,
+                ]);
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
                 $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
