@@ -59,6 +59,7 @@ security:
     access_control:
          - { path: ^/login, roles: PUBLIC_ACCESS }
          - { path: ^/connect, roles: PUBLIC_ACCESS }
+         - { path: ^/portal, roles: PUBLIC_ACCESS }
          - { path: ^/admin, roles: [ROLE_ADMIN] }
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
