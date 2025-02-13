@@ -21,11 +21,6 @@ parameters:
 			path: src/Command/MsgsSendMailTokenCommand.php
 
 		-
-			message: "#^Call to method getRid\\(\\) on an unknown class App\\\\Repository\\\\Msgs\\.$#"
-			count: 1
-			path: src/Command/MsgsSendMailTokenCommand.php
-
-		-
 			message: "#^Call to method setSendCaptcha\\(\\) on an unknown class App\\\\Command\\\\type\\.$#"
 			count: 1
 			path: src/Command/MsgsSendMailTokenCommand.php
@@ -151,16 +146,6 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: "#^Variable \\$msg might not be defined\\.$#"
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
-			message: "#^Variable \\$partitionTag might not be defined\\.$#"
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: "#^Call to an undefined method App\\\\Controller\\\\DomainController\\:\\:getDoctrine\\(\\)\\.$#"
 			count: 3
 			path: src/Controller/DomainController.php
@@ -282,51 +267,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$id$#"
-			count: 2
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^PHPDoc tag @throws with type App\\\\Controller\\\\type\\|Symfony\\\\Component\\\\Process\\\\Exception\\\\ProcessFailedException is not subtype of Throwable$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$mailId of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$mailId of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$partitionTag of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$partitionTag of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$rid of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$rid of method App\\\\Controller\\\\MessageController\\:\\:restore\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$status of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
-			count: 1
-			path: src/Controller/MessageController.php
-
-		-
-			message: "#^Parameter \\$wb of method App\\\\Controller\\\\MessageController\\:\\:msgsToWblist\\(\\) has invalid type App\\\\Controller\\\\type\\.$#"
 			count: 1
 			path: src/Controller/MessageController.php
 

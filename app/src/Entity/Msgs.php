@@ -416,6 +416,11 @@ class Msgs
         return $this->mailId;
     }
 
+    public function getMailIdAsString()
+    {
+        return stream_get_contents($this->mailId, -1, 0);
+    }
+
     public function getSendCaptcha(): ?int
     {
         return $this->sendCaptcha;
