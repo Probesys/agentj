@@ -35,9 +35,9 @@ You can then access the web interface to configure your mail domain.
 
 ### upgrade
 
-> Always check the [changelog](../CHANGELOG.md) / [releases notes]() ***before*** begining the upgrade process, as well a backup your installation (database, volumes).
+> Always check the [changelog](../CHANGELOG.md) / [releases notes](https://github.com/Probesys/agentj/releases) ***before*** begining the upgrade process, and do a backup (database, volumes).
 
-1. ensure you're using the lastest `docker-compose.yml` version
+1. ensure you're using the correct `docker-compose.yml` version
 2. upgrade your `.env`: set `VERSION` and check changes from `.env.example`
 3. run something like `docker compose pull ; docker compose up -d`
 
@@ -47,10 +47,10 @@ You need to configure `.env` to set `VERSION`, `COMPOSE_FILE` and `UID`/`GID` th
 
 ##### `COMPOSE_FILE`
 
-- `compose.dev.yml` will mount the code from your dev folder into app container, to ease development; and expose database port and log on the host
+- `compose.dev.yml` will mount the code from your dev folder into app container; and expose database port and log on the host
 - `compose.test.yml` will start 2 smtp servers and fix IP addresses of some containers. Also used in CI, it allows you to run [mail test script](../app/docker/tests/testmail.sh) from within the `app` container
 
-> to manually run the mail tests (a good idea to check you dev install, but **don't use it on a production setup**), run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
+> to manually run the mail tests (a good idea to check your dev install, but **not on a production setup**), run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
 
 ##### `UID`/`GID`
 
@@ -59,20 +59,3 @@ At least for a classic Docker installation on Linux, those allow to share permis
 ##### `VERSION`
 
 Use `dev` or equivalent. As the dev setup require a local build of images it should not matter, but this way you're sure no existing image will be accidentally pulled, which can lead to weird errors.
-
-## Communication matrix
-
-
-| from ↓ \ to →                 | amavis        | outamavis       | app          | db           | relay      | smtp          | outsmtp       | opendkim      | policyd-rate-limit |
-|-------------------------------|---------------|-----------------|--------------|--------------|------------|---------------|---------------|---------------|--------------------|
-| amavis (10024/tcp)            | -             | -               | -            | ? → 3306/tcp | -          | ? → 10025/tcp |               | -             |
-| outamavis (10024/tcp)         | -             | -               | -            | ? → 3306/tcp | -          |               | ? → 10025/tcp | -             |
-| app (8090/tcp)                | ? → 9998/tcp  |                 | -            | ? → 3306/tcp | ???        | -             |               | -             |
-| db (3306/tcp)                 | -             | -               | -            | -            | -          | -             | -             | -             |
-| opendkim (8891/tcp)           | -             | -               | -            | ? → 3306/tcp | -          | -             | -             | -             |
-| relay (25/tcp)                | -             | -               | -            | -            | -          | -             | -             | ? → 8891/tcp  |
-| smtp (25/tcp 10025/tcp)       | ? → 10024/tcp |                 | -            | ? → 3306/tcp | ? → 25/tcp | -             |               | ? → 8891/tcp  |
-| outsmtp (26/tcp 10025/tcp)    |               | ? → 10024/tcp   | -            | ? → 3306/tcp |            |               |               | ? → 8891/tcp  | ? → 8552/tcp
-| policyd-rate-limit (8552/tcp) |               |                 |              | ? → 3306/tcp |            |               |               |               |
-
-

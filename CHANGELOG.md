@@ -38,14 +38,14 @@ Technical
 * all containers are now based on Debian 12
 * DKIM keys are now generated via PHP and stored in the database
 
-## v2.0.0 manual actions
-
-**Before** starting the upgrade, copy DKIM keys and Symfony tokens from the running instance (see helper script `scripts/get-dkim-sf-encryption-token-pre-agentj2.sh`)  
-- add tokens to `.env`, and update this file from `.env.example`
-- pull and start the new images, then wait for the end of the migrations and installation of dependencies
-- insert the previously saved DKIM keys in the migrated database
-- run `docker compose exec db /docker-entrypoint-initdb.d/opendkim_user.sh` to create the new opendkim user
-- ensure nginx log folder is ok `docker compose exec app 'mkdir -p /var/log/nginx ; chown -R www-data:www-data /var/log/nginx'`
+> [!CAUTION]
+> **Before** the upgrade, extract DKIM keys and Symfony tokens from the running instance (see helper script `scripts/get-dkim-sf-encryption-token-pre-agentj2.sh`)  
+> 
+> - add Symfony tokens to `.env`
+> - pull and start the new images
+> - wait for the end of database migrations, then insert the previously saved DKIM keys
+> - run `docker compose exec db /docker-entrypoint-initdb.d/opendkim_user.sh` to create the new opendkim user
+> - ensure nginx log folder is ok `docker compose exec app 'mkdir -p /var/log/nginx ; chown -R www-data:www-data /var/log/nginx'`
 
 # v1.6.4
 
