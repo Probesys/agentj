@@ -30,13 +30,17 @@ It will also send validation mail to the unknown senders (mail adresses with whi
 
 > It is not recommended to launch the stack as *root*. We recommend you to create a dedicated *docker* user (make sure it belongs to the *docker* group).
 
-Except all external configuration (eg DNS) which will not be covered here for the moment, all you have to do is to configure `.env` using the documented `.env.example` and start the containers.
+Except all external configuration which is be covered, all you have to do is to configure `.env` using the documented `.env.example` and start the containers.
 
-#### upgrade
+### upgrade
 
-***If you upgrade from an old (pre version 2) version
+***If you upgrade from an old (pre version 2) version*** be sure to 
 
-#### develop
+1. ensure you're using the lastest `docker-compose.yml` version
+2. upgrade your `.env`: set `VERSION` and check changes from `.env.example`
+3. run something like `docker compose pull ; docker compose up -d`
+
+### develop
 
 You need to configure `.env` to set `VERSION`, `COMPOSE_FILE` and `UID`/`GID` then **build the containers locally** using `docker compose build` or directly `docker compose up --build -d`.
 
