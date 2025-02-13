@@ -23,6 +23,14 @@ class MsgsRepository extends ServiceEntityRepository
         parent::__construct($registry, Msgs::class);
     }
 
+    public function findOneByMailId(int $partitionTag, string $mailId): ?Msgs
+    {
+        return $this->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+        ]);
+    }
+
   /**
      * Construct the SQL fragement of the search request
      * @param type $type
