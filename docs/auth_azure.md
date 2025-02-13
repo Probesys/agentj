@@ -4,7 +4,7 @@
 ### OAuth Authentication
 
 > [!IMPORTANT]
-> Requirements before enabling OAuth on Azure
+> **Requirements before enabling OAuth on Azure**  
 > You need to declare your AgentJ as an application in your Azure account.  
 > Use your AgentJ base URL, adding `/connect/azure/check` at the end, as redirect URI.
 > Note down your application client id, application secret (watch out:  it is limited in time and **shown only once**).  

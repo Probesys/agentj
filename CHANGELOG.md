@@ -39,10 +39,10 @@ Technical
 * DKIM keys are now generated via PHP and stored in the database
 
 > [!CAUTION]
-> **Before** the upgrade, extract DKIM keys and Symfony tokens from the running instance (see helper script `scripts/get-dkim-sf-encryption-token-pre-agentj2.sh`)  
+> **Before** the upgrade, extract DKIM keys and Symfony tokens from the running instance (see [helper script](scripts/get-dkim-sf-encryption-token-pre-agentj2.sh))  
 > 
-> - add Symfony tokens to `.env`
-> - pull and start the new images
+> - add Symfony tokens to `.env` (in addition to merge changes from `.env.example`)
+> - pull and start the new containers
 > - wait for the end of database migrations, then insert the previously saved DKIM keys
 > - run `docker compose exec db /docker-entrypoint-initdb.d/opendkim_user.sh` to create the new opendkim user
 > - ensure nginx log folder is ok `docker compose exec app 'mkdir -p /var/log/nginx ; chown -R www-data:www-data /var/log/nginx'`
@@ -66,7 +66,7 @@ By default, the *clamav* service, installed in the *amavis* container will start
 
 # v1.5.0
 
-This version adds [OAuth with Azure](01-installation.md#oauth-with-azure). Please refer to [dedicated deployement documentation](01-installation.md#oauth-with-azure) if you need this feature.
+This version adds OAuth with Azure, please refer to [dedicated deployement documentation](docs/auth_azure.md) if you need this feature.
 
 # v1.4.3
 
