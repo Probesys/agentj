@@ -7,8 +7,17 @@
 
 ---
 
-**AgentJ** is designed to protect your already existing mail server from spam, fishing and other malicious mail you and users of your organisation may receive.  
-All your incoming mails will be intercepted and blocked if needed. Legitimate mails for which an human can confirm sending will be delivered directly to your inbox, and for all the other mails, you'll be able to manually choose what to do.
+**AgentJ** is designed to protect your already existing mail server from incoming malicious messages and to prevent compromised accounts from your users to send spam or virus.  
+
+Features includes 
+- human authentication for unknown sender
+- spam/virus detection, for incoming as well as outgoing mail
+- send quota
+- shared mailbox, multi domain aliases
+
+It runs in a Docker stack and use well-known projects and technologies: 
+- mail system: Postfix, SpamAssassin, ClamAV, OpenDKIM
+- web interface: Symfony 7 with PHP 8.2 and MariaDB
 
 AgentJ is a [Probesys](https://www.probesys.coop) project, made available under the GNU Affero General Public License v3.0.
 

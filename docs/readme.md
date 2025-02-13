@@ -1,17 +1,21 @@
 
 ## Description
 
-AgentJ is intended to be the target of MX field for your mail domain. Properly configured, it will receive all your mails, filter them, and transfer them to your already existing mailboxes.  
-It will also send validation mail to the unknown senders (mail adresses with which you never exchanged mail), so it need a proper setup to send mail, eventually using your mail domain.
+AgentJ is intended to be the target of MX field for your mail domain, to receive all your mail before transfering them (or not) to your final inbox. It will also send validation mail to unknown senders (mail adresses with which you never exchanged mail), so it need a proper setup to send mail, eventually using your mail domain.
+
+Optionnally, it can also handle outgoing email with following possibilities:
+- configure send quota for your user
+- 
+- to prevent a compromised mail account from your organisation to send spam or virus
 
 #### services
 
 - **app**: main AgentJ web interface (configuration for admins, usage for users)
-- **db**: a MariaDB instance to store mails, user account, DKIM keys, authorized/banned senders, Amavis scores …
-- **smtp**: a postfix instance that will receive the incoming e-mails and check them using **amavis** container (amavis/clamav/spamassassin service)
+- **db**: a MariaDB instance to store mails, domains configuration, users info, DKIM keys, authorized/banned senders, Amavis scores …
+- **smtp**: a postfix instance that will receive the incoming e-mails and check them using **amavis** container
 - **relay**: a Postfix instance needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
 - **outsmtp**: a postfix instance that will handle outgoing e-mails, sent by local users (via their original smtp server) and check them using **outamavis**
-- **amavis**: a container running Amavis/Spamassassin and ClamAV services which check incoming mail
+- **amavis**: a container running Amavis/Spamassassin and ClamAV services
 - **outamavis**: same as **amavis** but used for outgoing e-mails sent by local users
 - **opendkim**: verify incoming mail DKIM signature for incoming mail, and append signature for outgoing mail
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
