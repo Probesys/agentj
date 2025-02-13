@@ -1,12 +1,8 @@
 
-## Description
+## Technical description
 
-AgentJ is intended to be the target of MX field for your mail domain, to receive all your mail before transfering them (or not) to your final inbox. It will also send validation mail to unknown senders (mail adresses with which you never exchanged mail), so it need a proper setup to send mail, eventually using your mail domain.
-
-Optionnally, it can also handle outgoing email with following possibilities:
-- configure send quota for your user
-- 
-- to prevent a compromised mail account from your organisation to send spam or virus
+AgentJ is intended to be set as your mail domain MX, and as relay for your SMTP server. It will send mail from the web domain and, depending on the configuration, from your mail domain.  
+Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 
 #### services
 
@@ -21,7 +17,7 @@ Optionnally, it can also handle outgoing email with following possibilities:
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
 - *for tests only* **smtptest** and **badrelay**: see [tests](#tests) below
 
-> By default *ClamAV* run in the amavis containers, but you can run it externally (directly on the host or in a separated docker container)
+> By default *ClamAV* run in the amavis containers, but you can run it externally (directly on the host or in a separated container). See `.env.example` for details
 
 #### volumes
 
@@ -34,11 +30,12 @@ Optionnally, it can also handle outgoing email with following possibilities:
 
 > It is not recommended to launch the stack as *root*. We recommend you to create a dedicated *docker* user (make sure it belongs to the *docker* group).
 
-Except all external configuration which is be covered, all you have to do is to configure `.env` using the documented `.env.example` and start the containers.
+Except all external mail configuration which is not covered here, all you have to do is to configure `.env` using the documented `.env.example` and start the containers.
+You can then access the web interface to configure your mail domain.
 
 ### upgrade
 
-***If you upgrade from an old (pre version 2) version*** be sure to 
+> Always check the [changelog](../CHANGELOG.md) / [releases notes]() ***before*** begining the upgrade process, as well a backup your installation (database, volumes).
 
 1. ensure you're using the lastest `docker-compose.yml` version
 2. upgrade your `.env`: set `VERSION` and check changes from `.env.example`
