@@ -3,15 +3,13 @@
 namespace App\Repository;
 
 use App\Entity\Msgrcpt;
+use App\Entity\Msgs;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Msgs|null find($id, $lockMode = null, $lockVersion = null)
- * @method Msgs|null findOneBy(array $criteria, array $orderBy = null)
- * @method Msgs[]    findAll()
- * @method Msgs[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Msgrcpt>
  */
 class MsgrcptRepository extends ServiceEntityRepository
 {
@@ -21,6 +19,22 @@ class MsgrcptRepository extends ServiceEntityRepository
         parent::__construct($registry, Msgrcpt::class);
     }
 
+    public function findOneByMessageAndRid(Msgs $message, int $rid): ?Msgrcpt
+    {
+        return $this->findOneBy([
+            'partitionTag' => $message->getPartitionTag(),
+            'mailId' => $message->getMailId(),
+            'rid' => $rid,
+        ]);
+    }
+
+    public function findByMessage(Msgs $message): array
+    {
+        return $this->findBy([
+            'partitionTag' => $message->getPartitionTag(),
+            'mailId' => $message->getMailId(),
+        ]);
+    }
 
   /**
    * Update the status of a message for one recipient
