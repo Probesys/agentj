@@ -260,12 +260,8 @@ class DomainController extends AbstractController
             return $this->redirectToRoute('domain_index');
         }
 
-        $dkim = null;
-        $dnsInfo = null;
-        if ($domain->getDomainKeys() !== null) {
-            $dkim = $this->em->getRepository(DomainKey::class)->find($domain->getDomainKeys()->getId());
-            $dnsInfo = $dkim->getDnsinfo();
-        }
+        $dkim = $domain->getDomainKeys();
+        $dnsInfo = $dkim?->getDnsinfo();
         return $this->render('domain/edit.html.twig', [
             'domain' => $domain,
             'dkim' => $dkim,
