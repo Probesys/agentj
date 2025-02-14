@@ -67,7 +67,7 @@ Generics:
     formNotComplete: "Please provide mandatory information"
     UserExist: "The user already exists in the database"
     EmailDoesNotExist: "The email account does not exist in the database"
-    BadColumnsFile: "The number of column is incorrect. Check your file."
+    BadColumnsFile: "The number of columns is incorrect. Check your file."
     azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
     incorrectCredential: Invalid credentials
     groupWithPriorityExists: "A group with same priority already exists for this domain. Please choose another one"
@@ -100,6 +100,7 @@ Generics:
     unblockedMessages: Non-blocked messages
     blockedMessages: Blocked messages
     unreadAlerts: "Unread Alert|Unread Alerts"
+    variables: Variables
   batch:
     labels:
       for_selection: "For the selection"
@@ -301,6 +302,8 @@ Message:
     resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED synchronized"
     resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED synchronized"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
+  Office365Connector:
+    tokenError: "Unable to get access token. Please check your parameters"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: "new unprocessed messages"
@@ -337,7 +340,7 @@ Search:
   AmavisOutput: Amavis Output
   Size: Size
   Host: Host of the sender
-  ReplyTo: Reply- to a message
+  ReplyTo: Reply to a message
   StartDate: Start date
   EndDate: End date
   BSpamLevel: Amavis Spam Level
@@ -436,7 +439,7 @@ Entities:
     index: "List of domains"
     edit: "Edit domain"
     fields:
-      mailMessage: "Text of the validation email's email with the link to the captcha"
+      mailMessage: "Text of the email validating the email address with the captcha link"
       captachaMessage: "Presentation text on captcha page"
       successCaptchaMessage: "Captcha validation message"
       messageAlert: "Message of the report"
@@ -591,6 +594,7 @@ Entities:
     show: "Details of the connector"
     labels:
     fields:
+      id: "Id"
       name: "Connector name"
       type: "Connector type"
       active: "Active connector"

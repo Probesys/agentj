@@ -58,7 +58,7 @@ Generics:
     list: "Liste"
   messages:
     no_records_found: Aucun résultat trouvé
-    confirmationDeleteMessageQuestion: Êtes vous certain de vouloir supprimer cet élément ?
+    confirmationDeleteMessageQuestion: Êtes-vous certain de vouloir supprimer cet élément\_?
     welcome: Bienvenue
     welcomeAgentJ: Bienvenue sur AgentJ
     welcomeHomeMessage:
@@ -100,6 +100,7 @@ Generics:
     unblockedMessages: Messages non bloqués
     blockedMessages: Messages bloqués
     unreadAlerts: "Alerte non lue|Alertes non lues"
+    variables: Variables
   batch:
     labels:
       for_selection: Pour la selection
@@ -301,6 +302,8 @@ Message:
     resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED synchronisés"
     resultImportAliase: "$NB_ALIAS_CREATED alias créés, $NB_ALIAS_UPDATED  synchronisés"
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
+  Office365Connector:
+    tokenError: "Impossible se connecter à votre compte. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: nouveau(x) messages non traités
@@ -393,7 +396,7 @@ Entities:
       spamQuarantineTo: Faire suivre le spam vers le mail
       bannedQuarantineTo: Faire suivre les bannis vers le mail
       badHeaderQuarantineTo: Faire suivre les mauvais entêtes vers le mail
-      uncheckedQuarantineTo: Faire suivre les spams non cochés vers le mail
+      uncheckedQuarantineTo: Faire suivre les spams non vérifiés vers le mail
       cleanQuarantineTo: Faire suivre les spams nettoyés vers le mail
       archiveQuarantineTo: Faire suivre les spams archivés vers le mail
       spamTagLevel: Niveau du tag de SPAM
@@ -423,7 +426,7 @@ Entities:
       forwardMethod: Méthode pour le forward
       saUserconf: Configuration Utilisateur SA
       saUsername: Nom Utilisateur SA
-      uncheckedLover: Aime les non vérifiés
+      uncheckedLover: Aime les spams non vérifiés
     tabs:
       policy: Stratégie
       quarantine: Quarantaine
@@ -591,6 +594,7 @@ Entities:
     show: Détails du connecteur
     labels:
     fields:
+      id: "Id"
       name: "Nom du connecteur"
       type: "Type de connecteur"
       active: "Connecteur actif"

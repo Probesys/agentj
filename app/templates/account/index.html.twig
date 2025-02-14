@@ -22,7 +22,7 @@
           {{ form_start(form) }}
           <div class="row">
             <div class="col-md-2">
-              {{ 'Entities.User.fields.fullName'|trans() }}
+              'Entities.User.fields.fullName'|trans
             </div>
             <div class="col-md-10">
               {{ app.user.fullName }}
@@ -37,27 +37,20 @@
               {{ 'Entities.User.fields.groups'|trans() }}
             </div>
             <div class="col-md-10">
-{#              {{ app.user.groups }}#}
             </div>
             <div class="col-md-2">
               {{ 'Entities.User.fields.report'|trans() }}
-              {#              {{ form_label(form.report) }}#}
             </div>
             <div class="col-md-10">
-              {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
               {{ form_widget(form.report) }}
             </div>
             <div class="col-md-2">
               {{ 'Entities.User.fields.bypassHumanAuth'|trans() }}
-              {#              {{ form_label(form.report) }}#}
             </div>
             <div class="col-md-10">
-              {#              <input type="checkbox" name="user_preferences[report]" value=""/>#}
               {{ form_widget(form.bypassHumanAuth) }}
             </div>
           </div>
-
-
           <div class="d-flex justify-content-center">
             <input type="submit" class="btn btn-primary mr-2" value="{{ button_label|default('Generics.actions.save'|trans)}}" >
             <a class="btn btn-outline-secondary " href="/">{{ 'Generics.actions.cancel'|trans() }}</a>
@@ -91,12 +84,8 @@
             </div>
           </div>
           {% endif %}
-
-
         </div>
       </div>
     </div>
-
-
   </div>
 {% endblock %}

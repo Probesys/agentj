@@ -77,9 +77,7 @@ class UserController extends AbstractController {
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-//            dd($form->get('password')->get('first')->getData());
             if ($userNameExist) {
-                //                $this->addFlash('danger', $this->translator->trans('Generics.flash.userNameAlreadyExist'));
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAlreadyExist'),

@@ -41,7 +41,7 @@
                     <a href="{{ path('group_remove_user',{'id' : group.id,'user' : user.id}) }}?_token={{ csrf_token('removeUser' ~ user.id) }}" class='btn btn-sm btn-danger confirmModal' 
                        data-dialog-title='{{ 'Message.Dialogs.confirmRemoveUserFromGroupTitle'|trans }}' 
                        data-dialog-content='{{ 'Message.Dialogs.confirmRemoveUserFromGroupContent'|trans }}'                   
-                       title="{{ 'Message.Dialogs.confirmRemoveUserFormGroupTitle'|trans() }}">
+                       title="{{ 'Message.Dialogs.confirmRemoveUserFromGroupTitle'|trans() }}">
                       <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
                       <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Delete'|trans() }}</span>
                     </a>
