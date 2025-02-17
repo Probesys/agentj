@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Mime\Address;
 
 /**
  * Msgs
@@ -344,6 +345,15 @@ class Msgs
     public function getFromAddr(): ?string
     {
         return $this->fromAddr;
+    }
+
+    public function getFromMimeAddress(): ?Address
+    {
+        try {
+            return Address::create($this->fromAddr ?? '');
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
     }
 
     public function setFromAddr(?string $fromAddr): self
