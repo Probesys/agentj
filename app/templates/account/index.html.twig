@@ -22,7 +22,7 @@
           {{ form_start(form) }}
           <div class="row">
             <div class="col-md-2">
-              'Entities.User.fields.fullName'|trans
+              {{ 'Entities.User.fields.fullName'|trans }}
             </div>
             <div class="col-md-10">
               {{ app.user.fullName }}
