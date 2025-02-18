@@ -7,6 +7,7 @@ use App\Entity\SqlLimitReport;
 use App\Entity\Alert;
 use App\Entity\User;
 use App\Entity\Domain;
+use App\Entity\Maddr;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Mailer\Mailer;
@@ -93,6 +94,17 @@ class CreateAlertMessageHandler
                             $this->translator->setLocale($user->getDomain()->getDefaultLang());
                         } else {
                             $this->translator->setLocale('fr');
+                        }
+
+                        // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
+                        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+                            $sid = $outMsg->getSid();
+                            $maddr = $this->entityManager->getRepository(Maddr::class)->find($sid);
+                            $domain = $maddr ? $maddr->getDomain() : null;
+                            $userDomains = $user->getDomains()->toArray();
+                            if ($domain === null || !in_array($domain, $userDomains)) {
+                                continue;
+                            }
                         }
 
                         $alert = new Alert();
@@ -213,15 +225,6 @@ class CreateAlertMessageHandler
 
             $timezone = new \DateTimeZone('Europe/Paris');
 
-            // Collect all sender users' email addresses
-            $senderEmails = [];
-            foreach ($reports as $report) {
-                $fromAddr = $report->getMailId();
-                if (!in_array($fromAddr, $senderEmails)) {
-                    $senderEmails[] = $fromAddr;
-                }
-            }
-
             $target = $message->getTarget();
 
             if ($target === 'admin') {
@@ -243,6 +246,27 @@ class CreateAlertMessageHandler
                         $this->translator->setLocale($user->getDomain()->getDefaultLang());
                     } else {
                         $this->translator->setLocale('fr');
+                    }
+
+                    // Collect all sender users' email addresses
+                    $senderEmails = [];
+                    foreach ($reports as $report) {
+                        $fromAddr = $report->getMailId();
+                        // if user is an admin check if the address is in a domain he administer
+                        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+                            $domainString = strtolower(substr($fromAddr, strpos($fromAddr, '@') + 1));
+                            $domain = $this->entityManager->getRepository(Domain::class)->findOneBy(['domain' => $domainString]);
+                            $userDomains = $user->getDomains()->toArray();
+                            if ($domain === null || !in_array($domain, $userDomains)) {
+                                continue;
+                            }
+                        }
+                        if (!in_array($fromAddr, $senderEmails)) {
+                            $senderEmails[] = $fromAddr;
+                        }
+                    }
+                    if (empty($senderEmails)) {
+                        continue;
                     }
 
                     $alert = new Alert();
