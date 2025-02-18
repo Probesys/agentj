@@ -64,9 +64,19 @@ class DefaultController extends AbstractController {
         $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
         $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::VIRUS, $alias);
 
-        $domains = $this->em->getRepository(Domain::class)->findAll();
+        /** @var User */
+        $user = $this->getUser();
+
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $domains = $this->em->getRepository(Domain::class)->findAll();
+        } elseif ($this->isGranted('ROLE_ADMIN')) {
+            $domains = $user->getDomains();
+        } else {
+            $domains = [];
+        }
+
         foreach ($domains as $domain) {
-            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($domain->getId());
+            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($this->getUser(), $domain->getId());
 
             $data[$domain->getId()] = [
                 'totalMsgCount' => array_reduce($users, function($carry, $user) {
@@ -84,7 +94,7 @@ class DefaultController extends AbstractController {
             ];
         }
         // Add data for "All" option
-        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts();
+        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($this->getUser());
         $data['All'] = [
             'totalMsgCount' => array_reduce($users, function($carry, $user) {
                 return $carry + $user['msgCount'];

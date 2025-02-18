@@ -132,6 +132,9 @@ class UserRepository extends ServiceEntityRepository {
                     return $domain->getId();
                 })->toArray());
             }
+            if (empty($domainsIds)) {
+                return [];
+            }
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
 
@@ -172,6 +175,9 @@ class UserRepository extends ServiceEntityRepository {
                 $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
                     return $domain->getId();
                 })->toArray());
+            }
+            if (empty($domainsIds)) {
+                return [];
             }
             $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
         }
@@ -326,7 +332,7 @@ class UserRepository extends ServiceEntityRepository {
         return $query->getScalarResult();
     }
 
-    public function getUsersWithRoleAndMessageCounts($domainId = null)
+    public function getUsersWithRoleAndMessageCounts(User $user, $domainId = null)
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -377,6 +383,26 @@ class UserRepository extends ServiceEntityRepository {
 
         if ($domainId !== null) {
             $sql .= ' AND u.domain_id = :domainId';
+        }
+
+        // if $user is an admin, add a condition to check only the domains he administer
+        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+            $domainsIds = [];
+            if ($user->getDomain()) {
+                $domainsIds[] = $user->getDomain()->getId();
+            }
+            $domains = $user->getDomains();
+            if ($domains !== null && !$domains->isEmpty()) {
+                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
+                    return $domain->getId();
+                })->toArray());
+            }
+
+            $sql .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
+
+            if ($domainsIds === []) {
+                return [];
+            }
         }
 
         $sql .= ' GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount';
