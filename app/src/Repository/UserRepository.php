@@ -111,7 +111,7 @@ class UserRepository extends ServiceEntityRepository {
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
                 ->leftJoin('u.domain', 'd')
-                ->join('u.policy', 'p')
+                ->leftJoin('u.policy', 'p')
                 ->where('u.originalUser is null');
 
         if ($role) {

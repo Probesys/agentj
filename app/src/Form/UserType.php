@@ -36,7 +36,7 @@ class UserType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'label' => $labelEmail,
-                'required' => true,
+                'required' => !$adminForm,
             ])
             ->add('emailRecovery', EmailType::class, [
                 'label' => 'Entities.User.fields.emailRecovery',

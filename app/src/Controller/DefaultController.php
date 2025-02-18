@@ -105,7 +105,7 @@ class DefaultController extends AbstractController {
         {
             $showAlertWidget = false;
         }
-        
+
         return $this->render('home/index.html.twig', [
                     'controller_name' => 'DefaultController',
                     'listDay' => $labels,

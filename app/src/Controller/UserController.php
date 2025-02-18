@@ -130,7 +130,8 @@ class UserController extends AbstractController {
             'adminForm' => true,
             'include_quota' => false,
         ]);
-        $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
+        $email = $user->getEmail();
+        $form->get('email')->setData($email !== null ? stream_get_contents($email, -1, 0) : '');
 
         $form->remove('originalUser');
         $form->remove('emailRecovery');
