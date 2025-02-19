@@ -5,7 +5,7 @@ Generics:
     cancel: Cancel
     show: See
     edit: Edit
-    remove: Delete
+    remove: Remove
     save: Save
     clean: Clear
     filter: Filter
@@ -25,6 +25,10 @@ Generics:
     import: "Import"
     importFile: "Import from file"
     addIpAddress: "IP Address"
+    chooseUser: "Choose a user"
+    chooseDomain: "Choose a domain"
+    choosePolicy: "Choose a policy"
+    showMore: "Show more"
   fields:
     name: Title
     helpMessage: "Help message"
@@ -46,6 +50,7 @@ Generics:
     recipient: "Recipient"
     user: User
     userName: Username
+    attachments: Attachments
     type: Type
     active: Active
     inactive: Inactive
@@ -64,16 +69,15 @@ Generics:
     EmailDoesNotExist: "The email account does not exist in the database"
     BadColumnsFile: "The number of columns is incorrect. Check your file."
     azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
-    azurOAuthInvalidState: An error occured. Please try again.
     incorrectCredential: Invalid credentials
-    groupWithPriorityExists: "A group with same priority allready exists for this domain. Please choose another one"
+    groupWithPriorityExists: "A group with same priority already exists for this domain. Please choose another one"
     helpAlert: "Alerts on blocked outgoing emails (quota exceeded, etc.)"
     cannotPreviewMailWithvirus: "You cannot view this message because it contains a virus."
     selectAtLeastOneDomain: "You must select at least one domain"
   labels:
     all: All
     filters: Filters
-    item_per_page: "Number of items per page (sur %totalItemFound% found)"
+    item_per_page: "Number of items per page (on %totalItemFound% found)"
     lastModificationOn: "Last modification"
     of_type: type
     for_client: "for the customer"
@@ -91,10 +95,12 @@ Generics:
     statistics: Statistics
     statTable: Stats Table
     previewUsers: Overview of Users
-    outgoingMails: Outgoing mails
-    incomingMails: Incomings mails
+    outgoingMails: Outgoing emails
+    incomingMails: Incomings emails
     unblockedMessages: Non-blocked messages
     blockedMessages: Blocked messages
+    unreadAlerts: "Unread Alert|Unread Alerts"
+    variables: Variables
   batch:
     labels:
       for_selection: "For the selection"
@@ -109,8 +115,8 @@ Generics:
     deleteSuccess: "A successful removal!"
     deleteFailure: "An error occurred during the deletion!"
     deleteMassiveSuccess: "Mass removal completed successfully!"
-    addSuccess: "Added successfully !"
-    addFailure: "An error occurred when added!"
+    addSuccess: "Added successfully!"
+    addFailure: "An error occurred when trying to add!"
     ImportSuccess:
       "There are [NB_USER] email accounts that have been successfully
       imported!"
@@ -123,17 +129,17 @@ Generics:
     BadColumnsFile: "Bad number of columns for the file."
     NoImport: "No email account was imported."
     domainNotExist: "The domain does not exist"
-    emailAllreadyExist: "This email is already used. You can't use it"
-    imapLoginAllreadyExist: "This imap login allready exists. You can't use it"
-    aliasAllreadyExist: "This alias is already used. You can't use it"
-    userNameAllreadyExist: "This login already exists. You can't use it"
+    emailAlreadyExist: "This email is already used. You can't use it"
+    imapLoginAlreadyExist: "This imap login already exists. You can't use it"
+    aliasAlreadyExist: "This alias is already used. You can't use it"
+    userNameAlreadyExist: "This login already exists. You can't use it"
     passwordNotMatching: "Password confirmation is not valid"
-    groupNameAllreadyExist:
+    groupNameAlreadyExist:
       This group label already exists for this domain. You can't
       use it
     BadFormatcsv: "Bad format file"
     IncorrectColumns: "Row [ROW]: Incorrect number of columns."
-    InvalidEmail: "Row [ROW]: address e-mail is invalid."
+    InvalidEmail: "Row [ROW]: email address is invalid."
     NonexistantDomain: "Row [ROW]: Domain [DOMAIN] does not exist in the database."
     NonexistantUser: "Row [ROW]: User [EMAIL] does not exist in the database."
     ExistingUser: "Row [ROW] : User [EMAIL] already exist and is not an alias."
@@ -177,7 +183,7 @@ Navigation:
   domainlist: Domains
   untreated: "Untreated"
   authorized: Authorized
-  policy: Strategies
+  policy: Policies
   hello: Hello
   import:
     title: Imports
@@ -210,11 +216,12 @@ Message:
     list: Actions
     Autorized: Authorize
     AutorizedSender: "Authorize the sender"
-    AutorizedDomain: "Authorize the sender to all users"
+    AutorizedDomain: "Authorize the sender for all users"
     Banned: Ban
     BannedSender: "Ban the sender"
     BannedDomain: "Ban sender for all users"
     Delete: Delete
+    Unlock: Unlock
     DeleteMessage: "Delete the message"
     Restore: Recover
     RestoreMessage: "Recover the message"
@@ -232,14 +239,14 @@ Message:
     confirmDeleteMsgContent: "Are you sure you want to delete the message?"
     confirmAuthorizedMsgtitle: "Authorize the sender"
     confirmAuthorizedDomainMsgtitle: "Authorize sender for all users"
-    confirmAuthorizedMsgContent: "Are you sure you're authorizing the sender?"
+    confirmAuthorizedMsgContent: "Are you sure you want to authorize the sender?"
     confirmAuthorizedDomainMsgContent:
-      "Are you sure to authorize the sender for all
+      "Are you sure you want to authorize the sender for all
       users?"
     confirmBannedMsgtitle: "Ban the sender"
-    confirmBannedMsgContent: "Are you sure you're banging the sender?"
+    confirmBannedMsgContent: "Are you sure you want to ban the sender?"
     confirmBannedDomainMsgtitle: "Ban sender for all users"
-    confirmBannedDomainMsgContent: "Are you sure to ban the sender for all users?"
+    confirmBannedDomainMsgContent: "Are you sure you want to ban the sender for all users?"
     confirmRestoreMsgtitle: "Recover the message"
     confirmRestoreMsgContent: "Are you sure you want to get the message back?"
     confirmDeleteSenderTitleW: "Delete this sender?"
@@ -249,18 +256,16 @@ Message:
     confirmDeleteGroupTitle: "Delete this group?"
     confirmDeleteGroupContent: "Are you sure you want to delete this group?"
     confirmRemoveUserFromGroupTitle: "Remove from the group?"
-    confirmRemoveUserFromGroupContent:
-      "Are you sure you want to remove this user
-      from the group?"
+    confirmRemoveUserFromGroupContent: "Are you sure you want to remove this user from the group?"
     confirmRemoveRuleTitle: "Delete the rule?"
     confirmRemoveRuleContent: "Are you sure you want to delete this rule?"
     confirmRemoveConnectorTitle: Delete connector.
-    confirmRemoveConnectorContent: Are tou sure you want to delete this connector ?
+    confirmRemoveConnectorContent: Are you sure you want to delete this connector?
   Flash:
     deleteSuccesFull: "Successful deletion"
     domainCreatd: "The domain has been successfully created"
-    domainUpdated: "The field has successfully changed"
-    missingRuleForDomain: "A first rule must first be created in this field"
+    domainUpdated: "The field has been successfully updated"
+    missingRuleForDomain: "A rule must first be created for this domain"
     ruleExistForDomain: "A similar rule already exists in this area"
     domainRuleCreated: "The domain rule was created with success"
     domainRuleUpdated: "The domain rule has been updated with success"
@@ -270,9 +275,9 @@ Message:
     messageDeleted: "Message deleted successfully"
     messageRestored: "Message successfully recovered"
     senderAuthorized: "The address is now authorized"
-    senderBanned: "The address is now banished"
+    senderBanned: "The address is now banned"
     checkMailUnsuccessful: "We couldn't check this email."
-    connectionOk: "Connexion success"
+    connectionOk: "Connection success"
     connectionKo: "Unable to connect"
     invalidLdapQuery: "Invalid Ldap query"
     ldapNbUserfound: "$NB_USER user(s) found"
@@ -297,30 +302,54 @@ Message:
     resultImportGroup: "$NB_GROUP_CREATED groups created, $NB_GROUP_UPDATED synchronized"
     resultImportAliase: "$NB_ALIAS_CREATED alias created, $NB_ALIAS_UPDATED synchronized"
     tokenError: "Unable to get access token from graph API. Please check your parameters"
+  Office365Connector:
+    tokenError: "Unable to get access token. Please check your parameters"
   Toast:
     defaultTitle: Information
-    newUntreatedMessage: "new(x) unprocessed messages"
+    newUntreatedMessage: "new unprocessed messages"
   Report:
     defaultMailSubject: "Messages pending on AgentJ for "
     defaultAlertMailContent:
       'Hello.<br/> You have [NB_UNTREATED_MESSAGES] emails
-      that are in validation expectations.<br/><br/> And [NB_BLOCKED_MESSAGES] messages
+      that are untreated.<br/><br/> And [NB_BLOCKED_MESSAGES] messages
       that were blocked by AgentJ. <br/><br/> You can treat them on <a href="[URL_MSGS]">[URL_MSGS]</a>.<br/><br/>
-      Thank you and good day. '
+      Thank you and have a nice day. '
   Captcha:
-    defaultMailSubject: "Audit Email"
+    defaultMailSubject: "Confirm your Email"
     defaultMailContent:
       'Hello.<br/><br/> You tried to send an email to: [EMAIL_DEST]
-      <br/><br/> For security reasons we are obliged to check your email. <br/><br/>
+      <br/><br/> For security reasons we are obliged to check your email. <br/>
+      <br/>
       Please confirm your email by clicking on the following link: <br/> <a href="[URL_CAPTCHA]">[URL_CAPTCHA]</a>
       <br/><br/> Thank you and good day '
     defaultCaptchaPageContent:
-      "<strong>Audit of your email</strong> <br/> Please
+      "<strong>Confirmation of your email</strong> <br/> Please
       validate your email by validating the captcha below"
     defaultCaptchaConfirmMsg: "Thank you and good day"
 Form:
   PolicyDomain: "Filter threshold"
   ImportFile: "Select a file to import"
+
+Search:
+  Title: Advanced search
+  MailId: Mail ID
+  Sender: Sender
+  Recipient: Recipient
+  Subject: Subject
+  Date: Date
+  AmavisOutput: Amavis Output
+  Size: Size
+  Host: Host of the sender
+  ReplyTo: Reply to a message
+  StartDate: Start date
+  EndDate: End date
+  BSpamLevel: Amavis Spam Level
+  Incoming: INCOMING
+  Outgoing: OUTGOING
+  MessageType: Message type
+  Filter: Filter
+  AdvancedFilter: Advanced filter
+
 Entities:
   Group:
     Title: "Managing groups"
@@ -350,42 +379,42 @@ Entities:
       rights: rights
       users: users
       domain: "Associated domains"
-      overrideUser: "Supplante user choices"
+      overrideUser: "Override user choices"
   Policy:
     label: Policy
     index: "List of policies"
     fields:
       virusLover: "Love viruses"
-      spamLover: "Love the spam"
+      spamLover: "Love spams"
       bannedFilesLover: "Likes banned files"
       badHeaderLover: "Love the bad headers"
       bypassVirusChecks: "Bypass virus verification"
-      bypassBannedChecks: "Bypass the ban check"
-      bypassHeaderChecks: "Bypass the header check"
-      bypassSpamChecks: "Bypass the spam check"
-      virusQuarantineTo: "Follow viruses to email"
-      spamQuarantineTo: "Follow the spam to the mail"
-      bannedQuarantineTo: "Follow the banned to the mail"
-      badHeaderQuarantineTo: "Follow the wrong headers to the mail"
-      uncheckedQuarantineTo: "Follow spams not checked to mail"
-      cleanQuarantineTo: "Follow the spams cleaned to the mail"
-      archiveQuarantineTo: "Follow the archived spams to the mail"
+      bypassBannedChecks: "Bypass the ban list verification"
+      bypassHeaderChecks: "Bypass the header verification"
+      bypassSpamChecks: "Bypass the spam verification"
+      virusQuarantineTo: "Transfer viruses to the following email:"
+      spamQuarantineTo: "Transfer spams to the following email:"
+      bannedQuarantineTo: "Transfer banned messages to the following email:"
+      badHeaderQuarantineTo: "Transfer wrong headers messages to the following email:"
+      uncheckedQuarantineTo: "Transfer unchecked spams to the following email:"
+      cleanQuarantineTo: "Transfer the spams cleaned to the following email:"
+      archiveQuarantineTo: "Transfer archived spams to the following email:"
       spamTagLevel: "Tag level of SPAM"
       spamTag2Level: "Tag level2 of SPAM"
       spamTag3Level: "Tag level3 of SPAM"
       spamKillLevel: "Level of SPAM kill"
-      spamDsnCutoffLevel: "Seuil dsn du SPAM"
-      spamQuarantineCutoffLevel: "Seuil quarantine du SPAM"
-      spamSubjectTag: "SPAM tag dans le sujet"
-      spamSubjectTag2: "SPAM tag dans le sujet 2"
-      spamSubjectTag3: "SPAM tag dans le sujet 3"
-      addrExtensionVirus: "Address extension virus"
+      spamDsnCutoffLevel: "DSN Cutoff of SPAM"
+      spamQuarantineCutoffLevel: "Quarantine Cutoff of SPAM"
+      spamSubjectTag: "SPAM tag in the subject"
+      spamSubjectTag2: "SPAM tag in the subject 2"
+      spamSubjectTag3: "SPAM tag in the subject 3"
+      addrExtensionVirus: "Virus extension address"
       addrExtensionSpam: "SPAM extension address"
-      addrExtensionBanned: "Banner extension address"
+      addrExtensionBanned: "Banned extension address"
       addrExtensionBadHeader: "Address extension bad header"
-      warnvirusrecip: "Addressing warning of viruses"
-      warnbannedrecip: "Avert recipient banni"
-      warnbadhrecip: "Warning recipient bad head"
+      warnvirusrecip: "Warn recipient of a virus"
+      warnbannedrecip: "Warn recipient of a message from a banned sender"
+      warnbadhrecip: "Warn recipient of a message with bad header"
       newvirusAdmin: "Admin new virus"
       virusAdmin: "Admin virus"
       bannedAdmin: Banished
@@ -397,35 +426,41 @@ Entities:
       forwardMethod: "Method for forwarding"
       saUserconf: "User configuration SA"
       saUsername: "User name SA"
-      uncheckedLover: uncheckedLover
+      uncheckedLover: Love unchecked
     tabs:
-      policy: Strategy
+      policy: Policy
       quarantine: Quarantine
       tagLevel: "Tag level"
       other: Other
     actions:
-      add_new: "Add a new strategy"
+      add_new: "Add a new policy"
   Domain:
     Name: Domain
     index: "List of domains"
     edit: "Edit domain"
     fields:
-      mailMessage: "Text of the email validation mail with the link captcha"
-      captachaMessage: "Text of presentation on captcha page"
+      mailMessage: "Text of the email validating the email address with the captcha link"
+      captachaMessage: "Presentation text on captcha page"
       successCaptchaMessage: "Captcha validation message"
       messageAlert: "Message of the report"
       domain: "Domain name"
       srvSmtp: "SMTP server"
+      srvImap: "IMAP server"
+      datemod: "Date of change"
       smtp_port: "SMTP port"
+      imapPort: "IMAP port"
+      imapFlag: "IMAP security"
       active: "Active domain"
-      policy: "Strategy for the field"
+      transport: Transport
+      policy: "Policy for the field"
       level: "Spam threshold"
-      mailAuthenticationSender: "Email address that sends authentication requests"
+      mailAuthenticationSender: "Email address that sends authentication request"
+      imapNoValidateCert: Do not validate certificates
       defaultLang: "Default language"
-      quota: "Email quota"
-      quota_emails: "Email quota"
-      quota_seconds: "Quota time"
-      addQuota: "Add a quota"
+      quota: Rate Limit
+      quota_emails: Number of email during the period
+      quota_seconds: Period duration
+      addQuota: "Add a rate limit"
       sendUserAlerts: "Send alerts to users dashboard in AgentJ"
       sendUserMailAlerts: "Send alerts to users by email"
     labels:
@@ -442,21 +477,18 @@ Entities:
       auth: AUTH, USERS & ALIAS
       filters: FILTERS & RATES
       alerts: ALERTS
+      saveBeforeConnectors: Please register the domain first before adding connectors.
       dynamicsVariables:
-        {
-          URL_CAPTCHA: "Link to captcha",
-          EMAIL_DEST: "Email of recipient",
-          URL_MSGS: "Link to mails pending",
-          NB_AUTHORIZED_MESSAGES: "Authorized messages",
-          NB_UNTREATED_MESSAGES: "Number of untreated messages",
-          NB_SPAMMED_MESSAGES: "Number
-            of spam messages",
-          NB_BANNED_MESSAGES: "Number of messages banned",
-          NB_DELETED_MESSAGES: "Number
-            of messages deleted",
-          NB_RESTORED_MESSAGES: "Number of messages restored",
-          LIST_MAIL_MSGS: "List of untreated messages",
-        }
+        URL_CAPTCHA: "Link to captcha"
+        EMAIL_DEST: "Email of recipient"
+        URL_MSGS: "Link to pending emails"
+        NB_AUTHORIZED_MESSAGES: "Authorized messages"
+        NB_UNTREATED_MESSAGES: "Number of untreated messages"
+        NB_SPAMMED_MESSAGES: "Number of messages counted as spam"
+        NB_BANNED_MESSAGES: "Number of banned messages"
+        NB_DELETED_MESSAGES: "Number of deleted messages"
+        NB_RESTORED_MESSAGES: "Number of restored messages"
+        LIST_MAIL_MSGS: "List of untreated messages"
     actions:
       add_connector: Add connector
       importUserAndAliases: "Import users and aliases"
@@ -466,21 +498,21 @@ Entities:
       editDomainRule: "Amend a rule"
       WBList: List
       messages: Messages
-      blockAllMails: "Block all mails"
+      blockAllMails: "Block all emails"
       allowAllMails: "Allow all emails"
       allowWithSpamFilter: "Allow with spam filter"
-      allowWithLightFilter: "Allow with flexible filter"
+      allowWithLightFilter: "Allow with light filter"
       backToDomainList: "Return to the list of domains"
     rulesValues:
-      10: "Block all mails"
-      B: "Block all mails"
+      10: "Block all emails"
+      B: "Block all emails"
       W: "Allow all emails"
       0: "Allow with spam filter"
       2: "Allow with flexible filter"
   User:
     indexLocal: "List of administrators"
     indexEmail: "List of email accounts"
-    indexAlias: "List of alias emails"
+    indexAlias: "List of email aliases"
     labels:
       defaultDomainParameters: "Default domain parameters"
     actions:
@@ -503,6 +535,7 @@ Entities:
       outMsgBlockedCount: "Outgoing message blocked count"
       inMsgBlockedCount: "Incoming message blocked count"
       originalUser: "Reference email"
+      sharedWith: "Shared with"
       alias: Alias
       sharedBy: "Shared with"
       groups: Group
@@ -511,7 +544,7 @@ Entities:
       report: "Send report"
       bypassHumanAuth: "Deactivate human authentication"
       policy: "Policy"
-      office365PrincipalName: "M365 principal mail"
+      office365PrincipalName: "M365 principal email"
   Alert:
     actions:
       read: Read
@@ -519,33 +552,37 @@ Entities:
     messages:
       admin:
         virus:
-          title: Outgoing mail containing a virus blocked
-          content: 'A virus was detected in an outgoing mail. Affected user: '
+          title: Outgoing email containing a virus blocked
+          content: 'A virus was detected in an outgoing email. Affected users: '
         quota:
-          title: Quota limit exceeded
-          content: 'Mails have been blocked due to exceeded quotas. Affected users: '
+          title: Rate limit exceeded
+          content: 'Mails have been blocked due to exceeded rate limits. Affected users: '
       user:
         virus:
-          title: Your outgoing mail has been blocked
-          content: 'A virus was detected in a mail you sent.'
+          title: Your outgoing email has been blocked
+          content: 'A virus was detected in an email you sent.'
         quota:
-          title: You have exceeded the quota
-          content: 'You have exceeded the quota. Your mail was not delivered.'
+          title: You have exceeded the rate limit
+          content: 'You have exceeded the rate limit. Your email was not delivered.'
   Message:
     index: "List of messages"
-    untreated: "No treaties"
-    authorized: Authorized
-    banned: Banned
-    delete: Deleted
-    restored: Restored
-    virus: with virus
-    spammedDetect: "spammed detected automatically"
+    untreated: "that are Untreated"
+    authorized: that have been Authorized
+    banned: that have been Banned
+    delete: that have been Deleted
+    restored: that have been Restored
+    virus: detected with a Virus
+    spammedDetect: "detected as a Spam"
     informationMessage: "The messages will be automatically deleted after 30 days."
     spamLevel: Note
-    labels:
-      infos: "Information about the blockage"
     dateAuthRequestAt: "Authentication request sent the"
     isMailingList: "Mailing list? "
+    labels:
+      infos: "Information about the blockage"
+      preview: "Preview of the message"
+      linkDisabled: "Link disabled"
+      imgDisabled: "Image disabled"
+      reason: "Reason for blockage"
   Msgrcpt:
     labels:
       infos: "Information about the message"
@@ -553,13 +590,17 @@ Entities:
     fields:
       bspamLevel: "Spam rating"
   Connector:
+    index: "List of connectors"
+    show: "Details of the connector"
     labels:
+    fields:
+      id: "Id"
+      name: "Connector name"
+      type: "Connector type"
+      active: "Active connector"
     actions:
       add: "Add Office365 connector"
       edit: "Edit Office365 connector"
-    fields:
-      name: "Connector name"
-      type: "Connector type"
   LdapConnector:
     labels:
     actions:
@@ -570,14 +611,15 @@ Entities:
       ldapPort: "Port (default 389)"
       allowAnonymousBind: "Allow anonymous connexion"
       LdapBaseDN: "BaseDN"
-      ldapLoginField: "LDAP field for login (ex : uid)"
+      ldapLoginField: "LDAP field for login (ex: uid)"
       ldapBindDn: "Bind Dn"
       LdapPassword: "Password"
-      ldapRealNameField: "LDAP Field for username (ex : sn)"
+      ldapRealNameField: "LDAP Field for username (ex: sn)"
       synchronizeGroup: "Also synchronize groups"
-      ldapGroupNameField: "LDAP field for group name (ex : sn)"
+      ldapGroupNameField: "LDAP field for group name (ex: sn)"
       ldapEmailField: "LDAP field for email"
       ldapAliasField: "LDAP field for alias (if different from email)"
+      ldapGroupMemberField: "LDAP field for group members"
       ldapUserFilter: "Filter for user"
       ldapGroupFilter: "Filter for groups"
   ImapConnector:
@@ -592,6 +634,9 @@ Entities:
       imapNoValidateCert: "Do not validate certificates"
   Office365Connector:
     labels:
+    actions:
+      add: "Add Office365 connector"
+      edit: "Edit Office365 connector"
     fields:
       tenant: "Tenant Id"
       client: "Client Id"
@@ -608,7 +653,7 @@ Entities:
         1: Validated by captcha
         2: Validated by the group
         3: Validated by the administrator
-        4: Validated by outgoing mail
+        4: Validated by outgoing email
       typeLabelB:
         0: Blocked by you
         1: Blocked by captcha
@@ -620,26 +665,29 @@ Entities:
   Import:
     Wbliste:
       title: "White list: import a list"
-      description:
-        "The file must be encoded in utf8 in text or csv format.<br/> Each
-        line must have a valid email address<br/>"
+      description: "The file must be encoded in utf8 in text or csv format.<br/> Each
+                    line must have a valid email address<br/>"
     Users:
       title: "Import users"
-      labels: { titleInfo: Information }
+      labels:
+        titleInfo: Information
       description:
         "The file must be encoded in utf8 in csv format separated by semicolon.
-        <br/> The structure is as follows: email; LastName; FirstName; Group<br/>"
+        <br/>
+        The structure is as follows: email; LastName; FirstName; Group<br/>"
       warning:
         "Warning : The already existing users will be updated with the new
         information."
     Alias:
       title: "Import alias"
-      labels: { titleInfo: Information }
+      labels:
+        titleInfo: Information
       description:
         "The file must be encoded in utf8 in csv format separated by semicolon.
-        <br/> The structure is as follows: FirstName; LastName; email; alias's email<br/>"
+        <br/>
+        The structure is as follows: FirstName; LastName; email; alias's email<br/>"
       warning:
-        "Warning : The already existing users will be updated with the new
+        "Warning: The already existing users will be updated with the new
         information."
     WhiteListe:
       title: "Import a list of addresses to allow"
