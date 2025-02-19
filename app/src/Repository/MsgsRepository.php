@@ -200,9 +200,9 @@ class MsgsRepository extends ServiceEntityRepository
             // Check if $user is an admin
             $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
             if ($isAdmin) {
-                $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+                $sql .= ' AND (m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
             } else {
-                $sql .= ' and (m.subject like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+                $sql .= ' AND (m.subject LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
             }
         }
 
@@ -219,6 +219,10 @@ class MsgsRepository extends ServiceEntityRepository
 
         $stmt = $conn->prepare($sql);
 
+        if ($searchKey) {
+            $stmt->bindValue('searchKey', '%' . $searchKey . '%');
+        }
+
         $return = $stmt->executeQuery()->fetchAllAssociative();
         unset($stmt);
         unset($conn);
@@ -228,12 +232,9 @@ class MsgsRepository extends ServiceEntityRepository
 public function advancedSearch(?User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
 {
     $conn = $this->getEntityManager()->getConnection();
-
-    // Switch between tables based on message type
     $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
     $msgrcptTable = $messageType === 'outgoing' ? 'out_msgrcpt' : 'msgrcpt';
 
-    // Original SQL query
     $sql = "
         SELECT
             m.*,
@@ -246,19 +247,21 @@ public function advancedSearch(?User $user = null, string $messageType = 'incomi
             m.time_num,
             mr.rid,
             mr.bspam_level,
-            mr.amavis_output
+            mr.amavis_output,
+            CASE
+                WHEN m.subject LIKE 'Re:%'
+                OR m.subject LIKE 'RE:%'
+                THEN 'oui'
+                ELSE 'non'
+            END as replyTo
         FROM {$table} m
         LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
         LEFT JOIN maddr ON maddr.id = mr.rid
         LEFT JOIN message_status ms ON mr.status_id = ms.id
         LEFT JOIN users u ON u.email = maddr.email
         LEFT JOIN domain d ON u.domain_id = d.id
+        WHERE d.active = 1
     ";
-
-    if ($searchKey) {
-        $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
-    }
-
 
     if ($sortParams) {
         $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
@@ -266,44 +269,15 @@ public function advancedSearch(?User $user = null, string $messageType = 'incomi
         $sql .= ' ORDER BY m.time_num desc, m.status_id ';
     }
 
-
-    // Execute the original query
     $stmt = $conn->prepare($sql);
+
     $allMessages = $stmt->executeQuery()->fetchAllAssociative();
 
-    // Take out messages that dont have a rid
-    $allMessages = array_filter($allMessages, function ($message) {
-        return $message['rid'] !== null;
-    });
-
-    // Add replyTo status to each message based on m.sid
-    foreach ($allMessages as &$message) {
-        // Fetch the correct email using m.sid
-        $sid = $message['sid'];
-        $emailQuery = "
-            SELECT email
-            FROM maddr
-            WHERE id = :sid
-        ";
-
-        // Prepare and execute the email lookup query
-        $emailStmt = $conn->prepare($emailQuery);
-        $emailStmt->bindValue('sid', $sid);
-        $emailResult = $emailStmt->executeQuery()->fetchOne();
-
-        // Determine the replyTo status
-        $message['replyTo'] = ($message['from_addr'] !== $emailResult) ? 'oui' : 'non';
-    }
-
-    // Clean up resources
     unset($stmt);
     unset($conn);
 
     return $allMessages;
 }
-
-
-
 
   /**
    * SELECT only msgs to send email with captch
