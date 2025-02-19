@@ -117,7 +117,7 @@ class Domain
     private Collection $dailyStats;
 
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
-    private DomainKey $domain_keys;
+    private ?DomainKey $domain_keys;
 
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $domainRelays;

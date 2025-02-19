@@ -396,11 +396,7 @@ class MessageController extends AbstractController
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
         //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
 
-        $fromAddr = null;
-        preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msgs->getFromAddr(), $matches);
-        if (isset($matches[0][0]) && filter_var($matches[0][0], FILTER_VALIDATE_EMAIL)) {
-            $fromAddr = filter_var($matches[0][0], FILTER_VALIDATE_EMAIL);
-        }
+        $fromAddr = $msgs->getFromMimeAddress()?->getAddress();
 
         $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
 
@@ -535,11 +531,9 @@ class MessageController extends AbstractController
 
         $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
 
-        preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msgs->getFromAddr(), $matches);
-        if (isset($matches[0][0]) && filter_var($matches[0][0], FILTER_VALIDATE_EMAIL)) {
-            $fromAddr = filter_var($matches[0][0], FILTER_VALIDATE_EMAIL);
-            $emailSenderToWb = $emailSender != $fromAddr ? $fromAddr : $emailSender;
-        }
+        $fromAddr = $msgs->getFromMimeAddress()?->getAddress();
+
+        $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
 
         $emailRecipient = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
         $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));

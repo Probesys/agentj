@@ -50,8 +50,15 @@ class WblistRepository extends ServiceEntityRepository {
         }
 
         if ($searchKey) {
-            $dql->andWhere('(s.email like :searchkey or u.email like :searchkey or u.fullname like :searchkey )')
-                    ->setParameter('searchkey', '%' . $searchKey . '%');
+            // Check if $user is an admin
+            $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
+            if ($isAdmin) {
+                $dql->andWhere('(LOWER(s.email) like LOWER(:searchkey) or LOWER(u.email) like LOWER(:searchkey) or LOWER(u.fullname) like LOWER(:searchkey))')
+                    ->setParameter('searchkey', '%' . strtolower($searchKey) . '%');
+            } else {
+                $dql->andWhere('(LOWER(s.email) like LOWER(:searchkey))')
+                    ->setParameter('searchkey', '%' . strtolower($searchKey) . '%');
+            }
         }
 
         if ($sortPrams) {

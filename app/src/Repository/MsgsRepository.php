@@ -180,7 +180,6 @@ class MsgsRepository extends ServiceEntityRepository
 
         $conn = $this->getEntityManager()->getConnection();
 
-
         $sql = 'SELECT m.mail_id, m.message_error, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level, '
                 . 'CASE '
                     . 'WHEN ms.name IS NOT NULL THEN ms.name '
@@ -198,7 +197,13 @@ class MsgsRepository extends ServiceEntityRepository
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias, $fromDate);
 
         if ($searchKey) {
-            $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+            // Check if $user is an admin
+            $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
+            if ($isAdmin) {
+                $sql .= ' and (m.subject like "%' . $searchKey . '%" or maddr.email like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+            } else {
+                $sql .= ' and (m.subject like "%' . $searchKey . '%" or m.from_addr like "%' . $searchKey . '%") ';
+            }
         }
 
 

@@ -70,88 +70,91 @@ class MsgsSendMailTokenCommand extends Command
             $msgs = $this->em->getRepository(Msgs::class)->searchMsgsToSendAuthToken();
 
             foreach ($msgs as $msg) {
-                $email_clean = "";
-                preg_match_all("/[\._a-zA-Z0-9-]+@[\._a-zA-Z0-9-]+/i", $msg['from_addr'], $email_clean);
-                if (isset($email_clean[0][0]) && filter_var($email_clean[0][0], FILTER_VALIDATE_EMAIL)) {
-                    $msg['from_addr'] = filter_var($email_clean[0][0], FILTER_VALIDATE_EMAIL);
+                try {
+                    $fromAddr = Address::create($msg['from_addr'])->getAddress();
+                } catch (\InvalidArgumentException $e) {
+                    $fromAddr = null;
+                }
 
-                    if (!$msg['from_addr']) {
-                        continue;
-                    }
-
+                if (!$fromAddr) {
                     $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
 
-                  /* @var $msgrcpt Msgrcpt */
-                    $msgrcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['mailId' => $msg['mail_id'], 'rid' => $msg['rid']]);
-
-                    if (is_null($msgrcpt)) {
-                        continue;
-                    }
-
-
-                    $destEmail = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
-                  /* @var $user User */
-                    $user = $this->em->getRepository(User::class)->findOneBy(['email' => $destEmail]);
-                    if ($user) {
-                        $fromName = $user->getFullName() ? $user->getFullName() : '';
-                        if ($user->getDomain()->getMailAuthenticationSender() && filter_var($user->getDomain()->getMailAuthenticationSender(), FILTER_VALIDATE_EMAIL)) {
-                            $mailFrom = $user->getDomain()->getMailAuthenticationSender();
-                        } else {
-                            $mailFrom = $this->getApplication()->getKernel()->getContainer()->getParameter('app.domain_mail_authentification_sender');
-                        }
-
-                        $destDomain = $user->getDomain();
-                    } else {
-                        continue;
-                    }
-
-                    if ($user->getBypassHumanAuth()) {
-                          $this->releaseMessage($msgObj, $msgrcpt, $user);
-                    } else {
-                        // Bypass if an authetification has been sent the last day for this sender
-                        $auhtentificationAlreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
-                        if (count($auhtentificationAlreadySent) > 0) {
-                            $today = new \DateTime();
-                            $dateLastSendAuthentification = new \DateTime($auhtentificationAlreadySent[0]['time_iso']);
-                            $interval = $today->diff($dateLastSendAuthentification)->format('%a');
-                            if ($interval <= 0) {
-                                  continue;
-                            }
-                        }
-
-                        $mailBody = $this->createAuthMessageContent($destDomain, $msg, $destEmail);
-                        $message = $this->createAuthMessage($msgObj, $mailFrom, $fromName, $mailBody);
-                        if ($message) {
-                            if ($this->sendAuthMessage($msgObj, $message, $msgrcpt)) {
-                                  $logService = new LogService($this->em);
-                                  $logService->addLog('Authentification request sent', $msg['mail_id'], $mailBody['html_body']);
-                                  $mailTo = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
-                                  $subject = $this->getSubject($msgObj);
-                                  $output->writeln(date('Y-m-d H:i:s') . "\t" . $mailFrom . "<" . $fromName . ">" . "\t" . $msg['mail_id'] . "\t" . $mailTo . "\t" . $subject);
-                            }
-                        } else {
-                            $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
-                            if ($msgObj) {
-                                          $msgObj->setMessageError(sprintf('Unable to create Message ', $msg['from_addr']));
-                                          $msgObj->setStatus($this->messageStatusError);
-                                          $this->em->persist($msgObj);
-                                          $this->em->flush();
-                            }
-                            return Command::FAILURE;
-                        }
-                    }
-                } else {
-                    $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
                     if ($msgObj) {
                         $msgObj->setMessageError(sprintf('Email %s is not valid', $msg['from_addr']));
                         $msgObj->setStatus($this->messageStatusError);
                         $this->em->persist($msgObj);
                         $this->em->flush();
                     }
+
                     return Command::FAILURE;
                 }
+
+                $msg['from_addr'] = $fromAddr;
+
+                $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
+
+                /* @var $msgrcpt Msgrcpt */
+                $msgrcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['mailId' => $msg['mail_id'], 'rid' => $msg['rid']]);
+
+                if (is_null($msgrcpt)) {
+                    continue;
+                }
+
+
+                $destEmail = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
+                /* @var $user User */
+                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $destEmail]);
+                if ($user) {
+                    $fromName = $user->getFullName() ? $user->getFullName() : '';
+                    if ($user->getDomain()->getMailAuthenticationSender() && filter_var($user->getDomain()->getMailAuthenticationSender(), FILTER_VALIDATE_EMAIL)) {
+                        $mailFrom = $user->getDomain()->getMailAuthenticationSender();
+                    } else {
+                        $mailFrom = $this->getApplication()->getKernel()->getContainer()->getParameter('app.domain_mail_authentification_sender');
+                    }
+
+                    $destDomain = $user->getDomain();
+                } else {
+                    continue;
+                }
+
+                if ($user->getBypassHumanAuth()) {
+                    $this->releaseMessage($msgObj, $msgrcpt, $user);
+                } else {
+                    // Bypass if an authetification has been sent the last day for this sender
+                    $AuhtentificationAllreadySent = $this->em->getRepository(Msgs::class)->checkLastRequestSent($destEmail, $msg['from_addr']);
+                    if (count($AuhtentificationAllreadySent) > 0) {
+                        $today = new \DateTime();
+                        $dateLastSendAuthentification = new \DateTime($AuhtentificationAllreadySent[0]['time_iso']);
+                        $interval = $today->diff($dateLastSendAuthentification)->format('%a');
+                        if ($interval <= 0) {
+                            continue;
+                        }
+                    }
+
+                    $mailBody = $this->createAuthMessageContent($destDomain, $msg, $destEmail);
+                    $message = $this->createAuthMessage($msgObj, $mailFrom, $fromName, $mailBody);
+                    if ($message) {
+                        if ($this->sendAuthMessage($msgObj, $message, $msgrcpt)) {
+                            $logService = new LogService($this->em);
+                            $logService->addLog('Authentification request sent', $msg['mail_id'], $mailBody['html_body']);
+                            $mailTo = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
+                            $subject = $this->getSubject($msgObj);
+                            $output->writeln(date('Y-m-d H:i:s') . "\t" . $mailFrom . "<" . $fromName . ">" . "\t" . $msg['mail_id'] . "\t" . $mailTo . "\t" . $subject);
+                        }
+                    } else {
+                        $msgObj = $this->em->getRepository(Msgs::class)->findOneBy(['mailId' => $msg['mail_id']]);
+                        if ($msgObj) {
+                            $msgObj->setMessageError(sprintf('Unable to create Message ', $msg['from_addr']));
+                            $msgObj->setStatus($this->messageStatusError);
+                            $this->em->persist($msgObj);
+                            $this->em->flush();
+                        }
+                        return Command::FAILURE;
+                    }
+                }
             }
-          //update the msgs error
+
+            //update the msgs error
             $this->em->getRepository(Msgs::class)->updateErrorStatus();
 
             $lock->release();
