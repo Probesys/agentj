@@ -1,6 +1,6 @@
 <h2 class="mx-2">{{ 'Generics.labels.previewUsers'|trans }}</h2>
-<section id="no-more-tables">
-	<table class="table datatable hidden">
+<div class="table-responsive">
+	<table id="table_users" class="table table-hover">
 		<thead>
 			<tr>
 				<th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
@@ -42,4 +42,15 @@
 			{% endfor %}
 		</tbody>
 	</table>
-</section>
+</div>
+<script>
+	$('#table_users').DataTable(
+    {
+		"initComplete": function (settings, json) {
+			$('#table_users').removeAttr('style');
+		},
+		"language": {
+			url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
+		}
+    });
+</script>
