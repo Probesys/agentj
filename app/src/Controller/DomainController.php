@@ -260,8 +260,8 @@ class DomainController extends AbstractController
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
         }
 
-        $dkim = $this->em->getRepository(DomainKey::class)->find($domain->getDomainKeys()->getId());
-        $dnsInfo = $dkim->getDnsinfo();
+        $dkim = $domain->getDomainKeys();
+        $dnsInfo = $dkim?->getDnsinfo();
         return $this->render('domain/edit.html.twig', [
             'domain' => $domain,
             'dkim' => $dkim,
@@ -398,6 +398,10 @@ class DomainController extends AbstractController
     private function generateOpenDkim(Domain $domain): bool
     {
         $dkim = $domain->getDomainKeys();
+        if ($dkim === null) {
+            $dkim = new DomainKey();
+            $domain->setDomainKeys($dkim);
+        }
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');
         try {
