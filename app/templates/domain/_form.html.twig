@@ -62,7 +62,7 @@
             </div>
         </div>
         {#    DNS    #}
-        {% if domain.id is not null %}
+        {% if domain.id is not null and dkim is not null %}
             <div class="card mt-4 mb-4">
                 <div class="card-header">
                     {{ 'Entities.Domain.labels.dns' | trans() }}
