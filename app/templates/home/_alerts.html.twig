@@ -1,7 +1,7 @@
 <h2 class="mx-2 d-flex justify-content-between">{{ 'Generics.labels.recentAlerts'|trans }}
 	<a href="{{ path('alert_index') }}" class="btn btn-secondary">{{ 'Voir plus'|trans }}</a>
 </h2>
-<section>
+<div class="table-responsive">
 	<table id="table_alerts" class="table table-hover">
 		<thead>
 			<tr>
@@ -40,4 +40,4 @@
 			{% endfor %}
 		</tbody>
 	</table>
-</section>
+</div>
