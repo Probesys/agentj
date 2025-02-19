@@ -4,6 +4,7 @@ cd /var/www/agentj || exit
 bash /var/www/agentj/docker/tests/init.sh
 
 test_results=/tmp/test_mails
+mail_db=/tmp/test_db/mailpit.db
 
 send() {
 	# for log
@@ -33,25 +34,29 @@ send() {
 		"in")
 			swaks --from $local_addr --to "$aj_addr" --body "sent to agentj" -s smtptest:26 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			test_str="From $mail_from"
+			#test_str="{\"From\":%\"Address\":\"$local_addr\"}"
+			test_str="%From%Address\":\"$local_addr\"%To%Address\":\"$aj_addr\"%"
 			;;
 		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
 		"out")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s outsmtp $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			test_str="From $aj_addr"
+			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
+			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			;;
 		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
 		"outviarelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s smtptest:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			test_str="From $aj_addr"
+			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
+			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			;;
 		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
 		"outviabadrelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s badrelay:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			test_str="From $aj_addr"
+			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
+			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			wait_time=5
 			;;
 		*)
@@ -68,7 +73,7 @@ send() {
 	touch "$test_results/mailtester"
 	# wait for all mail to be received
 	secs=0
-	while [ "$(grep -c "$test_str" $test_results/mailtester)" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
+	while [ "$(sqlite3 "$mail_db" "select count(*) from mailbox where Metadata like '$test_str'")" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
 	done
@@ -79,8 +84,8 @@ send() {
 		sleep "$wait_time"
 	fi
 
-	received=$(grep -c "$test_str" "$test_results/mailtester")
-	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' "$test_results/mailtester")" && echo -n "(missing DKIM signature) "
+	received=$(sqlite3 "$mail_db" "select count(*) from mailbox where Metadata like '$test_str' and read = 0")
+	#test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' $test_results/mailtester)" && echo -n "(missing DKIM signature) "
 	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok ${secs}s"
@@ -90,7 +95,9 @@ send() {
 		echo 'failed' > "$test_results/$testname.result"
 	fi
 
-	mv "$test_results/mailtester" "$test_results/mailbox_$testname"
+	#sqlite3 "$mail_db" "update mailbox set read = 1 where Metadata like '$test_str%'"
+	mail_id=$(sqlite3 "$mail_db" "select ID from mailbox where Metadata like '$test_str'")
+	curl -X PUT http://mailpit.test:8025/api/v1/messages -d "{\"IDs\":[\"$mail_id\"], \"Read\": true}"
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]

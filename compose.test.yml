@@ -42,6 +42,7 @@ services:
         ipv4_address: 172.28.2.1
     volumes:
       - ./tests/results:/tmp/test_mails
+      - ./mailpit/data:/tmp/test_db
 
   amavis:
     dns: 172.28.2.5
