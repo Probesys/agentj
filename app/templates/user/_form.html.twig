@@ -20,7 +20,9 @@
 
 {% if (app.request.get('_route') != 'user_email_new') and (app.request.get('_route') != 'user_email_edit') and (app.request.get('_route') != 'new_user_email_alias') and (app.request.get('_route') != 'user_email_alias_edit')%}
     {% if form.roles is defined %}
-        {{ form_row(form.roles) }}
+        <div data-role='["{{ user.roles[0] }}"]'>
+            {{ form_row(form.roles, {'attr': {'id': 'roles'}}) }}
+        </div>
     {% endif %}
 {% endif %}
 
@@ -49,6 +51,61 @@
     {% if form.domain is defined %}
         {{ form_row(form.domain) }}
     {% endif %}
+{% endif %}
+
+{% if form.domains is defined %}
+    {{ form_row(form.domains) }}
+    <div id="domain-warning" style="color: red; display: none;">
+        {{ 'Generics.messages.selectAtLeastOneDomain'|trans }}
+    </div>
+    <script>
+        $(document).on('shown.bs.modal', function() {
+            const roleContainer = document.querySelector('[data-role]');
+            const role = roleContainer.getAttribute('data-role');
+            const selectElement = roleContainer.querySelector('select');
+
+            $(selectElement).val(role).trigger('change');
+        });
+
+        $(document).ready(function() {
+            $('.select2').select2();
+
+            const rolesSelect = document.getElementById('user_roles');
+            const form = document.querySelector('form'); // Adjust the selector if needed
+            const domainCheckboxes = document.querySelectorAll('input[name="user[domains][]"]');
+            const submitButton = form.querySelector('input[type="submit"]');
+            const domainWarning = document.getElementById('domain-warning');
+
+            function checkDomains() {
+                let isChecked = false;
+                domainCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        isChecked = true;
+                    }
+                });
+
+                submitButton.disabled = !isChecked;
+                domainWarning.style.display = isChecked ? 'none' : 'block';
+            }
+
+            // Initial check
+            checkDomains();
+
+            rolesSelect.addEventListener('change', function() {
+                const selectedRole = rolesSelect.value;
+                if (selectedRole === '["ROLE_SUPER_ADMIN"]') {
+                    domainCheckboxes.forEach(checkbox => checkbox.checked = true);
+                } else {
+                    domainCheckboxes.forEach(checkbox => checkbox.checked = false);
+                }
+                checkDomains();
+            });
+            // Add event listeners to checkboxes
+            domainCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', checkDomains);
+            });
+        });
+    </script>
 {% endif %}
 
 {% if form.imapLogin is defined %}
