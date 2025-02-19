@@ -294,6 +294,26 @@ public function advancedSearch(?User $user = null, string $messageType = 'incomi
         WHERE d.active = 1
     ";
 
+    // if $user is an admin, add a condition to check only the domains he administer
+    if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+        $domainsIds = [];
+        if ($user->getDomain()) {
+            $domainsIds[] = $user->getDomain()->getId();
+        }
+        $domains = $user->getDomains();
+        if ($domains !== null && !$domains->isEmpty()) {
+            $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
+                return $domain->getId();
+            })->toArray());
+        }
+
+        if (empty($domainsIds)) {
+            return [];
+        }
+
+        $sql .= ' and u.domain_id in (' . implode(',', $domainsIds) . ') ';
+    }
+
     if ($sortParams) {
         $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
     } else {
