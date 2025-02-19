@@ -18,6 +18,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Validator\Constraints\Type;
+use Symfony\Component\Validator\Constraints\Range;
 
 class DomainType extends AbstractType
 {
@@ -47,10 +50,17 @@ class DomainType extends AbstractType
             ])
             ->add('srvSmtp', null, [
                 'label' => 'Entities.Domain.fields.srvSmtp',
-                'required' => false,
+                'required' => true,
             ])
-            ->add('smtpPort', TextType::class, [
+            ->add('smtpPort', NumberType::class, [
                 'label' => 'Entities.Domain.fields.smtp_port',
+                'constraints' => [
+                    new Type(['type' => 'numeric']),
+                    new Range([
+                        'min' => 1,
+                        'max' => 65535
+                    ])
+                ],
             ])
             ->add('active', null, [
                 'label' => 'Entities.Domain.fields.active',
