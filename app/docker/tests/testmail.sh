@@ -34,28 +34,25 @@ send() {
 		"in")
 			swaks --from $local_addr --to "$aj_addr" --body "sent to agentj" -s smtptest:26 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			#test_str="{\"From\":%\"Address\":\"$local_addr\"}"
-			test_str="%From%Address\":\"$local_addr\"%To%Address\":\"$aj_addr\"%"
+			# mail is resent by AgentJ
+			test_str="%From%Address\":\"$mail_from\"%To%Address\":\"$local_addr\"%"
 			;;
 		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
 		"out")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s outsmtp $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
 			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			;;
 		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
 		"outviarelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s smtptest:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
 			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			;;
 		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
 		"outviabadrelay")
 			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s badrelay:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
-			#test_str="{\"From\":{\"Name\":\"\",\"Address\":\"$aj_addr\"}"
 			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
 			wait_time=5
 			;;
@@ -95,9 +92,8 @@ send() {
 		echo 'failed' > "$test_results/$testname.result"
 	fi
 
-	#sqlite3 "$mail_db" "update mailbox set read = 1 where Metadata like '$test_str%'"
-	mail_id=$(sqlite3 "$mail_db" "select ID from mailbox where Metadata like '$test_str'")
-	curl -X PUT http://mailpit.test:8025/api/v1/messages -d "{\"IDs\":[\"$mail_id\"], \"Read\": true}"
+	mail_id=$(sqlite3 "select ID from mailbox where Metadata like '$test_str'"|tr '\n' ','|sed 's/,/","/g')
+	curl -X PUT http://mailpit.test:8025/api/v1/messages -d "{\"IDs\":[\"${mail_id::-2}\"], \"Read\": true}"
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
