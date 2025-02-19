@@ -25,6 +25,10 @@ Generics:
     import: "Importer"
     importFile: "Importer depuis un fichier"
     addIpAddress: "Ajouter une adresse IP"
+    chooseUser: "Choisir un utilisateur"
+    chooseDomain: "Choisir un domaine"
+    choosePolicy: "Choisir une stratégie"
+    showMore: "Voir plus"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
@@ -54,23 +58,21 @@ Generics:
     list: "Liste"
   messages:
     no_records_found: Aucun résultat trouvé
-    confirmationDeleteMessageQuestion:
-      Êtes vous certain de vouloir supprimer cet
-      élément ?
+    confirmationDeleteMessageQuestion: Êtes-vous certain de vouloir supprimer cet élément\_?
     welcome: Bienvenue
     welcomeAgentJ: Bienvenue sur AgentJ
     welcomeHomeMessage:
       "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br>\
       \ veuillez vous authentifier"
-    formNotComplete: Veuillez renseigner les informations obligatoire
+    formNotComplete: Veuillez renseigner les informations obligatoires
     UserExist: L'utilisateur existe déjà dans la base de données
     EmailDoesNotExist: Le compte email n'existe pas dans la base de données
     BadColumnsFile: Le nombre de colonne est incorrecte. Vérifier votre fichier.
-    azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuilles contacter votre administrateur
+    azurOAuthInvalidIdentity: Les données d'identification à Microsoft sont erronées. Veuillez contacter votre administrateur
     incorrectCredential: Identifiants incorrects
-    groupWithPriorityExists: "Un group avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
+    groupWithPriorityExists: "Un groupe avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre"
     helpAlert: "Alertes sur les mails sortant bloqués (quota dépassé, etc...)"
-    cannotPreviewMailWithvirus: "Vous ne pouvez pas visualilser ce message car il contient un virus"
+    cannotPreviewMailWithvirus: "Vous ne pouvez pas visualiser ce message car il contient un virus"
     selectAtLeastOneDomain: "Veuillez sélectionner au moins un domaine"
   labels:
     all: Tous
@@ -97,6 +99,8 @@ Generics:
     incomingMails: Mails entrants
     unblockedMessages: Messages non bloqués
     blockedMessages: Messages bloqués
+    unreadAlerts: "Alerte non lue|Alertes non lues"
+    variables: Variables
   batch:
     labels:
       for_selection: Pour la selection
@@ -125,12 +129,12 @@ Generics:
     BadColumnsFile: Mauvais nombre de colonnes pour le fichier.
     NoImport: Aucun compte email n'a été importé.
     domainNotExist: Le domaine n'existe pas
-    emailAllreadyExist: Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser
-    imapLoginAllreadyExist: Ce login imap est déjà utilisé. Vous ne pouvez pas l'utiliser
-    aliasAllreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
-    userNameAllreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
+    emailAlreadyExist: Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser
+    imapLoginAlreadyExist: Ce login imap est déjà utilisé. Vous ne pouvez pas l'utiliser
+    aliasAlreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
+    userNameAlreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
     passwordNotMatching: La confirmation du mot de passe n'est pas valide
-    groupNameAllreadyExist:
+    groupNameAlreadyExist:
       Ce groupe existe déjà pour domaine. Vous ne pouvez pas
       utiliser ce nom
     BadFormatcsv: "Mauvais format de fichier"
@@ -151,7 +155,6 @@ Generics:
     year(s): An(s)
     months: mois
     bytes: Bytes
-
 Navigation:
   mainTitle: AgentJ
   mainSubTitle: Solution antispam AgentJ
@@ -218,6 +221,7 @@ Message:
     BannedSender: Bannir l'expéditeur
     BannedDomain: Bannir l'expéditeur à l'ensemble des utilisateurs
     Delete: Supprimer
+    Unlock: Débloquer
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
@@ -240,21 +244,15 @@ Message:
       Êtes-vous sur d'autoriser l'expéditeur pour
       tous les utilisateurs ?
     confirmBannedMsgtitle: Bannir l'expéditeur
-    confirmBannedMsgContent: Êtes-vous sur de bannir l'expéditeur ?
+    confirmBannedMsgContent: Êtes-vous sur de vouloir bannir l'expéditeur ?
     confirmBannedDomainMsgtitle: Bannir l'expéditeur pour tous les utilisateurs
-    confirmBannedDomainMsgContent:
-      Êtes-vous sur de bannir l'expéditeur pour tous
-      les utilisateurs ?
+    confirmBannedDomainMsgContent: Êtes-vous sur de bannir l'expéditeur pour tous les utilisateurs ?
     confirmRestoreMsgtitle: Récupérer le message
     confirmRestoreMsgContent: Êtes-vous sur de vouloir récupérer le message ?
     confirmDeleteSenderTitleW: Supprimer cet expéditeur ?
     confirmDeleteSenderTitleB: Débloquer cet expéditeur ?
-    confirmDeleteSenderContentW:
-      Êtes-vous sûr de vouloir supprimer cet expéditeur
-      ?
-    confirmDeleteSenderContentB:
-      Êtes-vous sûr de vouloir débloquer cet expéditeur
-      ?
+    confirmDeleteSenderContentW: Êtes-vous sûr de vouloir supprimer cet expéditeur ?
+    confirmDeleteSenderContentB: Êtes-vous sûr de vouloir débloquer cet expéditeur ?
     confirmDeleteGroupTitle: Supprimer ce groupe ?
     confirmDeleteGroupContent: Êtes-vous sûr de vouloir supprimer ce groupe ?
     confirmRemoveUserFromGroupTitle: Supprimer du groupe ?
@@ -304,6 +302,8 @@ Message:
     resultImportGroup: "$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED synchronisés"
     resultImportAliase: "$NB_ALIAS_CREATED alias créés, $NB_ALIAS_UPDATED  synchronisés"
     tokenError: "Impossible se connecter à votre compte Microsoft. Veuillez vérifier vos paramètres"
+  Office365Connector:
+    tokenError: "Impossible se connecter à votre compte. Veuillez vérifier vos paramètres"
   Toast:
     defaultTitle: Information
     newUntreatedMessage: nouveau(x) messages non traités
@@ -331,6 +331,7 @@ Form:
   ImportFile: Sélectionnez un fichier à importer
 
 Search:
+  Title: Recherche avancée
   MailId: Mail ID
   Sender: Expéditeur
   Recipient: Destinataire
@@ -347,6 +348,7 @@ Search:
   Outgoing: ENVOYÉ
   MessageType: Type de message
   Filter: Filtrer
+  AdvancedFilter: Filtres avancés
 
 Entities:
   Group:
@@ -359,7 +361,7 @@ Entities:
       Updated: Modifier
       updateGroup: Modifier le groupe
       Delete: Supprimer
-      manageList: Gérer les expéditeur
+      manageList: Gérer les expéditeurs
       addRule: Ajouter une règle
       addRuleToGroup: Ajouter une règle au groupe
       deleteRule: Supprimer la règle
@@ -394,7 +396,7 @@ Entities:
       spamQuarantineTo: Faire suivre le spam vers le mail
       bannedQuarantineTo: Faire suivre les bannis vers le mail
       badHeaderQuarantineTo: Faire suivre les mauvais entêtes vers le mail
-      uncheckedQuarantineTo: Faire suivre les spams non cochés vers le mail
+      uncheckedQuarantineTo: Faire suivre les spams non vérifiés vers le mail
       cleanQuarantineTo: Faire suivre les spams nettoyés vers le mail
       archiveQuarantineTo: Faire suivre les spams archivés vers le mail
       spamTagLevel: Niveau du tag de SPAM
@@ -424,7 +426,7 @@ Entities:
       forwardMethod: Méthode pour le forward
       saUserconf: Configuration Utilisateur SA
       saUsername: Nom Utilisateur SA
-      uncheckedLover: uncheckedLover
+      uncheckedLover: Aime les spams non vérifiés
     tabs:
       policy: Stratégie
       quarantine: Quarantaine
@@ -443,8 +445,13 @@ Entities:
       messageAlert: Message du rapport
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
+      srvImap: Serveur IMAP
+      datemod: Date de modification
       smtp_port: "Port SMTP"
+      imapPort: "Port IMAP"
+      imapFlag: "Sécurisation IMAP"
       active: Domaine actif
+      transport: Transport
       policy: Stratégie pour le domaine
       level: Seuil de spam
       mailAuthenticationSender: Adresse mail qui envoie les demandes d'authentification
@@ -528,6 +535,7 @@ Entities:
       outMsgBlockedCount: Nombre de messages sortants bloqués
       inMsgBlockedCount: Nombre de messages entrants bloqués
       originalUser: Email de référence
+      sharedWith: Partagé avec
       alias: Alias
       sharedBy: Partagée avec
       groups: Groupe
@@ -545,10 +553,10 @@ Entities:
       admin:
         virus:
           title: Mail sortant contenant un virus bloqué
-          content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné: '
+          content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné : '
         quota:
           title: Limite de quota franchie
-          content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés: '
+          content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés : '
       user:
         virus:
           title: Votre mail sortant a été bloqué
@@ -564,10 +572,8 @@ Entities:
     delete: Supprimés
     restored: Récupérés
     virus: avec virus
-    spammedDetect: spammés détectés automatiquement
-    informationMessage:
-      Les messages seront automatiquement effacés au bout de 30
-      jours.
+    spammedDetect: spams détectés automatiquement
+    informationMessage: Les messages seront automatiquement effacés au bout de 30 jours.
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
@@ -584,10 +590,17 @@ Entities:
     fields:
       bspamLevel: "Note de spam"
   Connector:
+    index: Liste des connecteurs
+    show: Détails du connecteur
     labels:
     fields:
+      id: "Id"
       name: "Nom du connecteur"
       type: "Type de connecteur"
+      active: "Connecteur actif"
+    actions:
+      add: "Ajouter un connecteur Office365"
+      edit: "Modifier un connecteur Office365"
   LdapConnector:
     labels:
     actions:
@@ -652,7 +665,7 @@ Entities:
   Import:
     Wbliste:
       title: "Liste blanche : importer une liste"
-      description: "Le fichier au format texte.<br\
+      description: "Le fichier doit être encodé en utf8 au format texte ou csv.<br\
         \ /> Chaque ligne doit comporter une adresse mail valide<br />"
     Users:
       title: Importer des utilisateurs
@@ -660,8 +673,8 @@ Entities:
         titleInfo: Information
       description:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
-        \ points virgules.<br /> La structure est la suivante : email ; LastName;\
-        \ FirstName; Group<br />"
+        \ points virgules.<br /> La structure est la suivante : email ; Nom;\
+        \ Prénom; Groupe<br />"
       warning:
         "Attention : les utilisateurs importés existant déjà dans la base de données\
         \ seront mis à jour."
@@ -671,8 +684,8 @@ Entities:
         titleInfo: Information
       description:
         "Le fichier doit être encodé en utf8 au format csv séparé par des\
-        \ points virgules.<br /> La structure est la suivante : FirstName ; AlLastName;\
-        \ email ; email de l'alias<br />"
+        \ points virgules.<br /> La structure est la suivante : Prénom ; Nom;\
+        \ Email ; Email de l'alias<br />"
       warning:
         "Attention : les utilisateurs importés existant déjà dans la base de données\
         \ seront mis à jour."
