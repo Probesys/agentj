@@ -170,7 +170,7 @@ class DomainController extends AbstractController
                 $this->addFlash('error', $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()));
             }
 
-            return $this->redirectToRoute('domain_index');
+            return $this->redirectToRoute('domain_new');
         } else {
             $form->get('level')->setData(0.5);
         }
@@ -257,7 +257,7 @@ class DomainController extends AbstractController
                 $this->addFlash('error', $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()));
             }
 
-            return $this->redirectToRoute('domain_index');
+            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
         }
 
         $dkim = $domain->getDomainKeys();
