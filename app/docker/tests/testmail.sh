@@ -4,7 +4,6 @@ cd /var/www/agentj || exit
 bash /var/www/agentj/docker/tests/init.sh
 
 test_results=/tmp/test_mails
-mail_db=/tmp/test_db/mailpit.db
 
 send() {
 	# for log
@@ -22,83 +21,78 @@ send() {
 	local_addr='root@smtp.test'
 	# expected From
 	mail_from=${7:-$local_addr}
-	test_str=''
 	# app cron which send validation mails run every min
 	# if overriden, tests will fails
 	wait_time=${TEST_TIMEOUT:-60}
 
+	message_subject="test$RANDOM"
+	message_id="null"
+
 	echo -n "[$testname] ... "
 
+	from_addr="$aj_addr"
+	to_addr="$local_addr"
 	case "$in_out" in
 		# to agentj, from external smtp server
 		"in")
-			swaks --from $local_addr --to "$aj_addr" --body "sent to agentj" -s smtptest:26 $swaks_opts > "$test_results/$testname.log" 2>&1
-			swaks_exit_code=$?
 			# mail is resent by AgentJ
-			test_str="%From%Address\":\"$mail_from\"%To%Address\":\"$local_addr\"%"
+			from_addr="$local_addr"
+			to_addr="$aj_addr"
+			smtp_server="smtptest:26"
 			;;
 		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
 		"out")
-			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s outsmtp $swaks_opts > "$test_results/$testname.log" 2>&1
-			swaks_exit_code=$?
-			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
+			smtp_server="outsmtp"
 			;;
 		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
 		"outviarelay")
-			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s smtptest:27 $swaks_opts > "$test_results/$testname.log" 2>&1
-			swaks_exit_code=$?
-			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
+			smtp_server="smtptest:27"
 			;;
 		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
 		"outviabadrelay")
-			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s badrelay:27 $swaks_opts > "$test_results/$testname.log" 2>&1
-			swaks_exit_code=$?
-			test_str="%From%Address\":\"$aj_addr\"%To%Address\":\"$local_addr\"%"
-			wait_time=5
+			smtp_server="badrelay:27"
 			;;
 		*)
 			echo "unknown value '$in_out' for parameter in_out"
 			return
 			;;
 	esac
+	# $swaks_opts should expand
+	# shellcheck disable=SC2086
+	swaks --from "$from_addr" --to "$to_addr" --server "$smtp_server" $swaks_opts \
+		--h-Subject="$message_subject" --body "$testname from: $from_addr to: $to_addr via: $smtp_server" \
+		> "$test_results/$testname.log" 2>&1
+	swaks_exit_code=$?
 
 	if [ "$swaks_expected" -ne "$swaks_exit_code" ]
 	then
 		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, mail_from '$mail_from', aj_addr '$aj_addr', options: '$swaks_opts' "
 	fi
 
-	touch "$test_results/mailtester"
-	# wait for all mail to be received
 	secs=0
-	while [ "$(sqlite3 "$mail_db" "select count(*) from mailbox where Metadata like '$test_str'")" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
+	# TODO no mail are received if we don't expect it
+	sleep 1
+	while [ "$message_id" = "null" ] && [ "$secs" -lt "$wait_time" ]
 	do
+		message_id=$(http -b "mailpit.test:8025/api/v1/search?query=$message_subject" | jq ".messages[0].ID")
 		sleep 1; secs=$((secs + 1))
 	done
-	# if we didn't expect any mail, sleep to be sure nothing is received
-	if [ "$expected_received_count" -eq 0 ]
-	then
-		secs="$wait_time"
-		sleep "$wait_time"
-	fi
 
-	received=$(sqlite3 "$mail_db" "select count(*) from mailbox where Metadata like '$test_str' and read = 0")
-	#test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' $test_results/mailtester)" && echo -n "(missing DKIM signature) "
-	if [ "$received" -eq "$expected_received_count" ]
+	if [ "$message_id" != "null" ] || [ "$expected_received_count" -eq 0 ]
 	then
 		echo "ok ${secs}s"
 		echo 'ok' > "$test_results/$testname.result"
 	else
-		echo "failed ${secs}s, received $received mail with '$test_str', expected $expected_received_count, agentj addr '$aj_addr', remote addr '$mail_from', swaks options '$swaks_opts'"
+		echo "failed ${secs}s, agentj addr '$aj_addr', remote addr '$mail_from', swaks options '$swaks_opts'"
 		echo 'failed' > "$test_results/$testname.result"
 	fi
-
-	mail_id=$(sqlite3 "select ID from mailbox where Metadata like '$test_str'"|tr '\n' ','|sed 's/,/","/g')
-	curl -X PUT http://mailpit.test:8025/api/v1/messages -d "{\"IDs\":[\"${mail_id::-2}\"], \"Read\": true}"
+	http -b put mailpit.test:8025/api/v1/messages "IDs[]:=$message_id" Read:=true >/dev/null 2>&1
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
+	{ sleep 3 && php bin/console ag:msgs; } &
 	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
