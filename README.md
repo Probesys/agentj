@@ -69,7 +69,6 @@ In .env set `COMPOSE_FILE=docker-compose.yml:compose.dev.yml`, and `DB_EXPOSED_P
 ### Tests
 
 Set `COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml`, then run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
-See also app/src/DataFixtures/ for info about test data
 
 ## Details
 

@@ -124,11 +124,11 @@ fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp ----" 1>&2
+	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
 	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
 	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
-	send 'out_bloc_bad_relay2' 'out' 'user@blocnormal.fr' 0 "" 24
-	send 'out_pass_bad_relay2' 'outviarelay' 'user@laissepasser.fr' 0
+	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 "" 24
+	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
