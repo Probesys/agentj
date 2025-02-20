@@ -4,40 +4,34 @@ cd /var/www/agentj || exit
 bash /var/www/agentj/docker/tests/init.sh
 
 test_results=/tmp/test_mails
+mailpit_api='http://mailpit.test:8025/api/v1'
 
 send() {
 	# for log
 	testname="$1"
-	# in|out (send to agentj or via agentj)
+	# in|out|outviarelay|outviabadrelay (send to agentj or via agentj)
 	in_out="$2"
-	# agentj test address (from or to)
-	aj_addr="$3"
+	from_addr="$3"
 	# number of received mail expected
 	expected_received_count="$4"
 	# additionnal swaks options (eg attach a file)
 	swaks_opts="$5"
 	# expected swaks error code (if empty, means no error expected)
 	swaks_expected="${6:-0}"
-	local_addr='root@smtp.test'
-	# expected From
-	mail_from=${7:-$local_addr}
-	# app cron which send validation mails run every min
-	# if overriden, tests will fails
-	wait_time=${TEST_TIMEOUT:-60}
 
-	message_subject="test$RANDOM"
-	message_id="null"
+	to_addr='root@smtp.test'
+	wait_time=${TEST_TIMEOUT:-60}
+	message_subject="test_${testname}_$RANDOM"
 
 	echo -n "[$testname] ... "
 
-	from_addr="$aj_addr"
-	to_addr="$local_addr"
 	case "$in_out" in
 		# to agentj, from external smtp server
 		"in")
 			# mail is resent by AgentJ
-			from_addr="$local_addr"
-			to_addr="$aj_addr"
+			_from="$from_addr"
+			from_addr="$to_addr"
+			to_addr="$_from"
 			smtp_server="smtptest:26"
 			;;
 		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
@@ -57,43 +51,60 @@ send() {
 			return
 			;;
 	esac
-	# $swaks_opts should expand
-	# shellcheck disable=SC2086
-	swaks --from "$from_addr" --to "$to_addr" --server "$smtp_server" $swaks_opts \
-		--h-Subject="$message_subject" --body "$testname from: $from_addr to: $to_addr via: $smtp_server" \
-		> "$test_results/$testname.log" 2>&1
-	swaks_exit_code=$?
+	test "$expected_received_count" -eq 0 && force_send=1
+	for _i in $(seq "${force_send:-$expected_received_count}")
+	do
+		# $swaks_opts should expand
+		# shellcheck disable=SC2086
+		swaks --from "$from_addr" --to "$to_addr" --server "$smtp_server" \
+			--h-Subject="$message_subject" --body "$testname from: $from_addr to: $to_addr via: $smtp_server" \
+			$swaks_opts > "$test_results/${testname}_$_i.log" 2>&1
+		swaks_exit_code=$?
+	done
 
 	if [ "$swaks_expected" -ne "$swaks_exit_code" ]
 	then
-		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, mail_from '$mail_from', aj_addr '$aj_addr', options: '$swaks_opts' "
+		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, from '$from_addr', to '$to_addr', options: '$swaks_opts' "
 	fi
 
 	secs=0
-	# TODO no mail are received if we don't expect it
-	sleep 1
-	while [ "$message_id" = "null" ] && [ "$secs" -lt "$wait_time" ]
+	recv_count=-1
+	# if we don't expect any mail, wait 30s to be sure nothing is received
+	test "$expected_received_count" -eq 0 && sleep 30
+	while [ "$recv_count" -lt "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
 	do
-		message_id=$(http -b "mailpit.test:8025/api/v1/search?query=$message_subject" | jq ".messages[0].ID")
-		sleep 1; secs=$((secs + 1))
+		sleep 2; secs=$((secs + 2))
+		recv_count=$(http -b "$mailpit_api/search?query=$message_subject" | jq ".messages_count")
 	done
 
-	if [ "$message_id" != "null" ] || [ "$expected_received_count" -eq 0 ]
-	then
+	if [ "$recv_count" -eq "$expected_received_count" ]; then
 		echo "ok ${secs}s"
 		echo 'ok' > "$test_results/$testname.result"
+		tag='ok'
 	else
-		echo "failed ${secs}s, agentj addr '$aj_addr', remote addr '$mail_from', swaks options '$swaks_opts'"
+		echo "failed ${secs}s, $recv_count/$expected_received_count mail, from '$from_addr', to '$to_addr', swaks options '$swaks_opts'"
 		echo 'failed' > "$test_results/$testname.result"
+		tag='TEST_FAILED'
 	fi
-	http -b put mailpit.test:8025/api/v1/messages "IDs[]:=$message_id" Read:=true >/dev/null 2>&1
+
+	# set read status and tag
+	if [ "$recv_count" -gt 0 ]; then
+	  message_ids=$(http -b "$mailpit_api/search?query=$message_subject" \
+	    | jq ".messages[].ID" | tr '\n' ' ' | sed 's/ / IDs[]:=/g' | sed 's/IDs\[\]:=$//')
+	  # $messages_ids should expand
+	  # shellcheck disable=SC2086
+	  http -q put "$mailpit_api/messages" "IDs[]:="$message_ids Read:=true
+	  # shellcheck disable=SC2086
+	  http -q put "$mailpit_api/tags" "IDs[]:="$message_ids "Tags[]:=\"$tag\""
+	fi
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
-	{ sleep 3 && php bin/console ag:msgs; } &
-	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1 "" 0 'will@blocnormal.fr'
+	{ sleep 3 && php bin/console ag:msgs >/dev/null; } &
+	# TODO check subject & validation mail sender is will@blocnormal.fr
+	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
 	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
@@ -131,43 +142,23 @@ fi
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
 then
 	echo "---- rate limit ----" 1>&2
-	# Domain 3 mail/s
-	swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.domain.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+	# Domain quota 3 mail/s
 	# 3 out_msgs and 1 sql_limit_report
-	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 ''
+	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3
 
-	# Group 2 mail/s
-	swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+	# Group quota 2 mail/s
 	# 2 out_msgs and 2 sql_limit_report
-	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 ''
+	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2
 
-	# Personnal 1 mail/s
-	swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.small.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+	# Personnal quota 1 mail/s
 	# 1 out_msgs and 3 sql_limit_report
-	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 ''
+	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1
 
-	# Personnal 10 mail/s
-	swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user.group1.perso.large.quota@blocnormal.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+	# Personnal quota 10 mail/s
 	# expect no swak error and 5 mails
 	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
 
 	echo "---- no rate limit ----" 1>&2
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 	# expect no swak error and 5 mails
 	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5
 fi
