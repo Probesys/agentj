@@ -43,7 +43,6 @@ RUN apt-get update -q --fix-missing && \
     nginx-light \
     openssl \
     perl \
-    rsyslog \
     sudo \
     supervisor \
     tzdata \

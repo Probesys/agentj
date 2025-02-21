@@ -78,7 +78,6 @@ RUN apt-get update -q --fix-missing && \
     php8.2-tokenizer \
     php8.2-xml \
     php8.2-zip \
-    rsyslog \
     sudo \
     supervisor \
     tzdata
