@@ -28,24 +28,28 @@ send() {
 
 	echo -n "[$testname] ... "
 
-	case $in_out in
+	case "$in_out" in
+		# to agentj, from external smtp server
 		"in")
-			swaks --from $local_addr --to $aj_addr --body "sent to agentj" -s smtptest:26 $swaks_opts > $test_results/$testname.log 2>&1
+			swaks --from $local_addr --to "$aj_addr" --body "sent to agentj" -s smtptest:26 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $mail_from"
 			;;
+		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
 		"out")
-			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s outsmtp $swaks_opts > $test_results/$testname.log 2>&1
+			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s outsmtp $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
 			;;
+		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
 		"outviarelay")
-			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s smtptest:27 $swaks_opts > $test_results/$testname.log 2>&1
+			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s smtptest:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
 			;;
+		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
 		"outviabadrelay")
-			swaks --to $local_addr --from $aj_addr --body "sent from agentj" -s badrelay:27 $swaks_opts > $test_results/$testname.log 2>&1
+			swaks --to $local_addr --from "$aj_addr" --body "sent from agentj" -s badrelay:27 $swaks_opts > "$test_results/$testname.log" 2>&1
 			swaks_exit_code=$?
 			test_str="From $aj_addr"
 			wait_time=5
@@ -61,7 +65,7 @@ send() {
 		echo -n "swaks error: $swaks_exit_code, expected $swaks_expected, mail_from '$mail_from', aj_addr '$aj_addr', options: '$swaks_opts' "
 	fi
 
-	touch $test_results/mailtester
+	touch "$test_results/mailtester"
 	# wait for all mail to be received
 	secs=0
 	while [ "$(grep -c "$test_str" $test_results/mailtester)" -ne "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
@@ -71,22 +75,22 @@ send() {
 	# if we didn't expect any mail, sleep to be sure nothing is received
 	if [ "$expected_received_count" -eq 0 ]
 	then
-		secs=$wait_time
-		sleep $wait_time
+		secs="$wait_time"
+		sleep "$wait_time"
 	fi
 
-	received=$(grep -c "$test_str" $test_results/mailtester)
-	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' $test_results/mailtester)" && echo -n "(missing DKIM signature) "
+	received=$(grep -c "$test_str" "$test_results/mailtester")
+	test "$received" -gt "$(grep -Ec '^DKIM-Signature: ' "$test_results/mailtester")" && echo -n "(missing DKIM signature) "
 	if [ "$received" -eq "$expected_received_count" ]
 	then
 		echo "ok ${secs}s"
-		echo 'ok' > $test_results/$testname.result
+		echo 'ok' > "$test_results/$testname.result"
 	else
 		echo "failed ${secs}s, received $received mail with '$test_str', expected $expected_received_count, agentj addr '$aj_addr', remote addr '$mail_from', swaks options '$swaks_opts'"
-		echo 'failed' > $test_results/$testname.result
+		echo 'failed' > "$test_results/$testname.result"
 	fi
 
-	mv $test_results/mailtester $test_results/mailbox_$testname
+	mv "$test_results/mailtester" "$test_results/mailbox_$testname"
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
@@ -96,7 +100,7 @@ then
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
 	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
-	send 'out_pass' 'outviarelay' 'user@laissepasser.fr' 1
+	send 'out_pass' 'out' 'user@laissepasser.fr' 1
 
 	send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
@@ -105,7 +109,6 @@ fi
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2
-
 	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
 	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
 
@@ -113,17 +116,19 @@ then
 	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 "--body docker/tests/gtube"
 
 	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-	send 'out_pass_virus' 'outviarelay' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
+	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
 
 	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 "--body docker/tests/gtube"
-	send 'out_pass_spam' 'outviarelay' 'user@laissepasser.fr' 0 "--body docker/tests/gtube"
+	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 "--body docker/tests/gtube"
 fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp ----" 1>&2
-	send 'out_bloc_bad_relay' 'outviabadrelay' 'user@blocnormal.fr' 0
-	send 'out_pass_bad_relay' 'outviabadrelay' 'user@laissepasser.fr' 0
+	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
+	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
+	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
+	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 "" 24
+	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
@@ -162,12 +167,12 @@ then
 	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
 
 	echo "---- no rate limit ----" 1>&2
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
-	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server smtptest:27 2>&1
+	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
+	swaks -ha --from 'user@laissepasser.fr' --to 'root@smtp.test' --server outsmtp 2>&1
 	# expect no swak error and 5 mails
-	send 'rate_limit_unlimited' 'outviarelay' 'user@laissepasser.fr' 5
+	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5
 fi
 
 echo "OK" > $test_results/TESTS_DONE

@@ -131,6 +131,16 @@ services:
     volumes:
       - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
 
+  senderverifmilter:
+    image: probesys38/agentj_senderverifmilter:${VERSION}
+    build:
+      context: senderverifmilter/
+    environment:
+      - DB_USER=opendkim
+      - DB_HOST
+      - DB_NAME
+      - DB_PASSWORD=$DB_OPENDKIM_PASSWORD
+
   syslogng:
     image: probesys38/agentj_syslogng:$VERSION
     build:
