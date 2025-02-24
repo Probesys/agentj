@@ -12,7 +12,6 @@ use App\Entity\User;
 use App\Entity\Alert;
 use App\Form\CaptchaFormType;
 use App\Service;
-use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -223,7 +222,7 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
-    public function checkCaptcha($token, Request $request, Service\MessageService $messageService, CryptEncryptService $cryptEncrypt) {
+    public function checkCaptcha($token, Request $request, Service\MessageService $messageService, Service\CryptEncryptService $cryptEncrypt) {
         $em = $this->em;
         $confirm = "";
 
@@ -314,9 +313,13 @@ class DefaultController extends AbstractController {
     /**
      * @return array{?Msgs, ?Domain, Msgrcpt[]}
      */
-    private function decryptMessageToken(CryptEncryptService $cryptEncryptService, string $token): array
+    private function decryptMessageToken(Service\CryptEncryptService $cryptEncryptService, string $token): array
     {
-        list($expirationTimestamp, $decryptedToken) = $cryptEncryptService->decrypt($token);
+        list($expiry, $decryptedToken) = $cryptEncryptService->decrypt($token);
+
+        if ($expiry < time()) {
+            throw $this->createNotFoundException('The token has expired.');
+        }
 
         $tokenParts = explode('%%%', $decryptedToken);
 
