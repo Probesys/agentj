@@ -1,7 +1,6 @@
+# OAuth with Azure
 
-## OAuth with Azure
-
-### OAuth Authentication
+## OAuth Authentication
 
 > [!IMPORTANT]
 > **Requirements before enabling OAuth on Azure**  
@@ -21,6 +20,6 @@ OAUTH_AZURE_CLIENT_ID=12345abc-4321-21ba-12ab-4321bc234abc
 ENABLE_AZURE_OAUTH=true
 ```
 
-### Office account importation
+## Office account importation
 
 Once domain is created, you can edit it to **Add a connector** with parameters from your Azure account for email accounts and groups to be imported.

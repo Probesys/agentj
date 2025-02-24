@@ -1,10 +1,10 @@
 
-## Technical description
+# Technical description
 
 AgentJ is intended to be set as your mail domain MX, and as relay for your SMTP server. It will send mail from the web domain and, depending on the configuration, from your mail domain.  
 Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 
-#### services
+## services
 
 - **app**: main AgentJ web interface (configuration for admins, usage for users)
 - **db**: a MariaDB instance to store mails, domains configuration, users info, DKIM keys, authorized/banned senders, Amavis scores …
@@ -33,7 +33,7 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 Except external mail configuration which is not covered here, all you have to do is to configure `.env` using the documented `.env.example` and start the containers.
 You can then access the web interface to configure your mail domain.
 
-### upgrade
+## Upgrade
 
 > Always check the [changelog](../CHANGELOG.md) / [releases notes](https://github.com/Probesys/agentj/releases) ***before*** begining the upgrade process, and do a backup (database, volumes).
 
@@ -41,21 +41,21 @@ You can then access the web interface to configure your mail domain.
 2. upgrade your `.env`: set `VERSION` and check changes from `.env.example`
 3. run something like `docker compose pull ; docker compose up -d`
 
-### develop
+## Develop
 
 You need to configure `.env` to set `VERSION`, `COMPOSE_FILE` and `UID`/`GID` then **build the containers locally** using `docker compose build` or directly `docker compose up --build -d`.
 
-##### `COMPOSE_FILE`
+### `COMPOSE_FILE`
 
 - `compose.dev.yml` will mount the code from your dev folder into app container; and expose database port and log on the host
 - `compose.test.yml` will start 2 smtp servers and set static IP addresses for containers. Also used in CI, it allows you to run [mail test script](../app/docker/tests/testmail.sh) from within the `app` container
 
 > to manually run the mail tests (a good idea to check your dev install, but **not on a production setup**), run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
 
-##### `UID`/`GID`
+### `UID`/`GID`
 
 At least for a classic Docker installation on Linux, those allow to share permissions of files from this repo with users in the containers.
 
-##### `VERSION`
+### `VERSION`
 
 Use `dev` or equivalent. As the dev setup require a local build of images it should not matter, but this way you're sure no existing image will be accidentally pulled, which can lead to weird errors as versions will not match.
