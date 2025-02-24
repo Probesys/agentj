@@ -20,7 +20,6 @@ jobs:
           - service: opendkim
           - service: policyd-rate-limit
           - service: smtp
-          - service: syslogng
     permissions:
       packages: write
       contents: read
