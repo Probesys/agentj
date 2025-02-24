@@ -90,8 +90,7 @@ class ReportSendMailCommand extends Command {
                 $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
                 $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
 
-                // TODO set validity to max 48h
-                $token = $this->cryptEncryptService->encrypt($user->getId());
+                $token = $this->cryptEncryptService->encrypt($user->getId(), lifetime: 48 * 3600);
 
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
                     'untreatedMsgs' => $untreatedMsgs,
