@@ -127,13 +127,13 @@ class MessagesController extends AbstractController
 
     private function getUserFromToken(string $token): ?Entity\User
     {
-        list($expirationTimestamp, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+        list($expiry, $data) = $this->cryptEncryptService->decrypt($token);
 
-        if ($expirationTimestamp < time()) {
+        if ($expiry < time()) {
             return null;
         }
 
-        $userId = (int) $decryptedToken;
+        $userId = (int) $data;
         return $this->em->getRepository(Entity\User::class)->find($userId);
     }
 }

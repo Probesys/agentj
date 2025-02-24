@@ -901,26 +901,6 @@ parameters:
 			path: src/Security/LoginFormAuthenticator.php
 
 		-
-			message: "#^Method App\\\\Service\\\\CryptEncryptService\\:\\:decrypt\\(\\) has invalid return type App\\\\Service\\\\type\\.$#"
-			count: 1
-			path: src/Service/CryptEncryptService.php
-
-		-
-			message: "#^Method App\\\\Service\\\\CryptEncryptService\\:\\:encrypt\\(\\) has invalid return type App\\\\Service\\\\type\\.$#"
-			count: 1
-			path: src/Service/CryptEncryptService.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$token$#"
-			count: 1
-			path: src/Service/CryptEncryptService.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$url$#"
-			count: 1
-			path: src/Service/CryptEncryptService.php
-
-		-
 			message: "#^Default value of the parameter \\#2 \\$mailId \\(string\\) of method App\\\\Service\\\\LogService\\:\\:addLog\\(\\) is incompatible with type App\\\\Service\\\\type\\.$#"
 			count: 1
 			path: src/Service/LogService.php
