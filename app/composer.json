@@ -12,7 +12,7 @@
         "doctrine/doctrine-bundle": "^2.4",
         "doctrine/doctrine-migrations-bundle": "^3.1",
         "doctrine/orm": "^2.8",
-        "knplabs/knp-paginator-bundle": "^5.8",
+        "knplabs/knp-paginator-bundle": "^6.6",
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "microsoft/microsoft-graph": "^1.70",
         "phpdocumentor/reflection-docblock": "^5.2",
