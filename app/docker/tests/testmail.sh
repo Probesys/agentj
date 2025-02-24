@@ -14,10 +14,12 @@ send() {
 	from_addr="$3"
 	# number of received mail expected
 	expected_received_count="$4"
+	# number of mail to send, default 1
+	mail_to_send="${5:-1}"
 	# additionnal swaks options (eg attach a file)
-	swaks_opts="$5"
+	swaks_opts="$6"
 	# expected swaks error code (if empty, means no error expected)
-	swaks_expected="${6:-0}"
+	swaks_expected="${7:-0}"
 
 	to_addr='root@smtp.test'
 	wait_time=${TEST_TIMEOUT:-60}
@@ -51,14 +53,14 @@ send() {
 			return
 			;;
 	esac
-	test "$expected_received_count" -eq 0 && force_send=1
-	for _i in $(seq "${force_send:-$expected_received_count}")
+
+	for c in $(seq "$mail_to_send")
 	do
 		# $swaks_opts should expand
 		# shellcheck disable=SC2086
 		swaks --from "$from_addr" --to "$to_addr" --server "$smtp_server" \
 			--h-Subject="$message_subject" --body "$testname from: $from_addr to: $to_addr via: $smtp_server" \
-			$swaks_opts > "$test_results/${testname}_$_i.log" 2>&1
+			$swaks_opts > "$test_results/${testname}_$c.log" 2>&1
 		swaks_exit_code=$?
 	done
 
@@ -68,13 +70,14 @@ send() {
 	fi
 
 	secs=0
-	recv_count=-1
-	# if we don't expect any mail, wait 30s to be sure nothing is received
-	test "$expected_received_count" -eq 0 && sleep 30
-	while [ "$recv_count" -lt "$expected_received_count" ] && [ "$secs" -lt "$wait_time" ]
+	recv_count=0
+	while [ "$secs" -lt "$wait_time" ]
 	do
-		sleep 2; secs=$((secs + 2))
+		sleep 1; secs=$((secs + 1))
 		recv_count=$(http -b "$mailpit_api/search?query=$message_subject" | jq ".messages_count")
+		if [ "$expected_received_count" -ne 0 ] && [ "$recv_count" -eq "$expected_received_count" ]; then
+			break
+		fi
 	done
 
 	if [ "$recv_count" -eq "$expected_received_count" ]; then
@@ -117,17 +120,17 @@ fi
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2
-	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 "--attach @docker/tests/eicar.com.txt"
+	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @docker/tests/eicar.com.txt"
 
-	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 "--body docker/tests/gtube"
-	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 "--body docker/tests/gtube"
+	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body docker/tests/gtube"
+	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body docker/tests/gtube"
 
-	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 "--attach @docker/tests/eicar.com.txt"
-	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 "--attach @docker/tests/eicar.com.txt"
+	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
 
-	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 "--body docker/tests/gtube"
-	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 "--body docker/tests/gtube"
+	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 1 "--body docker/tests/gtube"
+	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body docker/tests/gtube"
 fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
@@ -135,7 +138,7 @@ then
 	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
 	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
 	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
-	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 "" 24
+	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1 "" 24
 	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
 fi
 
@@ -144,23 +147,23 @@ then
 	echo "---- rate limit ----" 1>&2
 	# Domain quota 3 mail/s
 	# 3 out_msgs and 1 sql_limit_report
-	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3
+	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 5
 
 	# Group quota 2 mail/s
 	# 2 out_msgs and 2 sql_limit_report
-	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2
+	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 5
 
 	# Personnal quota 1 mail/s
 	# 1 out_msgs and 3 sql_limit_report
-	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1
+	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
 
 	# Personnal quota 10 mail/s
 	# expect no swak error and 5 mails
-	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5
+	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
 
 	echo "---- no rate limit ----" 1>&2
 	# expect no swak error and 5 mails
-	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5
+	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5 5
 fi
 
 echo "OK" > $test_results/TESTS_DONE

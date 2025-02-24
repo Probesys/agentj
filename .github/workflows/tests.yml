@@ -33,6 +33,7 @@ jobs:
           sed -i "s|example.com|agentj.local|g" .env
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
+          sed -i "s|#MAILPIT_WEB=.*|MAILPIT_WEB=8025|g" .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
