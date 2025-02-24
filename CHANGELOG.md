@@ -1,4 +1,6 @@
-# v2.0.0
+# Changelog of AgentJ
+
+## v2.0.0
 
 This release brings a main new feature: outgoing mails management. AgentJ
 can now be set as relay of an SMTP server, which allows to
@@ -47,11 +49,11 @@ Technical
 > - run `docker compose exec db /docker-entrypoint-initdb.d/opendkim_user.sh` to create the new opendkim user
 > - ensure nginx log folder is ok `docker compose exec app 'mkdir -p /var/log/nginx ; chown -R www-data:www-data /var/log/nginx'`
 
-# v1.6.4
+## v1.6.4
 
 If you use oauth authentication you need to create an Office365 connector, configure it with your Microsoft Entra application and synchronize agentj users.
 
-# v1.5.3
+## v1.5.3
 
 This version improves the way virus mail are handled and displayed in the Web interface. There is now a dedicated section for such mails in which they cannot be released (for security reasons, if releasing the mail is legitimate it should be done manually on the server side by an admin).
 It also adds the ability to use a remote ClamAV server so you **must** add the following variables in your `.env` file:
@@ -64,11 +66,11 @@ CLAMAV_TCPPORT=3310
 
 By default, the *clamav* service, installed in the *amavis* container will start. If CLAMAV_AUTOSTART is set to *false*, it won't start and *amavis* will try to connect ClamAV at the IP address configured in CLAMAV_TCPADDRESS.
 
-# v1.5.0
+## v1.5.0
 
 This version adds OAuth with Azure, please refer to [dedicated deployement documentation](docs/auth_azure.md) if you need this feature.
 
-# v1.4.3
+## v1.4.3
 
 This version improves the startup process of critical components and removes some volumes.
 
@@ -112,7 +114,7 @@ docker volume remove $COMPOSE_PROJECT_NAME_clamav $COMPOSE_PROJECT_NAME_postfix_
 docker-compose up -d
 ```
 
-# v1.4.2
+## v1.4.2
 
 This version add *SPF* checks to postfix and DKIM keys generation when adding a domain using web UI.
 
@@ -134,7 +136,7 @@ You must launch following commands once `app` container is running:
     echo "RequireSafeKeys         false" >> /etc/opendkim/opendkim.conf
 
 
-# v1.4.0
+## v1.4.0
 
 * New `.env.example` file, modify your `.env` file:
     * Add `VERSION` variable
@@ -145,7 +147,7 @@ You must launch following commands once `app` container is running:
 docker volume rm agentj-docker_public
 ```
 
-# v1.3.2
+## v1.3.2
 
 !!! important
     If you have made custom changes to `smtpconfig` volume, you have to merge default config manually.
@@ -165,16 +167,16 @@ docker-compose exec db /bin/bash
 mariadb-upgrade
 ```
 
-# v1.3.1
+## v1.3.1
 
 Nothing specific.
 
-# v1.3.0
+## v1.3.0
 
 Variable `COMPOSE_PROJECT_NAME=docker` was added in `.env` file.
 Its value must correspond to volumes already present for your AgentJ docker stack.
 
-# Upgrade from version 1.0.6 to 1.2+
+## Upgrade from version 1.0.6 to 1.2+
 
 Newer version of AgentJ (starting from 1.2) introduce breaking changes such as:
 
@@ -244,18 +246,18 @@ User names and ids are different between Debian and Alpine, so rights and owners
 | amavis                  | 102         | 103          | 100         | 101          |
 | opendkim (keys folder ) | 102         | 104          | 100         | 101          |
 
-# v1.2.3
+## v1.2.3
 
 * clamav: improve start process, move it to entrypoint
 * amavis: update clamav run dir
 * syslogng: improve log format, add rotation cron
 * app: remove duplicate cron entries
 
-# v1.2.1
+## v1.2.1
 
 * fix csv import emails
 
-# v1.2.0
+## v1.2.0
 
 * upgrade to Symfony 5
 * upgrade Alpine base
