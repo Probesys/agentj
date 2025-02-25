@@ -1,7 +1,6 @@
-
 # Technical description
 
-AgentJ is intended to be set as your mail domain MX, and as relay for your SMTP server. It will send mail from the web domain and, depending on the configuration, from your mail domain.  
+AgentJ is intended to be set as your mail domain MX, and as relay for your SMTP server. It will send mail from the web domain and, depending on the configuration, from your mail domain.
 Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 
 ## services
@@ -15,11 +14,11 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 - **outamavis**: same as **amavis** but used for outgoing e-mails sent by local users
 - **opendkim**: verify incoming mail DKIM signature for incoming mail, and append signature for outgoing mail
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
-- *for tests only* **smtptest** and **badrelay**: see [tests](#tests) below
+- *for tests only* **smtptest** and **badrelay**
 
 > By default *ClamAV* run in the amavis containers, but you can run it externally (directly on the host or in a separated container). See `.env.example` for details
 
-#### volumes
+## volumes
 
 - *amavis_in*/*amavis_out* : Amavis databases
 - *db* : MariaDB databases files
