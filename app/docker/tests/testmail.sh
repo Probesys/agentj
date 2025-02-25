@@ -146,19 +146,19 @@ fi
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
 then
 	echo "---- rate limit ----" 1>&2
-	# Domain quota 3 mail/s
+	# Domain quota 3 mail/5s
 	# 3 out_msgs and 1 sql_limit_report
 	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 5
 
-	# Group quota 2 mail/s
+	# Group quota 2 mail/5s
 	# 2 out_msgs and 2 sql_limit_report
 	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 5
 
-	# Personnal quota 1 mail/s
+	# Personnal quota 1 mail/5s
 	# 1 out_msgs and 3 sql_limit_report
 	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
 
-	# Personnal quota 10 mail/s
+	# Personnal quota 10 mail/5s
 	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
 
 	echo "---- no rate limit ----" 1>&2
