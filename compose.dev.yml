@@ -54,10 +54,12 @@ services:
     environment:
       - TZ
       - MP_DATABASE=/data/mailpit.db
+      - MP_VERBOSE=true
     volumes:
       - ./mailpit/data:/data
     networks:
       default:
+        ipv4_address: 172.28.2.7
         aliases:
           - mailpit.test
 

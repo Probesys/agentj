@@ -8,22 +8,28 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 - **app**: main AgentJ web interface (configuration for admins, usage for users)
 - **db**: a MariaDB instance to store mails, domains configuration, users info, DKIM keys, authorized/banned senders, Amavis scores …
 - **smtp**: a postfix instance that will receive the incoming e-mails and check them using **amavis** container
-- **relay**: a Postfix instance needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
+- **relay**: a postfix instance needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
 - **outsmtp**: a postfix instance that will handle outgoing e-mails, sent by local users (via their original smtp server) and check them using **outamavis**
 - **amavis**: a container running Amavis/Spamassassin and ClamAV services
 - **outamavis**: same as **amavis** but used for outgoing e-mails sent by local users
 - **opendkim**: verify incoming mail DKIM signature for incoming mail, and append signature for outgoing mail
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
-- *for tests only* **smtptest** and **badrelay**
+- **senderverifmilter**: custom postfix milter to secure multi-domains AgentJ instances
 
 > By default *ClamAV* run in the amavis containers, but you can run it externally (directly on the host or in a separated container). See `.env.example` for details
+
+### services for dev/tests
+
+- **mailpit** will catch all mail, from or to agentj
+- **smtptest** runs opensmtpd and dnsmasq. It can send mail to agentj on the behalf of configured domains; relay mail from agentj to mailpit, provide DNS for correct DKIM verification of tests mail
+- **badrelay** an opensmtpd instance not authorized to sent mail via agentj
 
 ## volumes
 
 - *amavis_in*/*amavis_out* : Amavis databases
 - *db* : MariaDB databases files
 - *postqueue* : the incoming mail queue (for **smtp**)
-- *outpostqueue* : the outgoing mail queue (for **outsmtp
+- *outpostqueue* : the outgoing mail queue (for **outsmtp**)
 
 ## Usage
 
@@ -46,8 +52,11 @@ You need to configure `.env` to set `VERSION`, `COMPOSE_FILE` and `UID`/`GID` th
 
 ### `COMPOSE_FILE`
 
-- `compose.dev.yml` will mount the code from your dev folder into app container; and expose database port and log on the host
-- `compose.test.yml` will start 2 smtp servers and set static IP addresses for containers. Also used in CI, it allows you to run [mail test script](../app/docker/tests/testmail.sh) from within the `app` container
+`compose.dev.yml` will 
+- start [mailpit](https://mailpit.axllent.org)
+- mount the code from your dev folder into the app container
+- expose database port and log on the host
+- set static IPs and specify DNS for some containers
 
 > to manually run the mail tests (a good idea to check your dev install, but **not on a production setup**), run `docker compose exec -u www-data app ./docker/tests/testmail.sh`
 

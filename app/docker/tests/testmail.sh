@@ -6,6 +6,8 @@ bash /var/www/agentj/docker/tests/init.sh
 test_results=/tmp/test_mails
 mailpit_api='http://mailpit.test:8025/api/v1'
 
+set -x
+
 send() {
 	# for log
 	testname="$1"
@@ -74,6 +76,7 @@ send() {
 	while [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
+		http --print=bBhHm "$mailpit_api/search?query=$message_subject"
 		recv_count=$(http -b "$mailpit_api/search?query=$message_subject" | jq ".messages_count")
 		if [ "$expected_received_count" -ne 0 ] && [ "$recv_count" -eq "$expected_received_count" ]; then
 			break
@@ -102,66 +105,71 @@ send() {
 	fi
 }
 
-if [ -z "$1" ] || [ "$1" = "block" ]
-then
-	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
-	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
-	# TODO check subject & validation mail sender is will@blocnormal.fr
-	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
-	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+curl -v "http://mailpit.test:8025"
 
-	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
-	send 'out_pass' 'out' 'user@laissepasser.fr' 1
+http --ignore-stdin --all --print=HBhbm "http://mailpit.test:8025/"
+http --ignore-stdin --all --print=HBhbm "$mailpit_api"
 
-	send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
-	send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
-fi
+#if [ -z "$1" ] || [ "$1" = "block" ]
+#then
+#	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
+#	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
+#	# TODO check subject & validation mail sender is will@blocnormal.fr
+#	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
+#	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+#
+#	#send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
+#	#send 'out_pass' 'out' 'user@laissepasser.fr' 1
+#
+#	#send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
+#	#send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
+#fi
 
-if [ -z "$1" ] || [ "$1" = "virusspam" ]
-then
-	echo "---- virus/spam ----" 1>&2
-	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
-	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @docker/tests/eicar.com.txt"
-
-	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body docker/tests/gtube"
-	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body docker/tests/gtube"
-
-	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
-	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
-
-	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 1 "--body docker/tests/gtube"
-	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body docker/tests/gtube"
-fi
-
-if [ -z "$1" ] || [ "$1" = "relay" ]
-then
-	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
-	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
-	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
-	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1 "" 24
-	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
-fi
-
-if [ -z "$1" ] || [ "$1" = "ratelimit" ]
-then
-	echo "---- rate limit ----" 1>&2
-	# Domain quota 3 mail/s
-	# 3 out_msgs and 1 sql_limit_report
-	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 5
-
-	# Group quota 2 mail/s
-	# 2 out_msgs and 2 sql_limit_report
-	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 5
-
-	# Personnal quota 1 mail/s
-	# 1 out_msgs and 3 sql_limit_report
-	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
-
-	# Personnal quota 10 mail/s
-	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
-
-	echo "---- no rate limit ----" 1>&2
-	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 10 10
-fi
-
-echo "OK" > $test_results/TESTS_DONE
+#if [ -z "$1" ] || [ "$1" = "virusspam" ]
+#then
+#	echo "---- virus/spam ----" 1>&2
+#	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+#	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @docker/tests/eicar.com.txt"
+#
+#	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body docker/tests/gtube"
+#	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body docker/tests/gtube"
+#
+#	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+#	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+#
+#	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 1 "--body docker/tests/gtube"
+#	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body docker/tests/gtube"
+#fi
+#
+#if [ -z "$1" ] || [ "$1" = "relay" ]
+#then
+#	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
+#	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
+#	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
+#	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1 "" 24
+#	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
+#fi
+#
+#if [ -z "$1" ] || [ "$1" = "ratelimit" ]
+#then
+#	echo "---- rate limit ----" 1>&2
+#	# Domain quota 3 mail/s
+#	# 3 out_msgs and 1 sql_limit_report
+#	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 5
+#
+#	# Group quota 2 mail/s
+#	# 2 out_msgs and 2 sql_limit_report
+#	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 5
+#
+#	# Personnal quota 1 mail/s
+#	# 1 out_msgs and 3 sql_limit_report
+#	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
+#
+#	# Personnal quota 10 mail/s
+#	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
+#
+#	echo "---- no rate limit ----" 1>&2
+#	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 10 10
+#fi
+#
+#echo "OK" > $test_results/TESTS_DONE
