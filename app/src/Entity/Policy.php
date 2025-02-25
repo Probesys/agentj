@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Policy
@@ -23,6 +24,7 @@ class Policy
      * @var string|null
      */
     #[ORM\Column(name: 'policy_name', type: 'string', length: 32, nullable: true)]
+    #[Assert\NotBlank]
     private $policyName;
 
     /**
@@ -285,7 +287,7 @@ class Policy
 
     public function __toString(): string
     {
-        return $this->policyName;
+        return $this->policyName ?? '';
     }
 
     public function getId(): ?int
@@ -298,7 +300,7 @@ class Policy
         return $this->policyName;
     }
 
-    public function setPolicyName(?string $policyName): self
+    public function setPolicyName(string $policyName): self
     {
         $this->policyName = $policyName;
 
