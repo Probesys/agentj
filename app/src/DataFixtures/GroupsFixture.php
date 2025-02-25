@@ -31,7 +31,7 @@ class GroupsFixture extends Fixture
 		$group->setWb('0');
 		$group->setSlug('group1');
 		$group->setOverrideUser(false);
-		$group->setQuota([["quota_emails" => 2, "quota_seconds" => 5]]);
+		$group->setQuota([["quota_emails" => 2, "quota_seconds" => 1]]);
 
 		$manager->persist($group);
 		$manager->flush();

@@ -86,7 +86,7 @@ class UserFixture extends Fixture
 		->getRepository(Groups::class)
 		->findOneBy(['name' => 'group1']));
 	$user->setPolicy($user->getDomain()->getPolicy());
-	$user->setQuota([["quota_emails" => 10, "quota_seconds" => 5]]);
+	$user->setQuota([["quota_emails" => 10, "quota_seconds" => 1]]);
 
 	$manager->persist($user);
 
