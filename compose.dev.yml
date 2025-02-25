@@ -21,6 +21,11 @@ services:
         - GID
     volumes:
       - ./app/:/var/www/agentj
+      - ./tests/results:/tmp/test_mails
+    dns: 172.28.2.5
+    networks:
+      default:
+        ipv4_address: 172.28.2.1
     working_dir: /var/www/agentj
 
   watcher:
@@ -51,3 +56,62 @@ services:
       - MP_DATABASE=/data/mailpit.db
     volumes:
       - ./mailpit/data:/data
+    networks:
+      default:
+        aliases:
+          - mailpit.test
+
+  smtptest:
+    build:
+      context: tests/
+      args:
+        - UID
+        - GID
+    env_file:
+      - .env
+    volumes:
+      - ./tests/results:/var/mail/
+    networks:
+      default:
+        ipv4_address: 172.28.2.5
+        aliases:
+          - smtp.test
+
+  badrelay:
+    build:
+      context: tests/
+    networks:
+      default:
+        ipv4_address: 172.28.2.6
+        aliases:
+          - bad.relay
+    command: smtpd -d
+
+
+  opendkim:
+    volumes:
+      - ./tests/opendkim.test.conf:/etc/opendkim.test.conf
+      - ./tests/stubdns:/srv/stubdns
+
+  smtp:
+    dns: 172.28.2.5
+
+  outsmtp:
+    dns: 172.28.2.5
+
+  relay:
+    dns: 172.28.2.5
+
+  amavis:
+    dns: 172.28.2.5
+
+  outamavis:
+    dns: 172.28.2.5
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          ip_range: 172.28.1.0/24
+          gateway: 172.28.1.254

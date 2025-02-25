@@ -105,7 +105,7 @@ send() {
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
-	{ sleep 3 && php bin/console ag:msgs >/dev/null; } &
+	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
 	# TODO check subject & validation mail sender is will@blocnormal.fr
 	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
@@ -158,12 +158,10 @@ then
 	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
 
 	# Personnal quota 10 mail/s
-	# expect no swak error and 5 mails
 	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
 
 	echo "---- no rate limit ----" 1>&2
-	# expect no swak error and 5 mails
-	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 5 5
+	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 10 10
 fi
 
 echo "OK" > $test_results/TESTS_DONE
