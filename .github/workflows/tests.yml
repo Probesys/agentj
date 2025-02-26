@@ -25,7 +25,7 @@ jobs:
       - name: Setup env
         run: |
           cp .env.example .env
-          sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml:compose.test.yml|g" .env
+          sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml|g" .env
           sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
           sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
           sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
@@ -33,6 +33,7 @@ jobs:
           sed -i "s|example.com|agentj.local|g" .env
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
+          sed -i "s|#MAILPIT_WEB_PORT=.*|MAILPIT_WEB_PORT=8025|g" .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1
@@ -43,7 +44,6 @@ jobs:
           compose-file: |
             docker-compose.yml
             compose.dev.yml
-            compose.test.yml
           up-flags: --build
           down-flags: --volumes
 
