@@ -1,19 +1,19 @@
-    
 {% if untreatedMsgs is not empty %}
   <table style="width:100%;background-color: #fff;">
     <tbody>
       {% for msg in  untreatedMsgs%}
         <tr>
+
           <td>
             <div>
               <strong>{{ msg.from_addr }}</strong><br>
-              <p style="font-size: 10px">{{ msg.subject }}</p>              
+              <p style="font-size: 10px">{{ msg.subject }}</p>
             </div>
-
           </td>
+
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
-              <a href="{{url ~ path('message_authorized',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid})}}" 
+              <a href="{{url ~ path('portal_message_authorized',{'token':token,'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'recipientId':msg.rid})}}"
                  title={{ 'Message.Actions.AutorizedSender'|trans() }} style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
@@ -26,13 +26,14 @@
                  text-decoration: none;
                  ">
                 {{ 'Message.Actions.Autorized'|trans() }}
-              </a>              
+              </a>
             </div>
-
           </td>
+
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
-              <a href="{{url ~  path('message_restore',{'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'rid':msg.rid}) }}" title={{ 'Message.Actions.RestoreMessage'|trans() }} style="font-size:16px;
+              <a href="{{url ~  path('portal_message_restore',{'token':token,'partitionTag':msg.partition_tag,'mailId':msg.mail_id,'recipientId':msg.rid}) }}"
+                 title="{{ 'Message.Actions.RestoreMessage'|trans() }}" style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
                  border-radius: 5px;
@@ -42,22 +43,20 @@
                  color: #fff;
                  text-decoration: none;
                  ">
-
-                {{ 'Message.Actions.Restore'|trans() }}</a>              
-            </div>  
-
-
+                {{ 'Message.Actions.Restore'|trans() }}</a>
+            </div>
           </td>
 
-        </tr>        
+        </tr>
       {% endfor %}
+
       <tr>
         <td colspan="3">
           <div style="text-align:center">
             <a href="{{ url }}">{{ url }}</a>
           </div>
         </td>
-      </tr>      
+      </tr>
 
     </tbody>
   </table>
