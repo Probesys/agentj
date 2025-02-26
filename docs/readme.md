@@ -50,6 +50,8 @@ You can then access the web interface to configure your mail domain.
 
 You need to configure `.env` to set `VERSION`, `COMPOSE_FILE` and `UID`/`GID` then **build the containers locally** using `docker compose build` or directly `docker compose up --build -d`.
 
+> see [`docs/dev_mail.md`](./dev_mail.md) for information about how to send and receive mail in a dev installation
+
 ### `COMPOSE_FILE`
 
 `compose.dev.yml` will 
