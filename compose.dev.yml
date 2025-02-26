@@ -50,7 +50,7 @@ services:
   mailpit:
     image: axllent/mailpit:v1.22
     ports:
-      - $MAILPIT_WEB:8025
+      - $MAILPIT_WEB_PORT:8025
     environment:
       - TZ
       - MP_DATABASE=/data/mailpit.db

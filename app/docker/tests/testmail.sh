@@ -4,7 +4,7 @@ cd /var/www/agentj || exit
 bash /var/www/agentj/docker/tests/init.sh
 
 test_results=/tmp/test_mails
-mailpit_api="http://mailpit.test:$MAILPIT_WEB/api/v1"
+mailpit_api="http://mailpit.test:$MAILPIT_WEB_PORT/api/v1"
 curl='curl -s'
 
 send() {
