@@ -6,7 +6,7 @@ dx='docker compose exec -u www-data app'
 
 from='user@blocnormal.fr'
 to='root@smtp.test'
-subject="$RANDOM mail to agentj"
+subject="mail $RANDOM from agentj"
 
 $dx swaks --from "$from" --to "$to" --server smtptest:27 \
 	--h-Subject "$subject" --body "from $from to $to sent at $(date +%R)"
