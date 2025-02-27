@@ -166,7 +166,7 @@ limit_by_ip: False
 success_action: "dunno"
 # If a limit is reach, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
-fail_action: "defer_if_permit Rate limit reach, retry later"
+fail_action: "hold Rate limit reach, holding mail"
 # If we are unable to to contect the database backend, which action postfix should do.
 # see http://www.postfix.org/access.5.html for a list of actions.
 db_error_action: "dunno"
