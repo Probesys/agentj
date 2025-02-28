@@ -1,5 +1,52 @@
 # Changelog of AgentJ
 
+## 2025-02-28 - 2.1.0
+
+### New
+
+- Allow actions from reports if not logged in ([#134](https://github.com/Probesys/agentj/pull/134)) ([a79df0f](https://github.com/Probesys/agentj/commit/a79df0f))
+
+### Security
+
+- Fix access control for local administrators ([f3e6327](https://github.com/Probesys/agentj/commit/f3e6327), [fa803b1](https://github.com/Probesys/agentj/commit/fa803b1), [17405c0](https://github.com/Probesys/agentj/commit/17405c0))
+- Optimize advanced search and secure search from injection ([#141](https://github.com/Probesys/agentj/pull/141)) ([4b69242](https://github.com/Probesys/agentj/commit/4b69242))
+- Encrypt and decrypt tokens validity time ([c1f7202](https://github.com/Probesys/agentj/commit/c1f7202))
+
+### Bug fixes
+
+- Restore domain logic for user form ([#140](https://github.com/Probesys/agentj/pull/140)) ([6939a4a](https://github.com/Probesys/agentj/commit/6939a4a))
+- Add failsafe for domains without domainkeys ([#118](https://github.com/Probesys/agentj/pull/118)) ([e2d75ed](https://github.com/Probesys/agentj/commit/e2d75ed))
+- Fix search function for messages and wblist to search only in displayed columns ([#136](https://github.com/Probesys/agentj/pull/136)) ([bcdf6ed](https://github.com/Probesys/agentj/commit/bcdf6ed))
+- Add required field in DomainType to avoid error 500 ([#137](https://github.com/Probesys/agentj/pull/137)) ([33bc617](https://github.com/Probesys/agentj/commit/33bc617))
+- Add missing row in policy form and ordered them ([#138](https://github.com/Probesys/agentj/pull/138)) ([695d35c](https://github.com/Probesys/agentj/commit/695d35c))
+- Handle admin users with no email ([c988e58](https://github.com/Probesys/agentj/commit/c988e58))
+- Require the name in the policy form ([68bf352](https://github.com/Probesys/agentj/commit/68bf352))
+- Ensure sender/domain match ([#108](https://github.com/Probesys/agentj/pull/108)) ([75a6344](https://github.com/Probesys/agentj/commit/75a6344))
+- Parse the "from" addresses to handle character `+` ([#129](https://github.com/Probesys/agentj/pull/129)) ([bbbcaef](https://github.com/Probesys/agentj/commit/bbbcaef))
+- Fix visual issues in homepage modals ([#135](https://github.com/Probesys/agentj/pull/135)) ([b69cf80](https://github.com/Probesys/agentj/commit/b69cf80))
+- Fix and add translations in multiple views ([1594623](https://github.com/Probesys/agentj/commit/1594623))
+
+### Documentation
+
+- Merge the old documentation in this repo ([#126](https://github.com/Probesys/agentj/pull/126)) ([493154a](https://github.com/Probesys/agentj/commit/493154a))
+- Add basic templates for issues ([#101](https://github.com/Probesys/agentj/pull/101)) ([4c0c8f3](https://github.com/Probesys/agentj/commit/4c0c8f3))
+- Add a pull request template ([#102](https://github.com/Probesys/agentj/pull/102)) ([fe8b628](https://github.com/Probesys/agentj/commit/fe8b628))
+
+### Technical
+
+- Remove logspout & some syslog daemons ([#119](https://github.com/Probesys/agentj/pull/119)) ([112251c](https://github.com/Probesys/agentj/commit/112251c))
+- Hold over quota mail ([#149](https://github.com/Probesys/agentj/pull/149)) ([12c5d0b](https://github.com/Probesys/agentj/commit/12c5d0b))
+- Update the dependencies ([9e67d5e](https://github.com/Probesys/agentj/commit/9e67d5e), [e69ae91](https://github.com/Probesys/agentj/commit/e69ae91), [f9ea75f](https://github.com/Probesys/agentj/commit/f9ea75f))
+
+### Developers
+
+- Setup the CI on GitHub
+    - Provide workflows to run PHPStan and testmail ([#86](https://github.com/Probesys/agentj/pull/86)) ([490f342](https://github.com/Probesys/agentj/commit/490f342))
+    - Add senderverifmilter ([241560d](https://github.com/Probesys/agentj/commit/241560d))
+    - Build and push docker images ([#87](https://github.com/Probesys/agentj/pull/87)) ([b8db71d](https://github.com/Probesys/agentj/commit/b8db71d))
+- Add Mailpit to the development environment ([#127](https://github.com/Probesys/agentj/pull/127)) ([0166dc8](https://github.com/Probesys/agentj/commit/0166dc8))
+- Extract and refactor a MessageService ([5ff2987](https://github.com/Probesys/agentj/commit/5ff2987))
+
 ## v2.0.0
 
 This release brings a main new feature: outgoing mails management. AgentJ
