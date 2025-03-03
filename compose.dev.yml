@@ -99,9 +99,6 @@ services:
   outsmtp:
     dns: 172.28.2.5
 
-  relay:
-    dns: 172.28.2.5
-
   amavis:
     dns: 172.28.2.5
 
