@@ -40,7 +40,7 @@ uucp      unix  -       n       n       -       -       pipe
   flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)
 
 policyd-spf  unix  -       n       n       -       0       spawn
-  user=policyd-spf argv=/usr/bin/policyd-spf /etc/conf/in/postfix-policyd-spf-python/policyd-spf.conf
+  user=policyd-spf argv=/usr/bin/policyd-spf /etc/postfix-in/policyd-spf.conf
 
 # Amavis config
 amavisfeed unix    -       -       n        -      2     lmtp
