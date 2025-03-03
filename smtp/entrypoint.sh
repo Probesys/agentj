@@ -4,11 +4,11 @@
 set -e
 
 IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
-sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/conf/$SMTP_TYPE/postfix/main.cf"
-sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/conf/$SMTP_TYPE/postfix/master.cf"
+sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/postfix-$SMTP_TYPE/main.cf"
+sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" "/etc/postfix-$SMTP_TYPE/master.cf"
 
 # Set mailname
-sed -i "s/\$DOMAIN/${EHLO_DOMAIN:-$DOMAIN}/g" "/etc/conf/$SMTP_TYPE/postfix/main.cf"
+sed -i "s/\$DOMAIN/${EHLO_DOMAIN:-$DOMAIN}/g" "/etc/postfix-$SMTP_TYPE/main.cf"
 echo "${EHLO_DOMAIN:-$DOMAIN}" > /etc/mailname
 
 if [ "$SMTP_TYPE" != "relay" ]
@@ -25,19 +25,19 @@ fi
 
 # For existing installs: fix file permissions
 # For new installs: create dir
-find "/etc/conf/$SMTP_TYPE/postfix/" -type f -exec chmod 644 {} \;
+find "/etc/postfix-$SMTP_TYPE/" -type f -exec chmod 644 {} \;
 
 for dir in active bounce corrupt defer deferred flush hold incoming \
-    private saved trace
+	private saved trace
 do
-    mkdir -p "/var/spool/postfix/$dir"
-    chown -R postfix:root "/var/spool/postfix/$dir"
+	mkdir -p "/var/spool/postfix/$dir"
+	chown -R postfix:root "/var/spool/postfix/$dir"
 done
 
 for dir in maildrop public
 do
-    mkdir -p "/var/spool/postfix/$dir"
-    chown -R postfix:postdrop "/var/spool/postfix/$dir"
+	mkdir -p "/var/spool/postfix/$dir"
+	chown -R postfix:postdrop "/var/spool/postfix/$dir"
 done
 
-exec "$@"
+/usr/sbin/postfix -c "/etc/postfix-$SMTP_TYPE" start-fg

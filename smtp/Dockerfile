@@ -18,8 +18,9 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     tzdata  \ 
     iproute2   
 
-RUN mkdir -p /etc/conf
-COPY conf /etc/conf 
+COPY in /etc/postfix-in
+COPY out /etc/postfix-out
+COPY relay /etc/postfix-relay
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 25/tcp
