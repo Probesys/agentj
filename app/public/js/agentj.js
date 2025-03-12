@@ -321,8 +321,3 @@ function hideAlertMessage() {
     $(this).remove();
   });
 }
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/serviceworker.js');
-}
-;
