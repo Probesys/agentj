@@ -258,8 +258,18 @@ class MsgsRepository extends ServiceEntityRepository
     public function advancedSearch(?User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
     {
         $conn = $this->getEntityManager()->getConnection();
-        $table = $messageType === 'outgoing' ? 'out_msgs' : 'msgs';
-        $msgrcptTable = $messageType === 'outgoing' ? 'out_msgrcpt' : 'msgrcpt';
+
+        if ($messageType === 'incoming') {
+            $table = 'msgs';
+            $msgrcptTable = 'msgrcpt';
+            $userJoinCondition = 'u.email = maddr.email';
+        } elseif ($messageType === 'outgoing') {
+            $table = 'out_msgs';
+            $msgrcptTable = 'out_msgrcpt';
+            $userJoinCondition = 'u.email = m.from_addr';
+        } else {
+            throw new \DomainException("messageType must be one of 'incoming' or 'outgoing' (got {$messageType})");
+        }
 
         $sql = <<<SQL
             SELECT
@@ -284,7 +294,7 @@ class MsgsRepository extends ServiceEntityRepository
             LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
             LEFT JOIN maddr ON maddr.id = mr.rid
             LEFT JOIN message_status ms ON mr.status_id = ms.id
-            LEFT JOIN users u ON u.email = maddr.email
+            LEFT JOIN users u ON {$userJoinCondition}
             LEFT JOIN domain d ON u.domain_id = d.id
             WHERE d.active = 1
         SQL;
