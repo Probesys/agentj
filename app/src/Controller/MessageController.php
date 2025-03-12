@@ -95,20 +95,20 @@ class MessageController extends AbstractController
                 default:
                     $subTitle = 'Entities.Message.untreated';
                     $messageActions = [
+                        'Message.Actions.Restore' => 'restore',
                         'Message.Actions.Autorized' => 'authorized',
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
-                        'Message.Actions.Restore' => 'restore',
                     ];
                     $type = MessageStatus::UNTREATED;
                     break;
             }
         } else {
             $messageActions = [
+                'Message.Actions.Restore' => 'restore',
                 'Message.Actions.Autorized' => 'authorized',
                 'Message.Actions.Banned' => 'banned',
                 'Message.Actions.Delete' => 'delete',
-                'Message.Actions.Restore' => 'restore',
             ];
             $subTitle = 'Entities.Message.untreated';
         }
