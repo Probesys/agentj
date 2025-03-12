@@ -1,5 +1,23 @@
 # Changelog of AgentJ
 
+## 2025-03-13 - 2.1.1
+
+### Bug fixes
+
+- List outgoing emails in the advanced search ([#165](https://github.com/Probesys/agentj/pull/165)) ([963d1f1](https://github.com/Probesys/agentj/commit/963d1f1))
+- Fix the action order on untreated and spam messages pages ([#164](https://github.com/Probesys/agentj/pull/164)) ([4b96b98](https://github.com/Probesys/agentj/commit/4b96b98))
+- Don't lookup MX from outsmtp for configured domains ([#158](https://github.com/Probesys/agentj/pull/158)) ([3ded4b9](https://github.com/Probesys/agentj/commit/3ded4b9))
+
+### Technical
+
+- Update MariaDB to 10.11 (LTS) ([#161](https://github.com/Probesys/agentj/pull/161)) ([baa29fe](https://github.com/Probesys/agentj/commit/baa29fe))
+- Fix the link to the Azure OAuth documentation in env file ([#156](https://github.com/Probesys/agentj/pull/156)) ([5d64961](https://github.com/Probesys/agentj/commit/5d64961))
+
+### Developers
+
+- Update the dependencies and remove axios ([#163](https://github.com/Probesys/agentj/pull/163)) ([c75df4e](https://github.com/Probesys/agentj/commit/c75df4e))
+- Remove the useless service worker ([#162](https://github.com/Probesys/agentj/pull/162)) ([40b9ac8](https://github.com/Probesys/agentj/commit/40b9ac8))
+
 ## 2025-02-28 - 2.1.0
 
 ### New
