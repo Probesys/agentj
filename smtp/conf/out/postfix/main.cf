@@ -29,4 +29,8 @@ milter_protocol = 6
 smtpd_milters = inet:opendkim:8891
 non_smtpd_milters = inet:opendkim:8891
 
+# for protected domain, do not lookup mx, but send directly to the configured smtp
+# this is mainly useful for Delivery Status Notifications
+transport_maps = proxy:mysql:/etc/conf/out/postfix/mysql-transport_map.cf
+
 maillog_file = /dev/stdout
