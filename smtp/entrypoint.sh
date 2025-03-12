@@ -28,16 +28,16 @@ fi
 find "/etc/conf/$SMTP_TYPE/postfix/" -type f -exec chmod 644 {} \;
 
 for dir in active bounce corrupt defer deferred flush hold incoming \
-	private saved trace
+    private saved trace
 do
-	mkdir -p "/var/spool/postfix/$dir"
-	chown -R postfix:root "/var/spool/postfix/$dir"
+    mkdir -p "/var/spool/postfix/$dir"
+    chown -R postfix:root "/var/spool/postfix/$dir"
 done
 
 for dir in maildrop public
 do
-	mkdir -p "/var/spool/postfix/$dir"
-	chown -R postfix:postdrop "/var/spool/postfix/$dir"
+    mkdir -p "/var/spool/postfix/$dir"
+    chown -R postfix:postdrop "/var/spool/postfix/$dir"
 done
 
 exec "$@"

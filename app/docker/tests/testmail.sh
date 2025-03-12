@@ -22,9 +22,11 @@ send() {
 	# expected swaks error code (if empty, means no error expected)
 	swaks_expected="${7:-0}"
 
-	to_addr='root@smtp.test'
+	to_addr="${to_addr:-root@smtp.test}"
 	wait_time=${TEST_TIMEOUT:-30}
 	message_subject="test_${testname}_$RANDOM"
+	_expected_subject="${expected_subject:-$message_subject}"
+	expected_subject="${_expected_subject// /%20}"
 
 	echo -n "[$testname] ... "
 
@@ -75,8 +77,10 @@ send() {
 	while [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
-		recv_count=$($curl "$mailpit_api/search?query=$message_subject" | jq ".messages_count")
-		# don't wait only if we expect more than 0 mail and less than sent
+		messages_json=$($curl "$mailpit_api/search?query=$expected_subject")
+		recv_count=$(echo "$messages_json" | jq ".messages_count")
+		sender=$(echo "$messages_json" | jq -r ".messages[0].From.Address")
+		# don't wait only if we expect more than 0 mail and as much than sent
 		if [ "$expected_received_count" -ne 0 ] \
 			&& [ "$expected_received_count" -eq "$mail_to_send" ] \
 			&& [ "$recv_count" -eq "$expected_received_count" ]; then
@@ -84,31 +88,41 @@ send() {
 		fi
 	done
 
-	if [ "$recv_count" -eq "$expected_received_count" ]; then
+	# if not specified, sender is from_addr
+	test -z "$expected_sender" && expected_sender="$from_addr"
+	# if we don't expect mail, sender is null (from jq)
+	test "$expected_received_count" -eq 0 && expected_sender="null"
+	if [ "$recv_count" -eq "$expected_received_count" ] \
+		&& [ "$expected_sender" = "$sender" ]; then
 		echo "ok ${secs}s"
 		echo 'ok' > "$test_results/$testname.result"
 		tag='ok'
 	else
-		echo "failed ${secs}s, $recv_count/$expected_received_count mail, from '$from_addr', to '$to_addr', swaks options '$swaks_opts'"
+		echo "failed ${secs}s, $recv_count/$expected_received_count mail, to '$to_addr', from '$sender'/'$expected_sender', swaks options '$swaks_opts'"
 		echo 'failed' > "$test_results/$testname.result"
 		tag='TEST_FAILED'
 	fi
 
 	# set read status and tag
 	if [ "$recv_count" -gt 0 ]; then
-	  message_ids=$($curl "$mailpit_api/search?query=$message_subject" \
+	  message_ids=$($curl "$mailpit_api/search?query=$expected_subject" \
 	    | jq ".messages[].ID" | tr '\n' ',' | sed 's/,$//')
 	  $curl -o /dev/null -X PUT "$mailpit_api/messages" --json "{\"IDs\":[$message_ids], \"Read\":true}"
 	  $curl -o /dev/null -X PUT "$mailpit_api/tags" --json "{\"IDs\":[$message_ids], \"Tags\":[\"$tag\"]}"
 	fi
+
+	expected_subject=
+	expected_received_count=
+	expected_sender=
+	to_addr=
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
 	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
-	# TODO check subject & validation mail sender is will@blocnormal.fr
-	send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
+	expected_sender="will@blocnormal.fr" \
+		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
 	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
@@ -163,6 +177,15 @@ then
 
 	echo "---- no rate limit ----" 1>&2
 	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 10 10
+fi
+
+if [ -z "$1" ] || [ "$1" = "dsn" ]
+then
+	echo "---- non delivery message ----" 1>&2
+	expected_subject="Undelivered Mail Returned to Sender" \
+		expected_sender="MAILER-DAEMON@${EHLO_DOMAIN:-$DOMAIN}" \
+		to_addr="inexistant@mail.addr" \
+		send 'dsn_non_delivery' 'outviarelay' 'user@blocnormal.fr' 1 1
 fi
 
 echo "OK" > $test_results/TESTS_DONE
