@@ -97,16 +97,34 @@ $ git clone git@github.com:Probesys/agentj.git
 $ cd agentj
 ```
 
-Configure the application:
+Start the application:
 
 ```console
-$ cp .env.example .env
+$ make docker-start
 ```
 
-Edit the `.env` file to your needs.
-The file is commented to help you to change it.
+The command automatically setup an `.env` file suitable for development.
+
+Login to [localhost:8090](http://localhost:8090) with the credentials `admin` / `secret`.
 
 Read more to learn [how to send and receive emails during development.](/docs/dev_mail.md)
+
+### Update the Docker images
+
+You can rebuild and pull the images manually with:
+
+```console
+$ make docker-images
+```
+
+### Clean your Docker environment
+
+Sometimes, you may need to rebuild your environment from scratch.
+You can remove all the Docker stuff (containers, volumes, networks) with:
+
+```console
+$ make docker-clean FORCE=true
+```
 
 ### About the `compose.dev.yml` file
 
