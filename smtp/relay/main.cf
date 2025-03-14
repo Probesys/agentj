@@ -46,6 +46,6 @@ smtp_destination_concurrency_failed_cohort_limit = 10
 # **IMPORTANT:** this slow_dest_domains_tranport hash is "french-centric".
 # It needs to be adapted to fit your local internet landscape if your
 # organization is outside of France.
-transport_maps = lmdb:/etc/postfix-in/slow_dest_domains_transport
+transport_maps = lmdb:/etc/postfix/slow_dest_domains_transport
 
 maillog_file = /dev/stdout
