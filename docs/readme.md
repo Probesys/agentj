@@ -15,7 +15,7 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 - **opendkim**: verify incoming mail DKIM signature for incoming mail, and append signature for outgoing mail
 - **policyd-rate-limit**: rate limiting service used by **outsmtp**, get policies from **db**
 - **senderverifmilter**: custom postfix milter to secure multi-domains AgentJ instances
-- *optionnal* **clamav**: ClamAV instance used by both amavis containers. An external instance can be used instead (eg to be used by multiples AgentJ stack)
+- *optionnal* **clamav**: ClamAV instance used by both amavis containers. An external instance can be used instead
 
 ### services for dev/tests
 
