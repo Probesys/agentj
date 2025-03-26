@@ -108,6 +108,9 @@ services:
   outamavis:
     dns: 172.28.2.5
 
+  clamav:
+    dns: 172.28.2.5
+
 networks:
   default:
     ipam:

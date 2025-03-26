@@ -140,6 +140,12 @@ services:
       - DB_NAME
       - DB_PASSWORD=$DB_OPENDKIM_PASSWORD
 
+  clamav:
+    image: clamav/clamav:stable
+    user: clamav
+    entrypoint: /init-unprivileged
+    profiles: [clamav]
+
 volumes:
   amavis_out:
   amavis_in:

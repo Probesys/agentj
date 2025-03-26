@@ -11,11 +11,6 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     amavisd-new \
-    arj \
-    cabextract \
-    clamav \
-    clamav-daemon \
-    cpio \
     lhasa \
     libdbi-perl \
     libjson-perl \
@@ -34,7 +29,6 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     libio-socket-ssl-perl \
     libnet-patricia-perl \
     libdbd-mysql-perl \
-    #unrar \
     pyzor  \
     razor \
     supervisor  \ 
@@ -46,11 +40,6 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
 
 COPY amavisd.patch /root/amavisd.patch
 RUN cd /usr/share/perl5/Amavis && patch -p1 < /root/amavisd.patch
-
-COPY conf/clamav/clamd.conf /etc/clamav/clamd.conf
-RUN /usr/bin/freshclam --log=/var/log/clamav/freshclam.log \
-        --daemon-notify=/etc/clamav/clamd.conf \
-        --config-file=/etc/clamav/freshclam.conf
 
 COPY conf/spamassassin/local.cf /etc/mail/spamassassin/local.cf
 RUN /usr/bin/sa-update
