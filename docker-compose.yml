@@ -61,12 +61,7 @@ services:
     env_file:
       - .env
     depends_on:
-      amavis:
-        condition: service_started
-      outamavis:
-        condition: service_started
-      db:
-        condition: service_healthy
+      - amavis
     ports:
       - $PROXY_LISTEN_ADDR:$PROXY_PORT:80
 
@@ -79,6 +74,8 @@ services:
       - SMTP_TYPE=relay
     env_file:
       - .env
+    depends_on:
+      - opendkim
     command:  [ "/usr/sbin/postfix", "-c", "/etc/conf/relay/postfix", "start-fg" ]
 
   smtp:
@@ -91,10 +88,7 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
-      opendkim:
-        condition: service_started
+      - opendkim
     volumes:
       - postqueue:/var/spool/postfix
     ports:
@@ -111,10 +105,9 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
-      opendkim:
-        condition: service_started
+      - opendkim
+      - senderverifmilter
+      - policyd-rate-limit
     volumes:
       - outpostqueue:/var/spool/postfix
     ports:
@@ -145,6 +138,9 @@ services:
     restart: unless-stopped
     volumes:
       - ./policyd-rate-limit/policyd-rate-limit.yaml:/policyd-rate-limit.yaml
+    depends_on:
+      db:
+        condition: service_healthy
 
   senderverifmilter:
     image: probesys38/agentj_senderverifmilter:${VERSION}
@@ -155,6 +151,9 @@ services:
       - DB_HOST
       - DB_NAME
       - DB_PASSWORD=$DB_OPENDKIM_PASSWORD
+    depends_on:
+      db:
+        condition: service_healthy
 
   clamav:
     image: clamav/clamav:stable
