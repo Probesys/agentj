@@ -88,11 +88,22 @@ send() {
 		fi
 	done
 
+	dkim_ok=1
+	# check if DKIM header is present (valid or not)
+	if [ "$recv_count" -gt 0 ]; then
+		msgs=$($curl "$mailpit_api/search?query=$expected_subject" \
+		  | jq -r ".messages[].ID" | tr '\n' ' ')
+	  for msg in $msgs; do
+		  $curl "$mailpit_api/message/$msg/headers" | grep -q 'Dkim-Signature' \
+			  || { dkim_ok=0; echo -n " [missing dkim] "; break; }
+	  done
+	fi
+
 	# if not specified, sender is from_addr
 	test -z "$expected_sender" && expected_sender="$from_addr"
 	# if we don't expect mail, sender is null (from jq)
 	test "$expected_received_count" -eq 0 && expected_sender="null"
-	if [ "$recv_count" -eq "$expected_received_count" ] \
+	if [ "$recv_count" -eq "$expected_received_count" ] && [ "$dkim_ok" -eq 1 ] \
 		&& [ "$expected_sender" = "$sender" ]; then
 		echo "ok ${secs}s"
 		echo 'ok' > "$test_results/$testname.result"
