@@ -71,7 +71,7 @@ services:
       context: ./smtp/.
     restart: always
     environment:
-      - SMTP_TYPE=in
+      - MAIL_CONFIG=/etc/postfix-in
     env_file:
       - .env
     depends_on:
@@ -87,7 +87,7 @@ services:
       context: ./smtp/.
     restart: always
     environment:
-      - SMTP_TYPE=out
+      - MAIL_CONFIG=/etc/postfix-out
     env_file:
       - .env
     depends_on:

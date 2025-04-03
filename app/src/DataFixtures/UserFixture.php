@@ -21,6 +21,7 @@ class UserFixture extends Fixture
     {
 	$user = new User();
 	$user->setEmail('user@blocnormal.fr');
+	$user->setReport(true);
 	$user->setFullname('user blocnormal');
 	$user->setUsername('user@blocnormal.fr');
 	$user->setRoles('["ROLE_USER"]');
