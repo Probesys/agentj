@@ -47,8 +47,6 @@ sudo -u www-data php bin/console agentj:update-groups-wblist
 rm -rf /var/www/agentj/var/cache
 chown -R www-data:www-data /var/www/agentj/var
 find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
-# Allow web server user to purge old virus and spam mails
-usermod -aG www-data amavis && chmod -R g+w /tmp/amavis/quarantine
 
 echo "Installing crontabs"
 if [ ! -d /var/log/agentj ]; then
