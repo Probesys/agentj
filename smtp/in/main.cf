@@ -40,15 +40,12 @@ smtpd_client_restrictions =
     reject_rhsbl_helo dbl.spamhaus.org, 
     reject_rhsbl_sender dbl.spamhaus.org
 
-alias_maps = hash:/etc/postfix/aliases
-alias_database = hash:/etc/postfix/aliases
-
 local_recipient_maps =
 local_transport = error:local mail delivery is disabled 
 
-relay_domains = proxy:mysql:/etc/postfix/mysql-virtual_domains.cf
-relay_recipient_maps = proxy:mysql:/etc/postfix/mysql-virtual_recipient_maps.cf
-transport_maps = proxy:mysql:/etc/postfix/mysql-transport_map.cf
+relay_domains = proxy:mysql:/etc/postfix-in/mysql-virtual_domains.cf
+relay_recipient_maps = proxy:mysql:/etc/postfix-in/mysql-virtual_recipient_maps.cf
+transport_maps = proxy:mysql:/etc/postfix-common/mysql-transport_map.cf
 relayhost =
 soft_bounce = no
 

@@ -77,12 +77,15 @@ send() {
 	while [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
-		messages_json=$($curl "$mailpit_api/search?query=$expected_subject")
+		messages_json=$($curl "$mailpit_api/search?query=subject:\"$expected_subject\"%20!is:tagged%20is:unread")
 		recv_count=$(echo "$messages_json" | jq ".messages_count")
 		sender=$(echo "$messages_json" | jq -r ".messages[0].From.Address")
-		# don't wait only if we expect more than 0 mail and as much than sent
-		if [ "$expected_received_count" -ne 0 ] \
-			&& [ "$expected_received_count" -eq "$mail_to_send" ] \
+		# don't wait if
+		# - we did expect to receive at least one mail
+		# - we did not expect less mail than sent (for rate limit)
+		# - we received what was expected
+		if [ "$expected_received_count" -gt 0 ] \
+			&& [ "$expected_received_count" -ge "$mail_to_send" ] \
 			&& [ "$recv_count" -eq "$expected_received_count" ]; then
 			break
 		fi
@@ -100,7 +103,7 @@ send() {
 	else
 		echo "failed ${secs}s, $recv_count/$expected_received_count mail, to '$to_addr', from '$sender'/'$expected_sender', swaks options '$swaks_opts'"
 		echo 'failed' > "$test_results/$testname.result"
-		tag='TEST_FAILED'
+		tag='FAIL'
 	fi
 
 	# set read status and tag
@@ -108,22 +111,30 @@ send() {
 	  message_ids=$($curl "$mailpit_api/search?query=$expected_subject" \
 	    | jq ".messages[].ID" | tr '\n' ',' | sed 's/,$//')
 	  $curl -o /dev/null -X PUT "$mailpit_api/messages" --json "{\"IDs\":[$message_ids], \"Read\":true}"
-	  $curl -o /dev/null -X PUT "$mailpit_api/tags" --json "{\"IDs\":[$message_ids], \"Tags\":[\"$tag\"]}"
+	  $curl -o /dev/null -X PUT "$mailpit_api/tags" --json "{\"IDs\":[$message_ids], \"Tags\":[\"test:$tag\"]}"
 	fi
 
 	expected_subject=
 	expected_received_count=
 	expected_sender=
 	to_addr=
+	mail_to_send=
+	swaks_expected=
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
-	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
+	echo "---- block unknown sender, receive report, authorize by sending mail ----" 1>&2
 	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
 	expected_sender="will@blocnormal.fr" \
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+
+	php bin/console ag:report >/dev/null
+	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
+		expected_sender="no-reply@${APP_DOMAIN:-$DOMAIN}" \
+		to_addr="user@blocnormal.fr" \
+		send 'report' 'outviarelay' 'user@blocnormal.fr' 1 0
 
 	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
 	send 'out_pass' 'out' 'user@laissepasser.fr' 1
@@ -151,8 +162,8 @@ fi
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
 	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
-	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0
-	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0
+	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0 1
+	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0 1
 	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1 "" 24
 	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
 fi

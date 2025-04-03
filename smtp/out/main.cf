@@ -6,18 +6,17 @@ compatibility_level = 2
 smtp_host_lookup = dns, native
 
 myhostname = $DOMAIN
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+myorigin = /etc/mailname
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $IPV4_NETWORK
 
-smtpd_relay_restrictions = permit_mynetworks, check_policy_service { inet:[senderverifmilter]:10033, default_action=DUNNO }, reject
+smtpd_relay_restrictions = permit_mynetworks,
+			 check_policy_service { inet:[senderverifmilter]:10033, default_action=DUNNO },
+			 reject
 smtpd_data_restrictions = check_policy_service { inet:[policyd-rate-limit]:8552, default_action=DUNNO }
-
-alias_maps = hash:/etc/postfix/aliases
-alias_database = hash:/etc/postfix/aliases
 
 local_recipient_maps =
 local_transport = error:local mail delivery is disabled 
 relayhost =
-soft_bounce = no
 
 content_filter=amavisfeed:[outamavis]:10024
 mailbox_size_limit = 0
@@ -29,8 +28,9 @@ milter_protocol = 6
 smtpd_milters = inet:opendkim:8891
 non_smtpd_milters = inet:opendkim:8891
 
-# for protected domain, do not lookup mx, but send directly to the configured smtp
+# for protected domains, do not lookup mx, but send directly to the configured smtp
 # this is mainly useful for Delivery Status Notifications
-transport_maps = proxy:mysql:/etc/postfix/mysql-transport_map.cf
+transport_maps = proxy:mysql:/etc/postfix-common/mysql-transport_map.cf,
+	       lmdb:/etc/postfix-common/slow_dest_domains_transport
 
 maillog_file = /dev/stdout

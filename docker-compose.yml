@@ -59,23 +59,13 @@ services:
     ports:
       - $PROXY_LISTEN_ADDR:$PROXY_PORT:80
 
-  relay:
-    image: probesys38/agentj_smtp:${VERSION}
-    build:
-      context: ./smtp/.
-    restart: always
-    environment:
-      - SMTP_TYPE=relay
-    env_file:
-      - .env
-
   smtp:
     image: probesys38/agentj_smtp:$VERSION
     build:
       context: ./smtp/.
     restart: always
     environment:
-      - SMTP_TYPE=in
+      - MAIL_CONFIG=/etc/postfix-in
     env_file:
       - .env
     depends_on:
@@ -92,7 +82,7 @@ services:
       context: ./smtp/.
     restart: always
     environment:
-      - SMTP_TYPE=out
+      - MAIL_CONFIG=/etc/postfix-out
     env_file:
       - .env
     depends_on:
@@ -102,7 +92,6 @@ services:
       - outpostqueue:/var/spool/postfix
     ports:
       - $SMTP_LISTEN_ADDR:$SMTP_OUT_PORT:25
-    command:  [ "/usr/sbin/postfix", "-c", "/etc/postfix-out", "start-fg" ]
 
   opendkim:
     image: probesys38/agentj_opendkim:$VERSION

@@ -20,11 +20,13 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
 
 COPY in /etc/postfix-in
 COPY out /etc/postfix-out
-COPY relay /etc/postfix-relay
+COPY common /etc/postfix-common
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 25/tcp
 EXPOSE 10025/tcp
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-HEALTHCHECK --start-period=60s CMD postfix status 2>/dev/null || exit 1
+# use default configuration instead of our own to prevent postfix status to cleverly and annoyingly output
+# its status check to the same output as the others daemons, which ends in our container log
+HEALTHCHECK --start-period=60s CMD MAIL_CONFIG=/etc/postfix postfix status || exit 1
