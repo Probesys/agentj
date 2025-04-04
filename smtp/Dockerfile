@@ -24,7 +24,6 @@ COPY common /etc/postfix-common
 COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 25/tcp
-EXPOSE 10025/tcp
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 # use default configuration instead of our own to prevent postfix status to cleverly and annoyingly output

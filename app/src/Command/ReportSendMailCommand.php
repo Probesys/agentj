@@ -122,9 +122,8 @@ class ReportSendMailCommand extends Command {
 
 
                 try {
-                    $smtpServer = $user->getDomain()->getSrvSmtp();
-                    $smtpPort = $user->getDomain()->getSmtpPort();
-                    $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
+                    $transport_server  =  $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
+                    $transport  =  Transport::fromDsn('smtp://'  .  $transport_server  .  ':25');
                     $mailer = new Mailer($transport);
 
                     $mailer->send($message);
