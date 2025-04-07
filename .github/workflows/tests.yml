@@ -49,5 +49,5 @@ jobs:
 
       - name: Run tests
         run: |
-          docker compose exec -u www-data app ./docker/tests/testmail.sh
+          ./tests/tests.sh
           exit $(cat `find tests/results -name '*.result'` | grep -c failed)
