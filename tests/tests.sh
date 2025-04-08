@@ -52,11 +52,11 @@ send() {
 			to_addr="$_from"
 			smtp_server="$ip_smtptest:26"
 			;;
-		# TODO
+		# from agentj, via implicitly authorized smtp (same private ip subnet)
 		"out")
 			smtp_server="$ip_smtptest:27"
 			;;
-		# TODO
+		# from agentj, via unauthorized client (host ip)
 		"unauthorized_smtp")
 			smtp_server="$ip_outsmtp"
 			;;
@@ -159,11 +159,10 @@ fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
-	send 'out_bloc_bad_relay1' 'unauthorized_smtp' 'user@blocnormal.fr' 0 1
-	send 'out_pass_bad_relay1' 'unauthorized_smtp' 'user@laissepasser.fr' 0 1
-	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1
-	send 'out_bloc_good_relay_bad_user2' 'out' 'user@laissepasser.fr' 0 1
+	echo "---- don't relay from unregistered smtp or unknown users ----" 1>&2
+	send 'out_bloc_bad_relay1' 'unauthorized_smtp' 'user@blocnormal.fr' 0 1 "" 24
+	send 'out_pass_bad_relay1' 'unauthorized_smtp' 'user@laissepasser.fr' 0 1 "" 24
+	send 'out_bloc_unknown_user' 'out' 'inexistant_user@blocnormal.fr' 0 1
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
