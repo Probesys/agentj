@@ -147,14 +147,14 @@ then
 	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"
 	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @tests/eicar.com.txt"
 
-	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body tests/gtube"
-	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body tests/gtube"
+	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body @tests/gtube"
+	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body @tests/gtube"
 
 	send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"
 	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @tests/eicar.com.txt"
 
-	send 'out_bloc_spam' 'out' 'user@blocnormal.fr' 0 1 "--body tests/gtube"
-	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body tests/gtube"
+	send 'out_bloc_spam' 'out' 'user@blocnormal.fr' 0 1 "--body @tests/gtube"
+	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body @tests/gtube"
 fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]

@@ -21,7 +21,6 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 
 - **mailpit** will catch all mail, from or to agentj
 - **smtptest** runs opensmtpd and dnsmasq. It can send mail to agentj on the behalf of configured domains; relay mail from agentj to mailpit, provide DNS for correct DKIM verification of tests mail
-- **badrelay** an opensmtpd instance not authorized to sent mail via agentj
 
 ## volumes
 
