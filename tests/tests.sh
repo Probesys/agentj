@@ -1,16 +1,29 @@
 #!/bin/bash
 
-cd /var/www/agentj || exit
-bash /var/www/agentj/docker/tests/init.sh
+dx='docker compose exec -u www-data app'
+ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_outsmtp=$(docker inspect "$(docker compose ps --format "{{.ID}}" outsmtp)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 
-test_results=/tmp/test_mails
-mailpit_api="http://mailpit.test:$MAILPIT_WEB_PORT/api/v1"
+source .env
+echo "waiting app"
+while [ "$(curl -so /dev/null -w '%{http_code}' "http://localhost:$PROXY_PORT/login")" -ne 200 ];
+do
+	echo -n '.'
+	sleep 1
+done
+echo ' ok'
+
+# add tests data to db if not already here
+$dx php bin/console doctrine:fixtures:load --append
+
+test_results=./tests/results
+mailpit_api="http://localhost:$MAILPIT_WEB_PORT/api/v1"
 curl='curl -s'
 
 send() {
 	# for log
 	testname="$1"
-	# in|out|outviarelay|outviabadrelay (send to agentj or via agentj)
+	# in|out|unauthorized_smtp (send to agentj or via agentj)
 	in_out="$2"
 	from_addr="$3"
 	# number of received mail expected
@@ -37,19 +50,15 @@ send() {
 			_from="$from_addr"
 			from_addr="$to_addr"
 			to_addr="$_from"
-			smtp_server="smtptest:26"
+			smtp_server="$ip_smtptest:26"
 			;;
-		# from agentj, via agentj smtp server (but connecting host ip must be authorized)
+		# from agentj, via implicitly authorized smtp (same private ip subnet)
 		"out")
-			smtp_server="outsmtp"
+			smtp_server="$ip_smtptest:27"
 			;;
-		# from agentj, via authorized external smtp server for domain blocnormal.fr, then agentj smtp server
-		"outviarelay")
-			smtp_server="smtptest:27"
-			;;
-		# from agentj, via unauthorized external smtp server (then blocked by agentj smtp server)
-		"outviabadrelay")
-			smtp_server="badrelay:27"
+		# from agentj, via unauthorized client (host ip)
+		"unauthorized_smtp")
+			smtp_server="$ip_outsmtp"
 			;;
 		*)
 			echo "unknown value '$in_out' for parameter in_out"
@@ -125,18 +134,18 @@ send() {
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender, receive report, authorize by sending mail ----" 1>&2
-	{ sleep 5 && php bin/console ag:msgs >/dev/null; } &
+	{ sleep 5 && $dx php bin/console ag:msgs >/dev/null; } &
 	expected_sender="will@blocnormal.fr" \
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
-	php bin/console ag:report >/dev/null
+	$dx php bin/console ag:report >/dev/null
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
 		expected_sender="no-reply@${APP_DOMAIN:-$DOMAIN}" \
 		to_addr="user@blocnormal.fr" \
 		send 'report' 'outviarelay' 'user@blocnormal.fr' 1 0
 
-	send 'out_bloc' 'outviarelay' 'user@blocnormal.fr' 1
+	send 'out_bloc' 'out' 'user@blocnormal.fr' 1
 	send 'out_pass' 'out' 'user@laissepasser.fr' 1
 
 	send 'in_bloc_known' 'in' 'user@blocnormal.fr' 1
@@ -146,26 +155,25 @@ fi
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2
-	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
-	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @docker/tests/eicar.com.txt"
+	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"
+	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @tests/eicar.com.txt"
 
-	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body docker/tests/gtube"
-	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body docker/tests/gtube"
+	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body @tests/gtube"
+	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body @tests/gtube"
 
-	send 'out_bloc_virus' 'outviarelay' 'user@blocnormal.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
-	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @docker/tests/eicar.com.txt"
+	send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"
+	send 'out_pass_virus' 'out' 'user@laissepasser.fr' 0 1 "--attach @tests/eicar.com.txt"
 
-	send 'out_bloc_spam' 'outviarelay' 'user@blocnormal.fr' 0 1 "--body docker/tests/gtube"
-	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body docker/tests/gtube"
+	send 'out_bloc_spam' 'out' 'user@blocnormal.fr' 0 1 "--body @tests/gtube"
+	send 'out_pass_spam' 'out' 'user@laissepasser.fr' 0 1 "--body @tests/gtube"
 fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp or users from another domain ----" 1>&2
-	send 'out_bloc_bad_relay1' 'outviabadrelay' 'user@blocnormal.fr' 0 1
-	send 'out_pass_bad_relay1' 'outviabadrelay' 'user@laissepasser.fr' 0 1
-	send 'out_bloc_good_relay_bad_user1' 'out' 'user@blocnormal.fr' 0 1 "" 24
-	send 'out_bloc_good_relay_bad_user2' 'outviarelay' 'user@laissepasser.fr' 0
+	echo "---- don't relay from unregistered smtp or unknown users ----" 1>&2
+	send 'out_bloc_bad_relay1' 'unauthorized_smtp' 'user@blocnormal.fr' 0 1 "" 24
+	send 'out_pass_bad_relay1' 'unauthorized_smtp' 'user@laissepasser.fr' 0 1 "" 24
+	send 'out_bloc_unknown_user' 'out' 'inexistant_user@blocnormal.fr' 0 1
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
@@ -173,18 +181,18 @@ then
 	echo "---- rate limit ----" 1>&2
 	# Domain quota 3 mail/5s
 	# 3 out_msgs and 1 sql_limit_report
-	send 'rate_limit_domain_3_mail_s' 'outviarelay' 'user.domain.quota@blocnormal.fr' 3 5
+	send 'rate_limit_domain_3_mail_s' 'out' 'user.domain.quota@blocnormal.fr' 3 5
 
 	# Group quota 2 mail/5s
 	# 2 out_msgs and 2 sql_limit_report
-	send 'rate_limit_group_2_mail_s' 'outviarelay' 'user.group1.quota@blocnormal.fr' 2 5
+	send 'rate_limit_group_2_mail_s' 'out' 'user.group1.quota@blocnormal.fr' 2 5
 
 	# Personnal quota 1 mail/5s
 	# 1 out_msgs and 3 sql_limit_report
-	send 'rate_limit_user_1_mail_s' 'outviarelay' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
+	send 'rate_limit_user_1_mail_s' 'out' 'user.group1.perso.small.quota@blocnormal.fr' 1 5
 
 	# Personnal quota 10 mail/5s
-	send 'rate_limit_user_10_mail_s' 'outviarelay' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
+	send 'rate_limit_user_10_mail_s' 'out' 'user.group1.perso.large.quota@blocnormal.fr' 5 5
 
 	echo "---- no rate limit ----" 1>&2
 	send 'rate_limit_unlimited' 'out' 'user@laissepasser.fr' 10 10
@@ -196,7 +204,7 @@ then
 	expected_subject="Undelivered Mail Returned to Sender" \
 		expected_sender="MAILER-DAEMON@$DOMAIN" \
 		to_addr="inexistant@mail.addr" \
-		send 'dsn_non_delivery' 'outviarelay' 'user@blocnormal.fr' 1 1
+		send 'dsn_non_delivery' 'out' 'user@blocnormal.fr' 1 1
 fi
 
 echo "OK" > $test_results/TESTS_DONE

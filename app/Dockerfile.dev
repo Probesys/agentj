@@ -45,9 +45,7 @@ RUN apt-get update -q --fix-missing && \
     perl \
     sudo \
     supervisor \
-    tzdata \
-    swaks \
-    jq
+    tzdata
 
 RUN mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid
 

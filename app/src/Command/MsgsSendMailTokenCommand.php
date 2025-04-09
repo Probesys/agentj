@@ -16,8 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Process\Process;
@@ -32,22 +31,19 @@ class MsgsSendMailTokenCommand extends Command
 
     private $messageStatusError;
     private $messageStatusAuthorized;
-   
 
     protected function configure():void
     {
-
     }
-    
 
     public function __construct(
         private EntityManagerInterface $em,
         private TranslatorInterface $translator,
-        private CryptEncryptService $cryptEncryptService) {
-
+        private MailerInterface $mailer,
+        private CryptEncryptService $cryptEncryptService
+    ) {
         parent::__construct();
     }
-    
 
     /**
      * 
@@ -269,16 +265,8 @@ class MsgsSendMailTokenCommand extends Command
      */
     private function sendAuthMessage(Msgs $msgObj, Email $message, $msgrcpt): bool
     {
-
-        $mailTo = stream_get_contents($msgObj->getSid()->getEmail(), -1, 0);
-        $failedRecipients = [];
-      /** Sne dth emessage * */
         try {
-
-            $transport_server = $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
-            $transport = Transport::fromDsn('smtp://' . $transport_server . ':25');
-            $mailer = new Mailer($transport);
-            $mailer->send($message);
+            $this->mailer->send($message);
             $msgObj->setSendCaptcha(time());
             $msgrcpt->setSendCaptcha(time());
             $this->em->persist($msgObj);
@@ -286,7 +274,7 @@ class MsgsSendMailTokenCommand extends Command
             $this->em->flush();
             return true;
         } catch (\Exception $e) {
-          //catch error and save this in msgs + change status to error
+            // catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
             $msgObj->setMessageError($messageError);
             $msgObj->setStatus($this->messageStatusError);

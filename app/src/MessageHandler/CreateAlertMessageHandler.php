@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -20,16 +21,21 @@ class CreateAlertMessageHandler
 {
     private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
-    private Mailer $mailer;
     private string $defaultMailFrom;
     private $translator;
+    private MailerInterface $mailer;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $params, TranslatorInterface $translator)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $params,
+        TranslatorInterface $translator,
+        MailerInterface $mailer,
+    ) {
         $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
         $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
         $this->translator = $translator;
+        $this->mailer = $mailer;
     }
 
     public function __invoke(CreateAlertMessage $message)
@@ -121,22 +127,17 @@ class CreateAlertMessageHandler
                         // Send email to admin/superadmin
                         $emailAddress = $user->getEmailFromRessource();
                         if ($emailAddress !== null && $user->getDomain() !== null) {
-                            $transport_server  =  $this->getApplication()->getKernel()->getContainer()->getParameter('app.smtp-transport');
-                            $transport  =  Transport::fromDsn('smtp://'  .  $transport_server  .  ':25');
-                            $mailer = new Mailer($transport);
-
                             $mailFrom = $user->getDomain()->getMailAuthenticationSender();
                             if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                                 $mailFrom = $this->defaultMailFrom;
                             }
-
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
                                 ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title'))
                                 ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content') . $fromAddr);
 
-                            $mailer->send($email);
+                            $this->mailer->send($email);
                         } else {
                             $this->output->writeln('No email address found for user: ' . $user->getId());
                         }
