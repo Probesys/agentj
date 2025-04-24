@@ -72,6 +72,16 @@ class Maddr
         return $this->domain;
     }
 
+    /**
+     *
+     * @return string
+     */
+    public function getReverseDomain(): ?string
+    {
+        $parts = explode('.', $this->domain);
+        return implode('.', array_reverse($parts));
+    }
+
     public function setDomain(string $domain): self
     {
         $this->domain = $domain;
