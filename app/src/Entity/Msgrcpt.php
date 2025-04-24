@@ -68,6 +68,11 @@ class Msgrcpt
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $amavisOutput = null;
 
+    #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
+    #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
+    private Msgs $msgs;
+
     public function getPartitionTag(): int
     {
         return $this->partitionTag;
@@ -226,4 +231,24 @@ class Msgrcpt
 
         return $this;
     }
+
+    /**
+     * @return Msgs|null
+     */
+    public function getMsgs(): ?Msgs
+    {
+        return $this->msgs;
+    }
+
+    /**
+     * @param Msgs|null $msgs
+     * @return $this
+     */
+    public function setMsgs(?Msgs $msgs): self
+    {
+        $this->msgs = $msgs;
+
+        return $this;
+    }
+
 }

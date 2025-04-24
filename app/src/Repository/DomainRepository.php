@@ -5,7 +5,6 @@ namespace App\Repository;
 use App\Entity\Domain;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\DBAL\FetchMode;
 
 /**
  * @extends ServiceEntityRepository<Domain>

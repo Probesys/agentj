@@ -129,7 +129,7 @@ send() {
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
 	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
-	{ sleep 5 && $dx php bin/console ag:msgs >/dev/null; } &
+	{ sleep 5 && $dx php bin/console agentj:send-auth-mail-token >/dev/null; } &
 	expected_sender="will@blocnormal.fr" \
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1

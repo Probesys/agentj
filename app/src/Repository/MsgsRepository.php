@@ -6,6 +6,7 @@ use App\Entity\Domain;
 use App\Entity\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Amavis\ContentType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -348,27 +349,29 @@ class MsgsRepository extends ServiceEntityRepository
     }
 
     /**
-     * SELECT only msgs to send email with captch
+     * get all message which need human authentication
      *
-     * @return array<int, array<string, mixed>>
+     * @return Msgs[]
      */
-    public function searchMsgsToSendAuthToken(): array
+    public function searchMsgsToSendAuthRequest(): array
     {
-        $conn = $this->getEntityManager()->getConnection();
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT m
+            FROM App\Entity\Msgs m
+            WHERE
+                (m.isMlist IS NULL OR m.isMlist = 0)
+                AND m.status IS NULL
+                AND m.sendCaptcha = 0
+                AND m.content NOT IN (:content)
+            SQL);
 
-        $sql = 'SELECT m.mail_id,maddr_sender.email as from_addr,m.send_captcha,maddr.email,m.partition_tag,m.secret_id,mr.rid FROM msgs m '
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN maddr maddr_sender ON maddr_sender.id = m.sid '
-            . ' LEFT JOIN users u on u.email=maddr.email'
-            . ' LEFT JOIN domain d on d.id=u.domain_id'
-            . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE (m.is_mlist is null or m.is_mlist=0) and m.status_id is null and mr.send_captcha=0 and m.content != "C" AND m.content != "V"  AND mr.bspam_level < d.level AND maddr.is_invalid is null '
-            . ' AND mr.wl != "Y" and mr.bl != "Y"  and mr.status_id IS NULL and mr.content != "C" AND mr.content != "V" and mr.content != "Y"'
-            . '  GROUP BY email,sid';
-        $stmt = $conn->prepare($sql);
+        $query->setParameter('content', [
+            ContentType::Clean,
+            ContentType::Virus,
+            ContentType::Unchecked,
+        ]);
 
-        return $stmt->executeQuery()->fetchAllAssociative();
+        return $query->getResult();
     }
 
     /**
@@ -399,31 +402,36 @@ class MsgsRepository extends ServiceEntityRepository
         $stmt->executeQuery();
     }
 
+
     /**
-     * return the number of msg are already processing to send authetification request for email "to", request without the mailId
-     *
-     * @return array<int, array<string, mixed>>
+     * Check the last request sent
      */
-    public function checkLastRequestSent(string $to, string $from): array
+    public function getDaysSinceLastRequest(string $to, string $from): ?int
     {
-        if (!$from) {
-            return [];
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) as time_diff
+            FROM App\Entity\Msgs m
+            LEFT JOIN App\Entity\Msgrcpt mr WITH m.mailId = mr.mailId AND m.partitionTag = mr.partitionTag
+            LEFT JOIN App\Entity\Maddr maddr WITH maddr.id = mr.rid
+            LEFT JOIN App\Entity\Maddr maddr_sender WITH maddr_sender.id = m.sid
+            WHERE
+                maddr.email = :to
+                AND maddr_sender.email = :from_addr
+                AND m.sendCaptcha != 0
+            ORDER BY m.timeIso DESC
+        SQL);
+
+        $query->setParameter('to', $to);
+        $query->setParameter('from_addr', $from);
+        $query->setMaxResults(1);
+
+        try {
+            $result = $query->getSingleScalarResult();
+            return $result;
+        } catch (\Doctrine\ORM\NoResultException $e) {
+            return null;
         }
 
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = 'SELECT m.time_iso FROM msgs m '
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN maddr maddr_sender ON maddr_sender.id = m.sid '
-            . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE maddr.email = :to_addr AND maddr_sender.email = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':to_addr', $to);
-        $stmt->bindParam(':from_addr', $from);
-
-        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -431,11 +439,21 @@ class MsgsRepository extends ServiceEntityRepository
      */
     public function updateErrorStatus(): void
     {
-        $conn = $this->getEntityManager()->getConnection();
-        //update the email Maddr
-        $sql = "UPDATE maddr SET is_invalid = 1 WHERE id in ( select sid from msgs where status_id = 4)";
-        $stmt = $conn->prepare($sql);
-        $stmt->executeQuery();
+
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            UPDATE App\Entity\Maddr m
+             SET m.isInvalid = true
+             WHERE m.id IN (
+                 SELECT IDENTITY(msgs.sid)
+                 FROM App\Entity\Msgs msgs
+                 WHERE msgs.status = :errorStatus
+             )
+        SQL);
+
+        $query->setParameter('errorStatus', MessageStatus::ERROR);
+
+        $query->execute();
+
     }
 
     /**
@@ -490,4 +508,5 @@ class MsgsRepository extends ServiceEntityRepository
         $nbDeletedMsgs = $result->rowCount();
         return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuarantine' => $nbDeletedQuarantine];
     }
+
 }

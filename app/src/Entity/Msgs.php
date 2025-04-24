@@ -5,7 +5,10 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use App\Entity\Maddr;
+use App\Entity\Msgrcpt;
 use App\Entity\MessageStatus;
 use App\Repository\MsgsRepository;
 
@@ -18,6 +21,7 @@ use App\Repository\MsgsRepository;
 #[ORM\Index(name: 'msgs_idx_time_num', columns: ['time_num'])]
 #[ORM\Index(name: 'msgs_idx_time_iso', columns: ['time_iso'])]
 #[ORM\Index(name: 'msgs_idx_mail_id', columns: ['mail_id'])]
+#[ORM\Index(name: 'idx_msgs_quar_type', columns: ['quar_type'])]
 #[ORM\Entity(repositoryClass: MsgsRepository::class)]
 class Msgs
 {
@@ -28,7 +32,6 @@ class Msgs
 
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
-    #[ORM\OneToOne(targetEntity: 'App\Entity\Msgrcpt', inversedBy: 'msgs', cascade: ['persist', 'remove'], fetch: 'EAGER')]
     private mixed $mailId = null;
 
     #[ORM\Column(name: 'secret_id', type: Types::BINARY, nullable: true)]
@@ -82,6 +85,12 @@ class Msgs
     #[ORM\Column(name: 'host', type: 'string', length: 255, nullable: false)]
     private string $host;
 
+    /** @var Collection<int, MsgRcpt> $msgRcpts */
+    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MsgRcpt::class)]
+    #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
+    #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
+    private Collection $msgRcpts;
+
     #[ORM\Column(name: 'validate_captcha', type: 'integer', nullable: true, options: ['unsigned' => true, 'default' => 0])]
     private int $validate_captcha;
 
@@ -99,8 +108,14 @@ class Msgs
     #[ORM\Column(name: 'message_error', type: 'text', nullable: true)]
     private ?string $messageError;
 
+    //If true it means that the message is from a mailing list
     #[ORM\Column(type: 'boolean', nullable: true)]
     private ?bool $isMlist;
+
+    public function __construct()
+    {
+        $this->msgRcpts = new ArrayCollection();
+    }
 
     public function getPartitionTag(): ?int
     {
@@ -351,7 +366,12 @@ class Msgs
 
     public function getMailIdAsString(): string
     {
-        return stream_get_contents($this->mailId, -1, 0);
+        $strMailId = $this->mailId;
+        if (is_resource($strMailId)) {
+            $strMailId = stream_get_contents($this->mailId, -1, 0);
+            rewind($this->mailId);
+        }
+        return $strMailId;
     }
 
     public function getSendCaptcha(): ?int
@@ -398,6 +418,36 @@ class Msgs
     public function setIsMlist(?bool $isMlist): self
     {
         $this->isMlist = $isMlist;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MsgRcpt>
+     */
+    public function getMsgRcpts(): Collection
+    {
+        return $this->msgRcpts;
+    }
+
+    public function addMsgRcpt(MsgRcpt $msgRcpt): self
+    {
+        if (!$this->msgRcpts->contains($msgRcpt)) {
+            $this->msgRcpts[] = $msgRcpt;
+            $msgRcpt->setMsgs($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMsgRcpt(MsgRcpt $msgRcpt): self
+    {
+        if ($this->msgRcpts->removeElement($msgRcpt)) {
+            // set the owning side to null (unless already changed)
+            if ($msgRcpt->getMsgs() === $this) {
+                $msgRcpt->setMsgs(null);
+            }
+        }
 
         return $this;
     }

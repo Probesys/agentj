@@ -258,7 +258,6 @@ class DefaultController extends AbstractController {
             if ($recipient) {
                 $confirm = str_replace('[EMAIL_DEST]', stream_get_contents($recipient->getRid()->getEmail(), -1, 0), $confirm);
             }
-
             if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
                     $messageService->authorize($message, $messageRecipients, ValidationSource::captcha);
@@ -342,16 +341,16 @@ class DefaultController extends AbstractController {
         $mailId = $tokenParts[0];
         $partitionTag = (int) $tokenParts[2];
         $domainId = $tokenParts[3];
-        $rid = $tokenParts[4] ? (int) $tokenParts[4] : null;
 
         $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
 
         $messageRecipients = [];
-        if ($message && $rid === null) {
+        if ($message) {
             $messageRecipients = $this->em->getRepository(Msgrcpt::class)->findByMessage($message);
-        } elseif ($message) {
-            $messageRecipients[] = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
+            $messageRecipients = array_filter($messageRecipients, function(Msgrcpt $msgrcpt) use ($domain) {
+                return $msgrcpt->getRid()->getReverseDomain() == $domain->getDomain();
+            });
         }
 
         return [$message, $domain, $messageRecipients];

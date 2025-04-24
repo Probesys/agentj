@@ -32,13 +32,13 @@
 			{{ msgRcpt.bspamLevel }}
 		</div>
 
-		{% if msgRcpt.sendCaptcha > 0 %}
+		{% if msg.sendCaptcha > 0 %}
 			<div class="col-md-4">
 				{{ 'Entities.Message.dateAuthRequestAt' | trans }}
 				:
 			</div>
 			<div class="col-md-8">
-				{{ msgRcpt.sendCaptcha | format_datetime('short', 'short') }}
+				{{ msg.sendCaptcha | format_datetime('short', 'short') }}
 			</div>
 		{% endif %}
 

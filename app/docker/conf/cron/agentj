@@ -1,4 +1,4 @@
-* * * * * www-data cd /var/www/agentj && php bin/console agentj:msgs-send-mail-token | logger -t agentj_cron 2>&1
+* * * * * www-data cd /var/www/agentj && php bin/console agentj:send-auth-mail-token | logger -t agentj_cron 2>&1
 * * * * * www-data cd /var/www/agentj && php bin/console app:create-alert-for-user | logger -t agentj_cron 2>&1
 * * * * * www-data cd /var/www/agentj && php bin/console app:create-alert-for-admin | logger -t agentj_cron 2>&1
 0 3 * * * www-data cd /var/www/agentj && php bin/console agentj:truncate-message-since-day 30 | logger -t agentj_cron 2>&1
