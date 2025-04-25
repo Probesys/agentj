@@ -76,7 +76,7 @@ class Maddr
      *
      * @return string
      */
-    public function getReverseDomain(): ?string
+    public function getReverseDomain(): string
     {
         $parts = explode('.', $this->domain);
         return implode('.', array_reverse($parts));
