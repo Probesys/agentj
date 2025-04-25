@@ -29,10 +29,10 @@ use App\Repository\DomainRepository;
 use App\Amavis\DeliveryStatus;
 
 #[AsCommand(
-    name: 'agentj:msgs-send-mail-token',
+    name: 'agentj:send-auth-mail-token',
     description: 'Send email with url token to validate email sender address',
 )]
-class MsgsSendMailTokenCommand extends Command
+class SendAuthMailRequestCommand extends Command
 {
 
     private MessageStatus $messageStatusError;
@@ -171,7 +171,7 @@ class MsgsSendMailTokenCommand extends Command
     {
 
         $token = $this->cryptEncryptService->encrypt(
-            $msg->getMailId()
+            $msg->getMailIdAsString()
             . '%%%' . $msg->getSecretId()
             . '%%%' . $msg->getPartitionTag()
             . '%%%' . $domain->getId()
