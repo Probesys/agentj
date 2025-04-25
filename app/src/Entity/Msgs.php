@@ -364,7 +364,12 @@ class Msgs
 
     public function getMailIdAsString(): string
     {
-        return stream_get_contents($this->mailId, -1, 0);
+        $strMailId = $this->mailId;
+        if (is_resource($strMailId)) {
+            $strMailId = stream_get_contents($this->mailId, -1, 0);
+            rewind($this->mailId);
+        }
+        return $strMailId;
     }
 
     public function getSendCaptcha(): ?int
