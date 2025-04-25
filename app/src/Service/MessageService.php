@@ -197,14 +197,13 @@ class MessageService
                     }
                 }
             }
-            $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
-            $messageRecipient->setStatus($messageStatus);
-            $this->em->persist($message);
-            $this->em->flush();
 
-            return true;
         }
 
-        return false;
+        $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
+        $messageRecipient->setStatus($messageStatus);
+        $this->em->persist($message);
+        $this->em->flush();
+        return true;
     }
 }
