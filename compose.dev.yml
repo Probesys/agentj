@@ -77,17 +77,6 @@ services:
         aliases:
           - smtp.test
 
-  badrelay:
-    build:
-      context: tests/
-    networks:
-      default:
-        ipv4_address: 172.28.2.6
-        aliases:
-          - bad.relay
-    command: smtpd -d
-
-
   opendkim:
     volumes:
       - ./tests/opendkim.test.conf:/etc/opendkim.test.conf
