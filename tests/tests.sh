@@ -1,8 +1,6 @@
 #!/bin/bash
 
 dx='docker compose exec -u www-data app'
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
-ip_outsmtp=$(docker inspect "$(docker compose ps --format "{{.ID}}" outsmtp)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 
 source .env
 echo "waiting app"
@@ -12,6 +10,9 @@ do
 	sleep 1
 done
 echo ' ok'
+
+ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_outsmtp=$(docker inspect "$(docker compose ps --format "{{.ID}}" outsmtp)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 
 # add tests data to db if not already here
 $dx php bin/console doctrine:fixtures:load --append
@@ -23,7 +24,7 @@ curl='curl -s'
 send() {
 	# for log
 	testname="$1"
-	# in|out|unauthorized_smtp (send to agentj or via agentj)
+	# in|out|out_proxy (send to agentj or via agentj)
 	in_out="$2"
 	from_addr="$3"
 	# number of received mail expected
@@ -52,12 +53,12 @@ send() {
 			to_addr="$_from"
 			smtp_server="$ip_smtptest:26"
 			;;
-		# from agentj, via implicitly authorized smtp (same private ip subnet)
+		# from agentj, via authorized smtp (see fixtures)
 		"out")
 			smtp_server="$ip_smtptest:27"
 			;;
-		# from agentj, via unauthorized client (host ip)
-		"unauthorized_smtp")
+		# from agentj, directly via outsmtp container
+		"out_proxy")
 			smtp_server="$ip_outsmtp"
 			;;
 		*)
@@ -170,10 +171,10 @@ fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp or unknown users ----" 1>&2
-	send 'out_bloc_bad_relay1' 'unauthorized_smtp' 'user@blocnormal.fr' 0 1 "" 24
-	send 'out_pass_bad_relay1' 'unauthorized_smtp' 'user@laissepasser.fr' 0 1 "" 24
+	echo "---- don't relay from inexistants users ----" 1>&2
 	send 'out_bloc_unknown_user' 'out' 'inexistant_user@blocnormal.fr' 0 1
+	echo "---- don't relay from unknown servers ----" 1>&2
+	send 'out_bloc_dont_relay_unknown' 'out_proxy' 'user@blocnormal.fr' 0 1 "" 24
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]

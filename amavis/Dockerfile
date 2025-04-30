@@ -1,10 +1,5 @@
 FROM debian:bookworm-slim 
 
-LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
-LABEL name = "Amavis & ClamAV dockerized for AgentJ"
-LABEL description = "Starts Amavis with DB connection, uses local ClamAV as AV scanner"
-
-
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \

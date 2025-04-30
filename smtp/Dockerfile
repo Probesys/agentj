@@ -1,9 +1,5 @@
 FROM debian:bookworm-slim
 
-LABEL maintainer="Sébastien Poher <sebastien.poher@probesys.com>"
-LABEL name = "Postfix incoming smtp for AgentJ"
-LABEL description = "Postfix server to relay incoming mails to anti-spam stack"
-
 SHELL [ "/bin/sh", "-e", "-c" ]
 
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
@@ -13,7 +9,6 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     apt-get -y install --no-install-recommends \
     postfix \ 
     postfix-mysql \ 
-    postfix-policyd-spf-python \ 
     postfix-lmdb \
     tzdata  \ 
     iproute2   

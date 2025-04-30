@@ -5,6 +5,8 @@ IPV4_NETWORK=$(ip route | grep  kernel | awk '{ print $1}')
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/postfix-*/main.cf
 sed -i "s~\$IPV4_NETWORK~$IPV4_NETWORK~g" /etc/postfix-*/master.cf
 
+sed -i "s~\$SMTP_TRUSTED_PROXIES~$SMTP_TRUSTED_PROXIES~" /etc/postfix-*/main.cf
+
 # Set mailname
 sed -i "s/\$DOMAIN/$DOMAIN/g" /etc/postfix-*/main.cf
 sed -i "s/\$EHLO_DOMAIN/${EHLO_DOMAIN:-$DOMAIN}/g" /etc/postfix-*/main.cf
