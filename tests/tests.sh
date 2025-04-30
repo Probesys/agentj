@@ -144,7 +144,7 @@ then
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
 		expected_sender="no-reply@${APP_DOMAIN:-$DOMAIN}" \
 		to_addr="user@blocnormal.fr" \
-		send 'report' 'outviarelay' 'user@blocnormal.fr' 1 0
+		send 'report' 'out' 'user@blocnormal.fr' 1 0
 
 	send 'out_bloc' 'out' 'user@blocnormal.fr' 1
 	send 'out_pass' 'out' 'user@laissepasser.fr' 1
