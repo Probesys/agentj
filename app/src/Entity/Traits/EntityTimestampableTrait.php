@@ -10,11 +10,11 @@ trait EntityTimestampableTrait
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(type: 'datetime')]
-    private $created;
+    private \DateTimeInterface $created;
 
     #[Gedmo\Timestampable(on: 'update')]
     #[ORM\Column(type: 'datetime')]
-    private $updated;
+    private \DateTimeInterface $updated;
 
     public function getCreated(): ?\DateTimeInterface
     {

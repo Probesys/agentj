@@ -7,7 +7,7 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserPreferencesType;
 use App\Repository\GroupsRepository;
-use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,21 +18,18 @@ class AccountController extends AbstractController {
 
     use ControllerWBListTrait;
 
-    private $em;
-    private $translator;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
-        $this->em = $em;
-        $this->translator = $translator;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator
+    ) {
     }
 
     #[Route(path: '/account', name: 'account')]
-    public function index(Request $request, GroupsRepository $groupsRepository) {
-
-        $groupDefaulWb = null;
-        /*         * @var  User  $user */
+    public function index(Request $request, GroupsRepository $groupsRepository): Response {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $form = $this->createForm(UserPreferencesType::class, $this->getUser(), [
+        $form = $this->createForm(UserPreferencesType::class, $user, [
             'action' => $this->generateUrl('account'),
         ]);
         $form->handleRequest($request);
@@ -56,8 +53,6 @@ class AccountController extends AbstractController {
                                 }))[0];
             }
         }
-//        dd($domainDefaulWb);
-
 
         return $this->render('account/index.html.twig', [
                     'controller_name' => 'AccountController',

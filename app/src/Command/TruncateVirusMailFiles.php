@@ -2,12 +2,16 @@
 
 namespace App\Command;
 
+use App\Entity\Log;
+use App\Entity\Msgs;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'agentj:truncate-virus-queue',
@@ -16,24 +20,26 @@ use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 class TruncateVirusMailFiles extends Command
 {
 
-    private $nbDays = 30;
+    private int $nbDays = 30;
 
-    protected function configure():void
-    {
+    public function __construct(
+        private ParameterBagInterface $params
+    ) {
+        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output):int
     {
         $deleteFiles = [];
-        if (!$this->getApplication()->getKernel()->getContainer()->getParameter('app.amavis_quarantine_dir')) {
+        if (!$this->params->get('app.amavis_quarantine_dir')) {
             throw new MissingMandatoryParametersException('The amavis_quarantine_dir parameter is missing ');
         }
-        $amavisQuarantDir = $this->getApplication()->getKernel()->getContainer()->getParameter('app.amavis_quarantine_dir');
+        $amavisQuarantDir = $this->params->get('app.amavis_quarantine_dir');
         if (!file_exists($amavisQuarantDir)) {
             throw new FileNotFoundException($amavisQuarantDir);
         }
 
-        $days = $this->getApplication()->getKernel()->getContainer()->getParameter('app.amavis_quarantine_nbdays_before_delete') ? $this->getApplication()->getKernel()->getContainer()->getParameter('app.amavis_quarantine_nbdays_before_delete') : $this->nbDays;
+        $days = $this->params->get('app.amavis_quarantine_nbdays_before_delete') ? $this->params->get('app.amavis_quarantine_nbdays_before_delete') : $this->nbDays;
         if ($days <= 10) {
             $days = $this->nbDays;
         }

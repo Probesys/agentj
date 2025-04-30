@@ -2,7 +2,9 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
-    level: 2
+    level: 6
     paths:
         - src/
 
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml

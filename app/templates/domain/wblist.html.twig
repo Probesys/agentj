@@ -13,7 +13,7 @@
   {% embed 'common/blockTitleAndButtons.html.twig' %}
 
     {% block content_button_actions %}
-      <a href="#" data-url-modal-content="{{ path('domain_wblist_new',{'domainId':domain.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new_rule'|trans() }}</a>              
+      <a href="#" data-url-modal-content="{{ path('domain_wblist_new',{'id':domain.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new_rule'|trans() }}</a>
     {% endblock %}
 
   {% endembed %}

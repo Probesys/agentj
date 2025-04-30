@@ -36,24 +36,21 @@ class DomainController extends AbstractController
 
     use ControllerWBListTrait;
 
-    private $translator;
-    private $em;
-    private $userService;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, UserService $userService)
-    {
-        //        parent::__construct();
-        $this->translator = $translator;
-        $this->em = $em;
-        $this->userService = $userService;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+        private UserService $userService,
+    ) {
     }
 
-    private function checkAccess($domain)
+    private function checkAccess(Domain $domain): void
     {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
             $allowedomains = $this->em
                 ->getRepository(Domain::class)
-                ->getListByUserId($this->getUser()->getId());
+                ->getListByUserId($user->getId());
             if (!in_array($domain, $allowedomains)) {
                 throw new AccessDeniedException();
             }
@@ -63,15 +60,16 @@ class DomainController extends AbstractController
     #[Route(path: '/', name: 'domain_index', methods: 'GET')]
     public function index(): Response
     {
-
-        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
             $domains = $this->em
                 ->getRepository(Domain::class)
                 ->findAll();
         } else {
             $domains = $this->em
                 ->getRepository(Domain::class)
-                ->getListByUserId($this->getUser()->getId());
+                ->getListByUserId($user->getId());
         }
 
 
@@ -120,12 +118,7 @@ class DomainController extends AbstractController
 
             $this->generateOpenDkim($domain);
 
-
-
-
-
-            $em = $this->em;
-            $em->persist($domain);
+            $this->em->persist($domain);
 
             //add domain to users
             $user = new User();
@@ -134,7 +127,7 @@ class DomainController extends AbstractController
             $user->setDomain($domain);
             $user->setPriority(2);
             $user->setPolicy($domain->getPolicy());
-            $em->persist($user);
+            $this->em->persist($user);
 
             $rules = $form->get("rules")->getData();
 
@@ -144,12 +137,12 @@ class DomainController extends AbstractController
                 $mailaddr = new Mailaddr();
                 $mailaddr->setPriority(0); // priority for domain is 0
                 $mailaddr->setEmail('@.');
-                $em->persist($mailaddr);
+                $this->em->persist($mailaddr);
             }
             $wblist = new Wblist($user, $mailaddr);
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-            $em->persist($wblist);
+            $this->em->persist($wblist);
 
             if ($form->has('logoFile')) {
                 $uploadedFile = $form['logoFile']->getData();
@@ -160,7 +153,7 @@ class DomainController extends AbstractController
             }
 
 
-            $em->flush();
+            $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
         } elseif ($form->isSubmitted()) {
@@ -200,7 +193,7 @@ class DomainController extends AbstractController
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
-        $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $form->getData('domain')->getDomain());
+        $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domain->getDomain());
         $form->get('rules')->setData($wblistArray['wb']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -239,7 +232,7 @@ class DomainController extends AbstractController
                 }
             }
 
-            if ($domain->getDomainKeys() === null || $domain->getDomainKeys()->getPublicKey() === null)
+            if ($domain->getDomainKeys() === null)
                 $this->generateOpenDkim($domain);
 
             $em->persist($wblist);
@@ -288,7 +281,7 @@ class DomainController extends AbstractController
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
     #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'GET|POST')]
-    public function deleteWblist($rid, $sid, Request $request): Response
+    public function deleteWblist(int $rid, int $sid, Request $request): Response
     {
         $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
@@ -310,25 +303,20 @@ class DomainController extends AbstractController
         $wblist = $this->em->getRepository(Wblist::class)->findBy(['rid' => $user]);
         if (!$wblist) {
             $this->addFlash('danger', $this->translator->trans('Message.Flash.missingRuleForDomain'));
-            return $this->redirectToRoute('domain_wblist_new', ['domainId' => $domain->getId(), 'type' => 'domain']);
+            return $this->redirectToRoute('domain_wblist_new', ['id' => $domain->getId(), 'type' => 'domain']);
         }
         return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
     }
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
-    #[Route(path: '/{domainId}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
-    public function newwblist($domainId, Request $request, MailaddrService $mailaddrService): Response
+    #[Route(path: '/{id}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
+    public function newwblist(Domain $domain, Request $request, MailaddrService $mailaddrService): Response
     {
-        $em = $this->em;
-        $domain = $this->em->getRepository(Domain::class)->find($domainId);
-        if (!$domain) {
-            throw $this->createNotFoundException('The domain does not exist');
-        }
         $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
-            'action' => $this->generateUrl('domain_wblist_new', ['domainId' => $domainId]),
+            'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),
         ]);
         $formBuilder->add('email', TextType::class);
         $actions = $this->getWBListUserActions();
@@ -351,22 +339,22 @@ class DomainController extends AbstractController
                 $priority = $mailaddrService->computePriority($data['email']);
                 $mailaddr->setPriority($priority);
 
-                $em->persist($mailaddr);
+                $this->em->persist($mailaddr);
             } else {
                 $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $user, 'sid' => $mailaddr]));
                 if ($domainWblistexist) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
-                    return $this->redirectToRoute('domain_wblist', ['id' => $domainId]);
+                    return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
                 }
             }
             $wblist = new Wblist($user, $mailaddr);
             $wblist->setWb($data['wb']);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
-            $em->persist($wblist);
-            $em->flush();
+            $this->em->persist($wblist);
+            $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
-            return $this->redirectToRoute('domain_wblist', ['id' => $domainId]);
+            return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
         }
 
         return $this->render('domain/newwblist.html.twig', [

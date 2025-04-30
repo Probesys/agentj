@@ -9,27 +9,30 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Result;
 
-class WblistRepository extends ServiceEntityRepository {
-
+/**
+ * @extends ServiceEntityRepository<Wblist>
+ */
+class WblistRepository extends ServiceEntityRepository
+{
     public function __construct(ManagerRegistry $registry) {
         parent::__construct($registry, Wblist::class);
     }
 
     /**
-     * search query
-     * @param type $type
-     * @return type
+     * @param ?array{
+     *     sort: string,
+     *     direction: string,
+     * } $sortParams
+     * @return array<int, array<string, mixed>>
      */
-    public function search($type = null, ?User $user = null, $searchKey = null, $sortPrams = null) {
-
+    public function search(?string $type = null, ?User $user = null, ?string $searchKey = null, ?array $sortParams = null): array {
         $dql = $this->createQueryBuilder('wb')
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->innerJoin('wb.rid', 'u')
                 ->innerJoin('wb.sid', 's')
                 ->leftJoin('wb.groups', 'g');
-
-        $conn = $this->getEntityManager()->getConnection();
 
         if (in_array('ROLE_USER', $user->getRoles())) {
             $dql->andWhere('wb.rid = :user')
@@ -61,59 +64,28 @@ class WblistRepository extends ServiceEntityRepository {
             }
         }
 
-        if ($sortPrams) {
-            $dql->orderBy($sortPrams['sort'], $sortPrams['direction']);
+        if ($sortParams) {
+            $dql->orderBy($sortParams['sort'], $sortParams['direction']);
         }
 
         return $dql->getQuery()->getScalarResult();
-
     }
 
     /**
-     * search query
-     * @param type $type
-     * @return type
+     * @return array<string, mixed>
      */
-    public function searchByReceiptDomain($domain) {
-
+    public function searchByReceiptDomain(string $domain): array {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " SELECT * FROM wblist  wb "
                 . " LEFT JOIN mailaddr ma ON ma.id = wb.sid "
                 . " LEFT JOIN users u ON wb.rid = u.id "
                 . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";
         $stmt = $conn->prepare($sql);
+
         return $stmt->executeQuery()->fetchAssociative();
     }
-    
-  /**
-   * 
-   * @param type $rid
-   * @param type $sid
-   * @return Wblist|null
-   */
-    public function findOneByRidAndSid($rid, Mailaddr $senderAddr):?Wblist
-    {
-dd($rid);
-        $dql = $this->createQueryBuilder('wb')
-                ->select('wb')
-                ->join('wb.sid', 'maddr')
-                ->where('wb.rid = :rid')
-                ->andWhere('maddr.email= :maddr')
-                ->setParameter('maddr', $senderAddr->getEmail())
-                ->setParameter('rid', $rid);
-        $query = $dql->getQuery();
-//        dd($query->getSQL());
-        $result = $query->getOneOrNullResult();
-        return $result;
-    }    
 
-    /**
-     * delete query
-     * @param int $groupId
-     * @return type
-     */
-    public function deleteFromGroup() {
-
+    public function deleteFromGroup(): Result {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " DELETE FROM wblist "
                 . " WHERE group_id  is not null";
@@ -122,45 +94,7 @@ dd($rid);
         return $stmt->execute();
     }
 
-    /**
-     * Delete wblist entries for a group and user
-     * @param Group $group
-     * @param User $user
-     * @return mixed
-     */
-    public function deleteUserWbListFromGroup(Groups $group, User $user) {
-        $qdl = $this->createQueryBuilder('wb')
-                ->delete()
-                ->where('wb.groups = :group')
-                ->andWhere('wb.rid =:user')
-                ->setParameter('group', $group)
-                ->setParameter('user', $user);
-
-        return $qdl->getQuery()->execute();
-    }
-
-    /**
-     * Delete wblist group entries for a user
-     * @param User $user
-     * @return type
-     */
-    public function deleteUserWbListFromUserGroups(User $user) {
-        $qdl = $this->createQueryBuilder('wb')
-                ->delete()
-                ->where('wb.groups is not null')
-                ->andWhere('wb.rid =:user')
-                ->setParameter('user', $user);
-
-        return $qdl->getQuery()->execute();
-    }
-
-    /**
-     * delete query
-     * @param int $groupId
-     * @return type
-     */
-    public function delete($rid, $sid, $priority) {
-//
+    public function delete(int $rid, int $sid, int $priority): mixed {
         $qdl = $this->createQueryBuilder('wb')
                 ->delete()
                 ->where('wb.rid =:rid')
@@ -171,17 +105,9 @@ dd($rid);
                 ->setParameter('priority', $priority);
 
         return $qdl->getQuery()->execute();
-
-        $conn = $this->getEntityManager()->getConnection();
     }
 
-    /**
-     * insert new rules for user of a group
-     * @param int $groupId
-     * @return type
-     */
-    public function insertFromGroup() {
-
+    public function insertFromGroup(): Result {
         $conn = $this->getEntityManager()->getConnection();
         $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
@@ -196,19 +122,17 @@ dd($rid);
 
                 
         $stmt = $conn->prepare($sqlSelectGroupwbList);
-        $stmt->execute();
+        return $stmt->execute();
     }
 
     /**
      * Get wblist informations about a sender adress
-     * @param type $senderAdress
-     * @return type
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function getWbListInfoForSender($senderAdress, $recipientAdress, $strDateMsg = null) {
-
+    public function getWbListInfoForSender(string $senderAdress, string $recipientAdress): array {
         $infos = [];
-        $s_str = '""';
-        $dateMsg = $strDateMsg ? new \DateTime($strDateMsg) : null;
+        $s_str = '""';        
         $r_domain = explode('@', $recipientAdress)[1];
         $r_ext = explode('.', $r_domain)[1];
         $r_str = "'$recipientAdress','@$r_domain','@.$r_domain','@.$r_ext','@.'";
@@ -237,7 +161,6 @@ dd($rid);
 
             $sql_select_white_black_list .= ' ORDER BY wblist.priority DESC , mailaddr.priority DESC ';
             $stmt = $conn->prepare($sql_select_white_black_list);
-//            $stmt->execute();
             $result1 = $stmt->executeQuery()->fetchAllAssociative();
             foreach ($result1 as $row1) {
                 $group = null;
@@ -261,27 +184,21 @@ dd($rid);
             }
         }
 
-
         return $infos;
     }
 
     /**
      * Return the default Wb for a domain
-     * @return type
      */
-    public function getDefaultDomainWBList(Domain $domain) {
+    public function getDefaultDomainWBList(Domain $domain): ?string {
         $sid = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy(['email' => '@.']);
         $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
-
         $wb = $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
         return $wb ? $wb->getWb() : null;
     }
 
     /**
      * Verify if a wblist rule exists for $user from $mailaddr
-     * @param User $user
-     * @param Mailaddr $mailaddr
-     * @return bool
      */
     public function getOneByUser(User $user, Mailaddr $mailaddr): ?Wblist {
         $dql = $this->createQueryBuilder('wb')
@@ -296,9 +213,9 @@ dd($rid);
     }
 
     /**
-     * Check if wblist is overriden by anotherOne with highter prioriry
-     * @param array $wbInfo
-     * @return bool
+     * Check if wblist is overriden by anotherOne with highter priority
+     *
+     * @param array<string, mixed> $wbInfo
      */
     public function wbListIsOverriden(array $wbInfo): bool {
         $dql = $this->createQueryBuilder('wb')
@@ -315,5 +232,4 @@ dd($rid);
         $result = $query->getOneOrNullResult();
         return !is_null($result);
     }
-
 }

@@ -27,7 +27,7 @@ class LDAPImportCommand extends Command {
     private EntityManagerInterface $em;
     private ?LdapConnector $connector;
     private Ldap $ldap;
-    private $translator;
+    private TranslatorInterface $translator;
     private LdapService $ldapService;
     private SymfonyStyle $io;
 
@@ -73,9 +73,11 @@ class LDAPImportCommand extends Command {
         return Command::SUCCESS;
     }
 
-    private function importUsers() {
+    private function importUsers(): void {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
+        $nbUserUpdated = 0;
+        $nbUserCreated = 0;
 
         if ($this->connector->getLdapUserFilter()) {
             $ldapQuery = $this->connector->getLdapUserFilter();
@@ -84,8 +86,6 @@ class LDAPImportCommand extends Command {
             $results = $query->execute();
             $this->ldapService->filterUserResultOnDomain($results, $this->connector);
 
-            $nbUserUpdated = 0;
-            $nbUserCreated = 0;
             foreach ($results as $entry) {
                 $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
@@ -151,11 +151,6 @@ class LDAPImportCommand extends Command {
         $this->em->flush();        
     }
 
-    /**
-     * 
-     * @param \stdclass $token
-     * @return void
-     */
     private function importGroups(): void {
 
         $mailAttribute = $this->connector->getLdapEmailField();
@@ -190,8 +185,7 @@ class LDAPImportCommand extends Command {
                     $isNew = true;
                     $priorityMax++;
                 }
-//                dump($realNameAttribute);
-//                dd($ldapGroup);
+
                 $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                 $group->setOriginConnector($this->connector);
                 $this->em->persist($group);
@@ -209,18 +203,10 @@ class LDAPImportCommand extends Command {
         }
     }
 
-    /**
-     * 
-     * @param \stdclass $token
-     * @param Groups $group
-     * @return void
-     */
     private function addMembersToGroup(Entry $ldapGroup, Groups $group): void {
-
         $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();
         $members = $ldapGroup->getAttribute($groupMemberfield) ? $ldapGroup->getAttribute($groupMemberfield) : [];
-        dump($members);
         foreach ($members as $member) {
             $user = $this->em->getRepository(User::class)->findOneByLdapDN($member);
             if ($user) {

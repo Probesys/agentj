@@ -9,10 +9,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 trait ControllerWBListTrait {
 
-    public $wBListDomainActions;
-    public $wBListUserActions;
 
-    public function getWBListDomainActions() {
+    /**
+     * @return array<string, string>
+     */
+    public function getWBListDomainActions(): array {
         return [
             '' => '',
             $this->translator->trans('Entities.Domain.actions.blockAllMails') => "0",
@@ -20,35 +21,14 @@ trait ControllerWBListTrait {
         ];
     }
 
-    public function getWBListUserActions() {
+    /**
+     * @return array<string, string>
+     */
+    public function getWBListUserActions(): array {
         return [
             '' => '',
             $this->translator->trans('Entities.Domain.actions.blockAllMails') => "B",
             $this->translator->trans('Entities.Domain.actions.allowAllMails') => "W",
         ];
     }
-    
-    /* UPDATE wblist from Group configuration (user,email, wb option ) */
-
-    public function updatedWBListFromGroup($groupId) {
-
-        $WblistRepository = $this->getDoctrine()->getManager()->getRepository(Wblist::class);
-        $group = $this->getDoctrine()->getManager()->getRepository(Groups::class)->find($groupId);
-
-        if ($group) {
-            $result = $WblistRepository->deleteFromGroup($groupId);
-            $UserRepository = $this->getDoctrine()->getManager()->getRepository(User::class);
-
-            //Check if the group is active
-            if ($result && $group->getActive()) {
-                $WblistRepository->insertFromGroup($groupId);
-                //update policy for all user from group
-                $UserRepository->updatePolicyForGroup($groupId);
-            } elseif (!$group->getActive()) {
-                //update policy for all user of a group from domain
-                $UserRepository->updatePolicyFromGroupToDomain($groupId);
-            }
-        }
-    }
-
 }

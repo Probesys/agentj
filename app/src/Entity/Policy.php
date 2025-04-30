@@ -12,278 +12,144 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: 'App\Repository\PolicyRepository')]
 class Policy
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'policy_name', type: 'string', length: 32, nullable: true)]
     #[Assert\NotBlank]
-    private $policyName;
+    private ?string $policyName = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'virus_lover', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $virusLover;
+    private ?string $virusLover = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_lover', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $spamLover;
+    private ?string $spamLover = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'unchecked_lover', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $uncheckedLover;
+    private ?string $uncheckedLover = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'banned_files_lover', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bannedFilesLover;
+    private ?string $bannedFilesLover = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bad_header_lover', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $badHeaderLover;
+    private ?string $badHeaderLover = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bypass_virus_checks', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bypassVirusChecks;
+    private ?string $bypassVirusChecks = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bypass_spam_checks', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bypassSpamChecks;
+    private ?string $bypassSpamChecks = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bypass_banned_checks', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bypassBannedChecks;
+    private ?string $bypassBannedChecks = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bypass_header_checks', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bypassHeaderChecks;
+    private ?string $bypassHeaderChecks = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'virus_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $virusQuarantineTo;
+    private ?string $virusQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $spamQuarantineTo;
+    private ?string $spamQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'banned_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $bannedQuarantineTo;
+    private ?string $bannedQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'unchecked_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $uncheckedQuarantineTo;
+    private ?string $uncheckedQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bad_header_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $badHeaderQuarantineTo;
+    private ?string $badHeaderQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'clean_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $cleanQuarantineTo;
+    private ?string $cleanQuarantineTo = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'archive_quarantine_to', type: 'string', length: 64, nullable: true)]
-    private $archiveQuarantineTo;
+    private ?string $archiveQuarantineTo = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_tag_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamTagLevel;
+    private ?float $spamTagLevel = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_tag2_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamTag2Level;
+    private ?float $spamTag2Level = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_tag3_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamTag3Level;
+    private ?float $spamTag3Level = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_kill_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamKillLevel;
+    private ?float $spamKillLevel = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_dsn_cutoff_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamDsnCutoffLevel;
+    private ?float $spamDsnCutoffLevel = null;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_quarantine_cutoff_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamQuarantineCutoffLevel;
+    private ?float $spamQuarantineCutoffLevel = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'addr_extension_virus', type: 'string', length: 64, nullable: true)]
-    private $addrExtensionVirus;
+    private ?string $addrExtensionVirus = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'addr_extension_spam', type: 'string', length: 64, nullable: true)]
-    private $addrExtensionSpam;
+    private ?string $addrExtensionSpam = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'addr_extension_banned', type: 'string', length: 64, nullable: true)]
-    private $addrExtensionBanned;
+    private ?string $addrExtensionBanned = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'addr_extension_bad_header', type: 'string', length: 64, nullable: true)]
-    private $addrExtensionBadHeader;
+    private ?string $addrExtensionBadHeader = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'warnvirusrecip', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $warnvirusrecip;
+    private ?string $warnvirusrecip = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'warnbannedrecip', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $warnbannedrecip;
+    private ?string $warnbannedrecip = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'warnbadhrecip', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $warnbadhrecip;
+    private ?string $warnbadhrecip = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'newvirus_admin', type: 'string', length: 64, nullable: true)]
-    private $newvirusAdmin;
+    private ?string $newvirusAdmin = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'virus_admin', type: 'string', length: 64, nullable: true)]
-    private $virusAdmin;
+    private ?string $virusAdmin = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'banned_admin', type: 'string', length: 64, nullable: true)]
-    private $bannedAdmin;
+    private ?string $bannedAdmin = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bad_header_admin', type: 'string', length: 64, nullable: true)]
-    private $badHeaderAdmin;
+    private ?string $badHeaderAdmin = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_admin', type: 'string', length: 64, nullable: true)]
-    private $spamAdmin;
+    private ?string $spamAdmin = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_subject_tag', type: 'string', length: 64, nullable: true)]
-    private $spamSubjectTag;
+    private ?string $spamSubjectTag = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_subject_tag2', type: 'string', length: 64, nullable: true)]
-    private $spamSubjectTag2;
+    private ?string $spamSubjectTag2 = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'spam_subject_tag3', type: 'string', length: 64, nullable: true)]
-    private $spamSubjectTag3;
+    private ?string $spamSubjectTag3 = null;
 
-    /**
-     * @var int|null
-     */
     #[ORM\Column(name: 'message_size_limit', type: 'integer', nullable: true)]
-    private $messageSizeLimit;
+    private ?int $messageSizeLimit = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'banned_rulenames', type: 'string', length: 64, nullable: true)]
-    private $bannedRulenames;
+    private ?string $bannedRulenames = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'disclaimer_options', type: 'string', length: 64, nullable: true)]
-    private $disclaimerOptions;
+    private ?string $disclaimerOptions = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'forward_method', type: 'string', length: 64, nullable: true)]
-    private $forwardMethod;
+    private ?string $forwardMethod = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'sa_userconf', type: 'string', length: 64, nullable: true)]
-    private $saUserconf;
+    private ?string $saUserconf = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'sa_username', type: 'string', length: 64, nullable: true)]
-    private $saUsername;
+    private ?string $saUsername = null;
 
     public function __toString(): string
     {

@@ -3,41 +3,36 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
+use App\Repository\MailaddrRepository;
 
 /**
  * Mailaddr
  */
 #[ORM\Table(name: 'mailaddr')]
 #[ORM\UniqueConstraint(name: 'email', columns: ['email'])]
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: MailaddrRepository::class)]
 class Mailaddr
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
-    private $priority = '7';
+    private int $priority = 7;
 
-    /**
-     * @var binary
-     */
-    #[ORM\Column(name: 'email', type: 'binary', nullable: false)]
-    private $email;
 
-    public function getId(): ?int
+    #[ORM\Column(name: 'email', type: Types::BINARY, nullable: false)]
+    private mixed $email;
+
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getPriority(): ?int
+    public function getPriority(): int
     {
         return $this->priority;
     }
@@ -49,13 +44,13 @@ class Mailaddr
         return $this;
     }
 
-    public function getEmail()
+    public function getEmail(): mixed
     {
         return stream_get_contents($this->email, -1, 0);
     }
 
 
-    public function setEmail($email): self
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 

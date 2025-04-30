@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Quarantine
@@ -11,57 +12,46 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class Quarantine
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $partitionTag = '0';
+    private int $partitionTag = 0;
 
-    /**
-     * @var binary
-     */
-    #[ORM\Column(name: 'mail_id', type: 'binary', nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $mailId;
+    private mixed $mailId = null;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'chunk_ind', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $chunkInd;
+    private int $chunkInd = 0;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'mail_text', type: 'blob', length: 65535, nullable: false)]
-    private $mailText;
+    private mixed $mailText = null;
 
-    public function getPartitionTag(): ?int
+    public function getPartitionTag(): int
     {
         return $this->partitionTag;
     }
 
-    public function getMailId()
+    public function getMailId(): mixed
     {
         return $this->mailId;
     }
 
-    public function getChunkInd(): ?int
+    public function getChunkInd(): int
     {
         return $this->chunkInd;
     }
 
-    public function getMailText()
+    public function getMailText(): mixed
     {
         return $this->mailText;
     }
 
-    public function setMailText($mailText): self
+    public function setMailText(mixed $mailText): self
     {
         $this->mailText = $mailText;
 

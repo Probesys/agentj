@@ -15,13 +15,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class PolicyController extends AbstractController
 {
 
-
-    private $translator;
-    private $em;
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
-    {
-        $this->translator = $translator;
-        $this->em = $em;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+    ) {
     }
 
     #[Route(path: '/', name: 'policy_index', methods: 'GET')]

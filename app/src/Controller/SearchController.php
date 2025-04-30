@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Msgs;
+use App\Entity\User;
 use App\Form\SearchFilterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,26 +11,19 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Doctrine\DBAL\FetchMode;
-use Doctrine\DBAL\Driver\Result;
+
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/advanced_search')]
 class SearchController extends AbstractController
 {
 
-    private $translator;
-    private $em;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
+    public function __construct(private EntityManagerInterface $em)
     {
-        $this->translator = $translator;
-        $this->em = $em;
     }
 
-    #[Route(path: '/{type}', name: 'advanced_search', methods: ['GET', 'POST'])]
-    public function advancedSearch(Request $request, EntityManagerInterface $entityManager, TranslatorInterface $translator, $type = null): Response
+    #[Route(path: '/', name: 'advanced_search', methods: ['GET', 'POST'])]
+    public function advancedSearch(Request $request): Response
     {
         $form = $this->createForm(SearchFilterType::class);
         $form->handleRequest($request);
@@ -44,7 +38,9 @@ class SearchController extends AbstractController
             $sortParams['direction'] = $request->request->get('sortDirection');
         }
 
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), $messageType, null, $sortParams);
+        /** @var User $user */
+        $user = $this->getUser();
+        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, $messageType, $sortParams);
 
 
         // Initialize active filters
@@ -124,7 +120,7 @@ class SearchController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'out_message_show', methods: ['GET'])]
-    public function showAction($partitionTag, $mailId, $rid, Request $request)
+    public function showAction(int $partitionTag, string $mailId, int $rid): Response
     {
         $conn = $this->em->getConnection();
 
@@ -158,7 +154,9 @@ class SearchController extends AbstractController
         ]);
         $outMsg = $stmtOutMsgs->fetchAssociative();
 
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($this->getUser(), 'outgoing');
+        /** @var User $user */
+        $user = $this->getUser();
+        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, 'outgoing');
 
         $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
             return $msg['mail_id'] === $outMsg['mail_id'];

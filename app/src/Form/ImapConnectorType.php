@@ -21,7 +21,7 @@ class ImapConnectorType extends ConnectorType
             ->add('imapPort',ChoiceType::class,[
                 'label' => 'Entities.ImapConnector.fields.imap_port',
                 'placeholder' => '',
-                'choices' => $this->imapPorts::allValues(),
+                'choices' => $this->imapPorts::values(),
                 'multiple' => false,
                 'expanded' => false,
 

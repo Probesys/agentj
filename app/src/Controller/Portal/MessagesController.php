@@ -20,6 +20,8 @@ class MessagesController extends AbstractController
         private Service\CryptEncryptService $cryptEncryptService,
         private Service\LogService $logService,
         private Service\MessageService $messageService,
+        private Repository\MsgrcptRepository $msgrcptRepository,
+        private Repository\MsgsRepository $msgsRepository,
     ) {
     }
 
@@ -47,13 +49,13 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $message = $this->em->getRepository(Entity\Msgs::class)->findOneByMailId($partitionTag, $mailId);
+        $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(Entity\Msgrcpt::class)->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->msgrcptRepository->findOneByMessageAndRid($message, $recipientId);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -91,13 +93,13 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $message = $this->em->getRepository(Entity\Msgs::class)->findOneByMailId($partitionTag, $mailId);
+        $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(Entity\Msgrcpt::class)->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->msgrcptRepository->findOneByMessageAndRid($message, $recipientId);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');

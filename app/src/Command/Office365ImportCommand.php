@@ -30,9 +30,9 @@ class Office365ImportCommand extends Command {
 
     private EntityManagerInterface $em;
     private Office365Connector $connector;
-    private $translator;
+    private TranslatorInterface $translator;
     private SymfonyStyle $io;
-    
+
     public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
         parent::__construct();
         $this->em = $em;
@@ -50,7 +50,6 @@ class Office365ImportCommand extends Command {
         $this->io =  new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
-        /* @var $connector Office365Connector */
         $this->connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
         if (!$this->connector) {
             $this->io->error('Connector not found');
@@ -64,7 +63,7 @@ class Office365ImportCommand extends Command {
         }
 
         $this->importUsers($token);
-        
+
         if ($this->connector->isSynchronizeGroup())
         {
             $this->importGroups($token);
@@ -94,10 +93,11 @@ class Office365ImportCommand extends Command {
         }
     }
 
-    private function importUsers(\stdclass $token) {
+    private function importUsers(\stdclass $token): void {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
+        $users = [];
 
         try {
             $users = $graph->createRequest("GET", '/users' . '?$select=id,displayName,mail,proxyaddresses, userPrincipalName&$filter=endsWith(userPrincipalName,\'@' . $domain->getDomain() . '\' )&$count=true&$top=999')
@@ -105,7 +105,7 @@ class Office365ImportCommand extends Command {
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
         } catch (GuzzleException $exc) {
-            return false;
+            $this->io->error($exc->getMessage());
         }
 
         $nbUserCreated = 0;
@@ -153,7 +153,12 @@ class Office365ImportCommand extends Command {
         ]));        
     }
 
-    private function addAliases(User $user, array $proxyAdresses):void {
+    /**
+     * Add aliases to a user
+     *
+     * @param array<string> $proxyAdresses
+     */
+    private function addAliases(User $user, array $proxyAdresses): void {
         foreach ($proxyAdresses as $proxyAdresse) {
             if (strpos($proxyAdresse, "smtp") !== false) {
 
@@ -175,23 +180,19 @@ class Office365ImportCommand extends Command {
         }
     }
 
-    /**
-     * 
-     * @param \stdclass $token
-     * @return void
-     */
     private function importGroups(\stdclass $token):void {
         $graph = new Graph();
         $graph->setAccessToken($token->access_token);
         $domain = $this->connector->getDomain();
+        $nbGroupCreated = 0;
+        $nbGroupUpdated = 0;
         try {
             $groups = $graph->createRequest("GET", '/groups' . '?$filter=endsWith(mail,\'@' . $domain->getDomain() . '\' )&$count=true')
                     ->setReturnType(GraphGroup::class)
                     ->addHeaders(['ConsistencyLevel' => 'eventual'])
                     ->execute();
             $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
-            $nbGroupCreated = 0;
-            $nbGroupUpdated = 0;
+
             foreach ($groups as $m365group) {
 
                 $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
@@ -199,7 +200,7 @@ class Office365ImportCommand extends Command {
                     $localGroup = new Groups();
                     $localGroup->setPriority($priorityMax + 1);
                     $localGroup->setName($m365group->getDisplayName());
-                    $localGroup->isActive(false);
+                    $localGroup->setActive(false);
                     $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
                     $localGroup->setDomain($this->connector->getDomain());
                     $localGroup->setOriginConnector($this->connector);
@@ -240,12 +241,6 @@ class Office365ImportCommand extends Command {
         ]));        
     }
 
-    /**
-     * 
-     * @param \stdclass $token
-     * @param Groups $group
-     * @return void
-     */
     private function addMembersToGroup(\stdclass $token, Groups $group): void {
         $members = [];
         $graph = new Graph();
@@ -272,9 +267,6 @@ class Office365ImportCommand extends Command {
 
     /**
      * Get owners of office 365 group. Share the group email with is members
-     * @param \stdclass $token
-     * @param User $userGroup
-     * @return void
      */
     private function addUserGroupOwners(\stdclass $token, User $userGroup): void {
         $owners = [];
@@ -297,5 +289,4 @@ class Office365ImportCommand extends Command {
             }
         }
     }
-
 }

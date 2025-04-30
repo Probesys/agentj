@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * DomainKey
@@ -14,50 +15,33 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[UniqueEntity('dkim')]
 class DomainKey
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var Domain
-     */
     #[ORM\OneToOne(targetEntity: 'App\Entity\Domain', mappedBy: 'domain_keys', cascade: ['persist'])]
-    private $domain;
+    private Domain $domain;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'domain_name', type: 'string', length: 255, nullable: false)]
-    private $domain_name;
+    private string $domain_name;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'selector', type: 'string', length: 255, nullable: false)]
-    private $selector;
+    private string $selector;
 
-    /**
-     * @var text
-     */
-    #[ORM\Column(name: 'private_key', type: 'text', nullable: false)]
-    private $privatekey;
+    #[ORM\Column(name: 'private_key', type: Types::TEXT, nullable: false)]
+    private string $privatekey;
 
-    /**
-     * @var text
-     */
-    #[ORM\Column(name: 'public_key', type: 'text', nullable: false)]
-    private $publickey;
+    #[ORM\Column(name: 'public_key', type: Types::TEXT, nullable: false)]
+    private string $publickey;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getDomain(): ?Domain
+    public function getDomain(): Domain
     {
         return $this->domain;
     }
@@ -68,7 +52,7 @@ class DomainKey
         return $this;
     }
 
-    public function getDomainName(): ?string
+    public function getDomainName(): string
     {
 	    return $this->domain_name;
     }
@@ -79,7 +63,7 @@ class DomainKey
 	    return $this;
     }
 
-    public function getSelector(): ?string
+    public function getSelector(): string
     {
         return $this->selector;
     }
@@ -90,7 +74,7 @@ class DomainKey
         return $this;
     }
 
-    public function getPublicKey(): ?string
+    public function getPublicKey(): string
     {
         return $this->publickey;
     }
@@ -101,7 +85,7 @@ class DomainKey
         return $this;
     }
 
-    public function getPrivateKey(): ?string
+    public function getPrivateKey(): string
     {
         return $this->privatekey;
     }

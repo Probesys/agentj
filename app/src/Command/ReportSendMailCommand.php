@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
@@ -23,14 +24,12 @@ use Twig\Environment;
     description: 'Send report email',
 )]
 class ReportSendMailCommand extends Command {
-
-
-
     public function __construct(
         private Environment $twig,
         private ManagerRegistry $doctrine,
         private TranslatorInterface $translator,
         private Service\CryptEncryptService $cryptEncryptService,
+        private ParameterBagInterface $params
     ) {
         parent::__construct();
     }
@@ -41,24 +40,20 @@ class ReportSendMailCommand extends Command {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output):int {
-//        $translator = $this->getContainer()->get('translator');
-
         $io = new SymfonyStyle($input, $output);
 
         $em = $this->doctrine->getManager();
 
-        $container = $this->getApplication()->getKernel()->getContainer();
-        $domain = $container->getParameter('domain');
-        $scheme = $container->getParameter('scheme');
+        $domain = $this->params->get('domain');
+        $scheme = $this->params->get('scheme');
 
         $url = $scheme . "://" . $domain;
         $i = 0;
 
         // Get users to send report
         $allUsers = $em->getRepository(User::class)->activeUsers();
-        
+
         foreach ($allUsers as $userId) {
-            /* @var $user User */
             $user = $em->getRepository(User::class)->find($userId);
             if ($user && $user->getReport()) {
                 /**
@@ -87,10 +82,7 @@ class ReportSendMailCommand extends Command {
                     $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
                 }
 
-                $url = $this->getApplication()->getKernel()->getContainer()->getParameter('scheme');
-                $url .= "://" . $this->getApplication()->getKernel()->getContainer()->getParameter('domain');
-
-                $token = $this->cryptEncryptService->encrypt($user->getId(), lifetime: 48 * 3600);
+                $token = $this->cryptEncryptService->encrypt((string) $user->getId(), lifetime: 48 * 3600);
 
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
                     'untreatedMsgs' => $untreatedMsgs,
@@ -100,15 +92,15 @@ class ReportSendMailCommand extends Command {
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
                 $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
-                $body = str_replace('[NB_AUTHORIZED_MESSAGES]', $nbAuthorized, $body);
-                $body = str_replace('[NB_SPAMMED_MESSAGES]', $nbSpammed, $body);
-                $body = str_replace('[NB_BANNED_MESSAGES]', $nbBanned, $body);
-                $body = str_replace('[NB_RESTORED_MESSAGES]', $nbRestored, $body);
-                $body = str_replace('[NB_DELETED_MESSAGES]', $nbDeleted, $body);
+                $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
+                $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
+                $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
+                $body = str_replace('[NB_RESTORED_MESSAGES]', (string) $nbRestored, $body);
+                $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
                 $body = str_replace('[URL_MSGS]', $url, $body);
                 //$mailFrom = 'no-reply@' . $domain->getDomain();
 
-                $mailFrom = $this->getApplication()->getKernel()->getContainer()->getParameter('app.domain_mail_authentification_sender');
+                $mailFrom = $this->params->get('app.domain_mail_authentification_sender');
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
                 $mailTo = stream_get_contents($user->getEmail(), -1, 0);
                 $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);

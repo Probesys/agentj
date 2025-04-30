@@ -4,29 +4,16 @@ namespace App\Service;
 
 use App\Entity\LdapConnector;
 use App\Entity\User;
-use App\Repository\GroupsWblistRepository;
-use App\Repository\WblistRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Ldap\Adapter\CollectionInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Ldap;
 
 class LdapService {
 
-    private EntityManagerInterface $em;
-    private WblistRepository $wblistRepository;
-    private GroupsWblistRepository $groupsWblistRepository;
-    private CryptEncryptService $cryptEncryptService;
 
     public function __construct(
-            EntityManagerInterface $em,
-            WblistRepository $wblistRepository,
-            GroupsWblistRepository $groupsWblistRepository,
-            CryptEncryptService $cryptEncryptService) {
-        $this->em = $em;
-        $this->wblistRepository = $wblistRepository;
-        $this->cryptEncryptService = $cryptEncryptService;
-        $this->groupsWblistRepository = $groupsWblistRepository;
+        private CryptEncryptService $cryptEncryptService,
+    ) {
     }
 
     public function bind(LdapConnector $connector): bool|Ldap {
@@ -45,7 +32,6 @@ class LdapService {
             }
         }
         
-        $baseDN = "";
         if (!$bindDN = $connector->getLdapBindDn()) {
             throw new ConnectionException('Please configure ldap search DN');
         }
@@ -64,7 +50,7 @@ class LdapService {
         }
     }
 
-    public function bindUser(User $user, string $password) {
+    public function bindUser(User $user, string $password): bool {
         
         if (!$user->getLdapDN()){
             return false;

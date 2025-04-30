@@ -23,30 +23,28 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController {
 
-    private $translator;
-    private $em;
-    private $security;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, Security $security) {
-        $this->translator = $translator;
-        $this->em = $em;
-        $this->security = $security;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+        private Security $security) {
     }
 
     #[Route(path: '/', name: 'homepage')]
-    public function index() {
-        $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $this->getUser()->getId()]);
-        $nbUntreadtedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::UNTREATED, $alias);
-        $nbAutorizeMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::AUTHORIZED, $alias);
-        $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::BANNED, $alias);
-        $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::DELETED, $alias);
-        $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::RESTORED, $alias);
-        $nbErrorMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::ERROR, $alias);
-        $nbSpammedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::SPAMMED, $alias);
-        $nbVirusMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($this->getUser(), MessageStatus::VIRUS, $alias);
-        $latest_msgs = $this->em->getRepository(Msgs::class)->search($this->getUser(), 'All', null, null, null, null, 5);
-        $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC'], 5);
-        $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $this->getUser()->getId()], ['date' => 'DESC']);
+    public function index(): Response {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+        $nbUntreadtedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::UNTREATED, $alias);
+        $nbAutorizeMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::AUTHORIZED, $alias);
+        $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::BANNED, $alias);
+        $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::DELETED, $alias);
+        $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::RESTORED, $alias);
+        $nbErrorMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::ERROR, $alias);
+        $nbSpammedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::SPAMMED, $alias);
+        $nbVirusMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::VIRUS, $alias);
+        $latest_msgs = $this->em->getRepository(Msgs::class)->search($user, null, null, null, null, null, 5);
+        $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
+        $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
         $unreadAlertsCount = count(array_filter($all_alerts, function($all_alert) {
             return !$all_alert->getIsRead();
         }));
@@ -55,17 +53,14 @@ class DefaultController extends AbstractController {
             return $item['time_iso'];
         }, $nbAutorizeMsgByDay);
 
-        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::UNTREATED, $alias);
-        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::AUTHORIZED, $alias);
-        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::BANNED, $alias);
-        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::DELETED, $alias);
-        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::RESTORED, $alias);
-        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::ERROR, $alias);
-        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::SPAMMED, $alias);
-        $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($this->getUser(), MessageStatus::VIRUS, $alias);
-
-        /** @var User */
-        $user = $this->getUser();
+        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::UNTREATED, $alias);
+        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::AUTHORIZED, $alias);
+        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::BANNED, $alias);
+        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::DELETED, $alias);
+        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::RESTORED, $alias);
+        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::ERROR, $alias);
+        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::SPAMMED, $alias);
+        $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::VIRUS, $alias);
 
         if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $domains = $this->em->getRepository(Domain::class)->findAll();
@@ -76,7 +71,7 @@ class DefaultController extends AbstractController {
         }
 
         foreach ($domains as $domain) {
-            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($this->getUser(), $domain->getId());
+            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user, $domain->getId());
 
             $data[$domain->getId()] = [
                 'totalMsgCount' => array_reduce($users, function($carry, $user) {
@@ -94,7 +89,7 @@ class DefaultController extends AbstractController {
             ];
         }
         // Add data for "All" option
-        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($this->getUser());
+        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user);
         $data['All'] = [
             'totalMsgCount' => array_reduce($users, function($carry, $user) {
                 return $carry + $user['msgCount'];
@@ -111,7 +106,7 @@ class DefaultController extends AbstractController {
         ];
 
         $showAlertWidget = true;
-        if ($this->getUser()->getDomain() && $this->getUser()->getDomain()->getSendUserAlerts() == false)
+        if ($user->getDomain() && $user->getDomain()->getSendUserAlerts() == false)
         {
             $showAlertWidget = false;
         }
@@ -139,7 +134,7 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '{user_email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
-    public function showMessagesStats($user_email, Request $request) {
+    public function showMessagesStats(string $user_email): Response {
         $connection = $this->em->getConnection();
 
         // Fetch domain_id from user table
@@ -219,7 +214,12 @@ class DefaultController extends AbstractController {
         ]);
     }
 
-    private function determineStatus($message) {
+    /**
+     * Determine the status of a message based on its properties
+     * @param array<string, mixed> $message
+     * @return string
+     */
+    private function determineStatus(array $message): string {
         if ($message['status_name'] !== null) {
             return $message['status_name'];
         } elseif ($message['status_id'] === null && $message['bspam_level'] > $message['level'] && $message['content'] !== 'C' && $message['content'] !== 'V') {
@@ -232,7 +232,7 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
-    public function checkCaptcha($token, Request $request, Service\MessageService $messageService, Service\CryptEncryptService $cryptEncrypt) {
+    public function checkCaptcha(string $token, Request $request, Service\MessageService $messageService, Service\CryptEncryptService $cryptEncrypt): Response {
         $em = $this->em;
         $confirm = "";
 
@@ -303,15 +303,17 @@ class DefaultController extends AbstractController {
             $url = $this->container->get('router')->generate('message');
         }
         
+        /** @var User $user */
+        $user = $this->getUser();
         if (!$this->security->isGranted('ROLE_PREVIOUS_ADMIN')){
-            $user = $this->getUser()->setPreferedLang($language);
+            $user->setPreferedLang($language);
             $em->persist($user);
             $em->flush();
         }
         
 
 
-        $user = $this->getUser()->setPreferedLang($language);
+        $user->setPreferedLang($language);
         $em->persist($user);
         $em->flush();
         
@@ -338,10 +340,9 @@ class DefaultController extends AbstractController {
         }
 
         $mailId = $tokenParts[0];
-        $secretId = $tokenParts[1];
-        $partitionTag = $tokenParts[2];
+        $partitionTag = (int) $tokenParts[2];
         $domainId = $tokenParts[3];
-        $rid = $tokenParts[4] ?? null;
+        $rid = $tokenParts[4] ? (int) $tokenParts[4] : null;
 
         $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
         $domain = $this->em->getRepository(Domain::class)->find($domainId);

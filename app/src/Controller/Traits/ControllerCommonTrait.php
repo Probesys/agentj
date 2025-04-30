@@ -7,7 +7,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 trait ControllerCommonTrait
 {
 
-    public function slugify($text)
+    public function slugify(string $text): string
     {
         $text = preg_replace('#[^\\pL\d]+#u', '-', $text);
         $text = trim($text, '-');

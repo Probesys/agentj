@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
+use App\Repository\MsgrcptRepository;
 
 /**
  * Msgrcpt
@@ -10,100 +12,68 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'msgrcpt')]
 #[ORM\Index(name: 'msgrcpt_idx_mail_id', columns: ['mail_id'])]
 #[ORM\Index(name: 'msgrcpt_idx_rid', columns: ['rid'])]
-#[ORM\Entity(repositoryClass: 'App\Repository\MsgrcptRepository')]
+#[ORM\Entity(repositoryClass: MsgrcptRepository::class)]
 class Msgrcpt
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $partitionTag = '0';
+    private int $partitionTag = 0;
 
-    /**
-     * @var binary
-     */
-    #[ORM\Column(name: 'mail_id', type: 'binary', nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $mailId;
+    private mixed $mailId = null;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private $rseqnum = '0';
+    private int $rseqnum = 0;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Maddr')]
     #[ORM\JoinColumn(name: 'rid', nullable: true)]
-    private $rid;
+    private ?Maddr $rid = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'is_local', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
-    private $isLocal = '';
+    private string $isLocal = '';
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'content', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
-    private $content = '';
+    private string $content = '';
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'ds', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
-    private $ds;
+    private string $ds;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'rs', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
-    private $rs;
+    private string $rs;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'bl', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $bl = '';
+    private ?string $bl = '';
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'wl', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $wl = '';
+    private ?string $wl = '';
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'bspam_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $bspamLevel;
+    private ?float $bspamLevel;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'smtp_resp', type: 'string', length: 255, nullable: true)]
-    private $smtpResp = '';
+    private ?string $smtpResp = '';
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\MessageStatus', inversedBy: 'msgrcpts')]
-    private $status;
+    private ?MessageStatus $status = null;
 
     #[ORM\Column(type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
-    private $sendCaptcha = 0;
+    private int $sendCaptcha = 0;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $amavisOutput;
+    private ?string $amavisOutput = null;
 
-    public function getPartitionTag(): ?int
+    public function getPartitionTag(): int
     {
         return $this->partitionTag;
     }
 
-    public function getMailId()
+    public function getMailId(): mixed
     {
         return $this->mailId;
     }
@@ -113,7 +83,7 @@ class Msgrcpt
         return $this->rseqnum;
     }
 
-    public function getIsLocal(): ?string
+    public function getIsLocal(): string
     {
         return $this->isLocal;
     }
@@ -125,7 +95,7 @@ class Msgrcpt
         return $this;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -137,7 +107,7 @@ class Msgrcpt
         return $this;
     }
 
-    public function getDs(): ?string
+    public function getDs(): string
     {
         return $this->ds;
     }
@@ -149,7 +119,7 @@ class Msgrcpt
         return $this;
     }
 
-    public function getRs(): ?string
+    public function getRs(): string
     {
         return $this->rs;
     }
@@ -161,48 +131,48 @@ class Msgrcpt
         return $this;
     }
 
-    public function getBl(): ?string
+    public function getBl(): string
     {
         return $this->bl;
     }
 
-    public function setBl(?string $bl): self
+    public function setBl(string $bl): self
     {
         $this->bl = $bl;
 
         return $this;
     }
 
-    public function getWl(): ?string
+    public function getWl(): string
     {
         return $this->wl;
     }
 
-    public function setWl(?string $wl): self
+    public function setWl(string $wl): self
     {
         $this->wl = $wl;
 
         return $this;
     }
 
-    public function getBspamLevel(): ?float
+    public function getBspamLevel(): float
     {
         return $this->bspamLevel;
     }
 
-    public function setBspamLevel(?float $bspamLevel): self
+    public function setBspamLevel(float $bspamLevel): self
     {
         $this->bspamLevel = $bspamLevel;
 
         return $this;
     }
 
-    public function getSmtpResp(): ?string
+    public function getSmtpResp(): string
     {
         return $this->smtpResp;
     }
 
-    public function setSmtpResp(?string $smtpResp): self
+    public function setSmtpResp(string $smtpResp): self
     {
         $this->smtpResp = $smtpResp;
 
@@ -233,7 +203,7 @@ class Msgrcpt
         return $this;
     }
 
-    public function getSendCaptcha(): ?int
+    public function getSendCaptcha(): int
     {
         return $this->sendCaptcha;
     }

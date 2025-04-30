@@ -7,18 +7,10 @@ use App\Entity\User;
 use App\Repository\GroupsRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class UserService {
 
-    private EntityManagerInterface $em;
-    private $userRepository;
-    private GroupsRepository $groupsRepository;
-
-    public function __construct(EntityManagerInterface $em, UserRepository $userRepository, GroupsRepository $groupsRepository) {
-        $this->em = $em;
-        $this->userRepository = $userRepository;
-        $this->groupsRepository = $groupsRepository;
+    public function __construct(private EntityManagerInterface $em, private UserRepository $userRepository, private GroupsRepository $groupsRepository) {
     }
 
     /**

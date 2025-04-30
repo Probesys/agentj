@@ -4,6 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
+use Doctrine\DBAL\Types\Types;
+use App\Entity\Maddr;
+use App\Entity\MessageStatus;
+use App\Repository\MsgsRepository;
 
 /**
  * Msgs
@@ -14,172 +18,101 @@ use Symfony\Component\Mime\Address;
 #[ORM\Index(name: 'msgs_idx_time_num', columns: ['time_num'])]
 #[ORM\Index(name: 'msgs_idx_time_iso', columns: ['time_iso'])]
 #[ORM\Index(name: 'msgs_idx_mail_id', columns: ['mail_id'])]
-#[ORM\Entity(repositoryClass: 'App\Repository\MsgsRepository')]
+#[ORM\Entity(repositoryClass: MsgsRepository::class)]
 class Msgs
 {
-    /**
-     * @var int
-     */
+
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
-    private $partitionTag = '0';
+    private int $partitionTag = 0;
 
-    /**
-     * @var binary
-     */
-    #[ORM\Column(name: 'mail_id', type: 'binary', nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
     #[ORM\OneToOne(targetEntity: 'App\Entity\Msgrcpt', inversedBy: 'msgs', cascade: ['persist', 'remove'], fetch: 'EAGER')]
-    private $mailId;
+    private mixed $mailId = null;
 
-    /**
-     * @var binary|null
-     */
-    #[ORM\Column(name: 'secret_id', type: 'binary', nullable: true)]
-    private $secretId = '';
+    #[ORM\Column(name: 'secret_id', type: Types::BINARY, nullable: true)]
+    private mixed $secretId = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'am_id', type: 'string', length: 20, nullable: false)]
-    private $amId;
+    private string $amId;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'time_num', type: 'integer', nullable: false, options: ['unsigned' => true])]
-    private $timeNum;
+    private int $timeNum;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'time_iso', type: 'string', length: 16, nullable: false, options: ['fixed' => true])]
-    private $timeIso;
+    private string $timeIso;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'policy', type: 'string', length: 255, nullable: true)]
-    private $policy = '';
+    private ?string $policy = '';
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'client_addr', type: 'string', length: 255, nullable: true)]
-    private $clientAddr = '';
+    private ?string $clientAddr = '';
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'size', type: 'integer', nullable: false, options: ['unsigned' => true])]
-    private $size;
+    private int $size;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'originating', type: 'string', length: 1, nullable: false, options: ['fixed' => true, 'default' => ''])]
-    private $originating = '';
+    private string $originating = '';
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'content', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $content;
+    private ?string $content;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'quar_type', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $quarType;
+    private ?string $quarType;
 
-    /**
-     * @var binary|null
-     */
-    #[ORM\Column(name: 'quar_loc', type: 'binary', nullable: true)]
-    private $quarLoc = '';
+    #[ORM\Column(name: 'quar_loc', type: Types::BINARY, nullable: true)]
+    private mixed $quarLoc = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'dsn_sent', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $dsnSent;
+    private ?string $dsnSent;
 
-    /**
-     * @var float|null
-     */
     #[ORM\Column(name: 'spam_level', type: 'float', precision: 10, scale: 0, nullable: true)]
-    private $spamLevel;
+    private ?float $spamLevel;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'message_id', type: 'string', length: 255, nullable: true)]
-    private $messageId = '';
+    private ?string $messageId = '';
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'from_addr', type: 'string', length: 255, nullable: true)]
-    private $fromAddr = '';
+    private ?string $fromAddr = '';
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'subject', type: 'string', length: 255, nullable: true)]
-    private $subject = '';
+    private ?string $subject = '';
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'host', type: 'string', length: 255, nullable: false)]
-    private $host;
+    private string $host;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'validate_captcha', type: 'integer', nullable: true, options: ['unsigned' => true, 'default' => 0])]
-    private $validate_captcha;
+    private int $validate_captcha;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\MessageStatus')]
+    #[ORM\ManyToOne(targetEntity: MessageStatus::class)]
     #[ORM\JoinColumn(name: 'status_id', nullable: true)]
-    private $status;
+    private ?MessageStatus $status;
 
-    /**
-     * @var \Maddr
-     */
     #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
-    #[ORM\ManyToOne(targetEntity: 'Maddr')]
-    private $sid;
+    #[ORM\ManyToOne(targetEntity: Maddr::class)]
+    private ?Maddr $sid;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'send_captcha', type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
-    private $sendCaptcha = 0;
+    private int $sendCaptcha = 0;
 
-    /**
-     * @var text
-     *
-     *
-     */
     #[ORM\Column(name: 'message_error', type: 'text', nullable: true)]
-    private $messageError;
+    private ?string $messageError;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $isMlist;
-
+    private ?bool $isMlist;
 
     public function getPartitionTag(): ?int
     {
         return $this->partitionTag;
     }
 
-    public function getSecretId()
+    public function getSecretId(): mixed
     {
         return $this->secretId;
     }
 
-    public function setSecretId($secretId): self
+    public function setSecretId(mixed $secretId): self
     {
         $this->secretId = $secretId;
 
@@ -294,12 +227,12 @@ class Msgs
         return $this;
     }
 
-    public function getQuarLoc()
+    public function getQuarLoc(): mixed
     {
         return $this->quarLoc;
     }
 
-    public function setQuarLoc($quarLoc): self
+    public function setQuarLoc(mixed $quarLoc): self
     {
         $this->quarLoc = $quarLoc;
 
@@ -411,12 +344,12 @@ class Msgs
         return $this;
     }
 
-    public function getMailId()
+    public function getMailId(): mixed
     {
         return $this->mailId;
     }
 
-    public function getMailIdAsString()
+    public function getMailIdAsString(): string
     {
         return stream_get_contents($this->mailId, -1, 0);
     }

@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -36,21 +37,27 @@ class UserController extends AbstractController {
 
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
     public function indexUserLocal(UserRepository $userRepository): Response {
-        $adminUsers = $userRepository->searchByRole($this->getUser(), '["ROLE_ADMIN"]');
-        $superAdminUsers = $userRepository->searchByRole($this->getUser(), '["ROLE_SUPER_ADMIN"]');
+        /** @var User $user */
+        $user = $this->getUser();
+        $adminUsers = $userRepository->searchByRole($user, '["ROLE_ADMIN"]');
+        $superAdminUsers = $userRepository->searchByRole($user, '["ROLE_SUPER_ADMIN"]');
         $users = array_merge($adminUsers, $superAdminUsers);
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
     #[Route(path: '/email', name: 'users_email_index', methods: 'GET')]
     public function indexUserEmail(UserRepository $userRepository): Response {
-        $users = $userRepository->searchByRole($this->getUser(), '["ROLE_USER"]');
+        /** @var User $user */
+        $user = $this->getUser();
+        $users = $userRepository->searchByRole($user, '["ROLE_USER"]');
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
     #[Route(path: '/alias', name: 'users_email_alias_index', methods: 'GET')]
     public function indexUserEmailAlias(UserRepository $userRepository): Response {
-        $users = $userRepository->searchAlias($this->getUser());
+        /** @var User $user */
+        $user = $this->getUser();
+        $users = $userRepository->searchAlias($user);
         return $this->render('user/indexAlias.html.twig', ['users' => $users]);
     }
 
@@ -74,6 +81,7 @@ class UserController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            $return = [];
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
@@ -195,7 +203,6 @@ class UserController extends AbstractController {
 
             if (!$form->isValid()) {
                 $errros = $form->getErrors(true);
-//                dd($errros[0]->getMessage());
                 $this->addFlash('error', $errros[0]->getMessage());
             } else {
                 $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
@@ -253,7 +260,7 @@ class UserController extends AbstractController {
     public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService, DomainRepository $domainRepository): Response {
         $user = new User();
 
-        $allowedomainIds = $this->getAlloweDomains();
+        $allowedDomains = $this->getAlloweDomains();
 
 
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors(); 
@@ -263,7 +270,7 @@ class UserController extends AbstractController {
                 $user,
                 [
                     'action' => $this->generateUrl('user_email_new'),
-                    'allowedomainIds' => $allowedomainIds,
+                    'allowedDomains' => $allowedDomains,
                     'attr' => ['class' => 'modal-ajax-form']
                 ]
         );
@@ -407,7 +414,7 @@ class UserController extends AbstractController {
 
         $oldGroups = $user->getGroups()->toArray();
 
-        $allowedomainIds = $this->getAlloweDomains();
+        $allowedDomains = $this->getAlloweDomains();
 
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
 
@@ -419,7 +426,7 @@ class UserController extends AbstractController {
 
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_email_edit', ['id' => $user->getId()]),
-            'allowedomainIds' => $allowedomainIds,
+            'allowedDomains' => $allowedDomains,
             'attr' => ['class' => 'modal-ajax-form']
         ]);
         $form->remove('password');
@@ -432,6 +439,7 @@ class UserController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            $return = [];
             $data = $form->getData();
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
@@ -511,7 +519,8 @@ class UserController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            $data = $form->getData(); //dump();die;
+            $return = [];
+            $data = $form->getData();
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
             if (stream_get_contents($oldUser['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
@@ -564,11 +573,16 @@ class UserController extends AbstractController {
         return $policy;
     }
 
-    private function getAlloweDomains() {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+    /**
+     * @return Domain[]
+     */
+    private function getAlloweDomains():array {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
             $allowedomains = $this->em
                     ->getRepository(Domain::class)
-                    ->getListByUserId($this->getUser()->getId());
+                    ->getListByUserId($user->getId());
         } else {
             $allowedomains = $this->em
                     ->getRepository(Domain::class)
@@ -577,15 +591,14 @@ class UserController extends AbstractController {
         return $allowedomains;
     }
 
-    private function checkDomainAccess(string $domainName = "") {
+    private function checkDomainAccess(string $domainName = "") : ?Domain {
         $allowedomains = $this->getAlloweDomains();
-        $allowedomainNamesArray = array_map(function ($entity) {
-            if ($entity) {
-                return $entity->getDomain();
-            }
+        $allowedomainNamesArray = array_map(function (Domain $entity) {
+            return $entity->getDomain();
         }, $allowedomains);
+
         if (!in_array($domainName, $allowedomainNamesArray)) {
-            return false;
+            return null;
         } else {
             return $this->em
                             ->getRepository(Domain::class)
@@ -597,21 +610,23 @@ class UserController extends AbstractController {
      * autocomplete user action. search in user
      */
     #[Route(path: '/user/autocomplete', name: 'autocomplete_user', options: ['expose' => true])]
-    public function autocompleteUserAction(UserRepository $userRepository, Request $request) {
+    public function autocompleteUserAction(UserRepository $userRepository, Request $request): JsonResponse {
 
         $q = $request->query->get('query');
-
+        $page_limit = $request->query->has('page_limit') ? (int) $request->query->get('page_limit') : 30;
         $return = [];
-
         $items = [];
         $allowedomains = [];
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
             $allowedomains = $this->em
                     ->getRepository(Domain::class)
-                    ->getListByUserId($this->getUser()->getId());
+                    ->getListByUserId($user->getId());
         }
 
-        $entities = $userRepository->autocomplete($q, $request->query->get('page_limit'), $request->query->get('page'), $allowedomains);
+        $entities = $userRepository->autocomplete($q, $page_limit, (int) $request->query->get('page'), $allowedomains);
 
         foreach ($entities as $entity) {
             $label = '' . stream_get_contents($entity['email'], -1, 0);
@@ -619,35 +634,8 @@ class UserController extends AbstractController {
             $items[] = ['value' => $entity['id'], 'text' => $label];
         }
         $return['results'] = $items;
-        return new Response(json_encode($return), $return ? 200 : 404);
-    }
+        $statusCode = empty($items) ? 404 : 200;
 
-    /**
-     * autocomplete user action. search in user in specified domains
-     */
-    #[Route(path: '/user/loadUserDomain', name: 'load_user_domain', options: ['expose' => true])]
-    public function loadUserDomain(UserRepository $userRepository, Request $request) {
-        $q = $request->request->get('q');
-        $domain = $request->request->get('domain');
-        $return = [];
-
-        $items = [];
-
-        $entities = $userRepository->searchInDomains($domain, $q, $request->query->get('page_limit'), $request->query->get('page'));
-        foreach ((array) $entities as $entity) {
-            $label = '' . stream_get_contents($entity['email'], -1, 0);
-
-            $items[] = ['id' => $entity['id'], 'text' => $label, 'label' => $label];
-        }
-
-        if ($request->query->get('field_name')) { // from Select2EntityType
-            $return['results'] = $items;
-            $return['more'] = true;
-        } elseif ($entities) {
-            $return['length'] = count($entities);
-            $return['items'] = $items;
-        }
-
-        return new Response(json_encode($return), $return ? 200 : 404);
+        return new JsonResponse($return, $statusCode);
     }
 }

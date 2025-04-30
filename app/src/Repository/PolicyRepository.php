@@ -8,14 +8,10 @@ use Doctrine\Persistence\ManagerRegistry;
 use Cocur\Slugify\Slugify;
 
 /**
- * @method Policy|null find($id, $lockMode = null, $lockVersion = null)
- * @method Policy|null findOneBy(array $criteria, array $orderBy = null)
- * @method Policy[]    findAll()
- * @method Policy[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Policy>
  */
 class PolicyRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Policy::class);

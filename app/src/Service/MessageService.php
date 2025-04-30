@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use App\Repository\MsgrcptRepository;
 
 class MessageService
 {
@@ -17,6 +18,7 @@ class MessageService
         private EntityManagerInterface $em,
         #[Autowire(param: 'app.amavisd-release')]
         private string $amavisdReleaseCommand,
+        private MsgrcptRepository $msgrcptRepository,
     ) {
     }
 
@@ -87,7 +89,7 @@ class MessageService
      */
     public function delete(Entity\Msgs $message, Entity\Msgrcpt $messageRecipient): bool
     {
-        $this->em->getRepository(Entity\Msgrcpt::class)->changeStatus(
+        $this->msgrcptRepository->changeStatus(
             $message->getPartitionTag(),
             $message->getMailIdAsString(),
             Entity\MessageStatus::DELETED,

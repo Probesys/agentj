@@ -7,61 +7,25 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Log|null find($id, $lockMode = null, $lockVersion = null)
- * @method Log|null findOneBy(array $criteria, array $orderBy = null)
- * @method Log[]    findAll()
- * @method Log[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Log>
  */
 class LogRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Log::class);
     }
 
-  // /**
-  //  * @return Log[] Returns an array of Log objects
-  //  */
-  /*
-    public function findByExampleField($value)
+    /**
+     * Truncate entries older than $nbDays from the the log table
+     */
+    public function truncateOlder(int $nbDays): int
     {
-    return $this->createQueryBuilder('l')
-    ->andWhere('l.exampleField = :val')
-    ->setParameter('val', $value)
-    ->orderBy('l.id', 'ASC')
-    ->setMaxResults(10)
-    ->getQuery()
-    ->getResult()
-    ;
-    }
-   */
+        $conn = $this->getEntityManager()->getConnection();
 
-  /*
-    public function findOneBySomeField($value): ?Log
-    {
-    return $this->createQueryBuilder('l')
-    ->andWhere('l.exampleField = :val')
-    ->setParameter('val', $value)
-    ->getQuery()
-    ->getOneOrNullResult()
-    ;
-    }
-   */
-
-  /**
-   * Truncate entries older than $nbDays from the the log table
-   * @param type $nbDays
-   */
-    public function truncateOlder($nbDays = null)
-    {
-        if (!is_null($nbDays)) {
-            $conn = $this->getEntityManager()->getConnection();
-
-            $sql = ' delete  from log where DATEDIFF(now(),log.created)> ' . $nbDays;
-            $stmt = $conn->prepare($sql);
-            $result = $stmt->execute();
-            return $result->rowCount();
-        }
+        $sql = 'delete from log where DATEDIFF(now(),log.created)> ' . $nbDays;
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->execute();
+        return $result->rowCount();
     }
 }

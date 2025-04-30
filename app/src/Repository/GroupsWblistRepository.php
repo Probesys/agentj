@@ -8,14 +8,10 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Captcha|null find($id, $lockMode = null, $lockVersion = null)
- * @method Captcha|null findOneBy(array $criteria, array $orderBy = null)
- * @method Captcha[]    findAll()
- * @method Captcha[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<GroupsWblist>
  */
 class GroupsWblistRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, GroupsWblist::class);
@@ -23,8 +19,8 @@ class GroupsWblistRepository extends ServiceEntityRepository
 
     /**
      * Get all wblist for a group
-     * @param Groups $group
-     * @return array
+     *
+     * @return array<int, int>
      */
     public function getwbListforGroup(Groups $group): array {
         $dql = $this->createQueryBuilder('gwl')
@@ -34,7 +30,5 @@ class GroupsWblistRepository extends ServiceEntityRepository
                 ->setParameter('group', $group);
         $query = $dql->getQuery();
         return $query->getResult();
-        
     }
-    
 }

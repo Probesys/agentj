@@ -12,8 +12,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ImportType extends AbstractType {
 
-    private DomainRepository $domainRepository;
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder

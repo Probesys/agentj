@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -10,80 +11,80 @@ class OutMsg
 {
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
-    private $partition_tag;
+    private int $partition_tag = 0;
 
     #[ORM\Id]
     #[ORM\Column(type: 'binary', length: 255)]
-    private $mail_id;
+    private mixed $mail_id = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $status_id;
+    private ?int $status_id;
 
     #[ORM\Column(type: 'bigint', nullable: true, options: ['unsigned' => true])]
-    private $sid;
+    private mixed $sid;
 
     #[ORM\Column(type: 'binary', length: 255, nullable: true)]
-    private $secret_id;
+    private mixed $secret_id;
 
     #[ORM\Column(type: 'string', length: 20)]
-    private $am_id;
+    private string $am_id;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    private $time_num;
+    private int $time_num;
 
     #[ORM\Column(type: 'string', length: 16)]
-    private $time_iso;
+    private string $time_iso;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $policy;
+    private ?string $policy = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $client_addr;
+    private ?string $client_addr = null;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    private $size;
+    private int $size;
 
     #[ORM\Column(type: 'string', length: 1, options: ['default' => ''])]
-    private $originating;
+    private string $originating;
 
     #[ORM\Column(type: 'string', length: 1, nullable: true)]
-    private $content;
+    private ?string $content = null;
 
     #[ORM\Column(type: 'string', length: 1, nullable: true)]
-    private $quar_type;
+    private ?string $quar_type = null;
 
     #[ORM\Column(type: 'binary', length: 255, nullable: true)]
-    private $quar_loc;
+    private mixed $quar_loc;
 
     #[ORM\Column(type: 'string', length: 1, nullable: true)]
-    private $dsn_sent;
+    private ?string $dsn_sent = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private $spam_level;
+    private ?float $spam_level = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $message_id;
+    private ?string $message_id = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $from_addr;
+    private ?string $from_addr = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $subject;
+    private ?string $subject = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $host;
+    private string $host;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true, 'default' => 0])]
-    private $validate_captcha;
+    private ?int $validate_captcha = null;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    private $send_captcha;
+    private ?int $send_captcha = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private $message_error;
+    private ?string $message_error = null;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $is_mlist;
+    private ?bool $is_mlist = null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $processed_user = false;
@@ -98,7 +99,7 @@ class OutMsg
         return $this->partition_tag;
     }
 
-    public function getMailId(): ?string
+    public function getMailId(): mixed
     {
         if ($this->mail_id === null) {
             return null;
@@ -119,7 +120,7 @@ class OutMsg
         return $this->sid;
     }
 
-    public function getSecretId(): ?string
+    public function getSecretId(): mixed
     {
         return $this->secret_id !== null ? bin2hex($this->secret_id) : null;
     }
@@ -169,7 +170,7 @@ class OutMsg
         return $this->quar_type;
     }
 
-    public function getQuarLoc(): ?string
+    public function getQuarLoc(): mixed
     {
         return $this->quar_loc;
     }
@@ -243,6 +244,172 @@ class OutMsg
     public function setProcessedAdmin(bool $processed_admin): self
     {
         $this->processed_admin = $processed_admin;
+        return $this;
+    }
+
+    public function setStatusId(?int $status_id): static
+    {
+        $this->status_id = $status_id;
+
+        return $this;
+    }
+
+    public function setSid(?string $sid): static
+    {
+        $this->sid = $sid;
+
+        return $this;
+    }
+
+    public function setSecretId(mixed $secret_id): static
+    {
+        $this->secret_id = $secret_id;
+
+        return $this;
+    }
+
+    public function setAmId(string $am_id): static
+    {
+        $this->am_id = $am_id;
+
+        return $this;
+    }
+
+    public function setTimeNum(int $time_num): static
+    {
+        $this->time_num = $time_num;
+
+        return $this;
+    }
+
+    public function setTimeIso(string $time_iso): static
+    {
+        $this->time_iso = $time_iso;
+
+        return $this;
+    }
+
+    public function setPolicy(?string $policy): static
+    {
+        $this->policy = $policy;
+
+        return $this;
+    }
+
+    public function setClientAddr(?string $client_addr): static
+    {
+        $this->client_addr = $client_addr;
+
+        return $this;
+    }
+
+    public function setSize(int $size): static
+    {
+        $this->size = $size;
+
+        return $this;
+    }
+
+    public function setOriginating(string $originating): static
+    {
+        $this->originating = $originating;
+
+        return $this;
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function setQuarType(?string $quar_type): static
+    {
+        $this->quar_type = $quar_type;
+
+        return $this;
+    }
+
+    public function setQuarLoc(mixed $quar_loc): static
+    {
+        $this->quar_loc = $quar_loc;
+
+        return $this;
+    }
+
+    public function setDsnSent(?string $dsn_sent): static
+    {
+        $this->dsn_sent = $dsn_sent;
+
+        return $this;
+    }
+
+    public function setSpamLevel(?float $spam_level): static
+    {
+        $this->spam_level = $spam_level;
+
+        return $this;
+    }
+
+    public function setMessageId(?string $message_id): static
+    {
+        $this->message_id = $message_id;
+
+        return $this;
+    }
+
+    public function setFromAddr(?string $from_addr): static
+    {
+        $this->from_addr = $from_addr;
+
+        return $this;
+    }
+
+    public function setSubject(?string $subject): static
+    {
+        $this->subject = $subject;
+
+        return $this;
+    }
+
+    public function setHost(string $host): static
+    {
+        $this->host = $host;
+
+        return $this;
+    }
+
+    public function setValidateCaptcha(int $validate_captcha): static
+    {
+        $this->validate_captcha = $validate_captcha;
+
+        return $this;
+    }
+
+    public function setSendCaptcha(int $send_captcha): static
+    {
+        $this->send_captcha = $send_captcha;
+
+        return $this;
+    }
+
+    public function setMessageError(?string $message_error): static
+    {
+        $this->message_error = $message_error;
+
+        return $this;
+    }
+
+    public function isMlist(): ?bool
+    {
+        return $this->is_mlist;
+    }
+
+    public function setIsMlist(?bool $is_mlist): static
+    {
+        $this->is_mlist = $is_mlist;
+
         return $this;
     }
 }

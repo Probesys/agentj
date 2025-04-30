@@ -7,121 +7,105 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\DBAL\Types\Types;
+use App\Repository\DomainRepository;
 
 /**
  * Domain
  */
 #[ORM\Table(name: 'domain')]
-#[ORM\Entity(repositoryClass: 'App\Repository\DomainRepository')]
+#[ORM\Entity(repositoryClass: DomainRepository::class)]
 #[UniqueEntity('domain')]
 class Domain
 {
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'domain', type: 'string', length: 255, unique: true, nullable: false)]
-    private $domain;
+    private string $domain;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'srv_smtp', type: 'string', length: 255, nullable: false)]
-    private $srvSmtp;
+    private string $srvSmtp;
 
-    /**
-     * @var \DateTime
-     */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private $datemod;
+    private ?\DateTimeInterface $datemod;
 
-    /**
-     * @var bool
-     */
+
     #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
-    private $active;
+    private bool $active;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'transport', type: 'string', length: 255, nullable: false)]
-    private $transport;
+    private string $transport;
 
-    /**
-     * @var text
-     *
-     *
-     */
-    #[ORM\Column(name: 'message', type: 'text', nullable: true)]
-    private $message;
+    #[ORM\Column(name: 'message', type: Types::TEXT, nullable: true)]
+    private ?string $message = null;
 
-    /**
-     * @var text
-     *
-     *
-     */
-    #[ORM\Column(name: 'mailmessage', type: 'text', nullable: true)]
-    private $mailmessage;
+    #[ORM\Column(name: 'mailmessage', type: Types::TEXT, nullable: true)]
+    private ?string $mailmessage = null;
 
-    /**
-     * @var text
-     *
-     *
-     */
-    #[ORM\Column(name: 'mail_alert', type: 'text', nullable: true)]
-    private $message_alert;
+    #[ORM\Column(name: 'mail_alert', type: Types::TEXT, nullable: true)]
+    private ?string $message_alert = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'level', type: 'float', nullable: true)]
-    private $level = 20;
+    private ?float $level = 20;
 
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
-    private $policy;
+    private ?Policy $policy;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'domains')]
-    private $users;
+    private Collection $users;
 
-    #[ORM\Column(type: 'text', nullable: true)]
-    private $confirmCaptchaMessage;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $confirmCaptchaMessage;
 
+    /**
+     * @var Collection<int, Groups>
+     */
     #[ORM\OneToMany(targetEntity: 'App\Entity\Groups', mappedBy: 'domain', orphanRemoval: true)]
-    private $groups;
+    private Collection $groups;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $logo;
+    private ?string $logo;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $mailAuthenticationSender;
+    private ?string $mailAuthenticationSender;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
-    private $defaultLang;
+    private ?string $defaultLang;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $smtpPort;
+    private ?int $smtpPort;
 
+    /**
+     * @var Collection<int, Connector>
+     */
     #[ORM\OneToMany(targetEntity: Connector::class, mappedBy: 'domain')]
-    private $connectors;
+    private Collection $connectors;
 
+    /**
+     * @var Collection<int, DailyStat>
+     */
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DailyStat::class)]
     private Collection $dailyStats;
 
     #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
     private ?DomainKey $domain_keys;
 
+    /**
+     * @var Collection<int, DomainRelay>
+     */
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DomainRelay::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $domainRelays;
 
+    /**
+     * @var array<int, array<string, int>>
+     */
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
@@ -251,7 +235,7 @@ class Domain
     }
 
     /**
-     * @return Collection|User[]
+     * @return Collection<int, User>
      */
     public function getUsers(): Collection
     {
@@ -291,7 +275,7 @@ class Domain
     }
 
     /**
-     * @return Collection|Groups[]
+     * @return Collection<int, Groups>
      */
     public function getGroups(): Collection
     {
@@ -465,6 +449,9 @@ class Domain
         return $this;
     }
 
+    /**
+     * @return Collection<int, DomainRelay>
+     */
     public function getDomainRelays(): Collection
     {
         return $this->domainRelays;
@@ -492,11 +479,17 @@ class Domain
         return $this;
     }
 
+    /**
+     * @return array<int, array<string, int>>
+     */
     public function getQuota(): ?array
     {
         return $this->quota;
     }
 
+    /**
+     * @param array<int, array<string, int>> $quota
+     */
     public function setQuota(?array $quota): static
     {
         $this->quota = $quota;

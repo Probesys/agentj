@@ -17,20 +17,17 @@ class SenderRateLimit
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'limits', type: 'string', length: 255, nullable: false)]
-    private $limits;
+    private string $limits;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getLimits(): ?string
+    public function getLimits(): string
     {
         return $this->limits;
     }

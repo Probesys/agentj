@@ -9,40 +9,40 @@ use Doctrine\ORM\Mapping as ORM;
 class LdapConnector extends Connector
 {
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapHost;
+    private ?string $ldapHost = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $ldapPort = 389;
+    private ?int $ldapPort = 389;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapBaseDN;
+    private ?string $ldapBaseDN = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapPassword;
-
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapLoginField;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapRealNameField;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapEmailField;
+    private ?string $ldapPassword = null;
 
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapGroupMemberField;
+    private ?string $ldapLoginField = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $ldapRealNameField = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $ldapEmailField = null;
 
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapBindDn;
+    private ?string $ldapGroupMemberField = null;
+
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapUserFilter;
+    private ?string $ldapBindDn = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapGroupFilter;
+    private ?string $ldapUserFilter = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $ldapGroupFilter = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ldapGroupNameField = null;

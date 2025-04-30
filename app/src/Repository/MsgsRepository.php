@@ -10,10 +10,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Msgs|null find($id, $lockMode = null, $lockVersion = null)
- * @method Msgs|null findOneBy(array $criteria, array $orderBy = null)
- * @method Msgs[]    findAll()
- * @method Msgs[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Msgs>
  */
 class MsgsRepository extends ServiceEntityRepository
 {
@@ -32,14 +29,17 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * Construct the SQL fragement of the search request
-     * @param type $type
-     * @param type $alias
-     * @return string
+     *
+     * @param ?User[] $alias
      */
-    private function getSearchMsgSqlWhere(?User $user = null, $type = null, $alias = [], $fromDate = null)
-    {
+    private function getSearchMsgSqlWhere(
+        ?User $user = null,
+        ?int $type = null,
+        ?array $alias = null,
+        ?int $fromDate = null
+    ): string {
         $email = null;
-        $sqlWhere = ' WHERE d.active=1  '; // and mr.content != "C" AND mr.content != "Y" AND mr.bl = "N" AND mr.bl != "V" AND mr.wl = "N" ';
+        $sqlWhere = ' WHERE d.active=1  ';
         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
             $domain = $user->getDomain();
             if ($domain !== null) {
@@ -82,7 +82,7 @@ class MsgsRepository extends ServiceEntityRepository
             case MessageStatus::RESTORED:
                 $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
                 break;
-            case 'All':
+            case null:
                 $sqlWhere .= ' ';
                 break;
             default:
@@ -117,11 +117,10 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * Count the number of message by $type (banned, etc..)
-     * @param type $type
-     * @param type $alias
-     * @return int
+     *
+     * @param User[] $alias
      */
-    public function countByType(?User $user = null, $type = null, $alias = [])
+    public function countByType(?User $user = null, ?int $type = null, array $alias = []): int
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -145,12 +144,12 @@ class MsgsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Count the number of message by $type (banned, etc..)
-     * @param type $type
-     * @param type $alias
-     * @return int
+     * Count the number of message by $type (banned, etc..) and day
+     *
+     * @param ?User[] $alias
+     * @return array<int, array<string, mixed>>
      */
-    public function countByTypeAndDays(?User $user = null, $type = null, $alias = [], ?\DateTime $day = null, ?Domain $domain = null)
+    public function countByTypeAndDays(?User $user = null, ?int $type = null, ?array $alias = null, ?\DateTime $day = null, ?Domain $domain = null): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -195,15 +194,21 @@ class MsgsRepository extends ServiceEntityRepository
 
         $stmt = $conn->prepare($sql);
         $result = $stmt->executeQuery()->fetchAllAssociative();
+
         return $result;
     }
 
     /**
      * search query
-     * @param type $type
-     * @return type
+     *
+     * @param ?User[] $alias
+     * @param ?array{
+     *     sort: string,
+     *     direction: string,
+     * } $sortParams
+     * @return array<int, array<string, mixed>>
      */
-    public function search(?User $user = null, $type = null, $alias = [], $searchKey = null, $sortPrams = null, $fromDate = null, $limit = null)
+    public function search(?User $user = null, ?int $type = null, ?array $alias = null, ?string $searchKey = null, ?array $sortParams = null, ?int $fromDate = null, ?int $limit = null): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -233,8 +238,8 @@ class MsgsRepository extends ServiceEntityRepository
             }
         }
 
-        if ($sortPrams) {
-            $sql .= ' ORDER BY ' . $sortPrams['sort'] . ' ' . $sortPrams['direction'];
+        if ($sortParams) {
+            $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id ';
         }
@@ -255,7 +260,14 @@ class MsgsRepository extends ServiceEntityRepository
         return $return;
     }
 
-    public function advancedSearch(?User $user = null, string $messageType = 'incoming', $searchKey = null, $sortParams = null)
+    /**
+     * @param ?array{
+     *     sort: string,
+     *     direction: string,
+     * } $sortParams
+     * @return array<int, array<string, mixed>>
+     */
+    public function advancedSearch(?User $user = null, string $messageType = 'incoming', ?array $sortParams = null): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -337,9 +349,10 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * SELECT only msgs to send email with captch
-     * @return type
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function searchMsgsToSendAuthToken()
+    public function searchMsgsToSendAuthToken(): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -360,11 +373,8 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * Update status of all message for one sender
-     * @param type $emailSender
-     * @param type $emailRecipient
-     * @param type $status
      */
-    public function updateMessageSender($emailSender, $emailRecipient, $status)
+    public function updateMessageSender(string $emailSender, string $emailRecipient, int $status): void
     {
         $conn = $this->getEntityManager()->getConnection();
         //mettre le status par rapport au mailid
@@ -380,11 +390,8 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * Update the status of a message
-     * @param type $partitiontag
-     * @param type $mailId
-     * @param type $status
      */
-    public function changeStatus($partitiontag, $mailId, $status)
+    public function changeStatus(int $partitiontag, string $mailId, int $status): void
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'UPDATE msgs SET status_id =  ' . $status . '  WHERE partition_tag = "' . $partitiontag . '" AND mail_id = "' . $mailId . '"';
@@ -394,13 +401,15 @@ class MsgsRepository extends ServiceEntityRepository
 
     /**
      * return the number of msg are already processing to send authetification request for email "to", request without the mailId
-     * @param type $to
-     * @param type $from
-     * @param type $mailId
-     * @return type
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function checkLastRequestSent($to, $from)
+    public function checkLastRequestSent(string $to, string $from): array
     {
+        if (!$from) {
+            return [];
+        }
+
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = 'SELECT m.time_iso FROM msgs m '
@@ -408,13 +417,11 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN maddr ON maddr.id = mr.rid '
             . ' LEFT JOIN maddr maddr_sender ON maddr_sender.id = m.sid '
             . ' LEFT JOIN message_status ms ON m.status_id = ms.id '
-            . ' WHERE maddr.email = "' . $to . '"  AND maddr_sender.email = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1';
+            . ' WHERE maddr.email = :to_addr AND maddr_sender.email = :from_addr AND mr.send_captcha !=0 order by m.time_iso desc limit 1';
 
         $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':to_addr', $to);
         $stmt->bindParam(':from_addr', $from);
-        if (!$from) {
-            return [];
-        }
 
         return $stmt->executeQuery()->fetchAllAssociative();
     }
@@ -422,7 +429,7 @@ class MsgsRepository extends ServiceEntityRepository
     /**
      * Update the maddr adresses that have a message status error
      */
-    public function updateErrorStatus()
+    public function updateErrorStatus(): void
     {
         $conn = $this->getEntityManager()->getConnection();
         //update the email Maddr
@@ -434,11 +441,9 @@ class MsgsRepository extends ServiceEntityRepository
     /**
      * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
      * @todo chercher le content = spammy et le rajouter dans le where !=
-     * @param type $emailSender
-     * @param type $emailRecipient
-     * @return type
+     * @return array<int, array<string, mixed>>
      */
-    public function getAllMessageRecipient($emailSender, $emailRecipient)
+    public function getAllMessageRecipient(string $emailSender, string $emailRecipient): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m'
@@ -447,92 +452,42 @@ class MsgsRepository extends ServiceEntityRepository
             . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
             . ' WHERE m.content != "C" AND msr.content != "C"  AND mr.email = "' . $emailRecipient . '" AND ms.email =  "' . $emailSender . '"';
         $stmt = $conn->prepare($sql);
-        //    $stmt->execute();
-        return $stmt->executeQuery()->fetchAllAssociative();
-    }
-
-    /**
-     * Return message statistics on a period
-     * @param type $emailReceipient
-     * @param type $start
-     * @param type $end
-     * @return type
-     */
-    public function getAllMessageReceipientForReport($emailReceipient = null, $start = null, $end = null)
-    {
-        //todo prévoir par domaine rajouter une jointure pour les admins
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT  m.content, mt.name,count(*) as nb FROM msgs m'
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' LEFT JOIN message_status mt on mt.id = m.status_id'
-            . ' WHERE 1  ';
-        if ($emailReceipient) {
-            $sql .= ' AND maddr.email = "' . $emailReceipient . '" ';
-        }
-        if ($start) {
-            $sql .= ' AND time_num >= ' . $start;
-        }
-        if ($end) {
-            $sql .= ' AND time_num <= ' . $end;
-        }
-        $sql .= ' GROUP BY m.content, m.status_id';
-
-        $stmt = $conn->prepare($sql);
-        return $stmt->executeQuery()->fetchAllAssociative();
-    }
-
-    /**
-     * Messages wait to unblock
-     * @return type
-     */
-    public function getMsgsToTreat()
-    {
-        //todo prévoir par domaine rajouter une jointure pour les admins
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT  count(*) as nb, maddr.email FROM msgs m'
-            . ' LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . ' LEFT JOIN maddr ON maddr.id = mr.rid '
-            . ' WHERE m.content != "C" AND m.content != "Y" AND mr.bl = "N" AND mr.wl = "N" AND mr.status_id IS NULL  ';
-
-        $sql .= ' GROUP BY maddr.email';
-
-        $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
     /**
      * Delete message older $date
-     * @param timestamp $date
-     * */
-    public function truncateMessageOlder($date)
+     *
+     * @return array{
+     *     nbDeletedMsgs: int,
+     *     nbDeletedMsgrcpt: int,
+     *     nbDeletedQuarantine: int,
+     * }
+     */
+    public function truncateMessageOlder(int $date): array
     {
-        if (!is_null($date)) {
-            $conn = $this->getEntityManager()->getConnection();
+        $conn = $this->getEntityManager()->getConnection();
 
-            $sql = ' DELETE mr FROM msgrcpt mr '
-                . ' LEFT JOIN  msgs m ON m.mail_id = mr.mail_id '
-                . ' WHERE m.time_num < ' . $date;
+        $sql = ' DELETE mr FROM msgrcpt mr '
+            . ' LEFT JOIN  msgs m ON m.mail_id = mr.mail_id '
+            . ' WHERE m.time_num < ' . $date;
 
-            $stmt = $conn->prepare($sql);
-            $result = $stmt->executeQuery();
-            $nbDeletedMsgrcpt = $result->rowCount();
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery();
+        $nbDeletedMsgrcpt = $result->rowCount();
 
-            $sql = ' DELETE q FROM quarantine q '
-                . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
-                . ' WHERE m.time_num < ' . $date;
+        $sql = ' DELETE q FROM quarantine q '
+            . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
+            . ' WHERE m.time_num < ' . $date;
 
-            $stmt = $conn->prepare($sql);
-            $result = $stmt->executeQuery();
-            $nbDeletedQuantaine = $result->rowCount();
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery();
+        $nbDeletedQuarantine = $result->rowCount();
 
-            $sql2 = ' DELETE FROM msgs WHERE time_num < ' . $date;
-            $stmt2 = $conn->prepare($sql2);
-            $result = $stmt2->executeQuery();
-            $nbDeletedMsgs = $result->rowCount();
-            return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuantaine' => $nbDeletedQuantaine];
-        }
+        $sql2 = ' DELETE FROM msgs WHERE time_num < ' . $date;
+        $stmt2 = $conn->prepare($sql2);
+        $result = $stmt2->executeQuery();
+        $nbDeletedMsgs = $result->rowCount();
+        return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuarantine' => $nbDeletedQuarantine];
     }
 }

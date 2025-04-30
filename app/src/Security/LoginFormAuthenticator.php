@@ -10,7 +10,6 @@ use App\Entity\User;
 use App\Service\LdapService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,32 +36,18 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
     use TargetPathTrait;
 
-    private $urlGenerator;
-    private $params;
-    private $csrfTokenManager;
-    private $entityManager;
-    private $translator;
-    private LdapService $ldapService;
-    private $logger;
 
     public const LOGIN_ROUTE = 'app_login';
 
     public function __construct(
-            UrlGeneratorInterface $urlGenerator,
-            ParameterBagInterface $params,
-            CsrfTokenManagerInterface $csrfTokenManager,
-            EntityManagerInterface $entityManager,
-            TranslatorInterface $translator,
-            LdapService $ldapService,
-            LoggerInterface $logger
+            private UrlGeneratorInterface $urlGenerator,
+            private CsrfTokenManagerInterface $csrfTokenManager,
+            private EntityManagerInterface $entityManager,
+            private TranslatorInterface $translator,
+            private LdapService $ldapService,
+            private LoggerInterface $logger
     ) {
-        $this->urlGenerator = $urlGenerator;
-        $this->params = $params;
-        $this->logger = $logger;
-        $this->csrfTokenManager = $csrfTokenManager;
-        $this->entityManager = $entityManager;
-        $this->translator = $translator;
-        $this->ldapService = $ldapService;
+
     }
 
     public function authenticate(Request $request): Passport {
@@ -114,7 +99,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return new SelfValidatingPassport(new UserBadge($user->getEmailFromRessource()), [new RememberMeBadge()]);
     }
 
-    private function getLoginImap(User $user, String $password) {
+    private function getLoginImap(User $user, String $password): bool {
         $cm = new ClientManager($options = []);
         $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();        
         foreach ($user->getDomain()->getConnectors() as $connector) {
@@ -146,25 +131,27 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return false;       
     }
 
-    private function getLocalUser(String $userName) {
+    private function getLocalUser(String $userName): ?User {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
         if ($user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()))) {
             return $user;
         }
-        return false;
+        return null;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
 
-        $request->getSession()->set('originalUser', $token->getUser()->getUsername());
+        /** @var User $user */
+        $user = $token->getUser();
+        $request->getSession()->set('originalUser', $user->getUsername());
 
-        if ($token->getUser()->getDomain() && $token->getUser()->getDomain()->getDefaultLang()) {
-            $request->getSession()->set('_locale', $token->getUser()->getDomain()->getDefaultLang());
+        if ($user->getDomain() && $user->getDomain()->getDefaultLang()) {
+            $request->getSession()->set('_locale', $user->getDomain()->getDefaultLang());
         }
 
 
-        if ($token->getUser()->getPreferedLang()) {
-            $request->getSession()->set('_locale', $token->getUser()->getPreferedLang());
+        if ($user->getPreferedLang()) {
+            $request->getSession()->set('_locale', $user->getPreferedLang());
         }
 
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
