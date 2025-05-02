@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dx='docker compose exec -u www-data app'
+ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 
 for user in 'user.domain.quota' 'user.group1.perso.large.quota' 'user.group1.perso.small.quota' 'user.group1.quota' 'user'
 do
@@ -8,14 +8,14 @@ do
 	echo out
 	for _i in $(seq 1 100)
 	do
-		$dx swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server smtptest:27 > /dev/null 2>&1
+		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 > /dev/null
 		echo -n .
 	done
 	echo ok
 	echo in
 	for _i in $(seq 1 100)
 	do
-		$dx swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server smtptest:26 > /dev/null 2>&1
+		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 > /dev/null
 		echo -n .
 	done
 	echo ok
