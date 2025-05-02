@@ -43,10 +43,6 @@ RUN yarnpkg encore production
 
 FROM debian:bookworm-slim AS run
 
-LABEL maintainer = "Sébastien Poher <sebastien.poher@probesys.com>"
-LABEL name = "AgentJ web app"
-LABEL description = "AgentJ frontend to manage mails and senders white/black lists"
-
 RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     ca-certificates \

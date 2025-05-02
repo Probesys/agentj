@@ -8,7 +8,6 @@ Users authentication can be made via IMAP, LDAP or Microsoft Azure.
 - **app**: main AgentJ web interface (configuration for admins, usage for users)
 - **db**: a MariaDB instance to store mails, domains configuration, users info, DKIM keys, authorized/banned senders, Amavis scores …
 - **smtp**: a postfix instance that will receive the incoming e-mails and check them using **amavis** container
-- **relay**: a postfix instance needed to avoid loops when forwarding the released or white-listed e-mails to their recipients(s)
 - **outsmtp**: a postfix instance that will handle outgoing e-mails, sent by local users (via their original smtp server) and check them using **outamavis**
 - **amavis**: a container running Amavis/Spamassassin
 - **outamavis**: same as **amavis** but used for outgoing e-mails sent by local users

@@ -1,5 +1,5 @@
 # Make policyd-rate-limit output logs to stderr
-debug: True
+debug: False
 
 # path where the program will try to write its pid to.
 pidfile: "/var/run/policyd-rate-limit/policyd-rate-limit.pid"
@@ -26,9 +26,9 @@ SOCKET: ["0.0.0.0", 8552]
 # A list of couple [number of emails, number of seconds]. If one of the element of the list is
 # exeeded (more than 'number of emails' on 'number of seconds' for an ip address or an sasl
 # username), postfix will return a temporary failure.
-limits:
-    - [10, 60] # limit to 10 mails by minutes
-    - [150, 86400] # limits to 150 mails by days
+#limits:
+#    - [10, 60] # limit to 10 mails by minutes
+#    - [150, 86400] # limits to 150 mails by days
 
 # dict of id -> limit list. Used to override limits and use custom limits for
 # a particular id. Use an empty list for no limits for a particular id.

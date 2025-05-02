@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-dx='docker compose exec -u www-data app'
+ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 count=${1:-10}
 
 echo " -- legit"
@@ -11,14 +10,14 @@ do
 	echo -n out
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server smtptest:27 --h-Subject "$i legit" --body "legit content" > /dev/null 2>&1
+		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 --h-Subject "$i legit" --body "legit content" > /dev/null
 		echo -n '.'
 	done
 	echo ok
 	echo -n in
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server smtptest:26 --h-Subject "$i legit" --body "legit content" > /dev/null 2>&1
+		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 --h-Subject "$i legit" --body "legit content" > /dev/null
 		echo -n '.'
 	done
 	echo ok
@@ -31,14 +30,14 @@ do
 	echo -n out
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server smtptest:27 --h-Subject "$i spam" --body "XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X" > /dev/null 2>&1
+		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 --h-Subject "$i spam" --body "XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X" > /dev/null
 		echo -n '.'
 	done
 	echo ok
 	echo -n in
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server smtptest:26 --h-Subject "$i spam" --body "XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X" > /dev/null 2>&1
+		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 --h-Subject "$i spam" --body "XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X" > /dev/null
 		echo -n '.'
 	done
 	echo ok
@@ -51,14 +50,14 @@ do
 	echo -n out
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server smtptest:27 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null 2>&1
+		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null
 		echo -n '.'
 	done
 	echo ok
 	echo -n in
 	for i in $(seq 1 "$count")
 	do
-		$dx swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server smtptest:26 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null 2>&1
+		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null
 		echo -n '.'
 	done
 	echo ok

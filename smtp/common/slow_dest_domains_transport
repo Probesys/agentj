@@ -1,0 +1,20 @@
+# Specific transport for slow destination domains.
+# A slow destination domain considers postfix default delivery rate too fast.
+# It will answer "SMTP 4XX" after a few emails if you don't setup a quite high
+# rate delay.
+# It needs a specific transport not to clog your outgoing queue because of a
+# destination_rate_delay >= 30s.
+# **IMPORTANT:** this slow_dest_domains_tranport hash is "french-centric".
+# It needs to be adapted to fit your local internet landscape if your
+# organization is outside of France.
+wanadoo.com slow:
+wanadoo.fr slow:
+orange.com slow:
+orange.fr slow:
+laposte.net slow:
+free.fr slow:
+aliceadsl.fr slow:
+hotmail.fr slow:
+yahoo.fr slow:
+yahoo.com slow:
+aol.com slow:
