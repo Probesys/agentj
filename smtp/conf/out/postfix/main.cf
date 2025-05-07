@@ -34,3 +34,5 @@ non_smtpd_milters = inet:opendkim:8891
 transport_maps = proxy:mysql:/etc/conf/out/postfix/mysql-transport_map.cf
 
 maillog_file = /dev/stdout
+
+smtp_tls_security_level = may
