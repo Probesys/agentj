@@ -49,3 +49,5 @@ smtp_destination_concurrency_failed_cohort_limit = 10
 transport_maps = lmdb:/etc/conf/relay/postfix/slow_dest_domains_transport
 
 maillog_file = /dev/stdout
+
+smtp_tls_security_level = may
