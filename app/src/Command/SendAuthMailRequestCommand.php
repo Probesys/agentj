@@ -97,7 +97,7 @@ class SendAuthMailRequestCommand extends Command
                         continue;
                     }
 
-                    if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null && $msgrcpt->getDs() !== DeliveryStatus::Pass) {
+                    if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === MessageStatus::UNTREATED && $msgrcpt->getDs() !== DeliveryStatus::Pass) {
                         $this->releaseMessage($message, $msgrcpt, $user);
                         continue;
                     }
