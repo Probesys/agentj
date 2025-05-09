@@ -10,6 +10,7 @@ use App\Repository\MaddrRepository;
  * Maddr
  */
 #[ORM\Table(name: 'maddr')]
+#[ORM\Index(name: 'idx_maddr_email', columns: ['email'])]
 #[ORM\UniqueConstraint(name: 'part_email', columns: ['partition_tag', 'email'])]
 #[ORM\Entity(repositoryClass: MaddrRepository::class)]
 class Maddr
@@ -69,6 +70,16 @@ class Maddr
     public function getDomain(): string
     {
         return $this->domain;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getReverseDomain(): string
+    {
+        $parts = explode('.', $this->domain);
+        return implode('.', array_reverse($parts));
     }
 
     public function setDomain(string $domain): self
