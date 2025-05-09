@@ -366,7 +366,11 @@ class MsgsRepository extends ServiceEntityRepository
                 AND m.content NOT IN (:content)
             SQL);
 
-        $query->setParameter('content', [ContentType::Clean, ContentType::Virus]);
+        $query->setParameter('content', [
+            ContentType::Clean,
+            ContentType::Virus,
+            ContentType::Unchecked
+        ]);
 
         return $query->getResult();
 
@@ -450,7 +454,7 @@ class MsgsRepository extends ServiceEntityRepository
 
         $query->setParameter('errorStatus', MessageStatus::ERROR);
 
-        return $query->execute();
+        $query->execute();
 
     }
 

@@ -85,6 +85,7 @@ class Msgs
     #[ORM\Column(name: 'host', type: 'string', length: 255, nullable: false)]
     private string $host;
 
+    /** @var Collection<int, MsgRcpt> $msgRcpts */
     #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MsgRcpt::class)]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
@@ -107,6 +108,7 @@ class Msgs
     #[ORM\Column(name: 'message_error', type: 'text', nullable: true)]
     private ?string $messageError;
 
+    //If true it means that the message is from a mailing list
     #[ORM\Column(type: 'boolean', nullable: true)]
     private ?bool $isMlist;
 
@@ -421,7 +423,7 @@ class Msgs
     }
 
     /**
-     * @return Collection|MsgRcpt[]
+     * @return Collection<int, MsgRcpt>
      */
     public function getMsgRcpts(): Collection
     {
