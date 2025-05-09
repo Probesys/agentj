@@ -9,10 +9,10 @@ use Doctrine\ORM\Query\TokenType;
 
 class DateDiff extends FunctionNode
 {
-    public $firstDateExpression = null;
-    public $secondDateExpression = null;
+    public Node|string $firstDateExpression = '';
+    public Node|string $secondDateExpression = '';
 
-    public function parse(\Doctrine\ORM\Query\Parser $parser): void
+    public function parse(Parser $parser): void
     {
         $parser->match(TokenType::T_IDENTIFIER);
         $parser->match(TokenType::T_OPEN_PARENTHESIS);
