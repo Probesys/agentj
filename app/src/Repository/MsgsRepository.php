@@ -404,7 +404,7 @@ class MsgsRepository extends ServiceEntityRepository
     /**
      * Check the last request sent
      */
-    public function getLastRequestSent(string $to, string $from): ?int
+    public function getDaysSinceLastRequest(string $to, string $from): ?int
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) as time_diff
