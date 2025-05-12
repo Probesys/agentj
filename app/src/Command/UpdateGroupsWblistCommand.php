@@ -36,27 +36,28 @@ class UpdateGroupsWblistCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $this->setGroupPriority();
+
         $activeGroups = $this->groupsRepository->findBy([
             'active' => true
         ]);
-        
+
         $rootMailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
         foreach ($activeGroups as $group){
             $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $rootMailaddr, 'groups' => $group]));
-            if (!$groupsWblist){
+            if (!$groupsWblist) {
                 $groupsWblist = new GroupsWblist();
                 $groupsWblist->setMailaddr($rootMailaddr);
             }
-                $groupsWblist->setGroups($group);
-                $groupsWblist->setWb($group->getWb());
-                $this->em->persist($groupsWblist);            
+            $groupsWblist->setGroups($group);
+            $groupsWblist->setWb($group->getWb());
+            $this->em->persist($groupsWblist);
         }
-         $this->em->flush();
-         $this->groupService->updateWblist();
-        
+        $this->em->flush();
+        $this->groupService->updateWblist();
+
         return Command::SUCCESS;
     }
-    
+
     /**
      * Update the group priority that does not have priority
      * @return void

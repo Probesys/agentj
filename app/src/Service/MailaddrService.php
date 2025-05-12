@@ -3,14 +3,8 @@
 namespace App\Service;
 
 class MailaddrService {
-
-    /**
-     *
-     * @param type $email
-     * @return int
-     */
-    public static function computePriority($email = "") {
-
+    public static function computePriority(string $email = ""): int
+    {
         $priority = 5; //default priority for email
         //in case domain
         if (substr(trim($email), 0, 1) == '@') {
@@ -42,5 +36,4 @@ class MailaddrService {
         }
         return $priority;
     }
-
 }

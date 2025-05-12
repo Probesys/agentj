@@ -11,6 +11,9 @@ use App\Entity\User;
 use App\Form\GroupsType;
 use App\Service\GroupService;
 use App\Service\UserService;
+use App\Repository\UserRepository;
+use App\Repository\GroupsWblistRepository;
+use App\Repository\MailaddrRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,15 +30,10 @@ class GroupsController extends AbstractController {
 
     use ControllerWBListTrait;
 
-    private $em;
-    private $translator;
-
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
-        $this->em = $em;
-        $this->translator = $translator;
+    public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator) {
     }
 
-    private function checkAccess($group) {
+    private function checkAccess(Groups $group): void {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
                 throw new AccessDeniedException();
@@ -45,9 +43,11 @@ class GroupsController extends AbstractController {
 
     #[Route(path: '/', name: 'groups_index', methods: 'GET')]
     public function index(): Response {
+        /** @var User $user */
+        $user = $this->getUser();
         $groups = $this->em
                 ->getRepository(Groups::class)
-                ->findByDomain($this->getUser()->getDomains());
+                ->findByDomain($user->getDomains()->toArray());
 
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }
@@ -103,7 +103,14 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/{id}/edit', name: 'groups_edit', methods: 'GET|POST')]
-    public function edit(Request $request, Groups $group, GroupService $groupService, UserService $userService): Response {
+    public function edit(
+        Request $request,
+        Groups $group,
+        GroupService $groupService,
+        UserService $userService,
+        GroupsWblistRepository $groupsWblistRepository,
+        MailaddrRepository $mailaddrRepository,
+    ): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -137,16 +144,16 @@ class GroupsController extends AbstractController {
 
             $this->em->persist($group);
 
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+            $mailaddr = $mailaddrRepository->findOneBy((['email' => '@.']));
 
-            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
+            $groupsWblist = $groupsWblistRepository->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
             if (!$groupsWblist){
                 $groupsWblist = new GroupsWblist();
                 $groupsWblist->setMailaddr($mailaddr);
             }
-                $groupsWblist->setGroups($group);
-                $groupsWblist->setWb($group->getWb());
-                $this->em->persist($groupsWblist);
+            $groupsWblist->setGroups($group);
+            $groupsWblist->setWb($group->getWb());
+            $this->em->persist($groupsWblist);
 
 
             $this->em->flush();
@@ -172,7 +179,7 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
-    public function listUsers(Request $request, Groups $group) {
+    public function listUsers(Request $request, Groups $group): Response {
         $this->checkAccess($group);
         $users = $group->getUsers();
         return $this->render('groups/group_users.html.twig', [
@@ -182,12 +189,18 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'GET')]
-    public function removeUser(Request $request, Groups $group, User $user, UserService $userService, GroupService $groupService): Response {
+    public function removeUser(
+        Request $request,
+        Groups $group,
+        User $user,
+        UserService $userService,
+        GroupService $groupService,
+        UserRepository $userRepository,
+    ): Response {
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $oldGroups = $user->getGroups()->toArray();
             $group->removeUser($user);
 
-            $userAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
+            $userAliases = $userRepository->findBy(['originalUser' => $user->getId()]);
             foreach ($userAliases as $alias) {
                 $group->removeUser($alias);
             }
@@ -236,7 +249,7 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/check-priority', name: 'groups_check_priority', methods: 'GET|POST')]
-    public function checkPriorityExist(Request $request) {
+    public function checkPriorityExist(Request $request): JsonResponse {
         $domainId = $request->request->get('domainId');
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
 

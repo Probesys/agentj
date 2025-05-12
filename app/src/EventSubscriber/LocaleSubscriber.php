@@ -8,14 +8,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    private $defaultLocale;
+    private string $defaultLocale;
 
-    public function __construct($defaultLocale = 'fr')
+    public function __construct(string $defaultLocale = 'fr')
     {
         $this->defaultLocale = $defaultLocale;
     }
 
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
         if (!$request->hasPreviousSession()) {

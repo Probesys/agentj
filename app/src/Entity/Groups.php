@@ -22,64 +22,68 @@ class Groups
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
-    private $name;
+    private string $name;
 
-
-    /**
-     * @var \DateTime
-     */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private $datemod;
+    private ?\DateTimeInterface $datemod = null;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
-    private $policy;
+    private ?Policy $policy = null;
 
+    /**
+     * @var Collection<int, Rights>
+     */
     #[ORM\ManyToMany(targetEntity: 'App\Entity\Rights', mappedBy: 'groups')]
-    private $rights;
+    private Collection $rights;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Domain', inversedBy: 'groups')]
     #[ORM\JoinColumn(nullable: false)]
-    private $domain;
+    private Domain $domain;
 
     #[ORM\Column(type: 'string', length: 10)]
-    private $wb;
+    private string $wb;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'groups', cascade: ['persist'])]
-    private $users;
+    private Collection $users;
 
-
+    /**
+     * @var Collection<int, GroupsWblist>
+     */
     #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
-    private $groupsWbLists;
+    private Collection $groupsWbLists;
 
     #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 128, unique: true)]
-    private $slug;
+    private string $slug;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $overrideUser;
+    private ?bool $overrideUser = null;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $active;
+    private ?bool $active = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $priority;
+    private ?int $priority = 1;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $uid;
+    private ?string $uid = null;
 
     #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'groups')]
-    private $originConnector;
+    private ?Connector $originConnector = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapDN;
+    private ?string $ldapDN = null;
 
+    /**
+     * @var array<int, array<string, int>>
+     */
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
@@ -133,7 +137,7 @@ class Groups
 
 
     /**
-     * @return Collection|Rights[]
+     * @return Collection<int, Rights>
      */
     public function getRights(): Collection
     {
@@ -350,11 +354,17 @@ class Groups
         return $this;
     }
 
+    /**
+     * @return array<int, array<string, int>>
+     */
     public function getQuota(): ?array
     {
         return $this->quota;
     }
 
+    /**
+     * @param array<int, array<string, int>> $quota
+     */
     public function setQuota(?array $quota): static
     {
         $this->quota = $quota;

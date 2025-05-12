@@ -13,7 +13,30 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-      - run: composer install --no-scripts --no-cache
+
+      - name: Setup env
+        run: |
+          cp .env.example .env
+          sed -i "s|\$AGENTJ_VERSION|dev|g" .env
+          sed -i "s|\$SF_APP_ENV|dev|g" .env
+          sed -i "s|\$SF_APP_SECRET|change-me|g" .env
+          sed -i "s|\$SF_TOKEN_ENCRYPTION_IV|change-me|g" .env
+          sed -i "s|\$SF_TOKEN_ENCRYPTION_SALT|change-me|g" .env
+          sed -i "s|\$SF_SENTRY_DSN||g" .env
+          sed -i "s|\$DB_NAME|agentj|g" .env
+          sed -i "s|\$DB_USER|agentj|g" .env
+          sed -i "s|\$DB_PASSWORD|secret|g" .env
+          sed -i "s|\$DB_HOST|localhost|g" .env
+          sed -i "s|\$DOMAIN|example.com|g" .env
+          sed -i "s|\$ENABLE_AZURE_OAUTH||g" .env
+          sed -i "s|\$OAUTH_AZURE_CLIENT_ID||g" .env
+          sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET||g" .env
+          sed -i "s|\$TRUSTED_PROXIES||g" .env
+          sed -i "s|\$TZ|Europe/Paris|g" .env
+          sed -i "s|\$DEFAULT_LOCALE|en|g" .env
+
+      - name: Install the dependencies
+        run: composer install
 
       - name: PHPStan Static Analysis
         run: ./vendor/bin/phpstan -v

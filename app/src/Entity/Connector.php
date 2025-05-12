@@ -21,23 +21,29 @@ class Connector {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    private string $name;
 
     #[ORM\ManyToOne(targetEntity: Domain::class, inversedBy: 'connectors')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private $domain;
+    private Domain $domain;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private $type;
+    private string $type;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'originConnector')]
-    private $users;
+    private Collection $users;
 
+    /**
+     * @var Collection<int, Groups>
+     */
     #[ORM\OneToMany(targetEntity: Groups::class, mappedBy: 'originConnector')]
-    private $groups;
+    private Collection $groups;
 
     #[ORM\Column(nullable: true)]
     private ?bool $synchronizeGroup = null;

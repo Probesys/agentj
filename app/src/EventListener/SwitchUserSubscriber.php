@@ -4,6 +4,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -20,11 +21,12 @@ class SwitchUserSubscriber implements EventSubscriberInterface
 
     public function onSwitchUser(SwitchUserEvent $event): bool
     {
-      /* @var User $user  */
+        /** @var User $user */
         $user = $this->security->getUser();
         $this->security->getToken();
         $userDomains = $user->getDomains()->toArray();
 
+        /** @var User $targetUser */
         $targetUser = $event->getTargetUser();
 
         $targetUserDomain = $targetUser->getDomain();

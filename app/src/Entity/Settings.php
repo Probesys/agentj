@@ -11,18 +11,18 @@ class Settings
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private $context;
+    private string $context;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private $name;
+    private string $name;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private $value;
+    private ?string $value = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }

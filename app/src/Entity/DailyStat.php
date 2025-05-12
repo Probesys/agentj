@@ -11,31 +11,31 @@ class DailyStat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'date')]
-    private $date;
+    private \DateTimeInterface $date;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbUntreated;
+    private ?int $nbUntreated = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbSpam;
+    private ?int $nbSpam = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbVirus;
+    private ?int $nbVirus = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbAuthorized;
+    private ?int $nbAuthorized = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbBanned;
+    private ?int $nbBanned = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbDeleted;
+    private ?int $nbDeleted = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $nbRestored;
+    private ?int $nbRestored = null;
 
     #[ORM\ManyToOne(inversedBy: 'dailyStats')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]

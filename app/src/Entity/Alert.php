@@ -5,37 +5,38 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use App\Repository\AlertRepository;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\AlertRepository')]
+#[ORM\Entity(repositoryClass: AlertRepository::class)]
 #[ORM\Table(name: 'alert')]
 class Alert
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $alertType;
+    private string $alertType;
 
     #[ORM\Column(type: 'string')]
-    private $refId;
+    private string $refId;
 
     #[ORM\Column(type: 'datetime')]
-    private $date;
+    private \DateTimeInterface $date;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $subject;
+    private string $subject;
 
     #[ORM\Column(type: 'boolean')]
-    private $isRead;
+    private bool $isRead;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $user;
+    private User $user;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $refUser;
+    private ?string $refUser = null;
 
     // Getters and setters for each property
     public function getId(): ?int

@@ -30,9 +30,4 @@ class CreateAlertMessage
     {
         return $this->target;
     }
-
-    private function log(string $message): void
-    {
-        error_log($message);
-    }
 }

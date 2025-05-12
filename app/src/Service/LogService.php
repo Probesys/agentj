@@ -7,21 +7,14 @@ use App\Entity\Log;
 
 class LogService
 {
-    private $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(private EntityManagerInterface $em)
     {
-        $this->em = $em;
     }
 
     /**
      * Add entry to the log table
-     * @param type $action
-     * @param type $mailId
-     * @param type $details
-     * @return boolean
      */
-    public function addLog($action, $mailId = '', $details = '')
+    public function addLog(string $action, string $mailId = '', string $details = ''): bool
     {
         $log = new Log();
         $log->setAction($action);

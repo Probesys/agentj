@@ -5,8 +5,9 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MessageStatusRepository;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\MessageStatusRepository')]
+#[ORM\Entity(repositoryClass: MessageStatusRepository::class)]
 class MessageStatus
 {
 
@@ -19,28 +20,31 @@ class MessageStatus
     const SPAMMED = 6;
     const VIRUS = 7;
 
-  #[ORM\Id]
+    #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
-  #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
 
-  #[ORM\OneToMany(targetEntity: 'App\Entity\Msgrcpt', mappedBy: 'status')]
-    private $msgrcpts;
+    /**
+     * @var Collection<int, Msgrcpt>
+     */
+    #[ORM\OneToMany(targetEntity: Msgrcpt::class, mappedBy: 'status')]
+    private Collection $msgrcpts;
 
     public function __construct()
     {
         $this->msgrcpts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -52,9 +56,9 @@ class MessageStatus
         return $this;
     }
 
-  /**
-   * @return Collection|Msgrcpt[]
-   */
+    /**
+     * @return Collection<int, Msgrcpt>
+     */
     public function getMsgrcpts(): Collection
     {
         return $this->msgrcpts;

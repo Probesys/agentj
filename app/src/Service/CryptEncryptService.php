@@ -7,11 +7,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class CryptEncryptService
 {
 
-    private $params;
-
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(private ParameterBagInterface $params)
     {
-        $this->params = $params;
     }
 
     /**
@@ -64,7 +61,7 @@ class CryptEncryptService
             // Handle the old (deprecated) version of the token. In this
             // version, expiration date was concatanated to the ciphertext in
             // the base64 string.
-            $expiry = substr(base64_decode($token), 0, 10);
+            $expiry = (int) substr(base64_decode($token), 0, 10);
             $ciphertext = substr_replace(base64_decode($token), '', 0, 10);
             $data = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, 0, $iv);
             return [$expiry, $data];

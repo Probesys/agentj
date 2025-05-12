@@ -13,7 +13,6 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MsgrcptRepository extends ServiceEntityRepository
 {
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Msgrcpt::class);
@@ -28,6 +27,9 @@ class MsgrcptRepository extends ServiceEntityRepository
         ]);
     }
 
+    /**
+     * @return Msgrcpt[]
+     */
     public function findByMessage(Msgs $message): array
     {
         return $this->findBy([
@@ -36,14 +38,10 @@ class MsgrcptRepository extends ServiceEntityRepository
         ]);
     }
 
-  /**
-   * Update the status of a message for one recipient
-   * @param type $partitiontag
-   * @param type $mailId
-   *  * @param type $rid
-   * @param type $status
-   */
-    public function changeStatus($partitiontag, $mailId, $status, $rid)
+    /**
+     * Update the status of a message for one recipient
+     */
+    public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'UPDATE msgrcpt SET status_id =  ' . $status . '  WHERE partition_tag = "' . $partitiontag . '" AND mail_id = "' . $mailId . '" and rid=' . $rid ;
@@ -51,14 +49,12 @@ class MsgrcptRepository extends ServiceEntityRepository
         $stmt->execute();
     }
 
-  /**
-   * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
-   * @todo chercher le content = spammy et le rajouter dans le where !=
-   * @param type $emailSender
-   * @param type $emailRecipient
-   * @return type
-   */
-    public function getAllMessageDomainRecipientsFromSender($emailSender, $domain)
+    /**
+     * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
+     * @todo chercher le content = spammy et le rajouter dans le where !=
+     * @return array<array<string, mixed>>
+     */
+    public function getAllMessageDomainRecipientsFromSender(string $emailSender, string $domain): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m'

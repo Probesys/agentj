@@ -13,17 +13,20 @@ class Rights
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    private string $name;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $system_name;
+    private string $system_name;
 
+    /**
+     * @var Collection<int, Groups>
+     */
     #[ORM\JoinTable(name: 'rights_groups')]
     #[ORM\ManyToMany(targetEntity: 'App\Entity\Groups', inversedBy: 'rights')]
-    private $groups;
+    private Collection $groups;
 
     public function __construct()
     {
@@ -41,7 +44,7 @@ class Rights
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -53,7 +56,7 @@ class Rights
         return $this;
     }
 
-    public function getSystemName(): ?string
+    public function getSystemName(): string
     {
         return $this->system_name;
     }
@@ -66,7 +69,7 @@ class Rights
     }
 
     /**
-     * @return Collection|Groups[]
+     * @return Collection<int, Groups>
      */
     public function getGroups(): Collection
     {

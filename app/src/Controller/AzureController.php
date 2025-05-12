@@ -18,10 +18,9 @@ class AzureController extends AbstractController
     {
         return $clientRegistry
             ->getClient('azure')
-//            ->redirect([], [])
             ->redirect([
                 'public_profile', 'email' // the scopes you want to access
-            ])
+            ], [])
         ;
     }
 

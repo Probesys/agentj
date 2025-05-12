@@ -7,7 +7,7 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
-use App\Repository\MsgsRepository;
+use App\Entity\Domain;
 use App\Repository\WblistRepository;
 use App\Service\LogService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,21 +15,20 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WblistController extends AbstractController {
 
-    private $translator;
-    private $em;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
-        $this->em = $em;
-        $this->translator = $translator;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+    ) {
     }
 
     #[Route(path: '/wblist/{type}', name: 'wblist')]
-    public function index($type, Request $request, PaginatorInterface $paginator) {
+    public function index(string $type, Request $request, PaginatorInterface $paginator): Response {
 
         $sortParams = [];
         $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
@@ -43,7 +42,11 @@ class WblistController extends AbstractController {
             $searchKey = trim($request->query->get('search'));
         }
 
-        $wblist = $this->em->getRepository(Wblist::class)->search($type, $this->getUser(), $searchKey, $sortParams);
+        /** @var User $user */
+        $user = $this->getUser();
+        $title = '';
+        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $searchKey, $sortParams);
+
         switch ($type) {
             case "W":
                 $title = $this->translator->trans('Navigation.whitelist');
@@ -55,7 +58,7 @@ class WblistController extends AbstractController {
         $totalItemFound = count($wblist);
 
         // Retrieve per_page from the request or use the default value
-        $per_page = $request->query->getInt('per_page', $this->getParameter('app.per_page_global'));
+        $per_page = $request->query->getInt('per_page', (int) $this->getParameter('app.per_page_global'));
 
         // Set the initial value of per_page in the form
         $filterForm->get('per_page')->setData($per_page);
@@ -75,13 +78,9 @@ class WblistController extends AbstractController {
         ]);
     }
 
-    /**
-     * @param integer $id
-     *
-     * @return Response
-     */
+
     #[Route(path: '/WBlist/{rid}/{sid}/{priority}/delete', name: 'wblist_delete', methods: 'GET')]
-    public function deleteAction($rid, $sid,$priority, WblistRepository $WblistRepository, Request $request) {
+    public function deleteAction(int $rid, int $sid, int $priority, WblistRepository $WblistRepository, Request $request): RedirectResponse {
         if ($this->isCsrfTokenValid('delete_wblist' . $rid . $sid, $request->query->get('_token'))) {
             $this->deleteWbList($rid, $sid,$priority, $WblistRepository);
             $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
@@ -96,9 +95,10 @@ class WblistController extends AbstractController {
         }
     }
 
-    private function deleteWbList($rid, $sid, $priority, WblistRepository $WblistRepository) {
+    private function deleteWbList(int $rid, int $sid, int $priority, WblistRepository $WblistRepository): void {
 
         $mainUser = $this->em->getRepository(User::class)->find($rid);
+        $userAndAliases = [];
 
         // if adress in an alias we get the target mail
         if ($mainUser && $mainUser->getOriginalUser()) {
@@ -116,29 +116,22 @@ class WblistController extends AbstractController {
         }
     }
 
-    /**
-     *
-     * @return Response
-     */
+
     #[Route(path: '/WBlist/batch/delete/', name: 'wblist_batch_delete', methods: 'POST', options: ['expose' => true])]
-    public function batchDeleteAction(Request $request, MsgsRepository $msgRepository) {
-        $em = $this->em;
+    public function batchDeleteAction(Request $request): RedirectResponse {
 
         foreach ($request->request->all('id') as $obj) {
             $mailInfo = json_decode($obj);
-            $em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
+            $this->em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
         }
 
         $referer = $request->headers->get('referer');
         return $this->redirect($referer);
     }
 
-    /**
-     *
-     * @return Response
-     */
+
     #[Route(path: '/batch/{action}', name: 'wblist_batch', methods: 'POST', options: ['expose' => true])]
-    public function batchWbListAction(Request $request, MsgsRepository $msgRepository, $action = null) {
+    public function batchWbListAction(Request $request, ?string $action = null): RedirectResponse {
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);
@@ -146,9 +139,7 @@ class WblistController extends AbstractController {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'delete':
-                        $mailInfo = json_decode($obj);
                         $this->deleteWbList($mailInfo[0], $mailInfo[1], $mailInfo[2], $em->getRepository(Wblist::class));
-                        //            $em->getRepository(Wblist::class)->deleteMessage($mailInfo[0], $mailInfo[1]);
                         $logService->addLog('delete batch wblist', $mailInfo[1]);
                         break;
                 }
@@ -160,7 +151,7 @@ class WblistController extends AbstractController {
     }
 
     #[Route(path: '/wblist/admin/import', name: 'import_wblist', options: ['expose' => true])]
-    public function importWbListAction(Request $request) {
+    public function importWbListAction(Request $request): Response {
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_wblist'),
             'user' => $this->getUser()
@@ -185,11 +176,9 @@ class WblistController extends AbstractController {
     }
 
     /**
-     * Import email adresses to whiteliste of $domains
-     * @param type $pathfile
-     * @param type $users
+     * @param Domain[] $domains
      */
-    private function importWbList($pathfile, $domains) {
+    private function importWbList(string $pathfile, array $domains): void {
         $tabWblist = [];
         if (($handle = fopen($pathfile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {

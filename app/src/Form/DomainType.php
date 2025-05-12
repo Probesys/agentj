@@ -3,21 +3,15 @@
 namespace App\Form;
 
 use App\Entity\Domain;
-use App\Entity\Policy;
-use App\Model\ImapPorts;
-use App\Repository\PolicyRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\Range;
@@ -25,17 +19,17 @@ use Symfony\Component\Validator\Constraints\Range;
 class DomainType extends AbstractType
 {
 
-    private $imapPorts;
-    private $tabLanguages;
+    /**
+     * @var array<string, string>
+     */
+    private array $tabLanguages;
 
-    public function __construct(ImapPorts $imapPorts, ParameterBagInterface $params)
+    public function __construct(ParameterBagInterface $params)
     {
         $langs = explode('|', $params->get('app_locales'));
         foreach ($langs as $lang) {
             $this->tabLanguages[$lang] = $lang;
         }
-
-        $this->imapPorts = $imapPorts;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

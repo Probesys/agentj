@@ -12,19 +12,13 @@ use Doctrine\DBAL\Connection;
 
 class AppExtension extends AbstractExtension {
 
-    private EntityManagerInterface $em;
-    private Connection $conn;
-
-    public function __construct(EntityManagerInterface $em) {
-        $this->em = $em;
-        $this->conn = $em->getConnection();
+    public function __construct(private EntityManagerInterface $em) {
     }
 
     /**
-     * 
-     * @return array
+     * @return TwigFilter[]
      */
-    public function getFilters() {
+    public function getFilters(): array {
         return [
             new TwigFilter('lcfirst', [$this, 'lcfirst']),
             new TwigFilter('stream_get_contents', [$this, 'streamGetcontent']),
@@ -33,16 +27,19 @@ class AppExtension extends AbstractExtension {
         ];
     }
 
-    public function lcfirst($strInput) {
+    public function lcfirst(string $strInput): string {
 
         return lcfirst($strInput);
     }
 
-    public function streamGetcontent($input): string {
+    public function streamGetcontent(mixed $input): string {
 
         return stream_get_contents($input, -1, 0);
     }
 
+    /**
+     * @return string[] $groupsLabel
+     */
     public function getUserGroups(int $userId): array {
 
         $user = $this->em->getRepository(User::class)->find($userId);
@@ -57,18 +54,17 @@ class AppExtension extends AbstractExtension {
 
         $groupsLabel = array_map(function (Groups $group) {
             return $group->getName();
-        }
-                , $groups);
+        }, $groups);
+
         return $groupsLabel;
     }
 
     /**
      * Check if wblist is overriden by anotherOne with highter prioriry
-     * @param int $rid
-     * @param int $sid
-     * @return boolean
+     *
+     * @param array<string, mixed> $wbInfo
      */
-    public function wbListIsOverriden(array $wbInfo) {
+    public function wbListIsOverriden(array $wbInfo): bool {
 
         return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
     }

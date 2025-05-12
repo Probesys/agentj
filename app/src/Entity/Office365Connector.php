@@ -10,16 +10,16 @@ class Office365Connector extends Connector
 {
 
     #[ORM\Column(type: 'string', length: 100)]
-    private $tenant;
+    private string $tenant;
 
     #[ORM\Column(type: 'string', length: 100)]
-    private $client;
+    private string $client;
 
     #[ORM\Column(type: 'string', length: 100)]
-    private $clientSecret;
+    private string $clientSecret;
 
 
-    public function getTenant(): ?string
+    public function getTenant(): string
     {
         return $this->tenant;
     }
@@ -31,7 +31,7 @@ class Office365Connector extends Connector
         return $this;
     }
 
-    public function getClient(): ?string
+    public function getClient(): string
     {
         return $this->client;
     }
@@ -43,7 +43,7 @@ class Office365Connector extends Connector
         return $this;
     }
 
-    public function getClientSecret(): ?string
+    public function getClientSecret(): string
     {
         return $this->clientSecret;
     }

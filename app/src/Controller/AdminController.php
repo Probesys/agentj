@@ -12,7 +12,7 @@ class AdminController extends AbstractController
 
 
   #[Route(path: '/delete-logo', name: 'delete_logo', methods: 'GET', options: ['expose' => true])]
-    public function deleteLogo()
+    public function deleteLogo(): Response
     {
 
         if (file_exists($this->getParameter('app.upload_directory') . 'logo.png')) {

@@ -3,6 +3,7 @@ biff = no
 smtp_host_lookup = dns, native
 message_size_limit = 40960000
 compatibility_level=3.6
+smtp_tls_security_level = may
 
 myhostname = $DOMAIN
 smtp_helo_name = $EHLO_DOMAIN

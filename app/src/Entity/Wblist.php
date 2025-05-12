@@ -5,12 +5,13 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Entity\Mailaddr;
+use App\Repository\WblistRepository;
 
 /**
  * Wblist
  */
 #[ORM\Table(name: 'wblist')]
-#[ORM\Entity(repositoryClass: 'App\Repository\WblistRepository')]
+#[ORM\Entity(repositoryClass: WblistRepository::class)]
 class Wblist
 {
     const WBLIST_PRIORITY_DOMAIN = 0;
@@ -21,41 +22,33 @@ class Wblist
     const WBLIST_TYPE_USER = 0 ; // Web liste origin is user        
     const WBLIST_TYPE_SENDER = 1 ; // Web liste origin is sender via human authentication
     const WBLIST_TYPE_GROUP = 2; // Web list origin is group
+
     #[ORM\ManyToOne(targetEntity: 'App\Entity\User', inversedBy: 'wbLists')]
     #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
-    private $rid;
+    private User $rid;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr')]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
-    private $sid;
+    private Mailaddr $sid;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
-    private $wb;
+    private string $wb;
 
-    /**
-     * @var \DateTime
-     */
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private $datemod ;
+    private \DateTimeInterface $datemod ;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
-    private $type;
+    private int $type;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
-    private $groups;
+    private Groups $groups;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[ORM\Id]
-    private $priority;
+    private int $priority;
 
     public function __construct(User $user, Mailaddr $mailaddr)
     {
@@ -112,7 +105,7 @@ class Wblist
         return $this;
     }
 
-    public function setSid(?Maddr $sid): self
+    public function setSid(Mailaddr $sid): self
     {
         $this->sid = $sid;
 
@@ -131,12 +124,12 @@ class Wblist
         return $this;
     }
 
-    public function getSid(): ?Mailaddr
+    public function getSid(): Mailaddr
     {
         return $this->sid;
     }
 
-    public function getPriority(): ?int
+    public function getPriority(): int
     {
         return $this->priority;
     }

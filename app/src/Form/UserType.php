@@ -26,7 +26,7 @@ class UserType extends AbstractType
         if ($options['alias']) {
             $labelEmail = 'Entities.User.fields.alias';
         }
-        $allowedomainIds = $options['allowedomainIds'];
+        $allowedDomains = $options['allowedDomains'];
 
 
         $domainHasIMAPConnector = $options['domainHasIMAPConnector'] ?? false;
@@ -74,21 +74,21 @@ class UserType extends AbstractType
                 'choice_label' => function ($group, $key, $index) {
                     return $group->getName() . ' (' . $group->getDomain() . ')';
                 },
-                'query_builder' => function (GroupsRepository $rep) use ($allowedomainIds) {
+                'query_builder' => function (GroupsRepository $rep) use ($allowedDomains) {
                     $retRepo = $rep->createQueryBuilder('g')
                         ->leftJoin('g.domain', 'd');
-                    if ($allowedomainIds) {
-                        $retRepo->where('d.id in (:allowedomainIds)')
-                            ->setParameter('allowedomainIds', $allowedomainIds);
+                    if ($allowedDomains) {
+                        $retRepo->where('d.id in (:allowedDomains)')
+                            ->setParameter('allowedDomains', $allowedDomains);
                     }
                     return $retRepo;
                 },
                 'attr' => ['style' => 'height:auto;']
             ])
             ->add('domain', null, [
-                'attr' => ['class' => 'select2'],
                 'label' => 'Entities.User.fields.domain',
                 'attr' => [
+                    'class' => 'select2',
                     'onChange' => 'toggleImapLogin(this)'  // JavaScript function for handling changes
                 ]
             ])
@@ -145,7 +145,7 @@ class UserType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'alias' => false,
-            'allowedomainIds' => [],
+            'allowedDomains' => [],
             'include_quota' => true,
             'adminForm' => false,
             'domainHasIMAPConnector' => false

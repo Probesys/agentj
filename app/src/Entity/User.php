@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\Policy;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,136 +17,123 @@ use Doctrine\DBAL\Types\Types;
  * Users
  */
 #[ORM\Table(name: 'users')]
-#[ORM\Entity(repositoryClass: 'App\Repository\UserRepository')]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], ignoreNull: true)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private $id;
+    private ?int $id = null;
 
-    /**
-     * @var int
-     */
     #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
-    private $priority = '7';
+    private int $priority = 7;
 
-    /**
-     * @var binary
-     */
-    #[ORM\Column(name: 'email', type: 'binary', nullable: true, unique: true)]
-    private $email;
+    #[ORM\Column(name: 'email', type: Types::BINARY, nullable: true, unique: true)]
+    private mixed $email = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'fullname', type: 'string', length: 255, nullable: true)]
-    private $fullname;
+    private ?string $fullname = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'username', type: 'string', length: 255, nullable: true)]
-    private $username;
+    private ?string $username = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'local', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
-    private $local;
+    private ?string $local = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
-    private $password;
+    private ?string $password = null;
 
-    /**
-     * @var string
-     */
     #[ORM\Column(name: 'roles', type: 'text', length: 0, nullable: true)]
-    private $roles;
+    private ?string $roles = null;
 
-    /**
-     * @var string|null
-     */
     #[ORM\Column(name: 'emailRecovery', type: 'string', length: 255, nullable: true)]
-    private $emailRecovery;
+    private ?string $emailRecovery = null;
+
+    #[ORM\Column(name: 'imapLogin', type: 'string', length: 255, nullable: true)]
+    private ?string $imapLogin = null;
+
+
+    #[ORM\ManyToOne(targetEntity: Policy::class)]
+    #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
+    private ?Policy $policy;
+
+    #[ORM\ManyToOne(targetEntity: Policy::class)]
+    #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
+    private ?Policy $outPolicy;
 
     /**
-     * @var string|null
+     * @var Collection<int, Domain>
      */
-    #[ORM\Column(name: 'imapLogin', type: 'string', length: 255, nullable: true)]
-    private $imapLogin;
-
-
-    #[ORM\ManyToOne(targetEntity: 'Policy')]
-    #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
-    private $policy;
-
-    #[ORM\ManyToOne(targetEntity: 'Policy')]
-    #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
-    private $outPolicy;
-
-
     #[ORM\JoinTable(name: 'users_domains')]
-    #[ORM\ManyToMany(targetEntity: 'Domain', inversedBy: 'users')]
-    private $domains;
+    #[ORM\ManyToMany(targetEntity: Domain::class, inversedBy: 'users')]
+    private Collection $domains;
 
-    #[ORM\ManyToOne(targetEntity: 'Domain')]
+    #[ORM\ManyToOne(targetEntity: Domain::class)]
     #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
-    private $domain;
+    private ?Domain $domain;
 
-    #[ORM\ManyToMany(targetEntity: 'Groups', inversedBy: 'users')]
+    /**
+     * @var Collection<int, Groups>
+     */
+    #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     #[OrderBy(['priority' => 'DESC'])]
-    private $groups;
+    private Collection $groups;
 
-    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
-    private $originalUser;
+    private ?User $originalUser;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $report;
+    private ?bool $report;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'ownedSharedBoxes')]
-    private $sharedWith;
+    private Collection $sharedWith;
 
+    /**
+     * @var Collection<int, User>
+     */
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'sharedWith')]
-    private $ownedSharedBoxes;
+    private Collection $ownedSharedBoxes;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $dateLastReport;
+    private ?int $dateLastReport;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private $bypassHumanAuth;
+    private ?bool $bypassHumanAuth;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
-    private $preferedLang;
+    private ?string $preferedLang;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $uid;
+    private ?string $uid;
 
-    #[ORM\OneToMany(targetEntity: 'App\Entity\Wblist', mappedBy: 'rid')]
-    private $wbLists;
+    /**
+     * @var Collection<int, Wblist>
+     */
+    #[ORM\OneToMany(targetEntity: Wblist::class, mappedBy: 'rid')]
+    private Collection $wbLists;
 
     #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'users')]
-    private $originConnector;
+    private ?Connector $originConnector;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $ldapDN;
+    private ?string $ldapDN;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $office365PrincipalName = null;
 
-    #[ORM\OneToOne(targetEntity: 'App\Entity\SenderRateLimit')]
+    #[ORM\OneToOne(targetEntity: SenderRateLimit::class)]
     private ?SenderRateLimit $sender_rate_limit = null;
 
+    /**
+     * @var array<int, array<string, int>>
+     */
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
@@ -153,7 +142,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         $this->domains = new ArrayCollection();
         $this->sharedWith = new ArrayCollection();
-        $this->owners = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->ownedSharedBoxes = new ArrayCollection();
         $this->wbLists = new ArrayCollection();
@@ -191,12 +179,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEmail()
+    public function getEmail(): mixed
     {
         return $this->email;
     }
 
-    public function getEmailFromRessource()
+    public function getEmailFromRessource(): ?string
     {
         if ($this->email === null) {
             return null;
@@ -205,7 +193,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return stream_get_contents($this->email, -1, 0);
     }
 
-    public function setEmail($email): self
+    public function setEmail(mixed $email): self
     {
         $this->email = $email;
 
@@ -346,7 +334,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|Domain[]
+     * @return Collection<int, Domain>
      */
     public function getDomains(): Collection
     {
@@ -421,7 +409,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|self[]
+     * @return Collection<int, self>
      */
     public function getSharedWith(): Collection
     {
@@ -533,9 +521,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Groups>
+     * @return ?Collection<int, Groups>
      */
-    public function getGroups(): Collection
+    public function getGroups(): ?Collection
     {
         return $this->groups;
     }
@@ -557,9 +545,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Wblist>
+     * @return ?Collection<int, Wblist>
      */
-    public function getWbLists(): Collection
+    public function getWbLists(): ?Collection
     {
         return $this->wbLists;
     }
@@ -634,11 +622,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return ?array<int, array<string, int>>
+     */
     public function getQuota(): ?array
     {
         return $this->quota;
     }
 
+    /**
+     * @param array<int, array<string, int>> $quota
+     */
     public function setQuota(?array $quota): static
     {
         $this->quota = $quota;

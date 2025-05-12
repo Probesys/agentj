@@ -14,7 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 class SearchFilterType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('fromAddr', TextType::class, [

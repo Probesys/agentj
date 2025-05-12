@@ -11,22 +11,13 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-//use Symfony\Component\String\Slugger\SluggerInterface;
-
 class FileUploader
 {
-
-
-
-    private $targetDirectory;
-
-    public function __construct($targetDirectory)
+    public function __construct(private string $targetDirectory)
     {
-
-        $this->targetDirectory = $targetDirectory;
     }
 
-    public function upload(UploadedFile $file)
+    public function upload(UploadedFile $file): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         try {
@@ -35,11 +26,5 @@ class FileUploader
         } catch (FileException $e) {
             return "";
         }
-    }
-
-    public function setTargetDirectory($dirname)
-    {
-        $this->targetDirectory = $this->targetDirectory . $dirname;
-        return $this;
     }
 }

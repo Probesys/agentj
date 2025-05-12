@@ -31,15 +31,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/ldap')]
 class LdapConnectorController extends AbstractController {
 
-    private $translator;
-    private $em;
-    private CryptEncryptService $cryptEncryptService;
     private Application $application;
 
-    public function __construct(KernelInterface $kernel, TranslatorInterface $translator, EntityManagerInterface $em, CryptEncryptService $cryptEncryptService) {
-        $this->translator = $translator;
-        $this->em = $em;
-        $this->cryptEncryptService = $cryptEncryptService;
+    public function __construct(
+        KernelInterface $kernel,
+        private TranslatorInterface $translator,
+        private CryptEncryptService $cryptEncryptService,
+    ) {
         $this->application = new Application($kernel);
     }
 
