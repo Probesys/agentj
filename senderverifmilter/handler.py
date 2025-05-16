@@ -43,7 +43,7 @@ class Handler:
         # request.get('recipient'),
         # request.get('cc_address'),
         # request.get('bcc_address'),
-        
+
         self.db = self.db_pool.connection()
         self.cursor = self.db.cursor()
         self.cursor.execute(
