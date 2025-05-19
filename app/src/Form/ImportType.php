@@ -16,7 +16,7 @@ class ImportType extends AbstractType {
     {
         $builder
                 ->add('attachment', FileType::class, ['label' => false])
-                ->add('domains', EntityType::class, [
+                ->add('domain', EntityType::class, [
                     'class' => Domain::class,
                     'multiple' => false,
                     'attr' => ['class' => 'select2'],

@@ -162,7 +162,7 @@ class WblistController extends AbstractController {
             if ($fileUpload->getClientMimeType() == "text/csv") {
                 $filename = 'import-wblist-agentj-' . time() . ".csv";
                 $file = $fileUpload->move('/tmp/', $filename);
-                $this->importWbList($file->getPathname(), $form->get('domains')->getData());
+                $this->importWbList($file->getPathname(), $form->get('domain')->getData());
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
@@ -175,10 +175,7 @@ class WblistController extends AbstractController {
         ]);
     }
 
-    /**
-     * @param Domain[] $domains
-     */
-    private function importWbList(string $pathfile, array $domains): void {
+    private function importWbList(string $pathfile, Domain $domain): void {
         $tabWblist = [];
         if (($handle = fopen($pathfile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {
@@ -193,30 +190,23 @@ class WblistController extends AbstractController {
                 }
 
                 if (filter_var(trim($data), FILTER_VALIDATE_EMAIL) || filter_var(trim($data), FILTER_VALIDATE_DOMAIN)) {
-
-                    foreach ($domains as $domain) {
-                        if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
-                            continue;
-                        }
-                        $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                        $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
-                        if (!$wblist) {
-                            $wblist = new Wblist($user, $mailaddrSender);
-                        }
-                        
-                        $wblist->setWb('W');
-                        $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
-                        $wblist->setType(1);
-                        $this->em->persist($wblist);
-                        $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
-                        
+                    if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
+                        continue;
                     }
-                   
-                    
+                    $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
+                    $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
+                    if (!$wblist) {
+                        $wblist = new Wblist($user, $mailaddrSender);
+                    }
+
+                    $wblist->setWb('W');
+                    $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
+                    $wblist->setType(1);
+                    $this->em->persist($wblist);
+                    $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
                 }
             }
             $this->em->flush();
-            
         }
     }
 
