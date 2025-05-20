@@ -13,6 +13,7 @@ use App\Entity\Alert;
 use App\Form\CaptchaFormType;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,7 +27,8 @@ class DefaultController extends AbstractController {
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
-        private Security $security) {
+        private Security $security,
+        private MsgrcptSearchRepository $msgrcptSearchRepository) {
     }
 
     #[Route(path: '/', name: 'homepage')]
@@ -34,15 +36,15 @@ class DefaultController extends AbstractController {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-        $nbUntreadtedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::UNTREATED, $alias);
-        $nbAutorizeMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::AUTHORIZED, $alias);
-        $nbBannedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::BANNED, $alias);
-        $nbDeletedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::DELETED, $alias);
-        $nbRestoredMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::RESTORED, $alias);
-        $nbErrorMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::ERROR, $alias);
-        $nbSpammedMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::SPAMMED, $alias);
-        $nbVirusMsgByDay = $this->em->getRepository(Msgs::class)->countByTypeAndDays($user, MessageStatus::VIRUS, $alias);
-        $latest_msgs = $this->em->getRepository(Msgs::class)->search($user, null, null, null, null, null, 5);
+        $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::UNTREATED);
+        $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::AUTHORIZED);
+        $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::BANNED);
+        $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::DELETED);
+        $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::RESTORED);
+        $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::ERROR);
+        $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::SPAMMED);
+        $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::VIRUS);
+        $latest_msgs = $this->msgrcptSearchRepository->getSearchQuery($user, null)->setMaxResults(5)->getResult();
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
         $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
         $unreadAlertsCount = count(array_filter($all_alerts, function($all_alert) {
@@ -50,17 +52,17 @@ class DefaultController extends AbstractController {
         }));
 
         $labels = array_map(function ($item) {
-            return $item['time_iso'];
+            return $item['timeIso'];
         }, $nbAutorizeMsgByDay);
 
-        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::UNTREATED, $alias);
-        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::AUTHORIZED, $alias);
-        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::BANNED, $alias);
-        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::DELETED, $alias);
-        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::RESTORED, $alias);
-        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::ERROR, $alias);
-        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::SPAMMED, $alias);
-        $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::VIRUS, $alias);
+        $msgs['untreated'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
+        $msgs['authorized'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+        $msgs['banned'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
+        $msgs['delete'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
+        $msgs['restored'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
+        $msgs['error'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::ERROR);
+        $msgs['spammed'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
+        $msgs['virus'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS);
 
         if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $domains = $this->em->getRepository(Domain::class)->findAll();
