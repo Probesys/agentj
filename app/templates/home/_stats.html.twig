@@ -19,7 +19,7 @@
           label: Translator.trans('Navigation.untreated'),
           data: [
             {% for day in nbUntreadtedMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#36A2EB', // Blue
@@ -31,7 +31,7 @@
           label: Translator.trans('Navigation.authorized'),
           data: [
             {% for day in nbAutorizeMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#77DD77', // Green
@@ -43,7 +43,7 @@
           label: Translator.trans('Navigation.banned'),
           data: [
             {% for day in nbBannedMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#FF9F40', // Orange
@@ -55,7 +55,7 @@
           label: Translator.trans('Navigation.Messagedelete'),
           data: [
             {% for day in nbDeletedMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#9966FF', // Purple
@@ -67,7 +67,7 @@
           label: Translator.trans('Navigation.MessageRestored'),
           data: [
             {% for day in nbRestoredMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#4BC0C0', // Teal
@@ -79,7 +79,7 @@
           label: 'Error',
           data: [
             {% for day in nbErrorMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#C9CBCF', // Light Gray
@@ -91,7 +91,7 @@
           label: 'Spam',
           data: [
             {% for day in nbSpammedMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#FF5733',  // Dark Orange
@@ -103,7 +103,7 @@
           label: 'Virus',
           data: [
             {% for day in nbVirusMsgByDay %}
-              { date: '{{ day.time_iso|date("Y-m-d") }}', value: {{ day.nb_result }} },
+              { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
             {% endfor %}
           ],
           borderColor: '#FF6384', // Red
