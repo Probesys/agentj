@@ -15,7 +15,6 @@ use App\Repository\MsgrcptRepository;
 #[ORM\Entity(repositoryClass: MsgrcptRepository::class)]
 class Msgrcpt
 {
-
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
@@ -81,6 +80,16 @@ class Msgrcpt
     public function getMailId(): mixed
     {
         return $this->mailId;
+    }
+
+    public function getMailIdAsString(): string
+    {
+        $strMailId = $this->mailId;
+        if (is_resource($strMailId)) {
+            $strMailId = stream_get_contents($this->mailId, -1, 0);
+            rewind($this->mailId);
+        }
+        return $strMailId;
     }
 
     public function getRseqnum(): ?int
@@ -250,5 +259,4 @@ class Msgrcpt
 
         return $this;
     }
-
 }
