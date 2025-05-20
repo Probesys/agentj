@@ -115,6 +115,7 @@ class MessageService
         int $type = Model\ValidationSource::user,
     ): bool {
         $status = $wb === 'W' ? Entity\MessageStatus::AUTHORIZED : Entity\MessageStatus::BANNED;
+        $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
 
         //check if sender exists in the database
         $emailSender = stream_get_contents($message->getSid()->getEmail(), -1, 0);
@@ -153,7 +154,7 @@ class MessageService
             foreach ($userAndAliases as $user) {
                 //add white liste
                 //        $sid = $mailaddrSender->getId();
-                $rid = $user->getId();
+
                 //if the message is authorized we release all message of the same sender
                 //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
                 $wblist = $this->em->getRepository(Entity\Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user]);
@@ -165,13 +166,17 @@ class MessageService
                 $wblist->setPriority(Entity\Wblist::WBLIST_PRIORITY_USER);
                 $this->em->persist($wblist);
 
-                $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
+
 
                 //get all messages from email Sender and send all message for one user
                 $msgsRelease = $this->em->getRepository(Entity\Msgs::class)->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                        $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy(['partitionTag' => $msgRelease['partition_tag'], 'mailId' => $msgRelease['mail_id'], 'rid' => $msgRelease['rid']]);
+                        $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
+                            'partitionTag' => $msgRelease['partition_tag'],
+                            'mailId' => $msgRelease['mail_id'],
+                            'rid' => $msgRelease['rid']
+                        ]);
                         //if W we deliver blokec messages if it has been released yet
                         if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
                             $process = new Process([
@@ -197,14 +202,13 @@ class MessageService
                     }
                 }
             }
-            $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
             $messageRecipient->setStatus($messageStatus);
-            $this->em->persist($message);
-            $this->em->flush();
-
-            return true;
+            $this->em->persist($messageRecipient);
         }
 
-        return false;
+        $message->setStatus($messageStatus);
+        $this->em->persist($message);
+        $this->em->flush();
+        return true;
     }
 }
