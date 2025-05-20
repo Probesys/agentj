@@ -26,6 +26,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use App\Amavis\DeliveryStatus;
+use Symfony\Component\Mailer\MailerInterface;
 
 #[AsCommand(
     name: 'agentj:send-auth-mail-token',
@@ -41,6 +42,7 @@ class SendAuthMailRequestCommand extends Command
         private MsgsRepository $msgsRepository,
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
+        private MailerInterface $mailer,
         #[Autowire(param: 'domain')]
         public readonly string $agentjDomain,
         #[Autowire(param: 'scheme')]
@@ -243,9 +245,7 @@ class SendAuthMailRequestCommand extends Command
     private function sendAuthEmail(Msgs $message, Email $email): bool
     {
         try {
-            $transport = Transport::fromDsn('smtp://' . $this->smtpTransport . ':25');
-            $mailer = new Mailer($transport);
-            $mailer->send($email);
+            $this->mailer->send($email);
 
             return true;
         } catch (\Exception $e) {
