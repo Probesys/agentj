@@ -104,7 +104,6 @@ class ReportSendMailCommand extends Command {
                 $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
                 $body = str_replace('[URL_MSGS]', $url, $body);
 
-                $mailFrom = $this->params->get('app.domain_mail_authentification_sender');
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
                 $mailTo = stream_get_contents($user->getEmail(), -1, 0);
                 $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);

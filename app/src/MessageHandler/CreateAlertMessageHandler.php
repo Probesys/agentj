@@ -21,9 +21,10 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class CreateAlertMessageHandler
 {
+    private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
     private string $defaultMailFrom;
-    private $translator;
+    private TranslatorInterface $translator;
     private MailerInterface $mailer;
 
     public function __construct(
