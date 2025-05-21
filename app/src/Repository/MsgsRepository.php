@@ -230,7 +230,7 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($searchKey) {
             // Check if $user is an admin
-            $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
+            $isAdmin = $user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()));
             if ($isAdmin) {
                 $sql .= ' AND (m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
             } else {
