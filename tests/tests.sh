@@ -11,8 +11,8 @@ do
 done
 echo ' ok'
 
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
-ip_outsmtp=$(docker inspect "$(docker compose ps --format "{{.ID}}" outsmtp)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_smtptest=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$(docker compose ps -q smtptest)")
+ip_outsmtp=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$(docker compose ps -q outsmtp)")
 
 # add tests data to db if not already here
 $dx php bin/console doctrine:fixtures:load --append

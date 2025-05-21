@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_smtptest=$(scripts/_smtptest_ip.sh)
 
 for user in 'user.domain.quota' 'user.group1.perso.large.quota' 'user.group1.perso.small.quota' 'user.group1.quota' 'user'
 do

@@ -2,7 +2,7 @@
 # send a mail from an external address and smtp
 # to an user of a domain protected by agentj
 
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_smtptest=$(scripts/_smtptest_ip.sh)
 
 from='root@smtp.test'
 to='user@blocnormal.fr'

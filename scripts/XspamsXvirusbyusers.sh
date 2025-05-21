@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
+ip_smtptest=$(scripts/_smtptest_ip.sh)
 count=${1:-10}
 
 echo " -- legit"
@@ -50,14 +50,14 @@ do
 	echo -n out
 	for i in $(seq 1 "$count")
 	do
-		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null
+		swaks --from "$user@blocnormal.fr" --to "root@smtp.test" --server "$ip_smtptest":27 --h-Subject "$i virus" --attach @tests/eicar.com.txt > /dev/null
 		echo -n '.'
 	done
 	echo ok
 	echo -n in
 	for i in $(seq 1 "$count")
 	do
-		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 --h-Subject "$i virus" --attach @docker/tests/eicar.com.txt > /dev/null
+		swaks --to "$user@blocnormal.fr" --from "root@smtp.test" --server "$ip_smtptest":26 --h-Subject "$i virus" --attach @tests/eicar.com.txt > /dev/null
 		echo -n '.'
 	done
 	echo ok
