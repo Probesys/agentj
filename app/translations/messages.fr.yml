@@ -130,7 +130,7 @@ Generics:
     NoImport: Aucun compte email n'a été importé.
     domainNotExist: Le domaine n'existe pas
     emailAlreadyExist: Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser
-    imapLoginAlreadyExist: Ce login imap est déjà utilisé. Vous ne pouvez pas l'utiliser
+    imapLoginAlreadyExist: Ce login IMAP est déjà utilisé. Vous ne pouvez pas l'utiliser
     aliasAlreadyExist: Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser
     userNameAlreadyExist: Ce login existe déjà. Vous ne pouvez pas l'utiliser
     passwordNotMatching: La confirmation du mot de passe n'est pas valide
@@ -625,8 +625,8 @@ Entities:
   ImapConnector:
     labels:
     actions:
-      add: "Ajouter un connecteur Imap"
-      edit: "Editer le connecteur Imap"
+      add: "Ajouter un connecteur IMAP"
+      edit: "Editer le connecteur IMAP"
     fields:
       imapHost: "Hôte"
       imapPort: "Port"
