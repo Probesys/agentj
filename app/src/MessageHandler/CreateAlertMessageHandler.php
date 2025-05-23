@@ -117,7 +117,7 @@ class CreateAlertMessageHandler
                         $alert->setAlertType('out_msgs');
                         $alert->setRefId($mailId);
                         $alert->setDate(new \DateTime('now', $timezone));
-                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title', [], $locale));
+                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale));
                         $alert->setIsRead(false);
                         $alert->setUser($user);
                         $alert->setRefUser($fromAddr);
@@ -134,8 +134,8 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
-                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title', [], $locale))
-                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content', [], $locale) . $fromAddr);
+                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale))
+                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content', locale: $locale) . $fromAddr);
 
                             $this->mailer->send($email);
                         } else {
@@ -164,7 +164,7 @@ class CreateAlertMessageHandler
                             $alert->setAlertType('out_msgs');
                             $alert->setRefId($mailId);
                             $alert->setDate(new \DateTime('now', $timezone));
-                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title', [], $locale));
+                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale));
                             $alert->setIsRead(false);
                             $alert->setUser($senderUser);
                             $alert->setRefUser($fromAddr);
@@ -183,8 +183,8 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($senderUser->getEmailFromRessource())
-                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title'))
-                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content'));
+                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale))
+                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content', locale: $locale));
 
                             $this->mailer->send($email);
                         }
@@ -269,7 +269,7 @@ class CreateAlertMessageHandler
                     $alert->setAlertType('sql_limit_report');
                     $alert->setRefId($id);
                     $alert->setDate(new \DateTime('now', $timezone));
-                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title', [], $locale));
+                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale));
                     $alert->setIsRead(false);
                     $alert->setUser($user);
                     $alert->setRefUser(implode(', ', $senderEmails));
@@ -287,8 +287,8 @@ class CreateAlertMessageHandler
                         $email = (new Email())
                             ->from($mailFrom)
                             ->to($emailAddress)
-                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title', [], $locale))
-                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content', [], $locale) . implode(', ', $senderEmails));
+                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale))
+                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content', locale: $locale) . implode(', ', $senderEmails));
 
                         $this->mailer->send($email);
                     } else {
@@ -323,7 +323,7 @@ class CreateAlertMessageHandler
                                 $alert->setAlertType('sql_limit_report');
                                 $alert->setRefId($id);
                                 $alert->setDate(new \DateTime('now', $timezone));
-                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title', [], $locale));
+                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale));
                                 $alert->setIsRead(false);
                                 $alert->setUser($senderUser);
                                 $alert->setRefUser($fromAddr);
@@ -342,8 +342,8 @@ class CreateAlertMessageHandler
                                 $email = (new Email())
                                     ->from($mailFrom)
                                     ->to($senderUser->getEmailFromRessource())
-                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title', [], $locale))
-                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content', [], $locale));
+                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale))
+                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content', locale: $locale));
 
                                 $this->mailer->send($email);
                             }

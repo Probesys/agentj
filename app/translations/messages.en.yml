@@ -130,7 +130,7 @@ Generics:
     NoImport: "No email account was imported."
     domainNotExist: "The domain does not exist"
     emailAlreadyExist: "This email is already used. You can't use it"
-    imapLoginAlreadyExist: "This imap login already exists. You can't use it"
+    imapLoginAlreadyExist: "This IMAP login already exists. You can't use it"
     aliasAlreadyExist: "This alias is already used. You can't use it"
     userNameAlreadyExist: "This login already exists. You can't use it"
     passwordNotMatching: "Password confirmation is not valid"
@@ -625,12 +625,12 @@ Entities:
   ImapConnector:
     labels:
     actions:
-      add: "Add Imap connector"
-      edit: "Edit imap connector"
+      add: "Add IMAP connector"
+      edit: "Edit IMAP connector"
     fields:
       imapHost: "Host"
       imapPort: "Port"
-      imapProtocol: "IMAP securityy"
+      imapProtocol: "Encryption"
       imapNoValidateCert: "Do not validate certificates"
   Office365Connector:
     labels:
