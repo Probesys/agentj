@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use App\Repository\ImapConnectorRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImapConnectorRepository::class)]
 class ImapConnector extends Connector
 {
+    public const PORT_RANGE = [1, 65535];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -17,6 +20,10 @@ class ImapConnector extends Connector
     private ?string $imapHost = null;
 
     #[ORM\Column]
+    #[Assert\Range(
+        min: self::PORT_RANGE[0],
+        max: self::PORT_RANGE[1],
+    )]
     private ?int $imapPort = null;
 
     #[ORM\Column(length: 10, nullable: true)]
@@ -24,6 +31,11 @@ class ImapConnector extends Connector
 
     #[ORM\Column]
     private ?bool $imapNoValidateCert = null;
+
+    public function __construct()
+    {
+        $this->imapPort = 993;
+    }
 
     public function getImapHost(): ?string
     {

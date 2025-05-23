@@ -3,28 +3,24 @@
 namespace App\Form;
 
 use App\Entity\ImapConnector;
-use App\Model\ImapPorts;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ImapConnectorType extends ConnectorType
 {
-    public function __construct(private ImapPorts $imapPorts) {
-
-    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         parent::buildForm($builder, $options);
-        $builder            
+        $builder
             ->add('imapHost')
-            ->add('imapPort',ChoiceType::class,[
+            ->add('imapPort', IntegerType::class, [
                 'label' => 'Entities.ImapConnector.fields.imap_port',
-                'placeholder' => '',
-                'choices' => $this->imapPorts::values(),
-                'multiple' => false,
-                'expanded' => false,
-
+                'attr' => [
+                    'min' => ImapConnector::PORT_RANGE[0],
+                    'max' => ImapConnector::PORT_RANGE[1],
+                ],
             ])
             ->add('imapProtocol', ChoiceType::class,[
                 'label' => 'Entities.ImapConnector.fields.imapProtocol',
