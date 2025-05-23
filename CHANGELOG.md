@@ -1,5 +1,33 @@
 # Changelog of AgentJ
 
+## 2025-05-23 - 2.1.2
+
+### Bug fixes
+
+- Allow admins to search on recipients ([5aeaae4](https://github.com/Probesys/agentj/commit/5aeaae4))
+- Show delivered "spammy" emails in the correct list ([93d6a25](https://github.com/Probesys/agentj/commit/93d6a25))
+- Fix importing white lists ([5c091c3](https://github.com/Probesys/agentj/commit/5c091c3))
+- Fix wblist import allowing bad values ([d4f610d](https://github.com/Probesys/agentj/commit/d4f610d))
+- Fix translations of alerts ([9b4ae6c](https://github.com/Probesys/agentj/commit/9b4ae6c))
+- Don't slice alert subject in tables ([95a4d20](https://github.com/Probesys/agentj/commit/95a4d20))
+- Fix various issues related to the IMAP connector form ([eca19a4](https://github.com/Probesys/agentj/commit/eca19a4), [ab3199f](https://github.com/Probesys/agentj/commit/ab3199f), [b3e0cda](https://github.com/Probesys/agentj/commit/b3e0cda))
+
+### Technical
+
+- Mutualize ClamAV instance for both amavis and allow to use external ClamAV service ([cf9ffd7](https://github.com/Probesys/agentj/commit/cf9ffd7))
+- Store information of all (non quarantined) mails with Amavis ([02ded11](https://github.com/Probesys/agentj/commit/02ded11))
+- Allow TLS for Postfix SMTP client ([d11ddc2](https://github.com/Probesys/agentj/commit/d11ddc2))
+- Wait for `db` container to be healthy ([f2c3ffa](https://github.com/Probesys/agentj/commit/f2c3ffa))
+- Auto-upgrade MariaDB if needed ([098d367](https://github.com/Probesys/agentj/commit/098d367))
+- Fix the "amavis user does not exists" error when starting the `app` container ([da493bd](https://github.com/Probesys/agentj/commit/da493bd))
+
+### Developers
+
+- Configure PHPStan up to level 6 ([b64377d](https://github.com/Probesys/agentj/commit/b64377d), [9c2784d](https://github.com/Probesys/agentj/commit/9c2784d))
+- Update the app dependencies ([acbf595](https://github.com/Probesys/agentj/commit/acbf595))
+- Execute the tests on the host ([d653231](https://github.com/Probesys/agentj/commit/d653231))
+- Add brief documentation about `senderverifmilter` ([8329f96](https://github.com/Probesys/agentj/commit/8329f96))
+
 ## 2025-03-13 - 2.1.1
 
 ### Bug fixes
