@@ -48,7 +48,7 @@ class Handler:
         self.cursor = self.db.cursor()
         self.cursor.execute(
                 '''
-                select 'OK' from domain a
+                select 1 from domain a
                 join domain_relay b on a.id = b.domain_id
                 join users c on a.id = c.domain_id
                 where b.ip_address = %s and c.email = %s
@@ -86,11 +86,5 @@ class Handler:
         """Send response"""
         # actions return to Postfix, see http://www.postfix.org/access.5.html for a list of actions.
         data = 'action={}\n\n'.format(message)
-        print('Sending data:', data)
         self.conn.send(data.encode('utf-8'))
         self.conn.close()
-
-    def __del__(self):
-        """Destructor"""
-        print('Handler destroyed')
-
