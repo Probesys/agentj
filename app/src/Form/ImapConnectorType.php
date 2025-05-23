@@ -24,11 +24,10 @@ class ImapConnectorType extends ConnectorType
             ])
             ->add('imapProtocol', ChoiceType::class,[
                 'label' => 'Entities.ImapConnector.fields.imapProtocol',
-                'required' => false,
                 'choices' => [
+                    'SSL/TLS' => 'ssl',
+                    'StartTLS' => 'starttls',
                     'Generics.labels.none' => '',
-                    'SSL' => 'ssl',
-                    'TLS' => 'tls',
                 ]
             ])
             ->add('imapNoValidateCert', null, [

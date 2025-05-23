@@ -35,6 +35,7 @@ class ImapConnector extends Connector
     public function __construct()
     {
         $this->imapPort = 993;
+        $this->imapProtocol = 'ssl';
     }
 
     public function getImapHost(): ?string

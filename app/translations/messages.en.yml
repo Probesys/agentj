@@ -630,7 +630,7 @@ Entities:
     fields:
       imapHost: "Host"
       imapPort: "Port"
-      imapProtocol: "IMAP securityy"
+      imapProtocol: "Encryption"
       imapNoValidateCert: "Do not validate certificates"
   Office365Connector:
     labels:
