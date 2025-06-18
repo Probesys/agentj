@@ -350,6 +350,10 @@ class DefaultController extends AbstractController {
         $messageRecipients = [];
         if ($message) {
             $messageRecipients = $this->em->getRepository(Msgrcpt::class)->findByMessage($message);
+
+            $messageRecipients = array_filter($messageRecipients, function(Msgrcpt $msgrcpt) use ($domain) {
+                return $msgrcpt->getRid()->getReverseDomain() == $domain->getDomain();
+            });
         }
 
         return [$message, $domain, $messageRecipients];

@@ -20,15 +20,15 @@
             {% for alert in alerts %}
                 <tr class="{{ alert.isRead ? '' : 'font-weight-bold' }}">
                     <td data-title="{{ 'Message.Date'|trans }}">
-                        <span title="{{ 'Message.Date'|trans ~ ' : ' ~ alert.date|format_datetime('short', 'short') }}">
+                        <time datetime="{{ alert.date|date('Y-m-d\\TH:i:s') }}">
                             {{ alert.date|format_datetime('short', 'short') }}
-                        </span>
+                        </time>
                     </td>
                     <td data-title="{{ 'Entities.User.fields.email'|trans }}">
-                        <span title="{{ alert.refUser }}">{{ alert.refUser }}</span>
+                        {{ alert.refUser }}
                     </td>
                     <td data-title="{{ 'Message.Object'|trans }}">
-                        <span title="{{ alert.subject }}">{{ alert.subject|slice(0, 30) }}</span>
+                        {{ alert.subject }}
                     </td>
                     <td>
                         <a href="{{ path('alert_read', { 'id': alert.id }) }}" class="btn btn-primary float-right" title="{{ 'Entities.Alert.actions.read'|trans }}">

@@ -26,6 +26,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use App\Amavis\DeliveryStatus;
+use Symfony\Component\Mailer\MailerInterface;
 
 #[AsCommand(
     name: 'agentj:send-auth-mail-token',
@@ -41,12 +42,11 @@ class SendAuthMailRequestCommand extends Command
         private MsgsRepository $msgsRepository,
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
+        private MailerInterface $mailer,
         #[Autowire(param: 'domain')]
         public readonly string $agentjDomain,
         #[Autowire(param: 'scheme')]
         public readonly string $agentjDomainScheme,
-        #[Autowire(param: 'app.smtp-transport')]
-        public readonly string $smtpTransport,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
@@ -59,8 +59,6 @@ class SendAuthMailRequestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
-
         $store = new SemaphoreStore();
         $factory = new LockFactory($store);
         $lock = $factory->createLock('msgs-send-mail-token', 1800);
@@ -74,7 +72,7 @@ class SendAuthMailRequestCommand extends Command
         $userRepository = $this->em->getRepository(User::class);
 
         foreach ($messagesToHandle as $message) {
-                $recipientsByDomain = [];
+            $recipientsByDomain = [];
 
             foreach ($message->getMsgrcpts() as $msgrcpt) {
                 $maddr = $msgrcpt->getRid();
@@ -94,7 +92,10 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
-                if ($msgrcpt->getBspamLevel() > $user->getDomain()->getLevel()) {
+                $messageIsPassed = $msgrcpt->getDs() === DeliveryStatus::Pass;
+                $messageIsSpam = $msgrcpt->getBspamLevel() > $user->getDomain()->getLevel();
+
+                if ($messageIsPassed || $messageIsSpam) {
                     continue;
                 }
 
@@ -107,7 +108,7 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
-                if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null && $msgrcpt->getDs() !== DeliveryStatus::Pass) {
+                if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null) {
                     $this->releaseMessage($message, $msgrcpt, $user);
                     continue;
                 }
@@ -118,21 +119,29 @@ class SendAuthMailRequestCommand extends Command
             foreach ($recipientsByDomain as $domainName => $messageRecipients) {
                 $domainRepository = $this->em->getRepository(Domain::class);
                 $domain = $domainRepository->findOneBy(['domain' => $domainName]);
-                if ($domain) {
-                    $mailFrom = $this->getMailFrom($domain);
-                    $fromName = $this->getMailFromName($messageRecipients[0]);
-                    $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients);
-                    $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody);
-                    if ($this->sendAuthEmail($message, $email)) {
-                        $logService = new LogService($this->em);
-                        $logService->addLog(
-                            'Authentification request sent',
-                            $message->getMailIdAsString(),
-                            $mailBody['html_body']
-                        );
-                        $subject = $this->getSubject($message);
-                        $output->writeln(date('Y-m-d H:i:s') . "\t" . $mailFrom . "<" . $fromName . ">" . "\t" . $message->getMailIdAsString() . "\t" . $message->getSid()->getEmailClear()  . "\t" . $subject);
-                    }
+                if (!$domain) {
+                    continue;
+                }
+
+                $mailFrom = $this->getMailFrom($domain);
+                $fromName = $this->getMailFromName($messageRecipients[0]);
+                $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients);
+                $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody);
+                if ($this->sendAuthEmail($message, $email)) {
+                    $logService = new LogService($this->em);
+                    $logService->addLog(
+                        'Authentification request sent',
+                        $message->getMailIdAsString(),
+                        $mailBody['html_body']
+                    );
+                    $subject = $this->getSubject($message);
+                    $output->writeln(
+                        date('Y-m-d H:i:s')
+                        . "\t{$fromName} <{$mailFrom}>"
+                        . "\t{$message->getMailIdAsString()}"
+                        . "\t{$message->getSid()->getEmailClear()}"
+                        . "\t{$subject}"
+                    );
                 }
             }
 
@@ -152,7 +161,6 @@ class SendAuthMailRequestCommand extends Command
      */
     private function createAuthEmailContent(Domain $domain, Msgs $msg, array $messageRecipients): array
     {
-
         $token = $this->cryptEncryptService->encrypt(
             $msg->getMailIdAsString()
             . '%%%' . $msg->getSecretId()
@@ -176,7 +184,6 @@ class SendAuthMailRequestCommand extends Command
         $bodyTextPlain = preg_replace("/\r|\n|\t/", "", $body);
         $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $bodyTextPlain);
         $bodyTextPlain = preg_replace_callback("/(&#[0-9]+;)/", function ($m) {
-
             return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
         }, $bodyTextPlain);
         $bodyTextPlain = html_entity_decode($bodyTextPlain);
@@ -188,7 +195,6 @@ class SendAuthMailRequestCommand extends Command
             'plain_body' => $bodyTextPlain,
         ];
     }
-
 
     /**
      * Set the subject of the mail send captcha from original subject
@@ -203,7 +209,6 @@ class SendAuthMailRequestCommand extends Command
         return $subject;
     }
 
-
     /**
      * create Email instance
      * @param string[] $body
@@ -214,19 +219,17 @@ class SendAuthMailRequestCommand extends Command
         string $fromName,
         array $body
     ): Email {
-
-
         $mailTo = $message->getSid()->getEmailClear();
         try {
             $subject = $this->getSubject($message);
             $email = new Email();
             $email->subject($subject)
-                    ->from(new Address($mailFrom, $fromName))
-                    ->to($mailTo)
-                    ->html($body['html_body'])
-                    ->text(strip_tags($body['plain_body']));
+                  ->from(new Address($mailFrom, $fromName))
+                  ->to($mailTo)
+                  ->html($body['html_body'])
+                  ->text(strip_tags($body['plain_body']));
         } catch (\Exception $e) {
-          //catch error and save this in msgs + change status to error
+            //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
             $message->setStatus($this->messageStatusError);
@@ -243,9 +246,7 @@ class SendAuthMailRequestCommand extends Command
     private function sendAuthEmail(Msgs $message, Email $email): bool
     {
         try {
-            $transport = Transport::fromDsn('smtp://' . $this->smtpTransport . ':25');
-            $mailer = new Mailer($transport);
-            $mailer->send($email);
+            $this->mailer->send($email);
 
             return true;
         } catch (\Exception $e) {
@@ -260,15 +261,12 @@ class SendAuthMailRequestCommand extends Command
 
     private function releaseMessage(Msgs $message, Msgrcpt $msgRcpt, User $user): void
     {
-
-        $process = new Process(
-            [
+        $process = new Process([
             $this->amavisdRelease,
             stream_get_contents($message->getQuarLoc(), -1, 0),
             stream_get_contents($message->getSecretId(), -1, 0),
-            $user->getEmailFromRessource()
-                ]
-        );
+            $user->getEmailFromRessource(),
+        ]);
 
         $process->run(
             function ($type, $buffer) use ($msgRcpt) {

@@ -2,11 +2,11 @@
 
 namespace App\Amavis;
 
-enum DeliveryStatus: string
+class DeliveryStatus
 {
-    case Pass = 'P';
-    case Reject = 'R';
-    case Bounce = 'B';
-    case Discard = 'D';
-    case TempFile = 'T';
+    public const Pass = 'P';
+    public const Reject = 'R';
+    public const Bounce = 'B';
+    public const Discard = 'D';
+    public const TempFile = 'T';
 }

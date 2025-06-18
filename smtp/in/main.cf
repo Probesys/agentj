@@ -1,0 +1,39 @@
+smtpd_banner = $myhostname AgentJ ESMTP (libre antispam system)
+biff = no
+smtp_host_lookup = dns, native
+message_size_limit = 40960000
+compatibility_level=3.6
+smtp_tls_security_level = may
+
+myhostname = $DOMAIN
+smtp_helo_name = $EHLO_DOMAIN
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mydestination =
+
+smtpd_relay_restrictions =
+    reject_unauth_destination
+smtpd_recipient_restrictions =
+    reject_non_fqdn_recipient,
+    reject_unlisted_recipient
+
+local_recipient_maps =
+local_transport = error:local mail delivery is disabled
+relayhost =
+
+content_filter=amavisfeed:[amavis]:10024
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+
+milter_default_action = tempfail
+smtpd_milters = inet:opendkim:8891
+non_smtpd_milters = inet:opendkim:8891
+
+transport_maps = proxy:mysql:/etc/postfix-common/mysql-transport_map.cf,
+	       lmdb:/etc/postfix-common/slow_dest_domains_transport
+# restrict relay to configured domains & recipients
+relay_domains = proxy:mysql:/etc/postfix-in/mysql-virtual_domains.cf
+relay_recipient_maps = proxy:mysql:/etc/postfix-in/mysql-virtual_recipient_maps.cf
+
+
+maillog_file = /dev/stdout

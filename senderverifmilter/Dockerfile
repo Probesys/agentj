@@ -1,7 +1,5 @@
 FROM python:3-slim
 
-EXPOSE 10033
-
 ARG UID=1001
 ARG GID=1001
 

@@ -71,11 +71,11 @@ class MsgsRepository extends ServiceEntityRepository
                 $sqlWhere .= ' and mr.content = "V" ';
                 break;
             case MessageStatus::BANNED:
-                $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"  ';
+                $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"';
                 break;
             case MessageStatus::AUTHORIZED:
                 //$sqlWhere .= ' and (mr.status_id=2 or (mr.wl = "Y" and mr.status_id != 3)) ';
-                $sqlWhere .= ' and (mr.status_id=2 or mr.wl = "Y") and mr.content != "V" ';
+                $sqlWhere .= ' and (mr.status_id=2 or mr.wl = "Y" or (mr.content="Y" and (mr.status_id = 2 or mr.status_id is null))) and mr.content != "V"';
                 break;
             case MessageStatus::DELETED:
                 $sqlWhere .= ' and mr.status_id=3 and mr.content != "V"  ';
@@ -91,7 +91,7 @@ class MsgsRepository extends ServiceEntityRepository
                 break;
             }
         } else {
-            $sqlWhere .= ' and mr.content != "C"  and mr.content != "V" AND mr.wl != "Y" AND mr.bl != "Y"  and ( mr.status_id IS NULL  OR mr.status_id = 4 ) and bspam_level <= d.level ';
+            $sqlWhere .= ' and mr.content != "C"  and mr.content != "V" and mr.content != "Y" AND mr.wl != "Y" AND mr.bl != "Y"  and ( mr.status_id IS NULL  OR mr.status_id = 4 ) and bspam_level <= d.level ';
         }
 
         if ($user && $user->getEmail() && in_array('ROLE_USER', $user->getRoles())) {
@@ -231,7 +231,7 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($searchKey) {
             // Check if $user is an admin
-            $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
+            $isAdmin = $user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()));
             if ($isAdmin) {
                 $sql .= ' AND (m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
             } else {
@@ -355,7 +355,6 @@ class MsgsRepository extends ServiceEntityRepository
      */
     public function searchMsgsToSendAuthRequest(): array
     {
-
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m
             FROM App\Entity\Msgs m
@@ -369,11 +368,10 @@ class MsgsRepository extends ServiceEntityRepository
         $query->setParameter('content', [
             ContentType::Clean,
             ContentType::Virus,
-            ContentType::Unchecked
+            ContentType::Unchecked,
         ]);
 
         return $query->getResult();
-
     }
 
     /**

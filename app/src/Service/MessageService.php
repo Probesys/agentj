@@ -172,8 +172,7 @@ class MessageService
                 $msgsRelease = $this->em->getRepository(Entity\Msgs::class)->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                        $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)
-                        ->findOneBy([
+                        $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
                             'partitionTag' => $msgRelease['partition_tag'],
                             'mailId' => $msgRelease['mail_id'],
                             'rid' => $msgRelease['rid']

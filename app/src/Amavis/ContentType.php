@@ -2,16 +2,16 @@
 
 namespace App\Amavis;
 
-enum ContentType: string
+class ContentType
 {
-    case Virus = 'V';
-    case Banned = 'B';
-    case Unchecked = 'U';
-    case Spam = 'S';
-    case Spammy = 'Y';
-    case BadMime = 'M';
-    case BadHeader = 'H';
-    case Oversized = 'O';
-    case MtaError = 'T';
-    case Clean = 'C';
+    public const Virus = 'V';
+    public const Banned = 'B';
+    public const Unchecked = 'U';
+    public const Spam = 'S';
+    public const Spammy = 'Y';
+    public const BadMime = 'M';
+    public const BadHeader = 'H';
+    public const Oversized = 'O';
+    public const MtaError = 'T';
+    public const Clean = 'C';
 }

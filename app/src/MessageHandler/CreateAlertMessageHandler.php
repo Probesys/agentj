@@ -10,8 +10,7 @@ use App\Entity\Domain;
 use App\Entity\Maddr;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -20,16 +19,23 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class CreateAlertMessageHandler
 {
+    private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
     private string $defaultMailFrom;
+    private TranslatorInterface $translator;
+    private MailerInterface $mailer;
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private ParameterBagInterface $params,
-        private TranslatorInterface $translator
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $params,
+        TranslatorInterface $translator,
+        MailerInterface $mailer,
     ) {
+        $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
-        $this->defaultMailFrom = $this->params->get('app.domain_mail_authentification_sender');
+        $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
+        $this->translator = $translator;
+        $this->mailer = $mailer;
     }
 
     public function __invoke(CreateAlertMessage $message): void
@@ -111,7 +117,7 @@ class CreateAlertMessageHandler
                         $alert->setAlertType('out_msgs');
                         $alert->setRefId($mailId);
                         $alert->setDate(new \DateTime('now', $timezone));
-                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title', [], $locale));
+                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale));
                         $alert->setIsRead(false);
                         $alert->setUser($user);
                         $alert->setRefUser($fromAddr);
@@ -121,23 +127,17 @@ class CreateAlertMessageHandler
                         // Send email to admin/superadmin
                         $emailAddress = $user->getEmailFromRessource();
                         if ($emailAddress !== null && $user->getDomain() !== null) {
-                            $smtpServer = $user->getDomain()->getSrvSmtp();
-                            $smtpPort = $user->getDomain()->getSmtpPort();
-                            $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                            $mailer = new Mailer($transport);
-
                             $mailFrom = $user->getDomain()->getMailAuthenticationSender();
                             if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                                 $mailFrom = $this->defaultMailFrom;
                             }
-
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
-                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title', [], $locale))
-                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content', [], $locale) . $fromAddr);
+                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale))
+                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content', locale: $locale) . $fromAddr);
 
-                            $mailer->send($email);
+                            $this->mailer->send($email);
                         } else {
                             $this->output->writeln('No email address found for user: ' . $user->getId());
                         }
@@ -164,7 +164,7 @@ class CreateAlertMessageHandler
                             $alert->setAlertType('out_msgs');
                             $alert->setRefId($mailId);
                             $alert->setDate(new \DateTime('now', $timezone));
-                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title', [], $locale));
+                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale));
                             $alert->setIsRead(false);
                             $alert->setUser($senderUser);
                             $alert->setRefUser($fromAddr);
@@ -183,14 +183,10 @@ class CreateAlertMessageHandler
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($senderUser->getEmailFromRessource())
-                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title'))
-                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content'));
+                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale))
+                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content', locale: $locale));
 
-                            $smtpServer = $senderUser->getDomain()->getSrvSmtp();
-                            $smtpPort = $senderUser->getDomain()->getSmtpPort();
-                            $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                            $mailer = new Mailer($transport);
-                            $mailer->send($email);
+                            $this->mailer->send($email);
                         }
 
                         $this->entityManager->flush();
@@ -273,7 +269,7 @@ class CreateAlertMessageHandler
                     $alert->setAlertType('sql_limit_report');
                     $alert->setRefId($id);
                     $alert->setDate(new \DateTime('now', $timezone));
-                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title', [], $locale));
+                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale));
                     $alert->setIsRead(false);
                     $alert->setUser($user);
                     $alert->setRefUser(implode(', ', $senderEmails));
@@ -283,11 +279,6 @@ class CreateAlertMessageHandler
                     // Send email to admin/superadmin
                     $emailAddress = $user->getEmailFromRessource();
                     if ($emailAddress !== null && $user->getDomain() !== null) {
-                        $smtpServer = $user->getDomain()->getSrvSmtp();
-                        $smtpPort = $user->getDomain()->getSmtpPort();
-                        $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                        $mailer = new Mailer($transport);
-
                         $mailFrom = $user->getDomain()->getMailAuthenticationSender();
                         if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                             $mailFrom = $this->defaultMailFrom;
@@ -296,10 +287,10 @@ class CreateAlertMessageHandler
                         $email = (new Email())
                             ->from($mailFrom)
                             ->to($emailAddress)
-                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title', [], $locale))
-                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content', [], $locale) . implode(', ', $senderEmails));
+                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale))
+                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content', locale: $locale) . implode(', ', $senderEmails));
 
-                        $mailer->send($email);
+                        $this->mailer->send($email);
                     } else {
                         $this->output->writeln('No email address found for user: ' . $user->getId());
                     }
@@ -332,7 +323,7 @@ class CreateAlertMessageHandler
                                 $alert->setAlertType('sql_limit_report');
                                 $alert->setRefId($id);
                                 $alert->setDate(new \DateTime('now', $timezone));
-                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title', [], $locale));
+                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale));
                                 $alert->setIsRead(false);
                                 $alert->setUser($senderUser);
                                 $alert->setRefUser($fromAddr);
@@ -351,14 +342,10 @@ class CreateAlertMessageHandler
                                 $email = (new Email())
                                     ->from($mailFrom)
                                     ->to($senderUser->getEmailFromRessource())
-                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title', [], $locale))
-                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content', [], $locale));
+                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale))
+                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content', locale: $locale));
 
-                                $smtpServer = $senderUser->getDomain()->getSrvSmtp();
-                                $smtpPort = $senderUser->getDomain()->getSmtpPort();
-                                $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                                $mailer = new Mailer($transport);
-                                $mailer->send($email);
+                                $this->mailer->send($email);
                             }
                         } else {
                             $this->output->writeln('No user found with email: ' . $fromAddr);
