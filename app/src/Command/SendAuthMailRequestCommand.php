@@ -47,8 +47,6 @@ class SendAuthMailRequestCommand extends Command
         public readonly string $agentjDomain,
         #[Autowire(param: 'scheme')]
         public readonly string $agentjDomainScheme,
-        #[Autowire(param: 'app.smtp-transport')]
-        public readonly string $smtpTransport,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]

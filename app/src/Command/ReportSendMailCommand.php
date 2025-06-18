@@ -11,6 +11,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport;
@@ -28,7 +30,10 @@ class ReportSendMailCommand extends Command {
         private Environment $twig,
         private ManagerRegistry $doctrine,
         private TranslatorInterface $translator,
+        private MailerInterface $mailer,
         private Service\CryptEncryptService $cryptEncryptService,
+        #[Autowire(param: 'app.domain_mail_authentification_sender')]
+        private string $defaultMailFrom,
         private ParameterBagInterface $params
     ) {
         parent::__construct();
@@ -98,28 +103,21 @@ class ReportSendMailCommand extends Command {
                 $body = str_replace('[NB_RESTORED_MESSAGES]', (string) $nbRestored, $body);
                 $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
                 $body = str_replace('[URL_MSGS]', $url, $body);
-                //$mailFrom = 'no-reply@' . $domain->getDomain();
 
-                $mailFrom = $this->params->get('app.domain_mail_authentification_sender');
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
                 $mailTo = stream_get_contents($user->getEmail(), -1, 0);
                 $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
                 $bodyTextPlain = strip_tags($bodyTextPlain);
-                
+
                 $message = new Email();
                 $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo )
-                        ->from(new Address($mailFrom, $fromName))
+                        ->from(new Address($this->defaultMailFrom, $fromName))
                         ->to($mailTo)
                         ->html($body)->text(strip_tags($bodyTextPlain));
 
 
                 try {
-                    $smtpServer = $user->getDomain()->getSrvSmtp();
-                    $smtpPort = $user->getDomain()->getSmtpPort();
-                    $transport = Transport::fromDsn('smtp://' . $smtpServer . ':' . $smtpPort);
-                    $mailer = new Mailer($transport);
-
-                    $mailer->send($message);
+                    $this->mailer->send($message);
                     $user->setDateLastReport(time());
                     $em->persist($user);
                     $em->flush();

@@ -1,8 +1,6 @@
 #!/bin/bash
 
 dx='docker compose exec -u www-data app'
-ip_smtptest=$(docker inspect "$(docker compose ps --format "{{.ID}}" smtptest)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
-ip_outsmtp=$(docker inspect "$(docker compose ps --format "{{.ID}}" outsmtp)" |grep -Po '(?<=IPAddress": ")(.*)(?=",)')
 
 source .env
 echo "waiting app"
@@ -12,6 +10,9 @@ do
 	sleep 1
 done
 echo ' ok'
+
+ip_smtptest=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$(docker compose ps -q smtptest)")
+ip_outsmtp=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$(docker compose ps -q outsmtp)")
 
 # add tests data to db if not already here
 $dx php bin/console doctrine:fixtures:load --append
@@ -23,7 +24,7 @@ curl='curl -s'
 send() {
 	# for log
 	testname="$1"
-	# in|out|unauthorized_smtp (send to agentj or via agentj)
+	# in|out|out_proxy (send to agentj or via agentj)
 	in_out="$2"
 	from_addr="$3"
 	# number of received mail expected
@@ -52,12 +53,12 @@ send() {
 			to_addr="$_from"
 			smtp_server="$ip_smtptest:26"
 			;;
-		# from agentj, via implicitly authorized smtp (same private ip subnet)
+		# from agentj, via authorized smtp (see fixtures)
 		"out")
 			smtp_server="$ip_smtptest:27"
 			;;
-		# from agentj, via unauthorized client (host ip)
-		"unauthorized_smtp")
+		# from agentj, directly via outsmtp container
+		"out_proxy")
 			smtp_server="$ip_outsmtp"
 			;;
 		*)
@@ -86,12 +87,15 @@ send() {
 	while [ "$secs" -lt "$wait_time" ]
 	do
 		sleep 1; secs=$((secs + 1))
-		messages_json=$($curl "$mailpit_api/search?query=$expected_subject")
+		messages_json=$($curl "$mailpit_api/search?query=subject:\"$expected_subject\"%20!is:tagged%20is:unread")
 		recv_count=$(echo "$messages_json" | jq ".messages_count")
 		sender=$(echo "$messages_json" | jq -r ".messages[0].From.Address")
-		# don't wait only if we expect more than 0 mail and as much than sent
-		if [ "$expected_received_count" -ne 0 ] \
-			&& [ "$expected_received_count" -eq "$mail_to_send" ] \
+		# don't wait if
+		# - we did expect to receive at least one mail
+		# - we did not expect less mail than sent (for rate limit)
+		# - we received what was expected
+		if [ "$expected_received_count" -gt 0 ] \
+			&& [ "$expected_received_count" -ge "$mail_to_send" ] \
 			&& [ "$recv_count" -eq "$expected_received_count" ]; then
 			break
 		fi
@@ -109,7 +113,7 @@ send() {
 	else
 		echo "failed ${secs}s, $recv_count/$expected_received_count mail, to '$to_addr', from '$sender'/'$expected_sender', swaks options '$swaks_opts'"
 		echo 'failed' > "$test_results/$testname.result"
-		tag='TEST_FAILED'
+		tag='FAIL'
 	fi
 
 	# set read status and tag
@@ -117,22 +121,30 @@ send() {
 	  message_ids=$($curl "$mailpit_api/search?query=$expected_subject" \
 	    | jq ".messages[].ID" | tr '\n' ',' | sed 's/,$//')
 	  $curl -o /dev/null -X PUT "$mailpit_api/messages" --json "{\"IDs\":[$message_ids], \"Read\":true}"
-	  $curl -o /dev/null -X PUT "$mailpit_api/tags" --json "{\"IDs\":[$message_ids], \"Tags\":[\"$tag\"]}"
+	  $curl -o /dev/null -X PUT "$mailpit_api/tags" --json "{\"IDs\":[$message_ids], \"Tags\":[\"test:$tag\"]}"
 	fi
 
 	expected_subject=
 	expected_received_count=
 	expected_sender=
 	to_addr=
+	mail_to_send=
+	swaks_expected=
 }
 
 if [ -z "$1" ] || [ "$1" = "block" ]
 then
-	echo "---- block unknown sender/unlock by sending mail ----" 1>&2
+	echo "---- block unknown sender, receive report, authorize by sending mail ----" 1>&2
 	{ sleep 5 && $dx php bin/console agentj:send-auth-mail-token >/dev/null; } &
 	expected_sender="will@blocnormal.fr" \
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
+
+	$dx php bin/console ag:report >/dev/null
+	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
+		expected_sender="no-reply@${APP_DOMAIN:-$DOMAIN}" \
+		to_addr="user@blocnormal.fr" \
+		send 'report' 'out' 'user@blocnormal.fr' 1 0
 
 	send 'out_bloc' 'out' 'user@blocnormal.fr' 1
 	send 'out_pass' 'out' 'user@laissepasser.fr' 1
@@ -159,10 +171,10 @@ fi
 
 if [ -z "$1" ] || [ "$1" = "relay" ]
 then
-	echo "---- don't relay from unregistered smtp or unknown users ----" 1>&2
-	send 'out_bloc_bad_relay1' 'unauthorized_smtp' 'user@blocnormal.fr' 0 1 "" 24
-	send 'out_pass_bad_relay1' 'unauthorized_smtp' 'user@laissepasser.fr' 0 1 "" 24
+	echo "---- don't relay from inexistants users ----" 1>&2
 	send 'out_bloc_unknown_user' 'out' 'inexistant_user@blocnormal.fr' 0 1
+	echo "---- don't relay from unknown servers ----" 1>&2
+	send 'out_bloc_dont_relay_unknown' 'out_proxy' 'user@blocnormal.fr' 0 1 "" 24
 fi
 
 if [ -z "$1" ] || [ "$1" = "ratelimit" ]
@@ -191,7 +203,7 @@ if [ -z "$1" ] || [ "$1" = "dsn" ]
 then
 	echo "---- non delivery message ----" 1>&2
 	expected_subject="Undelivered Mail Returned to Sender" \
-		expected_sender="MAILER-DAEMON@${EHLO_DOMAIN:-$DOMAIN}" \
+		expected_sender="MAILER-DAEMON@$DOMAIN" \
 		to_addr="inexistant@mail.addr" \
 		send 'dsn_non_delivery' 'out' 'user@blocnormal.fr' 1 1
 fi
