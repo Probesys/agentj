@@ -41,13 +41,13 @@
 						{% endif %}
 						{#            <th>{{ 'Message.Status'|trans() }}</th> #}
 						<th>
-						{{ knp_pagination_sortable(messagesRecipients, 'Message.Object'|trans,'m.subject') }}
+						    {{ knp_pagination_sortable(messagesRecipients, 'Message.Object'|trans, 'm.subject') }}
 						</th>
 						<th>
-						{{ knp_pagination_sortable(messagesRecipients, 'Message.Sender'|trans,'m.fromAddr') }}
+						    {{ knp_pagination_sortable(messagesRecipients, 'Message.Sender'|trans, 'm.fromAddr') }}
 						</th>
 						<th>
-						{{ knp_pagination_sortable(messagesRecipients, 'Message.Date'|trans,'m.timeNum') }}
+						    {{ knp_pagination_sortable(messagesRecipients, 'Message.Date'|trans, 'm.timeNum') }}
 						</th>
 						{# it not virus #}
 						{% if type != '7' %}
