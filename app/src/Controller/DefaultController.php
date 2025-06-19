@@ -28,7 +28,8 @@ class DefaultController extends AbstractController {
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private Security $security,
-        private MsgrcptSearchRepository $msgrcptSearchRepository) {
+        private MsgrcptSearchRepository $msgrcptSearchRepository,
+    ) {
     }
 
     #[Route(path: '/', name: 'homepage')]
