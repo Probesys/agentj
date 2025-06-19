@@ -45,7 +45,7 @@ class DefaultController extends AbstractController {
         $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::ERROR);
         $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::SPAMMED);
         $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::VIRUS);
-        $latest_msgs = $this->msgrcptSearchRepository->getSearchQuery($user, null)->setMaxResults(5)->getResult();
+        $latestMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery($user, null)->setMaxResults(5)->getResult();
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
         $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
         $unreadAlertsCount = count(array_filter($all_alerts, function($all_alert) {
