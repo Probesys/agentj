@@ -80,8 +80,8 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
-        ->leftJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
-        ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->leftJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
+            ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         $this->addUserSpecificJoins($queryBuilder, $user);
 
