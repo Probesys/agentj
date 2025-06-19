@@ -64,7 +64,7 @@ class MessageController extends AbstractController
                     break;
                 case 'virus':
                     $subTitle = 'Entities.Message.virus';
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::VIRUS);
+                    $messageStatus = MessageStatus::VIRUS;
                     $messageActions = [];
                     break;
                 case 'banned':
