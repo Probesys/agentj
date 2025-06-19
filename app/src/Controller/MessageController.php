@@ -132,7 +132,7 @@ class MessageController extends AbstractController
             $sortParams['direction'] = $request->query->get('direction');
         }
 
-        $searchKey = trim($request->query->get('search'));
+        $searchKey = trim($request->query->getString('search'));
         $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery($user, $messageStatus, $searchKey, $sortParams, null);
 
 
