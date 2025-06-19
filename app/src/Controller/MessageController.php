@@ -89,7 +89,7 @@ class MessageController extends AbstractController
                     break;
                 case 'restored':
                     $subTitle = 'Entities.Message.restored';
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::RESTORED);
+                    $messageStatus = MessageStatus::RESTORED;
                     break;
 
                 default:
