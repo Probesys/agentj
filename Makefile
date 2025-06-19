@@ -34,6 +34,17 @@ ifeq ($(LINTER), $(filter $(LINTER), all symfony))
 	$(CONSOLE) lint:container
 endif
 
+.PHONY: release
+release: ## Release a new version (take a VERSION argument)
+ifndef VERSION
+	$(error You need to provide a "VERSION" argument)
+endif
+	sed -i "s/^VERSION=.*/VERSION=$(VERSION)/" .env.example
+	$(EDITOR) CHANGELOG.md
+	git add .
+	git commit -m "release: Publish version $(VERSION)"
+	git tag -a $(VERSION) -m "Release version $(VERSION)"
+
 .env:
 	cp .env.example .env
 	sed -i "s/^VERSION=.*/VERSION=dev/" .env
