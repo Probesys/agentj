@@ -119,7 +119,7 @@ class MessageController extends AbstractController
             'action' => $this->generateUrl('message_batch')
         ]);
 
-        if ($messageStatus && ($messageStatus->getId() === MessageStatus::DELETED || $messageStatus->getId() === MessageStatus::VIRUS)) {
+        if ($messageStatus === MessageStatus::DELETED || $messageStatus === MessageStatus::VIRUS) {
             $filterForm->remove('actions');
         }
 
