@@ -154,7 +154,6 @@ class MessageController extends AbstractController
                 'distinct' => false,
             ]
         );
-        // dd($messagesRecipients);
         return $this->render('message/index.html.twig', [
             'subTitle' => $subTitle,
             'messagesRecipients' => $messagesRecipients,
