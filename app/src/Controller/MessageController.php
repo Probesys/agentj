@@ -114,7 +114,7 @@ class MessageController extends AbstractController
             $messageStatus = null;
         }
 
-        $filterForm = $this->createForm(ActionsFilterType::class, null, [
+        $filterForm = $this->createForm(ActionsFilterType::class, options: [
             'avalaibleActions' => $messageActions,
             'action' => $this->generateUrl('message_batch')
         ]);
