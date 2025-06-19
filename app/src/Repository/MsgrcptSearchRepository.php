@@ -18,7 +18,7 @@ class MsgrcptSearchRepository extends MsgrcptRepository
      */
     public function getSearchQuery(
         User $user,
-        ?MessageStatus $messageStatus = null,
+        ?int $messageStatus = null,
         ?string $searchKey = null,
         ?array $sortParams = null,
         ?int $fromDate = null
