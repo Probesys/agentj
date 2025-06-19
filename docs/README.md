@@ -161,3 +161,7 @@ This file is used to override the Docker Compose configuration in development:
 - it mounts the code from your local `app/` folder into the app container
 - it exposes the database port to the host
 - it sets static IPs and specify DNS for some containers
+
+### Release a version
+
+Read the documentation [to release a version.](/docs/release.md)
