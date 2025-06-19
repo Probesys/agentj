@@ -100,7 +100,7 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::UNTREATED);
+                    $messageStatus = MessageStatus::UNTREATED;
                     break;
             }
         } else {
