@@ -109,6 +109,18 @@ Login to [localhost:8090](http://localhost:8090) with the credentials `admin` / 
 
 Read more to learn [how to send and receive emails during development.](/docs/dev_mail.md)
 
+### Working in the Docker containers
+
+There are few scripts to allow to execute commands in the Docker containers easily:
+
+```
+$ ./scripts/php
+$ ./scripts/composer
+$ ./scripts/console
+$ ./scripts/yarn
+$ ./scripts/mariadb
+```
+
 ### Update the Docker images
 
 You can rebuild and pull the images manually with:

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SCRIPT_PATH=$(dirname $(realpath -s $0))
+export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
+
+docker compose exec -T app php "$@"
