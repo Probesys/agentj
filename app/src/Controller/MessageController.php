@@ -85,7 +85,7 @@ class MessageController extends AbstractController
                     break;
                 case 'delete':
                     $subTitle = 'Entities.Message.delete';
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::DELETED);
+                    $messageStatus = MessageStatus::DELETED;
                     break;
                 case 'restored':
                     $subTitle = 'Entities.Message.restored';
