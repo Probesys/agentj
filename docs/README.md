@@ -129,6 +129,21 @@ You can rebuild and pull the images manually with:
 $ make docker-images
 ```
 
+### Run the linters
+
+Execute the linters with:
+
+```console
+$ make lint
+```
+
+You can run a specific linter with:
+
+```console
+$ make lint LINTER=phpstan
+$ make lint LINTER=symfony
+```
+
 ### Clean your Docker environment
 
 Sometimes, you may need to rebuild your environment from scratch.

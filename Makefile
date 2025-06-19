@@ -1,5 +1,13 @@
 .DEFAULT_GOAL := help
 
+ifdef NO_DOCKER
+	PHP = cd app && php
+	CONSOLE = cd app && php bin/console
+else
+	PHP = ./scripts/php
+	CONSOLE = ./scripts/console
+endif
+
 .PHONY: docker-start
 docker-start: .env ## Start the Docker containers (development mode)
 	docker compose up --build
@@ -15,6 +23,16 @@ ifndef FORCE
 	$(error Please run the operation with FORCE=true)
 endif
 	docker compose down -v
+
+.PHONY: lint
+lint: LINTER ?= all
+lint: ## Execute the linters (can take a LINTER argument)
+ifeq ($(LINTER), $(filter $(LINTER), all phpstan))
+	$(PHP) vendor/bin/phpstan analyse -v
+endif
+ifeq ($(LINTER), $(filter $(LINTER), all symfony))
+	$(CONSOLE) lint:container
+endif
 
 .env:
 	cp .env.example .env
