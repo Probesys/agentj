@@ -69,7 +69,7 @@ class ReportSendMailCommand extends Command {
                  */
                 
                 $untreatedMsgs = $this->msgrcptSearchRepository->getSearchQuery(
-                    $user, null, null, null, $user->getDateLastReport()
+                    $user, fromDate: $user->getDateLastReport()
                 )->getResult();
                 $totalUnread = count($untreatedMsgs);
 
