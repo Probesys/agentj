@@ -157,7 +157,7 @@ class MessageController extends AbstractController
         return $this->render('message/index.html.twig', [
             'subTitle' => $subTitle,
             'messagesRecipients' => $messagesRecipients,
-            'type' => $messageStatus?->getId(),
+            'messageStatus' => $messageStatus,
             'filter_form' => $filterForm->createView()
         ]);
     }
