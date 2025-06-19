@@ -81,7 +81,7 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::AUTHORIZED);
+                    $messageStatus = MessageStatus::AUTHORIZED;
                     break;
                 case 'delete':
                     $subTitle = 'Entities.Message.delete';
