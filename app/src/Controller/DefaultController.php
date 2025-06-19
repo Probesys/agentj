@@ -36,7 +36,6 @@ class DefaultController extends AbstractController {
     public function index(): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
         $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::UNTREATED);
         $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::AUTHORIZED);
         $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::BANNED);
