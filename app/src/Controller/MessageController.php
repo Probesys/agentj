@@ -133,8 +133,7 @@ class MessageController extends AbstractController
         }
 
         $searchKey = trim($request->query->getString('search'));
-        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery($user, $messageStatus, $searchKey, $sortParams, null);
-
+        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery($user, $messageStatus, $searchKey, $sortParams);
 
         $per_page = (int) $this->getParameter('app.per_page_global');
         if ($request->query->has('per_page') && $request->query->getInt('per_page') > 0) {
