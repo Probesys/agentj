@@ -78,11 +78,11 @@ class ReportSendMailCommand extends Command {
                 }
 
                 $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
-                $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, 2);
-                $nbBanned = $this->msgrcptSearchRepository->countByType($user, 1);
-                $nbDeleted = $this->msgrcptSearchRepository->countByType($user, 3);
-                $nbRestored = $this->msgrcptSearchRepository->countByType($user, 5);
-                $nbSpammed = $this->msgrcptSearchRepository->countByType($user, 6);
+                $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+                $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
+                $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
+                $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
+                $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
                 $domain = $user->getDomain();
 
                 if ($domain && !empty($domain->getMessageAlert())) {
