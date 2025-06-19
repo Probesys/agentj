@@ -27,7 +27,12 @@ class WblistRepository extends ServiceEntityRepository
      * } $sortParams
      * @return array<int, array<string, mixed>>
      */
-    public function search(?string $type = null, ?User $user = null, ?string $searchKey = null, ?array $sortParams = null): array {
+    public function search(
+        ?string $type = null,
+        ?User $user = null,
+        ?string $searchKey = null,
+        ?array $sortParams = null
+    ): array {
         $dql = $this->createQueryBuilder('wb')
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->innerJoin('wb.rid', 'u')
@@ -72,17 +77,20 @@ class WblistRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<string, mixed>
+     * @return ?array<string, mixed>
      */
-    public function searchByReceiptDomain(string $domain): array {
+    public function searchByReceiptDomain(string $domain): ?array
+    {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " SELECT * FROM wblist  wb "
                 . " LEFT JOIN mailaddr ma ON ma.id = wb.sid "
                 . " LEFT JOIN users u ON wb.rid = u.id "
                 . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";
+
         $stmt = $conn->prepare($sql);
 
-        return $stmt->executeQuery()->fetchAssociative();
+        $result = $stmt->executeQuery()->fetchAssociative();
+        return $result !== false ? $result : null;
     }
 
     public function deleteFromGroup(): Result {

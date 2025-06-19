@@ -30,17 +30,18 @@ class WblistController extends AbstractController {
     #[Route(path: '/wblist/{type}', name: 'wblist')]
     public function index(string $type, Request $request, PaginatorInterface $paginator): Response {
 
-        $sortParams = [];
         $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
         $filterForm = $this->createForm(ActionsFilterType::class, null, [ 'avalaibleActions' => [$actionLabel => 'delete'], 'action' => $this->generateUrl('wblist_batch') ]);
+
+        $sortParams = null;
         if ($request->query->has('sortDirection') && $request->query->has('sortField')) {
-            $sortParams['sort'] = $request->query->get('sortField');
-            $sortParams['direction'] = $request->query->get('sortDirection');
+            $sortParams = [
+                'sort' => $request->query->getString('sortField'),
+                'direction' => $request->query->getString('sortDirection'),
+            ];
         }
-        $searchKey = null;
-        if ($request->query->has('search')) {
-            $searchKey = trim($request->query->get('search'));
-        }
+
+        $searchKey = trim($request->query->getString('search'));
 
         /** @var User $user */
         $user = $this->getUser();

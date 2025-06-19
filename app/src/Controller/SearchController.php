@@ -31,11 +31,12 @@ class SearchController extends AbstractController
         $data = $form->getData();
         $messageType = $data['messageType'] ?? 'incoming';
 
-
-        $sortParams = [];
+        $sortParams = null;
         if ($request->request->has('sortField') && $request->request->has('sortDirection')) {
-            $sortParams['sort'] = $request->request->get('sortField');
-            $sortParams['direction'] = $request->request->get('sortDirection');
+            $sortParams = [
+                'sort' => $request->request->getString('sortField'),
+                'direction' => $request->request->getString('sortDirection'),
+            ];
         }
 
         /** @var User $user */
@@ -159,7 +160,7 @@ class SearchController extends AbstractController
         $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, 'outgoing');
 
         $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
-            return $msg['mail_id'] === $outMsg['mail_id'];
+            return $outMsg !== false && $msg['mail_id'] === $outMsg['mail_id'];
         });
 
         return $this->render('message/out_show.html.twig', [

@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Ldap\Entry;
+use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -59,11 +60,12 @@ class LDAPImportCommand extends Command {
             return Command::FAILURE;
         }
 
-        if (!$this->ldap = $this->ldapService->bind($this->connector)) {
-            $this->io->error("Cannot connect to LDAP Server");
+        try {
+            $this->ldap = $this->ldapService->bind($this->connector);
+        } catch (ConnectionException $exception) {
+            $this->io->error($exception->getMessage());
             return Command::FAILURE;
         }
-        ;
 
         $this->importUsers();
         if ($this->connector->isSynchronizeGroup()) {

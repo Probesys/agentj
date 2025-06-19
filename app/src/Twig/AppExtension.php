@@ -34,7 +34,12 @@ class AppExtension extends AbstractExtension {
 
     public function streamGetcontent(mixed $input): string {
 
-        return stream_get_contents($input, -1, 0);
+        $clearContent = stream_get_contents($input, -1, 0);
+
+        if ($clearContent === false) {
+            return '';
+        }
+        return $clearContent;
     }
 
     /**

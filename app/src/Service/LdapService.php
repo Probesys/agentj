@@ -16,7 +16,7 @@ class LdapService {
     ) {
     }
 
-    public function bind(LdapConnector $connector): bool|Ldap {
+    public function bind(LdapConnector $connector): Ldap {
 
         $ldap = Ldap::create('ext_ldap', [
                     'host' => $connector->getLdapHost(),
@@ -42,6 +42,9 @@ class LdapService {
 
         try {
             $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
+            if ($clearPassword === false) {
+                throw new ConnectionException('Could not connect to ldap server');
+            }
 
             $ldap->bind($bindDN, $clearPassword);
             return $ldap;

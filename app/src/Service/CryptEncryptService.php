@@ -45,7 +45,7 @@ class CryptEncryptService
      * Decrypts the given token and returns an array with the first element as
      * the lifetime timestamp and the second element as the decrypted data.
      *
-     * @return array{int, string}
+     * @return array{int, string|false}
      * @throws \Exception
      */
     public function decrypt(string $token): array

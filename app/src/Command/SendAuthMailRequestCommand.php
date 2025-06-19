@@ -179,7 +179,8 @@ class SendAuthMailRequestCommand extends Command
         $bodyTextPlain = preg_replace("/\r|\n|\t/", "", $body);
         $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $bodyTextPlain);
         $bodyTextPlain = preg_replace_callback("/(&#[0-9]+;)/", function ($m) {
-            return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
+            $result = mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
+            return $result ?: '';
         }, $bodyTextPlain);
         $bodyTextPlain = html_entity_decode($bodyTextPlain);
         $bodyTextPlain = strip_tags($bodyTextPlain);

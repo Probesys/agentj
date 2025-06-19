@@ -116,7 +116,10 @@ class MessageService
         $messageStatus = $wb === 'W' ? MessageStatus::AUTHORIZED : MessageStatus::BANNED;
 
         //check if sender exists in the database
-        $emailSender = stream_get_contents($message->getSid()->getEmail(), -1, 0);
+        $emailSender = $message->getSid()->getEmailClear();
+        if ($emailSender === null) {
+            return false;
+        }
         //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
 
         $fromAddr = $message->getFromMimeAddress()?->getAddress();

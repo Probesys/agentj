@@ -156,7 +156,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __toString(): string
     {
-        return $this->email ? stream_get_contents($this->email, -1, 0) : "";
+        return $this->getEmailFromRessource() ?: '';
     }
 
     public function getId(): ?int
@@ -197,7 +197,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             return null;
         }
 
-        return stream_get_contents($this->email, -1, 0);
+        $emailClear = stream_get_contents($this->email, -1, 0);
+        if ($emailClear === false) {
+            return null;
+        }
+        return $emailClear;
     }
 
     public function setEmail(mixed $email): self
@@ -245,7 +249,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = json_decode($this->roles);
+        $roles = json_decode($this->roles, associative: true);
+
+        if (!is_array($roles)) {
+            $roles = [];
+        }
 
         // Afin d'être sûr qu'un user a toujours au moins 1 rôle
         if (empty($roles)) {

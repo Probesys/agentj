@@ -9,6 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -44,14 +45,27 @@ class TruncateVirusMailFiles extends Command
             $days = $this->nbDays;
         }
 
-        $folders = array_diff(scandir($amavisQuarantDir), ['..', '.']);
+        $folders = scandir($amavisQuarantDir);
+        if ($folders === false) {
+            throw new AccessDeniedException($amavisQuarantDir);
+        }
+
+        $folders = array_diff($folders, ['..', '.']);
         foreach ($folders as $folder) {
-            $files = array_diff(scandir($amavisQuarantDir . $folder), ['..', '.']);
-            ;
+            $files = scandir($amavisQuarantDir . $folder);
+            if ($files === false) {
+                continue;
+            }
+
+            $files = array_diff($files, ['..', '.']);
+
             foreach ($files as $file) {
                 $datemod = new \DateTime();
                 $filePath = $amavisQuarantDir . $folder . '/' . $file;
-                $datemod->setTimestamp(filemtime($filePath));
+                $modificationTime = filemtime($filePath);
+                if ($modificationTime !== false) {
+                    $datemod->setTimestamp($modificationTime);
+                }
                 $now = new \DateTime();
                 $interval = $now->diff($datemod);
                 if ($interval->format('%a') > $days) {

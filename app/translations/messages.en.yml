@@ -115,6 +115,8 @@ Generics:
     deleteSuccess: "A successful removal!"
     deleteFailure: "An error occurred during the deletion!"
     deleteMassiveSuccess: "Mass removal completed successfully!"
+    failedToGeneratePrivateKey: Failed to generate private key
+    failedToGeneratePublicKey: Failed to generate public key
     addSuccess: "Added successfully!"
     addFailure: "An error occurred when trying to add!"
     ImportSuccess:

@@ -183,7 +183,7 @@ class UserRepository extends ServiceEntityRepository {
      * autocomplete query
      * @param ?Domain[] $allowedomains
      *
-     * @return User[]
+     * @return array<int, array<string, mixed>>
      */
     public function autocomplete(?string $q, int $page_limit = 30, ?int $page = null, ?array $allowedomains = null): array {
         //    $slugify = new Slugify();
@@ -212,7 +212,7 @@ class UserRepository extends ServiceEntityRepository {
         if ($page) {
             // $query->setFirstResult(($page - 1) * $page_limit);
         }
-        
+
         return $query->getResult();
     }
 

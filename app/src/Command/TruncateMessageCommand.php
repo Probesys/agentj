@@ -38,6 +38,10 @@ class TruncateMessageCommand extends Command
 
         $now = time();
         $start = strtotime('-' . $days . ' day', $now);
+        if ($start === false) {
+            return Command::FAILURE;
+        }
+
         $userMsgsBlocked = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
         $output->writeln(date('Y-m-d H:i:s') . "\tdelete mail entries older than " . date('Y-m-d', $start) . "\t" . $userMsgsBlocked['nbDeletedMsgs'] . ' in msgs' . "\t" . $userMsgsBlocked['nbDeletedMsgrcpt'] . ' in msgrcpt'  . "\t" . $userMsgsBlocked['nbDeletedQuarantine'] . ' in quarantine');
         $nbDeletedlogs = $this->em->getRepository(Log::class)->truncateOlder($days);

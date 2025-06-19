@@ -109,14 +109,22 @@ class ReportSendMailCommand extends Command {
                 $body = str_replace('[URL_MSGS]', $url, $body);
 
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
-                $mailTo = stream_get_contents($user->getEmail(), -1, 0);
+
+                $mailTo = $user->getEmailFromRessource();
+
+                if ($mailTo === null) {
+                    continue;
+                }
+
+                $toAddress = new Address($mailTo);
+
                 $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
                 $bodyTextPlain = strip_tags($bodyTextPlain);
 
                 $message = new Email();
                 $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo )
                         ->from(new Address($this->defaultMailFrom, $fromName))
-                        ->to($mailTo)
+                        ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
 
 

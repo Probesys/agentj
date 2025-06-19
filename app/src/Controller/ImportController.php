@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function dd;
@@ -35,7 +36,8 @@ class ImportController extends AbstractController {
     }
 
     #[Route(path: '/users', name: 'import_user_email', options: ['expose' => true])]
-    public function index(Request $request) {
+    public function index(Request $request): Response
+    {
         $translator = $this->translator;
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_user_email'),
@@ -54,7 +56,7 @@ class ImportController extends AbstractController {
                 $fileSystem->remove([$file->getPathname()]);
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
-                    $message = str_replace('[NB_USER]', $result['user_import'], $message);
+                    $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
                     $this->addFlash('success', $message);
                 } else {
                     $this->addFlash('warning', 'Generics.flash.NoImport');
@@ -72,14 +74,21 @@ class ImportController extends AbstractController {
         ]);
     }
 
-    /*
+    /**
+     * Import user from file csv columns : email , LastName, FirstName, Group
      *
-     * Import user from file csv columns : email , LastName, FirstName, Group */
-
-    function import($pathfile) {
+     * @return array{user_import: integer}
+     */
+    private function import(string $pathfile): array {
         $translator = $this->translator;
         $split = ';';
-        $nbUser = count(file($pathfile)) - 1;
+
+        $lines = file($pathfile);
+        if ($lines === false) {
+            return ['user_import' => 0];
+        }
+
+        $nbUser = count($lines) - 1;
 
         $row = 0;
         $import = 0;
@@ -119,6 +128,11 @@ class ImportController extends AbstractController {
                                         //get rules of domain
                                         if (!isset($domains[$domainEmail]['wb'])) {
                                             $wb = $em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domainEmail);
+
+                                            if ($wb === null) {
+                                                $errors[] = 'No wblist found for this domain ' . $domainEmail;
+                                                continue;
+                                            }
                                             $domains[$domainEmail]['wb'] = $wb['wb'];
                                         }
                                         $group = new Groups();
@@ -213,7 +227,8 @@ class ImportController extends AbstractController {
     }
 
     #[Route(path: '/users_alias', name: 'import_user_alias', options: ['expose' => true])]
-    public function index_alias(Request $request) {
+    public function index_alias(Request $request): Response
+    {
         $translator = $this->translator;
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_user_alias'),
@@ -232,7 +247,7 @@ class ImportController extends AbstractController {
                 $fileSystem->remove([$file->getPathname()]);
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
-                    $message = str_replace('[NB_USER]', $result['user_import'], $message);
+                    $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
                     $this->addFlash('success', $message);
                 } else {
                     $this->addFlash('warning', 'Generics.flash.NoImport');
@@ -250,15 +265,20 @@ class ImportController extends AbstractController {
         ]);
     }
 
-
-    /*
+    /**
+     * Import alias from file csv columns : FirstName , LastName, email, email of alias
      *
-     * Import alias from file csv columns : FirstName , LastName, email, email of alias */
-
-    function import_alias($pathfile) {
+     * @return array{user_import: integer}
+     */
+    private function import_alias(string $pathfile): array
+    {
         $translator = $this->translator;
         $split = ';';
-        $nbUser = count(file($pathfile)) - 1;
+        $lines = file($pathfile);
+        if ($lines === false) {
+            return ['user_import' => 0];
+        }
+        $nbUser = count($lines) - 1;
 
         $row = 0;
         $import = 0;
@@ -315,6 +335,7 @@ class ImportController extends AbstractController {
                                         $user->setOriginalUser($original_user);
                                         $user->setPolicy($original_user->getPolicy());
                                         $em->persist($user);
+                                        $emails[$user->getEmail()] = $user->getEmail();
                                     }
                                 } else {
                                     $errors[] = $translator->trans('Generics.flash.NonexistantUser', ['ROW' => $row + 1, 'EMAIL' => $data[2]]);

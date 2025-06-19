@@ -125,10 +125,12 @@ class MessageController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $sortParams = [];
+        $sortParams = null;
         if ($request->query->has('sort') && $request->query->has('direction')) {
-            $sortParams['sort'] = $request->query->getString('sort');
-            $sortParams['direction'] = $request->query->getString('direction');
+            $sortParams = [
+                'sort' => $request->query->getString('sort'),
+                'direction' => $request->query->getString('direction'),
+            ];
         }
 
         $searchKey = trim($request->query->getString('search'));
@@ -424,13 +426,22 @@ class MessageController extends AbstractController
 
         $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
 
-        $emailSender = stream_get_contents($msgs->getSid()->getEmail(), -1, 0);
+        $emailSender = $msgs->getSid()->getEmailClear();
+
+        if ($emailSender === null) {
+            throw $this->createNotFoundException('Unable to retrieve the email sender');
+        }
 
         $fromAddr = $msgs->getFromMimeAddress()?->getAddress();
 
         $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
 
-        $emailRecipient = stream_get_contents($msgrcpt->getRid()->getEmail(), -1, 0);
+        $emailRecipient = $msgrcpt->getRid()->getEmailClear();
+
+        if ($emailRecipient === null) {
+            throw $this->createNotFoundException('Unable to retrieve the email recipient');
+        }
+
         $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
 
         $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
@@ -525,6 +536,10 @@ class MessageController extends AbstractController
             $rawMail .= stream_get_contents($mail_chunk->getMailText(), -1, 0);
         }
         $rawMail = mb_convert_encoding($rawMail, 'UTF-8', 'auto');
+
+        if (!$rawMail) {
+            throw $this->createNotFoundException('The message does not exist.');
+        }
 
         $message = Message::fromString($rawMail);
         $subject = $message->getSubject();

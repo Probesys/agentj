@@ -11,9 +11,9 @@ use App\Entity\User;
 use App\Entity\Alert;
 use App\Entity\Wblist;
 use App\Form\CaptchaFormType;
+use App\Repository\UserRepository;
 use App\Service;
 use App\Repository\MsgrcptRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -160,7 +160,6 @@ class DefaultController extends AbstractController {
         MsgrcptRepository $msgrcptRepository,
         UserRepository $userRepository
     ): Response {
-
         $connection = $this->em->getConnection();
 
         $user = $userRepository->findOneBy(['email' => $user_email]);
@@ -214,7 +213,7 @@ class DefaultController extends AbstractController {
         $msgs_status[] = [
             'name' => 'quota',
             'qty' => 0,
-            'qty_out' => $limitReports['count']
+            'qty_out' => $limitReports ? $limitReports['count'] : 0
         ];
 
         return $this->render('home/messages_stats.html.twig', [
@@ -265,7 +264,9 @@ class DefaultController extends AbstractController {
             $confirm = !empty($domain->getConfirmCaptchaMessage()) ? $domain->getConfirmCaptchaMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
             $recipient = $messageRecipients[0] ?? null;
             if ($recipient) {
-                $confirm = str_replace('[EMAIL_DEST]', stream_get_contents($recipient->getRid()->getEmail(), -1, 0), $confirm);
+                $emailDest = $recipient->getRid()->getEmailClear();
+                $emailDest = $emailDest ? $emailDest : '';
+                $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
             }
             if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
@@ -273,7 +274,6 @@ class DefaultController extends AbstractController {
                     $message->setValidateCaptcha(time());
                     $em->persist($message);
                     $em->flush();
-                    $mailId = stream_get_contents($message->getMailId(), -1, 0);
                 } else {
                     $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
                 }
@@ -339,6 +339,10 @@ class DefaultController extends AbstractController {
 
         if ($expiry < time()) {
             throw $this->createNotFoundException('The token has expired.');
+        }
+
+        if ($decryptedToken === false) {
+            throw $this->createNotFoundException('The token is invalid.');
         }
 
         $tokenParts = explode('%%%', $decryptedToken);

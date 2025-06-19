@@ -193,7 +193,13 @@ class DomainController extends AbstractController
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
+
         $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domain->getDomain());
+
+        if ($wblistArray === null) {
+            throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
+        }
+
         $form->get('rules')->setData($wblistArray['wb']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -394,11 +400,22 @@ class DomainController extends AbstractController
         $dkim->setSelector('agentj');
         try {
             $private_key = openssl_pkey_new();
+            if ($private_key === false) {
+                $this->addFlash('error', $this->translator->trans('Message.Flash.failedToGeneratePrivateKey'));
+                return false;
+            }
             $privkey_pem = null;
             openssl_pkey_export($private_key, $privkey_pem);
             $dkim->setPrivateKey($privkey_pem);
 
-            $pubkey_pem = openssl_pkey_get_details($private_key)['key'];
+            $details = openssl_pkey_get_details($private_key);
+
+            if ($details === false) {
+                $this->addFlash('error', $this->translator->trans('Message.Flash.failedToGeneratePublicKey'));
+                return false;
+            }
+
+            $pubkey_pem = $details['key'];
             $dkim->setPublicKey($pubkey_pem);
             // $public_key = openssl_pkey_get_public($public_key_pem);
 

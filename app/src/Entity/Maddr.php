@@ -55,9 +55,13 @@ class Maddr
     }
 
 
-    public function getEmailClear(): string
+    public function getEmailClear(): ?string
     {
-        return stream_get_contents($this->email, -1, 0);
+        $emailClear = stream_get_contents($this->email, -1, 0);
+        if ($emailClear === false) {
+            return null;
+        }
+        return $emailClear;
     }
 
     public function setEmail(string $email): self

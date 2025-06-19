@@ -120,7 +120,7 @@ class UserController extends AbstractController {
             }
 
 
-            return new Response(json_encode($return), 200);
+            return new JsonResponse($return, 200);
         }
 
         return $this->render('user/new.html.twig', [
@@ -170,7 +170,7 @@ class UserController extends AbstractController {
                 ];
             }
 
-            return new Response(json_encode($return), 200);
+            return new JsonResponse($return, 200);
         }
 
         return $this->render('user/edit.html.twig', [
@@ -257,7 +257,13 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/email/newUser', name: 'user_email_new', methods: 'GET|POST')]
-    public function newUserEmail(Request $request, UserRepository $userRepository, UserService $userService, GroupService $groupService, DomainRepository $domainRepository): Response {
+    public function newUserEmail(
+        Request $request,
+        UserRepository $userRepository,
+        UserService $userService,
+        GroupService $groupService,
+        DomainRepository $domainRepository,
+    ): Response {
         $user = new User();
 
         $allowedDomains = $this->getAlloweDomains();
@@ -325,14 +331,15 @@ class UserController extends AbstractController {
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
                 ];
 
-                return new Response(json_encode($return), 200);
+                return new JsonResponse($return, 200);
             } else {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.genericFormError'),
                 ];
             }
-            return new Response(json_encode($return), 200);
+
+            return new JsonResponse($return, 200);
         }
 
         return $this->render('user/new.html.twig', [
@@ -399,7 +406,8 @@ class UserController extends AbstractController {
                     'message' => $this->translator->trans('Generics.flash.genericFormError'),
                 ];
             }
-            return new Response(json_encode($return), 200);
+
+            return new JsonResponse($return, 200);
         }
 
         return $this->render('user/newAlias.html.twig', [
@@ -482,7 +490,7 @@ class UserController extends AbstractController {
                 ];
             }
 
-            return new Response(json_encode($return), 200);
+            return new JsonResponse($return, 200);
         }
 
         return $this->render('user/edit.html.twig', [
@@ -541,7 +549,7 @@ class UserController extends AbstractController {
                 ];
             }
 
-            return new Response(json_encode($return), 200);
+            return new JsonResponse($return, 200);
         }
         //        $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
 
@@ -626,7 +634,12 @@ class UserController extends AbstractController {
                     ->getListByUserId($user->getId());
         }
 
-        $entities = $userRepository->autocomplete($q, $page_limit, (int) $request->query->get('page'), $allowedomains);
+        $entities = $userRepository->autocomplete(
+            $q,
+            $page_limit,
+            $request->query->getInt('page', 1),
+            $allowedomains
+        );
 
         foreach ($entities as $entity) {
             $label = '' . stream_get_contents($entity['email'], -1, 0);

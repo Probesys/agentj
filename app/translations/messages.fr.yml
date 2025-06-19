@@ -117,6 +117,8 @@ Generics:
     deleteSuccess: Suppression effectuée avec succès !
     deleteFailure: Une erreur est survenue lors de la suppression !
     deleteMassiveSuccess: Suppression en masse effectuée avec succès !
+    failedToGeneratePrivateKey: Erreur lors de la génération de la clé privé
+    failedToGeneratePublicKey: Erreur lors de la génération de la clé publique
     addSuccess: Ajout effectué avec succès !
     addFailure: Une erreur est survenue lors d'ajout !
     ImportSuccess: Il y a [NB_USER] comptes emails qui ont été importés avec succès !

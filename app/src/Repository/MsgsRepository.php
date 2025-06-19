@@ -268,8 +268,11 @@ class MsgsRepository extends ServiceEntityRepository
      * } $sortParams
      * @return array<int, array<string, mixed>>
      */
-    public function advancedSearch(?User $user = null, string $messageType = 'incoming', ?array $sortParams = null): array
-    {
+    public function advancedSearch(
+        ?User $user = null,
+        string $messageType = 'incoming',
+        ?array $sortParams = null,
+    ): array {
         $conn = $this->getEntityManager()->getConnection();
 
         if ($messageType === 'incoming') {
@@ -425,7 +428,7 @@ class MsgsRepository extends ServiceEntityRepository
 
         try {
             $result = $query->getSingleScalarResult();
-            return $result;
+            return (int) $result;
         } catch (\Doctrine\ORM\NoResultException $e) {
             return null;
         }
