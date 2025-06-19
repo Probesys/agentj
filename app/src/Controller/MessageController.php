@@ -60,7 +60,7 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $messageStatus = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::SPAMMED);
+                    $messageStatus = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
                     $subTitle = 'Entities.Message.virus';
