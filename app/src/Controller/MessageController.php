@@ -128,8 +128,8 @@ class MessageController extends AbstractController
 
         $sortParams = [];
         if ($request->query->has('sort') && $request->query->has('direction')) {
-            $sortParams['sort'] = $request->query->get('sort');
-            $sortParams['direction'] = $request->query->get('direction');
+            $sortParams['sort'] = $request->query->getString('sort');
+            $sortParams['direction'] = $request->query->getString('direction');
         }
 
         $searchKey = trim($request->query->getString('search'));
