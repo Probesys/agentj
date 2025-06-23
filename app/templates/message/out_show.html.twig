@@ -1,5 +1,5 @@
 {% extends 'modalTemplate.html.twig' %}
-{% set msgDeferredStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
+{% set msgDeliveryStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
 {% block modalTitle %}
   {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
   {{ 'Entities.Msgrcpt.labels.infos' | trans }}
@@ -51,27 +51,15 @@
       {{ 'Message.Status.title' | trans }}
     </div>
     <div class="col-md-8">
-      {# If the message as an agentJ status #}
-      {% if outMsgRcpt.status_id is not null %}
-        {#   authorized or restored status     #}
-        {% set msgsStatus = outMsgRcpt.status.name %}
-        {% set response = outMsgRcpt.amavisOutput %}
-        {% if outMsgRcpt.status.id == 2 or outMsgRcpt.status.id == 5  %}
-          {% set deferredSatusClass = 'text-success' %}
-        {% else %}
-          {% set deferredSatusClass = 'text-danger' %}
-        {% endif %}
-      {% else %}
-        {% set msgsStatus = msgDeferredStatus[outMsgRcpt.ds] %}
+        {% set msgsStatus = msgDeliveryStatus[outMsgRcpt.ds] %}
         {% set response = outMsgRcpt.smtp_resp %}
         {% if outMsgRcpt.ds == 'P' %}
-          {% set deferredSatusClass = 'text-success' %}
+          {% set deliverySatusClass = 'text-success' %}
         {% else %}
-          {% set deferredSatusClass = 'text-danger' %}
+          {% set deliverySatusClass = 'text-danger' %}
         {% endif %}
-      {% endif %}
 
-      <span class="{{ deferredSatusClass }}">{{ msgsStatus }}</span><br>
+      <span class="{{ deliverySatusClass }}">{{ msgsStatus }}</span><br>
       <em>{{ response }}</em>
     </div>
     <div class="col-md-12">

@@ -4,9 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query;
 
 /**
  * @extends ServiceEntityRepository<Msgrcpt>
@@ -64,5 +64,20 @@ class MsgrcptRepository extends ServiceEntityRepository
             . ' WHERE m.content != "C" AND msr.content != "C" AND msr.status_id IS NULL AND mr.domain = "' . $domain . '" AND ms.email =  "' . $emailSender . '"';
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
+    public function findByEmailRecipient(string $email): Query {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mr
+            FROM App\Entity\Msgrcpt mr
+            LEFT JOIN App\Entity\Maddr maddr WITH maddr.id = mr.rid
+            LEFT JOIN App\Entity\Msgs msgs WITH msgs.mailId = mr.mailId AND msgs.partitionTag = mr.partitionTag
+            WHERE maddr.email = :email
+            AND msgs.quarType != ''
+            SQL);
+
+        $query->setParameter('email', $email);
+
+        return $query;
     }
 }

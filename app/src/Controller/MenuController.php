@@ -2,11 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\MessageStatus;
-use App\Entity\Msgs;
+use App\Amavis\MessageStatus;
 use App\Entity\User;
 use App\Repository\MsgrcptSearchRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 

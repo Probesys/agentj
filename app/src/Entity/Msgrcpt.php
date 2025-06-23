@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Amavis\MessageStatus;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use App\Repository\MsgrcptRepository;
@@ -58,8 +59,8 @@ class Msgrcpt
     #[ORM\Column(name: 'smtp_resp', type: 'string', length: 255, nullable: true)]
     private ?string $smtpResp = '';
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\MessageStatus', inversedBy: 'msgrcpts')]
-    private ?MessageStatus $status = null;
+    #[ORM\Column(name: 'status_id', type: 'integer', nullable: true)]
+    private ?int $status = null;
 
     #[ORM\Column(type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
     private int $sendCaptcha = 0;
@@ -205,16 +206,21 @@ class Msgrcpt
         return $this;
     }
 
-    public function getStatus(): ?MessageStatus
+    public function getStatus(): ?int
     {
         return $this->status;
     }
 
-    public function setStatus(?MessageStatus $status): self
+    public function setStatus(?int $status): self
     {
         $this->status = $status;
 
         return $this;
+    }
+
+    public function getStatusName(): string
+    {
+        return MessageStatus::getStatusName($this->status);
     }
 
     public function getSendCaptcha(): int
@@ -258,5 +264,45 @@ class Msgrcpt
         $this->msgs = $msgs;
 
         return $this;
+    }
+
+    public function isUntreated(): bool
+    {
+        return $this->status === MessageStatus::UNTREATED;
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->status === MessageStatus::BANNED;
+    }
+
+    public function isAuthorized(): bool
+    {
+        return $this->status === MessageStatus::AUTHORIZED;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->status === MessageStatus::DELETED;
+    }
+
+    public function isError(): bool
+    {
+        return $this->status === MessageStatus::ERROR;
+    }
+
+    public function isRestored(): bool
+    {
+        return $this->status === MessageStatus::RESTORED;
+    }
+
+    public function isSpam(): bool
+    {
+        return $this->status === MessageStatus::SPAMMED;
+    }
+
+    public function isVirus(): bool
+    {
+        return $this->status === MessageStatus::VIRUS;
     }
 }

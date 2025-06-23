@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Model\ValidationSource;
 use App\Entity\Mailaddr;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\Quarantine;
@@ -468,9 +468,9 @@ class MessageController extends AbstractController
                 if (!$process->isSuccessful()) {
                     throw new ProcessFailedException($process);
                 }
-                $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::AUTHORIZED);
+                $messageStatus = MessageStatus::AUTHORIZED;
             } else {
-                $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::BANNED);
+                $messageStatus = MessageStatus::BANNED;
             }
 
             $oneMsgRcptObj->setStatus($messageStatus);

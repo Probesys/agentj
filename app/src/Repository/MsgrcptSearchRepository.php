@@ -3,8 +3,9 @@
 namespace App\Repository;
 
 use App\Amavis\ContentType;
+use App\Entity\Domain;
 use App\Entity\User;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -17,7 +18,7 @@ class MsgrcptSearchRepository extends MsgrcptRepository
      * @param ?array{sort: string, direction: string} $sortParams
      */
     public function getSearchQuery(
-        User $user,
+        ?User $user,
         ?int $messageStatus = null,
         ?string $searchKey = null,
         ?array $sortParams = null,
@@ -26,10 +27,14 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
 
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
-        $this->addSearchKeyCondition($queryBuilder, $searchKey);
+
+        if ($searchKey) {
+            $this->addSearchKeyCondition($queryBuilder, $searchKey);
+        }
 
         if (!is_null($fromDate)) {
-            $queryBuilder->andWhere('m.timeNum > ' . $fromDate);
+            $queryBuilder->andWhere('m.timeNum > :date');
+            $queryBuilder->setParameter('date', $fromDate);
         }
 
         if ($sortParams) {
@@ -41,13 +46,8 @@ class MsgrcptSearchRepository extends MsgrcptRepository
         return $query;
     }
 
-    public function countByType(?User $user = null, ?int $type = null): int
+    public function countByType(?User $user = null, ?int $messageStatus = null): int
     {
-        $messageStatus = null;
-        if ($type) {
-            $entityManager = $this->getEntityManager();
-            $messageStatus = $entityManager->getRepository(MessageStatus::class)->find($type);
-        }
         $query = $this->getSearchQuery($user, $messageStatus);
         $paginator = new Paginator($query);
 
@@ -57,15 +57,25 @@ class MsgrcptSearchRepository extends MsgrcptRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function countByTypeAndDays(?User $user = null, ?int $type = null): array
+    public function countByTypeAndDays(
+        ?Domain $domain = null,
+        ?int $fromDate = null,
+        ?int $messageStatus = null,
+        ?User $user = null): array
     {
-        $messageStatus = null;
-        if ($type) {
-            $entityManager = $this->getEntityManager();
-            $messageStatus = $entityManager->getRepository(MessageStatus::class)->find($type);
-        }
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
         $queryBuilder->select('COUNT(mr.mailId) as nb_result, m.timeIso, SUBSTRING(m.timeIso, 1, 8) as date_group');
+
+        if (!is_null($fromDate)) {
+            $queryBuilder->andWhere('m.timeNum >= :date');
+            $queryBuilder->setParameter('date', $fromDate);
+        }
+
+        if ($domain) {
+            $queryBuilder->andWhere('d.id = :domain');
+            $queryBuilder->setParameter('domain', $domain->getId());
+        }
+
         $queryBuilder->groupBy('date_group');
 
         $query = $queryBuilder->getQuery();
@@ -74,8 +84,8 @@ class MsgrcptSearchRepository extends MsgrcptRepository
     }
 
     private function getSearchQueryBuilder(
-        User $user,
-        ?MessageStatus $messageStatus = null
+        ?User $user,
+        ?int $messageStatus = null
     ): QueryBuilder {
 
         $queryBuilder = $this->createQueryBuilder('mr');
@@ -85,16 +95,16 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
         $this->addUserSpecificJoins($queryBuilder, $user);
 
-        if ($user->isAdmin()) {
+        if ($user?->isAdmin()) {
             $this->addDomainCondition($queryBuilder, $user);
-        } else {
+        } elseif($user) {
             $this->addRecipientsCondition($queryBuilder, $user);
         }
 
-        if (!$messageStatus) {
-            $this->addSpamCondition($queryBuilder, $user, false);
-        } elseif ($messageStatus->getId() === MessageStatus::SPAMMED) {
-            $this->addSpamCondition($queryBuilder, $user, true);
+        if ($messageStatus === MessageStatus::UNTREATED) {
+            $this->addSpamCondition($queryBuilder, $user, isSpam: false);
+        } elseif ($messageStatus === MessageStatus::SPAMMED) {
+            $this->addSpamCondition($queryBuilder, $user, isSpam: true);
         }
 
         $this->addStatusCondition($queryBuilder, $messageStatus);
@@ -102,70 +112,69 @@ class MsgrcptSearchRepository extends MsgrcptRepository
         return $queryBuilder;
     }
 
-    private function addUserSpecificJoins(QueryBuilder $queryBuilder, User $user): void
+    private function addUserSpecificJoins(QueryBuilder $queryBuilder, ?User $user): void
     {
-        if ($user->isAdmin()) {
+        if (!$user || $user->isAdmin()) {
             $queryBuilder->leftJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email')
                ->leftJoin('App\Entity\Domain', 'd', Join::WITH, 'd.id = u.domain');
         }
     }
 
-    private function addStatusCondition(QueryBuilder $queryBuilder, ?MessageStatus $messageStatus): void
+    private function addStatusCondition(QueryBuilder $queryBuilder, ?int $messageStatus): void
     {
-        if (!$messageStatus) {
-            $messagestatusError = $this->getEntityManager()->getRepository(MessageStatus::class)->find(MessageStatus::ERROR);
+        if ($messageStatus === MessageStatus::UNTREATED) {
             $queryBuilder->andWhere('( mr.status IS NULL  OR mr.status = :messagestatusError ) and mr.bl!=\'Y\' and mr.content not in (:content) and mr.ds != :ds')
-                ->setParameter('messagestatusError', $messagestatusError)
+                ->setParameter('messagestatusError', MessageStatus::ERROR)
                 ->setParameter('content', [ContentType::Virus, ContentType::Clean])
                 ->setParameter('ds', DeliveryStatus::Pass);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::DELETED) {
+        if ($messageStatus === MessageStatus::DELETED) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('content', ContentType::Virus);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::RESTORED) {
+        if ($messageStatus === MessageStatus::RESTORED) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('content', ContentType::Virus);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::AUTHORIZED) {
+        if ($messageStatus === MessageStatus::AUTHORIZED) {
             $queryBuilder->andWhere('mr.status = :messageStatus or (mr.ds = :ds and (mr.status is null or mr.status = :messageStatus))')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('ds', DeliveryStatus::Pass);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::BANNED) {
+        if ($messageStatus === MessageStatus::BANNED) {
             $queryBuilder->andWhere('mr.status = :messageStatus or mr.bl = :bl')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('bl', 'Y');
         }
 
-        if ($messageStatus?->getId() === MessageStatus::SPAMMED) {
+        if ($messageStatus === MessageStatus::SPAMMED) {
             $queryBuilder->andWhere('mr.status is null and mr.content not in (:content)')
                 ->setParameter('content', [ContentType::Virus, ContentType::Clean]);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::VIRUS) {
+        if ($messageStatus === MessageStatus::VIRUS) {
             $queryBuilder->andWhere('mr.content = :content')
                 ->setParameter('content', ContentType::Virus);
         }
 
-        if ($messageStatus?->getId() === MessageStatus::ERROR) {
+        if ($messageStatus === MessageStatus::ERROR) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content not in (:content)')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('content', [ContentType::Virus, ContentType::Clean]);
         }
     }
 
-    private function addSpamCondition(QueryBuilder $queryBuilder, User $user, bool $isSpamm): void
+    private function addSpamCondition(QueryBuilder $queryBuilder, ?User $user, bool $isSpam): void
     {
-        $comparisonOperator = $isSpamm ? '>' : '<=';
+        $comparisonOperator = $isSpam ? '>' : '<=';
 
-        if ($user->isAdmin()) {
+        if (!$user || $user->isAdmin()) {
             $queryBuilder->andWhere('mr.bspamLevel ' . $comparisonOperator . ' d.level');
         } else {
             $level = $user->getDomain()->getLevel();
@@ -185,12 +194,10 @@ class MsgrcptSearchRepository extends MsgrcptRepository
             ->setParameter('recipients', $recipients);
     }
 
-    private function addSearchKeyCondition(QueryBuilder $queryBuilder, ?string $searchKey): void
+    private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        if ($searchKey) {
-            $queryBuilder->andWhere('m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.fromAddr LIKE :searchKey')
-                ->setParameter('searchKey', '%' . $searchKey . '%');
-        }
+        $queryBuilder->andWhere('m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.fromAddr LIKE :searchKey')
+            ->setParameter('searchKey', '%' . $searchKey . '%');
     }
 
     private function addDomainCondition(QueryBuilder $queryBuilder, User $user): void

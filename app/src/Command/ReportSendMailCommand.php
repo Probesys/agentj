@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\Msgs;
 use App\Entity\User;
+use App\Amavis\MessageStatus;
 use App\Repository\MsgrcptSearchRepository;
 use App\Service;
 use Doctrine\Persistence\ManagerRegistry;

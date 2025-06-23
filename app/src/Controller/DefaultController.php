@@ -2,16 +2,18 @@
 
 namespace App\Controller;
 
-use App\Controller\MessageController;
+use App\Amavis\ContentType;
 use App\Model\ValidationSource;
 use App\Entity\Domain;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Alert;
 use App\Form\CaptchaFormType;
 use App\Service;
+use App\Repository\MsgrcptRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,14 +38,31 @@ class DefaultController extends AbstractController {
     public function index(): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::UNTREATED);
-        $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::AUTHORIZED);
-        $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::BANNED);
-        $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::DELETED);
-        $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::RESTORED);
-        $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::ERROR);
-        $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::SPAMMED);
-        $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays($user, MessageStatus::VIRUS);
+        $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::UNTREATED
+        );
+        $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::AUTHORIZED
+        );
+        $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::BANNED
+        );
+        $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::DELETED
+        );
+        $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::RESTORED
+        );
+        $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::ERROR
+        );
+        $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::SPAMMED
+        );
+        $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+            user: $user, messageStatus: MessageStatus::VIRUS
+        );
+
         $latestMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery($user, null)->setMaxResults(5)->getResult();
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
         $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
@@ -124,7 +143,7 @@ class DefaultController extends AbstractController {
                     'nbErrorMsgByDay' => $nbErrorMsgByDay,
                     'nbSpammedMsgByDay' => $nbSpammedMsgByDay,
                     'nbVirusMsgByDay' => $nbVirusMsgByDay,
-                    'latest_msgs' => $latest_msgs,
+                    'latestMessageRecipients' => $latestMessageRecipients,
                     'users' => $users,
                     'alerts' => $alerts,
                     'unreadAlertsCount' => $unreadAlertsCount,
@@ -136,46 +155,32 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '{user_email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
-    public function showMessagesStats(string $user_email): Response {
+    public function showMessagesStats(
+        string $user_email,
+        MsgrcptRepository $msgrcptRepository,
+        UserRepository $userRepository): Response {
+
         $connection = $this->em->getConnection();
 
-        // Fetch domain_id from user table
-        $sqlUser = 'SELECT domain_id FROM users WHERE email = :user_email';
-        $stmtUser = $connection->executeQuery($sqlUser, ['user_email' => $user_email]);
-        $user = $stmtUser->fetchAssociative();
-        $domain_id = $user['domain_id'];
+        $user = $userRepository->findOneBy(['email' => $user_email]);
 
-        // Fetch messages with status
-        $sqlMessages = '
-            SELECT msgs.*, ms.name AS status_name, mr.status_id, mr.bspam_level, mr.content, d.level
-            FROM msgs
-            JOIN msgrcpt AS mr ON msgs.mail_id = mr.mail_id
-            JOIN maddr ON mr.rid = maddr.id
-            LEFT JOIN message_status AS ms ON msgs.status_id = ms.id
-            JOIN domain AS d ON d.id = :domain_id
-            WHERE maddr.email = :user_email
-            AND msgs.quar_type != ""
-        ';
-        $stmtMessages = $connection->executeQuery($sqlMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
-        $messages = $stmtMessages->fetchAllAssociative();
+        $query = $msgrcptRepository->findByEmailRecipient($user_email);
+        $messages = $query->getArrayResult();
 
-        // Fetch out messages with status
         $sqlOutMessages = '
-            SELECT out_msgs.*, ms.name AS status_name, mr.status_id, mr.bspam_level, mr.content, d.level
+            SELECT out_msgs.*, mr.status_id as status, mr.bspam_level as bspamLevel, mr.content
             FROM out_msgs
             JOIN out_msgrcpt AS mr ON out_msgs.mail_id = mr.mail_id
-            LEFT JOIN message_status AS ms ON out_msgs.status_id = ms.id
-            JOIN domain AS d ON d.id = :domain_id
             WHERE out_msgs.from_addr = :user_email
         ';
-        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['user_email' => $user_email, 'domain_id' => $domain_id]);
+        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['user_email' => $user_email]);
         $outMessages = $stmtOutMessages->fetchAllAssociative();
 
         // Determine status using provided logic
         $statusCounts = [];
 
         foreach ($messages as $message) {
-            $status = $this->determineStatus($message);
+            $status = $this->determineStatus($message, $user->getDomain()->getLevel());
             if (!isset($statusCounts[$status])) {
                 $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
             }
@@ -183,7 +188,7 @@ class DefaultController extends AbstractController {
         }
 
         foreach ($outMessages as $outMessage) {
-            $status = $this->determineStatus($outMessage);
+            $status = $this->determineStatus($outMessage, $user->getDomain()->getLevel());
             if (!isset($statusCounts[$status])) {
                 $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
             }
@@ -221,12 +226,13 @@ class DefaultController extends AbstractController {
      * @param array<string, mixed> $message
      * @return string
      */
-    private function determineStatus(array $message): string {
-        if ($message['status_name'] !== null) {
-            return $message['status_name'];
-        } elseif ($message['status_id'] === null && $message['bspam_level'] > $message['level'] && $message['content'] !== 'C' && $message['content'] !== 'V') {
+    private function determineStatus(array $message, float $level): string {
+        if ($message['status'] !== null) {
+            return MessageStatus::getStatusName($message['status']);
+        } elseif ($message['status'] === null && $message['bspamLevel'] > $level
+            && $message['content'] !== ContentType::Clean && $message['content'] !== ContentType::Virus) {
             return 'spam';
-        } elseif ($message['content'] === 'V') {
+        } elseif ($message['content'] === ContentType::Virus) {
             return 'virus';
         } else {
             return 'untreated';

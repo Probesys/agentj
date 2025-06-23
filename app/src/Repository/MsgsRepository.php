@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Amavis\ContentType;
@@ -288,7 +288,6 @@ class MsgsRepository extends ServiceEntityRepository
             SELECT
                 m.*,
                 mr.status_id,
-                ms.name,
                 m.partition_tag,
                 maddr.email,
                 m.subject,
@@ -306,7 +305,6 @@ class MsgsRepository extends ServiceEntityRepository
             FROM {$table} m
             LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
             LEFT JOIN maddr ON maddr.id = mr.rid
-            LEFT JOIN message_status ms ON mr.status_id = ms.id
             LEFT JOIN users u ON {$userJoinCondition}
             LEFT JOIN domain d ON u.domain_id = d.id
             WHERE d.active = 1
