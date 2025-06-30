@@ -94,9 +94,8 @@ class Msgs
     #[ORM\Column(name: 'validate_captcha', type: 'integer', nullable: true, options: ['unsigned' => true, 'default' => 0])]
     private int $validate_captcha;
 
-    #[ORM\ManyToOne(targetEntity: MessageStatus::class)]
-    #[ORM\JoinColumn(name: 'status_id', nullable: true)]
-    private ?MessageStatus $status;
+    #[ORM\Column(name: 'status_id', nullable: true)]
+    private ?int $status;
 
     #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
     #[ORM\ManyToOne(targetEntity: Maddr::class)]
@@ -347,12 +346,12 @@ class Msgs
         return $this;
     }
 
-    public function getStatus(): ?MessageStatus
+    public function getStatus(): ?int
     {
         return $this->status;
     }
 
-    public function setStatus(?MessageStatus $status): self
+    public function setStatus(?int $status): self
     {
         $this->status = $status;
 

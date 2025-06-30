@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\DBAL\Types\Types;
 
+
 /**
  * Users
  */
@@ -82,9 +83,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[OrderBy(['priority' => 'DESC'])]
     private Collection $groups;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'aliases')]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
     private ?User $originalUser;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'originalUser')]
+    private Collection $aliases;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
     private ?bool $report;
@@ -638,5 +645,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->quota = $quota;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getAliases(): ?Collection
+    {
+        return $this->aliases;
+    }
+
+    public function addAlias(User $alias): self
+    {
+        if (!$this->aliases->contains($alias)) {
+            $this->aliases[] = $alias;
+        }
+
+        return $this;
+    }
+
+    public function removeAlias(User $alias): self
+    {
+        $this->aliases->removeElement($alias);
+
+        return $this;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->getRoles()) || in_array('ROLE_SUPER_ADMIN', $this->getRoles());
     }
 }

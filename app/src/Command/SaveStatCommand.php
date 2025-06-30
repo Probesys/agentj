@@ -4,8 +4,8 @@ namespace App\Command;
 
 use App\Entity\DailyStat;
 use App\Entity\Domain;
-use App\Entity\MessageStatus;
-use App\Repository\MsgsRepository;
+use App\Amavis\MessageStatus;
+use App\Repository\MsgrcptSearchRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,25 +21,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     )]
 class SaveStatCommand extends Command {
 
-    private MsgsRepository $msgsRepository;
-    private EntityManagerInterface $em;
-
     protected function configure(): void {
-        $this
-                ->addArgument('day', InputArgument::OPTIONAL, 'Day  (YYYYMMDD) to save stat');
+        $this->addArgument('day', InputArgument::OPTIONAL, 'Day  (YYYYMMDD) to save stat');
     }
 
-    public function __construct(MsgsRepository $msgsRepository, EntityManagerInterface $em) {
+    public function __construct(
+        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private EntityManagerInterface $em) {
         parent::__construct();
-        $this->msgsRepository = $msgsRepository;
-        $this->em = $em;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
         $day = $input->getArgument('day');
         $dateToSave = new \DateTime();
-        $dateToSave->modify('-1 day');
+        $dateToSave->modify('-1 day')->setTime(0, 0, 0);
 
         if ($day) {
             $dateToSave = \Datetime::createFromFormat('Ymd', $day);
@@ -49,6 +45,8 @@ class SaveStatCommand extends Command {
             }
         }
 
+        $timestamp = $dateToSave->getTimestamp();
+
         $domains = $this->em->getRepository(Domain::class)->findBy(['active' => true]);
         foreach ($domains as $domain) {
             $stat = $this->em->getRepository(DailyStat::class)->findOneBy(['date' => $dateToSave, 'domain' => $domain]);
@@ -56,13 +54,41 @@ class SaveStatCommand extends Command {
                 $stat = new DailyStat();
             }
 
-            $nbUntreated = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::UNTREATED, null, $dateToSave, $domain);
-            $nbSpam = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::SPAMMED, null, $dateToSave, $domain);
-            $nbVirus = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::VIRUS, null, $dateToSave, $domain);
-            $nbAuthorized = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::AUTHORIZED, null, $dateToSave, $domain);
-            $nbBanned = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::BANNED, null, $dateToSave, $domain);
-            $nbDeleted = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::DELETED, null, $dateToSave, $domain);
-            $nbRestored = $this->msgsRepository->countByTypeAndDays(null, MessageStatus::RESTORED, null, $dateToSave, $domain);
+            $nbUntreated = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::UNTREATED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbSpam = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::SPAMMED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbVirus = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::VIRUS,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbAuthorized = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::AUTHORIZED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbBanned = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::BANNED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbDeleted = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::DELETED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
+            $nbRestored = $this->msgrcptSearchRepository->countByTypeAndDays(
+                messageStatus: MessageStatus::RESTORED,
+                fromDate: $timestamp,
+                domain: $domain
+            );
 
             $stat->setDate($dateToSave);
             $stat->setDomain($domain);
@@ -75,7 +101,6 @@ class SaveStatCommand extends Command {
             $stat->setNbRestored(count($nbRestored) > 0 ? $nbRestored[0]['nb_result'] : 0);
             $this->em->persist($stat);
         }
-
 
         $this->em->flush();
         $io->success(date('Y-m-d H:i:s') . '\nStat saved');
