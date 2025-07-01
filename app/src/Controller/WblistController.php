@@ -159,8 +159,8 @@ class WblistController extends AbstractController {
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
-            if ($fileUpload->getClientMimeType() == "text/csv") {
-                $filename = 'import-wblist-agentj-' . time() . ".csv";
+            if ($fileUpload->getClientMimeType() == "text/plain") {
+                $filename = 'import-wblist-agentj-' . time() . ".txt";
                 $file = $fileUpload->move('/tmp/', $filename);
                 $this->importWbList($file->getPathname(), $form->get('domain')->getData());
             } else {
@@ -179,35 +179,56 @@ class WblistController extends AbstractController {
         $tabWblist = [];
         if (($handle = fopen($pathfile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {
-                $mailaddrSender = $this->em->getRepository(Mailaddr::class)->findOneBy(['email' => trim($data)]);
+                $data = $this->sanitizeImportedData($data);
+
+                if ($data === null) {
+                    continue;
+                }
+
+                $mailaddrSender = $this->em->getRepository(Mailaddr::class)->findOneBy(['email' => $data]);
                 //if email doesn't exist then we create email in Mailaddr
                 if (!$mailaddrSender) {
                     $mailaddrSender = new Mailaddr();
-                    $mailaddrSender->setEmail(trim($data));
+                    $mailaddrSender->setEmail($data);
                     $mailaddrSender->setPriority(6);
                     $this->em->persist($mailaddrSender);
                     $this->em->flush();
                 }
 
-                if (filter_var(trim($data), FILTER_VALIDATE_EMAIL)) {
-                    if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
-                        continue;
-                    }
-                    $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                    $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
-                    if (!$wblist) {
-                        $wblist = new Wblist($user, $mailaddrSender);
-                    }
-
-                    $wblist->setWb('W');
-                    $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
-                    $wblist->setType(1);
-                    $this->em->persist($wblist);
-                    $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
+                if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
+                    continue;
                 }
+                $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
+                $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
+                if (!$wblist) {
+                    $wblist = new Wblist($user, $mailaddrSender);
+                }
+
+                $wblist->setWb('W');
+                $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
+                $wblist->setType(1);
+                $this->em->persist($wblist);
+                $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
             }
             $this->em->flush();
         }
+    }
+
+    private function sanitizeImportedData(string $data): ?string
+    {
+        $data = trim($data);
+
+        $email = filter_var($data, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE);
+        if ($email !== false) {
+            return $email;
+        }
+
+        $domain = filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
+        if ($domain !== false) {
+            return $domain;
+        }
+
+        return null;
     }
 
 }
