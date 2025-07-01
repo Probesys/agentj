@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Model\ValidationSource;
 use App\Entity\Mailaddr;
 use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
@@ -244,11 +243,11 @@ class MessageController extends AbstractController
 
                 switch ($action) {
                     case 'authorized':
-                        $messageService->authorize($message, [$messageRecipient], ValidationSource::user);
+                        $messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
                         $logService->addLog('authorized batch', $mailId);
                         break;
                     case 'banned':
-                        $messageService->ban($message, [$messageRecipient], ValidationSource::user);
+                        $messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
                         $logService->addLog('banned batch', $mailId);
                         break;
                     case 'delete':
@@ -290,7 +289,7 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->authorize($message, [$messageRecipient], ValidationSource::user)) {
+        if ($messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
             $logService->addLog('authorized', $mailId);
         }
@@ -325,7 +324,7 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->ban($message, [$messageRecipient], ValidationSource::user)) {
+        if ($messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
             $logService->addLog('banned', $mailId);
         }

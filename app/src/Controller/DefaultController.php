@@ -3,13 +3,13 @@
 namespace App\Controller;
 
 use App\Controller\MessageController;
-use App\Model\ValidationSource;
 use App\Entity\Domain;
 use App\Entity\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Alert;
+use App\Entity\Wblist;
 use App\Form\CaptchaFormType;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
@@ -261,7 +261,7 @@ class DefaultController extends AbstractController {
 
             if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, ValidationSource::captcha);
+                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                     $message->setValidateCaptcha(time());
                     $em->persist($message);
                     $em->flush();

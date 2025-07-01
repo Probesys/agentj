@@ -3,7 +3,6 @@
 namespace App\Controller\Portal;
 
 use App\Entity;
-use App\Model;
 use App\Repository;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,7 +62,7 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        if ($this->messageService->authorize($message, [$messageRecipient], Model\ValidationSource::user)) {
+        if ($this->messageService->authorize($message, [$messageRecipient], Entity\Wblist::WBLIST_TYPE_USER)) {
             $this->logService->addLog('authorized', $mailId);
         }
 

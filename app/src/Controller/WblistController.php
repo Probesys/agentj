@@ -198,6 +198,7 @@ class WblistController extends AbstractController {
                 if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
                     continue;
                 }
+
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
                 $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
                 if (!$wblist) {
@@ -206,7 +207,7 @@ class WblistController extends AbstractController {
 
                 $wblist->setWb('W');
                 $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
-                $wblist->setType(1);
+                $wblist->setType(Wblist::WBLIST_TYPE_IMPORT);
                 $this->em->persist($wblist);
                 $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
             }

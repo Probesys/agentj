@@ -654,6 +654,7 @@ Entities:
         2: Validated by the group
         3: Validated by the administrator
         4: Validated by outgoing email
+        5: Validated by file importation
       typeLabelB:
         0: Blocked by you
         1: Blocked by captcha
