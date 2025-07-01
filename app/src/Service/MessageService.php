@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity;
-use App\Model;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -112,7 +111,7 @@ class MessageService
         Entity\Msgs $message,
         array $messageRecipients,
         string $wb,
-        int $type = Model\ValidationSource::user,
+        int $type = Entity\Wblist::WBLIST_TYPE_USER,
     ): bool {
         $status = $wb === 'W' ? Entity\MessageStatus::AUTHORIZED : Entity\MessageStatus::BANNED;
         $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
