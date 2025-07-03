@@ -11,7 +11,9 @@
 
     {% block content_button_actions %}
       {%  if app.request.get('_route_params')['type'] == 'W' and is_granted('ROLE_ADMIN')%}
-        <a href="#" data-url-modal-content="{{ path('import_wblist') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6"><i class="fas fa-plus"></i>&nbsp;Importer depuis un fichier</a>
+        <a href="#" data-url-modal-content="{{ path('import_wblist') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6">
+            <i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}
+        </a>
       {% endif %}
     {% endblock %}
 
