@@ -184,7 +184,7 @@ document.addEventListener("turbo:load", function () {
   });
 
   // Show filename in label input
-  $(document).on('change', '#domain_logoFile', function (e) {
+  $(document).on('change', 'input[type="file"]', function (e) {
     //get the file name
     var fileName = $(this).val();
     $(this).next('.custom-file-label').html(fileName);
