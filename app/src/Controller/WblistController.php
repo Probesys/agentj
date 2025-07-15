@@ -224,9 +224,14 @@ class WblistController extends AbstractController {
             return $email;
         }
 
+        // This allows domains to be imported in both formats: "example.org" and "@example.org".
+        if (str_starts_with($data, '@')) {
+            $data = substr($data, 1);
+        }
+
         $domain = filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
         if ($domain !== false) {
-            return $domain;
+            return '@' . $domain;
         }
 
         return null;
