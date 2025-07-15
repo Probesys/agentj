@@ -135,15 +135,14 @@ class ImportController extends AbstractController
                                     if (!$group) {
                                         //get rules of domain
                                         if (!isset($domains[$domainEmail]['wb'])) {
-                                            $wb = $em->getRepository(Wblist::class)->searchByReceiptDomain(
-                                                '@' . $domainEmail
-                                            );
+                                            $wblist = $em->getRepository(Wblist::class)
+                                                         ->findOneByRecipientDomain($domains[$domainEmail]['entity']);
 
-                                            if ($wb === null) {
+                                            if ($wblist === null) {
                                                 $errors[] = 'No wblist found for this domain ' . $domainEmail;
                                                 continue;
                                             }
-                                            $domains[$domainEmail]['wb'] = $wb['wb'];
+                                            $domains[$domainEmail]['wb'] = $wblist->getWb();
                                         }
                                         $group = new Groups();
                                         $group->setName($data[3]);

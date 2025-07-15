@@ -21,11 +21,17 @@ class LogRepository extends ServiceEntityRepository
      */
     public function truncateOlder(int $nbDays): int
     {
-        $conn = $this->getEntityManager()->getConnection();
+        $entityManager = $this->getEntityManager();
 
-        $sql = 'delete from log where DATEDIFF(now(),log.created)> ' . $nbDays;
-        $stmt = $conn->prepare($sql);
-        $result = $stmt->execute();
-        return $result->rowCount();
+        $query = $entityManager->createQuery(<<<SQL
+            DELETE App\Entity\Log l
+            WHERE l.created <= :date
+        SQL);
+
+        $now = new \DateTimeImmutable('now');
+        $date = $now->modify("-{$nbDays} days");
+        $query->setParameter('date', $date);
+
+        return $query->execute();
     }
 }

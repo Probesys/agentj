@@ -50,7 +50,7 @@ class GroupsController extends AbstractController
         $user = $this->getUser();
         $groups = $this->em
                 ->getRepository(Groups::class)
-                ->findByDomain($user->getDomains()->toArray());
+                ->findByDomains($user->getDomains()->toArray());
 
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }

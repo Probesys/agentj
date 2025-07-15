@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
 
@@ -44,14 +45,25 @@ class MsgrcptRepository extends ServiceEntityRepository
     public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
+
         $sql = <<<SQL
-            UPDATE msgrcpt SET status_id = {$status}
-            WHERE partition_tag = "{$partitiontag}"
-            AND mail_id = "{$mailId}"
-            AND rid={$rid}
+            UPDATE msgrcpt SET status_id = :status
+            WHERE partition_tag = :partitionTag
+            AND mail_id = :mailId
+            AND rid = :rid
         SQL;
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
+
+        $conn->executeStatement($sql, [
+            'status' => $status,
+            'partitionTag' => $partitiontag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+        ], [
+            'status' => DBAL\ParameterType::INTEGER,
+            'partitionTag' => DBAL\ParameterType::STRING,
+            'mailId' => DBAL\ParameterType::STRING,
+            'rid' => DBAL\ParameterType::INTEGER,
+        ]);
     }
 
     /**
@@ -70,10 +82,12 @@ class MsgrcptRepository extends ServiceEntityRepository
             WHERE m.content != "C"
             AND msr.content != "C"
             AND msr.status_id IS NULL
-            AND mr.domain = "{$domain}"
-            AND ms.email = "{$emailSender}"
+            AND mr.domain = :domain
+            AND ms.email = :emailSender
         SQL;
         $stmt = $conn->prepare($sql);
+        $stmt->bindValue('domain', $domain);
+        $stmt->bindValue('emailSender', $emailSender);
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 

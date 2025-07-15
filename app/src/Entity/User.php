@@ -372,6 +372,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function hasDomain(Domain $domain): bool
+    {
+        return $this->domains->contains($domain);
+    }
 
     public function getEmailRecovery(): ?string
     {

@@ -17,34 +17,6 @@ class DomainRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get the list of domains owned by a local administrator
-     * @return Domain[]
-     */
-    public function getListByUserId(?int $userID = null): ?array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = "select domain_id from users_domains";
-        if ($userID) {
-            $sql .= " where user_id=" . $userID;
-        }
-
-        $stmt = $conn->prepare($sql);
-
-        $resultArray = $stmt->executeQuery()->fetchFirstColumn();
-
-        if ($resultArray) {
-            $dql = $this->createQueryBuilder('d')
-              ->where('d in(' . implode(',', $resultArray) . ')');
-            $query = $dql->getQuery();
-
-            return $query->getResult();
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Get the list of domains with IMAP connectors
      * @return array<int>
      */

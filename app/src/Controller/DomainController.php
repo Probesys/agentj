@@ -47,13 +47,11 @@ class DomainController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $allowedomains = $this->em
-                ->getRepository(Domain::class)
-                ->getListByUserId($user->getId());
-            if (!in_array($domain, $allowedomains)) {
-                throw new AccessDeniedException();
-            }
+        if (
+            !in_array('ROLE_SUPER_ADMIN', $user->getRoles()) &&
+            !$user->hasDomain($domain)
+        ) {
+            throw new AccessDeniedException();
         }
     }
 
@@ -67,9 +65,7 @@ class DomainController extends AbstractController
                 ->getRepository(Domain::class)
                 ->findAll();
         } else {
-            $domains = $this->em
-                ->getRepository(Domain::class)
-                ->getListByUserId($user->getId());
+            $domains = $user->getDomains();
         }
 
 
@@ -213,13 +209,13 @@ class DomainController extends AbstractController
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
 
-        $wblistArray = $this->em->getRepository(Wblist::class)->searchByReceiptDomain('@' . $domain->getDomain());
+        $wblist = $this->em->getRepository(Wblist::class)->findOneByRecipientDomain($domain);
 
-        if ($wblistArray === null) {
+        if ($wblist === null) {
             throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
         }
 
-        $form->get('rules')->setData($wblistArray['wb']);
+        $form->get('rules')->setData($wblist->getWb());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
@@ -242,10 +238,6 @@ class DomainController extends AbstractController
             $userDomain->setPolicy($policy);
 
             $rules = $form->get("rules")->getData();
-            $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
-                'rid' => $wblistArray['rid'],
-                'sid' => $wblistArray['sid'],
-            ]);
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 

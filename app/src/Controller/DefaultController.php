@@ -103,7 +103,7 @@ class DefaultController extends AbstractController
         }
 
         foreach ($domains as $domain) {
-            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user, $domain->getId());
+            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user, $domain);
 
             $data[$domain->getId()] = [
                 'totalMsgCount' => array_reduce($users, function ($carry, $user) {

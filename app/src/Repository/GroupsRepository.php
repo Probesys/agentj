@@ -41,22 +41,16 @@ class GroupsRepository extends ServiceEntityRepository
      * @param Domain[] $domains
      * @return Groups[]
      */
-    public function findByDomain(array $domains): array
+    public function findByDomains(array $domains): array
     {
         $dql = $this->createQueryBuilder('g');
 
-        if (is_array($domains)) {
-            $domainsID = array_map(function (Domain $entity) {
-                return $entity->getId();
-            }, $domains);
+        if ($domains) {
+            $dql->where('g.domain in (:domains)');
+            $dql->setParameter('domains', $domains);
         }
 
-        if (!empty($domainsID)) {
-            $dql->where('g.domain in (' . implode(',', $domainsID) . ')');
-        }
-        $query = $dql->getQuery();
-
-        return $query->getResult();
+        return $dql->getQuery()->getResult();
     }
 
     /**

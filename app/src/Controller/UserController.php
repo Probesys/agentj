@@ -633,9 +633,7 @@ class UserController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $allowedomains = $this->em
-                    ->getRepository(Domain::class)
-                    ->getListByUserId($user->getId());
+            $allowedomains = $user->getDomains()->toArray();
         } else {
             $allowedomains = $this->em
                     ->getRepository(Domain::class)
@@ -676,9 +674,7 @@ class UserController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $allowedomains = $this->em
-                    ->getRepository(Domain::class)
-                    ->getListByUserId($user->getId());
+            $allowedomains = $user->getDomains()->toArray();
         }
 
         $entities = $userRepository->autocomplete(

@@ -10,7 +10,7 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\DBAL\Result;
+use Doctrine\DBAL;
 
 /**
  * @extends ServiceEntityRepository<Wblist>
@@ -92,24 +92,19 @@ class WblistRepository extends ServiceEntityRepository
         return $dql->getQuery()->getScalarResult();
     }
 
-    /**
-     * @return ?array<string, mixed>
-     */
-    public function searchByReceiptDomain(string $domain): ?array
+    public function findOneByRecipientDomain(Domain $domain): ?Wblist
     {
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = " SELECT * FROM wblist  wb "
-                . " LEFT JOIN mailaddr ma ON ma.id = wb.sid "
-                . " LEFT JOIN users u ON wb.rid = u.id "
-                . " WHERE u.email = '" . $domain . "' AND ma.email = '@.' ";
+        $queryBuilder = $this->createQueryBuilder('wb');
+        $queryBuilder->innerJoin('wb.rid', 'r');
+        $queryBuilder->innerJoin('wb.sid', 's');
+        $queryBuilder->where("s.email = '@.'");
+        $queryBuilder->andWhere('r.email = :domain');
+        $queryBuilder->setParameter('domain', "@{$domain->getDomain()}");
 
-        $stmt = $conn->prepare($sql);
-
-        $result = $stmt->executeQuery()->fetchAssociative();
-        return $result !== false ? $result : null;
+        return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 
-    public function deleteFromGroup(): Result
+    public function deleteFromGroup(): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " DELETE FROM wblist "
@@ -133,7 +128,7 @@ class WblistRepository extends ServiceEntityRepository
         return $qdl->getQuery()->execute();
     }
 
-    public function insertFromGroup(): Result
+    public function insertFromGroup(): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
         $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
@@ -160,37 +155,65 @@ class WblistRepository extends ServiceEntityRepository
     public function getWbListInfoForSender(string $senderAdress, string $recipientAdress): array
     {
         $infos = [];
-        $senderAddresses = '""';
+
         $recipientDomain = explode('@', $recipientAdress)[1];
         $recipientExt = explode('.', $recipientDomain)[1];
-        $recipientAddresses = "'$recipientAdress','@$recipientDomain','@.$recipientDomain','@.$recipientExt','@.'";
+        $recipientAddresses = [
+            $recipientAdress,
+            "@{$recipientDomain}",
+            "@.{$recipientDomain}",
+            "@.{$recipientExt}",
+            '@.',
+        ];
 
+        $senderAddresses = [];
         if (!empty($senderAdress)) {
             $senderDomain = explode('@', $senderAdress)[1];
             $senderExt = explode('.', $senderDomain)[1];
-
-            $senderAddresses = "'$senderAdress','@$senderDomain','@.$senderDomain','@.$senderExt','@.'";
+            $senderAddresses = [
+                $senderAdress,
+                "@{$senderDomain}",
+                "@.{$senderDomain}",
+                "@.{$senderExt}",
+                '@.',
+            ];
         }
 
-
         $conn = $this->getEntityManager()->getConnection();
-        $sqlSelectPolicy = 'SELECT *,users.id' .
-                ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
-                ' WHERE users.email IN (' . $recipientAddresses . ') ORDER BY users.priority DESC ';
 
-        $stmt = $conn->prepare($sqlSelectPolicy);
-        $result = $stmt->executeQuery()->fetchAllAssociative();
+        $sqlSelectPolicy = <<<SQL
+            SELECT *, users.id
+            FROM users
+            LEFT JOIN policy ON users.policy_id=policy.id
+            WHERE users.email IN (:recipientAddresses)
+            ORDER BY users.priority DESC
+        SQL;
+
+        $result = $conn->executeQuery($sqlSelectPolicy, [
+            'recipientAddresses' => $recipientAddresses,
+        ], [
+            'recipientAddresses' => DBAL\ArrayParameterType::STRING,
+        ])->fetchAllAssociative();
+
         foreach ($result as $row) {
             $id = $row['id'];
             $sqlSelectWhiteBlackList = <<<SQL
-                SELECT wb,wblist.priority,wblist.datemod,wblist.group_id, wblist.sid, wblist.rid
-                FROM wblist JOIN mailaddr ON wblist.sid=mailaddr.id
-                WHERE wblist.rid={$id} AND mailaddr.email IN ({$senderAddresses})
+                SELECT wb, wblist.priority, wblist.datemod, wblist.group_id, wblist.sid, wblist.rid
+                FROM wblist
+                JOIN mailaddr ON wblist.sid = mailaddr.id
+                WHERE wblist.rid = :rid
+                AND mailaddr.email IN (:senderAddresses)
+                ORDER BY wblist.priority DESC, mailaddr.priority DESC
             SQL;
 
-            $sqlSelectWhiteBlackList .= ' ORDER BY wblist.priority DESC , mailaddr.priority DESC ';
-            $stmt = $conn->prepare($sqlSelectWhiteBlackList);
-            $result1 = $stmt->executeQuery()->fetchAllAssociative();
+            $result1 = $conn->executeQuery($sqlSelectWhiteBlackList, [
+                'rid' => $id,
+                'senderAddresses' => $senderAddresses,
+            ], [
+                'rid' => DBAL\ParameterType::INTEGER,
+                'senderAddresses' => DBAL\ArrayParameterType::STRING,
+            ])->fetchAllAssociative();
+
             foreach ($result1 as $row1) {
                 $group = null;
                 if (!is_null($row1['group_id'])) {

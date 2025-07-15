@@ -67,7 +67,8 @@ class GroupsType extends AbstractType
                         ->orderBy('d.domain', 'asc');
 
                     if ($user) {
-                        $builder->where('u.id =' . $user->getId());
+                        $builder->where('u.id = :user');
+                        $builder->setParameter('user', $user);
                     }
 
                     return $builder;

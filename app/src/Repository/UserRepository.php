@@ -6,6 +6,7 @@ use App\Entity\Domain;
 use App\Entity\User;
 use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
 
@@ -82,23 +83,6 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
-     * search query
-     */
-    public function search(?string $login): Query
-    {
-        $login = strtolower($login ?? '');
-        $dql = $this->createQueryBuilder('u')
-                ->select('u')
-        ;
-
-        if ($login != '') {
-            $dql->andwhere('u.email = \'' . $login . '\'');
-        }
-
-        return $dql->getQuery();
-    }
-
-    /**
      * search query by role
      *
      * @return User[]
@@ -118,22 +102,17 @@ class UserRepository extends ServiceEntityRepository
         }
 
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domain = $user->getDomain();
-            if ($domain !== null) {
-                $domainsIds = [$domain->getId()];
-            } else {
-                $domainsIds = [];
+            $domains = $user->getDomains()->toArray();
+            if ($user->getDomain()) {
+                $domains[] = $user->getDomain();
             }
-            $domains = $user->getDomains();
-            if ($domains !== null && !$domains->isEmpty()) {
-                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
-                    return $domain->getId();
-                })->toArray());
-            }
-            if (empty($domainsIds)) {
+
+            if (empty($domains)) {
                 return [];
             }
-            $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
+
+            $dql->andWhere('u.domain in (:domains)');
+            $dql->setParameter('domains', $domains);
         }
 
         $result = $dql->getQuery()->execute();
@@ -165,33 +144,26 @@ class UserRepository extends ServiceEntityRepository
                 ->join('u.originalUser', 'a')
                 ->where('u.originalUser is not null');
 
-        //todo finir les droits sur les domaines
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domain = $user->getDomain();
-            if ($domain !== null) {
-                $domainsIds = [$domain->getId()];
-            } else {
-                $domainsIds = [];
+            $domains = $user->getDomains()->toArray();
+            if ($user->getDomain()) {
+                $domains[] = $user->getDomain();
             }
-            $domains = $user->getDomains();
-            if ($domains !== null && !$domains->isEmpty()) {
-                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
-                    return $domain->getId();
-                })->toArray());
-            }
-            if (empty($domainsIds)) {
+
+            if (empty($domains)) {
                 return [];
             }
-            $dql->andWhere('u.domain in (' . implode(',', $domainsIds) . ')');
-        }
 
+            $dql->andWhere('u.domain in (:domains)');
+            $dql->setParameter('domains', $domains);
+        }
 
         return $dql->getQuery()->getScalarResult();
     }
 
     /**
      * autocomplete query
-     * @param ?Domain[] $allowedomains
+     * @param Domain[] $allowedomains
      *
      * @return array<int, array<string, mixed>>
      */
@@ -199,7 +171,7 @@ class UserRepository extends ServiceEntityRepository
         ?string $q,
         int $pageLimit = 30,
         ?int $page = null,
-        ?array $allowedomains = null,
+        array $allowedomains = [],
     ): array {
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email')
@@ -210,14 +182,13 @@ class UserRepository extends ServiceEntityRepository
         ;
 
         if ($allowedomains) {
-            $domainsIds = array_map(function (Domain $domain) {
-                return $domain->getId();
-            }, $allowedomains);
-            $dql->andWhere("u.domain in (" . implode(',', $domainsIds) . ")");
+            $dql->andWhere('u.domain in (:domains)');
+            $dql->setParameter('domains', $allowedomains);
         }
 
         if ($q) {
-            $dql->andWhere("u.email LIKE '%" . $q . "%'");
+            $dql->andWhere('u.email LIKE :query');
+            $dql->setParameter('query', "%{$q}%");
         }
 
         $query = $dql->getQuery();
@@ -227,14 +198,15 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $domainId
      * @return array<int, array<string, mixed>>
      */
-    public function getUsersWithRoleAndMessageCounts(User $user, ?int $domainId = null): array
+    public function getUsersWithRoleAndMessageCounts(User $user, ?Domain $domain = null): array
     {
         $conn = $this->getEntityManager()->getConnection();
+        $parameters = [];
+        $types = [];
 
-        $sql = '
+        $sql = <<<SQL
             SELECT
                 u.email,
                 u.fullname,
@@ -259,8 +231,8 @@ class UserRepository extends ServiceEntityRepository
                     COUNT(DISTINCT om.mail_id) - SUM(CASE
                         WHEN (
                             om.status_id = 2
-                            OR om.content = \'C\'
-                            OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\'))
+                            OR om.content = 'C'
+                            OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN ('C', 'V'))
                         ) THEN 1
                         ELSE 0
                     END) AS outMsgBlockedCount
@@ -286,31 +258,31 @@ class UserRepository extends ServiceEntityRepository
                 FROM sql_limit_report slr
                 GROUP BY slr.mail_id
             ) AS sqlLimitReportCounts ON sqlLimitReportCounts.mail_id = u.email
-            WHERE u.roles LIKE :role
-        ';
+            WHERE u.roles LIKE '%"ROLE_USER"%'
+        SQL;
 
-        if ($domainId !== null) {
-            $sql .= ' AND u.domain_id = :domainId';
+        if ($domain !== null) {
+            $sql .= ' AND u.domain_id = :domain';
+            $parameters['domain'] = $domain->getId();
+            $types['domain'] = DBAL\ParameterType::INTEGER;
         }
 
         // if $user is an admin, add a condition to check only the domains he administer
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = [];
+            $domains = $user->getDomains()->toArray();
             if ($user->getDomain()) {
-                $domainsIds[] = $user->getDomain()->getId();
-            }
-            $domains = $user->getDomains();
-            if ($domains !== null && !$domains->isEmpty()) {
-                $domainsIds = array_merge($domainsIds, $domains->map(function ($domain) {
-                    return $domain->getId();
-                })->toArray());
+                $domains[] = $user->getDomain();
             }
 
-            $sql .= ' AND u.domain_id in (' . implode(',', $domainsIds) . ') ';
-
-            if ($domainsIds === []) {
+            if (empty($domains)) {
                 return [];
             }
+
+            $sql .= ' AND u.domain_id in (:domains) ';
+            $parameters['domains'] = array_map(function ($domain) {
+                return $domain->getId();
+            }, $domains);
+            $types['domains'] = DBAL\ArrayParameterType::INTEGER;
         }
 
         $sql .= <<<SQL
@@ -322,13 +294,6 @@ class UserRepository extends ServiceEntityRepository
                 sqlLimitReportCounts.sqlLimitReportCount
         SQL;
 
-        $stmt = $conn->prepare($sql);
-        $params = ['role' => '%"ROLE_USER"%'];
-        if ($domainId !== null) {
-            $params['domainId'] = $domainId;
-        }
-        $result = $stmt->executeQuery($params)->fetchAllAssociative();
-
-        return $result;
+        return $conn->executeQuery($sql, $parameters, $types)->fetchAllAssociative();
     }
 }
