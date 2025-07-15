@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Domain;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -34,9 +34,6 @@ use Symfony\Component\Mailer\MailerInterface;
 )]
 class SendAuthMailRequestCommand extends Command
 {
-    private MessageStatus $messageStatusError;
-    private MessageStatus $messageStatusAuthorized;
-
     public function __construct(
         private EntityManagerInterface $em,
         private MsgsRepository $msgsRepository,
@@ -52,8 +49,6 @@ class SendAuthMailRequestCommand extends Command
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         public readonly string $defaultSenderAdress,
     ) {
-        $this->messageStatusError = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::ERROR);
-        $this->messageStatusAuthorized = $this->em->getRepository(MessageStatus::class)->find(MessageStatus::AUTHORIZED);
         parent::__construct();
     }
 
@@ -232,7 +227,7 @@ class SendAuthMailRequestCommand extends Command
             //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
-            $message->setStatus($this->messageStatusError);
+            $message->setStatus(MessageStatus::ERROR);
             $this->em->persist($message);
             $this->em->flush();
             $email = null;
@@ -252,7 +247,7 @@ class SendAuthMailRequestCommand extends Command
         } catch (\Exception $e) {
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
-            $message->setStatus($this->messageStatusError);
+            $message->setStatus(MessageStatus::ERROR);
             $this->em->persist($message);
             $this->em->flush();
             return false;
@@ -273,7 +268,7 @@ class SendAuthMailRequestCommand extends Command
                 $msgRcpt->setAmavisOutput($buffer);
             }
         );
-        $msgRcpt->setStatus($this->messageStatusAuthorized);
+        $msgRcpt->setStatus(MessageStatus::AUTHORIZED);
         $this->em->persist($msgRcpt);
         $this->em->flush();
     }

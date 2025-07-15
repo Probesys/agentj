@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Amavis\MessageStatus;
 use App\Entity;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -68,11 +69,10 @@ class MessageService
                 throw new ProcessFailedException($process);
             }
 
-            $msgStatus = $this->em->getRepository(Entity\MessageStatus::class)->find(Entity\MessageStatus::RESTORED);
-            $message->setStatus($msgStatus);
+            $message->setStatus(MessageStatus::RESTORED);
             $this->em->persist($message);
 
-            $messageRecipient->setStatus($msgStatus);
+            $messageRecipient->setStatus(MessageStatus::RESTORED);
             $this->em->persist($messageRecipient);
 
             $this->em->flush();
@@ -91,7 +91,7 @@ class MessageService
         $this->msgrcptRepository->changeStatus(
             $message->getPartitionTag(),
             $message->getMailIdAsString(),
-            Entity\MessageStatus::DELETED,
+            MessageStatus::DELETED,
             $messageRecipient->getRid()->getId(),
         );
 
@@ -113,8 +113,7 @@ class MessageService
         string $wb,
         int $type = Entity\Wblist::WBLIST_TYPE_USER,
     ): bool {
-        $status = $wb === 'W' ? Entity\MessageStatus::AUTHORIZED : Entity\MessageStatus::BANNED;
-        $messageStatus = $this->em->getRepository(Entity\MessageStatus::class)->find($status);
+        $messageStatus = $wb === 'W' ? MessageStatus::AUTHORIZED : MessageStatus::BANNED;
 
         //check if sender exists in the database
         $emailSender = stream_get_contents($message->getSid()->getEmail(), -1, 0);

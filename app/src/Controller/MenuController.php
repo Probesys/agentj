@@ -2,36 +2,32 @@
 
 namespace App\Controller;
 
-use App\Entity\MessageStatus;
-use App\Entity\Msgs;
+use App\Amavis\MessageStatus;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
 class MenuController extends AbstractController
 {
-
-    public function __construct(private EntityManagerInterface $em) {
-    }
-
     /**
      * @param array<string, mixed> $route_params
      */
-    public function renderSlideMenu(string $route, array $route_params): Response
-    {
+    public function renderSlideMenu(
+        string $route,
+        array $route_params,
+        MsgrcptSearchRepository $msgrcptSearchRepository
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        $alias = $this->em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
-        $msgs['untreated'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::UNTREATED, $alias);
-        $msgs['authorized'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::AUTHORIZED, $alias);
-        $msgs['banned'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::BANNED, $alias);
-        $msgs['delete'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::DELETED, $alias);
-        $msgs['restored'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::RESTORED, $alias);
-        $msgs['error'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::ERROR, $alias);
-        $msgs['spammed'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::SPAMMED, $alias);
-        $msgs['virus'] = $this->em->getRepository(Msgs::class)->countByType($user, MessageStatus::VIRUS, $alias);
-        unset($alias);
+        $msgs['untreated'] = $msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
+        $msgs['authorized'] = $msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+        $msgs['banned'] = $msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
+        $msgs['delete'] = $msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
+        $msgs['restored'] = $msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
+        $msgs['error'] = $msgrcptSearchRepository->countByType($user, MessageStatus::ERROR);
+        $msgs['spammed'] = $msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
+        $msgs['virus'] = $msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS);
 
         return $this->render(
             'navigation.html.twig',

@@ -14,7 +14,6 @@ use App\Repository\MailaddrRepository;
 #[ORM\Entity(repositoryClass: MailaddrRepository::class)]
 class Mailaddr
 {
-
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -49,6 +48,15 @@ class Mailaddr
         return stream_get_contents($this->email, -1, 0);
     }
 
+    public function getEmailClear(): string
+    {
+        $email = $this->email;
+        if (is_resource($email)) {
+            $email = stream_get_contents($email, -1, 0);
+            rewind($this->email);
+        }
+        return $email;
+    }
 
     public function setEmail(string $email): self
     {

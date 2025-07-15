@@ -3,13 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Mailaddr;
-use App\Entity\MessageStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\Quarantine;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
+use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MsgsRepository;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -28,7 +30,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 #[Route(path: '/message')]
 class MessageController extends AbstractController
 {
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em
@@ -36,8 +37,13 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{type}', name: 'message')]
-    public function index(Request $request, PaginatorInterface $paginator, ?string $type = null): Response
-    {
+    public function index(
+        Request $request,
+        PaginatorInterface $paginator,
+        MsgrcptSearchRepository $msgrcptSearchRepository,
+        MsgsRepository $msgsRepository,
+        ?string $type = null
+    ): Response {
         $subTitle = '';
         $messageActions = [
             'Message.Actions.Delete' => 'delete'
@@ -53,36 +59,36 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $type = MessageStatus::SPAMMED;
+                    $messageStatus = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
                     $subTitle = 'Entities.Message.virus';
-                    $type = MessageStatus::VIRUS;
+                    $messageStatus = MessageStatus::VIRUS;
                     $messageActions = [];
                     break;
                 case 'banned':
-                    $subTitle = 'Entities.Message.' . $type;
-                    $type = MessageStatus::BANNED;
+                    $subTitle = 'Entities.Message.banned';
+                    $messageStatus = MessageStatus::BANNED;
                     $messageActions = [
                         'Message.Actions.Autorized' => 'authorized',
                         'Message.Actions.Delete' => 'delete',
                     ];
                     break;
                 case 'authorized':
-                    $subTitle = 'Entities.Message.' . $type;
+                    $subTitle = 'Entities.Message.authorized';
                     $messageActions = [
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $type = MessageStatus::AUTHORIZED;
+                    $messageStatus = MessageStatus::AUTHORIZED;
                     break;
                 case 'delete':
-                    $subTitle = 'Entities.Message.' . $type;
-                    $type = MessageStatus::DELETED;
+                    $subTitle = 'Entities.Message.delete';
+                    $messageStatus = MessageStatus::DELETED;
                     break;
                 case 'restored':
-                    $subTitle = 'Entities.Message.' . $type;
-                    $type = MessageStatus::RESTORED;
+                    $subTitle = 'Entities.Message.restored';
+                    $messageStatus = MessageStatus::RESTORED;
                     break;
 
                 default:
@@ -93,7 +99,7 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
-                    $type = MessageStatus::UNTREATED;
+                    $messageStatus = MessageStatus::UNTREATED;
                     break;
             }
         } else {
@@ -104,35 +110,29 @@ class MessageController extends AbstractController
                 'Message.Actions.Delete' => 'delete',
             ];
             $subTitle = 'Entities.Message.untreated';
+            $messageStatus = null;
         }
-        $email = "";
 
-        $filterForm = $this->createForm(ActionsFilterType::class, null, ['avalaibleActions' => $messageActions, 'action' => $this->generateUrl('message_batch')]);
+        $filterForm = $this->createForm(ActionsFilterType::class, options: [
+            'avalaibleActions' => $messageActions,
+            'action' => $this->generateUrl('message_batch')
+        ]);
 
-        if ($type === MessageStatus::DELETED || $type === MessageStatus::VIRUS) {
+        if ($messageStatus === MessageStatus::DELETED || $messageStatus === MessageStatus::VIRUS) {
             $filterForm->remove('actions');
         }
 
         /** @var User $user */
         $user = $this->getUser();
-        if ($user->getEmail() && in_array('ROLE_USER', $user->getRoles())) {
-            $email = stream_get_contents($user->getEmail(), -1, 0);
-        }
-        $em = $this->em;
-        $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user->getId()]);
 
         $sortParams = [];
-        if ($request->query->has('sortDirection') && $request->query->has('sortField')) {
-            $sortParams['sort'] = $request->query->get('sortField');
-            $sortParams['direction'] = $request->query->get('sortDirection');
-        }
-        $searchKey = null;
-        if ($request->query->has('search')) {
-            $searchKey = trim($request->query->get('search'));
+        if ($request->query->has('sort') && $request->query->has('direction')) {
+            $sortParams['sort'] = $request->query->getString('sort');
+            $sortParams['direction'] = $request->query->getString('direction');
         }
 
-        $allMessages = $em->getRepository(Msgs::class)->search($user, $type, $alias, $searchKey, $sortParams, null);
-        $totalMsgFound = count($allMessages);
+        $searchKey = trim($request->query->getString('search'));
+        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery($user, $messageStatus, $searchKey, $sortParams);
 
         $per_page = (int) $this->getParameter('app.per_page_global');
         if ($request->query->has('per_page') && $request->query->getInt('per_page') > 0) {
@@ -143,19 +143,20 @@ class MessageController extends AbstractController
         }
         $filterForm->get('per_page')->setData($per_page);
 
-        $msg2Show = $paginator->paginate(
-            $allMessages,
-            $request->query->getInt('page', 1)/* page number */,
-            $per_page
+        $messagesRecipients = $paginator->paginate(
+            $messagesRecipientsQuery,
+            $request->query->getInt('page', 1),
+            $per_page,
+            [
+                'wrap-queries' => true,
+                'fetchJoinCollection' => false,
+                'distinct' => false,
+            ]
         );
-        unset($allMessages);
         return $this->render('message/index.html.twig', [
-            'controller_name' => 'MessageController',
             'subTitle' => $subTitle,
-            'msgs' => $msg2Show,
-            'type' => $type,
-            'per_page_global' => $per_page,
-            'totalItemFound' => $totalMsgFound,
+            'messagesRecipients' => $messagesRecipients,
+            'messageStatus' => $messageStatus,
             'filter_form' => $filterForm->createView()
         ]);
     }
@@ -164,7 +165,7 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'message_show', methods: 'GET')]
     public function showAction(int $partitionTag, string $mailId, int $rid): Response
     {
-        
+
         $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -382,7 +383,7 @@ class MessageController extends AbstractController
         int $rid,
         Request $request,
         Service\LogService $logService,
-    ): RedirectResponse{
+    ): RedirectResponse {
         if ($this->msgsToWblistDomain($partitionTag, $mailId, "W", $rid)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
             $logService->addLog('authorize for domain ', $mailId);
@@ -466,9 +467,9 @@ class MessageController extends AbstractController
                 if (!$process->isSuccessful()) {
                     throw new ProcessFailedException($process);
                 }
-                $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::AUTHORIZED);
+                $messageStatus = MessageStatus::AUTHORIZED;
             } else {
-                $messageStatus = $em->getRepository(MessageStatus::class)->find(MessageStatus::BANNED);
+                $messageStatus = MessageStatus::BANNED;
             }
 
             $oneMsgRcptObj->setStatus($messageStatus);

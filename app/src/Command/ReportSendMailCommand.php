@@ -2,8 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\Msgs;
 use App\Entity\User;
+use App\Amavis\MessageStatus;
+use App\Repository\MsgrcptSearchRepository;
 use App\Service;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -34,7 +35,8 @@ class ReportSendMailCommand extends Command {
         private Service\CryptEncryptService $cryptEncryptService,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
-        private ParameterBagInterface $params
+        private ParameterBagInterface $params,
+        private MsgrcptSearchRepository $msgrcptSearchRepository,
     ) {
         parent::__construct();
     }
@@ -65,8 +67,10 @@ class ReportSendMailCommand extends Command {
                  * Récupérer les liste des messages non traités depuis le dernier envoie du rapport
                  * N'envoyer le rapport que si ce nombre est > 0
                  */
-                $alias = $em->getRepository(User::class)->findBy(['originalUser' => $user]);
-                $untreatedMsgs = $em->getRepository(Msgs::class)->search($user, null, $alias, null, null, $user->getDateLastReport());
+
+                $untreatedMsgs = $this->msgrcptSearchRepository->getSearchQuery(
+                    $user, fromDate: $user->getDateLastReport()
+                )->getResult();
                 $totalUnread = count($untreatedMsgs);
 
                 if ($totalUnread == 0) {
@@ -74,11 +78,11 @@ class ReportSendMailCommand extends Command {
                 }
 
                 $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
-                $nbAuthorized = $em->getRepository(Msgs::class)->countByType($user, 2, $alias);
-                $nbBanned = $em->getRepository(Msgs::class)->countByType($user, 1, $alias);
-                $nbDeleted = $em->getRepository(Msgs::class)->countByType($user, 3, $alias);
-                $nbRestored = $em->getRepository(Msgs::class)->countByType($user, 5, $alias);
-                $nbSpammed = $em->getRepository(Msgs::class)->countByType($user, 6, $alias);
+                $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+                $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
+                $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
+                $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
+                $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
                 $domain = $user->getDomain();
 
                 if ($domain && !empty($domain->getMessageAlert())) {
