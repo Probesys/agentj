@@ -21,13 +21,15 @@ class WblistRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param 'W'|'B'|'any' $type
      * @param ?array{
-     *     sort: string,
-     *     direction: string,
-     * } $sortParams
+     *     field: 'emailuser'|'email'|'wb.datemod',
+     *     direction: 'asc'|'desc',
+     * } $sort
      * @return array<int, array<string, mixed>>
      */
-    public function search(?string $type = null, ?User $user = null, ?string $searchKey = null, ?array $sortParams = null): array {
+    public function search(string $type, User $user, string $query = '', ?array $sort = null): array
+    {
         $dql = $this->createQueryBuilder('wb')
                 ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
                 ->innerJoin('wb.rid', 'u')
@@ -35,37 +37,40 @@ class WblistRepository extends ServiceEntityRepository
                 ->leftJoin('wb.groups', 'g');
 
         if (in_array('ROLE_USER', $user->getRoles())) {
-            $dql->andWhere('wb.rid = :user')
-                    ->setParameter('user', $user);
+            $dql->andWhere('wb.rid = :user');
+            $dql->setParameter('user', $user);
         }
 
-        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domainsIds = array_map(function ($entity) {
-                return $entity->getId();
-            }, $user->getDomains()->toArray());
-            $dql->andWhere('u.domain in (:domains)')
-                    ->setParameter('domains', $domainsIds);
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            $dql->andWhere('u.domain in (:domains)');
+            $dql->setParameter('domains', $user->getDomains());
         }
 
-        if ($type) {
-            $dql->andWhere('wb.wb = :type')
-                    ->setParameter('type', $type);
+        // The wblist.wb attribute can either be "W or Y / B or N / space / score".
+        // Score can be positive (i.e. lean towards blacklisting) or negative
+        // (i.e. lean towards whitelisting). Space is neutral.
+        // Score allows soft-wblisting, but we only want to handle
+        // hard-wblisting in this method for now.
+        if ($type === 'W') {
+            $dql->andWhere("wb.wb = 'W' OR wb.wb = 'Y'");
+        } elseif ($type === 'B') {
+            $dql->andWhere("wb.wb = 'B' OR wb.wb = 'N'");
         }
 
-        if ($searchKey) {
-            // Check if $user is an admin
-            $isAdmin = $user && in_array('ROLE_ADMIN', $user->getRoles());
-            if ($isAdmin) {
-                $dql->andWhere('(LOWER(s.email) like LOWER(:searchkey) or LOWER(u.email) like LOWER(:searchkey) or LOWER(u.fullname) like LOWER(:searchkey))')
-                    ->setParameter('searchkey', '%' . strtolower($searchKey) . '%');
-            } else {
-                $dql->andWhere('(LOWER(s.email) like LOWER(:searchkey))')
-                    ->setParameter('searchkey', '%' . strtolower($searchKey) . '%');
+        if ($query) {
+            $whereQuery = 'LOWER(s.email) LIKE LOWER(:query)';
+
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+                $whereQuery .= ' OR LOWER(u.email) LIKE LOWER(:query)';
+                $whereQuery .= ' OR LOWER(u.fullname) LIKE LOWER(:query)';
             }
+
+            $dql->andWhere($whereQuery);
+            $dql->setParameter('query', "%{$query}%");
         }
 
-        if ($sortParams) {
-            $dql->orderBy($sortParams['sort'], $sortParams['direction']);
+        if ($sort) {
+            $dql->orderBy($sort['field'], $sort['direction']);
         }
 
         return $dql->getQuery()->getScalarResult();

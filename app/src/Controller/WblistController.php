@@ -29,23 +29,31 @@ class WblistController extends AbstractController {
 
     #[Route(path: '/wblist/{type}', name: 'wblist')]
     public function index(string $type, Request $request, PaginatorInterface $paginator): Response {
+        if ($type !== 'W' && $type !== 'B') {
+            throw $this->createNotFoundException("Type {$type} is invalid");
+        }
 
-        $sortParams = [];
         $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
         $filterForm = $this->createForm(ActionsFilterType::class, null, [ 'avalaibleActions' => [$actionLabel => 'delete'], 'action' => $this->generateUrl('wblist_batch') ]);
-        if ($request->query->has('sortDirection') && $request->query->has('sortField')) {
-            $sortParams['sort'] = $request->query->get('sortField');
-            $sortParams['direction'] = $request->query->get('sortDirection');
+
+        $sortField = $request->query->getString('sortField');
+        if (!in_array($sortField, ['emailuser', 'email', 'wb.datemod'])) {
+            $sortField = 'email';
         }
-        $searchKey = null;
-        if ($request->query->has('search')) {
-            $searchKey = trim($request->query->get('search'));
+        $sortDirection = $request->query->getString('sortDirection');
+        if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
+            $sortDirection = 'asc';
         }
+
+        $query = trim($request->query->getString('search'));
 
         /** @var User $user */
         $user = $this->getUser();
         $title = '';
-        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $searchKey, $sortParams);
+        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $query, [
+            'field' => $sortField,
+            'direction' => $sortDirection,
+        ]);
 
         switch ($type) {
             case "W":
