@@ -66,7 +66,7 @@
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
-              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN') %}
+              {% if wb.email != '@.' and (wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')) %}
                   {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList%}
                   {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList %}
                   {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList %}

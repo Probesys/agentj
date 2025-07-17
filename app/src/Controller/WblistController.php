@@ -29,24 +29,31 @@ class WblistController extends AbstractController {
 
     #[Route(path: '/wblist/{type}', name: 'wblist')]
     public function index(string $type, Request $request, PaginatorInterface $paginator): Response {
+        if ($type !== 'W' && $type !== 'B') {
+            throw $this->createNotFoundException("Type {$type} is invalid");
+        }
 
         $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
         $filterForm = $this->createForm(ActionsFilterType::class, null, [ 'avalaibleActions' => [$actionLabel => 'delete'], 'action' => $this->generateUrl('wblist_batch') ]);
 
-        $sortParams = null;
-        if ($request->query->has('sortDirection') && $request->query->has('sortField')) {
-            $sortParams = [
-                'sort' => $request->query->getString('sortField'),
-                'direction' => $request->query->getString('sortDirection'),
-            ];
+        $sortField = $request->query->getString('sortField');
+        if (!in_array($sortField, ['emailuser', 'email', 'wb.datemod'])) {
+            $sortField = 'email';
+        }
+        $sortDirection = $request->query->getString('sortDirection');
+        if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
+            $sortDirection = 'asc';
         }
 
-        $searchKey = trim($request->query->getString('search'));
+        $query = trim($request->query->getString('search'));
 
         /** @var User $user */
         $user = $this->getUser();
         $title = '';
-        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $searchKey, $sortParams);
+        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $query, [
+            'field' => $sortField,
+            'direction' => $sortDirection,
+        ]);
 
         switch ($type) {
             case "W":
@@ -225,12 +232,16 @@ class WblistController extends AbstractController {
             return $email;
         }
 
+        // This allows domains to be imported in both formats: "example.org" and "@example.org".
+        if (str_starts_with($data, '@')) {
+            $data = substr($data, 1);
+        }
+
         $domain = filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
         if ($domain !== false) {
-            return $domain;
+            return '@' . $domain;
         }
 
         return null;
     }
-
 }

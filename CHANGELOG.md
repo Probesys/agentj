@@ -1,5 +1,37 @@
 # Changelog of AgentJ
 
+## 2025-07-17 - 2.1.4
+
+### Bug fixes
+
+- Import whitelisted domains with their "@" ([9b71c68](https://github.com/Probesys/agentj/commit/9b71c68))
+- Fix searching and listing wblists ([c253330](https://github.com/Probesys/agentj/commit/c253330))
+- Don't allow to delete generic domain wblists ([66428c4](https://github.com/Probesys/agentj/commit/66428c4))
+
+## 2025-07-04 - 2.1.3
+
+### New
+
+- Allow to import authorized domains ([40a41ed](https://github.com/Probesys/agentj/commit/40a41ed))
+
+### Bug fixes
+
+- Fix editing LDAP connector failure ([d50d38f](https://github.com/Probesys/agentj/commit/d50d38f))
+- Fix the type of Wblist on file importation ([7f1e049](https://github.com/Probesys/agentj/commit/7f1e049))
+- Fix file inputs not displaying value ([5e3f543](https://github.com/Probesys/agentj/commit/5e3f543))
+- Translate "import" button in English ([9fbc040](https://github.com/Probesys/agentj/commit/9fbc040))
+
+### Documentation
+
+- Update the main documentation file ([1358579](https://github.com/Probesys/agentj/commit/1358579))
+
+### Developers
+
+- Provide a Makefile with useful Docker shortcuts ([796ff97](https://github.com/Probesys/agentj/commit/796ff97))
+- Provide scripts to work in containers more easily ([64cec74](https://github.com/Probesys/agentj/commit/64cec74))
+- Provide a command to run the linters ([3baf39e](https://github.com/Probesys/agentj/commit/3baf39e))
+- Provide a command to release a version ([8ef4fa1](https://github.com/Probesys/agentj/commit/8ef4fa1))
+
 ## 2025-05-23 - 2.1.2
 
 ### Bug fixes
