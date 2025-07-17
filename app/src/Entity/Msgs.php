@@ -25,7 +25,6 @@ use App\Repository\MsgsRepository;
 #[ORM\Entity(repositoryClass: MsgsRepository::class)]
 class Msgs
 {
-
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     private int $partitionTag = 0;
@@ -55,7 +54,13 @@ class Msgs
     #[ORM\Column(name: 'size', type: 'integer', nullable: false, options: ['unsigned' => true])]
     private int $size;
 
-    #[ORM\Column(name: 'originating', type: 'string', length: 1, nullable: false, options: ['fixed' => true, 'default' => ''])]
+    #[ORM\Column(
+        name: 'originating',
+        type: 'string',
+        length: 1,
+        nullable: false,
+        options: ['fixed' => true, 'default' => ''],
+    )]
     private string $originating = '';
 
     #[ORM\Column(name: 'content', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
@@ -91,8 +96,13 @@ class Msgs
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $msgRcpts;
 
-    #[ORM\Column(name: 'validate_captcha', type: 'integer', nullable: true, options: ['unsigned' => true, 'default' => 0])]
-    private int $validate_captcha;
+    #[ORM\Column(
+        name: 'validate_captcha',
+        type: 'integer',
+        nullable: true,
+        options: ['unsigned' => true, 'default' => 0],
+    )]
+    private int $validateCaptcha;
 
     #[ORM\Column(name: 'status_id', nullable: true)]
     private ?int $status;
@@ -399,12 +409,12 @@ class Msgs
 
     public function getValidateCaptcha(): ?int
     {
-        return $this->validate_captcha;
+        return $this->validateCaptcha;
     }
 
-    public function setValidateCaptcha(?int $validate_captcha): self
+    public function setValidateCaptcha(?int $validateCaptcha): self
     {
-        $this->validate_captcha = $validate_captcha;
+        $this->validateCaptcha = $validateCaptcha;
 
         return $this;
     }

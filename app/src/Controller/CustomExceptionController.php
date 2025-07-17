@@ -15,8 +15,8 @@ class CustomExceptionController extends AbstractController
 
     public function showAction(\Throwable $exception): Response
     {
-        $statusCode = $exception instanceof HttpExceptionInterface ? 
-            $exception->getStatusCode() : 
+        $statusCode = $exception instanceof HttpExceptionInterface ?
+            $exception->getStatusCode() :
             Response::HTTP_INTERNAL_SERVER_ERROR;
 
         return new Response(

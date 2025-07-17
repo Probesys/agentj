@@ -9,9 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[Route(path: '/admin/config')]
 class AdminController extends AbstractController
 {
-
-
-  #[Route(path: '/delete-logo', name: 'delete_logo', methods: 'GET', options: ['expose' => true])]
+    #[Route(path: '/delete-logo', name: 'delete_logo', methods: 'GET', options: ['expose' => true])]
     public function deleteLogo(): JsonResponse
     {
 

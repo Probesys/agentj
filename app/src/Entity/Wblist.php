@@ -14,17 +14,17 @@ use App\Repository\WblistRepository;
 #[ORM\Entity(repositoryClass: WblistRepository::class)]
 class Wblist
 {
-    const WBLIST_PRIORITY_DOMAIN = 0;
-    const WBLIST_PRIORITY_GROUP = 50;
-    const WBLIST_PRIORITY_USER = 100;
-    const WBLIST_PRIORITY_GROUP_OVERRIDE = 200;
+    public const WBLIST_PRIORITY_DOMAIN = 0;
+    public const WBLIST_PRIORITY_GROUP = 50;
+    public const WBLIST_PRIORITY_USER = 100;
+    public const WBLIST_PRIORITY_GROUP_OVERRIDE = 200;
 
-    const WBLIST_TYPE_USER = 0; // List origin is a user
-    const WBLIST_TYPE_AUTHENTICATION = 1 ; // List origin is human authentication
-    const WBLIST_TYPE_GROUP = 2; // List origin is a group
-    const WBLIST_TYPE_ADMIN = 3; // List origin is an administrator
-    const WBLIST_TYPE_OUTMAIL = 4; // List origin is a sent email
-    const WBLIST_TYPE_IMPORT = 5; // List origin is an import file
+    public const WBLIST_TYPE_USER = 0; // List origin is a user
+    public const WBLIST_TYPE_AUTHENTICATION = 1 ; // List origin is human authentication
+    public const WBLIST_TYPE_GROUP = 2; // List origin is a group
+    public const WBLIST_TYPE_ADMIN = 3; // List origin is an administrator
+    public const WBLIST_TYPE_OUTMAIL = 4; // List origin is a sent email
+    public const WBLIST_TYPE_IMPORT = 5; // List origin is an import file
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\User', inversedBy: 'wbLists')]
     #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]

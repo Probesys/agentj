@@ -13,7 +13,7 @@ class DomainRelayType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('ip_address', TextType::class, [
+            ->add('ipAddress', TextType::class, [
                 'label' => 'Entities.DomainRelay.fields.ipAddress',
             ])
         ;

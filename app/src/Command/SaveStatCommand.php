@@ -16,22 +16,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-            name: 'agent:save-stat',
-            description: 'Add a short description for your command',
-    )]
-class SaveStatCommand extends Command {
-
-    protected function configure(): void {
+    name: 'agent:save-stat',
+    description: 'Add a short description for your command',
+)]
+class SaveStatCommand extends Command
+{
+    protected function configure(): void
+    {
         $this->addArgument('day', InputArgument::OPTIONAL, 'Day  (YYYYMMDD) to save stat');
     }
 
     public function __construct(
         private MsgrcptSearchRepository $msgrcptSearchRepository,
-        private EntityManagerInterface $em) {
+        private EntityManagerInterface $em
+    ) {
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int {
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
         $io = new SymfonyStyle($input, $output);
         $day = $input->getArgument('day');
         $dateToSave = new \DateTime();
@@ -107,5 +110,4 @@ class SaveStatCommand extends Command {
 
         return Command::SUCCESS;
     }
-
 }

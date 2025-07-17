@@ -22,7 +22,8 @@ class GroupsWblistRepository extends ServiceEntityRepository
      *
      * @return array<int, int>
      */
-    public function getwbListforGroup(Groups $group): array {
+    public function getwbListforGroup(Groups $group): array
+    {
         $dql = $this->createQueryBuilder('gwl')
                 ->select('madr.id, gwl.wb')
                 ->join('gwl.mailaddr', 'madr')

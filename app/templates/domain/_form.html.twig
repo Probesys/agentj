@@ -38,7 +38,7 @@
                 <div data-add-ip-address-target="container" id="domain-relays-container">
                     {% for domainRelay in form.domainRelays %}
                         <div>
-                            {{ form_row(domainRelay.ip_address, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
+                            {{ form_row(domainRelay.ipAddress, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
                             <button type="button" class="btn btn-danger col-sm-2"
                                     data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
                         </div>
@@ -47,7 +47,7 @@
 
                 {% set domainRelayPrototype %}
                     <br>
-                    {{ form_row(form.domainRelays.vars.prototype.ip_address, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%" } })|e }}
+                    {{ form_row(form.domainRelays.vars.prototype.ipAddress, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%" } })|e }}
                     <button type="button" class="btn btn-danger col-sm-2"
                             data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
                 {% endset %}

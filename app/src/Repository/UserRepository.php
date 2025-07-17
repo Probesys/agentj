@@ -12,13 +12,15 @@ use Doctrine\ORM\Query;
 /**
  * @extends ServiceEntityRepository<User>
  */
-class UserRepository extends ServiceEntityRepository {
-
-    public function __construct(ManagerRegistry $registry) {
+class UserRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
         parent::__construct($registry, User::class);
     }
 
-    public function findOneByUid(string $uid): ?User {
+    public function findOneByUid(string $uid): ?User
+    {
         return $this->createQueryBuilder('u')
                         ->join('u.domain', 'd')
                         ->andWhere('u.uid = :uid')
@@ -28,7 +30,8 @@ class UserRepository extends ServiceEntityRepository {
                         ->getOneOrNullResult();
     }
 
-    public function findOneByLdapDN(string $dn): ?User {
+    public function findOneByLdapDN(string $dn): ?User
+    {
         return $this->createQueryBuilder('u')
                         ->join('u.domain', 'd')
                         ->andWhere('u.ldapDN = :ldapDN')
@@ -37,7 +40,8 @@ class UserRepository extends ServiceEntityRepository {
                         ->getOneOrNullResult();
     }
 
-    public function findOneByEmail(string $email): ?User {
+    public function findOneByEmail(string $email): ?User
+    {
         return $this->createQueryBuilder('u')
                         ->join('u.domain', 'd')
                         ->andWhere('u.email = :email')
@@ -47,7 +51,8 @@ class UserRepository extends ServiceEntityRepository {
                         ->getOneOrNullResult();
     }
 
-    public function findOneByPrincipalName(string $principalName): ?User {
+    public function findOneByPrincipalName(string $principalName): ?User
+    {
         return $this->createQueryBuilder('u')
                         ->join('u.domain', 'd')
                         ->andWhere('u.office365PrincipalName = :principalName')
@@ -62,7 +67,8 @@ class UserRepository extends ServiceEntityRepository {
      *
      * @return array<int, array<string, int>>
      */
-    public function activeUsers(bool $withAlias = false): array {
+    public function activeUsers(bool $withAlias = false): array
+    {
         $conn = $this->getEntityManager()->getConnection();
         $sql = 'SELECT u.id from users u
             inner join domain d on u.domain_id=d.id
@@ -78,7 +84,8 @@ class UserRepository extends ServiceEntityRepository {
     /**
      * search query
      */
-    public function search(?string $login): Query {
+    public function search(?string $login): Query
+    {
         $login = strtolower($login ?? '');
         $dql = $this->createQueryBuilder('u')
                 ->select('u')
@@ -96,7 +103,8 @@ class UserRepository extends ServiceEntityRepository {
      *
      * @return User[]
      */
-    public function searchByRole(User $user, ?string $role = null): array {
+    public function searchByRole(User $user, ?string $role = null): array
+    {
 
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
@@ -135,7 +143,8 @@ class UserRepository extends ServiceEntityRepository {
     /**
      * @return User[]
      */
-    public function getListAliases(User $user): array {
+    public function getListAliases(User $user): array
+    {
         $dql = $this->createQueryBuilder('u')
                 ->join('u.originalUser', 'a')
                 ->where('u.originalUser= :user')
@@ -149,7 +158,8 @@ class UserRepository extends ServiceEntityRepository {
      * Return a list of aliases associate to a user
      * @return User[]
      */
-    public function searchAlias(User $user): array {
+    public function searchAlias(User $user): array
+    {
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email as alias, a.email as email')
                 ->join('u.originalUser', 'a')
@@ -185,8 +195,12 @@ class UserRepository extends ServiceEntityRepository {
      *
      * @return array<int, array<string, mixed>>
      */
-    public function autocomplete(?string $q, int $page_limit = 30, ?int $page = null, ?array $allowedomains = null): array {
-        //    $slugify = new Slugify();
+    public function autocomplete(
+        ?string $q,
+        int $pageLimit = 30,
+        ?int $page = null,
+        ?array $allowedomains = null,
+    ): array {
         $dql = $this->createQueryBuilder('u')
                 ->select('u.id, u.email')
                 ->andWhere(" u.originalUser is null")// filter only email user without alias
@@ -196,7 +210,7 @@ class UserRepository extends ServiceEntityRepository {
         ;
 
         if ($allowedomains) {
-            $domainsIds = array_map(function (Domain$domain) {
+            $domainsIds = array_map(function (Domain $domain) {
                 return $domain->getId();
             }, $allowedomains);
             $dql->andWhere("u.domain in (" . implode(',', $domainsIds) . ")");
@@ -205,13 +219,9 @@ class UserRepository extends ServiceEntityRepository {
         if ($q) {
             $dql->andWhere("u.email LIKE '%" . $q . "%'");
         }
-        
-        $query = $dql->getQuery();
-        $query->setMaxResults($page_limit);
 
-        if ($page) {
-            // $query->setFirstResult(($page - 1) * $page_limit);
-        }
+        $query = $dql->getQuery();
+        $query->setMaxResults($pageLimit);
 
         return $query->getResult();
     }
@@ -232,8 +242,14 @@ class UserRepository extends ServiceEntityRepository {
                 d.domain AS domain,
                 msgCounts.msgCount,
                 msgCounts.msgBlockedCount,
-                outMsgCounts.outMsgCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgCount,
-                outMsgCounts.outMsgBlockedCount + COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0) AS outMsgBlockedCount
+                (
+                    outMsgCounts.outMsgCount +
+                    COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
+                ) AS outMsgCount,
+                (
+                    outMsgCounts.outMsgBlockedCount +
+                    COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
+                ) AS outMsgBlockedCount
             FROM users u
             LEFT JOIN domain d ON u.domain_id = d.id
             LEFT JOIN (
@@ -241,7 +257,11 @@ class UserRepository extends ServiceEntityRepository {
                     om.from_addr,
                     COUNT(DISTINCT om.mail_id) AS outMsgCount,
                     COUNT(DISTINCT om.mail_id) - SUM(CASE
-                        WHEN om.status_id = 2 OR om.content = \'C\' OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\')) THEN 1
+                        WHEN (
+                            om.status_id = 2
+                            OR om.content = \'C\'
+                            OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN (\'C\', \'V\'))
+                        ) THEN 1
                         ELSE 0
                     END) AS outMsgBlockedCount
                 FROM out_msgs om
@@ -293,7 +313,14 @@ class UserRepository extends ServiceEntityRepository {
             }
         }
 
-        $sql .= ' GROUP BY u.id, outMsgCounts.outMsgCount, msgCounts.msgCount, outMsgCounts.outMsgBlockedCount, msgCounts.msgBlockedCount, sqlLimitReportCounts.sqlLimitReportCount';
+        $sql .= <<<SQL
+            GROUP BY u.id,
+                outMsgCounts.outMsgCount,
+                msgCounts.msgCount,
+                outMsgCounts.outMsgBlockedCount,
+                msgCounts.msgBlockedCount,
+                sqlLimitReportCounts.sqlLimitReportCount
+        SQL;
 
         $stmt = $conn->prepare($sql);
         $params = ['role' => '%"ROLE_USER"%'];

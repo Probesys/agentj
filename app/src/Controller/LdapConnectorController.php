@@ -29,8 +29,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/ldap')]
-class LdapConnectorController extends AbstractController {
-
+class LdapConnectorController extends AbstractController
+{
     private Application $application;
 
     public function __construct(
@@ -42,7 +42,8 @@ class LdapConnectorController extends AbstractController {
     }
 
     #[Route('/{domain}/new', name: 'app_connector_ldap_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response {
+    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
+    {
 
         $connector = new LdapConnector();
         $connector->setDomain($domain);
@@ -52,11 +53,10 @@ class LdapConnectorController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $data = $form->getData();
-            if($data->getLdapPassword()){
+            if ($data->getLdapPassword()) {
                 $cryptedPass = $this->cryptEncryptService->encrypt($data->getLdapPassword());
-                $data->setLdapPassword($cryptedPass);                
+                $data->setLdapPassword($cryptedPass);
             }
 
             $connectorRepository->add($connector, true);
@@ -66,13 +66,14 @@ class LdapConnectorController extends AbstractController {
 
         $form->get("type")->setData(ConnectorTypes::LDAP);
         return $this->render('connector/new_ldap.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_connector_ldap_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, LdapConnector $connector, ConnectorRepository $connectorRepository): Response {
+    public function edit(Request $request, LdapConnector $connector, ConnectorRepository $connectorRepository): Response
+    {
         $oldPass = $connector->getLdapPassword();
 
         $form = $this->createForm(LdapConnectorType::class, $connector, [
@@ -92,17 +93,20 @@ class LdapConnectorController extends AbstractController {
 
             $connectorRepository->add($connector, true);
 
-            return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $connector->getDomain()->getId(),
+            ], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('connector/edit_ldap.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 
     #[Route('/{id}/sync-user', name: 'app_ldap_connector_sync')]
-    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
+    {
         if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
             $input = new ArrayInput([
                 'connectorId' => $connector->getId(),
@@ -113,13 +117,12 @@ class LdapConnectorController extends AbstractController {
             $this->addFlash('success', nl2br($output->fetch()));
         }
 
-
         return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
 
     #[Route('/checkbind', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
-    public function checkbindAction(Request $request, LdapService $ldapService): Response {
-
+    public function checkbindAction(Request $request, LdapService $ldapService): Response
+    {
         $testConnector = new LdapConnector();
         $form = $this->createForm(LdapConnectorType::class, $testConnector);
         $form->handleRequest($request);
@@ -135,17 +138,27 @@ class LdapConnectorController extends AbstractController {
 
             try {
                 $ldapService->bind($testConnector);
-                return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.connectionOk')]);
+                return new JsonResponse([
+                    'status' => 'success',
+                    'message' => $this->translator->trans('Message.Flash.connectionOk'),
+                ]);
             } catch (ConnectionException $exc) {
-                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => $this->translator->trans('Message.Flash.connectionKo'),
+                ]);
             }
         }
 
-        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => $this->translator->trans('Message.Flash.invalidLdapQuery'),
+        ]);
     }
 
     #[Route('/check-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
-    public function checkUserFilter(Domain $domain, Request $request, LdapService $ldapService): Response {
+    public function checkUserFilter(Domain $domain, Request $request, LdapService $ldapService): Response
+    {
 
         $testConnector = new LdapConnector();
         $form = $this->createForm(LdapConnectorType::class, $testConnector);
@@ -171,20 +184,35 @@ class LdapConnectorController extends AbstractController {
                 try {
                     $results = $query->execute();
                     $ldapService->filterUserResultOnDomain($results, $testConnector);
-                    return new JsonResponse(['status' => 'success', 'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', ['$NB_USER' => count($results)])]);
+                    return new JsonResponse([
+                        'status' => 'success',
+                        'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', [
+                            '$NB_USER' => count($results),
+                        ]),
+                    ]);
                 } catch (LdapException $exc) {
-                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+                    return new JsonResponse([
+                        'status' => 'error',
+                        'message' => $this->translator->trans('Message.Flash.invalidLdapQuery'),
+                    ]);
                 }
             } catch (ConnectionException $exc) {
-                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => $this->translator->trans('Message.Flash.connectionKo'),
+                ]);
             }
         }
 
-        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => $this->translator->trans('Message.Flash.invalidLdapQuery'),
+        ]);
     }
 
     #[Route('/check-groups-filter/{domain}', name: 'app_connector_ldap_check_groups_filter', methods: ['GET', 'POST'])]
-    public function checkGroupFilter(Domain $domain, Request $request, LdapService $ldapService): Response {
+    public function checkGroupFilter(Domain $domain, Request $request, LdapService $ldapService): Response
+    {
 
         $testConnector = new LdapConnector();
         $form = $this->createForm(LdapConnectorType::class, $testConnector);
@@ -211,16 +239,29 @@ class LdapConnectorController extends AbstractController {
                     $groups = $query->execute();
                     $ldapService->filterGroupResultWihtoutMembers($groups, $testConnector->getLdapGroupMemberField());
 
-                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.ldapNbGroupfound', ['$NB_GROUP' => count($groups)])]);
+                    return new JsonResponse([
+                        'status' => 'error',
+                        'message' => $this->translator->trans('Message.Flash.ldapNbGroupfound', [
+                            '$NB_GROUP' => count($groups),
+                        ]),
+                    ]);
                 } catch (LdapException $exc) {
-                    return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+                    return new JsonResponse([
+                        'status' => 'error',
+                        'message' => $this->translator->trans('Message.Flash.invalidLdapQuery'),
+                    ]);
                 }
             } catch (ConnectionException $exc) {
-                return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.connectionKo')]);
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => $this->translator->trans('Message.Flash.connectionKo'),
+                ]);
             }
         }
 
-        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Message.Flash.invalidLdapQuery')]);
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => $this->translator->trans('Message.Flash.invalidLdapQuery'),
+        ]);
     }
-
 }

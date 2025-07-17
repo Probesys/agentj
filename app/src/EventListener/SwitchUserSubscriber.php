@@ -13,8 +13,6 @@ use Symfony\Component\Security\Http\SecurityEvents;
 
 class SwitchUserSubscriber implements EventSubscriberInterface
 {
-
-
     public function __construct(private Security $security)
     {
     }
@@ -43,15 +41,15 @@ class SwitchUserSubscriber implements EventSubscriberInterface
             throw new AccessDeniedException('You are not allowed to swtich to this user');
         }
 
-      //Check if the swicth user in in list of domains of the admin
+        // Check if the swicth user in in list of domains of the admin
         if ($this->security->isGranted('ROLE_ADMIN') && !in_array($targetUserDomain, $userDomains)) {
             throw new AccessDeniedException('You are not allowed to swtich to this user');
         }
 
-
-      //If a user attempt to switch to another user, the target user must be an alias of the original user or is shared with original user
+        // If a user attempt to switch to another user, the target user must be
+        // an alias of the original user or is shared with original user
         if ($this->security->isGranted('ROLE_USER')) {
-          //if target user is shared with original user
+            // if target user is shared with original user
             if ($targetUser->getSharedWith()->contains($user)) {
                 return true;
             }
@@ -72,7 +70,7 @@ class SwitchUserSubscriber implements EventSubscriberInterface
         return false;
     }
 
-    public static function getSubscribedEvents():array
+    public static function getSubscribedEvents(): array
     {
         return [
             SecurityEvents::SWITCH_USER => 'onSwitchUser',

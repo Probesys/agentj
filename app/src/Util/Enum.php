@@ -21,7 +21,7 @@ abstract class Enum
     {
         $array = (new \ReflectionClass(static::class))->getConstants();
         $array = array_combine($array, array_values($array));
-        
+
         return $array;
     }
 

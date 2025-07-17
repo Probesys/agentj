@@ -17,7 +17,7 @@ class DomainRelay
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $ip_address = null;
+    private ?string $ipAddress = null;
 
     #[ORM\ManyToOne(inversedBy: 'domainRelays')]
     #[ORM\JoinColumn(nullable: false)]
@@ -30,12 +30,12 @@ class DomainRelay
 
     public function getIpAddress(): ?string
     {
-        return $this->ip_address;
+        return $this->ipAddress;
     }
 
-    public function setIpAddress(string $ip_address): static
+    public function setIpAddress(string $ipAddress): static
     {
-        $this->ip_address = $ip_address;
+        $this->ipAddress = $ipAddress;
 
         return $this;
     }
@@ -51,6 +51,4 @@ class DomainRelay
 
         return $this;
     }
-
-
 }

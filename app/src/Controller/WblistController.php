@@ -19,8 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class WblistController extends AbstractController {
-
+class WblistController extends AbstractController
+{
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -28,13 +28,17 @@ class WblistController extends AbstractController {
     }
 
     #[Route(path: '/wblist/{type}', name: 'wblist')]
-    public function index(string $type, Request $request, PaginatorInterface $paginator): Response {
+    public function index(string $type, Request $request, PaginatorInterface $paginator): Response
+    {
         if ($type !== 'W' && $type !== 'B') {
             throw $this->createNotFoundException("Type {$type} is invalid");
         }
 
         $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
-        $filterForm = $this->createForm(ActionsFilterType::class, null, [ 'avalaibleActions' => [$actionLabel => 'delete'], 'action' => $this->generateUrl('wblist_batch') ]);
+        $filterForm = $this->createForm(ActionsFilterType::class, null, [
+            'avalaibleActions' => [$actionLabel => 'delete'],
+            'action' => $this->generateUrl('wblist_batch'),
+        ]);
 
         $sortField = $request->query->getString('sortField');
         if (!in_array($sortField, ['emailuser', 'email', 'wb.datemod'])) {
@@ -65,16 +69,16 @@ class WblistController extends AbstractController {
         }
         $totalItemFound = count($wblist);
 
-        // Retrieve per_page from the request or use the default value
-        $per_page = $request->query->getInt('per_page', (int) $this->getParameter('app.per_page_global'));
+        // Retrieve perPage from the request or use the default value
+        $perPage = $request->query->getInt('per_page', (int) $this->getParameter('app.per_page_global'));
 
-        // Set the initial value of per_page in the form
-        $filterForm->get('per_page')->setData($per_page);
+        // Set the initial value of perPage in the form
+        $filterForm->get('per_page')->setData($perPage);
 
         $wblist2Show = $paginator->paginate(
-                $wblist,
-                $request->query->getInt('page', 1)/* page number */,
-                $per_page
+            $wblist,
+            $request->query->getInt('page', 1)/* page number */,
+            $perPage
         );
         return $this->render('wb_list/index.html.twig', [
                     'controller_name' => 'WBListController',
@@ -88,9 +92,15 @@ class WblistController extends AbstractController {
 
 
     #[Route(path: '/WBlist/{rid}/{sid}/{priority}/delete', name: 'wblist_delete', methods: 'GET')]
-    public function deleteAction(int $rid, int $sid, int $priority, WblistRepository $WblistRepository, Request $request): RedirectResponse {
+    public function deleteAction(
+        int $rid,
+        int $sid,
+        int $priority,
+        WblistRepository $wblistRepository,
+        Request $request
+    ): RedirectResponse {
         if ($this->isCsrfTokenValid('delete_wblist' . $rid . $sid, $request->query->get('_token'))) {
-            $this->deleteWbList($rid, $sid,$priority, $WblistRepository);
+            $this->deleteWbList($rid, $sid, $priority, $wblistRepository);
             $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
         } else {
             $this->addFlash('error', 'Invalid csrf token');
@@ -103,7 +113,12 @@ class WblistController extends AbstractController {
         }
     }
 
-    private function deleteWbList(int $rid, int $sid, int $priority, WblistRepository $WblistRepository): void {
+    private function deleteWbList(
+        int $rid,
+        int $sid,
+        int $priority,
+        WblistRepository $wblistRepository,
+    ): void {
 
         $mainUser = $this->em->getRepository(User::class)->find($rid);
         $userAndAliases = [];
@@ -120,13 +135,18 @@ class WblistController extends AbstractController {
         }
 
         foreach ($userAndAliases as $user) {
-            $WblistRepository->delete($user->getId(), $sid, $priority);
+            $wblistRepository->delete($user->getId(), $sid, $priority);
         }
     }
 
-
-    #[Route(path: '/WBlist/batch/delete/', name: 'wblist_batch_delete', methods: 'POST', options: ['expose' => true])]
-    public function batchDeleteAction(Request $request): RedirectResponse {
+    #[Route(
+        path: '/WBlist/batch/delete/',
+        name: 'wblist_batch_delete',
+        methods: 'POST',
+        options: ['expose' => true],
+    )]
+    public function batchDeleteAction(Request $request): RedirectResponse
+    {
 
         foreach ($request->request->all('id') as $obj) {
             $mailInfo = json_decode($obj);
@@ -138,8 +158,14 @@ class WblistController extends AbstractController {
     }
 
 
-    #[Route(path: '/batch/{action}', name: 'wblist_batch', methods: 'POST', options: ['expose' => true])]
-    public function batchWbListAction(Request $request, ?string $action = null): RedirectResponse {
+    #[Route(
+        path: '/batch/{action}',
+        name: 'wblist_batch',
+        methods: 'POST',
+        options: ['expose' => true],
+    )]
+    public function batchWbListAction(Request $request, ?string $action = null): RedirectResponse
+    {
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);
@@ -147,7 +173,12 @@ class WblistController extends AbstractController {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'delete':
-                        $this->deleteWbList($mailInfo[0], $mailInfo[1], $mailInfo[2], $em->getRepository(Wblist::class));
+                        $this->deleteWbList(
+                            $mailInfo[0],
+                            $mailInfo[1],
+                            $mailInfo[2],
+                            $em->getRepository(Wblist::class)
+                        );
                         $logService->addLog('delete batch wblist', $mailInfo[1]);
                         break;
                 }
@@ -159,7 +190,8 @@ class WblistController extends AbstractController {
     }
 
     #[Route(path: '/wblist/admin/import', name: 'import_wblist', options: ['expose' => true])]
-    public function importWbListAction(Request $request): Response {
+    public function importWbListAction(Request $request): Response
+    {
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_wblist'),
             'user' => $this->getUser()
@@ -183,7 +215,8 @@ class WblistController extends AbstractController {
         ]);
     }
 
-    private function importWbList(string $pathfile, Domain $domain): void {
+    private function importWbList(string $pathfile, Domain $domain): void
+    {
         $tabWblist = [];
         if (($handle = fopen($pathfile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {
@@ -203,12 +236,18 @@ class WblistController extends AbstractController {
                     $this->em->flush();
                 }
 
-                if (isset($tabWblist[$domain->getId()]) && in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])){
+                if (
+                    isset($tabWblist[$domain->getId()]) &&
+                    in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])
+                ) {
                     continue;
                 }
 
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user ]);
+                $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
+                    'sid' => $mailaddrSender,
+                    'rid' => $user,
+                ]);
                 if (!$wblist) {
                     $wblist = new Wblist($user, $mailaddrSender);
                 }

@@ -61,8 +61,8 @@ class MsgrcptSearchRepository extends MsgrcptRepository
         ?Domain $domain = null,
         ?int $fromDate = null,
         ?int $messageStatus = null,
-        ?User $user = null): array
-    {
+        ?User $user = null
+    ): array {
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
         $queryBuilder->select('COUNT(mr.mailId) as nb_result, m.timeIso, SUBSTRING(m.timeIso, 1, 8) as date_group');
 
@@ -97,7 +97,7 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
         if ($user?->isAdmin()) {
             $this->addDomainCondition($queryBuilder, $user);
-        } elseif($user) {
+        } elseif ($user) {
             $this->addRecipientsCondition($queryBuilder, $user);
         }
 
@@ -123,28 +123,44 @@ class MsgrcptSearchRepository extends MsgrcptRepository
     private function addStatusCondition(QueryBuilder $queryBuilder, ?int $messageStatus): void
     {
         if ($messageStatus === MessageStatus::UNTREATED) {
-            $queryBuilder->andWhere('( mr.status IS NULL  OR mr.status = :messagestatusError ) and mr.bl!=\'Y\' and mr.content not in (:content) and mr.ds != :ds')
+            $queryBuilder
+                ->andWhere(<<<SQL
+                    (
+                        mr.status IS NULL
+                        OR mr.status = :messagestatusError
+                    )
+                    AND mr.bl != 'Y'
+                    AND mr.content NOT IN (:content)
+                    AND mr.ds != :ds
+                SQL)
                 ->setParameter('messagestatusError', MessageStatus::ERROR)
-                ->setParameter('content', [ContentType::Virus, ContentType::Clean])
-                ->setParameter('ds', DeliveryStatus::Pass);
+                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN])
+                ->setParameter('ds', DeliveryStatus::PASS);
         }
 
         if ($messageStatus === MessageStatus::DELETED) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
                 ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', ContentType::Virus);
+                ->setParameter('content', ContentType::VIRUS);
         }
 
         if ($messageStatus === MessageStatus::RESTORED) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
                 ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', ContentType::Virus);
+                ->setParameter('content', ContentType::VIRUS);
         }
 
         if ($messageStatus === MessageStatus::AUTHORIZED) {
-            $queryBuilder->andWhere('mr.status = :messageStatus or (mr.ds = :ds and (mr.status is null or mr.status = :messageStatus))')
+            $queryBuilder
+                ->andWhere(<<<SQL
+                    mr.status = :messageStatus
+                    or (
+                        mr.ds = :ds
+                        and (mr.status is null or mr.status = :messageStatus)
+                    )
+                SQL)
                 ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('ds', DeliveryStatus::Pass);
+                ->setParameter('ds', DeliveryStatus::PASS);
         }
 
         if ($messageStatus === MessageStatus::BANNED) {
@@ -155,18 +171,18 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
         if ($messageStatus === MessageStatus::SPAMMED) {
             $queryBuilder->andWhere('mr.status is null and mr.content not in (:content)')
-                ->setParameter('content', [ContentType::Virus, ContentType::Clean]);
+                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN]);
         }
 
         if ($messageStatus === MessageStatus::VIRUS) {
             $queryBuilder->andWhere('mr.content = :content')
-                ->setParameter('content', ContentType::Virus);
+                ->setParameter('content', ContentType::VIRUS);
         }
 
         if ($messageStatus === MessageStatus::ERROR) {
             $queryBuilder->andWhere('mr.status = :messageStatus and mr.content not in (:content)')
                 ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', [ContentType::Virus, ContentType::Clean]);
+                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN]);
         }
     }
 
@@ -196,7 +212,8 @@ class MsgrcptSearchRepository extends MsgrcptRepository
 
     private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        $queryBuilder->andWhere('m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.fromAddr LIKE :searchKey')
+        $queryBuilder
+            ->andWhere('m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.fromAddr LIKE :searchKey')
             ->setParameter('searchKey', '%' . $searchKey . '%');
     }
 

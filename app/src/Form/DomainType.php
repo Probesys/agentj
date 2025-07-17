@@ -18,7 +18,6 @@ use Symfony\Component\Validator\Constraints\Range;
 
 class DomainType extends AbstractType
 {
-
     /**
      * @var array<string, string>
      */

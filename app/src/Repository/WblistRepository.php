@@ -16,7 +16,8 @@ use Doctrine\DBAL\Result;
  */
 class WblistRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry) {
+    public function __construct(ManagerRegistry $registry)
+    {
         parent::__construct($registry, Wblist::class);
     }
 
@@ -35,7 +36,17 @@ class WblistRepository extends ServiceEntityRepository
         ?array $sort = null
     ): array {
         $dql = $this->createQueryBuilder('wb')
-                ->select('u.id as rid, s.id as sid,wb.type as type,wb.priority as priority,wb.datemod, u.fullname, s.email as email,u.email as emailuser, g.name as group ')
+                ->select(
+                    'u.id as rid, ' .
+                    's.id as sid, ' .
+                    'wb.type as type, ' .
+                    'wb.priority as priority, ' .
+                    'wb.datemod, ' .
+                    'u.fullname, ' .
+                    's.email as email, ' .
+                    'u.email as emailuser, ' .
+                    'g.name as group'
+                )
                 ->innerJoin('wb.rid', 'u')
                 ->innerJoin('wb.sid', 's')
                 ->leftJoin('wb.groups', 'g');
@@ -97,7 +108,8 @@ class WblistRepository extends ServiceEntityRepository
         return $result !== false ? $result : null;
     }
 
-    public function deleteFromGroup(): Result {
+    public function deleteFromGroup(): Result
+    {
         $conn = $this->getEntityManager()->getConnection();
         $sql = " DELETE FROM wblist "
                 . " WHERE group_id  is not null";
@@ -106,7 +118,8 @@ class WblistRepository extends ServiceEntityRepository
         return $stmt->execute();
     }
 
-    public function delete(int $rid, int $sid, int $priority): mixed {
+    public function delete(int $rid, int $sid, int $priority): mixed
+    {
         $qdl = $this->createQueryBuilder('wb')
                 ->delete()
                 ->where('wb.rid =:rid')
@@ -119,7 +132,8 @@ class WblistRepository extends ServiceEntityRepository
         return $qdl->getQuery()->execute();
     }
 
-    public function insertFromGroup(): Result {
+    public function insertFromGroup(): Result
+    {
         $conn = $this->getEntityManager()->getConnection();
         $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
@@ -132,7 +146,7 @@ class WblistRepository extends ServiceEntityRepository
                                     inner join groups_wblist gw on gw.group_id =g.id 
                                     where g.active = true and gw.wb !='' and g.priority is not null";
 
-                
+
         $stmt = $conn->prepare($sqlSelectGroupwbList);
         return $stmt->execute();
     }
@@ -142,37 +156,39 @@ class WblistRepository extends ServiceEntityRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    public function getWbListInfoForSender(string $senderAdress, string $recipientAdress): array {
+    public function getWbListInfoForSender(string $senderAdress, string $recipientAdress): array
+    {
         $infos = [];
-        $s_str = '""';        
-        $r_domain = explode('@', $recipientAdress)[1];
-        $r_ext = explode('.', $r_domain)[1];
-        $r_str = "'$recipientAdress','@$r_domain','@.$r_domain','@.$r_ext','@.'";
+        $senderAddresses = '""';
+        $recipientDomain = explode('@', $recipientAdress)[1];
+        $recipientExt = explode('.', $recipientDomain)[1];
+        $recipientAddresses = "'$recipientAdress','@$recipientDomain','@.$recipientDomain','@.$recipientExt','@.'";
 
         if (!empty($senderAdress)) {
-            $s_domain = explode('@', $senderAdress)[1];
-            $s_ext = explode('.', $s_domain)[1];
+            $senderDomain = explode('@', $senderAdress)[1];
+            $senderExt = explode('.', $senderDomain)[1];
 
-            $s_str = "'$senderAdress','@$s_domain','@.$s_domain','@.$s_ext','@.'";
+            $senderAddresses = "'$senderAdress','@$senderDomain','@.$senderDomain','@.$senderExt','@.'";
         }
 
 
         $conn = $this->getEntityManager()->getConnection();
-        $sql_select_policy = 'SELECT *,users.id' .
+        $sqlSelectPolicy = 'SELECT *,users.id' .
                 ' FROM users LEFT JOIN policy ON users.policy_id=policy.id' .
-                ' WHERE users.email IN (' . $r_str . ') ORDER BY users.priority DESC ';
+                ' WHERE users.email IN (' . $recipientAddresses . ') ORDER BY users.priority DESC ';
 
-        $stmt = $conn->prepare($sql_select_policy);
+        $stmt = $conn->prepare($sqlSelectPolicy);
         $result = $stmt->executeQuery()->fetchAllAssociative();
         foreach ($result as $row) {
             $id = $row['id'];
-            $sql_select_white_black_list = 'SELECT wb,wblist.priority,wblist.datemod,wblist.group_id, wblist.sid, wblist.rid ' .
-                    ' FROM wblist JOIN mailaddr ON wblist.sid=mailaddr.id' .
-                    ' WHERE wblist.rid=' . $id . ' AND mailaddr.email IN (' . $s_str . ')' .
-                    ' ';
+            $sqlSelectWhiteBlackList = <<<SQL
+                SELECT wb,wblist.priority,wblist.datemod,wblist.group_id, wblist.sid, wblist.rid
+                FROM wblist JOIN mailaddr ON wblist.sid=mailaddr.id
+                WHERE wblist.rid={$id} AND mailaddr.email IN ({$senderAddresses})
+            SQL;
 
-            $sql_select_white_black_list .= ' ORDER BY wblist.priority DESC , mailaddr.priority DESC ';
-            $stmt = $conn->prepare($sql_select_white_black_list);
+            $sqlSelectWhiteBlackList .= ' ORDER BY wblist.priority DESC , mailaddr.priority DESC ';
+            $stmt = $conn->prepare($sqlSelectWhiteBlackList);
             $result1 = $stmt->executeQuery()->fetchAllAssociative();
             foreach ($result1 as $row1) {
                 $group = null;
@@ -202,9 +218,12 @@ class WblistRepository extends ServiceEntityRepository
     /**
      * Return the default Wb for a domain
      */
-    public function getDefaultDomainWBList(Domain $domain): ?string {
+    public function getDefaultDomainWBList(Domain $domain): ?string
+    {
         $sid = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy(['email' => '@.']);
-        $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
+        $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy([
+            'email' => '@' . $domain->getDomain(),
+        ]);
         $wb = $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
         return $wb ? $wb->getWb() : null;
     }
@@ -212,7 +231,8 @@ class WblistRepository extends ServiceEntityRepository
     /**
      * Verify if a wblist rule exists for $user from $mailaddr
      */
-    public function getOneByUser(User $user, Mailaddr $mailaddr): ?Wblist {
+    public function getOneByUser(User $user, Mailaddr $mailaddr): ?Wblist
+    {
         $dql = $this->createQueryBuilder('wb')
                 ->select('wb')
                 ->where('wb.rid = :user')
@@ -229,7 +249,8 @@ class WblistRepository extends ServiceEntityRepository
      *
      * @param array<string, mixed> $wbInfo
      */
-    public function wbListIsOverriden(array $wbInfo): bool {
+    public function wbListIsOverriden(array $wbInfo): bool
+    {
         $dql = $this->createQueryBuilder('wb')
                 ->select('wb')
                 ->where('wb.rid =:rid')

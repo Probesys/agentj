@@ -64,34 +64,64 @@ class MsgsRepository extends ServiceEntityRepository
 
         if ($type) {
             switch ($type) {
-            case MessageStatus::SPAMMED: //spam and
-                $sqlWhere .= ' and mr.status_id is null and  bspam_level > d.level and mr.content != "C" and mr.content != "V"  ';
-                break;
-            case MessageStatus::VIRUS: //spam and
-                $sqlWhere .= ' and mr.content = "V" ';
-                break;
-            case MessageStatus::BANNED:
-                $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"';
-                break;
-            case MessageStatus::AUTHORIZED:
-                //$sqlWhere .= ' and (mr.status_id=2 or (mr.wl = "Y" and mr.status_id != 3)) ';
-                $sqlWhere .= ' and (mr.status_id=2 or mr.wl = "Y" or (mr.content="Y" and (mr.status_id = 2 or mr.status_id is null))) and mr.content != "V"';
-                break;
-            case MessageStatus::DELETED:
-                $sqlWhere .= ' and mr.status_id=3 and mr.content != "V"  ';
-                break;
-            case MessageStatus::RESTORED:
-                $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
-                break;
-            case null:
-                $sqlWhere .= ' ';
-                break;
-            default:
-                $sqlWhere .= ' and bspam_level <= d.level and mr.content != "C" and mr.content != "V" and  mr.status_id=' . $type .  ' ';
-                break;
+                case MessageStatus::SPAMMED: //spam and
+                    $sqlWhere .= <<<SQL
+                        AND mr.status_id is null
+                        AND bspam_level > d.level
+                        AND mr.content != "C"
+                        AND mr.content != "V"
+                    SQL;
+                    break;
+                case MessageStatus::VIRUS: //spam and
+                    $sqlWhere .= ' and mr.content = "V" ';
+                    break;
+                case MessageStatus::BANNED:
+                    $sqlWhere .= ' and (mr.status_id=1 or mr.bl = "Y")  and mr.content != "V"';
+                    break;
+                case MessageStatus::AUTHORIZED:
+                    $sqlWhere .= <<<SQL
+                        AND (
+                            mr.status_id=2
+                            OR mr.wl = "Y"
+                            OR (
+                                mr.content="Y"
+                                AND (
+                                    mr.status_id = 2
+                                    OR mr.status_id is null
+                                )
+                            )
+                        )
+                        AND mr.content != "V"
+                    SQL;
+                    break;
+                case MessageStatus::DELETED:
+                    $sqlWhere .= ' and mr.status_id=3 and mr.content != "V"  ';
+                    break;
+                case MessageStatus::RESTORED:
+                    $sqlWhere .= ' and mr.status_id=5 and mr.content != "V"  ';
+                    break;
+                case null:
+                    $sqlWhere .= ' ';
+                    break;
+                default:
+                    $sqlWhere .= <<<SQL
+                        AND bspam_level <= d.level
+                        AND mr.content != "C"
+                        AND mr.content != "V"
+                        AND mr.status_id = {$type}
+                    SQL;
+                    break;
             }
         } else {
-            $sqlWhere .= ' and mr.content != "C"  and mr.content != "V" and mr.content != "Y" AND mr.wl != "Y" AND mr.bl != "Y"  and ( mr.status_id IS NULL  OR mr.status_id = 4 ) and bspam_level <= d.level ';
+            $sqlWhere .= <<<SQL
+                AND mr.content != "C"
+                AND mr.content != "V"
+                AND mr.content != "Y"
+                AND mr.wl != "Y"
+                AND mr.bl != "Y"
+                AND (mr.status_id IS NULL OR mr.status_id = 4)
+                AND bspam_level <= d.level
+            SQL;
         }
 
         if ($user && $user->getEmail() && in_array('ROLE_USER', $user->getRoles())) {
@@ -150,8 +180,13 @@ class MsgsRepository extends ServiceEntityRepository
      * @param ?User[] $alias
      * @return array<int, array<string, mixed>>
      */
-    public function countByTypeAndDays(?User $user = null, ?int $type = null, ?array $alias = null, ?\DateTime $day = null, ?Domain $domain = null): array
-    {
+    public function countByTypeAndDays(
+        ?User $user = null,
+        ?int $type = null,
+        ?array $alias = null,
+        ?\DateTime $day = null,
+        ?Domain $domain = null,
+    ): array {
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = 'select count(m.mail_id) as nb_result,m.time_iso  from msgs m '
@@ -161,12 +196,12 @@ class MsgsRepository extends ServiceEntityRepository
             . 'left join users u on u.email=maddr.email '
             . 'left join domain d on u.domain_id=d.id ';
 
-        if ($day){
-            $sql.= " AND date(m.time_iso) = '" . $day->format('Y-m-d') . "'";
+        if ($day) {
+            $sql .= " AND date(m.time_iso) = '" . $day->format('Y-m-d') . "'";
         }
 
-        if ($domain){
-            $sql.= " AND d.id = '" . $domain->getId() . "'";
+        if ($domain) {
+            $sql .= " AND d.id = '" . $domain->getId() . "'";
         }
 
         // if $user is an admin, add a condition to check only the domains he administer
@@ -209,33 +244,68 @@ class MsgsRepository extends ServiceEntityRepository
      * } $sortParams
      * @return array<int, array<string, mixed>>
      */
-    public function search(?User $user = null, ?int $type = null, ?array $alias = null, ?string $searchKey = null, ?array $sortParams = null, ?int $fromDate = null, ?int $limit = null): array
-    {
+    public function search(
+        ?User $user = null,
+        ?int $type = null,
+        ?array $alias = null,
+        ?string $searchKey = null,
+        ?array $sortParams = null,
+        ?int $fromDate = null,
+        ?int $limit = null,
+    ): array {
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = 'SELECT m.mail_id, m.message_error, mr.status_id, ms.name, m.partition_tag, maddr.email, m.subject, m.from_addr, m.time_num, mr.rid, mr.bspam_level, '
-            . 'CASE '
-            . 'WHEN ms.name IS NOT NULL THEN ms.name '
-            . 'WHEN mr.status_id IS NULL AND mr.bspam_level > d.level AND mr.content != "C" AND mr.content != "V" THEN "spam" '
-            . 'WHEN mr.content = "V" THEN "virus" '
-            . 'ELSE "untreated" '
-            . 'END AS status_description '
-            . 'FROM msgs m '
-            . 'LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id '
-            . 'LEFT JOIN maddr ON maddr.id = mr.rid '
-            . 'LEFT JOIN message_status ms ON mr.status_id = ms.id '
-            . 'LEFT JOIN users u ON u.email = maddr.email '
-            . 'LEFT JOIN domain d ON u.domain_id = d.id';
+        $sql = <<<SQL
+            SELECT m.mail_id,
+                m.message_error,
+                mr.status_id,
+                ms.name,
+                m.partition_tag,
+                maddr.email,
+                m.subject,
+                m.from_addr,
+                m.time_num,
+                mr.rid,
+                mr.bspam_level,
+                (
+                    CASE
+                    WHEN ms.name IS NOT NULL THEN ms.name
+                    WHEN (
+                        mr.status_id IS NULL
+                        AND mr.bspam_level > d.level
+                        AND mr.content != "C"
+                        AND mr.content != "V" THEN "spam"
+                    )
+                    WHEN mr.content = "V" THEN "virus"
+                    ELSE "untreated"
+                    END
+                ) AS status_description
+            FROM msgs m
+            LEFT JOIN msgrcpt mr ON m.mail_id = mr.mail_id
+            LEFT JOIN maddr ON maddr.id = mr.rid
+            LEFT JOIN message_status ms ON mr.status_id = ms.id
+            LEFT JOIN users u ON u.email = maddr.email
+            LEFT JOIN domain d ON u.domain_id = d.id
+        SQL;
 
         $sql .= $this->getSearchMsgSqlWhere($user, $type, $alias, $fromDate);
 
         if ($searchKey) {
-            // Check if $user is an admin
-            $isAdmin = $user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()));
-            if ($isAdmin) {
-                $sql .= ' AND (m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
+            if ($user && $user->isAdmin()) {
+                $sql .= <<<SQL
+                    AND (
+                        m.subject LIKE :searchKey
+                        OR m.from_addr LIKE :searchKey
+                        OR maddr.email LIKE :searchKey
+                    )
+                SQL;
             } else {
-                $sql .= ' AND (m.subject LIKE :searchKey OR m.from_addr LIKE :searchKey) ';
+                $sql .= <<<SQL
+                    AND (
+                        m.subject LIKE :searchKey
+                        OR m.from_addr LIKE :searchKey
+                    )
+                SQL;
             }
         }
 
@@ -367,9 +437,9 @@ class MsgsRepository extends ServiceEntityRepository
             SQL);
 
         $query->setParameter('content', [
-            ContentType::Clean,
-            ContentType::Virus,
-            ContentType::Unchecked,
+            ContentType::CLEAN,
+            ContentType::VIRUS,
+            ContentType::UNCHECKED,
         ]);
 
         return $query->getResult();
@@ -398,7 +468,11 @@ class MsgsRepository extends ServiceEntityRepository
     public function changeStatus(int $partitiontag, string $mailId, int $status): void
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sql = 'UPDATE msgs SET status_id =  ' . $status . '  WHERE partition_tag = "' . $partitiontag . '" AND mail_id = "' . $mailId . '"';
+        $sql = <<<SQL
+            UPDATE msgs SET status_id = {$status}
+            WHERE partition_tag = "{$partitiontag}"
+            AND mail_id = "{$mailId}"
+        SQL;
         $stmt = $conn->prepare($sql);
         $stmt->executeQuery();
     }
@@ -417,13 +491,13 @@ class MsgsRepository extends ServiceEntityRepository
             LEFT JOIN App\Entity\Maddr maddr_sender WITH maddr_sender.id = m.sid
             WHERE
                 maddr.email = :to
-                AND maddr_sender.email = :from_addr
+                AND maddr_sender.email = :from
                 AND m.sendCaptcha != 0
             ORDER BY m.timeIso DESC
         SQL);
 
         $query->setParameter('to', $to);
-        $query->setParameter('from_addr', $from);
+        $query->setParameter('from', $from);
         $query->setMaxResults(1);
 
         try {
@@ -432,7 +506,6 @@ class MsgsRepository extends ServiceEntityRepository
         } catch (\Doctrine\ORM\NoResultException $e) {
             return null;
         }
-
     }
 
     /**
@@ -454,7 +527,6 @@ class MsgsRepository extends ServiceEntityRepository
         $query->setParameter('errorStatus', MessageStatus::ERROR);
 
         $query->execute();
-
     }
 
     /**
@@ -465,11 +537,16 @@ class MsgsRepository extends ServiceEntityRepository
     public function getAllMessageRecipient(string $emailSender, string $emailRecipient): array
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m'
-            . ' LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id '
-            . ' LEFT JOIN maddr ms ON ms.id = m.sid '//sid is sender
-            . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
-            . ' WHERE m.content != "C" AND msr.content != "C"  AND mr.email = "' . $emailRecipient . '" AND ms.email =  "' . $emailSender . '"';
+        $sql = <<<SQL
+            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
+            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
+            LEFT JOIN maddr ms ON ms.id = m.sid
+            LEFT JOIN maddr mr ON mr.id = msr.rid
+            WHERE m.content != "C"
+            AND msr.content != "C"
+            AND mr.email = "{$emailRecipient}"
+            AND ms.email = "{$emailSender}"
+        SQL;
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAllAssociative();
     }
@@ -507,7 +584,10 @@ class MsgsRepository extends ServiceEntityRepository
         $stmt2 = $conn->prepare($sql2);
         $result = $stmt2->executeQuery();
         $nbDeletedMsgs = $result->rowCount();
-        return ['nbDeletedMsgs' => $nbDeletedMsgs, 'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt, 'nbDeletedQuarantine' => $nbDeletedQuarantine];
+        return [
+            'nbDeletedMsgs' => $nbDeletedMsgs,
+            'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt,
+            'nbDeletedQuarantine' => $nbDeletedQuarantine,
+        ];
     }
-
 }

@@ -11,11 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 class MenuController extends AbstractController
 {
     /**
-     * @param array<string, mixed> $route_params
+     * @param array<string, mixed> $routeParams
      */
     public function renderSlideMenu(
         string $route,
-        array $route_params,
+        array $routeParams,
         MsgrcptSearchRepository $msgrcptSearchRepository
     ): Response {
         /** @var User $user */
@@ -31,7 +31,7 @@ class MenuController extends AbstractController
 
         return $this->render(
             'navigation.html.twig',
-            ['msgs' => $msgs, 'route' => $route, 'route_params' => $route_params]
+            ['msgs' => $msgs, 'route' => $route, 'route_params' => $routeParams]
         );
     }
 
@@ -42,7 +42,11 @@ class MenuController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $domain = $user->getDomain();
-        if ($domain && $domain->getLogo() && file_exists($this->getParameter('app.upload_directory') . $domain->getLogo())) {
+        if (
+            $domain &&
+            $domain->getLogo() &&
+            file_exists($this->getParameter('app.upload_directory') . $domain->getLogo())
+        ) {
             $logoUploaded = true;
             $logoImg = $domain->getLogo();
         } else {

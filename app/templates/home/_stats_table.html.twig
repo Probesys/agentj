@@ -34,7 +34,7 @@
 					<td data-title="{{'Entities.User.fields.outMsgCount'|trans }}">{{ user.outMsgCount }}</td>
 					<td data-title="{{'Entities.User.fields.outMsgBlockedCount'|trans }}">{{ user.outMsgBlockedCount }}</td>
 					<td>
-						<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('messages_stats', {'user_email' : user.email}) }}" class="btn-open-modal btn btn-info float-right">
+						<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('messages_stats', {'userEmail' : user.email}) }}" class="btn-open-modal btn btn-info float-right">
 							<i class="fas fa-info"></i>
 						</a>
 					</td>

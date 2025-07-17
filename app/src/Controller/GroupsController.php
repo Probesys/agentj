@@ -26,14 +26,16 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/groups')]
-class GroupsController extends AbstractController {
-
+class GroupsController extends AbstractController
+{
     use ControllerWBListTrait;
 
-    public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator) {
+    public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator)
+    {
     }
 
-    private function checkAccess(Groups $group): void {
+    private function checkAccess(Groups $group): void
+    {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
                 throw new AccessDeniedException();
@@ -42,7 +44,8 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/', name: 'groups_index', methods: 'GET')]
-    public function index(): Response {
+    public function index(): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $groups = $this->em
@@ -53,7 +56,8 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/new', name: 'groups_new', methods: 'GET|POST')]
-    public function new(Request $request): Response {
+    public function new(Request $request): Response
+    {
         $group = new Groups();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
@@ -62,7 +66,11 @@ class GroupsController extends AbstractController {
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
-            $form = $this->createForm(GroupsType::class, $group, ['actions' => $this->getWBListUserActions(), 'user' => $this->getUser(), 'action' => $this->generateUrl('groups_new')]);
+            $form = $this->createForm(GroupsType::class, $group, [
+                'actions' => $this->getWBListUserActions(),
+                'user' => $this->getUser(),
+                'action' => $this->generateUrl('groups_new'),
+            ]);
         }
         $form->handleRequest($request);
 
@@ -147,7 +155,7 @@ class GroupsController extends AbstractController {
             $mailaddr = $mailaddrRepository->findOneBy((['email' => '@.']));
 
             $groupsWblist = $groupsWblistRepository->findOneBy((['mailaddr' => $mailaddr, 'groups' => $group]));
-            if (!$groupsWblist){
+            if (!$groupsWblist) {
                 $groupsWblist = new GroupsWblist();
                 $groupsWblist->setMailaddr($mailaddr);
             }
@@ -179,7 +187,8 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
-    public function listUsers(Request $request, Groups $group): Response {
+    public function listUsers(Request $request, Groups $group): Response
+    {
         $this->checkAccess($group);
         $users = $group->getUsers();
         return $this->render('groups/group_users.html.twig', [
@@ -217,7 +226,8 @@ class GroupsController extends AbstractController {
     /**
      * Vérify if a group with lable already exists for a domain
      */
-    public function checkNameforDomain(string $name, Domain $domain): bool {
+    public function checkNameforDomain(string $name, Domain $domain): bool
+    {
 
         $group = $this->em->getRepository(Groups::class)->findOneBy([
             'domain' => $domain,
@@ -232,7 +242,12 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'GET')]
-    public function delete(Request $request, Groups $group, UserService $userService, GroupService $groupService): Response {
+    public function delete(
+        Request $request,
+        Groups $group,
+        UserService $userService,
+        GroupService $groupService,
+    ): Response {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
             $groupUsers = $group->getUsers()->toArray();
 
@@ -249,7 +264,8 @@ class GroupsController extends AbstractController {
     }
 
     #[Route(path: '/check-priority', name: 'groups_check_priority', methods: 'GET|POST')]
-    public function checkPriorityExist(Request $request): JsonResponse {
+    public function checkPriorityExist(Request $request): JsonResponse
+    {
         $domainId = $request->request->get('domainId');
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
 
@@ -259,11 +275,13 @@ class GroupsController extends AbstractController {
             'priority' => $priority,
         ]);
 
-        if (!$group || $group->getId() == $request->request->get('groupId')){
-            return new JsonResponse(['status' => 'success']);    
+        if (!$group || $group->getId() == $request->request->get('groupId')) {
+            return new JsonResponse(['status' => 'success']);
         }
-        
-        return new JsonResponse(['status' => 'error', 'message' => $this->translator->trans('Generics.messages.groupWithPriorityExists')]);
-    }
 
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => $this->translator->trans('Generics.messages.groupWithPriorityExists'),
+        ]);
+    }
 }

@@ -8,6 +8,8 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use App\Model\ConnectorTypes;
 
+// phpcs:disable Squiz.Classes.ValidClassName
+// phpcs:disable Generic.Files.LineLength
 final class Version20240724142306_migrate_imap_info extends AbstractMigration
 {
     public function getDescription(): string
@@ -19,7 +21,7 @@ final class Version20240724142306_migrate_imap_info extends AbstractMigration
     {
         foreach ($this->connection->fetchAllAssociative('SELECT id, domain, srv_imap, imap_port, imap_flag, imap_no_validate_cert  FROM domain') as $result) {
             $connector = $this->connection->fetchOne('SELECT id FROM connector where discr=\'Imap\' and domain_id=' . $result['id']);
-            if (!$connector){
+            if (!$connector) {
                 $now = new \DateTime();
                 $this->connection->insert('connector', [
                     'domain_id' => $result['id'],
@@ -41,6 +43,5 @@ final class Version20240724142306_migrate_imap_info extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-
     }
 }

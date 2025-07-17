@@ -12,6 +12,7 @@ use App\Entity\Wblist;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
+use App\Repository\SettingsRepository;
 use App\Service\FileUploader;
 use App\Service\MailaddrService;
 use App\Service\UserService;
@@ -33,7 +34,6 @@ use App\Entity\Policy;
 #[Route(path: '/domain')]
 class DomainController extends AbstractController
 {
-
     use ControllerWBListTrait;
 
     public function __construct(
@@ -77,8 +77,12 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
-    public function new(Request $request, FileUploader $fileUploader, ParameterBagInterface $params): Response
-    {
+    public function new(
+        Request $request,
+        FileUploader $fileUploader,
+        ParameterBagInterface $params,
+        SettingsRepository $settingsRepository,
+    ): Response {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
         }
@@ -108,12 +112,24 @@ class DomainController extends AbstractController
             $domain->setTransport($strTransport);
             //Default messages
             //captcha page
-            $messageConfig = $this->em->getRepository(Settings::class)->findBy(['context' => 'default_domain_messages']);
+            $messageConfig = $settingsRepository->findBy(['context' => 'default_domain_messages']);
             if ($messageConfig) {
-                $domain->setMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_request'])->getValue());
-                $domain->setConfirmCaptchaMessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'page_content_authentification_valid'])->getValue());
-                $domain->setMailmessage($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_authentification_request'])->getValue());
-                $domain->setMessageAlert($this->em->getRepository(Settings::class)->findOneBy(['context' => 'default_domain_messages', 'name' => 'mail_content_report'])->getValue());
+                $domain->setMessage($settingsRepository->findOneBy([
+                    'context' => 'default_domain_messages',
+                    'name' => 'page_content_authentification_request',
+                ])->getValue());
+                $domain->setConfirmCaptchaMessage($settingsRepository->findOneBy([
+                    'context' => 'default_domain_messages',
+                    'name' => 'page_content_authentification_valid',
+                ])->getValue());
+                $domain->setMailmessage($settingsRepository->findOneBy([
+                    'context' => 'default_domain_messages',
+                    'name' => 'mail_content_authentification_request',
+                ])->getValue());
+                $domain->setMessageAlert($settingsRepository->findOneBy([
+                    'context' => 'default_domain_messages',
+                    'name' => 'mail_content_report',
+                ])->getValue());
             }
 
             $this->generateOpenDkim($domain);
@@ -160,7 +176,10 @@ class DomainController extends AbstractController
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
                 $cause = $error->getCause();
-                $this->addFlash('error', $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()));
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue())
+                );
             }
 
             return $this->redirectToRoute('domain_new');
@@ -223,7 +242,10 @@ class DomainController extends AbstractController
             $userDomain->setPolicy($policy);
 
             $rules = $form->get("rules")->getData();
-            $wblist = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $wblistArray['rid'], 'sid' => $wblistArray['sid']]);
+            $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
+                'rid' => $wblistArray['rid'],
+                'sid' => $wblistArray['sid'],
+            ]);
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
@@ -238,8 +260,9 @@ class DomainController extends AbstractController
                 }
             }
 
-            if ($domain->getDomainKeys() === null)
+            if ($domain->getDomainKeys() === null) {
                 $this->generateOpenDkim($domain);
+            }
 
             $em->persist($wblist);
             $em->persist($userDomain);
@@ -253,7 +276,10 @@ class DomainController extends AbstractController
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
                 $cause = $error->getCause();
-                $this->addFlash('error', $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()));
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()),
+                );
             }
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
@@ -347,7 +373,10 @@ class DomainController extends AbstractController
 
                 $this->em->persist($mailaddr);
             } else {
-                $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $user, 'sid' => $mailaddr]));
+                $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy(([
+                    'rid' => $user,
+                    'sid' => $mailaddr,
+                ]));
                 if ($domainWblistexist) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
                     return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
@@ -399,24 +428,24 @@ class DomainController extends AbstractController
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');
         try {
-            $private_key = openssl_pkey_new();
-            if ($private_key === false) {
+            $privateKey = openssl_pkey_new();
+            if ($privateKey === false) {
                 $this->addFlash('error', $this->translator->trans('Message.Flash.failedToGeneratePrivateKey'));
                 return false;
             }
-            $privkey_pem = null;
-            openssl_pkey_export($private_key, $privkey_pem);
-            $dkim->setPrivateKey($privkey_pem);
+            $privkeyPem = null;
+            openssl_pkey_export($privateKey, $privkeyPem);
+            $dkim->setPrivateKey($privkeyPem);
 
-            $details = openssl_pkey_get_details($private_key);
+            $details = openssl_pkey_get_details($privateKey);
 
             if ($details === false) {
                 $this->addFlash('error', $this->translator->trans('Message.Flash.failedToGeneratePublicKey'));
                 return false;
             }
 
-            $pubkey_pem = $details['key'];
-            $dkim->setPublicKey($pubkey_pem);
+            $pubkeyPem = $details['key'];
+            $dkim->setPublicKey($pubkeyPem);
             // $public_key = openssl_pkey_get_public($public_key_pem);
 
             $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getDnsEntry());

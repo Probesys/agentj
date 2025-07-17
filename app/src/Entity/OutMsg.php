@@ -11,35 +11,35 @@ class OutMsg
 {
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
-    private int $partition_tag = 0;
+    private int $partitionTag = 0;
 
     #[ORM\Id]
     #[ORM\Column(type: 'binary', length: 255)]
-    private mixed $mail_id = null;
+    private mixed $mailId = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $status_id;
+    private ?int $statusId;
 
     #[ORM\Column(type: 'bigint', nullable: true, options: ['unsigned' => true])]
     private mixed $sid;
 
     #[ORM\Column(type: 'binary', length: 255, nullable: true)]
-    private mixed $secret_id;
+    private mixed $secretId;
 
     #[ORM\Column(type: 'string', length: 20)]
-    private string $am_id;
+    private string $amId;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    private int $time_num;
+    private int $timeNum;
 
     #[ORM\Column(type: 'string', length: 16)]
-    private string $time_iso;
+    private string $timeIso;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $policy = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $client_addr = null;
+    private ?string $clientAddr = null;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
     private int $size;
@@ -51,22 +51,22 @@ class OutMsg
     private ?string $content = null;
 
     #[ORM\Column(type: 'string', length: 1, nullable: true)]
-    private ?string $quar_type = null;
+    private ?string $quarType = null;
 
     #[ORM\Column(type: 'binary', length: 255, nullable: true)]
-    private mixed $quar_loc;
+    private mixed $quarLoc;
 
     #[ORM\Column(type: 'string', length: 1, nullable: true)]
-    private ?string $dsn_sent = null;
+    private ?string $dsnSent = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $spam_level = null;
+    private ?float $spamLevel = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $message_id = null;
+    private ?string $messageId = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $from_addr = null;
+    private ?string $fromAddr = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $subject = null;
@@ -75,44 +75,42 @@ class OutMsg
     private string $host;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true, 'default' => 0])]
-    private ?int $validate_captcha = null;
+    private ?int $validateCaptcha = null;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    private ?int $send_captcha = null;
+    private ?int $sendCaptcha = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $message_error = null;
+    private ?string $messageError = null;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $is_mlist = null;
+    private ?bool $isMlist = null;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $processed_user = false;
+    private bool $processedUser = false;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $processed_admin = false;
-
-    // Getters and setters for the fields you need
+    private bool $processedAdmin = false;
 
     public function getPartitionTag(): ?int
     {
-        return $this->partition_tag;
+        return $this->partitionTag;
     }
 
     public function getMailId(): mixed
     {
-        if ($this->mail_id === null) {
+        if ($this->mailId === null) {
             return null;
         }
 
-        $mailId = is_resource($this->mail_id) ? stream_get_contents($this->mail_id) : $this->mail_id;
+        $mailId = is_resource($this->mailId) ? stream_get_contents($this->mailId) : $this->mailId;
 
         return bin2hex($mailId);
     }
 
     public function getStatusId(): ?int
     {
-        return $this->status_id;
+        return $this->statusId;
     }
 
     public function getSid(): ?int
@@ -122,22 +120,22 @@ class OutMsg
 
     public function getSecretId(): mixed
     {
-        return $this->secret_id !== null ? bin2hex($this->secret_id) : null;
+        return $this->secretId !== null ? bin2hex($this->secretId) : null;
     }
 
     public function getAmId(): ?string
     {
-        return $this->am_id;
+        return $this->amId;
     }
 
     public function getTimeNum(): ?int
     {
-        return $this->time_num;
+        return $this->timeNum;
     }
 
     public function getTimeIso(): ?string
     {
-        return $this->time_iso;
+        return $this->timeIso;
     }
 
     public function getPolicy(): ?string
@@ -147,7 +145,7 @@ class OutMsg
 
     public function getClientAddr(): ?string
     {
-        return $this->client_addr;
+        return $this->clientAddr;
     }
 
     public function getSize(): ?int
@@ -167,32 +165,32 @@ class OutMsg
 
     public function getQuarType(): ?string
     {
-        return $this->quar_type;
+        return $this->quarType;
     }
 
     public function getQuarLoc(): mixed
     {
-        return $this->quar_loc;
+        return $this->quarLoc;
     }
 
     public function getDsnSent(): ?string
     {
-        return $this->dsn_sent;
+        return $this->dsnSent;
     }
 
     public function getSpamLevel(): ?float
     {
-        return $this->spam_level;
+        return $this->spamLevel;
     }
 
     public function getMessageId(): ?string
     {
-        return $this->message_id;
+        return $this->messageId;
     }
 
     public function getFromAddr(): ?string
     {
-        return $this->from_addr;
+        return $this->fromAddr;
     }
 
     public function getSubject(): ?string
@@ -207,49 +205,49 @@ class OutMsg
 
     public function getValidateCaptcha(): ?int
     {
-        return $this->validate_captcha;
+        return $this->validateCaptcha;
     }
 
     public function getSendCaptcha(): ?int
     {
-        return $this->send_captcha;
+        return $this->sendCaptcha;
     }
 
     public function getMessageError(): ?string
     {
-        return $this->message_error;
+        return $this->messageError;
     }
 
     public function getIsMlist(): ?bool
     {
-        return $this->is_mlist;
+        return $this->isMlist;
     }
 
     public function isProcessedUser(): ?bool
     {
-        return $this->processed_user;
+        return $this->processedUser;
     }
 
-    public function setProcessedUser(bool $processed_user): self
+    public function setProcessedUser(bool $processedUser): self
     {
-        $this->processed_user = $processed_user;
+        $this->processedUser = $processedUser;
         return $this;
     }
 
     public function isProcessedAdmin(): ?bool
     {
-        return $this->processed_admin;
+        return $this->processedAdmin;
     }
 
-    public function setProcessedAdmin(bool $processed_admin): self
+    public function setProcessedAdmin(bool $processedAdmin): self
     {
-        $this->processed_admin = $processed_admin;
+        $this->processedAdmin = $processedAdmin;
         return $this;
     }
 
-    public function setStatusId(?int $status_id): static
+    public function setStatusId(?int $statusId): static
     {
-        $this->status_id = $status_id;
+        $this->statusId = $statusId;
 
         return $this;
     }
@@ -261,30 +259,30 @@ class OutMsg
         return $this;
     }
 
-    public function setSecretId(mixed $secret_id): static
+    public function setSecretId(mixed $secretId): static
     {
-        $this->secret_id = $secret_id;
+        $this->secretId = $secretId;
 
         return $this;
     }
 
-    public function setAmId(string $am_id): static
+    public function setAmId(string $amId): static
     {
-        $this->am_id = $am_id;
+        $this->amId = $amId;
 
         return $this;
     }
 
-    public function setTimeNum(int $time_num): static
+    public function setTimeNum(int $timeNum): static
     {
-        $this->time_num = $time_num;
+        $this->timeNum = $timeNum;
 
         return $this;
     }
 
-    public function setTimeIso(string $time_iso): static
+    public function setTimeIso(string $timeIso): static
     {
-        $this->time_iso = $time_iso;
+        $this->timeIso = $timeIso;
 
         return $this;
     }
@@ -296,9 +294,9 @@ class OutMsg
         return $this;
     }
 
-    public function setClientAddr(?string $client_addr): static
+    public function setClientAddr(?string $clientAddr): static
     {
-        $this->client_addr = $client_addr;
+        $this->clientAddr = $clientAddr;
 
         return $this;
     }
@@ -324,44 +322,44 @@ class OutMsg
         return $this;
     }
 
-    public function setQuarType(?string $quar_type): static
+    public function setQuarType(?string $quarType): static
     {
-        $this->quar_type = $quar_type;
+        $this->quarType = $quarType;
 
         return $this;
     }
 
-    public function setQuarLoc(mixed $quar_loc): static
+    public function setQuarLoc(mixed $quarLoc): static
     {
-        $this->quar_loc = $quar_loc;
+        $this->quarLoc = $quarLoc;
 
         return $this;
     }
 
-    public function setDsnSent(?string $dsn_sent): static
+    public function setDsnSent(?string $dsnSent): static
     {
-        $this->dsn_sent = $dsn_sent;
+        $this->dsnSent = $dsnSent;
 
         return $this;
     }
 
-    public function setSpamLevel(?float $spam_level): static
+    public function setSpamLevel(?float $spamLevel): static
     {
-        $this->spam_level = $spam_level;
+        $this->spamLevel = $spamLevel;
 
         return $this;
     }
 
-    public function setMessageId(?string $message_id): static
+    public function setMessageId(?string $messageId): static
     {
-        $this->message_id = $message_id;
+        $this->messageId = $messageId;
 
         return $this;
     }
 
-    public function setFromAddr(?string $from_addr): static
+    public function setFromAddr(?string $fromAddr): static
     {
-        $this->from_addr = $from_addr;
+        $this->fromAddr = $fromAddr;
 
         return $this;
     }
@@ -380,35 +378,35 @@ class OutMsg
         return $this;
     }
 
-    public function setValidateCaptcha(int $validate_captcha): static
+    public function setValidateCaptcha(int $validateCaptcha): static
     {
-        $this->validate_captcha = $validate_captcha;
+        $this->validateCaptcha = $validateCaptcha;
 
         return $this;
     }
 
-    public function setSendCaptcha(int $send_captcha): static
+    public function setSendCaptcha(int $sendCaptcha): static
     {
-        $this->send_captcha = $send_captcha;
+        $this->sendCaptcha = $sendCaptcha;
 
         return $this;
     }
 
-    public function setMessageError(?string $message_error): static
+    public function setMessageError(?string $messageError): static
     {
-        $this->message_error = $message_error;
+        $this->messageError = $messageError;
 
         return $this;
     }
 
     public function isMlist(): ?bool
     {
-        return $this->is_mlist;
+        return $this->isMlist;
     }
 
-    public function setIsMlist(?bool $is_mlist): static
+    public function setIsMlist(?bool $isMlist): static
     {
-        $this->is_mlist = $is_mlist;
+        $this->isMlist = $isMlist;
 
         return $this;
     }

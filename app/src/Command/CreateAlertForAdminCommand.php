@@ -1,5 +1,4 @@
 <?php
-// src/Command/CreateAlertForAdminCommand.php
 
 namespace App\Command;
 
@@ -15,7 +14,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(
     name: 'app:create-alert-for-admin',
-    description: 'Check for new out_msgs with content "V" and new sql_limit_report entries and dispatch alert messages to admins.',
+    description: 'Check for new out virus messages and new limit reports and dispatch alert messages to admins.',
 )]
 class CreateAlertForAdminCommand extends Command
 {
@@ -35,9 +34,9 @@ class CreateAlertForAdminCommand extends Command
 
         $outMsgs = $this->entityManager->getRepository(OutMsg::class)->createQueryBuilder('o')
             ->where('o.content = :content')
-            ->andWhere('o.processed_admin = :processed_admin')
+            ->andWhere('o.processedAdmin = :processedAdmin')
             ->setParameter('content', 'V')
-            ->setParameter('processed_admin', false)
+            ->setParameter('processedAdmin', false)
             ->getQuery()
             ->getResult();
 
@@ -58,22 +57,22 @@ class CreateAlertForAdminCommand extends Command
 
             $binaryMailId = hex2bin($mailId);
 
-            // Mark the outmsg as processed_admin
-            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+            // Mark the outmsg as processedAdmin
+            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
             $outMsgToSave->setProcessedAdmin(true);
             $this->entityManager->persist($outMsgToSave);
             $this->entityManager->flush();
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-            ->select('r.id, r.mail_id, r.date, r.recipientCount, r.delta, r.processed_admin, COUNT(r) as reportCount')
-            ->where('r.processed_admin = :processed_admin')
-            ->setParameter('processed_admin', false)
+            ->select('r.id, r.mailId, r.date, r.recipientCount, r.delta, r.processedAdmin, COUNT(r) as reportCount')
+            ->where('r.processedAdmin = :processedAdmin')
+            ->setParameter('processedAdmin', false)
             ->groupBy('r.date')
             ->getQuery()
             ->getResult();
 
-        $totalCount = array_reduce($reports, function($carry, $report) {
+        $totalCount = array_reduce($reports, function ($carry, $report) {
             return $carry + $report['reportCount'];
         }, 0);
 
@@ -98,7 +97,7 @@ class CreateAlertForAdminCommand extends Command
                 continue;
             }
 
-            // Mark each report as processed_admin
+            // Mark each report as processedAdmin
             foreach ($sqlLimitReports as $sqlLimitReport) {
                 $sqlLimitReport->setProcessedAdmin(true);
                 $this->entityManager->persist($sqlLimitReport);
@@ -107,11 +106,13 @@ class CreateAlertForAdminCommand extends Command
             try {
                 // Flush once after all updates
                 $this->entityManager->flush();
-                $output->writeln('Reports for date ' . $reportDateString . ' marked as processed_admin.');
+                $output->writeln('Reports for date ' . $reportDateString . ' marked as processedAdmin.');
 
                 $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'admin'));
             } catch (\Exception $e) {
-                $output->writeln('Failed to mark reports as processed_admin for date ' . $reportDateString . ': ' . $e->getMessage());
+                $output->writeln(
+                    "Failed to mark reports as processedAdmin for date {$reportDateString}: {$e->getMessage()}"
+                );
             }
         }
 

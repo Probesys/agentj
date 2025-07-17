@@ -1,4 +1,5 @@
 <?php
+
 // src/Message/CreateAlertMessage.php
 
 namespace App\Message;

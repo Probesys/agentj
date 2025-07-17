@@ -19,7 +19,6 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class UserType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $labelEmail = 'Entities.User.fields.email';
@@ -27,7 +26,6 @@ class UserType extends AbstractType
             $labelEmail = 'Entities.User.fields.alias';
         }
         $allowedDomains = $options['allowedDomains'];
-
 
         $domainHasIMAPConnector = $options['domainHasIMAPConnector'] ?? false;
 
@@ -106,7 +104,6 @@ class UserType extends AbstractType
                 'label' => 'Entities.User.fields.sharedWith',
             ]);
 
-
         if ($adminForm) {
             $builder->add('domains', EntityType::class, [
                 'class' => Domain::class,
@@ -125,9 +122,6 @@ class UserType extends AbstractType
                 'class' => 'imap-login-field',
             ]
         ]);
-   
-
-
 
         if ($options['include_quota']) {
             $builder->add('quota', CollectionType::class, [

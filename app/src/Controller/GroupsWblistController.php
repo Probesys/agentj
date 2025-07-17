@@ -21,19 +21,21 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/groups/wblist')]
-class GroupsWblistController extends AbstractController {
-
+class GroupsWblistController extends AbstractController
+{
     use ControllerWBListTrait;
 
     private EntityManagerInterface $em;
     private TranslatorInterface $translator;
 
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator) {
+    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator)
+    {
         $this->em = $em;
         $this->translator = $translator;
     }
 
-    private function checkAccess(Groups $group): void {
+    private function checkAccess(Groups $group): void
+    {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
                 throw new AccessDeniedException();
@@ -42,17 +44,26 @@ class GroupsWblistController extends AbstractController {
     }
 
     #[Route(path: '/{groupId}', name: 'groups_wblist_index', methods: 'GET')]
-    public function index(int $groupId): Response {
+    public function index(int $groupId): Response
+    {
         $groupswblists = $this->em->getRepository(GroupsWblist::class)->findBy((['groups' => $groupId]));
 
         $groups = $this->em->getRepository(Groups::class)->find($groupId);
         $this->checkAccess($groups);
 
-        return $this->render('groups_wblist/index.html.twig', ['groups_wblists' => $groupswblists, 'groups' => $groups]);
+        return $this->render('groups_wblist/index.html.twig', [
+            'groups_wblists' => $groupswblists,
+            'groups' => $groups,
+        ]);
     }
 
     #[Route(path: '/{groupId}/new', name: 'groups_wblist_new', methods: 'GET|POST')]
-    public function new(int $groupId, Request $request, MailaddrService $mailaddrService, GroupService $groupService): Response {
+    public function new(
+        int $groupId,
+        Request $request,
+        MailaddrService $mailaddrService,
+        GroupService $groupService,
+    ): Response {
         $groups = $this->em->getRepository(Groups::class)->findOneBy((['id' => $groupId]));
         if (!$groups) {
             throw $this->createNotFoundException('The groups does not exist');
@@ -78,7 +89,10 @@ class GroupsWblistController extends AbstractController {
                 $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
                 $em->persist($mailaddr);
             } else {
-                $groupsWblistexist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $mailaddr, 'groups' => $groups]));
+                $groupsWblistexist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+                    'mailaddr' => $mailaddr,
+                    'groups' => $groups,
+                ]));
                 if ($groupsWblistexist) {
                     $this->addFlash('warning', $this->translator->trans('Message.Flash.ruleExists'));
                     return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
@@ -107,8 +121,17 @@ class GroupsWblistController extends AbstractController {
     }
 
     #[Route(path: '/{groupId}/edit/{sid}', name: 'groups_wblist_edit', methods: 'GET|POST')]
-    public function edit(int $groupId, int $sid, Request $request, MailaddrService $mailaddrService, GroupService $groupService): Response {
-        $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy(['mailaddr' => $sid, 'groups' => $groupId]);
+    public function edit(
+        int $groupId,
+        int $sid,
+        Request $request,
+        MailaddrService $mailaddrService,
+        GroupService $groupService,
+    ): Response {
+        $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy([
+            'mailaddr' => $sid,
+            'groups' => $groupId,
+        ]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
         $form = $this->createForm(GroupsWblistType::class, null, [
@@ -161,10 +184,14 @@ class GroupsWblistController extends AbstractController {
     }
 
     #[Route(path: '/{groupId}/{sid}/delete', name: 'groups_wblist_delete', methods: 'GET')]
-    public function delete(int $groupId, int $sid, GroupService $groupService): RedirectResponse {
+    public function delete(int $groupId, int $sid, GroupService $groupService): RedirectResponse
+    {
         $group = $this->em->getRepository(Groups::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
-        $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $sid, 'groups' => $groupId]));
+        $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+            'mailaddr' => $sid,
+            'groups' => $groupId,
+        ]));
         if ($groupsWblist) {
             $em = $this->em;
             $em->remove($groupsWblist);
@@ -174,5 +201,4 @@ class GroupsWblistController extends AbstractController {
 
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
     }
-
 }

@@ -115,7 +115,7 @@ class LdapConnector extends Connector
         return $this;
     }
 
-       public function getLdapRealNameField(): ?string
+    public function getLdapRealNameField(): ?string
     {
         return $this->ldapRealNameField;
     }
@@ -151,7 +151,7 @@ class LdapConnector extends Connector
 
         return $this;
     }
-   
+
 
     public function getLdapBindDn(): ?string
     {
@@ -224,8 +224,4 @@ class LdapConnector extends Connector
 
         return $this;
     }
-
-    
-
-
 }

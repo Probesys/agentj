@@ -14,7 +14,7 @@ class SqlLimitReport
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 320)]
-    private string $mail_id;
+    private string $mailId;
 
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $date;
@@ -26,10 +26,10 @@ class SqlLimitReport
     private int $delta;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $processed_user = false;
+    private bool $processedUser = false;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $processed_admin = false;
+    private bool $processedAdmin = false;
 
     // Getters and setters for each property
 
@@ -40,12 +40,12 @@ class SqlLimitReport
 
     public function getMailId(): ?string
     {
-        return $this->mail_id;
+        return $this->mailId;
     }
 
-    public function setMailId(string $mail_id): self
+    public function setMailId(string $mailId): self
     {
-        $this->mail_id = $mail_id;
+        $this->mailId = $mailId;
         return $this;
     }
 
@@ -84,23 +84,23 @@ class SqlLimitReport
 
     public function isProcessedUser(): ?bool
     {
-        return $this->processed_user;
+        return $this->processedUser;
     }
 
-    public function setProcessedUser(bool $processed_user): self
+    public function setProcessedUser(bool $processedUser): self
     {
-        $this->processed_user = $processed_user;
+        $this->processedUser = $processedUser;
         return $this;
     }
 
     public function isProcessedAdmin(): ?bool
     {
-        return $this->processed_admin;
+        return $this->processedAdmin;
     }
 
-    public function setProcessedAdmin(bool $processed_admin): self
+    public function setProcessedAdmin(bool $processedAdmin): self
     {
-        $this->processed_admin = $processed_admin;
+        $this->processedAdmin = $processedAdmin;
         return $this;
     }
 }

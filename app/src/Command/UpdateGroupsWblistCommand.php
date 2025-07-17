@@ -20,16 +20,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class UpdateGroupsWblistCommand extends Command
 {
     public function __construct(
-            private GroupsRepository $groupsRepository,
-            private EntityManagerInterface $em,
-            private GroupService $groupService
-            ) {
+        private GroupsRepository $groupsRepository,
+        private EntityManagerInterface $em,
+        private GroupService $groupService
+    ) {
         parent::__construct();
     }
-    
+
     protected function configure(): void
     {
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -42,8 +41,11 @@ class UpdateGroupsWblistCommand extends Command
         ]);
 
         $rootMailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
-        foreach ($activeGroups as $group){
-            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy((['mailaddr' => $rootMailaddr, 'groups' => $group]));
+        foreach ($activeGroups as $group) {
+            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+                'mailaddr' => $rootMailaddr,
+                'groups' => $group,
+            ]));
             if (!$groupsWblist) {
                 $groupsWblist = new GroupsWblist();
                 $groupsWblist->setMailaddr($rootMailaddr);
@@ -62,14 +64,14 @@ class UpdateGroupsWblistCommand extends Command
      * Update the group priority that does not have priority
      * @return void
      */
-    private function setGroupPriority():void
+    private function setGroupPriority(): void
     {
         $listGroupWithNoPriority = $this->groupsRepository->findBy(['priority' => null]);
-        foreach ($listGroupWithNoPriority as $group){
+        foreach ($listGroupWithNoPriority as $group) {
             $maxPriority = $this->groupsRepository->getMaxPriorityforDomain($group->getDomain());
             $group->setPriority($maxPriority + 1);
             $this->em->persist($group);
             $this->em->flush();
-        }        
+        }
     }
 }

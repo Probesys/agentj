@@ -8,15 +8,15 @@ use Symfony\Component\Ldap\Adapter\CollectionInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Ldap;
 
-class LdapService {
-
-
+class LdapService
+{
     public function __construct(
         private CryptEncryptService $cryptEncryptService,
     ) {
     }
 
-    public function bind(LdapConnector $connector): Ldap {
+    public function bind(LdapConnector $connector): Ldap
+    {
 
         $ldap = Ldap::create('ext_ldap', [
                     'host' => $connector->getLdapHost(),
@@ -31,7 +31,7 @@ class LdapService {
                 throw new ConnectionException('Could not connect to ldap server');
             }
         }
-        
+
         if (!$bindDN = $connector->getLdapBindDn()) {
             throw new ConnectionException('Please configure ldap search DN');
         }
@@ -53,14 +53,14 @@ class LdapService {
         }
     }
 
-    public function bindUser(User $user, string $password): bool {
-        
-        if (!$user->getLdapDN()){
+    public function bindUser(User $user, string $password): bool
+    {
+
+        if (!$user->getLdapDN()) {
             return false;
         }
-        
-        foreach ($user->getDomain()->getConnectors() as $connector) {
 
+        foreach ($user->getDomain()->getConnectors() as $connector) {
             if ($connector instanceof LdapConnector) {
                 $ldap = Ldap::create('ext_ldap', [
                             'host' => $connector->getLdapHost(),
@@ -72,26 +72,31 @@ class LdapService {
                 } catch (ConnectionException $exception) {
                     continue;
                 }
-            }            
+            }
         }
-        
+
         return false;
     }
 
-    public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void {
+    public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void
+    {
 
         $result = array_filter($result->toArray(), function ($user) use ($connector) {
-            $email = $user->getAttribute($connector->getLdapEmailField()) ? $user->getAttribute($connector->getLdapEmailField())[0] : null;
-            $domainName = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? explode('@', $email)[1] : null;
+            $attribute = $user->getAttribute($connector->getLdapEmailField());
+            $email = $attribute ? $attribute[0] : null;
+            $emailIsValid = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+            $domainName = $emailIsValid ? explode('@', $email)[1] : null;
 
             return $domainName == $connector->getDomain()->getDomain();
         });
     }
 
-    public function filterGroupResultWihtoutMembers(CollectionInterface &$result, string $groupMemberAttribute): void {
+    public function filterGroupResultWihtoutMembers(CollectionInterface &$result, string $groupMemberAttribute): void
+    {
 
         $result = array_filter($result->toArray(), function ($ldapGroup) use ($groupMemberAttribute) {
-            $nbMembers = $ldapGroup->getAttribute($groupMemberAttribute) ? count($ldapGroup->getAttribute($groupMemberAttribute)) : 0;
+            $attribute = $ldapGroup->getAttribute($groupMemberAttribute);
+            $nbMembers = $attribute ? count($attribute) : 0;
             return $nbMembers > 0;
         });
     }

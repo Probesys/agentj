@@ -7,13 +7,13 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-trait ControllerWBListTrait {
-
-
+trait ControllerWBListTrait
+{
     /**
      * @return array<string, string>
      */
-    public function getWBListDomainActions(): array {
+    public function getWBListDomainActions(): array
+    {
         return [
             '' => '',
             $this->translator->trans('Entities.Domain.actions.blockAllMails') => "0",
@@ -24,7 +24,8 @@ trait ControllerWBListTrait {
     /**
      * @return array<string, string>
      */
-    public function getWBListUserActions(): array {
+    public function getWBListUserActions(): array
+    {
         return [
             '' => '',
             $this->translator->trans('Entities.Domain.actions.blockAllMails') => "B",

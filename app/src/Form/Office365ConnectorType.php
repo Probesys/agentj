@@ -22,7 +22,6 @@ class Office365ConnectorType extends ConnectorType
             ->add('clientSecret', null, [
                 'label' => 'Entities.Office365Connector.fields.clientSecret',
             ])
-//            ->add('connector')
         ;
     }
 

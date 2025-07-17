@@ -81,7 +81,6 @@ class SearchFilterType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        // Set the data_class to null as this form does not directly map to an entity
         $resolver->setDefaults([]);
     }
 }

@@ -15,17 +15,16 @@ use Doctrine\DBAL\Types\Types;
 #[UniqueEntity('dkim')]
 class DomainKey
 {
-
     #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: 'App\Entity\Domain', mappedBy: 'domain_keys', cascade: ['persist'])]
+    #[ORM\OneToOne(targetEntity: 'App\Entity\Domain', mappedBy: 'domainKeys', cascade: ['persist'])]
     private Domain $domain;
 
     #[ORM\Column(name: 'domain_name', type: 'string', length: 255, nullable: false)]
-    private string $domain_name;
+    private string $domainName;
 
     #[ORM\Column(name: 'selector', type: 'string', length: 255, nullable: false)]
     private string $selector;
@@ -54,13 +53,13 @@ class DomainKey
 
     public function getDomainName(): string
     {
-	    return $this->domain_name;
+        return $this->domainName;
     }
 
-    public function setDomainName(string $domain_name): self
+    public function setDomainName(string $domainName): self
     {
-	    $this->domain_name = $domain_name;
-	    return $this;
+        $this->domainName = $domainName;
+        return $this;
     }
 
     public function getSelector(): string
@@ -98,8 +97,8 @@ class DomainKey
 
     public function getDnsEntry(): string
     {
-	$pubkey = preg_replace('/(-----(BEGIN|END) PUBLIC KEY-----)|[ \n]/', '', $this->publickey);
-	return "v=DKIM1; k=rsa; s={$this->selector}; p={$pubkey}";
+        $pubkey = preg_replace('/(-----(BEGIN|END) PUBLIC KEY-----)|[ \n]/', '', $this->publickey);
+        return "v=DKIM1; k=rsa; s={$this->selector}; p={$pubkey}";
     }
 
     public function getDnsinfo(): string

@@ -10,6 +10,8 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Alter table connector to add imap info
  */
+// phpcs:disable Squiz.Classes.ValidClassName
+// phpcs:disable Generic.Files.LineLength
 final class Version20240724130703_create_imap_connector extends AbstractMigration
 {
     public function getDescription(): string

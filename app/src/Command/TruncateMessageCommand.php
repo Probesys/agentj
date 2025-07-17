@@ -16,22 +16,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class TruncateMessageCommand extends Command
 {
-
     public function __construct(
         private EntityManagerInterface $em
     ) {
         parent::__construct();
     }
 
-    protected function configure():void
+    protected function configure(): void
     {
         $this->addArgument('days');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output):int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $days = (int)$input->getArgument('days');
-      //default value is 30 days
         if ($days <= 10) {
             $days = 30;
         }
@@ -43,9 +41,19 @@ class TruncateMessageCommand extends Command
         }
 
         $userMsgsBlocked = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
-        $output->writeln(date('Y-m-d H:i:s') . "\tdelete mail entries older than " . date('Y-m-d', $start) . "\t" . $userMsgsBlocked['nbDeletedMsgs'] . ' in msgs' . "\t" . $userMsgsBlocked['nbDeletedMsgrcpt'] . ' in msgrcpt'  . "\t" . $userMsgsBlocked['nbDeletedQuarantine'] . ' in quarantine');
+
+        $message = date('Y-m-d H:i:s');
+        $message .= "\tdelete mail entries older than " . date('Y-m-d', $start);
+        $message .= "\t{$userMsgsBlocked['nbDeletedMsgs']} in msgs";
+        $message .= "\t{$userMsgsBlocked['nbDeletedMsgrcpt']} in msgrcpt";
+        $message .= "\t{$userMsgsBlocked['nbDeletedQuarantine']} in quarantine";
+        $output->writeln($message);
+
         $nbDeletedlogs = $this->em->getRepository(Log::class)->truncateOlder($days);
-        $output->writeln(date('Y-m-d H:i:s') . "\tdelete log entries older than " . date('Y-m-d', $start) . "\t" . $nbDeletedlogs . ' deleted');
+        $message = date('Y-m-d H:i:s');
+        $message .= "\tdelete log entries older than " . date('Y-m-d', $start);
+        $message .= "\t{$nbDeletedlogs} deleted";
+        $output->writeln($message);
         return Command::SUCCESS;
     }
 }

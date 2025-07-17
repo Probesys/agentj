@@ -26,25 +26,24 @@ class LdapConnectorType extends ConnectorType
             ->add('LdapBaseDN', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.LdapBaseDN',
-            ])                
+            ])
             ->add('allowAnonymousBind', null, [
-//                'required' => true,
                 'label' => 'Entities.LdapConnector.fields.allowAnonymousBind',
             ])
             ->add('ldapBindDn', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapBindDn',
-                'attr'=> ['data-ldap-bind' => 'true']
-            ])                
+                'attr' => ['data-ldap-bind' => 'true']
+            ])
             ->add('LdapPassword', PasswordType::class, [
                 'required' => is_null($builder->getData()->getId()),
                 'label' => 'Entities.LdapConnector.fields.LdapPassword',
-                'attr'=> ['data-ldap-bind' => 'true']
+                'attr' => ['data-ldap-bind' => 'true']
             ])
             ->add('ldapLoginField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapLoginField',
-            ])     
+            ])
             ->add('ldapRealNameField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapRealNameField',
@@ -52,30 +51,30 @@ class LdapConnectorType extends ConnectorType
             ->add('ldapEmailField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapEmailField',
-            ])            
+            ])
             ->add('ldapAliasField', null, [
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.ldapAliasField',
-            ])                      
+            ])
             ->add('ldapGroupNameField', null, [
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',
-                'attr'=> ['data-ldap-group' => 'true']
-            ])                                                   
+                'attr' => ['data-ldap-group' => 'true']
+            ])
             ->add('ldapGroupMemberField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupMemberField',
-                'attr'=> ['data-ldap-group' => 'true']
-            ])       
+                'attr' => ['data-ldap-group' => 'true']
+            ])
             ->add('ldapUserFilter', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapUserFilter',                
-            ]) 
+                'label' => 'Entities.LdapConnector.fields.ldapUserFilter',
+            ])
             ->add('ldapGroupFilter', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupFilter',
-                'attr'=> ['data-ldap-group' => 'true']
-            ])                 
+                'attr' => ['data-ldap-group' => 'true']
+            ])
         ;
     }
 

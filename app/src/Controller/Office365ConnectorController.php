@@ -20,20 +20,21 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/office365')]
-class Office365ConnectorController extends AbstractController {
-
+class Office365ConnectorController extends AbstractController
+{
     private Application $application;
 
-    public function __construct(KernelInterface $kernel) {
+    public function __construct(KernelInterface $kernel)
+    {
         $this->application = new Application($kernel);
     }
 
-    
+
     #[Route('/{domain}/new', name: 'app_connector_o365_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response {
+    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
+    {
 
         $connector = new Office365Connector();
         $connector->setDomain($domain);
@@ -43,13 +44,12 @@ class Office365ConnectorController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $connectorRepository->add($connector, true);
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        $form->get("type")->setData(ConnectorTypes::Office365);
+        $form->get("type")->setData(ConnectorTypes::OFFICE365);
         return $this->render('connector/new.html.twig', [
                     'connector' => $connector,
                     'form' => $form,
@@ -57,14 +57,16 @@ class Office365ConnectorController extends AbstractController {
     }
 
     #[Route('/{id}', name: 'app_connector_show', methods: ['GET'])]
-    public function show(Office365Connector $connector): Response {
+    public function show(Office365Connector $connector): Response
+    {
         return $this->render('connector/show.html.twig', [
                     'connector' => $connector,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_connector_o365_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+    public function edit(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
+    {
         $form = $this->createForm(Office365ConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_o365_edit', ['id' => $connector->getId()]),
         ]);
@@ -73,7 +75,11 @@ class Office365ConnectorController extends AbstractController {
         if ($form->isSubmitted() && $form->isValid()) {
             $connectorRepository->add($connector, true);
 
-            return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute(
+                'domain_edit',
+                ['id' => $connector->getDomain()->getId()],
+                Response::HTTP_SEE_OTHER
+            );
         }
 
         return $this->render('connector/edit.html.twig', [
@@ -83,7 +89,8 @@ class Office365ConnectorController extends AbstractController {
     }
 
     #[Route('/office365/{id}/sync-user', name: 'app_office365_connector_sync')]
-    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response {
+    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
+    {
         if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
             $input = new ArrayInput([
                 'connectorId' => $connector->getId(),
@@ -97,5 +104,4 @@ class Office365ConnectorController extends AbstractController {
 
         return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
-
 }

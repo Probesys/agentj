@@ -13,11 +13,13 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class GroupsRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry) {
+    public function __construct(ManagerRegistry $registry)
+    {
         parent::__construct($registry, Groups::class);
     }
 
-    public function findOneByUid(string $uid): ?Groups {
+    public function findOneByUid(string $uid): ?Groups
+    {
         return $this->createQueryBuilder('g')
                         ->where('g.uid = :uid')
                         ->setParameter('uid', $uid)
@@ -25,7 +27,8 @@ class GroupsRepository extends ServiceEntityRepository
                         ->getOneOrNullResult();
     }
 
-    public function findOneByLdapDN(string $dn): ?Groups {
+    public function findOneByLdapDN(string $dn): ?Groups
+    {
         return $this->createQueryBuilder('g')
                         ->where('g.ldapDN = :ldapDN')
                         ->setParameter('ldapDN', $dn)
@@ -38,7 +41,8 @@ class GroupsRepository extends ServiceEntityRepository
      * @param Domain[] $domains
      * @return Groups[]
      */
-    public function findByDomain(array $domains): array {
+    public function findByDomain(array $domains): array
+    {
         $dql = $this->createQueryBuilder('g');
 
         if (is_array($domains)) {
@@ -58,7 +62,8 @@ class GroupsRepository extends ServiceEntityRepository
     /**
      * Return the main (hightest priority) group of the user $user
      */
-    public function getMainUserGroup(User $user): ?Groups {
+    public function getMainUserGroup(User $user): ?Groups
+    {
         $dql = $this->createQueryBuilder('g')
                 ->innerJoin('g.users', 'u')
                 ->where('g.active = true')
@@ -69,7 +74,8 @@ class GroupsRepository extends ServiceEntityRepository
         return $query->getOneOrNullResult();
     }
 
-    public function getMaxPriorityforDomain(Domain $domain): int {
+    public function getMaxPriorityforDomain(Domain $domain): int
+    {
         $dql = $this->createQueryBuilder('g')
                 ->select('MAX(g.priority) as max')
                 ->where('g.domain = :domain')

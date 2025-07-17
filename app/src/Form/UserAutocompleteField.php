@@ -12,22 +12,16 @@ use Symfony\UX\Autocomplete\Form\BaseEntityAutocompleteType;
 #[AsEntityAutocompleteField]
 class UserAutocompleteField extends AbstractType
 {
-    public function __construct(private RouterInterface $router) {
-        ;
+    public function __construct(private RouterInterface $router)
+    {
     }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'class' => User::class,
             'placeholder' => 'Generics.actions.chooseUser',
             'autocomplete_url' => $this->router->generate('autocomplete_user'),
-            // 'choice_label' => 'name',
-
-            // choose which fields to use in the search
-            // if not passed, *all* fields are used
-            // 'searchable_fields' => ['name'],
-
-            // 'security' => 'ROLE_SOMETHING',
         ]);
     }
 

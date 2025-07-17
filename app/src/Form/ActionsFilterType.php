@@ -9,10 +9,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ActionsFilterType extends AbstractType
 {
-
-    public function buildForm(FormBuilderInterface $builder, array $options):void
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-
         $builder
             ->add('actions', ChoiceType::class, [
                 'label' => 'Actions',
@@ -28,29 +26,35 @@ class ActionsFilterType extends AbstractType
                     'class' => 'form-control form-control-sm'
                 ],
                 'required' => false,
-                'choices' => [10 => 10, 25 => 25, 50 => 50 , 100 => 100, 200 => 200, 500 => 500 ,1000 => 1000,3000 => 3000],
+                'choices' => [
+                    10 => 10,
+                    25 => 25,
+                    50 => 50,
+                    100 => 100,
+                    200 => 200,
+                    500 => 500,
+                    1000 => 1000,
+                    3000 => 3000,
+                ],
             ])
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver):void
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-        'data_class' => null,
+            'data_class' => null,
         ]);
 
         $resolver->setRequired('avalaibleActions');
     }
 
-  /**
-   * @return string
-   */
-    public function getName()
+    public function getName(): string
     {
         return 'massive-actions-form';
     }
 
-    public function getBlockPrefix():string
+    public function getBlockPrefix(): string
     {
         return $this->getName();
     }

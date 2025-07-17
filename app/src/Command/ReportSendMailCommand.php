@@ -26,7 +26,8 @@ use Twig\Environment;
     name: 'agentj:report-send-mail',
     description: 'Send report email',
 )]
-class ReportSendMailCommand extends Command {
+class ReportSendMailCommand extends Command
+{
     public function __construct(
         private Environment $twig,
         private ManagerRegistry $doctrine,
@@ -46,7 +47,8 @@ class ReportSendMailCommand extends Command {
         $this->setDescription('Send report email ');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output):int {
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
         $io = new SymfonyStyle($input, $output);
 
         $em = $this->doctrine->getManager();
@@ -69,7 +71,8 @@ class ReportSendMailCommand extends Command {
                  */
 
                 $untreatedMsgs = $this->msgrcptSearchRepository->getSearchQuery(
-                    $user, fromDate: $user->getDateLastReport()
+                    $user,
+                    fromDate: $user->getDateLastReport()
                 )->getResult();
                 $totalUnread = count($untreatedMsgs);
 
@@ -122,7 +125,7 @@ class ReportSendMailCommand extends Command {
                 $bodyTextPlain = strip_tags($bodyTextPlain);
 
                 $message = new Email();
-                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo )
+                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
                         ->from(new Address($this->defaultMailFrom, $fromName))
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
@@ -138,7 +141,7 @@ class ReportSendMailCommand extends Command {
                     $i++;
                 } catch (\Exception $e) {
                     //catch error and save this in msgs + change status to error
-                    $messageError = $e->getMessage();   
+                    $messageError = $e->getMessage();
                     $io->note(sprintf('Error  %s : [%s]', $user->getEmailFromRessource(), $messageError));
                 }
             }
@@ -151,5 +154,4 @@ class ReportSendMailCommand extends Command {
         }
         return Command::SUCCESS;
     }
-
 }

@@ -10,6 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
+// phpcs:disable Generic.Files.LineLength
 final class Version20221025152327 extends AbstractMigration
 {
     public function getDescription(): string

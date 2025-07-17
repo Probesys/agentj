@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: Office365ConnectorRepository::class)]
 class Office365Connector extends Connector
 {
-
     #[ORM\Column(type: 'string', length: 100)]
     private string $tenant;
 
@@ -54,5 +53,4 @@ class Office365Connector extends Connector
 
         return $this;
     }
-
 }

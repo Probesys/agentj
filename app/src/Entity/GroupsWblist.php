@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\GroupsWblistRepository;
+
 /**
  * GroupsWblist
  */
@@ -11,7 +12,6 @@ use App\Repository\GroupsWblistRepository;
 #[ORM\Entity(repositoryClass: GroupsWblistRepository::class)]
 class GroupsWblist
 {
-
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups', inversedBy: 'groupsWbLists')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]

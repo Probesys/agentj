@@ -23,20 +23,22 @@ use App\Repository\DomainRepository;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 #[Route(path: 'admin/users')]
-class UserController extends AbstractController {
-
+class UserController extends AbstractController
+{
     use ControllerWBListTrait;
 
     private TranslatorInterface $translator;
     private EntityManagerInterface $em;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em) {
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
+    {
         $this->translator = $translator;
         $this->em = $em;
     }
 
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
-    public function indexUserLocal(UserRepository $userRepository): Response {
+    public function indexUserLocal(UserRepository $userRepository): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $adminUsers = $userRepository->searchByRole($user, '["ROLE_ADMIN"]');
@@ -46,7 +48,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/email', name: 'users_email_index', methods: 'GET')]
-    public function indexUserEmail(UserRepository $userRepository): Response {
+    public function indexUserEmail(UserRepository $userRepository): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $users = $userRepository->searchByRole($user, '["ROLE_USER"]');
@@ -54,7 +57,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/alias', name: 'users_email_alias_index', methods: 'GET')]
-    public function indexUserEmailAlias(UserRepository $userRepository): Response {
+    public function indexUserEmailAlias(UserRepository $userRepository): Response
+    {
         /** @var User $user */
         $user = $this->getUser();
         $users = $userRepository->searchAlias($user);
@@ -62,7 +66,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/local/new', name: 'user_local_new', methods: 'GET|POST')]
-    public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response {
+    public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response
+    {
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_new'),
@@ -85,6 +90,9 @@ class UserController extends AbstractController {
             $data = $form->getData();
             $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $firstPassword = $form->get('password')->get('first')->getData();
+            $secondPassword = $form->get('password')->get('second')->getData();
+
             if ($userNameExist) {
                 $return = [
                     'status' => 'danger',
@@ -95,14 +103,14 @@ class UserController extends AbstractController {
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
-            } elseif ($form->get('password')->get('first')->getData() != $form->get('password')->get('second')->getData()) {
+            } elseif ($firstPassword != $secondPassword) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.passwordNotMatching'),
                 ];
             } elseif ($form->isValid()) {
                 $role = $form->get('roles')->getData();
-                $encoded = $passwordHasher->hashPassword($user, $form->get('password')->get('first')->getData());
+                $encoded = $passwordHasher->hashPassword($user, $firstPassword);
                 $policy = $this->em->getRepository(Policy::class)->find(5);
                 $username = $form->get('username')->getData();
                 $username = $username ? $username : $form->get('fullname')->getData();
@@ -130,7 +138,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/local/{id}/edit', name: 'user_local_edit', methods: 'GET|POST')]
-    public function edit(Request $request, User $user): Response {
+    public function edit(Request $request, User $user): Response
+    {
 
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
@@ -152,7 +161,9 @@ class UserController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $form->get('username')->getData()]);
+            $userNameExist = $this->em->getRepository(User::class)->findOneBy([
+                'username' => $form->get('username')->getData(),
+            ]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
             if ($oldUser['username'] != $form->get('username')->getData() && $userNameExist) {
                 $return = [
@@ -179,9 +190,10 @@ class UserController extends AbstractController {
         ]);
     }
 
-    
+
     #[Route(path: '/local/{id}/changePassword', name: 'user_local_change_password', methods: 'GET|POST')]
-    public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response {
+    public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
+    {
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_change_password', ['id' => $user->getId()]),
             'include_quota' => false,
@@ -200,7 +212,6 @@ class UserController extends AbstractController {
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-
             if (!$form->isValid()) {
                 $errros = $form->getErrors(true);
                 $this->addFlash('error', $errros[0]->getMessage());
@@ -221,7 +232,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/local/{id}/delete', name: 'user_local_delete', methods: 'GET')]
-    public function deleteLocal(Request $request, User $user): Response {
+    public function deleteLocal(Request $request, User $user): Response
+    {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             $this->em->remove($user);
             $this->em->flush();
@@ -231,7 +243,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'GET')]
-    public function deleteEmail(Request $request, User $user): Response {
+    public function deleteEmail(Request $request, User $user): Response
+    {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
             if (in_array('ROLE_USER', $user->getRoles())) {
                 $this->em->remove($user);
@@ -243,7 +256,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/email/batchDelete', name: 'user_email_batch_delete', methods: 'POST')]
-    public function batchDeleteEmail(Request $request): Response {
+    public function batchDeleteEmail(Request $request): Response
+    {
 
         foreach ($request->request->all('id') as $id) {
             $user = $this->em->getRepository(User::class)->find($id);
@@ -269,12 +283,12 @@ class UserController extends AbstractController {
         $allowedDomains = $this->getAlloweDomains();
 
 
-        $imapDomains = $domainRepository->findDomainsWithIMAPConnectors(); 
+        $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
 
         $form = $this->createForm(
-                UserType::class,
-                $user,
-                [
+            UserType::class,
+            $user,
+            [
                     'action' => $this->generateUrl('user_email_new'),
                     'allowedDomains' => $allowedDomains,
                     'attr' => ['class' => 'modal-ajax-form']
@@ -293,9 +307,15 @@ class UserController extends AbstractController {
             $data = $form->getData();
 
             $emailExist = $userRepository->findOneBy(['email' => $data->getEmail()]);
-//            dd($form->get('email')->getData());
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
-            $imapLoginExist = !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            if (!$data->getImapLogin()) {
+                $imapLoginExist = false;
+            } else {
+                $imapLoginExist = $userRepository->findOneBy([
+                    'imapLogin' => $data->getImapLogin(),
+                    'domain' => $newDomain,
+                ]);
+            }
 
             if (!$newDomain) {
                 $return = [
@@ -350,7 +370,8 @@ class UserController extends AbstractController {
     }
 
     #[Route(path: '/newAlias', name: 'new_user_email_alias', methods: 'GET|POST')]
-    public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response {
+    public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response
+    {
         $groups = null;
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -416,9 +437,16 @@ class UserController extends AbstractController {
         ]);
     }
 
-    
+
     #[Route(path: '/email/{id}/edit', name: 'user_email_edit', methods: 'GET|POST')]
-    public function editUserEmail(User $user, Request $request, UserService $userService, GroupService $groupService, UserRepository $userRepository, DomainRepository $domainRepository): Response {
+    public function editUserEmail(
+        User $user,
+        Request $request,
+        UserService $userService,
+        GroupService $groupService,
+        UserRepository $userRepository,
+        DomainRepository $domainRepository,
+    ): Response {
 
         $oldGroups = $user->getGroups()->toArray();
 
@@ -454,13 +482,24 @@ class UserController extends AbstractController {
 
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
 
-            $imapLoginExist = !$data->getImapLogin() ? false : $userRepository->findOneBy(['imapLogin' => $data->getImapLogin(), 'domain' => $newDomain]);
+            if (!$data->getImapLogin()) {
+                $imapLoginExist = false;
+            } else {
+                $imapLoginExist = $userRepository->findOneBy([
+                    'imapLogin' => $data->getImapLogin(),
+                    'domain' => $newDomain,
+                ]);
+            }
+
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
-            } elseif (stream_get_contents($oldUserData['email'], -1, 0) != $form->get('email')->getData() && $emailExist) {
+            } elseif (
+                stream_get_contents($oldUserData['email'], -1, 0) != $form->get('email')->getData() &&
+                $emailExist
+            ) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
@@ -471,7 +510,6 @@ class UserController extends AbstractController {
                     'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
-
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
                 $user->setUsername($user->getEmail());
@@ -501,9 +539,14 @@ class UserController extends AbstractController {
         ]);
     }
 
-    
+
     #[Route(path: '/alias/{id}/edit', name: 'user_email_alias_edit', methods: 'GET|POST')]
-    public function editUserEmailAlias(Request $request, User $user, UserService $userService, GroupService $groupService): Response {
+    public function editUserEmailAlias(
+        Request $request,
+        User $user,
+        UserService $userService,
+        GroupService $groupService,
+    ): Response {
         $userId = null;
         if ($user->getOriginalUser()) {
             $userId = $user->getOriginalUser()->getId();
@@ -564,7 +607,8 @@ class UserController extends AbstractController {
      * @param User $user
      * @return Policy
      */
-    private function computeUserPolicy(User $user): Policy {
+    private function computeUserPolicy(User $user): Policy
+    {
         $policy = null;
         $groupsRepository = $this->em->getRepository(Groups::class);
         if ($user->getGroups() && count($user->getGroups()) > 0) {
@@ -584,7 +628,8 @@ class UserController extends AbstractController {
     /**
      * @return Domain[]
      */
-    private function getAlloweDomains():array {
+    private function getAlloweDomains(): array
+    {
         /** @var User $user */
         $user = $this->getUser();
         if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
@@ -599,7 +644,8 @@ class UserController extends AbstractController {
         return $allowedomains;
     }
 
-    private function checkDomainAccess(string $domainName = "") : ?Domain {
+    private function checkDomainAccess(string $domainName = ""): ?Domain
+    {
         $allowedomains = $this->getAlloweDomains();
         $allowedomainNamesArray = array_map(function (Domain $entity) {
             return $entity->getDomain();
@@ -618,10 +664,11 @@ class UserController extends AbstractController {
      * autocomplete user action. search in user
      */
     #[Route(path: '/user/autocomplete', name: 'autocomplete_user', options: ['expose' => true])]
-    public function autocompleteUserAction(UserRepository $userRepository, Request $request): JsonResponse {
+    public function autocompleteUserAction(UserRepository $userRepository, Request $request): JsonResponse
+    {
 
         $q = $request->query->get('query');
-        $page_limit = $request->query->has('page_limit') ? (int) $request->query->get('page_limit') : 30;
+        $pageLimit = $request->query->has('page_limit') ? (int) $request->query->get('page_limit') : 30;
         $return = [];
         $items = [];
         $allowedomains = [];
@@ -636,7 +683,7 @@ class UserController extends AbstractController {
 
         $entities = $userRepository->autocomplete(
             $q,
-            $page_limit,
+            $pageLimit,
             $request->query->getInt('page', 1),
             $allowedomains
         );

@@ -4,7 +4,6 @@ namespace App\Amavis;
 
 class MessageStatus
 {
-
     public const UNTREATED = null;
     public const BANNED = 1;
     public const AUTHORIZED = 2;
@@ -37,6 +36,4 @@ class MessageStatus
                 return 'Unknown';
         }
     }
-
 }
-

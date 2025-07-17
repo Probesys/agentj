@@ -9,12 +9,9 @@ use Captcha\Bundle\CaptchaBundle\Form\Type\CaptchaType;
 
 class CaptchaFormType extends AbstractType
 {
-
-    public function buildForm(FormBuilderInterface $builder, array $options):void
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-
-        $builder->add('email', null, [
-            ])
+        $builder->add('email', null, [])
             ->add('emailEmpty', null, [
                 'label' => false,
                 'required' => false,
@@ -23,10 +20,10 @@ class CaptchaFormType extends AbstractType
     }
 
 
-    public function configureOptions(OptionsResolver $resolver):void
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-        'data_class' => null
+            'data_class' => null,
         ]);
     }
 }

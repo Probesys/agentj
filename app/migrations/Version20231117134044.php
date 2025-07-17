@@ -21,7 +21,6 @@ final class Version20231117134044 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE connector ADD allow_anonymous_bind TINYINT(1) DEFAULT NULL');
-
     }
 
     public function down(Schema $schema): void

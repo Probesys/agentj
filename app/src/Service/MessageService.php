@@ -148,7 +148,9 @@ class MessageService
 
             // we check if aliases exist
             if ($mainUser) {
-                $userAndAliases = $this->em->getRepository(Entity\User::class)->findBy(['originalUser' => $mainUser->getId()]);
+                $userAndAliases = $this->em->getRepository(Entity\User::class)->findBy([
+                    'originalUser' => $mainUser->getId(),
+                ]);
                 array_unshift($userAndAliases, $mainUser);
             }
 
@@ -158,7 +160,10 @@ class MessageService
 
                 //if the message is authorized we release all message of the same sender
                 //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
-                $wblist = $this->em->getRepository(Entity\Wblist::class)->findOneBy(['sid' => $mailaddrSender, 'rid' => $user]);
+                $wblist = $this->em->getRepository(Entity\Wblist::class)->findOneBy([
+                    'sid' => $mailaddrSender,
+                    'rid' => $user,
+                ]);
                 if (!$wblist) {
                     $wblist = new Entity\Wblist($user, $mailaddrSender);
                 }
@@ -170,7 +175,8 @@ class MessageService
 
 
                 //get all messages from email Sender and send all message for one user
-                $msgsRelease = $this->em->getRepository(Entity\Msgs::class)->getAllMessageRecipient($emailSender, $user);
+                $msgsRelease = $this->em->getRepository(Entity\Msgs::class)
+                                        ->getAllMessageRecipient($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
                         $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([

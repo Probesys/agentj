@@ -10,6 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
+// phpcs:disable Generic.Files.LineLength
 final class Version20230301132150 extends AbstractMigration
 {
     public function getDescription(): string
@@ -20,7 +21,7 @@ final class Version20230301132150 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE connector ADD ldap_group_name_field VARCHAR(255) DEFAULT NULL, ADD synchronize_group TINYINT(1) DEFAULT NULL');                
+        $this->addSql('ALTER TABLE connector ADD ldap_group_name_field VARCHAR(255) DEFAULT NULL, ADD synchronize_group TINYINT(1) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void

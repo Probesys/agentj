@@ -12,36 +12,32 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-
 #[AsCommand(
     name: 'agentj:create-super-admin',
     description: 'Create the first super administrator for the application. If user exist the password will be updated',
 )]
 class CreateSuperAdminCommand extends Command
 {
-
-
     public function __construct(
-        private UserPasswordHasherInterface $passwordEncoder, 
-        private EntityManagerInterface $em)
-    {
+        private UserPasswordHasherInterface $passwordEncoder,
+        private EntityManagerInterface $em
+    ) {
         parent::__construct();
-
     }
 
-    protected function configure():void
-    {    
+    protected function configure(): void
+    {
         $this->addArgument('userName', InputArgument::REQUIRED, 'Super admin login')
             ->addArgument('password', InputArgument::REQUIRED, 'Super admin password');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output):int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $isNewUser = false;
         $userName = $input->getArgument('userName');
         $password = $input->getArgument('password');
-        
+
         $user = $this->em->getRepository(User::class)->findOneBy(['username' => $userName]);
         if (!$user) {
             $user = new User();
@@ -66,7 +62,7 @@ class CreateSuperAdminCommand extends Command
         } else {
             $io->success("The user " . $userName . " has been successfully updated");
         }
-        
+
         return Command::SUCCESS;
     }
 }

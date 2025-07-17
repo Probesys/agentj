@@ -24,8 +24,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class DefaultController extends AbstractController {
-
+class DefaultController extends AbstractController
+{
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -35,39 +35,48 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '/', name: 'homepage')]
-    public function index(): Response {
+    public function index(): Response
+    {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::UNTREATED
+            user: $user,
+            messageStatus: MessageStatus::UNTREATED
         );
         $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::AUTHORIZED
+            user: $user,
+            messageStatus: MessageStatus::AUTHORIZED
         );
         $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::BANNED
+            user: $user,
+            messageStatus: MessageStatus::BANNED
         );
         $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::DELETED
+            user: $user,
+            messageStatus: MessageStatus::DELETED
         );
         $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::RESTORED
+            user: $user,
+            messageStatus: MessageStatus::RESTORED
         );
         $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::ERROR
+            user: $user,
+            messageStatus: MessageStatus::ERROR
         );
         $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::SPAMMED
+            user: $user,
+            messageStatus: MessageStatus::SPAMMED
         );
         $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user, messageStatus: MessageStatus::VIRUS
+            user: $user,
+            messageStatus: MessageStatus::VIRUS
         );
 
         $latestMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery($user)->setMaxResults(5)->getResult();
         $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
-        $all_alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
-        $unreadAlertsCount = count(array_filter($all_alerts, function($all_alert) {
-            return !$all_alert->getIsRead();
+        $allAlerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
+        $unreadAlertsCount = count(array_filter($allAlerts, function ($alert) {
+            return !$alert->getIsRead();
         }));
 
         $labels = array_map(function ($item) {
@@ -95,16 +104,16 @@ class DefaultController extends AbstractController {
             $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user, $domain->getId());
 
             $data[$domain->getId()] = [
-                'totalMsgCount' => array_reduce($users, function($carry, $user) {
+                'totalMsgCount' => array_reduce($users, function ($carry, $user) {
                     return $carry + $user['msgCount'];
                 }, 0),
-                'totalMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
                     return $carry + $user['msgBlockedCount'];
                 }, 0),
-                'totalOutMsgCount' => array_reduce($users, function($carry, $user) {
+                'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
                     return $carry + $user['outMsgCount'];
                 }, 0),
-                'totalOutMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+                'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
                     return $carry + $user['outMsgBlockedCount'];
                 }, 0),
             ];
@@ -112,23 +121,22 @@ class DefaultController extends AbstractController {
         // Add data for "All" option
         $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user);
         $data['All'] = [
-            'totalMsgCount' => array_reduce($users, function($carry, $user) {
+            'totalMsgCount' => array_reduce($users, function ($carry, $user) {
                 return $carry + $user['msgCount'];
             }, 0),
-            'totalMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+            'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
                 return $carry + $user['msgBlockedCount'];
             }, 0),
-            'totalOutMsgCount' => array_reduce($users, function($carry, $user) {
+            'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
                 return $carry + $user['outMsgCount'];
             }, 0),
-            'totalOutMsgBlockedCount' => array_reduce($users, function($carry, $user) {
+            'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
                 return $carry + $user['outMsgBlockedCount'];
             }, 0),
         ];
 
         $showAlertWidget = true;
-        if ($user->getDomain() && $user->getDomain()->getSendUserAlerts() == false)
-        {
+        if ($user->getDomain() && $user->getDomain()->getSendUserAlerts() == false) {
             $showAlertWidget = false;
         }
 
@@ -154,26 +162,26 @@ class DefaultController extends AbstractController {
         ]);
     }
 
-    #[Route(path: '{user_email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
+    #[Route(path: '{userEmail}/messages_stats/', name: 'messages_stats', methods: 'GET')]
     public function showMessagesStats(
-        string $user_email,
+        string $userEmail,
         MsgrcptRepository $msgrcptRepository,
         UserRepository $userRepository
     ): Response {
         $connection = $this->em->getConnection();
 
-        $user = $userRepository->findOneBy(['email' => $user_email]);
+        $user = $userRepository->findOneBy(['email' => $userEmail]);
 
-        $query = $msgrcptRepository->findByEmailRecipient($user_email);
+        $query = $msgrcptRepository->findByEmailRecipient($userEmail);
         $messages = $query->getArrayResult();
 
         $sqlOutMessages = '
             SELECT out_msgs.*, mr.status_id as status, mr.bspam_level as bspamLevel, mr.content
             FROM out_msgs
             JOIN out_msgrcpt AS mr ON out_msgs.mail_id = mr.mail_id
-            WHERE out_msgs.from_addr = :user_email
+            WHERE out_msgs.from_addr = :userEmail
         ';
-        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['user_email' => $user_email]);
+        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['userEmail' => $userEmail]);
         $outMessages = $stmtOutMessages->fetchAllAssociative();
 
         // Determine status using provided logic
@@ -198,26 +206,26 @@ class DefaultController extends AbstractController {
         }
 
         // Convert to array and return to view
-        $msgs_status = array_values($statusCounts);
+        $messagesStatus = array_values($statusCounts);
 
-        // Get the count of sql_limit_report entries where id = $user_email
+        // Get the count of sql_limit_report entries where id = $userEmail
         $sqlLimitReports = '
             SELECT COUNT(*) AS count
             FROM sql_limit_report
-            WHERE mail_id = :user_email
+            WHERE mail_id = :userEmail
         ';
-        $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['user_email' => $user_email]);
+        $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['userEmail' => $userEmail]);
         $limitReports = $stmtLimitReports->fetchAssociative();
 
-        // Add Sql_Limit_Report to $msgs_status
-        $msgs_status[] = [
+        // Add Sql_Limit_Report to $messagesStatus
+        $messagesStatus[] = [
             'name' => 'quota',
             'qty' => 0,
             'qty_out' => $limitReports ? $limitReports['count'] : 0
         ];
 
         return $this->render('home/messages_stats.html.twig', [
-            'msgs_status' => $msgs_status
+            'msgs_status' => $messagesStatus,
         ]);
     }
 
@@ -226,13 +234,16 @@ class DefaultController extends AbstractController {
      * @param array<string, mixed> $message
      * @return string
      */
-    private function determineStatus(array $message, float $level): string {
+    private function determineStatus(array $message, float $level): string
+    {
         if ($message['status'] !== null) {
             return MessageStatus::getStatusName($message['status']);
-        } elseif ($message['status'] === null && $message['bspamLevel'] > $level
-            && $message['content'] !== ContentType::Clean && $message['content'] !== ContentType::Virus) {
+        } elseif (
+            $message['status'] === null && $message['bspamLevel'] > $level
+            && $message['content'] !== ContentType::CLEAN && $message['content'] !== ContentType::VIRUS
+        ) {
             return 'spam';
-        } elseif ($message['content'] === ContentType::Virus) {
+        } elseif ($message['content'] === ContentType::VIRUS) {
             return 'virus';
         } else {
             return 'untreated';
@@ -240,7 +251,12 @@ class DefaultController extends AbstractController {
     }
 
     #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
-    public function checkCaptcha(string $token, Request $request, Service\MessageService $messageService, Service\CryptEncryptService $cryptEncrypt): Response {
+    public function checkCaptcha(
+        string $token,
+        Request $request,
+        Service\MessageService $messageService,
+        Service\CryptEncryptService $cryptEncrypt,
+    ): Response {
         $em = $this->em;
         $confirm = "";
 
@@ -255,20 +271,31 @@ class DefaultController extends AbstractController {
         }
 
         $senderEmail = stream_get_contents($message->getSid()->getEmail(), -1, 0);
-        $content = !empty($domain->getMessage()) ? $domain->getMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaPageContent');
+        if (!empty($domain->getMessage())) {
+            $content = $domain->getMessage();
+        } else {
+            $content = $this->translator->trans('Message.Captcha.defaultCaptchaPageContent');
+        }
 
         $form = $this->createForm(CaptchaFormType::class, null);
         $form->handleRequest($request); //todo gérer l'erreur si la page est rechargée
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $confirm = !empty($domain->getConfirmCaptchaMessage()) ? $domain->getConfirmCaptchaMessage() : $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
+            if (!empty($domain->getConfirmCaptchaMessage())) {
+                $confirm = $domain->getConfirmCaptchaMessage();
+            } else {
+                $confirm = $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
+            }
+
             $recipient = $messageRecipients[0] ?? null;
             if ($recipient) {
                 $emailDest = $recipient->getRid()->getEmailClear();
                 $emailDest = $emailDest ? $emailDest : '';
                 $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
             }
-            if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) { // Test is the sender is the same than the posted email field and if the mail has not been yet treated
+
+            // Test if the sender is the same than the posted email field and if the mail has not been yet treated
+            if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
                     $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                     $message->setValidateCaptcha(time());
@@ -285,23 +312,20 @@ class DefaultController extends AbstractController {
         }
 
         return $this->render('message/captcha.html.twig', [
-                    'token' => $token,
-                    'mailToValidate' => $senderEmail,
-                    'form' => $form->createView(),
-                    'confirm' => $confirm,
-                    'content' => $content
+            'token' => $token,
+            'mailToValidate' => $senderEmail,
+            'form' => $form->createView(),
+            'confirm' => $confirm,
+            'content' => $content
         ]);
     }
 
     /**
      * Change the locale for the current user.
-     *
-     *
-     * @param string  $language
-     * @return Response
      */
     #[Route(path: '/setlocale/{language}', name: 'setlocale')]
-    public function setLocaleAction(Request $request, EntityManagerInterface $em, $language = null) {
+    public function setLocaleAction(Request $request, EntityManagerInterface $em, ?string $language = null): Response
+    {
         if (null != $language) {
             $request->getSession()->set('_locale', $language);
         }
@@ -310,23 +334,19 @@ class DefaultController extends AbstractController {
         if (empty($url)) {
             $url = $this->container->get('router')->generate('message');
         }
-        
+
         /** @var User $user */
         $user = $this->getUser();
-        if (!$this->security->isGranted('ROLE_PREVIOUS_ADMIN')){
+        if (!$this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
             $user->setPreferedLang($language);
             $em->persist($user);
             $em->flush();
         }
-        
-
 
         $user->setPreferedLang($language);
         $em->persist($user);
         $em->flush();
-        
 
-        
         return new RedirectResponse($url);
     }
 
@@ -362,7 +382,7 @@ class DefaultController extends AbstractController {
         if ($message) {
             $messageRecipients = $this->em->getRepository(Msgrcpt::class)->findByMessage($message);
 
-            $messageRecipients = array_filter($messageRecipients, function(Msgrcpt $msgrcpt) use ($domain) {
+            $messageRecipients = array_filter($messageRecipients, function (Msgrcpt $msgrcpt) use ($domain) {
                 return $msgrcpt->getRid()->getReverseDomain() == $domain->getDomain();
             });
         }

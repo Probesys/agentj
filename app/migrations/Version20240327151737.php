@@ -10,6 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
+// phpcs:disable Generic.Files.LineLength
 final class Version20240327151737 extends AbstractMigration
 {
     public function getDescription(): string
@@ -28,7 +29,7 @@ final class Version20240327151737 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-	// mail_count is ignored by doctrine
+        // mail_count is ignored by doctrine
         $this->addSql('drop table `mail_count`');
         $this->addSql('ALTER TABLE users DROP FOREIGN KEY FK_1483A5E9211063FF');
         $this->addSql('DROP TABLE rate_limits');

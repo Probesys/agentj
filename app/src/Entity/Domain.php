@@ -31,7 +31,6 @@ class Domain
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $datemod;
 
-
     #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
     private bool $active;
 
@@ -45,11 +44,10 @@ class Domain
     private ?string $mailmessage = null;
 
     #[ORM\Column(name: 'mail_alert', type: Types::TEXT, nullable: true)]
-    private ?string $message_alert = null;
+    private ?string $messageAlert = null;
 
     #[ORM\Column(name: 'level', type: 'float', nullable: true)]
     private ?float $level = 20;
-
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
@@ -94,8 +92,13 @@ class Domain
     #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DailyStat::class)]
     private Collection $dailyStats;
 
-    #[ORM\OneToOne(targetEntity: 'App\Entity\DomainKey', inversedBy: 'domain', cascade: ['persist'], orphanRemoval: true)]
-    private ?DomainKey $domain_keys;
+    #[ORM\OneToOne(
+        targetEntity: 'App\Entity\DomainKey',
+        inversedBy: 'domain',
+        cascade: ['persist'],
+        orphanRemoval: true,
+    )]
+    private ?DomainKey $domainKeys;
 
     /**
      * @var Collection<int, DomainRelay>
@@ -110,10 +113,10 @@ class Domain
     private ?array $quota = null;
 
     #[ORM\Column(type: 'boolean', nullable: false)]
-    private bool $send_user_alerts = false;
+    private bool $sendUserAlerts = false;
 
     #[ORM\Column(type: 'boolean', nullable: false)]
-    private bool $send_user_mail_alerts = false;
+    private bool $sendUserMailAlerts = false;
 
     public function __construct()
     {
@@ -122,7 +125,7 @@ class Domain
         $this->groups = new ArrayCollection();
         $this->connectors = new ArrayCollection();
         $this->dailyStats = new ArrayCollection();
-        $this->domain_keys = new DomainKey();
+        $this->domainKeys = new DomainKey();
         $this->domainRelays = new ArrayCollection(); # ip addresses
     }
 
@@ -307,12 +310,12 @@ class Domain
 
     public function getMessageAlert(): ?string
     {
-        return $this->message_alert;
+        return $this->messageAlert;
     }
 
-    public function setMessageAlert(?string $message_alert): self
+    public function setMessageAlert(?string $messageAlert): self
     {
-        $this->message_alert = $message_alert;
+        $this->messageAlert = $messageAlert;
 
         return $this;
     }
@@ -439,12 +442,12 @@ class Domain
 
     public function getDomainKeys(): ?DomainKey
     {
-        return $this->domain_keys;
+        return $this->domainKeys;
     }
 
-    public function setDomainKeys(?DomainKey $domain_keys): self
+    public function setDomainKeys(?DomainKey $domainKeys): self
     {
-        $this->domain_keys = $domain_keys;
+        $this->domainKeys = $domainKeys;
 
         return $this;
     }
@@ -498,23 +501,23 @@ class Domain
 
     public function getSendUserAlerts(): bool
     {
-        return $this->send_user_alerts;
+        return $this->sendUserAlerts;
     }
 
-    public function setSendUserAlerts(bool $send_user_alerts): static
+    public function setSendUserAlerts(bool $sendUserAlerts): static
     {
-        $this->send_user_alerts = $send_user_alerts;
+        $this->sendUserAlerts = $sendUserAlerts;
         return $this;
     }
 
     public function getSendUserMailAlerts(): bool
     {
-        return $this->send_user_mail_alerts;
+        return $this->sendUserMailAlerts;
     }
 
-    public function setSendUserMailAlerts(bool $send_user_mail_alerts): static
+    public function setSendUserMailAlerts(bool $sendUserMailAlerts): static
     {
-        $this->send_user_mail_alerts = $send_user_mail_alerts;
+        $this->sendUserMailAlerts = $sendUserMailAlerts;
         return $this;
     }
 

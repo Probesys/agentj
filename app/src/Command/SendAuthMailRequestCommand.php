@@ -59,7 +59,7 @@ class SendAuthMailRequestCommand extends Command
         $lock = $factory->createLock('msgs-send-mail-token', 1800);
 
         if (!$lock->acquire()) {
-            $output->writeln("Can't acquire the msgs-send-mail-token lock, it probably means that the command is already running.");
+            $output->writeln("Can't acquire the msgs-send-mail-token lock, the command is probably already running.");
             return Command::FAILURE;
         }
 
@@ -87,7 +87,7 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
-                $messageIsPassed = $msgrcpt->getDs() === DeliveryStatus::Pass;
+                $messageIsPassed = $msgrcpt->getDs() === DeliveryStatus::PASS;
                 $messageIsSpam = $msgrcpt->getBspamLevel() > $user->getDomain()->getLevel();
 
                 if ($messageIsPassed || $messageIsSpam) {

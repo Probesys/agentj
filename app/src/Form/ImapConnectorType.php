@@ -22,7 +22,7 @@ class ImapConnectorType extends ConnectorType
                     'max' => ImapConnector::PORT_RANGE[1],
                 ],
             ])
-            ->add('imapProtocol', ChoiceType::class,[
+            ->add('imapProtocol', ChoiceType::class, [
                 'label' => 'Entities.ImapConnector.fields.imapProtocol',
                 'choices' => [
                     'SSL/TLS' => 'ssl',

@@ -12,7 +12,6 @@ use Doctrine\DBAL\Types\Types;
 #[ORM\Entity]
 class Quarantine
 {
-
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]

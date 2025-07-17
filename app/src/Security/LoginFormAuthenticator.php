@@ -2,9 +2,6 @@
 
 namespace App\Security;
 
-//use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
-
-
 use App\Entity\ImapConnector;
 use App\Entity\User;
 use App\Service\LdapService;
@@ -32,57 +29,59 @@ use Webklex\PHPIMAP\ClientManager;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 
-class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
-
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
+{
     use TargetPathTrait;
-
 
     public const LOGIN_ROUTE = 'app_login';
 
     public function __construct(
-            private UrlGeneratorInterface $urlGenerator,
-            private CsrfTokenManagerInterface $csrfTokenManager,
-            private EntityManagerInterface $entityManager,
-            private TranslatorInterface $translator,
-            private LdapService $ldapService,
-            private LoggerInterface $logger
+        private UrlGeneratorInterface $urlGenerator,
+        private CsrfTokenManagerInterface $csrfTokenManager,
+        private EntityManagerInterface $entityManager,
+        private TranslatorInterface $translator,
+        private LdapService $ldapService,
+        private LoggerInterface $logger
     ) {
-
     }
 
-    public function authenticate(Request $request): Passport {
-
+    public function authenticate(Request $request): Passport
+    {
         $username = $request->request->getString('username', '');
-        $csrf_token = $request->request->getString('_csrf_token', '');
+        $csrfToken = $request->request->getString('_csrf_token', '');
         $password = $request->request->getString('password', '');
 
-        $token = new CsrfToken('authenticate', $csrf_token);
+        $token = new CsrfToken('authenticate', $csrfToken);
         if (!$this->csrfTokenManager->isTokenValid($token)) {
             throw new InvalidCsrfTokenException();
         }
-
 
         // check if a local user exists
         $localUser = $this->getLocalUser($username);
         if ($localUser) {
             return new Passport(
-                    new UserBadge($username),
-                    new PasswordCredentials($password),
-                    [
-                new CsrfTokenBadge('authenticate', $csrf_token),
-                new RememberMeBadge(),
-                    ]
+                new UserBadge($username),
+                new PasswordCredentials($password),
+                [
+                    new CsrfTokenBadge('authenticate', $csrfToken),
+                    new RememberMeBadge(),
+                ]
             );
         }
 
-        /* @var $user User */
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => strtolower($username)]);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy([
+            'email' => strtolower($username),
+        ]);
         if (!$user) {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['imapLogin' => strtolower($username)]);
+            $user = $this->entityManager->getRepository(User::class)->findOneBy([
+                'imapLogin' => strtolower($username),
+            ]);
         }
 
         if (!$user) {
-            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('Generics.messages.incorrectCredential')
+            );
         }
 
         $ldapBind = $this->ldapService->bindUser($user, $password);
@@ -93,18 +92,20 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         $loginImap = $this->getLoginImap($user, $password);
 
         if (!$loginImap) {
-            throw new CustomUserMessageAuthenticationException($this->translator->trans('Generics.messages.incorrectCredential'));
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('Generics.messages.incorrectCredential')
+            );
         }
 
         return new SelfValidatingPassport(new UserBadge($user->getEmailFromRessource()), [new RememberMeBadge()]);
     }
 
-    private function getLoginImap(User $user, String $password): bool {
+    private function getLoginImap(User $user, string $password): bool
+    {
         $cm = new ClientManager($options = []);
-        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();        
+        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
         foreach ($user->getDomain()->getConnectors() as $connector) {
             if ($connector instanceof ImapConnector) {
-                /*@var $connector ImapConnector*/
                 $client = $cm->make([
                     'host' => $connector->getImapHost(),
                     'port' => $connector->getImapPort(),
@@ -117,21 +118,25 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
 
                 try {
                     $client->connect();
-                    if ($client->isConnected()){                        
+                    if ($client->isConnected()) {
                         return true;
                     }
-                    
                 } catch (ConnectionFailedException $exc) {
-                    $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());                    
+                    $this->logger->error(
+                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                    );
                 } catch (ImapServerErrorException $exc) {
-                    $this->logger->error("User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage());                    
+                    $this->logger->error(
+                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                    );
                 }
             }
         }
-        return false;       
+        return false;
     }
 
-    private function getLocalUser(String $userName): ?User {
+    private function getLocalUser(string $userName): ?User
+    {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
         if ($user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()))) {
             return $user;
@@ -139,8 +144,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return null;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
-
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    {
         /** @var User $user */
         $user = $token->getUser();
         $request->getSession()->set('originalUser', $user->getUsername());
@@ -160,7 +165,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator {
         return new RedirectResponse($this->urlGenerator->generate('message'));
     }
 
-    protected function getLoginUrl(Request $request): string {
+    protected function getLoginUrl(Request $request): string
+    {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 }

@@ -1,5 +1,4 @@
 <?php
-// src/Controller/AlertController.php
 
 namespace App\Controller;
 

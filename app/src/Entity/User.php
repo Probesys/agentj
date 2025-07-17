@@ -13,7 +13,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\DBAL\Types\Types;
 
-
 /**
  * Users
  */
@@ -22,7 +21,6 @@ use Doctrine\DBAL\Types\Types;
 #[UniqueEntity(fields: ['email'], ignoreNull: true)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -136,7 +134,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $office365PrincipalName = null;
 
     #[ORM\OneToOne(targetEntity: SenderRateLimit::class)]
-    private ?SenderRateLimit $sender_rate_limit = null;
+    private ?SenderRateLimit $senderRateLimit = null;
 
     /**
      * @var array<int, array<string, int>>
@@ -627,12 +625,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getSenderRateLimit(): ?SenderRateLimit
     {
-        return $this->sender_rate_limit;
+        return $this->senderRateLimit;
     }
 
     public function setSenderRateLimit(SenderRateLimit $limits): self
     {
-        $this->sender_rate_limit = $limits;
+        $this->senderRateLimit = $limits;
 
         return $this;
     }

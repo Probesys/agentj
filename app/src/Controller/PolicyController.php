@@ -14,7 +14,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/policy')]
 class PolicyController extends AbstractController
 {
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,

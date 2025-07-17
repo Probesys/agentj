@@ -24,7 +24,10 @@ class MessagesController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/authorized', name: 'portal_message_authorized')]
+    #[Route(
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/authorized',
+        name: 'portal_message_authorized',
+    )]
     public function authorized(
         string $token,
         int $partitionTag,
@@ -69,7 +72,10 @@ class MessagesController extends AbstractController
         return $this->render('portal/messages/authorized.html.twig');
     }
 
-    #[Route(path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/restore', name: 'portal_message_restore')]
+    #[Route(
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/restore',
+        name: 'portal_message_restore',
+    )]
     public function restore(
         string $token,
         int $partitionTag,

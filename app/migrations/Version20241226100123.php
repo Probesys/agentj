@@ -29,7 +29,6 @@ final class Version20241226100123 extends AbstractMigration
         if (!$this->indexExists('msgs', $indexNameMsgs)) {
             $this->addSql('CREATE INDEX ' . $indexNameMsgs . ' ON msgs (quar_type)');
         }
-
     }
 
     public function down(Schema $schema): void
@@ -47,7 +46,6 @@ final class Version20241226100123 extends AbstractMigration
         if ($this->indexExists('msgs', $indexNameMsgs)) {
             $this->addSql('DROP INDEX ' . $indexNameMsgs . ' ON msgs');
         }
-
     }
 
     private function indexExists(string $table, string $index): bool

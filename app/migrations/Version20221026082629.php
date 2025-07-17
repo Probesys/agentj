@@ -22,12 +22,10 @@ final class Version20221026082629 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('update users set roles = REPLACE(roles, "[\'ROLE_USER\']", "[\"ROLE_USER\"]")');
         $this->addSql('update users set roles = REPLACE(roles, "[\'ROLE_ADMIN\']", "[\"ROLE_ADMIN\"]")');
-
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-
     }
 }

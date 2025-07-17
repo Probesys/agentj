@@ -20,11 +20,11 @@ use Symfony\Component\Ldap\Ldap;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsCommand(
-            name: 'agentj:import-ldap',
-            description: 'import users from LDAP',
-    )]
-class LDAPImportCommand extends Command {
-
+    name: 'agentj:import-ldap',
+    description: 'import users from LDAP',
+)]
+class LDAPImportCommand extends Command
+{
     private EntityManagerInterface $em;
     private ?LdapConnector $connector;
     private Ldap $ldap;
@@ -33,23 +33,23 @@ class LDAPImportCommand extends Command {
     private SymfonyStyle $io;
 
     public function __construct(
-            EntityManagerInterface $em,
-            TranslatorInterface $translator,
-            LdapService $ldapService) {
+        EntityManagerInterface $em,
+        TranslatorInterface $translator,
+        LdapService $ldapService
+    ) {
         parent::__construct();
         $this->em = $em;
         $this->translator = $translator;
         $this->ldapService = $ldapService;
     }
 
-    protected function configure(): void {
-        $this
-                ->addArgument('connectorId', InputArgument::REQUIRED, 'Connector from wich import users')
-
-        ;
+    protected function configure(): void
+    {
+        $this->addArgument('connectorId', InputArgument::REQUIRED, 'Connector from wich import users');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int {
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
         $this->io = new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
@@ -75,7 +75,8 @@ class LDAPImportCommand extends Command {
         return Command::SUCCESS;
     }
 
-    private function importUsers(): void {
+    private function importUsers(): void
+    {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
         $nbUserUpdated = 0;
@@ -93,7 +94,8 @@ class LDAPImportCommand extends Command {
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
                 // we consider that the first element of the email array is the main email of the user
 
-                $userName = $entry->getAttribute($realNameAttribute) ? $entry->getAttribute($realNameAttribute)[0] : null;
+                $attribute = $entry->getAttribute($realNameAttribute);
+                $userName = $attribute ? $attribute[0] : null;
                 $isNew = false;
                 if (!$user) {
                     $user = new User();
@@ -132,14 +134,15 @@ class LDAPImportCommand extends Command {
         }
 
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-                    '$NB_USER_CREATED' => $nbUserCreated,
-                    '$NB_USER_UPDATED' => $nbUserUpdated,
+            '$NB_USER_CREATED' => $nbUserCreated,
+            '$NB_USER_UPDATED' => $nbUserUpdated,
         ]));
-        
+
         $this->em->flush();
     }
 
-    private function createAlias(User $user, string $email): void {
+    private function createAlias(User $user, string $email): void
+    {
         $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
         if (!$alias) {
             $alias = new User();
@@ -150,10 +153,11 @@ class LDAPImportCommand extends Command {
         $alias->setOriginalUser($user);
         $alias->setDomain($user->getDomain());
         $this->em->persist($alias);
-        $this->em->flush();        
+        $this->em->flush();
     }
 
-    private function importGroups(): void {
+    private function importGroups(): void
+    {
 
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapGroupNameField();
@@ -163,7 +167,8 @@ class LDAPImportCommand extends Command {
             $ldapQuery = $this->connector->getLdapGroupFilter();
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
-            $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($this->connector->getDomain());
+            $priorityMax = $this->em->getRepository(Groups::class)
+                                    ->getMaxPriorityforDomain($this->connector->getDomain());
 
             $results = $query->execute();
             $nbGroupUpdated = 0;
@@ -171,7 +176,6 @@ class LDAPImportCommand extends Command {
             $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
 
             foreach ($results as $ldapGroup) {
-
                 /* @var $ldapGroup Entry */
                 $isNew = false;
                 $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
@@ -197,15 +201,16 @@ class LDAPImportCommand extends Command {
             }
 
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
-                        '$NB_GROUP_CREATED' => $nbGroupCreated,
-                        '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+                '$NB_GROUP_CREATED' => $nbGroupCreated,
+                '$NB_GROUP_UPDATED' => $nbGroupUpdated,
             ]));
 
             $this->em->flush();
         }
     }
 
-    private function addMembersToGroup(Entry $ldapGroup, Groups $group): void {
+    private function addMembersToGroup(Entry $ldapGroup, Groups $group): void
+    {
         $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();
         $members = $ldapGroup->getAttribute($groupMemberfield) ? $ldapGroup->getAttribute($groupMemberfield) : [];

@@ -24,9 +24,10 @@ class ImapConnectorController extends AbstractController
             'controller_name' => 'ImapConnectorController',
         ]);
     }
-    
+
     #[Route('/{domain}/new', name: 'app_connector_imap_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response {
+    public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
+    {
 
         $connector = new ImapConnector();
         $connector->setDomain($domain);
@@ -49,7 +50,8 @@ class ImapConnectorController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_connector_imap_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, ImapConnector $connector, ConnectorRepository $connectorRepository): Response {
+    public function edit(Request $request, ImapConnector $connector, ConnectorRepository $connectorRepository): Response
+    {
 
         $form = $this->createForm(ImapConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_imap_edit', ['id' => $connector->getId()]),
@@ -59,7 +61,11 @@ class ImapConnectorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $connector = $form->getData();
             $connectorRepository->add($connector, true);
-            return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute(
+                'domain_edit',
+                ['id' => $connector->getDomain()->getId()],
+                Response::HTTP_SEE_OTHER,
+            );
         }
 
         $form->remove("synchronizeGroup");
@@ -68,5 +74,4 @@ class ImapConnectorController extends AbstractController
                     'form' => $form,
         ]);
     }
-    
 }

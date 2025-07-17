@@ -10,23 +10,23 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ImportType extends AbstractType {
-
+class ImportType extends AbstractType
+{
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-                ->add('attachment', FileType::class, ['label' => false])
-                ->add('domain', EntityType::class, [
-                    'class' => Domain::class,
-                    'multiple' => false,
-                    'attr' => ['class' => 'select2'],
-                    'query_builder' => function (DomainRepository $rep) {
-                        return $rep->createQueryBuilder('d')
-                                ->leftJoin('d.users', 'u')
-                                ->where('d.active = 1 ')
-                                ->orderBy('d.domain', 'asc');
-                    },
-        ]);
+            ->add('attachment', FileType::class, ['label' => false])
+            ->add('domain', EntityType::class, [
+                'class' => Domain::class,
+                'multiple' => false,
+                'attr' => ['class' => 'select2'],
+                'query_builder' => function (DomainRepository $rep) {
+                    return $rep->createQueryBuilder('d')
+                               ->leftJoin('d.users', 'u')
+                               ->where('d.active = 1 ')
+                               ->orderBy('d.domain', 'asc');
+                },
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -36,5 +36,4 @@ class ImportType extends AbstractType {
             'user' => null
         ]);
     }
-
 }

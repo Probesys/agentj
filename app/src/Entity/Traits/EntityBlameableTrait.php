@@ -8,7 +8,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 trait EntityBlameableTrait
 {
-
     #[Gedmo\Blameable(on: 'create')]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(referencedColumnName: 'id', onDelete: 'SET NULL')]

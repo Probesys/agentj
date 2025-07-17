@@ -10,21 +10,21 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class GroupsWblistType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $actions = $options['actions'];
-        $builder->add('email', TextType::class)
-        ->add('wb', ChoiceType::class, [
-        'choices' => $actions,
-        ]);
+        $builder
+            ->add('email', TextType::class)
+            ->add('wb', ChoiceType::class, [
+                'choices' => $actions,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-        'data_class' => null,
-        'actions' => null,
+            'data_class' => null,
+            'actions' => null,
         ]);
     }
 }

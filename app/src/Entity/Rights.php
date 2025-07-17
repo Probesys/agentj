@@ -19,7 +19,7 @@ class Rights
     private string $name;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private string $system_name;
+    private string $systemName;
 
     /**
      * @var Collection<int, Groups>
@@ -58,12 +58,12 @@ class Rights
 
     public function getSystemName(): string
     {
-        return $this->system_name;
+        return $this->systemName;
     }
 
-    public function setSystemName(string $system_name): self
+    public function setSystemName(string $systemName): self
     {
-        $this->system_name = $system_name;
+        $this->systemName = $systemName;
 
         return $this;
     }

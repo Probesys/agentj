@@ -10,6 +10,8 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
+// phpcs:disable Squiz.Classes.ValidClassName
+// phpcs:disable Generic.Files.LineLength
 final class Version20240724142425_update_domain extends AbstractMigration
 {
     public function getDescription(): string

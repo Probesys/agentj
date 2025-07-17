@@ -1,4 +1,5 @@
 <?php
+
 // src/Entity/Alert.php
 
 namespace App\Entity;

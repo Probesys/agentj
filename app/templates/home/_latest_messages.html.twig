@@ -22,7 +22,7 @@
 				{% set error_badge_detail = "" %}
 				{% if messageRecipient.isError() %}
 					{% set error_badge = 'Message.ErrorSendCaptcha' %}
-					{% set error_badge_detail = messageRecipient.message_error %}
+					{% set error_badge_detail = messageRecipient.messageError %}
 				{% endif %}
 				{% set keyPairMessage =  [messageRecipient.partitionTag, messageRecipient.mailId,messageRecipient.rid] %}
 				<tr>

@@ -20,7 +20,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 )]
 class TruncateVirusMailFiles extends Command
 {
-
     private int $nbDays = 30;
 
     public function __construct(
@@ -29,7 +28,7 @@ class TruncateVirusMailFiles extends Command
         parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output):int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $deleteFiles = [];
         if (!$this->params->get('app.amavis_quarantine_dir')) {
@@ -40,7 +39,8 @@ class TruncateVirusMailFiles extends Command
             throw new FileNotFoundException($amavisQuarantDir);
         }
 
-        $days = $this->params->get('app.amavis_quarantine_nbdays_before_delete') ? $this->params->get('app.amavis_quarantine_nbdays_before_delete') : $this->nbDays;
+        $defaultNbDays = $this->params->get('app.amavis_quarantine_nbdays_before_delete');
+        $days = $defaultNbDays ? $defaultNbDays : $this->nbDays;
         if ($days <= 10) {
             $days = $this->nbDays;
         }

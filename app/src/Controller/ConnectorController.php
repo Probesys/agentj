@@ -13,25 +13,30 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/connector')]
-class ConnectorController extends AbstractController {
-
+class ConnectorController extends AbstractController
+{
     #[Route('/', name: 'app_connector_index', methods: ['GET'])]
-    public function index(ConnectorRepository $connectorRepository): Response {
+    public function index(ConnectorRepository $connectorRepository): Response
+    {
         return $this->render('connector/index.html.twig', [
-                    'connectors' => $connectorRepository->findAll(),
+            'connectors' => $connectorRepository->findAll(),
         ]);
     }
 
-    
-
     #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
-    public function delete(Request $request, Connector $connector, ConnectorRepository $connectorRepository, TranslatorInterface $translator): Response {        
+    public function delete(
+        Request $request,
+        Connector $connector,
+        ConnectorRepository $connectorRepository,
+        TranslatorInterface $translator,
+    ): Response {
         if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->query->get('_token'))) {
             $connectorRepository->remove($connector, true);
             $this->addFlash('success', $translator->trans('Message.Flash.deleteSuccesFull'));
         }
 
-        return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('domain_edit', [
+            'id' => $connector->getDomain()->getId(),
+        ], Response::HTTP_SEE_OTHER);
     }
-
 }

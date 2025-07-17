@@ -1,5 +1,4 @@
 <?php
-// src/Command/CreateAlertForUserCommand.php
 
 namespace App\Command;
 
@@ -15,7 +14,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(
     name: 'app:create-alert-for-user',
-    description: 'Check for new out_msgs with content "V" and new sql_limit_report entries and dispatch alert messages to users.',
+    description: 'Check for new out virus messages and new limit reports and dispatch alert messages to users.',
 )]
 class CreateAlertForUserCommand extends Command
 {
@@ -35,9 +34,9 @@ class CreateAlertForUserCommand extends Command
 
         $outMsgs = $this->entityManager->getRepository(OutMsg::class)->createQueryBuilder('o')
             ->where('o.content = :content')
-            ->andWhere('o.processed_user = :processed_user')
+            ->andWhere('o.processedUser = :processedUser')
             ->setParameter('content', 'V')
-            ->setParameter('processed_user', false)
+            ->setParameter('processedUser', false)
             ->getQuery()
             ->getResult();
 
@@ -58,22 +57,22 @@ class CreateAlertForUserCommand extends Command
 
             $binaryMailId = hex2bin($mailId);
 
-            // Mark the outmsg as processed_user
-            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+            // Mark the outmsg as processedUser
+            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
             $outMsgToSave->setProcessedUser(true);
             $this->entityManager->persist($outMsgToSave);
             $this->entityManager->flush();
         }
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
-            ->select('r.id, r.mail_id, r.date, r.recipientCount, r.delta, r.processed_user, COUNT(r) as reportCount')
-            ->where('r.processed_user = :processed_user')
-            ->setParameter('processed_user', false)
+            ->select('r.id, r.mailId, r.date, r.recipientCount, r.delta, r.processedUser, COUNT(r) as reportCount')
+            ->where('r.processedUser = :processedUser')
+            ->setParameter('processedUser', false)
             ->groupBy('r.date')
             ->getQuery()
             ->getResult();
 
-        $totalCount = array_reduce($reports, function($carry, $report) {
+        $totalCount = array_reduce($reports, function ($carry, $report) {
             return $carry + $report['reportCount'];
         }, 0);
 
@@ -95,7 +94,7 @@ class CreateAlertForUserCommand extends Command
                 continue;
             }
 
-            // Mark each report as processed_user
+            // Mark each report as processedUser
             foreach ($sqlLimitReports as $sqlLimitReport) {
                 $sqlLimitReport->setProcessedUser(true);
                 $this->entityManager->persist($sqlLimitReport);
@@ -104,11 +103,13 @@ class CreateAlertForUserCommand extends Command
             try {
                 // Flush once after all updates
                 $this->entityManager->flush();
-                $output->writeln('Reports for date ' . $reportDateString . ' marked as processed_user.');
+                $output->writeln('Reports for date ' . $reportDateString . ' marked as processedUser.');
 
                 $this->messageBus->dispatch(new CreateAlertMessage('sql_limit_report', $reportDateString, 'user'));
             } catch (\Exception $e) {
-                $output->writeln('Failed to mark reports as processed_user for date ' . $reportDateString . ': ' . $e->getMessage());
+                $output->writeln(
+                    'Failed to mark reports as processedUser for date ' . $reportDateString . ': ' . $e->getMessage()
+                );
             }
         }
 

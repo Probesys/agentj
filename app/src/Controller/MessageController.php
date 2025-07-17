@@ -134,21 +134,26 @@ class MessageController extends AbstractController
         }
 
         $searchKey = trim($request->query->getString('search'));
-        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery($user, $messageStatus, $searchKey, $sortParams);
+        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery(
+            $user,
+            $messageStatus,
+            $searchKey,
+            $sortParams,
+        );
 
-        $per_page = (int) $this->getParameter('app.per_page_global');
+        $perPage = (int) $this->getParameter('app.per_page_global');
         if ($request->query->has('per_page') && $request->query->getInt('per_page') > 0) {
-            $per_page = $request->query->getInt('per_page', $per_page);
-            $request->getSession()->set('per_page', $per_page);
+            $perPage = $request->query->getInt('per_page', $perPage);
+            $request->getSession()->set('per_page', $perPage);
         } elseif ($request->getSession()->has('per_page') && $request->getSession()->get('per_page') > 0) {
-            $per_page = $request->getSession()->get('per_page');
+            $perPage = $request->getSession()->get('per_page');
         }
-        $filterForm->get('per_page')->setData($per_page);
+        $filterForm->get('per_page')->setData($perPage);
 
         $messagesRecipients = $paginator->paginate(
             $messagesRecipientsQuery,
             $request->query->getInt('page', 1),
-            $per_page,
+            $perPage,
             [
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
@@ -183,7 +188,10 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wbListInfos = $this->em->getRepository(Wblist::class)->getWbListInfoForSender($msg->getSid()->getEmailClear(), $msgRcpt->getRid()->getEmailClear());
+        $wbListInfos = $this->em->getRepository(Wblist::class)->getWbListInfoForSender(
+            $msg->getSid()->getEmailClear(),
+            $msgRcpt->getRid()->getEmailClear(),
+        );
         return $this->render('message/show.html.twig', [
             'controller_name' => 'MessageController',
             'msg' => $msg,
@@ -413,7 +421,9 @@ class MessageController extends AbstractController
         return new RedirectResponse($referer);
     }
 
-    /* Create rules of domain and change the message status and type (0 = user validate / 1 = captcha validate / 2 = group validate ) */
+    /**
+     * Create rules of domain and change the message status and type.
+     */
     public function msgsToWblistDomain(int $partitionTag, string $mailId, string $wb, int $rid): bool
     {
         $em = $this->em;
@@ -424,7 +434,11 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The message does not exist.');
         }
 
-        $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+        $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+        ]);
 
         $emailSender = $msgs->getSid()->getEmailClear();
 
@@ -464,11 +478,23 @@ class MessageController extends AbstractController
         $em->persist($wblist);
         $em->flush();
 
-        $listeMsgToRelease = $msgrcpt = $em->getRepository(Msgrcpt::class)->getAllMessageDomainRecipientsFromSender($emailSender, $msgrcpt->getRid()->getDomain());
+        $listeMsgToRelease = $msgrcpt = $em->getRepository(Msgrcpt::class)->getAllMessageDomainRecipientsFromSender(
+            $emailSender,
+            $msgrcpt->getRid()->getDomain()
+        );
         foreach ($listeMsgToRelease as $oneRcpt) {
-            $oneMsgRcptObj = $em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $oneRcpt['partition_tag'], 'mailId' => $oneRcpt['mail_id'], 'rid' => $oneRcpt['rid']]);
+            $oneMsgRcptObj = $em->getRepository(Msgrcpt::class)->findOneBy([
+                'partitionTag' => $oneRcpt['partition_tag'],
+                'mailId' => $oneRcpt['mail_id'],
+                'rid' => $oneRcpt['rid'],
+            ]);
             if ($wb == 'W') {
-                $process = new Process([$this->getParameter('app.amavisd-release'), $oneRcpt['quar_loc'], $oneRcpt['secret_id'], $oneRcpt['recept_mail']]);
+                $process = new Process([
+                    $this->getParameter('app.amavisd-release'),
+                    $oneRcpt['quar_loc'],
+                    $oneRcpt['secret_id'],
+                    $oneRcpt['recept_mail'],
+                ]);
                 $process->getCommandLine();
                 $process->run(
                     function ($type, $buffer) use ($oneMsgRcptObj) {
@@ -499,7 +525,11 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
     public function showDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+        ]);
 
         if (!$msgRcpt) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -518,8 +548,15 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $mail_chunks = $this->em->getRepository(Quarantine::class)->findBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId, 'rid' => $rid]);
+        $mailChunks = $this->em->getRepository(Quarantine::class)->findBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+        ]);
+        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $rid,
+        ]);
 
         if (!$msgRcpt) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -527,13 +564,13 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($msgRcpt);
 
-        if (!$mail_chunks) {
+        if (!$mailChunks) {
             throw $this->createNotFoundException('The message does not exist.');
         }
 
         $rawMail = "";
-        foreach ($mail_chunks as $mail_chunk) {
-            $rawMail .= stream_get_contents($mail_chunk->getMailText(), -1, 0);
+        foreach ($mailChunks as $mailChunk) {
+            $rawMail .= stream_get_contents($mailChunk->getMailText(), -1, 0);
         }
         $rawMail = mb_convert_encoding($rawMail, 'UTF-8', 'auto');
 
@@ -598,7 +635,10 @@ class MessageController extends AbstractController
         }, $listAliases);
         $accessibleRecipientEmails = array_merge([$user->getEmailFromRessource()], $accessibleRecipientEmails);
 
-        if (!$this->isGranted("ROLE_ADMIN") && !in_array($msgRcpt->getRid()->getEmailClear(), $accessibleRecipientEmails)) {
+        if (
+            !$this->isGranted("ROLE_ADMIN") &&
+            !in_array($msgRcpt->getRid()->getEmailClear(), $accessibleRecipientEmails)
+        ) {
             throw new AccessDeniedException();
         }
     }

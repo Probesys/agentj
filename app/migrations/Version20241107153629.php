@@ -7,6 +7,7 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
+// phpcs:disable Generic.Files.LineLength
 final class Version20241107153629 extends AbstractMigration
 {
     public function getDescription(): string

@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[Route(path: '/advanced_search')]
 class SearchController extends AbstractController
 {
-
     public function __construct(private EntityManagerInterface $em)
     {
     }
@@ -126,12 +125,12 @@ class SearchController extends AbstractController
         $conn = $this->em->getConnection();
 
         // Fetching the OutMsgrcpt data using raw SQL
-        $sqlOutMsgrcpt = '
-        SELECT * FROM out_msgrcpt
-        WHERE partition_tag = :partitionTag
-        AND mail_id = :mailId
-        AND rid = :rid
-    ';
+        $sqlOutMsgrcpt = <<<SQL
+            SELECT * FROM out_msgrcpt
+            WHERE partition_tag = :partitionTag
+            AND mail_id = :mailId
+            AND rid = :rid
+        SQL;
 
         // Execute the query and fetch data as an associative array
         $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
@@ -142,11 +141,11 @@ class SearchController extends AbstractController
         $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
 
         // Fetching the OutMsgs data using raw SQL
-        $sqlOutMsgs = '
-        SELECT * FROM out_msgs
-        WHERE partition_tag = :partitionTag
-        AND mail_id = :mailId
-    ';
+        $sqlOutMsgs = <<<SQL
+            SELECT * FROM out_msgs
+            WHERE partition_tag = :partitionTag
+            AND mail_id = :mailId
+        SQL;
 
         // Execute the query and fetch data as an associative array
         $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
@@ -170,6 +169,4 @@ class SearchController extends AbstractController
             'message' => $ms,
         ]);
     }
-
-
 }

@@ -2,7 +2,8 @@
 
 namespace App\Service;
 
-class MailaddrService {
+class MailaddrService
+{
     public static function computePriority(string $email = ""): int
     {
         $priority = 5; //default priority for email
@@ -32,7 +33,11 @@ class MailaddrService {
             }
         } else {
             $priority = 6;
-            //todo user (priority 6) / user+foo (priority 7) / user@sub.example.com (priority 8) / user+foo@sub.example.com (priority 9)
+            // TODO
+            // - user (priority 6)
+            // - user+foo (priority 7)
+            // - user@sub.example.com (priority 8)
+            // - user+foo@sub.example.com (priority 9)
         }
         return $priority;
     }

@@ -68,7 +68,7 @@
 						{% set bold = "bold" %}
 						{% if msgRecipient.status is not null and msgRecipient.status == 4 %}
 							{% set error_badge = 'Message.ErrorSendCaptcha' %}
-							{% set error_badge_detail = msgRecipient.message_error %}
+							{% set error_badge_detail = msgRecipient.messageError %}
 						{% endif %}
 						{% if msgRecipient.status is not null and msgRecipient.status is null %}
 							{% set status = 'Message.Status.untreated'|trans()  %}

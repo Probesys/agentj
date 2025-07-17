@@ -10,6 +10,8 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
+// phpcs:disable Squiz.Classes.ValidClassName
+// phpcs:disable Generic.Files.LineLength
 final class Version20240725090527_create_domain_relay extends AbstractMigration
 {
     public function getDescription(): string
@@ -28,7 +30,7 @@ final class Version20240725090527_create_domain_relay extends AbstractMigration
     }
 
     public function down(Schema $schema): void
-    {   
+    {
         // Check if the table exists before attempting to drop it
         if ($schema->hasTable('domain_relay')) {
             // this down() migration is auto-generated, please modify it to your needs

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\MessageHandler;
 
 use App\Message\CreateAlertMessage;
@@ -64,7 +65,7 @@ class CreateAlertMessageHandler
         }
 
         // Ensure the field name matches the database column
-        $outMsg = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mail_id' => $binaryMailId]);
+        $outMsg = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
         $this->output->writeln('OutMsg fetched: ' . ($outMsg ? 'Yes' : 'No'));
 
         if ($outMsg) {
@@ -117,7 +118,11 @@ class CreateAlertMessageHandler
                         $alert->setAlertType('out_msgs');
                         $alert->setRefId($mailId);
                         $alert->setDate(new \DateTime('now', $timezone));
-                        $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale));
+                        $subject = $this->translator->trans(
+                            'Entities.Alert.messages.admin.virus.title',
+                            locale: $locale,
+                        );
+                        $alert->setSubject($subject);
                         $alert->setIsRead(false);
                         $alert->setUser($user);
                         $alert->setRefUser($fromAddr);
@@ -131,11 +136,22 @@ class CreateAlertMessageHandler
                             if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                                 $mailFrom = $this->defaultMailFrom;
                             }
+
+                            $subject = $this->translator->trans(
+                                'Entities.Alert.messages.admin.virus.title',
+                                locale: $locale,
+                            );
+                            $text = $this->translator->trans(
+                                'Entities.Alert.messages.admin.virus.content',
+                                locale: $locale
+                            );
+                            $text .= $fromAddr;
+
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($emailAddress)
-                                ->subject($this->translator->trans('Entities.Alert.messages.admin.virus.title', locale: $locale))
-                                ->text($this->translator->trans('Entities.Alert.messages.admin.virus.content', locale: $locale) . $fromAddr);
+                                ->subject($subject)
+                                ->text($text);
 
                             $this->mailer->send($email);
                         } else {
@@ -144,8 +160,9 @@ class CreateAlertMessageHandler
                     }
 
                     $this->entityManager->flush();
-                    $this->output->writeln('Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN');
-
+                    $this->output->writeln(
+                        'Alerts created and persisted for users with ROLE_SUPER_ADMIN or ROLE_ADMIN'
+                    );
                 } elseif ($target === 'user') {
                     if ($senderUser) {
                         // Set the locale for the translator
@@ -164,7 +181,11 @@ class CreateAlertMessageHandler
                             $alert->setAlertType('out_msgs');
                             $alert->setRefId($mailId);
                             $alert->setDate(new \DateTime('now', $timezone));
-                            $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale));
+                            $subject = $this->translator->trans(
+                                'Entities.Alert.messages.user.virus.title',
+                                locale: $locale,
+                            );
+                            $alert->setSubject($subject);
                             $alert->setIsRead(false);
                             $alert->setUser($senderUser);
                             $alert->setRefUser($fromAddr);
@@ -180,11 +201,21 @@ class CreateAlertMessageHandler
                             if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                                 $mailFrom = $this->defaultMailFrom;
                             }
+
+                            $subject = $this->translator->trans(
+                                'Entities.Alert.messages.user.virus.title',
+                                locale: $locale,
+                            );
+                            $text = $this->translator->trans(
+                                'Entities.Alert.messages.user.virus.content',
+                                locale: $locale,
+                            );
+
                             $email = (new Email())
                                 ->from($mailFrom)
                                 ->to($senderUser->getEmailFromRessource())
-                                ->subject($this->translator->trans('Entities.Alert.messages.user.virus.title', locale: $locale))
-                                ->text($this->translator->trans('Entities.Alert.messages.user.virus.content', locale: $locale));
+                                ->subject($subject)
+                                ->text($text);
 
                             $this->mailer->send($email);
                         }
@@ -251,7 +282,9 @@ class CreateAlertMessageHandler
                         // if user is an admin check if the address is in a domain he administer
                         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
                             $domainString = strtolower(substr($fromAddr, strpos($fromAddr, '@') + 1));
-                            $domain = $this->entityManager->getRepository(Domain::class)->findOneBy(['domain' => $domainString]);
+                            $domain = $this->entityManager->getRepository(Domain::class)->findOneBy([
+                                'domain' => $domainString,
+                            ]);
                             $userDomains = $user->getDomains()->toArray();
                             if ($domain === null || !in_array($domain, $userDomains)) {
                                 continue;
@@ -269,7 +302,11 @@ class CreateAlertMessageHandler
                     $alert->setAlertType('sql_limit_report');
                     $alert->setRefId($id);
                     $alert->setDate(new \DateTime('now', $timezone));
-                    $alert->setSubject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale));
+                    $subject = $this->translator->trans(
+                        'Entities.Alert.messages.admin.quota.title',
+                        locale: $locale,
+                    );
+                    $alert->setSubject($subject);
                     $alert->setIsRead(false);
                     $alert->setUser($user);
                     $alert->setRefUser(implode(', ', $senderEmails));
@@ -284,31 +321,44 @@ class CreateAlertMessageHandler
                             $mailFrom = $this->defaultMailFrom;
                         }
 
+                        $subject = $this->translator->trans(
+                            'Entities.Alert.messages.admin.quota.title',
+                            locale: $locale,
+                        );
+                        $text = $this->translator->trans(
+                            'Entities.Alert.messages.admin.quota.content',
+                            locale: $locale,
+                        );
+                        $text .= implode(', ', $senderEmails);
+
                         $email = (new Email())
                             ->from($mailFrom)
                             ->to($emailAddress)
-                            ->subject($this->translator->trans('Entities.Alert.messages.admin.quota.title', locale: $locale))
-                            ->text($this->translator->trans('Entities.Alert.messages.admin.quota.content', locale: $locale) . implode(', ', $senderEmails));
+                            ->subject($subject)
+                            ->text($text);
 
                         $this->mailer->send($email);
                     } else {
                         $this->output->writeln('No email address found for user: ' . $user->getId());
                     }
                 }
-
             } elseif ($target === 'user') {
-
                 // Create an alert for each senderUser
                 $processedSenders = [];
                 foreach ($reports as $report) {
                     $fromAddr = $report->getMailId();
                     if (!isset($processedSenders[$fromAddr])) {
-                        $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
+                        $senderUser = $this->entityManager->getRepository(User::class)->findOneBy([
+                            'email' => $fromAddr,
+                        ]);
                         if ($senderUser) {
                             // Set the locale for the translator
                             if ($senderUser->getPreferedLang() !== null) {
                                 $locale = $senderUser->getPreferedLang();
-                            } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
+                            } elseif (
+                                $senderUser->getDomain() &&
+                                $senderUser->getDomain()->getDefaultLang() !== null
+                            ) {
                                 $locale = $senderUser->getDomain()->getDefaultLang();
                             } else {
                                 $locale = 'fr';
@@ -323,7 +373,11 @@ class CreateAlertMessageHandler
                                 $alert->setAlertType('sql_limit_report');
                                 $alert->setRefId($id);
                                 $alert->setDate(new \DateTime('now', $timezone));
-                                $alert->setSubject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale));
+                                $subject = $this->translator->trans(
+                                    'Entities.Alert.messages.user.quota.title',
+                                    locale: $locale,
+                                );
+                                $alert->setSubject($subject);
                                 $alert->setIsRead(false);
                                 $alert->setUser($senderUser);
                                 $alert->setRefUser($fromAddr);
@@ -339,11 +393,19 @@ class CreateAlertMessageHandler
                                 if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
                                     $mailFrom = $this->defaultMailFrom;
                                 }
+                                $subject = $this->translator->trans(
+                                    'Entities.Alert.messages.user.quota.title',
+                                    locale: $locale,
+                                );
+                                $text = $this->translator->trans(
+                                    'Entities.Alert.messages.user.quota.content',
+                                    locale: $locale
+                                );
                                 $email = (new Email())
                                     ->from($mailFrom)
                                     ->to($senderUser->getEmailFromRessource())
-                                    ->subject($this->translator->trans('Entities.Alert.messages.user.quota.title', locale: $locale))
-                                    ->text($this->translator->trans('Entities.Alert.messages.user.quota.content', locale: $locale));
+                                    ->subject($subject)
+                                    ->text($text);
 
                                 $this->mailer->send($email);
                             }

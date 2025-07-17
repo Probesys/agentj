@@ -44,7 +44,12 @@ class MsgrcptRepository extends ServiceEntityRepository
     public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sql = 'UPDATE msgrcpt SET status_id =  ' . $status . '  WHERE partition_tag = "' . $partitiontag . '" AND mail_id = "' . $mailId . '" and rid=' . $rid ;
+        $sql = <<<SQL
+            UPDATE msgrcpt SET status_id = {$status}
+            WHERE partition_tag = "{$partitiontag}"
+            AND mail_id = "{$mailId}"
+            AND rid={$rid}
+        SQL;
         $stmt = $conn->prepare($sql);
         $stmt->execute();
     }
@@ -57,16 +62,23 @@ class MsgrcptRepository extends ServiceEntityRepository
     public function getAllMessageDomainRecipientsFromSender(string $emailSender, string $domain): array
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m'
-            . ' LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id '
-            . ' LEFT JOIN maddr ms ON ms.id = m.sid '//sid is sender
-            . ' LEFT JOIN maddr mr ON mr.id = msr.rid '//rid is recipient
-            . ' WHERE m.content != "C" AND msr.content != "C" AND msr.status_id IS NULL AND mr.domain = "' . $domain . '" AND ms.email =  "' . $emailSender . '"';
+        $sql = <<<SQL
+            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
+            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
+            LEFT JOIN maddr ms ON ms.id = m.sid
+            LEFT JOIN maddr mr ON mr.id = msr.rid
+            WHERE m.content != "C"
+            AND msr.content != "C"
+            AND msr.status_id IS NULL
+            AND mr.domain = "{$domain}"
+            AND ms.email = "{$emailSender}"
+        SQL;
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    public function findByEmailRecipient(string $email): Query {
+    public function findByEmailRecipient(string $email): Query
+    {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
             FROM App\Entity\Msgrcpt mr

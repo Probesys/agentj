@@ -10,15 +10,17 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Doctrine\DBAL\Connection;
 
-class AppExtension extends AbstractExtension {
-
-    public function __construct(private EntityManagerInterface $em) {
+class AppExtension extends AbstractExtension
+{
+    public function __construct(private EntityManagerInterface $em)
+    {
     }
 
     /**
      * @return TwigFilter[]
      */
-    public function getFilters(): array {
+    public function getFilters(): array
+    {
         return [
             new TwigFilter('lcfirst', [$this, 'lcfirst']),
             new TwigFilter('stream_get_contents', [$this, 'streamGetcontent']),
@@ -27,12 +29,14 @@ class AppExtension extends AbstractExtension {
         ];
     }
 
-    public function lcfirst(string $strInput): string {
+    public function lcfirst(string $strInput): string
+    {
 
         return lcfirst($strInput);
     }
 
-    public function streamGetcontent(mixed $input): string {
+    public function streamGetcontent(mixed $input): string
+    {
 
         $clearContent = stream_get_contents($input, -1, 0);
 
@@ -45,7 +49,8 @@ class AppExtension extends AbstractExtension {
     /**
      * @return string[] $groupsLabel
      */
-    public function getUserGroups(int $userId): array {
+    public function getUserGroups(int $userId): array
+    {
 
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
@@ -69,9 +74,9 @@ class AppExtension extends AbstractExtension {
      *
      * @param array<string, mixed> $wbInfo
      */
-    public function wbListIsOverriden(array $wbInfo): bool {
+    public function wbListIsOverriden(array $wbInfo): bool
+    {
 
         return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
     }
-
 }
