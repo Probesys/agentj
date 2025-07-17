@@ -30,9 +30,20 @@ lint: ## Execute the linters (can take a LINTER argument)
 ifeq ($(LINTER), $(filter $(LINTER), all phpstan))
 	$(PHP) vendor/bin/phpstan analyse -v
 endif
+ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
+	$(PHP) vendor/bin/phpcs
+endif
 ifeq ($(LINTER), $(filter $(LINTER), all symfony))
 	$(CONSOLE) lint:container
 endif
+
+.PHONY: lint-fix
+lint-fix: LINTER ?= all
+lint-fix: ## Fix the errors detected by the linters (can take a LINTER argument)
+ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
+	$(PHP) vendor/bin/phpcbf
+endif
+
 
 .PHONY: release
 release: ## Release a new version (take a VERSION argument)

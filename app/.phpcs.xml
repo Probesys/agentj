@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PHP_CodeSniffer" xsi:noNamespaceSchemaLocation="phpcs.xsd">
+    <description>The coding standard for AgentJ.</description>
+
+    <file>public/index.php</file>
+    <file>src</file>
+    <file>migrations</file>
+
+    <arg name="extensions" value="php" />
+
+    <rule ref="PSR12" />
+
+    <rule ref="Squiz.NamingConventions.ValidVariableName">
+        <exclude name="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore"/>
+    </rule>
+</ruleset>
+
