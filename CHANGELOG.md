@@ -1,5 +1,13 @@
 # Changelog of AgentJ
 
+## 2025-07-17 - 2.1.4
+
+### Bug fixes
+
+- Import whitelisted domains with their "@" ([9b71c68](https://github.com/Probesys/agentj/commit/9b71c68))
+- Fix searching and listing wblists ([c253330](https://github.com/Probesys/agentj/commit/c253330))
+- Don't allow to delete generic domain wblists ([66428c4](https://github.com/Probesys/agentj/commit/66428c4))
+
 ## 2025-07-04 - 2.1.3
 
 ### New
