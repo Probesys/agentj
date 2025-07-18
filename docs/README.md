@@ -45,6 +45,12 @@ $ git clone https://github.com/Probesys/agentj.git
 $ cd agentj
 ```
 
+Checkout to the latest version (see [releases](https://github.com/Probesys/agentj/releases)):
+
+```console
+$ git checkout <VERSION>
+```
+
 Configure the application:
 
 ```console
@@ -76,7 +82,7 @@ Update the code to the latest version (see [releases](https://github.com/Probesy
 
 ```console
 $ git fetch
-$ git switch <VERSION>
+$ git checkout <VERSION>
 ```
 
 Update the `VERSION` variable in the `.env` file and adapt other variables accordingly to the migration notes.
