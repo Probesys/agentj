@@ -1,5 +1,18 @@
 # Changelog of AgentJ
 
+## unreleased
+
+### Migration notes
+
+MariaDB has been upgraded to version 11.4.
+While the system tables are automatically upgraded, user tables aren't.
+To fully upgrade all the tables, run the following command after restarting the stack.
+Please note that the command can take a long time for large databases.
+
+```console
+$ docker compose exec db mariadb-upgrade --force -uroot -p<ROOT PASSWORD>
+```
+
 ## 2025-07-17 - 2.1.4
 
 ### Bug fixes
