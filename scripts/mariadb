@@ -5,4 +5,4 @@ export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
 
 source $SCRIPT_PATH/../.env
 
-docker compose exec db mysql -u $DB_USER -p$DB_PASSWORD "$@"
+docker compose exec db mariadb -u $DB_USER -p$DB_PASSWORD "$@"
