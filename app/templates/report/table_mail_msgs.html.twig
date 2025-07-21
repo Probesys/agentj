@@ -1,7 +1,9 @@
 {% if untreatedMsgs is not empty %}
   <table style="width:100%;background-color: #fff;">
     <tbody>
-      {% for msg in  untreatedMsgs%}
+      {% for msg in  untreatedMsgs %}
+      {% set token = user.id ~ '%%%' ~ msg.getMailIdAsString() %}
+      {% set token = encrypt(token, 48 * 3600) %}
         <tr>
 
           <td>

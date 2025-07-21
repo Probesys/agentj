@@ -51,6 +51,12 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
+        $tokenMailId = $this->getMailIdFromToken($token);
+
+        if ($tokenMailId !== null && $tokenMailId !== $mailId) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
         $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
@@ -98,6 +104,12 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
+        $tokenMailId = $this->getMailIdFromToken($token);
+
+        if ($tokenMailId !== null && $tokenMailId !== $mailId) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
         $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
@@ -134,13 +146,47 @@ class MessagesController extends AbstractController
 
     private function getUserFromToken(string $token): ?Entity\User
     {
-        list($expiry, $data) = $this->cryptEncryptService->decrypt($token);
+        list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
 
         if ($expiry < time()) {
             return null;
         }
 
-        $userId = (int) $data;
+        if ($decryptedToken === false) {
+            return null;
+        }
+
+        //old version of token does not have mailId, only userId
+        if (strpos($decryptedToken, '%%%') === false) {
+            $userId = (int) $decryptedToken;
+        } else {
+            $tokenParts = explode('%%%', $decryptedToken);
+            $userId = (int) $tokenParts[0];
+        }
+
         return $this->em->getRepository(Entity\User::class)->find($userId);
+    }
+
+    private function getMailIdFromToken(string $token): ?string
+    {
+        list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+
+        if ($expiry < time()) {
+            return null;
+        }
+
+        if ($decryptedToken === false) {
+            return null;
+        }
+
+        //old version of token does not have mailId
+        if (strpos($decryptedToken, '%%%') === false) {
+            $mailId = null;
+        } else {
+            $tokenParts = explode('%%%', $decryptedToken);
+            $mailId = (string) $tokenParts[1];
+        }
+
+        return $mailId;
     }
 }
