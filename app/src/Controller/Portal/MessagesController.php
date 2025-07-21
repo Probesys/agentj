@@ -16,7 +16,6 @@ class MessagesController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private Service\CryptEncryptService $cryptEncryptService,
         private Service\LogService $logService,
         private Service\MessageService $messageService,
         private Repository\MsgrcptRepository $msgrcptRepository,
@@ -45,9 +44,16 @@ class MessagesController extends AbstractController
             ]);
         }
 
-        $user = $this->getUserFromToken($token);
+        $result = $this->messageService->decryptReleaseToken($token);
 
-        if (!$user) {
+        if (!$result) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        $user = $result[0];
+        $tokenMailId = $result[1];
+
+        if ($tokenMailId !== null && $tokenMailId !== $mailId) {
             throw $this->createNotFoundException('The token is invalid.');
         }
 
@@ -92,9 +98,16 @@ class MessagesController extends AbstractController
             ]);
         }
 
-        $user = $this->getUserFromToken($token);
+        $result = $this->messageService->decryptReleaseToken($token);
 
-        if (!$user) {
+        if (!$result) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        $user = $result[0];
+        $tokenMailId = $result[1];
+
+        if ($tokenMailId !== null && $tokenMailId !== $mailId) {
             throw $this->createNotFoundException('The token is invalid.');
         }
 
@@ -130,17 +143,5 @@ class MessagesController extends AbstractController
         if (!in_array($messageRecipient->getRid()->getEmailClear(), $accessibleRecipientEmails)) {
             throw new AccessDeniedException();
         }
-    }
-
-    private function getUserFromToken(string $token): ?Entity\User
-    {
-        list($expiry, $data) = $this->cryptEncryptService->decrypt($token);
-
-        if ($expiry < time()) {
-            return null;
-        }
-
-        $userId = (int) $data;
-        return $this->em->getRepository(Entity\User::class)->find($userId);
     }
 }

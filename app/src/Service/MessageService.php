@@ -4,13 +4,15 @@ namespace App\Service;
 
 use App\Amavis\MessageStatus;
 use App\Entity;
+use App\Repository\MsgrcptRepository;
+use App\Repository\UserRepository;
+use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use App\Repository\MsgrcptRepository;
 
 class MessageService
 {
@@ -19,6 +21,8 @@ class MessageService
         #[Autowire(param: 'app.amavisd-release')]
         private string $amavisdReleaseCommand,
         private MsgrcptRepository $msgrcptRepository,
+        private UserRepository $userRepository,
+        private CryptEncryptService $cryptEncryptService,
     ) {
     }
 
@@ -217,5 +221,54 @@ class MessageService
         $this->em->persist($message);
         $this->em->flush();
         return true;
+    }
+
+    /**
+     * Return a secure token containing the id of the user and of the message.
+     * The token is valid for 48h.
+     */
+    public function getReleaseToken(Entity\Msgs $message, Entity\User $user): string
+    {
+        $data = $user->getId() . '%%%' . $message->getMailIdAsString();
+        return $this->cryptEncryptService->encrypt($data, lifetime: 48 * 3600);
+    }
+
+    /**
+     * Extract the data from a token (i.e. a user and a mail id).
+     *
+     * If the token is invalid or expired, it returns null.
+     *
+     * @return ?array{Entity\User, ?string}
+     */
+    public function decryptReleaseToken(string $token): ?array
+    {
+        list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+
+        if ($expiry < time()) {
+            return null;
+        }
+
+        if ($decryptedToken === false) {
+            return null;
+        }
+
+        // The previous version of token does not have mailId, only userId.
+        // TODO remove this condition in AgentJ >= 2.3
+        if (strpos($decryptedToken, '%%%') === false) {
+            $userId = (int) $decryptedToken;
+            $mailId = null;
+        } else {
+            $tokenParts = explode('%%%', $decryptedToken);
+            $userId = (int) $tokenParts[0];
+            $mailId = $tokenParts[1];
+        }
+
+        $user = $this->userRepository->find($userId);
+
+        if (!$user) {
+            return null;
+        }
+
+        return [$user, $mailId];
     }
 }

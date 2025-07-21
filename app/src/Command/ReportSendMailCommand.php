@@ -5,7 +5,6 @@ namespace App\Command;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
 use App\Repository\MsgrcptSearchRepository;
-use App\Service;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,8 +14,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -33,7 +30,6 @@ class ReportSendMailCommand extends Command
         private ManagerRegistry $doctrine,
         private TranslatorInterface $translator,
         private MailerInterface $mailer,
-        private Service\CryptEncryptService $cryptEncryptService,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
         private ParameterBagInterface $params,
@@ -94,12 +90,10 @@ class ReportSendMailCommand extends Command
                     $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
                 }
 
-                $token = $this->cryptEncryptService->encrypt((string) $user->getId(), lifetime: 48 * 3600);
-
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
                     'untreatedMsgs' => $untreatedMsgs,
                     'url' => $url,
-                    'token' => $token,
+                    'user' => $user,
                 ]);
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);

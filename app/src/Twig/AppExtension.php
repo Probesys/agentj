@@ -3,17 +3,22 @@
 namespace App\Twig;
 
 use App\Entity\Groups;
+use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 use Doctrine\DBAL\Connection;
 
 class AppExtension extends AbstractExtension
 {
-    public function __construct(private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private MessageService $messageService,
+    ) {
     }
 
     /**
@@ -26,6 +31,13 @@ class AppExtension extends AbstractExtension
             new TwigFilter('stream_get_contents', [$this, 'streamGetcontent']),
             new TwigFilter('user_groups', [$this, 'getUserGroups']),
             new TwigFilter('wblist_is_overridden', [$this, 'wbListIsOverriden']),
+        ];
+    }
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
         ];
     }
 
@@ -78,5 +90,10 @@ class AppExtension extends AbstractExtension
     {
 
         return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
+    }
+
+    public function messageReleaseToken(Msgs $message, User $user): string
+    {
+        return $this->messageService->getReleaseToken($message, $user);
     }
 }
