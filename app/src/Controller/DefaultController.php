@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Amavis\ContentType;
 use App\Entity\Domain;
 use App\Amavis\MessageStatus;
+use App\Entity\Mailaddr;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -294,10 +295,31 @@ class DefaultController extends AbstractController
                 $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
             }
 
+            //For each message recipient, check if the sender is in the wblist
+            $validRecipients = [];
+            $mailAddr = $this->em->getRepository(Mailaddr::class)->findOneBy([
+                'email' => $message->getSid()->getEmailClear()
+            ]);
+
+            foreach ($messageRecipients as $messageRecipient) {
+                $user = $this->em->getRepository(User::class)->findOneBy([
+                    'email' => $messageRecipient->getRid()->getEmailClear()
+                ]);
+
+                $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
+                    'rid' => $user,
+                    'sid' => $mailAddr
+                ]);
+
+                if (!$wblist) {
+                    $validRecipients[] = $messageRecipient;
+                }
+            }
+
             // Test if the sender is the same than the posted email field and if the mail has not been yet treated
             if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
+                    $messageService->authorize($message, $validRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                     $message->setValidateCaptcha(time());
                     $em->persist($message);
                     $em->flush();
