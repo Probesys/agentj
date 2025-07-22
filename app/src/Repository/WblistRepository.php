@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Domain;
 use App\Entity\Groups;
+use App\Entity\Maddr;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
@@ -228,20 +229,32 @@ class WblistRepository extends ServiceEntityRepository
         return $wb ? $wb->getWb() : null;
     }
 
-    /**
-     * Verify if a wblist rule exists for $user from $mailaddr
-     */
-    public function getOneByUser(User $user, Mailaddr $mailaddr): ?Wblist
+    public function isRecipientInSenderList(Maddr $sender, Maddr $recipient): bool
     {
-        $dql = $this->createQueryBuilder('wb')
-                ->select('wb')
-                ->where('wb.rid = :user')
-                ->andWhere('wb.sid = :sender')
-                ->setParameter('user', $user)
-                ->setParameter('sender', $mailaddr);
+        $entityManager = $this->getEntityManager();
 
-        $query = $dql->getQuery();
-        return $query->getOneOrNullResult();
+        $query = $entityManager->createQuery(<<<SQL
+            SELECT wbl
+            FROM App\Entity\Wblist wbl
+            JOIN wbl.sid s
+            JOIN wbl.rid r
+            WHERE (wbl.wb = 'B' OR wbl.wb = 'W')
+            AND s.email = :sender_email
+            AND (
+                r.email = :recipient_email
+                OR r.email = :recipient_domain
+            )
+        SQL);
+
+        $recipientEmail = $recipient->getEmailClear();
+        $recipientDomain = $recipient->getReverseDomain();
+
+        $query->setParameter('sender_email', $sender->getEmailClear());
+        $query->setParameter('recipient_email', $recipientEmail);
+        $query->setParameter('recipient_domain', "@{$recipientDomain}");
+        $query->setMaxResults(1);
+
+        return $query->getOneOrNullResult() !== null;
     }
 
     /**

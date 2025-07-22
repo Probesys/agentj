@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Amavis\ContentType;
 use App\Entity\Domain;
 use App\Amavis\MessageStatus;
+use App\Entity\Mailaddr;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -12,8 +13,9 @@ use App\Entity\Alert;
 use App\Entity\Wblist;
 use App\Form\CaptchaFormType;
 use App\Repository\UserRepository;
-use App\Service;
 use App\Repository\MsgrcptRepository;
+use App\Repository\WblistRepository;
+use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -254,6 +256,7 @@ class DefaultController extends AbstractController
     public function checkCaptcha(
         string $token,
         Request $request,
+        WblistRepository $wblistRepository,
         Service\MessageService $messageService,
         Service\CryptEncryptService $cryptEncrypt,
     ): Response {
@@ -270,7 +273,18 @@ class DefaultController extends AbstractController
             throw $this->createNotFoundException('The domain does not exist.');
         }
 
-        $senderEmail = stream_get_contents($message->getSid()->getEmail(), -1, 0);
+        $sender = $message->getSid();
+        $senderEmail = $sender->getEmailClear();
+
+        // Keep only recipients that are NOT already in a wblist. This avoids,
+        // for a instance, a blocked sender to authorise himself.
+        $messageRecipients = array_filter(
+            $messageRecipients,
+            function ($recipient) use ($wblistRepository, $sender) {
+                return !$wblistRepository->isRecipientInSenderList($sender, $recipient->getRid());
+            }
+        );
+
         if (!empty($domain->getMessage())) {
             $content = $domain->getMessage();
         } else {
