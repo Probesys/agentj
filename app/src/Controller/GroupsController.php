@@ -77,10 +77,10 @@ class GroupsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
             if ($labelExists) {
-                return new JsonResponse(json_encode([
+                return new JsonResponse([
                             'status' => 'danger',
                             'message' => $this->translator->trans('Generics.flash.groupNameAlreadyExist'),
-                ]));
+                ]);
             }
 
             $this->em->persist($group);
@@ -98,10 +98,10 @@ class GroupsController extends AbstractController
             $this->em->persist($groupsWblist);
 
             $this->em->flush();
-            return new JsonResponse(json_encode([
+            return new JsonResponse([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.addSuccess'),
-                    ]), 200);
+                    ], 200);
         }
 
         return $this->render('groups/new.html.twig', [
@@ -143,10 +143,10 @@ class GroupsController extends AbstractController
             if ($oldName != $group->getName() || $olddomain != $group->getDomain()) {
                 $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
                 if ($labelExists) {
-                    return new JsonResponse(json_encode([
+                    return new JsonResponse([
                                 'status' => 'danger',
                                 'message' => $this->translator->trans('Generics.flash.groupNameAlreadyExist'),
-                    ]));
+                    ]);
                 }
             }
 
@@ -174,10 +174,10 @@ class GroupsController extends AbstractController
 
             $this->em->flush();
 
-            return new JsonResponse(json_encode([
+            return new JsonResponse([
                         'status' => 'success',
                         'message' => $this->translator->trans('Generics.flash.editSuccess'),
-                    ]), 200);
+                    ], 200);
         }
 
         return $this->render('groups/edit.html.twig', [
