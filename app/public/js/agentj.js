@@ -159,7 +159,6 @@ document.addEventListener("turbo:load", function () {
       processData: false,
       contentType: false,
       success: function (data) {
-        data = $.parseJSON(data);
         var message = "";
         if (typeof data.message !== "undefined") {
           message = data.message;
