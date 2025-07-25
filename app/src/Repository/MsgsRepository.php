@@ -2,19 +2,16 @@
 
 namespace App\Repository;
 
-use App\Entity\Domain;
-use App\Amavis\MessageStatus;
+use App\Amavis\ContentType;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Amavis\ContentType;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Msgs>
+ * @extends BaseMessageRepository<Msgs>
  */
-class MsgsRepository extends ServiceEntityRepository
+class MsgsRepository extends BaseMessageRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

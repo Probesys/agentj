@@ -45,20 +45,26 @@ class SearchFilterType extends AbstractType
             ])
             ->add('bspamLevelMin', NumberType::class, [
                 'required' => false,
+                'label' => 'Search.BSpamLevelMin'
             ])
             ->add('bspamLevelMax', NumberType::class, [
                 'required' => false,
+                'label' => 'Search.BSpamLevelMax'
             ])
-            ->add('size', TextType::class, [
+            ->add('sizeMin', TextType::class, [
                 'required' => false,
-                'label' => 'Search.Size'
+                'label' => 'Search.SizeMin'
+            ])
+            ->add('sizeMax', TextType::class, [
+                'required' => false,
+                'label' => 'Search.SizeMax'
             ])
             ->add('replyTo', ChoiceType::class, [
                 'required' => false,
                 'label' => 'Search.ReplyTo',
                 'choices' => [
-                    'Oui' => 'oui',
-                    'Non' => 'non',
+                    'Generics.labels.yes' => 'oui',
+                    'Generics.labels.no' => 'non',
                 ],
             ])
             ->add('host', TextType::class, [
@@ -72,9 +78,9 @@ class SearchFilterType extends AbstractType
                 ],
                 'expanded' => true,
                 'multiple' => false,
+                'data' => 'incoming',
                 'label' => 'Search.MessageType',
                 'attr' => ['class' => 'switch-toggle'],
-                'data' => 'incoming',
             ])
             ->add('submit', SubmitType::class, ['label' => 'Search.Filter']);
     }

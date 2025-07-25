@@ -1,32 +1,33 @@
-{% for msg in msgs %}
+{% for messageRecipient in messagesRecipients %}
     <tr>
-        <td data-title="{{ 'Search.MailId'|trans }}">{{ msg.mail_id }}</td>
-        <td data-title="{{ 'Search.Sender'|trans }}">{{ msg.from_addr }}</td>
-        <td data-title="{{ 'Search.Recipient'|trans }}">{{ msg.email }}</td>
-        <td data-title="{{ 'Search.Subject'|trans }}">{{ msg.subject }}</td>
-        <td data-title="{{ 'Search.Date'|trans }}">{{ msg.time_iso|date('d-m-Y') }}</td>
+        <td data-title="{{ 'Search.MailId'|trans }}">{{ messageRecipient.getMailIdAsString }}</td>
+        <td data-title="{{ 'Search.Sender'|trans }}">{{ messageRecipient.msgs.fromAddr }}</td>
+        <td data-title="{{ 'Search.Recipient'|trans }}">{{ messageRecipient.rid.getEmailClear }}</td>
+        <td data-title="{{ 'Search.Subject'|trans }}">{{ messageRecipient.msgs.subject }}</td>
+        <td data-title="{{ 'Search.Date'|trans }}">{{ messageRecipient.msgs.timeIso|format_datetime('short', 'short') }}</td>
 
-        {% if (activeFilters.bspamLevelMin is defined and activeFilters.bspamLevelMin|default('') != '' and activeFilters.bspamLevelMin != 0)
-            or (activeFilters.bspamLevelMax is defined and activeFilters.bspamLevelMax|default('') != '' and activeFilters.bspamLevelMax != 0) %}
-            <td>{{ msg.bspam_level }}</td>
-        {% else %}
-            <td style="display: none;"></td>
-        {% endif %}
+        <td>{{ messageRecipient.bspamLevel }}</td>
 
-        {% if activeFilters['size'] is defined %}
-            <td class="size-column">{{ msg.size }}</td>
+        {% if (activeFilters['sizeMin'] is defined and activeFilters['sizeMin'] is not null)
+            or (activeFilters['sizeMax'] is defined and activeFilters['sizeMax'] is not null)
+        %}
+            <td class="size-column">{{ messageRecipient.msgs.size }}</td>
         {% else %}
             <td class="size-column" style="display: none;"></td>
         {% endif %}
 
-        {% if activeFilters['host'] is defined %}
-            <td class="host-column">{{ msg.host }}</td>
+        {% if activeFilters['host'] is defined and activeFilters['host'] is not null %}
+            <td class="host-column">{{ messageRecipient.msgs.host }}</td>
         {% else %}
             <td class="host-column" style="display: none;"></td>
         {% endif %}
 
-        {% if activeFilters['replyTo'] is defined %}
-            <td class="reply-to-column">{{ msg.replyTo }}</td>
+        {% if activeFilters['replyTo'] is defined and activeFilters['replyTo'] is not null %}
+            {% if messageRecipient.msgs.subject matches '/Re:/i' %}
+                <td class="reply-to-column">{{ 'Generics.labels.yes' | trans }}</td>
+            {% else %}
+                <td class="reply-to-column">{{ 'Generics.labels.no' | trans }}</td>
+            {% endif %}
         {% else %}
             <td class="reply-to-column" style="display: none;"></td>
         {% endif %}
@@ -34,11 +35,11 @@
         <td>
             {% if messageType == 'incoming' %}
                 <a href="#" data-modal-method-type="GET"
-                   data-url-modal-content="{{ path('message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"
+                   data-url-modal-content="{{ path('message_show', {'partitionTag' : messageRecipient.partitionTag, 'mailId' : messageRecipient.getMailIdAsString(), 'rid' : messageRecipient.rid.id}) }}"
                    class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
             {% else %}
                 <a href="#" data-modal-method-type="GET"
-                   data-url-modal-content="{{ path('out_message_show', {'partitionTag' : msg.partition_tag, 'mailId' : msg.mail_id, 'rid' : msg.rid}) }}"
+                   data-url-modal-content="{{ path('out_message_show', {'partitionTag' : messageRecipient.partitionTag, 'mailId' : messageRecipient.getMailIdAsString(), 'rid' : messageRecipient.rid.id}) }}"
                    class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
             {% endif %}
         </td>

@@ -4,16 +4,27 @@ namespace App\Repository;
 
 use App\Amavis\ContentType;
 use App\Entity\Domain;
+use App\Entity\Msgrcpt;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
+use App\Repository\BaseMessageRecipientRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\Persistence\ManagerRegistry;
 
-class MsgrcptSearchRepository extends MsgrcptRepository
+/**
+ * @extends BaseMessageRecipientRepository<Msgrcpt>
+ */
+class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Msgrcpt::class);
+    }
+
     /**
      * @param ?array{sort: string, direction: string} $sortParams
      */
@@ -83,15 +94,21 @@ class MsgrcptSearchRepository extends MsgrcptRepository
         return $query->getScalarResult();
     }
 
-    private function getSearchQueryBuilder(
-        ?User $user,
-        ?int $messageStatus = null
-    ): QueryBuilder {
-
+    protected function getBaseQueryBuilder(): QueryBuilder
+    {
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->leftJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
             ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+
+        return $queryBuilder;
+    }
+
+    private function getSearchQueryBuilder(
+        ?User $user = null,
+        ?int $messageStatus = null
+    ): QueryBuilder {
+        $queryBuilder = $this->getBaseQueryBuilder();
 
         $this->addUserSpecificJoins($queryBuilder, $user);
 

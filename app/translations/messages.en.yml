@@ -340,16 +340,19 @@ Search:
   Subject: Subject
   Date: Date
   AmavisOutput: Amavis Output
-  Size: Size
+  SizeMin: Minimum size
+  SizeMax: Maximum size
   Host: Host of the sender
   ReplyTo: Reply to a message
   StartDate: Start date
   EndDate: End date
-  BSpamLevel: Amavis Spam Level
+  BSpamLevelMin: Minimum Amavis spam level
+  BSpamLevelMax: Maximum Amavis spam level
   Incoming: INCOMING
   Outgoing: OUTGOING
   MessageType: Message type
   Filter: Filter
+  ResetFilters: Reset
   AdvancedFilter: Advanced filter
 
 Entities:

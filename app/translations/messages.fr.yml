@@ -340,16 +340,19 @@ Search:
   Subject: Objet
   Date: Date
   AmavisOutput: Score Amavis
-  Size: Taille
+  SizeMin: Taille minimum
+  SizeMax: Taille maximum
   Host: Domaine de l'expéditeur
   ReplyTo: Réponse à un message
   StartDate: Date de début
   EndDate: Date de fin
-  BSpamLevel: Score Amavis
+  BSpamLevelMin: Score Amavis minimum
+  BSpamLevelMax: Score Amavis maximum
   Incoming: REÇU
   Outgoing: ENVOYÉ
   MessageType: Type de message
   Filter: Filtrer
+  ResetFilters: Réinitialiser
   AdvancedFilter: Filtres avancés
 
 Entities:

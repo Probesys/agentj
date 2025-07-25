@@ -3,20 +3,19 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ 'Generics.messages.welcome'|trans }}
-    !
+    {{ 'Search.Title'|trans }}
 {% endblock %}
 
 {% block body %}
     <div class="m-4">
         <h3 class="mb-3">{{ 'Search.Title'|trans }}</h3>
 
-        <button id="toggleFilters" class="btn btn-primary mb-3">
+        <button type="button" data-toggle="collapse" aria-expanded="true" data-target="#filterContainer" id="toggleFilters" class="btn btn-primary mb-3">
             {{ 'Generics.labels.filters'|trans }}
             <span id="toggleArrow" class="arrow-right"></span>
         </button>
 
-        <div id="filterContainer" class="filtres mt-3 mb-5 col-md-12">
+        <div id="filterContainer" class="collapse show filtres mt-3 mb-5 col-md-12">
             {{ form_start(form) }}
             <div class="form-row">
                 <div class="col-md-6">
@@ -48,22 +47,28 @@
             </div>
 
             <!-- Button to toggle advanced filters -->
-            <button id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">{{ 'Search.AdvancedFilter'|trans }}</button>
+            <button type="button" data-toggle="collapse" aria-expanded="false" data-target="#advancedFilters" id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">{{ 'Search.AdvancedFilter'|trans }}</button>
 
             <!-- Advanced filters section -->
-            <div id="advancedFilters" style="display: none;">
+            <div id="advancedFilters" class="collapse">
                 {{ form_row(form.replyTo) }}
-                <div class="form-group">
-                    <label>{{ 'Search.BSpamLevel'|trans }}</label>
-                    <div class="d-flex">
-                        {{ form_widget(form.bspamLevelMin, { 'attr': { 'placeholder': 'Min' } }) }}
-                        {{ form_widget(form.bspamLevelMax, { 'attr': { 'placeholder': 'Max', 'class': 'ml-2' } }) }}
+                <div class="form-row">
+                    <div class="col-md-6">
+                        {{ form_row(form.bspamLevelMin) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.bspamLevelMax, { 'attr': {'class': 'ml-2' } }) }}
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col-md-6">
-                        {{ form_row(form.size) }}
+                        {{ form_row(form.sizeMin) }}
                     </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.sizeMax, { 'attr': { 'class': 'ml-2' } }) }}
+                    </div>
+                </div>
+                <div class="form-row">
                     <div class="col-md-6">
                         {{ form_row(form.host) }}
                     </div>
@@ -83,182 +88,71 @@
             </div>
             <div id="submit" class="mt-3">
                 {{ form_widget(form.submit) }}
+                <a href="{{ path('advanced_search') }}" id="search_filter_reset" class="btn btn-secondary">{{ 'Search.ResetFilters'|trans }}</a>
             </div>
             {{ form_end(form) }}
         </div>
- <div class="table-responsive">
-        <table class="table table-hover search" style="margin: 3rem 0 5rem 0"
-               data-active-filters="{{ activeFilters|json_encode }}">
-            <thead>
-            <tr class="table-header">
-                <th><a href="#" class="sort-link" data-sort-field="mail_id">{{ 'Search.MailId'|trans }}</a></th>
-                <th><a href="#" class="sort-link" data-sort-field="from_addr">{{ 'Search.Sender'|trans }}</a></th>
-                <th><a href="#" class="sort-link" data-sort-field="email">{{ 'Search.Recipient'|trans }}</a></th>
-                <th><a href="#" class="sort-link" data-sort-field="subject">{{ 'Search.Subject'|trans }}</a></th>
-                <th><a href="#" class="sort-link" data-sort-field="time_iso">{{ 'Search.Date'|trans }}</a></th>
-                <th class="amavis-header" style="display: none;"><a href="#" class="sort-link"
-                                                                    data-sort-field="bspam_level">{{ 'Search.AmavisOutput'|trans }}
-                </th>
-                <th class="size-header" style="display: none;"><a href="#" class="sort-link"
-                                                                  data-sort-field="size">{{ 'Search.Size'|trans }}</th>
-                <th class="host-header" style="display: none;"><a href="#" class="sort-link"
-                                                                  data-sort-field="host">{{ 'Search.Host'|trans }}</th>
-                <th class="reply-to-header" style="display: none;"><a href="#" class="sort-link"
-                                                                      data-sort-field="replyTo">{{ 'Search.ReplyTo'|trans }}
-                </th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% include 'search/_messages.html.twig' with { 'msgs': msgs } %}
-            </tbody>
-        </table>
- </div>
+
+        <div class="table-responsive" id="advancedSearchResult">
+            <table class="table table-hover search" style="margin: 3rem 0 5rem 0">
+                <thead>
+                    <tr class="table-header">
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.MailId'|trans, 'mr.mailId', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.Sender'|trans, 'm.fromAddr', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.Recipient'|trans, 'maddr.email', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.Subject'|trans, 'm.subject', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.Date'|trans, 'm.timeIso', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(messagesRecipients, 'Search.AmavisOutput'|trans, 'mr.bspamLevel', {}, {'_fragment': 'advancedSearchResult'}) }}
+                        </th>
+                        {% if (
+                            activeFilters['sizeMin'] is defined and activeFilters['sizeMin'] is not null)
+                            or (activeFilters['sizeMax'] is defined and activeFilters['sizeMax'] is not null)
+                        %}
+                            <th>
+                                {{ knp_pagination_sortable(messagesRecipients, 'Search.Size'|trans, 'm.size', {}, {'_fragment': 'advancedSearchResult'}) }}
+                            </th>
+                        {% endif %}
+                        {% if activeFilters['host'] is defined and activeFilters['host'] is not null %}
+                            <th>
+                                {{ knp_pagination_sortable(messagesRecipients, 'Search.Host'|trans, 'm.host', {}, {'_fragment': 'advancedSearchResult'}) }}
+                            </th>
+                        {% endif %}
+                        {% if activeFilters['replyTo'] is defined and activeFilters['replyTo'] is not null %}
+                            <th>
+                                {{ 'Search.ReplyTo'|trans }}
+                            </th>
+                        {% endif %}
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% include 'search/_messages.html.twig' with { 'messageRecipients': messagesRecipients } %}
+                </tbody>
+            </table>
+        </div>
+        <div class="navigation text-center">
+            {{ knp_pagination_render(messagesRecipients, null, {'_fragment': 'advancedSearchResult'}) }}
+        </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('turbo:load')
-            const toggleButton = document.getElementById('toggleFilters');
-            const filterContainer = document.getElementById('filterContainer');
-            const toggleArrow = document.getElementById('toggleArrow');
-            const toggleAdvancedButton = document.getElementById('toggleAdvancedFilters');
-            const advancedFilters = document.getElementById('advancedFilters');
-
-            // Toggle filter visibility
-            toggleButton.addEventListener('click', function () {
-                filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
-                toggleArrow.classList.toggle('arrow-down');
-                toggleArrow.classList.toggle('arrow-right');
-            });
-
-            // Toggle advanced filters visibility
-            toggleAdvancedButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
-            });
-
-            function updateToggleButtons() {
-                const inputs = document.querySelectorAll('.toggle-input');
-                inputs.forEach(function (input) {
-                    const toggleLabelDiv = input.closest('.toggle-label');
-                    if (input.checked) {
-                        toggleLabelDiv.classList.add('active');
-                    } else {
-                        toggleLabelDiv.classList.remove('active');
-                    }
-                });
-            }
-
-            // Initialize the buttons on page load
-            updateToggleButtons();
-
-            // Add event listeners to the inputs
-            const inputs = document.querySelectorAll('.toggle-input');
-            inputs.forEach(function (input) {
-                input.addEventListener('change', function () {
-                    updateToggleButtons();
-                });
-            });
-
-
-            let dataTable = $('.search').DataTable({
-                paging: true,
-                searching: false,
-                ordering: false,
-                "language": {
-                    url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json'
-                },
-            });
-            // Mapping of form fields to their corresponding table header classes
-            const columnMapping = {
-                'bspamLevelMin': '.amavis-header',
-                'bspamLevelMax': '.amavis-header',
-                'size': '.size-header',
-                'host': '.host-header',
-                'replyTo': '.reply-to-header',
-            };
-
-            // Handle form submission via Ajax
-            $('form').on('submit', function (e) {
-                e.preventDefault();
-
-                var $form = $(this);
-                var url = $form.attr('action');
-
-                // Check for active advanced filters and update header visibility accordingly
-                Object.keys(columnMapping).forEach(function (fieldName) {
-                    const headerSelector = columnMapping[fieldName];
-                    const fieldValue = $form.find(`[name="search_filter[${fieldName}]"]`).val();
-
-                    // Toggle header visibility based on field value
-                    if (fieldValue !== null && fieldValue !== '') {
-                        document.querySelector(headerSelector).style.display = '';
-                    } else {
-                        document.querySelector(headerSelector).style.display = 'none';
-                    }
-                });
-
-                // Send AJAX request to update the table
-                $.ajax({
-                    url: url,
-                    method: $form.attr('method'),
-                    data: $form.serialize(),
-                    success: function (response) {
-                        dataTable.destroy();
-                        // Update the table body with new content
-                        $('table.search tbody').html(response.content);
-                        dataTable = $('.search').DataTable({
-                            paging: true,
-                            searching: false,
-                            ordering: false,
-                            "language": {
-                                url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json'
-                            },
-                        });
-                    },
-                    error: function () {
-                        console.error('Error occurred while fetching data.');
-                    }
-                });
-            });
-
-            // Handle sort link clicks
-            $('.sort-link').on('click', function (e) {
-                e.preventDefault();
-
-                var sortField = $(this).data('sort-field');
-                var currentSortDirection = $(this).data('sort-direction') || 'asc';
-                var newSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-
-                // Update data attributes
-                $(this).data('sort-direction', newSortDirection);
-
-                var $form = $('form');
-                var formData = $form.serializeArray();
-
-                // Append sort parameters to form data
-                formData.push({name: 'sortField', value: sortField});
-                formData.push({name: 'sortDirection', value: newSortDirection});
-
-                // Send AJAX request to update the table
-                $.ajax({
-                    url: $form.attr('action'),
-                    method: $form.attr('method'),
-                    data: $.param(formData),
-                    success: function (response) {
-                        // Update the table body with new content
-                        $('table.search tbody').html(response.content);
-                    },
-                    error: function () {
-                        console.error('Error occurred while fetching data.');
-                    }
-                });
-
-            });
-        });
-    </script>
 
     <style>
+
+        /* Style pour le label lorsque le bouton radio est sélectionné */
+        input[type="radio"][name="search_filter[messageType]"]:checked + .form-check-label {
+            background-color: #6de7da;
+        }
+
         #toggleArrow {
             display: inline-block;
             margin-left: 10px;
@@ -283,7 +177,7 @@
             align-items: center;
         }
 
-        #search_filter_submit {
+        #search_filter_submit, #search_filter_reset {
             font-size: 1.2rem;
         }
 
@@ -341,7 +235,6 @@
             width: 100%;
             font-size: 0.9rem;
         }
-
     </style>
 
 {% endblock %}
