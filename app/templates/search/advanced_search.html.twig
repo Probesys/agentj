@@ -91,19 +91,19 @@
                 <thead>
                     <tr class="table-header">
                         <th>
-                            <a href="#" class="sort-link" data-sort-field="mail_id">{{ 'Search.MailId'|trans }}</a>
+							{{ knp_pagination_sortable(messagesRecipients, 'Search.MailId'|trans, 'mr.mailId') }}
                         </th>
                         <th>
-                            <a href="#" class="sort-link" data-sort-field="from_addr">{{ 'Search.Sender'|trans }}</a>
+							{{ knp_pagination_sortable(messagesRecipients, 'Search.Sender'|trans, 'm.fromAddr') }}
                         </th>
                         <th>
-                            <a href="#" class="sort-link" data-sort-field="email">{{ 'Search.Recipient'|trans }}</a>
+							{{ knp_pagination_sortable(messagesRecipients, 'Search.Recipient'|trans, 'maddr.email') }}
                         </th>
                         <th>
-                            <a href="#" class="sort-link" data-sort-field="subject">{{ 'Search.Subject'|trans }}</a>
+							{{ knp_pagination_sortable(messagesRecipients, 'Search.Subject'|trans, 'm.subject') }}
                         </th>
                         <th>
-                            <a href="#" class="sort-link" data-sort-field="time_iso">{{ 'Search.Date'|trans }}</a>
+							{{ knp_pagination_sortable(messagesRecipients, 'Search.Date'|trans, 'm.timeIso') }}
                         </th>
                         <th class="amavis-header" style="display: none;">
                             <a href="#" class="sort-link" data-sort-field="bspam_level">{{ 'Search.AmavisOutput'|trans }}</th>
@@ -117,13 +117,16 @@
                         <th class="reply-to-header" style="display: none;">
                             <a href="#" class="sort-link" data-sort-field="replyTo">{{ 'Search.ReplyTo'|trans }}</th>
                         </th>
-          	              <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% include 'search/_messages.html.twig' with { 'messageRecipients': messageRecipients } %}
+                    {% include 'search/_messages.html.twig' with { 'messageRecipients': messagesRecipients } %}
                 </tbody>
 			</table>
+			<div class="navigation text-center">
+				{{ knp_pagination_render(messagesRecipients) }}
+			</div>
 		</div>
 	</div>
 

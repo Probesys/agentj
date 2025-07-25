@@ -8,12 +8,12 @@ use App\Form\SearchFilterType;
 use App\Repository\MsgrcptSearchRepository;
 use App\Repository\OutMsgrcptRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/advanced_search')]
@@ -27,7 +27,10 @@ class SearchController extends AbstractController
     }
 
     #[Route(path: '/', name: 'advanced_search', methods: ['GET', 'POST'])]
-    public function advancedSearch(Request $request): Response
+    public function advancedSearch(
+        Request $request,
+        PaginatorInterface $paginator
+    ): Response
     {
         $form = $this->createForm(SearchFilterType::class);
         $form->handleRequest($request);
@@ -65,13 +68,27 @@ class SearchController extends AbstractController
                 ->getAdvancedSearchQuery($activeFilters, $sortParams);
         }
 
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->query->getInt('per_page', $perPage);
+
+        $recipients = $paginator->paginate(
+            $allMessages,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'wrap-queries' => true,
+                'fetchJoinCollection' => false,
+                'distinct' => false,
+            ]
+        );
+
         $form->setData($activeFilters);
 
         return $this->render('search/advanced_search.html.twig', [
-            'messageRecipients' => $allMessages->getResult(),
+            'messagesRecipients' => $recipients,
             'form' => $form->createView(),
             'messageType' => $messageType,
-            'activeFilters' => $activeFilters, // Pass the activeFilters to the main view
+            'activeFilters' => $activeFilters,
         ]);
     }
 

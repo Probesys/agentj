@@ -1,4 +1,4 @@
-{% for messageRecipient in messageRecipients %}
+{% for messageRecipient in messagesRecipients %}
     <tr>
         <td data-title="{{ 'Search.MailId'|trans }}">{{ messageRecipient.getMailIdAsString }}</td>
         <td data-title="{{ 'Search.Sender'|trans }}">{{ messageRecipient.msgs.fromAddr }}</td>
