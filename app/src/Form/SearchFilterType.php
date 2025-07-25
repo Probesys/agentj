@@ -74,7 +74,6 @@ class SearchFilterType extends AbstractType
                 'multiple' => false,
                 'label' => 'Search.MessageType',
                 'attr' => ['class' => 'switch-toggle'],
-                'data' => 'incoming',
             ])
             ->add('submit', SubmitType::class, ['label' => 'Search.Filter']);
     }

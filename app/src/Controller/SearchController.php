@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Form\SearchFilterType;
+use App\Repository\MsgrcptSearchRepository;
+use App\Repository\OutMsgrcptRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,8 +19,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[Route(path: '/advanced_search')]
 class SearchController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private OutMsgrcptRepository $outMsgrcptRepository
+    ) {
     }
 
     #[Route(path: '/', name: 'advanced_search', methods: ['GET', 'POST'])]
@@ -26,9 +31,6 @@ class SearchController extends AbstractController
     {
         $form = $this->createForm(SearchFilterType::class);
         $form->handleRequest($request);
-
-        $data = $form->getData();
-        $messageType = $data['messageType'] ?? 'incoming';
 
         $sortParams = null;
         if ($request->request->has('sortField') && $request->request->has('sortDirection')) {
@@ -38,81 +40,35 @@ class SearchController extends AbstractController
             ];
         }
 
-        /** @var User $user */
-        $user = $this->getUser();
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, $messageType, $sortParams);
+        $allMessages = $this->msgrcptSearchRepository->getAdvancedSearchQuery($sortParams);
 
-
-        // Initialize active filters
         $activeFilters = [];
 
-        // If form is submitted and valid, set active filters and filter messages
+        if ($request->getSession()->has('activeFilters')) {
+            $activeFilters = $request->getSession()->get('activeFilters');
+        }
+
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $activeFilters = $form->getData();
+            $request->getSession()->set('activeFilters', $activeFilters);
 
-            // Track which filters are active
-            foreach ($data as $key => $value) {
-                if (!empty($value)) {
-                    $activeFilters[$key] = true;
-                }
-            }
-
-            // Apply all active filters to the messages
-            $allMessages = array_filter($allMessages, function ($message) use ($data) {
-                // Basic filters
-                if (!empty($data['fromAddr']) && stripos($message['from_addr'], $data['fromAddr']) === false) {
-                    return false;
-                }
-                if (!empty($data['email']) && stripos($message['email'], $data['email']) === false) {
-                    return false;
-                }
-                if (!empty($data['subject']) && stripos($message['subject'], $data['subject']) === false) {
-                    return false;
-                }
-                if (!empty($data['mailId']) && stripos($message['mail_id'], $data['mailId']) === false) {
-                    return false;
-                }
-
-                // Advanced filters
-                if ($data['bspamLevelMin'] !== null && $message['bspam_level'] < $data['bspamLevelMin']) {
-                    return false;
-                }
-                if ($data['bspamLevelMax'] !== null && $message['bspam_level'] > $data['bspamLevelMax']) {
-                    return false;
-                }
-                if (!empty($data['startDate']) && $message['time_iso'] < $data['startDate']->format('Ymd\THis\Z')) {
-                    return false;
-                }
-                if (!empty($data['endDate']) && $message['time_iso'] > $data['endDate']->format('Ymd\THis\Z')) {
-                    return false;
-                }
-                if (!empty($data['size']) && stripos($message['size'], $data['size']) === false) {
-                    return false;
-                }
-                if (!empty($data['host']) && stripos($message['host'], $data['host']) === false) {
-                    return false;
-                }
-                if (!empty($data['replyTo']) && $message['replyTo'] !== $data['replyTo']) {
-                    return false;
-                }
-                return true;
-            });
+            return $this->redirectToRoute('advanced_search');
         }
 
-        // Handle AJAX requests
-        if ($request->isXmlHttpRequest()) {
-            return new JsonResponse([
-                'content' => $this->renderView('search/_messages.html.twig', [
-                    'msgs' => $allMessages,
-                    'messageType' => $messageType,
-                    'activeFilters' => $activeFilters,
-                ]),
-            ]);
+        $messageType = $activeFilters['messageType'] ?? 'incoming';
+        if ($messageType == 'incoming') {
+            $allMessages = $this->msgrcptSearchRepository
+                ->getAdvancedSearchQuery($activeFilters, $sortParams);
+        } else {
+            $allMessages = $this->outMsgrcptRepository
+                ->getAdvancedSearchQuery($activeFilters, $sortParams);
         }
 
-        // Render the main template
+        $form->setData($activeFilters);
+
         return $this->render('search/advanced_search.html.twig', [
-            'msgs' => $allMessages,
+            'messageRecipients' => $allMessages->getResult(),
             'form' => $form->createView(),
             'messageType' => $messageType,
             'activeFilters' => $activeFilters, // Pass the activeFilters to the main view
