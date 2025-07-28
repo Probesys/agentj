@@ -20,8 +20,9 @@ class OutMsg
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $statusId;
 
-    #[ORM\Column(type: 'bigint', nullable: true, options: ['unsigned' => true])]
-    private mixed $sid;
+    #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: Maddr::class)]
+    private ?Maddr $sid;
 
     #[ORM\Column(type: 'binary', length: 255, nullable: true)]
     private mixed $secretId;
@@ -113,7 +114,7 @@ class OutMsg
         return $this->statusId;
     }
 
-    public function getSid(): ?int
+    public function getSid(): ?Maddr
     {
         return $this->sid;
     }
@@ -252,7 +253,7 @@ class OutMsg
         return $this;
     }
 
-    public function setSid(?string $sid): static
+    public function setSid(?Maddr $sid): static
     {
         $this->sid = $sid;
 

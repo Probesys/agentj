@@ -77,8 +77,8 @@ class CreateAlertMessageHandler
             if ($outMsg->getContent() === 'V') {
                 $target = $message->getTarget();
 
-                // Fetch the user who sent the email based on from_addr
-                $fromAddr = $outMsg->getFromAddr();
+                // Fetch the user who sent the email
+                $fromAddr = $outMsg->getSid()->getEmailClear();
                 $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
 
                 $timezone = new \DateTimeZone('Europe/Paris');
