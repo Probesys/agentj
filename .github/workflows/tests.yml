@@ -30,6 +30,7 @@ jobs:
             sed -i "s|\$DB_PASSWORD|secret|g" .env
             sed -i "s|\$DB_HOST|localhost|g" .env
             sed -i "s|\$DOMAIN|example.com|g" .env
+            sed -i "s|\$SMTP_FROM|example@example.com|g" .env
             sed -i "s|\$ENABLE_AZURE_OAUTH||g" .env
             sed -i "s|\$OAUTH_AZURE_CLIENT_ID||g" .env
             sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET||g" .env
