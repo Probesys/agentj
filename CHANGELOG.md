@@ -13,6 +13,12 @@ Please note that the command can take a long time for large databases.
 $ docker compose exec db mariadb-upgrade --force -uroot -p<ROOT PASSWORD>
 ```
 
+## 2025-07-29 - 2.1.5
+
+### Technical
+
+- Don't use CDNs to load assets ([f6d3a5d](https://github.com/Probesys/agentj/commit/f6d3a5d))
+
 ## 2025-07-17 - 2.1.4
 
 ### Bug fixes
