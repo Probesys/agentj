@@ -153,6 +153,9 @@ class CreateAlertMessageHandler
                                 ->subject($subject)
                                 ->text($text);
 
+                            $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+                            $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
+
                             $this->mailer->send($email);
                         } else {
                             $this->output->writeln('No email address found for user: ' . $user->getId());
@@ -216,6 +219,9 @@ class CreateAlertMessageHandler
                                 ->to($senderUser->getEmailFromRessource())
                                 ->subject($subject)
                                 ->text($text);
+
+                            $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+                            $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
 
                             $this->mailer->send($email);
                         }
@@ -337,6 +343,9 @@ class CreateAlertMessageHandler
                             ->subject($subject)
                             ->text($text);
 
+                        $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+                        $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
+
                         $this->mailer->send($email);
                     } else {
                         $this->output->writeln('No email address found for user: ' . $user->getId());
@@ -406,6 +415,9 @@ class CreateAlertMessageHandler
                                     ->to($senderUser->getEmailFromRessource())
                                     ->subject($subject)
                                     ->text($text);
+
+                                $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+                                $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
 
                                 $this->mailer->send($email);
                             }
