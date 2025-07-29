@@ -320,3 +320,14 @@ function hideAlertMessage() {
     $(this).remove();
   });
 }
+
+// Unregister residual service workers.
+// See https://github.com/Probesys/agentj/pull/162
+// TODO remove this code in AgentJ >= 2.3
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+            registration.unregister();
+        }
+    });
+}
