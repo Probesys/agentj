@@ -20,6 +20,7 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 #[AsCommand(
@@ -38,6 +39,7 @@ class ReportSendMailCommand extends Command
         private string $defaultMailFrom,
         private ParameterBagInterface $params,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
         parent::__construct();
     }
@@ -53,10 +55,7 @@ class ReportSendMailCommand extends Command
 
         $em = $this->doctrine->getManager();
 
-        $domain = $this->params->get('domain');
-        $scheme = $this->params->get('scheme');
-
-        $url = $scheme . "://" . $domain;
+        $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
         $i = 0;
 
         // Get users to send report
