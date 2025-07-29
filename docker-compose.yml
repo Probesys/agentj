@@ -17,7 +17,7 @@ services:
       - TZ
       - DB_OPENDKIM_PASSWORD
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized", "--mariadbupgrade"]
       start_period: 10s
       interval: 10s
       timeout: 5s
