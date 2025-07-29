@@ -124,6 +124,8 @@ class ReportSendMailCommand extends Command
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
 
+                $message->getHeaders()->addTextHeader('Auto-Submitted', 'auto-generated');
+                $message->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
 
                 try {
                     $this->mailer->send($message);
