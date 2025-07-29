@@ -14,6 +14,7 @@ sed -i "s|\$DB_USER|$DB_USER|g" $env_file
 sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" $env_file
 sed -i "s|\$DB_HOST|$DB_HOST|g" $env_file
 sed -i "s|\$DOMAIN|${APP_DOMAIN:-$DOMAIN}|g" $env_file
+sed -i "s|\$SMTP_FROM|$SMTP_FROM|g" $env_file
 sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" $env_file
 sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" $env_file
 sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" $env_file

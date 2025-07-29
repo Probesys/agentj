@@ -19,7 +19,7 @@ parameters:
     app.domain_default_spam_level: "%env(DOMAIN_DEFAULT_SPAM_LEVEL)%"
     app.domain_min_spam_level: "%env(DOMAIN_MIN_SPAM_LEVEL)%"
     app.domain_max_spam_level: "%env(DOMAIN_MAX_SPAM_LEVEL)%"
-    app.domain_mail_authentification_sender: "%env(DOMAIN_MAIL_AUTHENTIFICATION_SENDER)%"
+    app.domain_mail_authentification_sender: "%env(SMTP_FROM)%"
     app.per_page_global: "25"
     timezone: "%env(TIMEZONE)%"
 services:
