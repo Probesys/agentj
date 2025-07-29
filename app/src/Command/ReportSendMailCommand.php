@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 #[AsCommand(
@@ -32,8 +33,8 @@ class ReportSendMailCommand extends Command
         private MailerInterface $mailer,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
-        private ParameterBagInterface $params,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
         parent::__construct();
     }
@@ -49,10 +50,6 @@ class ReportSendMailCommand extends Command
 
         $em = $this->doctrine->getManager();
 
-        $domain = $this->params->get('domain');
-        $scheme = $this->params->get('scheme');
-
-        $url = $scheme . "://" . $domain;
         $i = 0;
 
         // Get users to send report
@@ -92,9 +89,10 @@ class ReportSendMailCommand extends Command
 
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
                     'untreatedMsgs' => $untreatedMsgs,
-                    'url' => $url,
                     'user' => $user,
                 ]);
+
+                $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
                 $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);

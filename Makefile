@@ -64,6 +64,7 @@ endif
 	sed -i "s/^DB_OPENDKIM_PASSWORD=.*/DB_OPENDKIM_PASSWORD=secret/" .env
 	sed -i "s/^SUPER_ADMIN_PASSWORD=.*/SUPER_ADMIN_PASSWORD=secret/" .env
 	sed -i "s/^DOMAIN=.*/DOMAIN=localhost/" .env
+	sed -i "s/^APP_URL=.*/APP_URL=http:\/\/localhost:8090/" .env
 	sed -i "/SMTP_PORT/s/^#//" .env
 	sed -i "/SMTP_OUT_PORT/s/^#//" .env
 	sed -i "s/^SF_APP_ENV=.*/SF_APP_ENV=dev/" .env

@@ -25,6 +25,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Amavis\DeliveryStatus;
 use Symfony\Component\Mailer\MailerInterface;
 
@@ -40,10 +41,7 @@ class SendAuthMailRequestCommand extends Command
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
         private MailerInterface $mailer,
-        #[Autowire(param: 'domain')]
-        public readonly string $agentjDomain,
-        #[Autowire(param: 'scheme')]
-        public readonly string $agentjDomainScheme,
+        private UrlGeneratorInterface $urlGenerator,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
@@ -162,7 +160,9 @@ class SendAuthMailRequestCommand extends Command
             . '%%%' . $msg->getPartitionTag()
             . '%%%' . $domain->getId()
         );
-        $url = $this->agentjDomainScheme . "://" . $this->agentjDomain . "/check/" . $token;
+        $url = $this->urlGenerator->generate('check_message', [
+            'token' => $token
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         if (!empty($domain->getMailmessage())) {
             $body = $domain->getMailmessage();

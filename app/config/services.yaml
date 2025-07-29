@@ -8,8 +8,6 @@ parameters:
     app_locales: en|fr
     salt: "%env(TOKEN_ENCRYPTION_SALT)%"
     iv: "%env(TOKEN_ENCRYPTION_IV)%"
-    domain: "%env(DOMAIN)%"
-    scheme: "%env(DOMAIN_SCHEME)%"
     app.agentj-version: "%env(AGENTJ_VERSION)%"
     app.timezone: "%env(TIMEZONE)%"
     app.amavisd-release: "%env(AMAVIS_RELEASE__PATH)%"
