@@ -37,7 +37,6 @@ class ReportSendMailCommand extends Command
         private Service\CryptEncryptService $cryptEncryptService,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
-        private ParameterBagInterface $params,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
         private UrlGeneratorInterface $urlGenerator,
     ) {
