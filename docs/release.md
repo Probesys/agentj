@@ -7,6 +7,16 @@ Also, see if you can fix any minor bugs or small technical debt issues first: th
 
 Before releasing a version, you should at least update the dependencies to their latest patch versions.
 
+## Determine the version
+
+There are three kind of versions: major, minor or patch.
+
+- Major versions are released on the `main` branch and contain major features.
+- Minor versions are also released on the `main` branch but they come with less noticeable features.
+- Patch versions are released on "patch" branches (e.g. [branch `2.1`](https://github.com/Probesys/agentj/tree/2.1)) and must only contain backward-compatible changes, **meaning that administrators must be able to upgrade to these versions automatically.**
+
+In practice, there is not much difference between major and minor versions: it's mainly for the external communication.
+
 ## Start the release process
 
 There's a `make` command to release a new version of AgentJ:
@@ -74,6 +84,11 @@ Once the version tag is pushed, you must publish the version on GitHub:
 3. name the release to the version tag (e.g. “AgentJ 2.0.0”);
 4. copy the content of the changelog corresponding to the version;
 5. you should adapt the title levels in Markdown (i.e. titles of level 3 `###` must be changed by titles of level 2 `##`);
+
+## Create the next "patch" branch
+
+When you release a minor or a major version, you must create the corresponding "patch" branch.
+For instance, when version 2.2.0 has been released, the [branch `2.2`](https://github.com/Probesys/agentj/tree/2.2) has been created.
 
 ## Fix mistakes made during the release
 
