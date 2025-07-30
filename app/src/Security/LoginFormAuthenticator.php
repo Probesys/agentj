@@ -123,11 +123,29 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                     }
                 } catch (ConnectionFailedException $exc) {
                     $this->logger->error(
-                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                        'IMAP connection failed for user "{imap_login}" on host "{imap_host}:{imap_port}": {message}',
+                        [
+                            'exception' => $exc,
+                            'message' => $exc->getMessage(),
+                            'user_id' => $user->getId(),
+                            'imap_login' => $login,
+                            'imap_host' => $connector->getImapHost(),
+                            'imap_port' => $connector->getImapPort(),
+                            'imap_protocol' => $connector->getImapProtocol(),
+                        ]
                     );
                 } catch (ImapServerErrorException $exc) {
                     $this->logger->error(
-                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                        'IMAP server error for user "{imap_login}" on host "{imap_host}:{imap_port}": {message}',
+                        [
+                            'exception' => $exc,
+                            'message' => $exc->getMessage(),
+                            'user_id' => $user->getId(),
+                            'imap_login' => $login,
+                            'imap_host' => $connector->getImapHost(),
+                            'imap_port' => $connector->getImapPort(),
+                            'imap_protocol' => $connector->getImapProtocol(),
+                        ]
                     );
                 }
             }
