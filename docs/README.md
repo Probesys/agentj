@@ -95,6 +95,18 @@ $ docker compose pull
 $ docker compose up -d
 ```
 
+### Versioning policy
+
+Versions of AgentJ are following this pattern: `major.minor.patch`.
+For instance, version 2.1.0 means 2 is major, 1 is minor and 0 is patch.
+
+Major and minor versions can introduce breaking changes in the configuration so it's strongly recommended to check the changelog before such upgrade.
+It is safe to upgrade to patch versions automatically, although it is preferable to always check the changelog.
+
+For now, we only provide maintenance and security fixes for the latest minor version.
+
+We don't commit to a specific release schedule, but you can expect ~3 minor or major versions per year.
+
 ## Development
 
 Get the code:
@@ -194,6 +206,19 @@ This file is used to override the Docker Compose configuration in development:
 - it mounts the code from your local `app/` folder into the app container
 - it exposes the database port to the host
 - it sets static IPs and specify DNS for some containers
+
+### Managing version branches
+
+For each minor version of AgentJ, we create a dedicated Git "patch" branch (e.g. [branch `2.1`](https://github.com/Probesys/agentj/tree/2.1)).
+This allows to release patch versions while working on major features on the `main` branch.
+
+Generally speaking, if you work on a new feature, start your branch from `main`.
+If you work on a bugfix, you should start your branch from the latest patch branch.
+Some maintenance tasks may also start from the patch branch if it can be helpful.
+Pull requests must target the corresponding branch.
+
+Maintainers must synchronize as often as possible the `main` branch with the latest patch branch by creating a branch from `main` and merge the patch branch in it.
+Then, follow the normal workflow by opening a pull request.
 
 ### Release a version
 
