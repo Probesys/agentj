@@ -60,7 +60,6 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.6",
-        "fzaninotto/faker": "^1.5",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^1.12",
         "phpstan/phpstan-doctrine": "^1.5",
