@@ -13,6 +13,16 @@ Please note that the command can take a long time for large databases.
 $ docker compose exec db mariadb-upgrade --force -uroot -p<ROOT PASSWORD>
 ```
 
+## 2025-07-31 - 2.1.6
+
+This is a security release, it fixes a SQL injection only exploitable by a malicious administrator.
+See the commit for more information.
+Updating AgentJ is recommended.
+
+### Security
+
+- Fix a SQL injection in advanced search ([0b14160](https://github.com/Probesys/agentj/commit/0b14160))
+
 ## 2025-07-29 - 2.1.5
 
 ### Technical

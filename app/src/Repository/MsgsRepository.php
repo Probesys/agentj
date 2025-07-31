@@ -404,9 +404,20 @@ class MsgsRepository extends ServiceEntityRepository
         }
 
         if ($sortParams) {
-            $sql .= ' ORDER BY ' . $sortParams['sort'] . ' ' . $sortParams['direction'];
+            $sortField = $sortParams['sort'];
+            $sortDirection = $sortParams['direction'];
+
+            if (!in_array($sortField, ['mail_id', 'from_addr', 'email', 'subject', 'time_iso'])) {
+                $sortField = 'm.time_num';
+            }
+
+            if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
+                $sortDirection = 'desc';
+            }
+
+            $sql .= " ORDER BY {$sortField} {$sortDirection}";
         } else {
-            $sql .= ' ORDER BY m.time_num desc, m.status_id ';
+            $sql .= ' ORDER BY m.time_num desc, m.status_id';
         }
 
         $stmt = $conn->prepare($sql);
