@@ -1,17 +1,38 @@
 # Changelog of AgentJ
 
-## unreleased
+## 2025-07-31 - 2.2.0
 
-### Migration notes
+### Security
 
-MariaDB has been upgraded to version 11.4.
-While the system tables are automatically upgraded, user tables aren't.
-To fully upgrade all the tables, run the following command after restarting the stack.
-Please note that the command can take a long time for large databases.
+- Make report tokens unique per email ([1fb34ae](https://github.com/Probesys/agentj/commit/1fb34ae))
+- Do not allow users to reauthorize themselves ([34449c4](https://github.com/Probesys/agentj/commit/34449c4))
 
-```console
-$ docker compose exec db mariadb-upgrade --force -uroot -p<ROOT PASSWORD>
-```
+### Features
+
+- Send only one validation email for multiple receivers of the same domain ([31840a6](https://github.com/Probesys/agentj/commit/31840a6))
+
+### Bug fixes
+
+- Show the preview button only for untreated emails ([89b155b](https://github.com/Probesys/agentj/commit/89b155b))
+- Close the modal after submitting a user form ([043b3f2](https://github.com/Probesys/agentj/commit/043b3f2))
+- Fetch the sender email correctly for virus alerts ([27d2b32](https://github.com/Probesys/agentj/commit/27d2b32))
+- Unregister residual service workers ([5017429](https://github.com/Probesys/agentj/commit/5017429))
+
+### Documentation
+
+- Indicate to checkout to the desired version in the installation guide ([2ec3fbd](https://github.com/Probesys/agentj/commit/2ec3fbd))
+
+### Maintenance
+
+- Upgrade to MariaDB 11.4 ([5a97b3b](https://github.com/Probesys/agentj/commit/5a97b3b))
+- Enable mariadbupgrade in healthcheck ([a57f8d4](https://github.com/Probesys/agentj/commit/a57f8d4))
+- Decrease the Amavis `dsn_cutoff` level ([c8219f8](https://github.com/Probesys/agentj/commit/c8219f8))
+- Rework the Postfix configurations ([5416231](https://github.com/Probesys/agentj/commit/5416231))
+- Setup PHPStan up to level 7 ([f7bdcd5](https://github.com/Probesys/agentj/commit/f7bdcd5))
+- Setup PHP\_CodeSniffer ([f7e926c](https://github.com/Probesys/agentj/commit/f7e926c), [9aa8625](https://github.com/Probesys/agentj/commit/9aa8625))
+- Update the dependencies ([85ee60b](https://github.com/Probesys/agentj/commit/85ee60b), [e2d2569](https://github.com/Probesys/agentj/commit/e2d2569), [21c9638](https://github.com/Probesys/agentj/commit/21c9638))
+- Refactor the research of messages ([cc39352](https://github.com/Probesys/agentj/commit/cc39352))
+- Refactor the native SQL queries ([cac9805](https://github.com/Probesys/agentj/commit/cac9805))
 
 ## 2025-07-31 - 2.1.6
 
