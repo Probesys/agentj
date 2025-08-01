@@ -123,11 +123,43 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                     }
                 } catch (ConnectionFailedException $exc) {
                     $this->logger->error(
-                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                        sprintf(
+                            "IMAP connection failed for user '%s' on host '%s:%s' (Error %d, %s): %s",
+                            $login,
+                            $connector->getImapHost(),
+                            $connector->getImapPort(),
+                            $exc->getCode(),
+                            get_class($exc),
+                            $exc->getMessage()
+                        ),
+                        [
+                            'exception' => $exc,
+                            'user_id' => $user->getId(),
+                            'imap_login' => $login,
+                            'imap_host' => $connector->getImapHost(),
+                            'imap_port' => $connector->getImapPort(),
+                            'imap_protocol' => $connector->getImapProtocol(),
+                        ]
                     );
                 } catch (ImapServerErrorException $exc) {
                     $this->logger->error(
-                        "User cannot connect \t (Error " . $exc->getCode() . ")\t" . $exc->getMessage()
+                        sprintf(
+                            "IMAP server error for user '%s' on host '%s:%s' (Error %d, %s): %s",
+                            $login,
+                            $connector->getImapHost(),
+                            $connector->getImapPort(),
+                            $exc->getCode(),
+                            get_class($exc),
+                            $exc->getMessage()
+                        ),
+                        [
+                            'exception' => $exc,
+                            'user_id' => $user->getId(),
+                            'imap_login' => $login,
+                            'imap_host' => $connector->getImapHost(),
+                            'imap_port' => $connector->getImapPort(),
+                            'imap_protocol' => $connector->getImapProtocol(),
+                        ]
                     );
                 }
             }
