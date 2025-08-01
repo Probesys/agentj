@@ -224,6 +224,9 @@ class SendAuthMailRequestCommand extends Command
                   ->to($mailTo)
                   ->html($body['html_body'])
                   ->text(strip_tags($body['plain_body']));
+
+            $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+            $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
         } catch (\Exception $e) {
             //catch error and save this in msgs + change status to error
             $messageError = $e->getMessage();
