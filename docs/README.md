@@ -24,7 +24,8 @@ Services:
 
 Services used during dev/tests:
 
-- **mailpit**: catch all emails, from or to AgentJ
+- **ldap**: runs an OpenLDAP server
+- **mailpit**: catches all emails, from or to AgentJ
 - **smtptest**: runs opensmtpd and dnsmasq. It can send email to AgentJ on the behalf of configured domains; relay email from AgentJ to mailpit, provide DNS for correct DKIM verification of tests email
 
 Volumes:
@@ -159,6 +160,31 @@ You can remove all the Docker stuff (containers, volumes, networks) with:
 ```console
 $ make docker-clean FORCE=true
 ```
+
+### Working with LDAP
+
+The development stack provides a LDAP server.
+To use it, you must create a `example.com` domain in AgentJ.
+
+Then, create a LDAP connector with the following values:
+
+- host: `ldap`
+- port: 1389
+- bind DN: `cn=admin,dc=example,dc=com`
+- password: `secret`
+- BaseDN: `ou=users,dc=example,dc=com`
+- Login field: `uid`
+- Name field: `displayName`
+- Email field: `mail`
+- Users filter: `(cn=*)`
+
+Then, import the users.
+You can login with one of the LDAP users:
+
+- `alix@example.com` / `secret`
+- `benedict@example.com` / `secret`
+- `charlie@example.com` / `secret`
+- `dominique@example.com` / `secret`
 
 ### About the `compose.dev.yml` file
 
