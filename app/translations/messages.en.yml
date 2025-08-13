@@ -2,6 +2,7 @@ Generics:
   actions:
     create: Add
     delete: Delete
+    deleteSelection: Delete selection
     cancel: Cancel
     show: See
     edit: Edit
@@ -29,6 +30,7 @@ Generics:
     chooseDomain: "Choose a domain"
     choosePolicy: "Choose a policy"
     showMore: "Show more"
+    showNbItemPerPage: "Display %nbItems% items per page"
   fields:
     name: Title
     helpMessage: "Help message"
@@ -110,6 +112,7 @@ Generics:
       noSelectedItemError: "You must select at least one item to complete this operation!"
   flash:
     genericFormError: "An error occurred when processing the form"
+    invalidCsrfToken: "Invalid CSRF token"
     updateSuccess: "The update has been successfully completed"
     editSuccess: "The update has been successfully completed"
     deleteSuccess: "A successful removal!"

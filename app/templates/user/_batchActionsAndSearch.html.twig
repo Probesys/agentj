@@ -1,0 +1,27 @@
+<div class="col mb-3 bg-white pb-3">
+    <div class="row">
+        <div class="col-md-6">
+            <form
+                id="massive-actions-form"
+                data-controller="mass-action-form"
+                data-message-confirm="{{ 'Message.Actions.massiveActionContent'|trans }}"
+                class="d-inline"
+                action="{{ path('user_email_batch_delete') }}"
+                data-mass-action-group="users"
+                method="post"
+            >
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete user') }}">
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    data-action="mass-action-form#submit"
+                >
+                    {{ 'Generics.actions.deleteSelection'|trans }}
+                </button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            {% include 'common/_rapidSearchForm.html.twig' %}
+        </div>
+    </div>
+</div>

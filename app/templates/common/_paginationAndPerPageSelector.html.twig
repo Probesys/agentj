@@ -1,0 +1,21 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            {{ knp_pagination_render(pagination) }}
+        </div>
+
+        <div class="col">
+            <nav>
+                <ul class="pagination justify-content-end">
+                    {% for per_page in per_pages %}
+                        <li class="page-item {% if app.session.get('perPage') == per_page %}active{% endif %}">
+                            <a title="{{'Generics.actions.showNbItemPerPage'|trans({'%nbItems%': per_page})}}" class="page-link" href="{{ path('per_page', {'nbItems': per_page}) }}">
+                                {{ per_page }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

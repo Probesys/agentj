@@ -685,4 +685,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return in_array('ROLE_ADMIN', $this->getRoles()) || in_array('ROLE_SUPER_ADMIN', $this->getRoles());
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return in_array('ROLE_SUPER_ADMIN', $this->getRoles());
+    }
 }

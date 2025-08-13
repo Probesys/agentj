@@ -6,7 +6,9 @@
 
 {% block body %}
     <div class="m-4">
-        <h3 class="mb-3">{{ 'Search.Title'|trans }}</h3>
+        <h3 class="mb-3">
+            {{ 'Search.Title'|trans }}
+        </h3>
 
         <button type="button" data-toggle="collapse" aria-expanded="true" data-target="#filterContainer" id="toggleFilters" class="btn btn-primary mb-3">
             {{ 'Generics.labels.filters'|trans }}
@@ -45,7 +47,9 @@
             </div>
 
             <!-- Button to toggle advanced filters -->
-            <button type="button" data-toggle="collapse" aria-expanded="false" data-target="#advancedFilters" id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">{{ 'Search.AdvancedFilter'|trans }}</button>
+            <button type="button" data-toggle="collapse" aria-expanded="false" data-target="#advancedFilters" id="toggleAdvancedFilters" class="btn btn-secondary mb-4 mt-3">
+                {{ 'Search.AdvancedFilter'|trans }}
+            </button>
 
             <!-- Advanced filters section -->
             <div id="advancedFilters" class="collapse">
@@ -75,7 +79,9 @@
             </div>
 
             <div class="form-group">
-                <label id="label_messagetype">{{ form_label(form.messageType) }}</label>
+                <label id="label_messagetype">
+                    {{ form_label(form.messageType) }}
+                </label>
                 <div class="toggle-button-group">
                     {% for choice in form.messageType %}
                         <div class="toggle-label">
@@ -86,13 +92,15 @@
             </div>
             <div id="submit" class="mt-3">
                 {{ form_widget(form.submit) }}
-                <a href="{{ path('advanced_search') }}" id="search_filter_reset" class="btn btn-secondary">{{ 'Search.ResetFilters'|trans }}</a>
+                <a href="{{ path('advanced_search') }}" id="search_filter_reset" class="btn btn-secondary">
+                    {{ 'Search.ResetFilters'|trans }}
+                </a>
             </div>
             {{ form_end(form) }}
         </div>
 
         <div class="table-responsive" id="advancedSearchResult">
-            <table class="table table-hover search" style="margin: 3rem 0 5rem 0">
+            <table class="table table-hover search">
                 <thead>
                     <tr class="table-header">
                         <th>
@@ -139,9 +147,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="navigation text-center">
-            {{ knp_pagination_render(messagesRecipients, null, {'_fragment': 'advancedSearchResult'}) }}
-        </div>
+        {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': messagesRecipients } %}
     </div>
 
     <style>
@@ -175,7 +181,8 @@
             align-items: center;
         }
 
-        #search_filter_submit, #search_filter_reset {
+        #search_filter_submit,
+        #search_filter_reset {
             font-size: 1.2rem;
         }
 

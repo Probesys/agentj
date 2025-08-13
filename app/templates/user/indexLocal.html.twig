@@ -1,76 +1,101 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{'Entities.User.indexLocal'|trans}}{% endblock %}
+{% block title %}
+    {{'Entities.User.indexLocal'|trans}}
+{% endblock %}
 
 {% block body %}
 
-    {% set _title = 'Entities.User.indexLocal'|trans %}
+    {% set _title = 'Entities.User.indexLocal'|trans ~ ' : ' ~ users.getTotalItemCount%}
     {% embed 'common/blockTitleAndButtons.html.twig' %}
 
         {% block content_button_actions %}
-            <a data-url-modal-content="{{ path('user_local_new') }}"  href="#" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new'|trans() }}</a>
+            <button type="button"
+                data-url-modal-content="{{ path('user_local_new') }}"
+                class="btn-open-modal btn btn-success"
+            >
+                <i class="fas fa-plus"></i>
+                &nbsp;
+                {{ 'Entities.User.actions.add_new'|trans() }}
+            </button>
         {% endblock %}
 
     {% endembed %}
 
+    {% include 'user/_batchActionsAndSearch.html.twig' %}
 
- <div class="table-responsive">
-    <section id="no-more-tables">
-        <table class="table datatable hidden">
-            <thead>
-                <tr>
-                    <th>{{ 'Entities.User.fields.userName'|trans }}</th>
-                    <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
-                    <th>{{ 'Entities.User.fields.roles'|trans }}</th>
-                    <th>actions</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                {% for user in users %}
+    <div class="table-responsive">
+        <section id="no-more-tables">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td data-title="{{'Entities.User.fields.userName'|trans }}">{{ user.username }}</td>
-                        <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                        <td data-title="{{'Entities.User.fields.roles'|trans }}">
-                            {{ user.roles }}
-                            {% for role in user.roles %}
-                                {{ role }}
-                            {% endfor %}
-                            {# user.roles #}</td>
-                        <td>
-                            <ul class="list-inline list-unstyled">
-                                <li class="list-inline-item">
-                                    <a href="#" data-url-modal-content="{{ path('user_local_edit', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
-                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                                    </a>
-
-                                    <a href="#" data-url-modal-content="{{ path('user_local_change_password', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-warning' title="{{ 'Generics.actions.changePassword'|trans() }}">
-                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.changePassword'|trans() }}</span>
-                                    </a>
-
-                                    <a href="{{ path('user_local_delete', {'id': user.id}) }}?_token={{ csrf_token('delete' ~ user.id) }}" 
-                                       class='btn btn-sm btn-danger confirmModal'
-                                       data-dialog-title='{{ 'Message.Dialogs.confirmDeleteUserTitle'|trans }}'
-                                       data-dialog-content='{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}'
-                                       title="{{ 'Generics.actions.delete'|trans() }}">
-                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                    </a>
-                                    <a href="{{ path('homepage', {'_switch_user': user.username}) }}"
-                                       class='btn btn-sm btn-primary'
-                                       title="{{ 'Generics.actions.connectAs'|trans() ~ user.username}} ">
-                                        <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </td>
+                        <th>
+                            <input type="checkbox" class="cb" id="checkAll" data-target-checkall-class="selected-msg">
+                            <label class="for-cb check-all" for="checkAll"></label>
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.userName'|trans, 'u.username') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.fullName'|trans, 'u.fullname') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.roles'|trans, 'u.roles') }}
+                        </th>
+                        <th>
+                            {{ 'Generics.labels.actions' | trans }}
+                        </th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
- </div>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="id[]" value="{{ user.id }}" id="user_{{ user.id }}" class="cb selected-msg" data-mass-action-group="users"/>
+                                <label class="for-cb"></label>
+                            </td>
+                            <td data-title="{{'Entities.User.fields.userName'|trans }}">
+                                {{ user.username }}
+                            </td>
+                            <td data-title="{{'Entities.User.fields.fullName'|trans }}">
+                                {{ user.fullname }}
+                            </td>
+                            <td data-title="{{'Entities.User.fields.roles'|trans }}">
+                                {{ user.roles | join(', ') }}
+                            </td>
+                            <td>
+                                <ul class="list-inline list-unstyled">
+                                    <li class="list-inline-item">
+                                        <button type="button" href="#" data-url-modal-content="{{ path('user_local_edit', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                            <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">
+                                                {{ 'Generics.actions.edit'|trans() }}
+                                            </span>
+                                        </button>
+
+                                        <button type="button" href="#" data-url-modal-content="{{ path('user_local_change_password', {'id': user.id}) }}" class='btn-open-modal btn btn-sm btn-warning' title="{{ 'Generics.actions.changePassword'|trans() }}">
+                                            <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                            <span class="d-md-none d-lg-block">
+                                                {{ 'Generics.actions.changePassword'|trans() }}
+                                            </span>
+                                        </button>
+
+                                        {% include 'user/_delete_form.html.twig' with {'user': user} %}
+
+                                        {% if user.email is not null %}
+                                            {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
+                                        {% endif %}
+
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': users } %}
+
 {% endblock %}

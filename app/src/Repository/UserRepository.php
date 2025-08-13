@@ -4,11 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Domain;
 use App\Entity\User;
-use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -82,40 +83,58 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * search query by role
-     *
-     * @return User[]
-     */
-    public function searchByRole(User $user, ?string $role = null): array
-    {
 
-        $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
+    /** @param array<string> $roles */
+    public function search(
+        User $currentUser,
+        ?array $roles = null,
+        ?string $searchKey = null,
+        bool $isAlias = false
+    ): ?Query {
+
+        $qb = $this->createQueryBuilder('u')
+                ->select('u')
                 ->leftJoin('u.domain', 'd')
-                ->leftJoin('u.policy', 'p')
-                ->where('u.originalUser is null');
+                ->leftJoin('u.policy', 'p');
 
-        if ($role) {
-            $dql->andWhere('u.roles = :role');
-            $dql->setParameter('role', $role);
+        if ($isAlias) {
+            $qb->leftJoin('u.originalUser', 'ou');
+            $qb->where('u.originalUser is not null');
+        } else {
+            $qb->where('u.originalUser is null');
         }
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
+        if ($roles) {
+            $expr = new Expr\Orx();
+            foreach ($roles as $key => $role) {
+                $expr->add("u.roles LIKE :role{$key}");
+                $qb->setParameter("role{$key}", "%\"{$role}\"%");
+            }
+            $qb->andWhere($expr);
+        }
+
+        if (!$currentUser->isSuperAdmin()) {
+            $domains = $currentUser->getDomains()->toArray();
+            if ($currentUser->getDomain()) {
+                $domains[] = $currentUser->getDomain();
             }
 
             if (empty($domains)) {
-                return [];
+                throw new AccessDeniedException('You do not have access to any domain');
             }
 
-            $dql->andWhere('u.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
+            $qb->andWhere('u.domain in (:domains)');
+            $qb->setParameter('domains', $domains);
         }
 
-        $result = $dql->getQuery()->execute();
+        if ($searchKey) {
+            $qb->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
+            $qb->setParameter('searchKey', "%{$searchKey}%");
+        }
+
+        $qb->orderBy('u.email', 'ASC');
+
+        $result = $qb->getQuery();
         return $result;
     }
 
@@ -133,33 +152,6 @@ class UserRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    /**
-     * Return a list of aliases associate to a user
-     * @return User[]
-     */
-    public function searchAlias(User $user): array
-    {
-        $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email as alias, a.email as email')
-                ->join('u.originalUser', 'a')
-                ->where('u.originalUser is not null');
-
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
-            }
-
-            if (empty($domains)) {
-                return [];
-            }
-
-            $dql->andWhere('u.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
-        }
-
-        return $dql->getQuery()->getScalarResult();
-    }
 
     /**
      * autocomplete query

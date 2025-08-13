@@ -1,83 +1,114 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{'Entities.User.indexEmail'|trans}}{% endblock %}
+{% block title %}
+    {{ 'Entities.User.indexEmail'|trans }}
+{% endblock %}
 
 {% block body %}
-    {% set _title = 'Entities.User.indexEmail'|trans %}
+    {% set _title = 'Entities.User.indexEmail'|trans ~ ' : ' ~ users.getTotalItemCount %}
+
     {% embed 'common/blockTitleAndButtons.html.twig' %}
-
         {% block content_button_actions %}
-                {% if is_granted('ROLE_ADMIN') %}
-                    <a href="#" data-turbo="false" data-url-modal-content="{{ path('import_user_email') }}" class="btn-open-modal btn btn-success float-right ml-2  col-sm-12 col-md-4 mb-1"><i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}</a>
-                {% endif %}
-                <a href="#" data-url-modal-content="{{ path('user_email_new') }}"  class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 "><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.User.actions.add_new'|trans() }}</a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <button
+                    type="button"
+                    data-url-modal-content="{{ path('user_email_new') }}"
+                    class="btn-open-modal btn btn-success"
+                >
+                    <i class="fas fa-plus"></i>
+                    &nbsp;
+                    {{ 'Entities.User.actions.add_new'|trans }}
+                </button>
 
+                <button
+                    type="button"
+                    data-url-modal-content="{{ path('import_user_email') }}"
+                    class="btn-open-modal btn btn-success"
+                >
+                    <i class="fas fa-plus"></i>
+                    &nbsp;
+                    {{ 'Generics.actions.importFile'|trans }}
+                </button>
+            {% endif %}
         {% endblock %}
-
     {% endembed %}
 
+    {% include 'user/_batchActionsAndSearch.html.twig' %}
 
-    <form id="massive-actions-form" action="{{ path('user_email_batch_delete') }}" method="post">
-         <div class="table-responsive">
+    <div class="table-responsive">
         <section id="no-more-tables">
-            <table id="table_users" class="table datatable hidden">
+            <table id="table_users" class="table">
                 <thead>
                     <tr>
                         <th>
-                            <input type="checkbox" class="cb" id='checkAll' data-target-checkall-class="selected-msg">
+                            <input type="checkbox" class="cb" id="checkAll" data-target-checkall-class="selected-msg">
                             <label class="for-cb check-all" for="checkAll"></label>
                         </th>
-                        <th>{{ 'Entities.User.fields.email'|trans }}</th>
-                        <th>{{ 'Entities.User.fields.fullName'|trans }}</th>
-                        <th>{{ 'Entities.User.fields.policy'|trans }}</th>
-                        <th>{{ 'Entities.User.fields.groups'|trans }}</th>
-                        <th>actions</th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.email'|trans, 'u.email') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.fullName'|trans, 'u.fullname') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(users, 'Entities.User.fields.policy'|trans, 'p.policyName') }}
+                        </th>
+                        <th>
+                            {{ 'Entities.User.fields.groups'|trans }}
+                        </th>
+                        <th>
+                            {{ 'Generics.labels.actions' | trans }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-
                     {% for user in users %}
-                      {% set groups = user.id | user_groups  %}
-{#                      {{ dump(groups) }}#}
+                        {% set groups = user.id|user_groups %}
                         <tr>
                             <td>
-                                <input type="checkbox" name="id[]" value="{{ user.id }}" id="{{ user.id }}" class="cb selected-msg">
+                                <input
+                                    type="checkbox"
+                                    name="id[]"
+                                    value="{{ user.id }}"
+                                    id="user_{{ user.id }}"
+                                    class="cb selected-msg"
+                                    data-mass-action-group="users"
+                                />
                                 <label class="for-cb"></label>
                             </td>
-                            <td data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email | stream_get_contents }}</td>
-                            <td data-title="{{'Entities.User.fields.fullName'|trans }}">{{ user.fullname }}</td>
-                            <td data-title="{{'Entities.User.fields.policy'|trans }}">{{ user.policyName }}</td>
-                            <td data-title="{{'Entities.User.fields.groups'|trans }}">
-                              {% for group in groups %}
-
-                                <span class="badge badge-secondary">{{ group }}</span>
-                              {% endfor %}
-                              </td>
+                            <td data-title="{{ 'Entities.User.fields.email'|trans }}">
+                                {{ user.email|stream_get_contents }}
+                            </td>
+                            <td data-title="{{ 'Entities.User.fields.fullName'|trans }}">
+                                {{ user.fullname }}
+                            </td>
+                            <td data-title="{{ 'Entities.User.fields.policy'|trans }}">
+                                {{ user.policy.policyName }}
+                            </td>
+                            <td data-title="{{ 'Entities.User.fields.groups'|trans }}">
+                                {% for group in groups %}
+                                    <span class="badge badge-secondary">
+                                        {{ group }}
+                                    </span>
+                                {% endfor %}
+                            </td>
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">
-                                        <a href="#" data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"  class='btn-open-modal btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                        <button
+                                            type="button"
+                                            data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"
+                                            class="btn-open-modal btn btn-sm btn-success"
+                                            title="{{ 'Generics.actions.edit'|trans }}">
                                             <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                                        </a>
+                                            <span class="d-md-none d-lg-block">
+                                                {{ 'Generics.actions.edit'|trans }}
+                                            </span>
+                                        </button>
 
-                                        <a href="{{ path('user_email_delete', {'id': user.id}) }}?_token={{ csrf_token('delete' ~ user.id) }}" 
-                                           class='btn btn-sm btn-danger confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmDeleteUserTitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}'
-                                           title="{{ 'Generics.actions.delete'|trans() }}">
-                                            <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                        </a>
+                                        {% include 'user/_delete_form.html.twig' with {'user': user} %}
 
-                                        <a href="{{ path('homepage', {'_switch_user': user.email | stream_get_contents}) }}" 
-                                           class='btn btn-sm btn-primary'
-                                           title="{{ 'Generics.actions.connectAs'|trans() ~ user.email}} ">
-                                            <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
-                                        </a>
-
-
+                                        {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
                                     </li>
                                 </ul>
                             </td>
@@ -86,6 +117,8 @@
                 </tbody>
             </table>
         </section>
-         </div>
-    </form>
+    </div>
+
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': users } %}
+
 {% endblock %}

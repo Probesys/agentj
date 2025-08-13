@@ -364,6 +364,21 @@ class DefaultController extends AbstractController
         return new RedirectResponse($url);
     }
 
+    #[Route('/per_page/{nbItems}', name: 'per_page')]
+    public function perPage(int $nbItems, Request $request): Response
+    {
+        $referer = $request->headers->get('referer');
+        $session = $request->getSession();
+        $session->set('perPage', $nbItems);
+        $urlParts = parse_url($referer);
+        parse_str($urlParts['query'] ?? '', $query);
+        $query['page'] = 1;
+        $newQuery = http_build_query($query);
+        $newReferer = strtok($referer, '?') . '?' . $newQuery;
+
+        return $referer ? $this->redirect($newReferer) : $this->redirectToRoute('homepage');
+    }
+
     /**
      * @return array{?Msgs, ?Domain, Msgrcpt[]}
      */
