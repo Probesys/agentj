@@ -20,6 +20,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Repository\DomainRepository;
+use Knp\Component\Pager\PaginatorInterface;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 #[Route(path: 'admin/users')]
@@ -37,22 +38,50 @@ class UserController extends AbstractController
     }
 
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
-    public function indexUserLocal(UserRepository $userRepository): Response
-    {
+    public function indexUserLocal(
+        Request $request,
+        PaginatorInterface $paginator,
+        UserRepository $userRepository
+    ): Response {
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
         /** @var User $user */
         $user = $this->getUser();
-        $adminUsers = $userRepository->searchByRole($user, '["ROLE_ADMIN"]');
-        $superAdminUsers = $userRepository->searchByRole($user, '["ROLE_SUPER_ADMIN"]');
-        $users = array_merge($adminUsers, $superAdminUsers);
+        $users = $userRepository->search($user, '["ROLE_ADMIN"]');
+        $users = $paginator->paginate(
+            $users,
+            $request->query->getInt('page', 1),
+            $perPage
+        );
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
     #[Route(path: '/email', name: 'users_email_index', methods: 'GET')]
-    public function indexUserEmail(UserRepository $userRepository): Response
-    {
+    public function indexUserEmail(
+        Request $request,
+        PaginatorInterface $paginator,
+        UserRepository $userRepository
+    ): Response {
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
         /** @var User $user */
         $user = $this->getUser();
-        $users = $userRepository->searchByRole($user, '["ROLE_USER"]');
+
+        $searchKey = $request->query->getString('search');
+        $users = $userRepository->search($user, '["ROLE_USER"]', $searchKey);
+        $users = $paginator->paginate(
+            $users,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'u.email',
+                'defaultSortDirection' => 'asc',
+            ]
+        );
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
@@ -242,10 +271,10 @@ class UserController extends AbstractController
         return $this->redirect($referer);
     }
 
-    #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'GET')]
+    #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'POST')]
     public function deleteEmail(Request $request, User $user): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->getString('_token'))) {
             if (in_array('ROLE_USER', $user->getRoles())) {
                 $this->em->remove($user);
                 $this->em->flush();
@@ -259,6 +288,13 @@ class UserController extends AbstractController
     public function batchDeleteEmail(Request $request): Response
     {
 
+        $csrfToken = $request->request->getString('_csrf_token', 'delete');
+
+        if (!$this->isCsrfTokenValid('delete user', $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken', [], 'errors'));
+            $referer = $request->headers->get('referer');
+            return $this->redirect($referer);
+        }
         foreach ($request->request->all('id') as $id) {
             $user = $this->em->getRepository(User::class)->find($id);
             if ($user) {
