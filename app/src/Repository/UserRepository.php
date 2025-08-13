@@ -82,16 +82,12 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * search query by role
-     *
-     * @return User[]
-     */
-    public function searchByRole(User $user, ?string $role = null): array
+
+    public function search(User $currentUser, ?string $role = null, ?string $searchKey = null): ?Query
     {
 
         $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
+                ->select('u')
                 ->leftJoin('u.domain', 'd')
                 ->leftJoin('u.policy', 'p')
                 ->where('u.originalUser is null');
@@ -101,21 +97,26 @@ class UserRepository extends ServiceEntityRepository
             $dql->setParameter('role', $role);
         }
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
+        if ($currentUser->isAdmin()) {
+            $domains = $currentUser->getDomains()->toArray();
+            if ($currentUser->getDomain()) {
+                $domains[] = $currentUser->getDomain();
             }
 
-            if (empty($domains)) {
-                return [];
+            if (!empty($domains)) {
+                $dql->andWhere('u.domain in (:domains)');
+                $dql->setParameter('domains', $domains);
             }
-
-            $dql->andWhere('u.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
         }
 
-        $result = $dql->getQuery()->execute();
+        if ($searchKey) {
+            $dql->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
+            $dql->setParameter('searchKey', "%{$searchKey}%");
+        }
+
+        $dql->orderBy('u.email', 'ASC');
+
+        $result = $dql->getQuery();
         return $result;
     }
 
