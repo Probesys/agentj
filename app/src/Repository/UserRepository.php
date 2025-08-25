@@ -83,9 +83,10 @@ class UserRepository extends ServiceEntityRepository
     }
 
 
+    /** @param array<string> $roles */
     public function search(
         User $currentUser,
-        ?string $role = null,
+        ?array $roles = null,
         ?string $searchKey = null,
         bool $isAlias = false
     ): ?Query {
@@ -102,9 +103,9 @@ class UserRepository extends ServiceEntityRepository
             $qb->where('u.originalUser is null');
         }
 
-        if ($role) {
-            $qb->andWhere('u.roles = :role');
-            $qb->setParameter('role', $role);
+        if ($roles) {
+            $qb->andWhere('u.roles IN (:roles)');
+            $qb->setParameter('roles', $roles);
         }
 
         if ($currentUser->isAdmin()) {
