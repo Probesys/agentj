@@ -83,18 +83,28 @@ class UserRepository extends ServiceEntityRepository
     }
 
 
-    public function search(User $currentUser, ?string $role = null, ?string $searchKey = null): ?Query
-    {
+    public function search(
+        User $currentUser,
+        ?string $role = null,
+        ?string $searchKey = null,
+        bool $isAlias = false
+    ): ?Query {
 
-        $dql = $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u')
                 ->select('u')
                 ->leftJoin('u.domain', 'd')
-                ->leftJoin('u.policy', 'p')
-                ->where('u.originalUser is null');
+                ->leftJoin('u.policy', 'p');
+
+        if ($isAlias) {
+            $qb->leftJoin('u.originalUser', 'ou');
+            $qb->where('u.originalUser is not null');
+        } else {
+            $qb->where('u.originalUser is null');
+        }
 
         if ($role) {
-            $dql->andWhere('u.roles = :role');
-            $dql->setParameter('role', $role);
+            $qb->andWhere('u.roles = :role');
+            $qb->setParameter('role', $role);
         }
 
         if ($currentUser->isAdmin()) {
@@ -104,19 +114,19 @@ class UserRepository extends ServiceEntityRepository
             }
 
             if (!empty($domains)) {
-                $dql->andWhere('u.domain in (:domains)');
-                $dql->setParameter('domains', $domains);
+                $qb->andWhere('u.domain in (:domains)');
+                $qb->setParameter('domains', $domains);
             }
         }
 
         if ($searchKey) {
-            $dql->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
-            $dql->setParameter('searchKey', "%{$searchKey}%");
+            $qb->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
+            $qb->setParameter('searchKey', "%{$searchKey}%");
         }
 
-        $dql->orderBy('u.email', 'ASC');
+        $qb->orderBy('u.email', 'ASC');
 
-        $result = $dql->getQuery();
+        $result = $qb->getQuery();
         return $result;
     }
 

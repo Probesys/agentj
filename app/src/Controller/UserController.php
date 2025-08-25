@@ -72,7 +72,9 @@ class UserController extends AbstractController
         $user = $this->getUser();
 
         $searchKey = $request->query->getString('search');
-        $users = $userRepository->search($user, '["ROLE_USER"]', $searchKey);
+
+        $users = $userRepository->search($user, '["ROLE_USER"]', searchKey: $searchKey);
+
         $users = $paginator->paginate(
             $users,
             $request->query->getInt('page', 1),
@@ -86,11 +88,30 @@ class UserController extends AbstractController
     }
 
     #[Route(path: '/alias', name: 'users_email_alias_index', methods: 'GET')]
-    public function indexUserEmailAlias(UserRepository $userRepository): Response
-    {
+    public function indexUserEmailAlias(
+        Request $request,
+        PaginatorInterface $paginator,
+        UserRepository $userRepository
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        $users = $userRepository->searchAlias($user);
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+        $searchKey = $request->query->getString('search');
+
+        $users = $userRepository->search($user, isAlias: true, searchKey: $searchKey);
+        $users = $paginator->paginate(
+            $users,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'u.email',
+                'defaultSortDirection' => 'asc',
+            ]
+        );
+
         return $this->render('user/indexAlias.html.twig', ['users' => $users]);
     }
 
@@ -295,6 +316,7 @@ class UserController extends AbstractController
             $referer = $request->headers->get('referer');
             return $this->redirect($referer);
         }
+
         foreach ($request->request->all('id') as $id) {
             $user = $this->em->getRepository(User::class)->find($id);
             if ($user) {
