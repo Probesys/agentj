@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2025-08-25 - 2.2.1
+
+### Bug fixes
+
+- Don't prefetch links with Turbo ([4e9f607](https://github.com/Probesys/agentj/commit/4e9f607))
+
 ## 2025-07-31 - 2.2.0
 
 ### Security
