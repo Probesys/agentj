@@ -49,12 +49,25 @@ class UserController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        $users = $userRepository->search($user, '["ROLE_ADMIN"]');
+
+        $searchKey = $request->query->getString('search');
+
+        $users = $userRepository->search(
+            $user,
+            ['["ROLE_ADMIN"]', '["ROLE_SUPER_ADMIN"]'],
+            searchKey: $searchKey
+        );
+
         $users = $paginator->paginate(
             $users,
             $request->query->getInt('page', 1),
-            $perPage
+            $perPage,
+            [
+                'defaultSortFieldName' => 'u.username',
+                'defaultSortDirection' => 'asc',
+            ]
         );
+
         return $this->render('user/indexLocal.html.twig', ['users' => $users]);
     }
 
@@ -73,7 +86,7 @@ class UserController extends AbstractController
 
         $searchKey = $request->query->getString('search');
 
-        $users = $userRepository->search($user, '["ROLE_USER"]', searchKey: $searchKey);
+        $users = $userRepository->search($user, ['["ROLE_USER"]'], searchKey: $searchKey);
 
         $users = $paginator->paginate(
             $users,
@@ -101,7 +114,7 @@ class UserController extends AbstractController
 
         $searchKey = $request->query->getString('search');
 
-        $users = $userRepository->search($user, isAlias: true, searchKey: $searchKey);
+        $users = $userRepository->search($user, ['["ROLE_USER"]'], isAlias: true, searchKey: $searchKey);
         $users = $paginator->paginate(
             $users,
             $request->query->getInt('page', 1),
@@ -281,26 +294,14 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/local/{id}/delete', name: 'user_local_delete', methods: 'GET')]
-    public function deleteLocal(Request $request, User $user): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->query->get('_token'))) {
-            $this->em->remove($user);
-            $this->em->flush();
-        }
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
-    }
-
     #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'POST')]
     public function deleteEmail(Request $request, User $user): Response
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->getString('_token'))) {
-            if (in_array('ROLE_USER', $user->getRoles())) {
-                $this->em->remove($user);
-                $this->em->flush();
-            }
+            $this->em->remove($user);
+            $this->em->flush();
         }
+
         $referer = $request->headers->get('referer');
         return $this->redirect($referer);
     }
