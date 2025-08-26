@@ -1,3 +1,8 @@
+{% set searchKey = '' %}
+{% if app.request.query.has('search') %}
+    {% set searchKey = app.request.query.get('search') %}
+{% endif %}
+
 <form class="form-inline float-right">
     <label for="search" class="mr-2 col-form-label">&nbsp</label><br/>
     <input type="text" placeholder="{{'Generics.actions.search'|trans}}"

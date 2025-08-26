@@ -15,7 +15,14 @@
 
     {% endembed %}
 
-    {% include 'user/_massive_action_form.html.twig' %}
+    {% include 'common/_batchActionsAndSearch.html.twig'
+        with {
+            'actionPath': path('user_email_batch_delete'),
+            'csrfToken': csrf_token('delete user'),
+            'messageConfirm': 'Message.Actions.massiveActionContent'|trans,
+            'buttonLabel': 'Generics.actions.deleteSelection'|trans
+            }
+    %}
 
     <div class="table-responsive">
             <section id="no-more-tables">

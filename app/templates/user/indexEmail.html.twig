@@ -23,7 +23,14 @@
         {% endblock %}
     {% endembed %}
 
-    {% include 'user/_massive_action_form.html.twig' %}
+    {% include 'common/_batchActionsAndSearch.html.twig'
+        with {
+            'actionPath': path('user_email_batch_delete'),
+            'csrfToken': csrf_token('delete user'),
+            'messageConfirm': 'Message.Actions.massiveActionContent'|trans,
+            'buttonLabel': 'Generics.actions.deleteSelection'|trans
+            }
+    %}
 
     <div class="table-responsive">
         <section id="no-more-tables">
@@ -51,7 +58,7 @@
                                     value="{{ user.id }}"
                                     id="user_{{ user.id }}"
                                     class="cb selected-msg">
-                                <label class="for-cb" for="user_{{ user.id }}"></label>
+                                <label class="for-cb"></label>
                             </td>
                             <td data-title="{{ 'Entities.User.fields.email'|trans }}">
                                 {{ user.email|stream_get_contents }}
