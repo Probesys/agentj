@@ -6,17 +6,19 @@ use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Mailaddr;
-use App\Entity\Settings;
+use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\SettingsRepository;
+use App\Repository\DomainRepository;
 use App\Service\FileUploader;
 use App\Service\MailaddrService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -24,12 +26,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Entity\Policy;
 
 #[Route(path: '/domain')]
 class DomainController extends AbstractController
@@ -56,20 +55,40 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/', name: 'domain_index', methods: 'GET')]
-    public function index(): Response
-    {
+    public function index(
+        Request $request,
+        DomainRepository $domainRepository,
+        PaginatorInterface $paginator,
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $domains = $this->em
-                ->getRepository(Domain::class)
-                ->findAll();
-        } else {
-            $domains = $user->getDomains();
-        }
 
+        $domainsQuery = $domainRepository->getSearchQuery(
+            currentUser: $user,
+            searchKey: $request->query->getString('search')
+        );
 
-        return $this->render('domain/index.html.twig', ['domains' => $domains]);
+        $this->sanitizeSortParameter($request);
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+        $domains = $paginator->paginate(
+            $domainsQuery,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'd.domain',
+                'defaultSortDirection' => 'asc',
+            ]
+        );
+
+        return $this->render(
+            'domain/index.html.twig',
+            [
+                'domains' => $domains,
+            ]
+        );
     }
 
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
@@ -283,11 +302,12 @@ class DomainController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{id}/delete', name: 'domain_delete', methods: 'GET')]
+    #[Route(path: '/{id}/delete', name: 'domain_delete', methods: 'POST')]
     public function delete(Request $request, Domain $domain): Response
     {
         $this->checkAccess($domain);
-        if ($this->isCsrfTokenValid('delete' . $domain->getId(), $request->query->get('_token'))) {
+        $token = $request->request->getString('_token');
+        if ($this->isCsrfTokenValid('delete' . $domain->getId(), $token)) {
             $em = $this->em;
             $em->remove($domain);
             $em->flush();
@@ -439,6 +459,22 @@ class DomainController extends AbstractController
         } catch (ProcessFailedException $exception) {
             $this->addFlash('error', $exception->getMessage());
             return false;
+        }
+    }
+
+
+    private function sanitizeSortParameter(Request $request): void
+    {
+        $allowedSortFields = [
+            'd.domain',
+            'd.datemod',
+            'd.active',
+        ];
+
+        $sort = $request->query->getString('sort', 'd.domain');
+
+        if (!in_array($sort, $allowedSortFields, true)) {
+            $request->query->set('sort', 'd.domain');
         }
     }
 }

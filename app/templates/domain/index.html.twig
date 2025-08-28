@@ -1,75 +1,116 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{'Entities.Domain.index'|trans()}}{% endblock %}
+{% block title %}
+    {{'Entities.Domain.index'|trans()}}
+{% endblock %}
 
 {% block body %}
 
-    {% set _title = 'Entities.Domain.index'|trans %}
+    {% set _title = 'Entities.Domain.index'|trans ~ ' : ' ~ domains.getTotalItemCount %}
     {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-        {% block content_button_actions %} 
+        {% block content_button_actions %}
             {% if is_granted('ROLE_SUPER_ADMIN') %}
                 <div class="p-2 flex-fill">
-                    <a href="{{ path('domain_new') }}" class="btn btn-success float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new'|trans() }}</a>
+                    <a href="{{ path('domain_new') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i>
+                        {{ 'Entities.Domain.actions.add_new'|trans() }}
+                    </a>
                 </div>
-            {%  endif %}              
-        {% endblock %}          
+            {%  endif %}
+        {% endblock %}
+    {% endembed %}
 
-    {% endembed %}  
-   
- <div class="table-responsive">
-    <section id="no-more-tables">
-        <table id ="table_msgs"  class="table datatable hidden">
-            <thead>
-                <tr>
-                    <th>{{ 'Generics.fields.name'|trans }}</th>
-                    <th>{{ 'Generics.fields.datemod'|trans }}</th>
-                    <th>{{ 'Generics.fields.active'|trans }}</th>
-                    <th>{{ 'Generics.labels.actions'|trans() }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for domain in domains %}
+    <div class="col mb-3 bg-white pb-3">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/_rapidSearchForm.html.twig'%}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <section id="no-more-tables">
+            <table id="table_msgs" class="table">
+                <thead>
                     <tr>
-                        <td data-title="{{'Generics.fields.name'|trans }}">{{ domain.domain }}</td>
-                        <td data-title="{{'Generics.fields.datemod'|trans }}">{{ domain.datemod ? domain.datemod | format_datetime('short', 'short') : '' }}</td>
-                        <td data-title="{{'Generics.fields.active'|trans }}">{{ domain.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}</td>
-                        <td>
-                            <ul class="list-inline list-unstyled">
-                                <li class="list-inline-item">
-                                    <a href="{{ path('domain_edit', {'id': domain.id}) }}"  class='btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
-                                        <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i> 
-                                      <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="{{ path('domain_wblist',{'id':domain.id}) }}" class='btn btn-sm btn-dark ' title="{{ 'Entities.Domain.actions.WBList'|trans() }}" >
-                                        <i class="fas fa-ruler d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                        <span class="d-none d-lg-block">{{ 'Entities.Domain.labels.rules'|trans() }}</span>                         
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="{{ path('domain_messages',{'id':domain.id}) }}" class='btn btn-sm btn-secondary ' title="{{ 'Entities.Domain.actions.messages'|trans() }}">
-                                        <i class="fas fa-comments d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                        <span class="d-none d-lg-block">{{ 'Entities.Domain.actions.messages'|trans() }}</span>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="{{ path('domain_delete', {'id': domain.id}) }}?_token={{ csrf_token('delete' ~ domain.id) }}" 
-                                       class='btn btn-sm btn-danger confirmModal' 
-                                       data-dialog-title='{{ 'Message.Dialogs.confirmDeleteDomainTitle'|trans }}' 
-                                       data-dialog-content='{{ 'Message.Dialogs.confirmDeleteDomainContent'|trans }}'
-                                       title="{{ 'Generics.actions.delete'|trans() }}">
-                                        <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                        <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </td>
+                        <th>
+                            {{ knp_pagination_sortable(domains, 'Generics.fields.name'|trans, 'd.domain') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(domains, 'Generics.fields.datemod'|trans, 'd.datemod') }}
+                        </th>
+                        <th>
+                            {{ knp_pagination_sortable(domains, 'Generics.fields.active'|trans, 'd.active') }}
+                        </th>
+                        <th>
+                            {{ 'Generics.labels.actions'|trans() }}
+                        </th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
- </div>
+                </thead>
+                <tbody>
+                    {% for domain in domains %}
+                        <tr>
+                            <td data-title="{{'Generics.fields.name'|trans }}">
+                                {{ domain.domain }}
+                            </td>
+                            <td data-title="{{'Generics.fields.datemod'|trans }}">
+                                {{ domain.datemod ? domain.datemod | format_datetime('short', 'short') : '' }}
+                            </td>
+                            <td data-title="{{'Generics.fields.active'|trans }}">
+                                {{ domain.active ? 'Generics.labels.yes'|trans  :  'Generics.labels.no'|trans }}
+                            </td>
+                            <td>
+                                <ul class="list-inline list-unstyled">
+                                    <li class="list-inline-item">
+                                        <a href="{{ path('domain_edit', {'id': domain.id}) }}" class='btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+                                            <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                            <span class="d-none d-lg-block">
+                                                {{ 'Generics.actions.edit'|trans() }}
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href="{{ path('domain_wblist',{'id':domain.id}) }}" class='btn btn-sm btn-dark ' title="{{ 'Entities.Domain.actions.WBList'|trans() }}">
+                                            <i class="fas fa-ruler d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                            <span class="d-none d-lg-block">
+                                                {{ 'Entities.Domain.labels.rules'|trans() }}
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href="{{ path('domain_messages',{'id':domain.id}) }}" class='btn btn-sm btn-secondary ' title="{{ 'Entities.Domain.actions.messages'|trans() }}">
+                                            <i class="fas fa-comments d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                            <span class="d-none d-lg-block">
+                                                {{ 'Entities.Domain.actions.messages'|trans() }}
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <form
+                                            method="post"
+                                            class="d-inline"
+                                            action="{{ path('domain_delete', {'id': domain.id}) }}"
+                                            data-turbo-confirm="{{ 'Message.Dialogs.confirmDeleteDomainContent'|trans }}"
+                                        >
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ domain.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                                <span class="d-none d-lg-block">
+                                                    {{ 'Generics.actions.delete'|trans() }}
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': domains } %}
+
 {% endblock %}
