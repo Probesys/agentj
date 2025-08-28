@@ -82,40 +82,52 @@ class UserRepository extends ServiceEntityRepository
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 
-    /**
-     * search query by role
-     *
-     * @return User[]
-     */
-    public function searchByRole(User $user, ?string $role = null): array
-    {
 
-        $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email, u.fullname, u.username, u.roles, u.imapLogin', 'p.policyName', 'd.domain')
+    /** @param array<string> $roles */
+    public function search(
+        User $currentUser,
+        ?array $roles = null,
+        ?string $searchKey = null,
+        bool $isAlias = false
+    ): ?Query {
+
+        $qb = $this->createQueryBuilder('u')
+                ->select('u')
                 ->leftJoin('u.domain', 'd')
-                ->leftJoin('u.policy', 'p')
-                ->where('u.originalUser is null');
+                ->leftJoin('u.policy', 'p');
 
-        if ($role) {
-            $dql->andWhere('u.roles = :role');
-            $dql->setParameter('role', $role);
+        if ($isAlias) {
+            $qb->leftJoin('u.originalUser', 'ou');
+            $qb->where('u.originalUser is not null');
+        } else {
+            $qb->where('u.originalUser is null');
         }
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
-            }
-
-            if (empty($domains)) {
-                return [];
-            }
-
-            $dql->andWhere('u.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
+        if ($roles) {
+            $qb->andWhere('u.roles IN (:roles)');
+            $qb->setParameter('roles', $roles);
         }
 
-        $result = $dql->getQuery()->execute();
+        if ($currentUser->isAdmin()) {
+            $domains = $currentUser->getDomains()->toArray();
+            if ($currentUser->getDomain()) {
+                $domains[] = $currentUser->getDomain();
+            }
+
+            if (!empty($domains)) {
+                $qb->andWhere('u.domain in (:domains)');
+                $qb->setParameter('domains', $domains);
+            }
+        }
+
+        if ($searchKey) {
+            $qb->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
+            $qb->setParameter('searchKey', "%{$searchKey}%");
+        }
+
+        $qb->orderBy('u.email', 'ASC');
+
+        $result = $qb->getQuery();
         return $result;
     }
 

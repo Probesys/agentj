@@ -1,0 +1,16 @@
+<form
+    id="massive-actions-form"
+    data-controller="mass-action-form"
+    data-checkbox-target-class="selected-msg"
+    data-message-confirm="{{ messageConfirm }}"
+    class="d-inline"
+    action="{{ actionPath }}"
+    method="post">
+    <input type="hidden" name="_csrf_token" value="{{ csrfToken }}">
+    <button
+        type="button"
+        class="btn btn-danger"
+        data-action="mass-action-form#submit"
+        >{{ buttonLabel }}
+    </button>
+</form>

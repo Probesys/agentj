@@ -11,7 +11,8 @@ twig:
         enable_azure_oauth: '%env(ENABLE_AZURE_OAUTH)%'
         locales:
             - fr
-            - en      
+            - en
+        per_pages: [10, 25, 50, 100, 500, 1000]
         domainMessages_availableFields:
             'Entities.Domain.labels.dynamicsVariables.URL_CAPTCHA' : 'URL_CAPTCHA'
             'Entities.Domain.labels.dynamicsVariables.EMAIL_DEST' : 'EMAIL_DEST'
