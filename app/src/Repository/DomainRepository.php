@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -29,5 +31,26 @@ class DomainRepository extends ServiceEntityRepository
             ->select('d.id')
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function getSearchQuery(
+        User $currentUser,
+        ?string $searchKey = null,
+    ): Query {
+        $queryBuilder = $this->createQueryBuilder('d');
+
+        if ($searchKey) {
+            $queryBuilder->where('d.domain LIKE :search')
+                ->setParameter('search', '%' . $searchKey . '%');
+        }
+
+        if (!$currentUser->isSuperAdmin()) {
+            $queryBuilder->andWhere(':user MEMBER OF d.users')
+                ->setParameter('user', $currentUser);
+        }
+
+        $query = $queryBuilder->getQuery();
+
+        return $query;
     }
 }
