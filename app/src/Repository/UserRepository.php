@@ -4,12 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Domain;
 use App\Entity\User;
-use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -106,23 +106,25 @@ class UserRepository extends ServiceEntityRepository
 
         if ($roles) {
             $expr = new Expr\Orx();
-            foreach($roles as $key => $role) {
+            foreach ($roles as $key => $role) {
                 $expr->add("u.roles LIKE :role{$key}");
                 $qb->setParameter("role{$key}", "%\"{$role}\"%");
             }
-            $qb->andWhere($expr);            
+            $qb->andWhere($expr);
         }
 
-        if ($currentUser->isAdmin()) {
+        if (!$currentUser->isSuperAdmin()) {
             $domains = $currentUser->getDomains()->toArray();
             if ($currentUser->getDomain()) {
                 $domains[] = $currentUser->getDomain();
             }
 
-            if (!empty($domains)) {
-                $qb->andWhere('u.domain in (:domains)');
-                $qb->setParameter('domains', $domains);
+            if (empty($domains)) {
+                throw new AccessDeniedException('You do not have access to any domain');
             }
+
+            $qb->andWhere('u.domain in (:domains)');
+            $qb->setParameter('domains', $domains);
         }
 
         if ($searchKey) {
