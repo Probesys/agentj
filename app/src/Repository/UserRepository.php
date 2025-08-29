@@ -8,6 +8,7 @@ use Cocur\Slugify\Slugify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query;
 
 /**
@@ -104,8 +105,12 @@ class UserRepository extends ServiceEntityRepository
         }
 
         if ($roles) {
-            $qb->andWhere('u.roles IN (:roles)');
-            $qb->setParameter('roles', $roles);
+            $expr = new Expr\Orx();
+            foreach($roles as $key => $role) {
+                $expr->add("u.roles LIKE :role{$key}");
+                $qb->setParameter("role{$key}", "%\"{$role}\"%");
+            }
+            $qb->andWhere($expr);            
         }
 
         if ($currentUser->isAdmin()) {
