@@ -5,8 +5,8 @@ export default class extends Controller {
     submit () {
         const confirmMessage = this.element.dataset.messageConfirm;
         const formData = new FormData(this.element);
-        const checkboxesTargetClass = this.element.dataset.checkboxTargetClass;
-        const checkboxes = document.querySelectorAll(`input[type='checkbox'].${checkboxesTargetClass}:checked`);
+        const checkboxesGroup = this.element.dataset.massActionGroup;
+        const checkboxes = document.querySelectorAll(`input[type='checkbox'][data-mass-action-group="${checkboxesGroup}":checked`);
 
         checkboxes.forEach(checkbox => {
             this.element.append(checkbox);
