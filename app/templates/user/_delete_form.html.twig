@@ -1,7 +1,9 @@
-<form class="d-inline"
-        action="{{ path('user_email_delete', {'id': user.id}) }}"
-        method="post"
-        onsubmit="return confirm('{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}');">
+<form
+    class="d-inline"
+    action="{{ path('user_email_delete', {'id': user.id}) }}"
+    method="post"
+    data-turbo-confirm="{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}"
+>
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
     <button type="submit"
             class="btn btn-sm btn-danger"
