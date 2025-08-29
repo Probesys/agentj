@@ -1,0 +1,13 @@
+        <nav>
+            <ul class="pagination">
+                {% for per_page in per_pages %}
+                    <li class="page-item {% if app.session.get('perPage') == per_page %}active{% endif %}">
+                        <a title="Afficher {{ per_page }} résultats par page"
+                           class="page-link"
+                           href="{{ path('per_page', {'nbItems': per_page}) }}">
+                            {{ per_page }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>

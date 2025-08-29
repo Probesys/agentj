@@ -2,6 +2,7 @@ Generics:
   actions:
     create: Ajouter
     delete: Supprimer
+    deleteSelection: Supprimer la sélection
     cancel: Annuler
     show: Voir
     edit: Éditer
@@ -112,6 +113,7 @@ Generics:
         cette opération !
   flash:
     genericFormError: Une erreur s'est produite lors du traitement du formulaire
+    invalidCsrfToken: Token CSRF invalide
     updateSuccess: La mise à jour a été effectuée avec succès
     editSuccess: La mise à jour a été effectuée avec succès
     deleteSuccess: Suppression effectuée avec succès !

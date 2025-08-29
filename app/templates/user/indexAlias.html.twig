@@ -3,7 +3,7 @@
 {% block title %}{{'Entities.User.indexAlias'|trans}}{% endblock %}
 
 {% block body %}
-    {% set _title = 'Entities.User.indexAlias'|trans %}
+    {% set _title = 'Entities.User.indexAlias'|trans ~ ' : ' ~ users.getTotalItemCount%}
     {% embed 'common/blockTitleAndButtons.html.twig' %}
 
         {% block content_button_actions %}
@@ -15,33 +15,38 @@
 
     {% endembed %}
 
+    {% include 'common/_batchActionsAndSearch.html.twig'
+        with {
+            'actionPath': path('user_email_batch_delete'),
+            'csrfToken': csrf_token('delete user'),
+            'messageConfirm': 'Message.Actions.massiveActionContent'|trans,
+            'buttonLabel': 'Generics.actions.deleteSelection'|trans
+            }
+    %}
 
-
-    <form id="massive-actions-form" action="{{ path('user_email_batch_delete') }}" method="post">
-         <div class="table-responsive">
-        <section id="no-more-tables">
-            <table id="table_users" class="table datatable hidden">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" class="cb" id='checkAll' data-target-checkall-class="selected-msg">
-                            <label class="for-cb" for="checkAll"></label>
-                        </th>
-                        <th>{{ 'Entities.User.fields.alias'|trans }}</th>
-                        <th>{{ 'Entities.User.fields.email'|trans }}</th>
-                        <th>actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-
+    <div class="table-responsive">
+            <section id="no-more-tables">
+                <table id="table_users" class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" class="cb" id="checkAll" data-target-checkall-class="selected-msg">
+                                <label class="for-cb check-all" for="checkAll"></label>
+                            </th>
+                            <th>{{ knp_pagination_sortable(users, 'Entities.User.fields.alias'|trans, 'u.email') }}</th>
+                            <th>{{ knp_pagination_sortable(users, 'Entities.User.fields.email'|trans, 'ou.email') }}</th>
+                            <th>{{ 'Generics.labels.actions' | trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     {% for user in users %}
                         <tr>
                             <td>
                                 <input type="checkbox" name="id[]" value="{{ user.id }}" id="{{ user.id }}" class="cb selected-msg">
                                 <label class="for-cb"></label>
                             </td>
-                            <td  data-title="{{'Entities.User.fields.alias'|trans }}">{{ user.alias }}</td>
-                            <td  data-title="{{'Entities.User.fields.email'|trans }}">{{ user.email }}</td>
+                            <td  data-title="{{'Entities.User.fields.alias'|trans }}">{{ user.getEmailFromRessource() }}</td>
+                            <td  data-title="{{'Entities.User.fields.email'|trans }}">{{ user.originalUser.getEmailFromRessource() }}</td>
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">
@@ -50,20 +55,10 @@
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
                                         </a>
 
-                                        <a href="{{ path('user_email_delete', {'id': user.id}) }}?_token={{ csrf_token('delete' ~ user.id) }}" 
-                                           class='btn btn-sm btn-danger confirmModal' 
-                                           data-dialog-title='{{ 'Message.Dialogs.confirmDeleteUserTitle'|trans }}' 
-                                           data-dialog-content='{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}'
-                                           title="{{ 'Generics.actions.delete'|trans() }}">
-                                            <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                        </a>       
-                                        <a href="{{ path('homepage', {'_switch_user': user.alias}) }}" 
-                                           class='btn btn-sm btn-primary' 
-                                           title="{{ 'Generics.actions.connectAs'|trans() ~ user.alias}} ">
-                                            <i class="fas fa-random  d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">{{ 'Generics.actions.impersonate'|trans() }}</span>
-                                        </a>                   
+
+                                        {% include 'user/_delete_form.html.twig' with {'user': user} %}
+
+                                        {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
                                     </li>
                                 </ul>
                             </td>
@@ -72,6 +67,17 @@
                 </tbody>
             </table>
         </section>
-         </div>
-    </form>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                {{ knp_pagination_render(users) }}
+            </div>
+
+            <div class="col">
+                {% include 'common/_per_page_selector.html.twig' %}
+            </div>
+        </div>
+    </div> 
 {% endblock %}
