@@ -98,7 +98,6 @@ class UserRepository extends ServiceEntityRepository
                 ->leftJoin('u.policy', 'p');
 
         if ($isAlias) {
-            $qb->leftJoin('u.originalUser', 'ou');
             $qb->where('u.originalUser is not null');
         } else {
             $qb->where('u.originalUser is null');
