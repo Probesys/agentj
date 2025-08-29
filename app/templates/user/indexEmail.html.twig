@@ -81,13 +81,15 @@
                             <td>
                                 <ul class="list-inline list-unstyled">
                                     <li class="list-inline-item">
-                                        <a href="#"
-                                           data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"
-                                           class="btn-open-modal btn btn-sm btn-success"
-                                           title="{{ 'Generics.actions.edit'|trans }}">
+                                        <button
+                                            type="button"
+                                            data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"
+                                            class="btn-open-modal btn btn-sm btn-success"
+                                            title="{{ 'Generics.actions.edit'|trans }}"
+                                        >
                                             <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
                                             <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans }}</span>
-                                        </a>
+                                        </button>
 
                                         {% include 'user/_delete_form.html.twig' with {'user': user} %}
 
