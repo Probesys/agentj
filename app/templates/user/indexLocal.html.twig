@@ -77,12 +77,15 @@
         </table>
     </section>
  </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                {{ knp_pagination_render(users) }}
+            </div>
 
-<div class="mt-3">
-{% include 'common/_per_page_selector.html.twig' %}
-</div>
-
-<div class="text-center">
-{{ knp_pagination_render(users) }}
-</div>
+            <div class="col">
+                {% include 'common/_per_page_selector.html.twig' %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
