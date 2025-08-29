@@ -151,33 +151,6 @@ class UserRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    /**
-     * Return a list of aliases associate to a user
-     * @return User[]
-     */
-    public function searchAlias(User $user): array
-    {
-        $dql = $this->createQueryBuilder('u')
-                ->select('u.id, u.email as alias, a.email as email')
-                ->join('u.originalUser', 'a')
-                ->where('u.originalUser is not null');
-
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
-            }
-
-            if (empty($domains)) {
-                return [];
-            }
-
-            $dql->andWhere('u.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
-        }
-
-        return $dql->getQuery()->getScalarResult();
-    }
 
     /**
      * autocomplete query
