@@ -30,6 +30,7 @@ Generics:
     chooseDomain: "Choisir un domaine"
     choosePolicy: "Choisir une stratégie"
     showMore: "Voir plus"
+    showNbItemPerPage: "Afficher %nbItems% éléments par page"
   fields:
     name: Intitulé
     helpMessage: Message d'aide
