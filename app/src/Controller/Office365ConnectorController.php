@@ -56,14 +56,6 @@ class Office365ConnectorController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_connector_show', methods: ['GET'])]
-    public function show(Office365Connector $connector): Response
-    {
-        return $this->render('connector/show.html.twig', [
-                    'connector' => $connector,
-        ]);
-    }
-
     #[Route('/{id}/edit', name: 'app_connector_o365_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
     {

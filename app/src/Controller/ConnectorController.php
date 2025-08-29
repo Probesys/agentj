@@ -15,14 +15,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/connector')]
 class ConnectorController extends AbstractController
 {
-    #[Route('/', name: 'app_connector_index', methods: ['GET'])]
-    public function index(ConnectorRepository $connectorRepository): Response
-    {
-        return $this->render('connector/index.html.twig', [
-            'connectors' => $connectorRepository->findAll(),
-        ]);
-    }
-
     #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
     public function delete(
         Request $request,

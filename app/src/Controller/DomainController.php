@@ -190,12 +190,6 @@ class DomainController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{id}', name: 'domain_show', methods: 'GET')]
-    public function show(Domain $domain): Response
-    {
-        return $this->render('domain/show.html.twig', ['domain' => $domain]);
-    }
-
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
     public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response
     {

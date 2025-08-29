@@ -51,12 +51,6 @@ class PolicyController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{id}', name: 'policy_show', methods: 'GET')]
-    public function show(Policy $policy): Response
-    {
-        return $this->render('policy/show.html.twig', ['policy' => $policy]);
-    }
-
     #[Route(path: '/{id}/edit', name: 'policy_edit', methods: 'GET|POST')]
     public function edit(Request $request, Policy $policy): Response
     {
