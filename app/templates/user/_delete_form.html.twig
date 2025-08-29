@@ -5,9 +5,10 @@
     data-turbo-confirm="{{ 'Message.Dialogs.confirmDeleteUserContent'|trans }}"
 >
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-    <button type="submit"
-            class="btn btn-sm btn-danger"
-            title="{{ 'Generics.actions.delete'|trans }}">
+    <button
+        type="submit"
+        class="btn btn-sm btn-danger"
+    >
         <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
         <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans }}</span>
     </button>
