@@ -54,10 +54,13 @@
 {% endif %}
 
 {% if form.domains is defined %}
+<div id="domain-selector">
     {{ form_row(form.domains) }}
     <div id="domain-warning" style="color: red; display: none;">
         {{ 'Generics.messages.selectAtLeastOneDomain'|trans }}
     </div>
+</div>
+
     <script>
         $(document).on('shown.bs.modal', function() {
             const roleContainer = document.querySelector('[data-role]');
@@ -95,10 +98,13 @@
                 const selectedRole = rolesSelect.value;
                 if (selectedRole === '["ROLE_SUPER_ADMIN"]') {
                     domainCheckboxes.forEach(checkbox => checkbox.checked = true);
+                    submitButton.disabled = false;
+                    document.getElementById('domain-selector').style.display = 'none';
                 } else {
                     domainCheckboxes.forEach(checkbox => checkbox.checked = false);
+                    document.getElementById('domain-selector').style.display = 'block';
+                    checkDomains();
                 }
-                checkDomains();
             });
             // Add event listeners to checkboxes
             domainCheckboxes.forEach(checkbox => {
