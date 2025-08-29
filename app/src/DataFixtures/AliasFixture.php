@@ -23,15 +23,16 @@ class AliasFixture extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
+        $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
+        $originalUser = $this->em->getRepository(User::class)->findOneBy(['email' => 'user@blocnormal.fr']);
+
         for ($i = 1; $i <= 20; $i++) {
             $alias = new User();
             $alias->setEmail('alias' . $i . '@blocnormal.fr');
             $alias->setFullname('alias' . $i . ' blocnormal');
             $alias->setUsername('alias' . $i . '@blocnormal.fr');
             $alias->setRoles('["ROLE_USER"]');
-            $originalUser = $this->em->getRepository(User::class)->findOneBy(['email' => 'user@blocnormal.fr']);
             $alias->setOriginalUser($originalUser);
-            $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
             $alias->setDomain($domain);
             $alias->setPolicy($domain->getPolicy());
 

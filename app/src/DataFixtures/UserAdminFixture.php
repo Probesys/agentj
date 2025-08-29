@@ -23,17 +23,18 @@ class UserAdminFixture extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        for ($i = 1; $i <= 20; $i++) {
-            $alias = new User();
-            $alias->setEmail('admin' . $i . '@blocnormal.fr');
-            $alias->setFullname('admin' . $i . ' blocnormal');
-            $alias->setUsername('admin' . $i . '@blocnormal.fr');
-            $alias->setRoles('["ROLE_ADMIN"]');
-            $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
-            $alias->addDomain($domain);
-            $alias->setPolicy($domain->getPolicy());
+        $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
 
-            $manager->persist($alias);
+        for ($i = 1; $i <= 20; $i++) {
+            $admin = new User();
+            $admin->setEmail('admin' . $i . '@blocnormal.fr');
+            $admin->setFullname('admin' . $i . ' blocnormal');
+            $admin->setUsername('admin' . $i . '@blocnormal.fr');
+            $admin->setRoles('["ROLE_ADMIN"]');
+            $admin->addDomain($domain);
+            $admin->setPolicy($domain->getPolicy());
+
+            $manager->persist($admin);
         }
 
         $manager->flush();
