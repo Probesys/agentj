@@ -86,7 +86,7 @@ class UserController extends AbstractController
 
         $searchKey = $request->query->getString('search');
 
-        $users = $userRepository->search($user, ['["ROLE_USER"]'], searchKey: $searchKey);
+        $users = $userRepository->search($user, ['ROLE_USER'], searchKey: $searchKey);
 
         $users = $paginator->paginate(
             $users,
