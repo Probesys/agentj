@@ -54,7 +54,7 @@ class UserController extends AbstractController
 
         $users = $userRepository->search(
             $user,
-            ['["ROLE_ADMIN"]', '["ROLE_SUPER_ADMIN"]'],
+            ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'],
             searchKey: $searchKey
         );
 
