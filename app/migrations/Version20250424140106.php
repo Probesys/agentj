@@ -17,6 +17,7 @@ final class Version20250424140106 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $this->addSql('delete mr from msgrcpt mr left join msgs m on m.mail_id=mr.mail_id where m.mail_id is null');
         $this->addSql('ALTER TABLE msgrcpt ADD CONSTRAINT FK_2259F7D4C8776F01296970D4 FOREIGN KEY (mail_id, partition_tag) REFERENCES msgs (mail_id, partition_tag) ON DELETE CASCADE');
         $this->addSql('CREATE INDEX IDX_2259F7D4C8776F01296970D4 ON msgrcpt (mail_id, partition_tag)');
     }
