@@ -40,10 +40,6 @@ class LdapConnectorType extends ConnectorType
                 'label' => 'Entities.LdapConnector.fields.LdapPassword',
                 'attr' => ['data-ldap-bind' => 'true']
             ])
-            ->add('ldapLoginField', null, [
-                'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapLoginField',
-            ])
             ->add('ldapRealNameField', null, [
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapRealNameField',

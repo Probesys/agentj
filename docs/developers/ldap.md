@@ -15,7 +15,6 @@ Then, create a LDAP connector with the following values:
 - bind DN: `cn=admin,dc=example,dc=com`
 - password: `secret`
 - BaseDN: `ou=users,dc=example,dc=com`
-- Login field: `uid`
 - Name field: `displayName`
 - Email field: `mail`
 - Alias field: `alias`

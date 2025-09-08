@@ -20,10 +20,6 @@ class LdapConnector extends Connector
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $ldapPassword = null;
 
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $ldapLoginField = null;
-
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $ldapRealNameField = null;
 
@@ -98,19 +94,6 @@ class LdapConnector extends Connector
     public function setLdapPassword(?string $ldapPassword): self
     {
         $this->ldapPassword = $ldapPassword;
-
-        return $this;
-    }
-
-
-    public function getLdapLoginField(): ?string
-    {
-        return $this->ldapLoginField;
-    }
-
-    public function setLdapLoginField(?string $ldapLoginField): self
-    {
-        $this->ldapLoginField = $ldapLoginField;
 
         return $this;
     }

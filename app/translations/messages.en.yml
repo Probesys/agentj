@@ -619,7 +619,6 @@ Entities:
       ldapPort: "Port (default 389)"
       allowAnonymousBind: "Anonymous connection"
       LdapBaseDN: "BaseDN"
-      ldapLoginField: "LDAP field for login (ex: uid)"
       ldapBindDn: "Bind Dn"
       LdapPassword: "Password"
       ldapRealNameField: "LDAP field for username (ex: sn)"
