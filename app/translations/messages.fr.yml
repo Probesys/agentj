@@ -281,7 +281,7 @@ Message:
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
     connectionOk: "Connexion établie"
     connectionKo: "Connexion échouée"
-    invalidLdapQuery: "Requête Ldap incorrecte"
+    invalidLdapQuery: "Requête LDAP incorrecte"
     ldapNbUserfound: "$NB_USER utilisateur(s) trouvé(s)"
     ldapNbGroupfound: "$NB_GROUP groupe(s) trouvé(s)"
   http:
@@ -609,12 +609,12 @@ Entities:
   LdapConnector:
     labels:
     actions:
-      add: "Ajouter un connecteur Ldap"
-      edit: "Editer le connecteur Ldap"
+      add: "Ajouter un connecteur LDAP"
+      edit: "Modifier le connecteur LDAP"
     fields:
       ldapHost: "Hôte"
       ldapPort: "Port (défaut 389)"
-      allowAnonymousBind: "Autorise les connections anonymes"
+      allowAnonymousBind: "Connexion anonyme"
       LdapBaseDN: "BaseDN"
       ldapLoginField: "Champ LDAP pour le login (ex : uid)"
       ldapBindDn: "Bind Dn"
@@ -624,8 +624,8 @@ Entities:
       ldapGroupNameField: "Champ LDAP pour le nom du groupe (ex : sn)"
       ldapEmailField: "Champ LDAP pour l'email"
       ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
-      ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupes"
-      ldapUserFilter: "Filtre pour les utilisateur"
+      ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupe"
+      ldapUserFilter: "Filtre pour les utilisateurs"
       ldapGroupFilter: "Filtre pour les groupes"
   ImapConnector:
     labels:

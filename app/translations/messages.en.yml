@@ -281,7 +281,7 @@ Message:
     checkMailUnsuccessful: "We couldn't check this email."
     connectionOk: "Connection success"
     connectionKo: "Unable to connect"
-    invalidLdapQuery: "Invalid Ldap query"
+    invalidLdapQuery: "Invalid LDAP query"
     ldapNbUserfound: "$NB_USER user(s) found"
     ldapNbGroupfound: "$NB_GROUP group(s) found"
   http:
@@ -609,23 +609,23 @@ Entities:
   LdapConnector:
     labels:
     actions:
-      add: "Add Ldap connector"
-      edit: "Edit Ldap connector"
+      add: "Add LDAP connector"
+      edit: "Edit LDAP connector"
     fields:
       ldapHost: "Host"
       ldapPort: "Port (default 389)"
-      allowAnonymousBind: "Allow anonymous connexion"
+      allowAnonymousBind: "Anonymous connection"
       LdapBaseDN: "BaseDN"
       ldapLoginField: "LDAP field for login (ex: uid)"
       ldapBindDn: "Bind Dn"
       LdapPassword: "Password"
-      ldapRealNameField: "LDAP Field for username (ex: sn)"
+      ldapRealNameField: "LDAP field for username (ex: sn)"
       synchronizeGroup: "Also synchronize groups"
       ldapGroupNameField: "LDAP field for group name (ex: sn)"
       ldapEmailField: "LDAP field for email"
       ldapAliasField: "LDAP field for alias (if different from email)"
       ldapGroupMemberField: "LDAP field for group members"
-      ldapUserFilter: "Filter for user"
+      ldapUserFilter: "Filter for users"
       ldapGroupFilter: "Filter for groups"
   ImapConnector:
     labels:
