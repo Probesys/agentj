@@ -142,7 +142,7 @@ then
 
 	$dx php bin/console ag:report >/dev/null
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
-		expected_sender="no-reply@${APP_DOMAIN:-$DOMAIN}" \
+		expected_sender="will@blocnormal.fr" \
 		to_addr="user@blocnormal.fr" \
 		send 'report' 'out' 'user@blocnormal.fr' 1 0
 

@@ -105,7 +105,12 @@ class ReportSendMailCommand extends Command
                 $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
                 $body = str_replace('[URL_MSGS]', $url, $body);
 
+                $from = $domain->getMailAuthenticationSender();
+                if (!$from) {
+                    $from = $this->defaultMailFrom;
+                }
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
+                $fromAddress = new Address($from, $fromName);
 
                 $mailTo = $user->getEmailFromRessource();
 
@@ -120,7 +125,7 @@ class ReportSendMailCommand extends Command
 
                 $message = new Email();
                 $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
-                        ->from(new Address($this->defaultMailFrom, $fromName))
+                        ->from($fromAddress)
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
 
