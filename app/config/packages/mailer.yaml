@@ -1,7 +1,3 @@
 framework:
     mailer:
         dsn: '%env(SMTP_TRANSPORT)%'
-        envelope:
-            sender: '%env(DOMAIN_MAIL_AUTHENTIFICATION_SENDER)%'
-        headers:
-            from: '%env(DOMAIN_MAIL_AUTHENTIFICATION_SENDER)%'
