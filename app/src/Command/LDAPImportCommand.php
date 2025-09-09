@@ -79,6 +79,7 @@ class LDAPImportCommand extends Command
     {
         $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapRealNameField();
+        $aliasAttribute = $this->connector->getLdapAliasField();
         $nbUserUpdated = 0;
         $nbUserCreated = 0;
 
@@ -90,9 +91,15 @@ class LDAPImportCommand extends Command
             $this->ldapService->filterUserResultOnDomain($results, $this->connector);
 
             foreach ($results as $entry) {
-                $emailAdress = $entry->getAttribute($mailAttribute) ? $entry->getAttribute($mailAttribute)[0] : null;
+                $listEmails = $entry->getAttribute($mailAttribute) ?? [];
+
+                if (count($listEmails) === 0) {
+                    continue;
+                }
+
+                // We consider that the first email of the list is the main email of the user.
+                $emailAdress = $listEmails[0];
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
-                // we consider that the first element of the email array is the main email of the user
 
                 $attribute = $entry->getAttribute($realNameAttribute);
                 $userName = $attribute ? $attribute[0] : null;
@@ -114,18 +121,17 @@ class LDAPImportCommand extends Command
                 $user->setRoles('["ROLE_USER"]');
 
                 $this->em->persist($user);
-                $listEmail = $entry->getAttribute($mailAttribute);
-                for ($i = 1; $i < count($listEmail); $i++) {
-                    $this->createAlias($user, $listEmail[$i]);
-                }
 
-                // if a specific field is used for aliases we complete the list of aliases with these attribute
-                $aliasAttribute = $this->connector->getLdapAliasField();
+                $listAliases = [];
                 if ($aliasAttribute) {
                     $listAliases = $entry->getAttribute($aliasAttribute) ?? [];
-                    foreach ($listAliases as $aliasEntry) {
-                        $this->createAlias($user, $aliasEntry);
-                    }
+                }
+
+                $listAliases = array_merge($listAliases, $listEmails);
+                $listAliases = array_unique($listAliases);
+
+                foreach ($listAliases as $aliasEmail) {
+                    $this->createAlias($user, $aliasEmail);
                 }
 
                 $nbUserUpdated = $isNew ? $nbUserUpdated : $nbUserUpdated = $nbUserUpdated + 1;
@@ -141,15 +147,20 @@ class LDAPImportCommand extends Command
         $this->em->flush();
     }
 
-    private function createAlias(User $user, string $email): void
+    private function createAlias(User $user, string $aliasEmail): void
     {
-        $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        // Make sure to not mark the base user as an alias of himself
+        if ($aliasEmail === $user->getEmail()) {
+            return;
+        }
+
+        $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
         if (!$alias) {
             $alias = new User();
         }
 
-        $alias->setEmail($email);
-        $alias->setUsername($email);
+        $alias->setEmail($aliasEmail);
+        $alias->setUsername($aliasEmail);
         $alias->setOriginalUser($user);
         $alias->setDomain($user->getDomain());
         $this->em->persist($alias);
