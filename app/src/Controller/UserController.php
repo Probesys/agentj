@@ -510,9 +510,10 @@ class UserController extends AbstractController
                     'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
+                $user->setUsername($user->getEmail());
+                $user->setDomain($newDomain);
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
-                $user->setUsername($user->getEmail());
 
                 $this->em->persist($user);
                 $this->em->flush();
