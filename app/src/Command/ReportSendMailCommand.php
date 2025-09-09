@@ -77,6 +77,7 @@ class ReportSendMailCommand extends Command
                 }
 
                 $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
+                $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
                 $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
                 $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
                 $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
@@ -98,6 +99,7 @@ class ReportSendMailCommand extends Command
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
                 $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
+                $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
                 $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
                 $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
                 $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
