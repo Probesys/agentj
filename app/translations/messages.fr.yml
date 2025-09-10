@@ -645,9 +645,9 @@ Entities:
       add: "Ajouter un connecteur Office365"
       edit: "Editer le connecteur Office365"
     fields:
-      tenant: "Id locataire"
-      client: "Id client"
-      clientSecret: "Secret client"
+      tenant: "Tenant ID"
+      clientId: "Client ID"
+      clientSecret: "Client Secret"
   WBList:
     fields:
       user: Utilisateur

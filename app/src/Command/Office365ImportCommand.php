@@ -74,7 +74,7 @@ class Office365ImportCommand extends Command
     private function getToken(): ?string
     {
         $guzzle = new Client();
-        $clientId = $this->connector->getClient();
+        $clientId = $this->connector->getClientId();
         $clientSecret = $this->connector->getClientSecret();
         $url = 'https://login.microsoftonline.com/' . $this->connector->getTenant() . '/oauth2/v2.0/token';
         try {

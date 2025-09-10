@@ -12,7 +12,7 @@ class Office365Connector extends Connector
     private string $tenant;
 
     #[ORM\Column(type: 'string', length: 100)]
-    private string $client;
+    private string $clientId;
 
     #[ORM\Column(type: 'string', length: 100)]
     private string $clientSecret;
@@ -30,14 +30,14 @@ class Office365Connector extends Connector
         return $this;
     }
 
-    public function getClient(): string
+    public function getClientId(): string
     {
-        return $this->client;
+        return $this->clientId;
     }
 
-    public function setClient(string $client): self
+    public function setClientId(string $clientId): self
     {
-        $this->client = $client;
+        $this->clientId = $clientId;
 
         return $this;
     }
