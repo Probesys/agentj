@@ -88,7 +88,8 @@ services:
         - LDAP_ADMIN_PASSWORD=secret
         - BITNAMI_DEBUG=true
     volumes:
-        - ./ldap:/ldifs:z
+        - ./ldap/tree.ldif:/ldifs/tree.ldif:z
+        - ./ldap/schemas/custom.ldif:/schema/custom.ldif:z
 
   opendkim:
     volumes:

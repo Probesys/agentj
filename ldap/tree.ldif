@@ -17,7 +17,21 @@ mail: alix@example.com
 mail: alix.hambourg@example.com
 uid: alix
 userPassword: secret
-objectclass: inetOrgPerson
+alias: ahambourg@example.com
+objectClass: inetOrgPerson
+objectClass: customObject
+
+dn: cn=shared,ou=users,dc=example,dc=com
+cn: shared
+sn: Shared account
+displayName: Shared account
+mail: shared@example.com
+uid: shared
+userPassword: secret
+SharedWith: alix@example.com, benedict@example.com
+SharedWith: charlie@example.com
+objectClass: inetOrgPerson
+objectClass: customObject
 
 dn: cn=benedict,ou=users,dc=example,dc=com
 cn: benedict
@@ -28,7 +42,9 @@ mail: benedict@example.com
 mail: benedict.aphone@example.com
 uid: benedict
 userPassword: secret
-objectclass: inetOrgPerson
+alias: baphone@example.com
+objectClass: inetOrgPerson
+objectClass: customObject
 
 dn: cn=charlie,ou=users,dc=example,dc=com
 cn: charlie
@@ -39,7 +55,9 @@ mail: charlie@example.com
 mail: charlie.gature@example.com
 uid: charlie
 userPassword: secret
-objectclass: inetOrgPerson
+alias: cgature@example.com
+objectClass: inetOrgPerson
+objectClass: customObject
 
 dn: cn=dominique,ou=users,dc=example,dc=com
 cn: dominique
@@ -50,4 +68,6 @@ mail: dominique@example.com
 mail: dominique.aragua@example.com
 uid: dominique
 userPassword: secret
-objectclass: inetOrgPerson
+alias: daragua@example.com
+objectClass: inetOrgPerson
+objectClass: customObject
