@@ -120,6 +120,11 @@ class SendAuthMailRequestCommand extends Command
                 $fromName = $this->getMailFromName($messageRecipients[0]);
                 $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients);
                 $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody);
+
+                if ($email === null) {
+                    continue;
+                }
+
                 if ($this->sendAuthEmail($message, $email)) {
                     $logService = new LogService($this->em);
                     $logService->addLog(
@@ -212,15 +217,18 @@ class SendAuthMailRequestCommand extends Command
     private function createAuthEmail(
         Msgs $message,
         string $mailFrom,
-        string $fromName,
+        ?string $fromName,
         array $body
-    ): Email {
+    ): ?Email {
         $mailTo = $message->getSid()->getEmailClear();
         try {
             $subject = $this->getSubject($message);
             $email = new Email();
+
+            $fromAddress = $fromName ? new Address($mailFrom, $fromName) : new Address($mailFrom);
+
             $email->subject($subject)
-                  ->from(new Address($mailFrom, $fromName))
+                  ->from($fromAddress)
                   ->to($mailTo)
                   ->html($body['html_body'])
                   ->text(strip_tags($body['plain_body']));
@@ -292,7 +300,7 @@ class SendAuthMailRequestCommand extends Command
         return $mailFrom;
     }
 
-    private function getMailFromName(Msgrcpt $msgrcpt): string
+    private function getMailFromName(Msgrcpt $msgrcpt): ?string
     {
         $userRepository = $this->em->getRepository(User::class);
         $user = $userRepository->findOneBy(['email' => $msgrcpt->getRid()->getEmailClear()]);

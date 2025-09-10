@@ -29,7 +29,7 @@ send() {
 	from_addr="$3"
 	# number of received mail expected
 	expected_received_count="$4"
-	# number of mail to send, default same as expected 
+	# number of mail to send, default same as expected
 	mail_to_send="${5:-$expected_received_count}"
 	# additionnal swaks options (eg attach a file)
 	swaks_opts="$6"
@@ -142,7 +142,7 @@ then
 
 	$dx php bin/console ag:report >/dev/null
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
-		expected_sender="${SMTP_FROM}" \
+		expected_sender="will@blocnormal.fr" \
 		to_addr="user@blocnormal.fr" \
 		send 'report' 'out' 'user@blocnormal.fr' 1 0
 

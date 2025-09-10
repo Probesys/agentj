@@ -74,6 +74,7 @@ class ReportSendMailCommand extends Command
                 }
 
                 $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
+                $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
                 $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
                 $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
                 $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
@@ -96,6 +97,7 @@ class ReportSendMailCommand extends Command
 
                 $body = str_replace('[USERNAME]', $user->getFullname(), $body);
                 $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
+                $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
                 $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
                 $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
                 $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
@@ -103,7 +105,12 @@ class ReportSendMailCommand extends Command
                 $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
                 $body = str_replace('[URL_MSGS]', $url, $body);
 
+                $from = $domain->getMailAuthenticationSender();
+                if (!$from) {
+                    $from = $this->defaultMailFrom;
+                }
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
+                $fromAddress = new Address($from, $fromName);
 
                 $mailTo = $user->getEmailFromRessource();
 
@@ -118,7 +125,7 @@ class ReportSendMailCommand extends Command
 
                 $message = new Email();
                 $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
-                        ->from(new Address($this->defaultMailFrom, $fromName))
+                        ->from($fromAddress)
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
 

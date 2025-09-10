@@ -7,6 +7,17 @@
 - You can remove the `APP_DOMAIN` variable from the root `.env` file and you must add a `APP_URL` variable (ex. `https://agentj.example.com`).
 - You must add a `SMTP_FROM` variable in the root `.env` file as it's no longer computed from the domain. Recommended value is `no-reply@<domain>`.
 
+## 2025-09-09 - 2.2.2
+
+### Bug fixes
+
+- Fix sending auth email if fullname is null ([98ec316](https://github.com/Probesys/agentj/commit/98ec316))
+- Replace `NB_UNTREATED_MESSAGES` in the reports ([f1ed1e1](https://github.com/Probesys/agentj/commit/f1ed1e1))
+- Sync user domain with his email domain on edition ([430ea71](https://github.com/Probesys/agentj/commit/430ea71))
+- Use the domain sender when sending reports ([79d53c0](https://github.com/Probesys/agentj/commit/79d53c0))
+- Remove default mailer From and Sender headers ([3f17c39](https://github.com/Probesys/agentj/commit/3f17c39))
+- Fix migration 20250424140106 to handle msgrcpts without msgs ([5949ec1](https://github.com/Probesys/agentj/commit/5949ec1))
+
 ## 2025-08-25 - 2.2.1
 
 ### Bug fixes
@@ -229,8 +240,8 @@ Technical
 * DKIM keys are now generated via PHP and stored in the database
 
 > [!CAUTION]
-> **Before** the upgrade, extract DKIM keys and Symfony tokens from the running instance (see [helper script](scripts/get-dkim-sf-encryption-token-pre-agentj2.sh))  
-> 
+> **Before** the upgrade, extract DKIM keys and Symfony tokens from the running instance (see [helper script](scripts/get-dkim-sf-encryption-token-pre-agentj2.sh))
+>
 > - add Symfony tokens to `.env` (in addition to merge changes from `.env.example`)
 > - pull and start the new containers
 > - wait for the end of database migrations, then insert the previously saved DKIM keys
