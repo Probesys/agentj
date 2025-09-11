@@ -52,6 +52,10 @@ class LdapConnectorType extends ConnectorType
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.ldapAliasField',
             ])
+            ->add('ldapSharedWithField', null, [
+                'required' => false,
+                'label' => 'Entities.LdapConnector.fields.ldapSharedWithField',
+            ])
             ->add('ldapGroupNameField', null, [
                 'required' => false,
                 'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',

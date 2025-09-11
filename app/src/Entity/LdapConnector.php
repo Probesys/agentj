@@ -49,6 +49,9 @@ class LdapConnector extends Connector
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ldapAliasField = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ldapSharedWithField = null;
+
 
     public function getLdapHost(): ?string
     {
@@ -204,6 +207,18 @@ class LdapConnector extends Connector
     public function setLdapAliasField(?string $ldapAliasField): static
     {
         $this->ldapAliasField = $ldapAliasField;
+
+        return $this;
+    }
+
+    public function getLdapSharedWithField(): ?string
+    {
+        return $this->ldapSharedWithField;
+    }
+
+    public function setLdapSharedWithField(?string $ldapSharedWithField): static
+    {
+        $this->ldapSharedWithField = $ldapSharedWithField;
 
         return $this;
     }

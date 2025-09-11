@@ -18,6 +18,7 @@ Then, create a LDAP connector with the following values:
 - Name field: `displayName`
 - Email field: `mail`
 - Alias field: `alias`
+- Shared mailboxes field: `SharedWith`
 - Users filter: `(cn=*)`
 
 Then, import the users.

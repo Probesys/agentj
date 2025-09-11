@@ -28,22 +28,22 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 )]
 class LDAPImportCommand extends Command
 {
-    private EntityManagerInterface $em;
     private ?LdapConnector $connector;
     private Ldap $ldap;
-    private TranslatorInterface $translator;
-    private LdapService $ldapService;
     private SymfonyStyle $io;
+    private int $nbUserUpdated = 0;
+    private int $nbUserCreated = 0;
+    private int $nbAliasCreated = 0;
+
+    /** @var array<User> */
+    private array $newUsers = [];
 
     public function __construct(
-        EntityManagerInterface $em,
-        TranslatorInterface $translator,
-        LdapService $ldapService
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator,
+        private LdapService $ldapService
     ) {
         parent::__construct();
-        $this->em = $em;
-        $this->translator = $translator;
-        $this->ldapService = $ldapService;
     }
 
     protected function configure(): void
@@ -56,7 +56,6 @@ class LDAPImportCommand extends Command
         $this->io = new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
-        /* @var $connector LdapConnector */
         $this->connector = $this->em->getRepository(LdapConnector::class)->find($connectorId);
         if (!$this->connector) {
             $this->io->error('Connector not found');
@@ -81,10 +80,8 @@ class LDAPImportCommand extends Command
     private function importUsers(): void
     {
         $mailAttribute = $this->connector->getLdapEmailField();
-        $realNameAttribute = $this->connector->getLdapRealNameField();
         $aliasAttribute = $this->connector->getLdapAliasField();
-        $nbUserUpdated = 0;
-        $nbUserCreated = 0;
+        $sharedWithAttribute = $this->connector->getLdapSharedWithField();
 
         if ($this->connector->getLdapUserFilter()) {
             $ldapQuery = $this->connector->getLdapUserFilter();
@@ -101,41 +98,18 @@ class LDAPImportCommand extends Command
                 }
 
                 // We consider that the first email of the list is the main email of the user.
-                $emailAdress = $listEmails[0];
+                $emailAddress = $listEmails[0];
 
-                // Verify and recover the email domain
-                $emailDomain = Email::extractDomain($emailAdress);
-                $domain = $emailDomain ? $this->em->getRepository(Domain::class)->findOneByDomain($emailDomain) : null;
+                $user = $this->findOrCreateUser($emailAddress);
 
-                // If the domain does not exist in AgentJ, ignore the user.
-                // Note that this should never happen as `filterUserResultOnDomain`
-                // makes sure that the domain exists. It's just a second security.
-                if (!$domain) {
+                if (!$user) {
                     continue;
                 }
 
-                $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
-
-                $attribute = $entry->getAttribute($realNameAttribute);
-                $userName = $attribute ? $attribute[0] : null;
-                $isNew = false;
-                if (!$user) {
-                    $user = new User();
-
-                    $user->setPolicy($domain->getPolicy());
-                    $isNew = true;
-                }
-                $user->setLdapDN($entry->getDN());
-                $user->setUid($entry->getAttribute('uid')[0]);
-                $user->setOriginConnector($this->connector);
-                $user->setFullname($userName);
-                $user->setUsername($emailAdress);
-                $user->setEmail($emailAdress);
-                $user->setDomain($domain);
-                $user->setPriority(MailaddrService::computePriority($emailAdress));
-                $user->setRoles('["ROLE_USER"]');
+                $this->updateUserFromLdap($user, $entry, $emailAddress);
 
                 $this->em->persist($user);
+                $this->em->flush();
 
                 $listAliases = [];
                 if ($aliasAttribute) {
@@ -146,27 +120,102 @@ class LDAPImportCommand extends Command
                 $listAliases = array_unique($listAliases);
 
                 foreach ($listAliases as $aliasEmail) {
-                    if (!filter_var($aliasEmail, FILTER_VALIDATE_EMAIL)) {
-                        continue;
-                    }
                     $this->createAlias($user, $aliasEmail);
                 }
 
-                $nbUserUpdated = $isNew ? $nbUserUpdated : $nbUserUpdated = $nbUserUpdated + 1;
-                $nbUserCreated = $isNew ? $nbUserCreated = $nbUserCreated + 1 : $nbUserCreated;
+                if ($sharedWithAttribute) {
+                    $listSharedWith = $entry->getAttribute($sharedWithAttribute) ?? [];
+                    $listSharedWith = array_reduce($listSharedWith, function ($carry, $item) {
+                        $emails = array_map('trim', explode(',', $item));
+                        return array_merge($carry, $emails);
+                    }, []);
+
+                    foreach ($listSharedWith as $sharedWithEmail) {
+                        $sharedUser = $this->findOrCreateUser($sharedWithEmail);
+
+                        if ($sharedUser) {
+                            $sharedUser->addOwnedSharedBox($user);
+                        }
+                    }
+                }
             }
         }
 
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-            '$NB_USER_CREATED' => $nbUserCreated,
-            '$NB_USER_UPDATED' => $nbUserUpdated,
+            '$NB_USER_CREATED' => $this->nbUserCreated,
+            '$NB_USER_UPDATED' => $this->nbUserUpdated,
+            '$NB_ALIAS_CREATED' => $this->nbAliasCreated,
         ]));
 
         $this->em->flush();
     }
 
+    private function updateUserFromLdap(
+        User $user,
+        Entry $entry,
+        string $emailAddress
+    ): void {
+        $realNameAttribute = $this->connector->getLdapRealNameField();
+        $attribute = $entry->getAttribute($realNameAttribute);
+        $fullname = $attribute ? $attribute[0] : null;
+
+        $user->setLdapDN($entry->getDN());
+        $user->setUid($entry->getAttribute('uid')[0]);
+        $user->setFullname($fullname);
+        $user->setUsername($emailAddress);
+
+        if (!in_array($user, $this->newUsers)) {
+            $this->nbUserUpdated++;
+        }
+    }
+
+    private function findOrCreateUser(string $emailAddress): ?User
+    {
+        if (!Email::validate($emailAddress)) {
+            return null;
+        }
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAddress]);
+
+        if ($user) {
+            return $user;
+        }
+
+        // Verify and recover the email domain
+        $domainName = Email::extractDomain($emailAddress);
+
+        if (!$domainName) {
+            return null;
+        }
+
+        $domain = $this->em->getRepository(Domain::class)->findOneByDomain($domainName);
+
+        // If the domain does not exist in AgentJ, ignore the user.
+        if (!$domain) {
+            return null;
+        }
+
+        $user = new User();
+        $user->setPolicy($domain->getPolicy());
+        $user->setOriginConnector($this->connector);
+        $user->setEmail($emailAddress);
+        $user->setDomain($domain);
+        $user->setPriority(MailaddrService::computePriority($emailAddress));
+        $user->setRoles('["ROLE_USER"]');
+        $this->em->persist($user);
+        $this->em->flush();
+        $this->nbUserCreated++;
+        $this->newUsers[] = $user;
+
+        return $user;
+    }
+
     private function createAlias(User $user, string $aliasEmail): void
     {
+        if (!Email::validate($aliasEmail)) {
+            return;
+        }
+
         // Make sure to not mark the base user as an alias of himself
         if ($aliasEmail === $user->getEmail()) {
             return;
@@ -174,7 +223,12 @@ class LDAPImportCommand extends Command
 
         // Alias domain verification
         $domainName = Email::extractDomain($aliasEmail);
-        $domain = $domainName ? $this->em->getRepository(Domain::class)->findOneByDomain($domainName) : null;
+
+        if (!$domainName) {
+            return;
+        }
+
+        $domain = $this->em->getRepository(Domain::class)->findOneByDomain($domainName);
 
         // If the domain is not managed, the alias is ignored.
         if (!$domain) {
@@ -184,6 +238,7 @@ class LDAPImportCommand extends Command
         $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
         if (!$alias) {
             $alias = new User();
+            $this->nbAliasCreated++;
         }
 
         $alias->setEmail($aliasEmail);
@@ -196,8 +251,6 @@ class LDAPImportCommand extends Command
 
     private function importGroups(): void
     {
-
-        $mailAttribute = $this->connector->getLdapEmailField();
         $realNameAttribute = $this->connector->getLdapGroupNameField();
         $groupMemberAttribute = $this->connector->getLdapGroupMemberField();
 
