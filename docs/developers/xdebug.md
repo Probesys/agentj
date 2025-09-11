@@ -25,5 +25,5 @@ Xdebug is a PHP extension that enables advanced debugging capabilities. It allow
     ]
 }
 ```
-3. Start the debug session in VS Code: you can open your navigator and trigger it by sending a request with the argument `XDEBUG_SESSION=agentj`, e.g. [localhost:8090?XDEBUG\_SESSION=agentj](http://localhost:8090?XDEBUG_SESSION=agentj)
+3. Start the debug session in VS Code: you can open your navigator and trigger it by sending a request with the argument `XDEBUG_SESSION_START`, e.g. [localhost:8090?XDEBUG\_SESSION\_START=1](http://localhost:8090?XDEBUG_SESSION_START=1)
 4. Place breakpoints and start debugging!
