@@ -267,7 +267,7 @@ By default, the *clamav* service, installed in the *amavis* container will start
 
 ## v1.5.0
 
-This version adds OAuth with Azure, please refer to [dedicated deployement documentation](docs/auth_azure.md) if you need this feature.
+This version adds OAuth with Azure, please refer to [dedicated deployement documentation](/docs/administrators/auth_azure.md) if you need this feature.
 
 ## v1.4.3
 

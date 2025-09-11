@@ -22,4 +22,4 @@ AgentJ is a [Probesys](https://www.probesys.coop) project, made available under 
 
 ## Documentation
 
-[Go to the documentation](docs/README.md)
+[Read the documentation.](docs/README.md)
