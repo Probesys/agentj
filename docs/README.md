@@ -185,6 +185,11 @@ $ make docker-clean FORCE=true
 The development stack provides a LDAP server.
 To use it, you must create a `example.com` domain in AgentJ.
 
+- Active domain: ☑️ *(check the box)*
+- Domain name: `example.com`
+- SMTP server: `smtp.test`
+- SMTP port: 25
+
 Then, create a LDAP connector with the following values:
 
 - host: `ldap`
