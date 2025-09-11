@@ -124,9 +124,16 @@ $ make docker-start
 
 The command automatically setup an `.env` file suitable for development.
 
+Load test data into your database with (this command **will not** delete existing data):
+
+```console
+$ scripts/console doctrine:fixtures:load --append
+```
+
 Login to [localhost:8090](http://localhost:8090) with the credentials `admin` / `secret`.
 
 Read more to learn [how to send and receive emails during development.](/docs/dev_mail.md)
+
 
 ### Working in the Docker containers
 
