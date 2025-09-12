@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim
 
-RUN apt update
-RUN apt install -y opendkim libopendbx1-mysql rsyslog iproute2
+RUN apt-get update
+RUN apt-get install -y opendkim libopendbx1-mysql rsyslog iproute2
 COPY entrypoint.sh /entrypoint.sh
 COPY opendkim.conf /etc/opendkim.conf
 COPY TrustedHosts /etc/trusted.opendkim.conf

@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 
-RUN apt update 
+RUN apt-get update
 
 ARG UID=1001
 ARG GID=1001
@@ -8,7 +8,7 @@ ARG GID=1001
 RUN groupadd -g $GID mailtester
 RUN useradd -u $UID -g $GID mailtester
 
-RUN apt install -y swaks opensmtpd curl opensmtpd-filter-dkimsign dnsmasq
+RUN apt-get install -y swaks opensmtpd curl opensmtpd-filter-dkimsign dnsmasq
 
 COPY dkim.priv /srv/dkim.priv
 RUN echo 'smtp.test' > /etc/mailname
