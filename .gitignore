@@ -6,3 +6,5 @@ __pycache__/
 .local/
 mailpit/
 .vscode/
+
+app/public/files
