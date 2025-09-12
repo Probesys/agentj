@@ -26,7 +26,6 @@ class SwitchUserSubscriber implements EventSubscriberInterface
 
         /** @var User $targetUser */
         $targetUser = $event->getTargetUser();
-
         $targetUserDomain = $targetUser->getDomain();
 
         if ($this->security->isGranted('IS_IMPERSONATOR')) {
@@ -58,8 +57,8 @@ class SwitchUserSubscriber implements EventSubscriberInterface
             if (!$targetUser->getOriginalUser()) {
                 throw new AccessDeniedException("You are not allowed to switch to this user");
             } else {
-                $originalUserEmail = stream_get_contents($user->getEmail(), -1, 0);
-                $targetUserEmail = stream_get_contents($targetUser->getOriginalUser()->getEmail(), -1, 0);
+                $originalUserEmail = $user->getEmail();
+                $targetUserEmail = $targetUser->getOriginalUser()->getEmail();
                 if ($originalUserEmail != $targetUserEmail) {
                     throw new AccessDeniedException("You are not allowed to switch to this user");
                 }

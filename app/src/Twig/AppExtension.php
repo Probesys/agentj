@@ -50,6 +50,10 @@ class AppExtension extends AbstractExtension
     public function streamGetcontent(mixed $input): string
     {
 
+        if (!is_resource($input)) {
+            return $input;
+        }
+
         $clearContent = stream_get_contents($input, -1, 0);
 
         if ($clearContent === false) {

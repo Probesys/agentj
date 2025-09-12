@@ -136,9 +136,9 @@ class MessagesController extends AbstractController
     {
         $listAliases = $this->em->getRepository(Entity\User::class)->getListAliases($user);
         $accessibleRecipientEmails = array_map(function ($item) {
-            return stream_get_contents($item->getEmail(), -1, 0);
+            return $item->getEmail();
         }, $listAliases);
-        $accessibleRecipientEmails = array_merge([$user->getEmailFromRessource()], $accessibleRecipientEmails);
+        $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
         if (!in_array($messageRecipient->getRid()->getEmailClear(), $accessibleRecipientEmails)) {
             throw new AccessDeniedException();

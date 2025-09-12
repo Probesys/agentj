@@ -272,7 +272,7 @@ class SendAuthMailRequestCommand extends Command
             $this->amavisdRelease,
             stream_get_contents($message->getQuarLoc(), -1, 0),
             stream_get_contents($message->getSecretId(), -1, 0),
-            $user->getEmailFromRessource(),
+            $user->getEmail(),
         ]);
 
         $process->run(

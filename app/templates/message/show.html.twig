@@ -1,114 +1,139 @@
 {% extends 'modalTemplate.html.twig' %}
 {% set msgDeliveryStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
 {% block modalTitle %}
-	{#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
-	{{ 'Entities.Msgrcpt.labels.infos' | trans }}
+    {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
+    {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
 
 {% block modalContent %}
-	<div class="row">
-		<div class="col-md-4">
-			{{ 'Generics.fields.date' | trans }}
-		</div>
-		<div class="col-md-8">
-			{{ msg.timeiso | format_datetime('short', 'short') }}
-		</div>
-		<div class="col-md-4">
-			{{ 'Generics.fields.sender' | trans }}
-		</div>
-		<div class="col-md-8">
-			{{ msg.sid.getEmailClear }}
-		</div>
-		<div class="col-md-4">
-			{{ 'Generics.fields.recipient' | trans }}
-		</div>
-		<div class="col-md-8">
-			{{ msgRcpt.rid.getEmailClear }}
-		</div>
-		<div class="col-md-4">
-			{{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
-		</div>
-		<div class="col-md-8">
-			{{ msgRcpt.bspamLevel }}
-		</div>
+    <div class="row">
+        <div class="col-md-4">
+            {{ 'Generics.fields.date' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ msg.timeiso | format_datetime('short', 'short') }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Generics.fields.sender' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ msg.sid.getEmailClear }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Generics.fields.recipient' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ msgRcpt.rid.getEmailClear }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ msgRcpt.bspamLevel }}
+        </div>
 
-		{% if msg.sendCaptcha > 0 %}
-			<div class="col-md-4">
-				{{ 'Entities.Message.dateAuthRequestAt' | trans }}
-				:
-			</div>
-			<div class="col-md-8">
-				{{ msg.sendCaptcha | format_datetime('short', 'short') }}
-			</div>
-		{% endif %}
+        {% if msg.sendCaptcha > 0 %}
+            <div class="col-md-4">
+                {{ 'Entities.Message.dateAuthRequestAt' | trans }}
+                :
+            </div>
+            <div class="col-md-8">
+                {{ msg.sendCaptcha | format_datetime('short', 'short') }}
+            </div>
+        {% endif %}
 
-		<div class="col-md-4">
-			{{ 'Entities.Message.isMailingList' | trans }}
-		</div>
-		<div class="col-md-8">
-			{%  if msg.isMlist %}
-				{{ 'Generics.labels.yes' | trans() }}
-			{% else %}
-				{{ 'Generics.labels.no' | trans() }}
-			{% endif %}
-		</div>
-		<div class="col-md-4">
-			{{ 'Message.Status.title' | trans }}
-		</div>
-		<div
-			class="col-md-8">
-			{# If the message as an agentJ status #}
-			{% if msgRcpt.status is not null %}
-				{#   authorized or restored status     #}
-				{% set msgsStatus = msgRcpt.getStatusName() %}
-				{% set response = msgRcpt.amavisOutput %}
-				{% if msgRcpt.status == 2 or msgRcpt.status == 5  %}
-					{% set deliverySatusClass = 'text-success' %}
-				{% else %}
-					{% set deliverySatusClass = 'text-danger' %}
-				{% endif %}
-			{% else %}
-				{% set msgsStatus = msgDeliveryStatus[msgRcpt.ds] %}
-				{% set response = msgRcpt.smtpResp %}
-				{% if msgRcpt.ds == 'P' %}
-					{% set deliverySatusClass = 'text-success' %}
-				{% else %}
-					{% set deliverySatusClass = 'text-danger' %}
-				{% endif %}
-			{% endif %}
+        <div class="col-md-4">
+            {{ 'Entities.Message.isMailingList' | trans }}
+        </div>
+        <div class="col-md-8">
+            {%  if msg.isMlist %}
+                {{ 'Generics.labels.yes' | trans() }}
+            {% else %}
+                {{ 'Generics.labels.no' | trans() }}
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            {{ 'Message.Status.title' | trans }}
+        </div>
+        <div
+            class="col-md-8">
+            {# If the message as an agentJ status #}
+            {% if msgRcpt.status is not null %}
+                {#   authorized or restored status     #}
+                {% set msgsStatus = msgRcpt.getStatusName() %}
+                {% set response = msgRcpt.amavisOutput %}
+                {% if msgRcpt.status == 2 or msgRcpt.status == 5  %}
+                    {% set deliverySatusClass = 'text-success' %}
+                {% else %}
+                    {% set deliverySatusClass = 'text-danger' %}
+                {% endif %}
+            {% else %}
+                {% set msgsStatus = msgDeliveryStatus[msgRcpt.ds] %}
+                {% set response = msgRcpt.smtpResp %}
+                {% if msgRcpt.ds == 'P' %}
+                    {% set deliverySatusClass = 'text-success' %}
+                {% else %}
+                    {% set deliverySatusClass = 'text-danger' %}
+                {% endif %}
+            {% endif %}
 
-			<span class="{{ deliverySatusClass }}">{{ msgsStatus }}</span><br>
-			<em>{{ response }}</em>
-		</div>
-		<div class="col-md-12">
-			{{ 'Entities.Msgrcpt.labels.appliedRule' | trans }}
-		</div>
-		<div class="col-md-12 table-responsive">
-			<table class="table table-sm">
-				<thead>
-					<tr>
-						<th>{{ 'Generics.fields.recipient' | trans }}</th>
-						<th>{{ 'Generics.fields.sender' | trans }}</th>
-						<th>{{ 'Generics.fields.list' | trans }}</th>
-						<th>{{ 'Generics.fields.priority' | trans }}</th>
-						<th>{{ 'Entities.User.fields.groups' | trans }}</th>
-					</tr>
-				</thead>
-				{% for wb in wblistInfo %}
-					{% set classTr = "" %}
-					{% if loop.index == 1 %}
-						{% set classTr = "bg-success text-white" %}
-					{% endif %}
-					<tr class="{{ classTr }} ">
-						<td>{{ wb.recipient.getEmailFromRessource }}</td>
-						<td>{{ wb.sender.email }}</td>
-						<td>{{ wb.wb }}</td>
-						<td>{{ wb.priority }}</td>
-						<td>{{ wb.group }}</td>
-					</tr>
-				{% endfor %}
-			</table>
-		</div>
-	</div>
+            <span class="{{ deliverySatusClass }}">
+                {{ msgsStatus }}
+            </span>
+            <br>
+            <em>
+                {{ response }}
+            </em>
+        </div>
+        <div class="col-md-12">
+            {{ 'Entities.Msgrcpt.labels.appliedRule' | trans }}
+        </div>
+        <div class="col-md-12 table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>
+                            {{ 'Generics.fields.recipient' | trans }}
+                        </th>
+                        <th>
+                            {{ 'Generics.fields.sender' | trans }}
+                        </th>
+                        <th>
+                            {{ 'Generics.fields.list' | trans }}
+                        </th>
+                        <th>
+                            {{ 'Generics.fields.priority' | trans }}
+                        </th>
+                        <th>
+                            {{ 'Entities.User.fields.groups' | trans }}
+                        </th>
+                    </tr>
+                </thead>
+                {% for wb in wblistInfo %}
+                    {% set classTr = "" %}
+                    {% if loop.index == 1 %}
+                        {% set classTr = "bg-success text-white" %}
+                    {% endif %}
+                    <tr class="{{ classTr }} ">
+                        <td>
+                            {{ wb.recipient.email }}
+                        </td>
+                        <td>
+                            {{ wb.sender.email }}
+                        </td>
+                        <td>
+                            {{ wb.wb }}
+                        </td>
+                        <td>
+                            {{ wb.priority }}
+                        </td>
+                        <td>
+                            {{ wb.group }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
 {% endblock %}

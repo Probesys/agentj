@@ -130,7 +130,7 @@ class CreateAlertMessageHandler
                         $this->entityManager->persist($alert);
 
                         // Send email to admin/superadmin
-                        $emailAddress = $user->getEmailFromRessource();
+                        $emailAddress = $user->getEmail();
                         if ($emailAddress !== null && $user->getDomain() !== null) {
                             $mailFrom = $user->getDomain()->getMailAuthenticationSender();
                             if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
@@ -216,7 +216,7 @@ class CreateAlertMessageHandler
 
                             $email = (new Email())
                                 ->from($mailFrom)
-                                ->to($senderUser->getEmailFromRessource())
+                                ->to($senderUser->getEmail())
                                 ->subject($subject)
                                 ->text($text);
 
@@ -320,7 +320,7 @@ class CreateAlertMessageHandler
                     $this->entityManager->persist($alert);
 
                     // Send email to admin/superadmin
-                    $emailAddress = $user->getEmailFromRessource();
+                    $emailAddress = $user->getEmail();
                     if ($emailAddress !== null && $user->getDomain() !== null) {
                         $mailFrom = $user->getDomain()->getMailAuthenticationSender();
                         if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
@@ -412,7 +412,7 @@ class CreateAlertMessageHandler
                                 );
                                 $email = (new Email())
                                     ->from($mailFrom)
-                                    ->to($senderUser->getEmailFromRessource())
+                                    ->to($senderUser->getEmail())
                                     ->subject($subject)
                                     ->text($text);
 

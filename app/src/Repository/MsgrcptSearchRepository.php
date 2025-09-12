@@ -220,9 +220,9 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     {
         $aliases = $user->getAliases()->toArray();
         $recipients = array_map(function (User $alias) {
-            return $alias->getEmailFromRessource();
+            return $alias->getEmail();
         }, $aliases);
-        $recipients[] = $user->getEmailFromRessource();
+        $recipients[] = $user->getEmail();
         $queryBuilder->andWhere('maddr.email IN (:recipients)')
             ->setParameter('recipients', $recipients);
     }

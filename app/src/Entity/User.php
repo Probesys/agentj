@@ -154,7 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __toString(): string
     {
-        return $this->getEmailFromRessource() ?: '';
+        return $this->getEmail() ?: '';
     }
 
     public function getId(): ?int
@@ -184,22 +184,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEmail(): mixed
+    public function getEmail(): ?string
     {
-        return $this->email;
-    }
+        $email = $this->email;
 
-    public function getEmailFromRessource(): ?string
-    {
-        if ($this->email === null) {
-            return null;
+        if (is_resource($email)) {
+            $email = stream_get_contents($email, -1, 0);
         }
 
-        $emailClear = stream_get_contents($this->email, -1, 0);
-        if ($emailClear === false) {
-            return null;
+        if (is_string($email)) {
+            return $email;
         }
-        return $emailClear;
+
+        return null;
     }
 
     public function setEmail(mixed $email): self

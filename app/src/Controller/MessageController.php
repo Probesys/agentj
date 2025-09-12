@@ -629,11 +629,13 @@ class MessageController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $listAliases = $this->em->getRepository(User::class)->getListAliases($user);
+        $listAliases = $user->getAliases()->toArray();
+
         $accessibleRecipientEmails = array_map(function ($item) {
-            return stream_get_contents($item->getEmail(), -1, 0);
+            return $item->getEmail();
         }, $listAliases);
-        $accessibleRecipientEmails = array_merge([$user->getEmailFromRessource()], $accessibleRecipientEmails);
+
+        $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
         if (
             !$this->isGranted("ROLE_ADMIN") &&

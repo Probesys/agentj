@@ -112,7 +112,7 @@ class ReportSendMailCommand extends Command
                 $fromName = $this->translator->trans('Entities.Report.mailFromName');
                 $fromAddress = new Address($from, $fromName);
 
-                $mailTo = $user->getEmailFromRessource();
+                $mailTo = $user->getEmail();
 
                 if ($mailTo === null) {
                     continue;
@@ -143,7 +143,7 @@ class ReportSendMailCommand extends Command
                 } catch (\Exception $e) {
                     //catch error and save this in msgs + change status to error
                     $messageError = $e->getMessage();
-                    $io->note(sprintf('Error  %s : [%s]', $user->getEmailFromRessource(), $messageError));
+                    $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
                 }
             }
         }

@@ -97,13 +97,13 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             );
         }
 
-        return new SelfValidatingPassport(new UserBadge($user->getEmailFromRessource()), [new RememberMeBadge()]);
+        return new SelfValidatingPassport(new UserBadge($user->getEmail()), [new RememberMeBadge()]);
     }
 
     private function getLoginImap(User $user, string $password): bool
     {
         $cm = new ClientManager($options = []);
-        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmailFromRessource();
+        $login = $user->getImapLogin() ? $user->getImapLogin() : $user->getEmail();
         foreach ($user->getDomain()->getConnectors() as $connector) {
             if ($connector instanceof ImapConnector) {
                 $client = $cm->make([

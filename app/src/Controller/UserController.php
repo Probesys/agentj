@@ -211,7 +211,7 @@ class UserController extends AbstractController
             'include_quota' => false,
         ]);
         $email = $user->getEmail();
-        $form->get('email')->setData($email !== null ? stream_get_contents($email, -1, 0) : '');
+        $form->get('email')->setData($email !== null ? $email : '');
 
         $form->remove('originalUser');
         $form->remove('emailRecovery');
@@ -530,7 +530,7 @@ class UserController extends AbstractController
         $form->remove('domain');
         $form->remove('emailRecovery');
         $form->remove('username');
-        $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
+        $form->get('email')->setData($user->getEmail());
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -626,7 +626,7 @@ class UserController extends AbstractController
         $form->remove('domain');
         $form->remove('sharedWith');
         $form->remove('imapLogin');
-        $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
+        $form->get('email')->setData($user->getEmail());
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -654,7 +654,6 @@ class UserController extends AbstractController
 
             return new JsonResponse($return, 200);
         }
-        //        $form->get('email')->setData(stream_get_contents($user->getEmail(), -1, 0));
 
         return $this->render('user/edit.html.twig', [
                     'user' => $user,
