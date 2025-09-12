@@ -112,10 +112,10 @@ class Domain
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
-    #[ORM\Column(type: 'boolean', nullable: false)]
+    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $sendUserAlerts = false;
 
-    #[ORM\Column(type: 'boolean', nullable: false)]
+    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $sendUserMailAlerts = false;
 
     public function __construct()
