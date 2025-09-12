@@ -37,7 +37,7 @@ send() {
 	swaks_expected="${7:-0}"
 
 	to_addr="${to_addr:-root@smtp.test}"
-	wait_time=${TEST_TIMEOUT:-30}
+	wait_time=${TEST_TIMEOUT:-15}
 	message_subject="test_${testname}_$RANDOM"
 	_expected_subject="${expected_subject:-$message_subject}"
 	expected_subject="${_expected_subject// /%20}"
