@@ -18,7 +18,7 @@ The command automatically setup an `.env` file suitable for development.
 Load test data into your database with (this command **will not** delete existing data):
 
 ```console
-$ scripts/console doctrine:fixtures:load --append
+$ make db-fixtures
 ```
 
 Login to [localhost:8090](http://localhost:8090) with the credentials `admin` / `secret`.
@@ -50,6 +50,26 @@ You can remove all the Docker stuff (containers, volumes, networks) with:
 
 ```console
 $ make docker-clean FORCE=true
+```
+
+## Manage the database
+
+You can generate a new migration with:
+
+```console
+$ make migration
+```
+
+Then, apply the migration:
+
+```console
+$ make db-migrate
+```
+
+If you need to rollback the last migration:
+
+```console
+$ make db-rollback
 ```
 
 ## About the `compose.dev.yml` file

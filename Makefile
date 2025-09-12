@@ -44,6 +44,22 @@ ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
 	$(PHP) vendor/bin/phpcbf
 endif
 
+.PHONY: migration
+migration: ## Generate a database migration from entities changes
+	$(CONSOLE) make:migration
+
+.PHONY: db-migrate
+db-migrate: VERSION ?= latest
+db-migrate: ## Migrate the database (can take a VERSION argument)
+	$(CONSOLE) doctrine:migrations:migrate --no-interaction $(VERSION)
+
+.PHONY: db-rollback
+db-rollback: ## Rollback the database to the previous version
+	$(CONSOLE) doctrine:migrations:migrate --no-interaction prev
+
+.PHONY: db-fixtures
+db-fixtures: ## Load the fixtures in the database
+	$(CONSOLE) doctrine:fixtures:load --append
 
 .PHONY: release
 release: ## Release a new version (take a VERSION argument)
