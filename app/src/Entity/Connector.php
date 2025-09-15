@@ -48,10 +48,17 @@ class Connector
     #[ORM\Column(nullable: true)]
     private ?bool $synchronizeGroup = null;
 
+    /**
+     * @var Collection<int, Groups>
+     */
+    #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'connectors')]
+    private Collection $targetGroups;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->groups = new ArrayCollection();
+        $this->targetGroups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -163,6 +170,30 @@ class Connector
     public function setSynchronizeGroup(?bool $synchronizeGroup): self
     {
         $this->synchronizeGroup = $synchronizeGroup;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Groups>
+     */
+    public function getTargetGroups(): Collection
+    {
+        return $this->targetGroups;
+    }
+
+    public function addTargetGroup(Groups $targetGroup): static
+    {
+        if (!$this->targetGroups->contains($targetGroup)) {
+            $this->targetGroups->add($targetGroup);
+        }
+
+        return $this;
+    }
+
+    public function removeTargetGroup(Groups $targetGroup): static
+    {
+        $this->targetGroups->removeElement($targetGroup);
 
         return $this;
     }

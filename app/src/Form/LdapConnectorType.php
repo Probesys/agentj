@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\Entity\LdapConnector;
-use Symfony\Component\Form\AbstractType;
+use App\Entity\Groups;
+use App\Repository\GroupsRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -13,6 +15,9 @@ class LdapConnectorType extends ConnectorType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         parent::buildForm($builder, $options);
+
+        $domain = $builder->getData()->getDomain();
+
         $builder
             ->add('ldapHost', null, [
                 'required' => true,
@@ -39,6 +44,19 @@ class LdapConnectorType extends ConnectorType
                 'required' => is_null($builder->getData()->getId()),
                 'label' => 'Entities.LdapConnector.fields.LdapPassword',
                 'attr' => ['data-ldap-bind' => 'true']
+            ])
+            ->add('targetGroups', EntityType::class, [
+                'attr' => ['class' => 'select2'],
+                'required' => false,
+                'class' => Groups::class,
+                'multiple' => true,
+                'expanded' => false,
+                'query_builder' => function (GroupsRepository $groupsRepository) use ($domain) {
+                    return $groupsRepository->createQueryBuilder('g')
+                        ->where('g.domain = :domain')
+                        ->setParameter('domain', $domain);
+                },
+                'label' => 'Entities.Connector.fields.targetGroups',
             ])
             ->add('ldapRealNameField', null, [
                 'required' => true,

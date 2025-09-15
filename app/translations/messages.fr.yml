@@ -606,6 +606,7 @@ Entities:
       name: "Nom du connecteur"
       type: "Type de connecteur"
       active: "Connecteur actif"
+      targetGroups: "Affecter les utilisateurs au(x) groupe(s)"
     actions:
       add: "Ajouter un connecteur Office365"
       edit: "Modifier un connecteur Office365"

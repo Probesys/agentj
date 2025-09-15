@@ -48,7 +48,12 @@ class LdapConnectorController extends AbstractController
         $connector = new LdapConnector();
         $connector->setDomain($domain);
         $form = $this->createForm(LdapConnectorType::class, $connector, [
-            'action' => $this->generateUrl('app_connector_ldap_new', ['domain' => $domain->getId()]),
+            'action' => $this->generateUrl(
+                'app_connector_ldap_new',
+                [
+                    'domain' => $domain->getId()
+                ]
+            ),
         ]);
         $form->handleRequest($request);
 
@@ -120,10 +125,11 @@ class LdapConnectorController extends AbstractController
         return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
     }
 
-    #[Route('/checkbind', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
-    public function checkbindAction(Request $request, LdapService $ldapService): Response
+    #[Route('/checkbind/{domain}', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
+    public function checkbindAction(Request $request, LdapService $ldapService, Domain $domain): Response
     {
         $testConnector = new LdapConnector();
+        $testConnector->setDomain($domain);
         $form = $this->createForm(LdapConnectorType::class, $testConnector);
         $form->handleRequest($request);
 
@@ -161,12 +167,12 @@ class LdapConnectorController extends AbstractController
     {
 
         $testConnector = new LdapConnector();
+        $testConnector->setDomain($domain);
         $form = $this->createForm(LdapConnectorType::class, $testConnector);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             $testConnector = $form->getData();
-            $testConnector->setDomain($domain);
             $pass = $request->request->get('encryptedPass');
             if ($testConnector->getLdapPassword()) {
                 $pass = $this->cryptEncryptService->encrypt($testConnector->getLdapPassword());

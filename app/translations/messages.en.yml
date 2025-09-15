@@ -606,6 +606,7 @@ Entities:
       name: "Connector name"
       type: "Connector type"
       active: "Active connector"
+      targetGroups: "Assign user(s) to group(s)"
     actions:
       add: "Add Office365 connector"
       edit: "Edit Office365 connector"

@@ -7,8 +7,10 @@ use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Repository\DomainRepository;
+use App\Service\GroupService;
 use App\Service\LdapService;
 use App\Service\MailaddrService;
+use App\Service\UserService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -41,7 +43,9 @@ class LDAPImportCommand extends Command
     public function __construct(
         private EntityManagerInterface $em,
         private TranslatorInterface $translator,
-        private LdapService $ldapService
+        private LdapService $ldapService,
+        private UserService $userService,
+        private GroupService $groupService
     ) {
         parent::__construct();
     }
@@ -73,6 +77,8 @@ class LDAPImportCommand extends Command
         if ($this->connector->isSynchronizeGroup()) {
             $this->importGroups();
         }
+
+        $this->assignGroupsToImportedUsers();
 
         return Command::SUCCESS;
     }
@@ -249,6 +255,19 @@ class LDAPImportCommand extends Command
         $this->em->flush();
     }
 
+    private function assignGroupsToImportedUsers(): void
+    {
+        foreach ($this->connector->getUsers() as $user) {
+            foreach ($this->connector->getTargetGroups() as $group) {
+                $user->addGroup($group);
+            }
+
+            $this->userService->updateAliasGroupsAndPolicyFromUser($user);
+        }
+        $this->groupService->updateWblist();
+    }
+
+
     private function importGroups(): void
     {
         $realNameAttribute = $this->connector->getLdapGroupNameField();
@@ -288,7 +307,7 @@ class LDAPImportCommand extends Command
                 $this->em->persist($group);
                 $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
                 $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
-                $this->addMembersToGroup($ldapGroup, $group);
+                $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
@@ -300,7 +319,7 @@ class LDAPImportCommand extends Command
         }
     }
 
-    private function addMembersToGroup(Entry $ldapGroup, Groups $group): void
+    private function addMembersToLdapGroup(Entry $ldapGroup, Groups $group): void
     {
         $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();

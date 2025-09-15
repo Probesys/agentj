@@ -87,6 +87,12 @@ class Groups
     #[ORM\Column(nullable: true)]
     private ?array $quota = null;
 
+    /**
+     * @var Collection<int, Connector>
+     */
+    #[ORM\ManyToMany(targetEntity: Connector::class, mappedBy: 'targetGroups')]
+    private Collection $connectors;
+
     public function __toString()
     {
         return $this->name;
@@ -99,6 +105,7 @@ class Groups
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
         $this->groupsWbLists = new ArrayCollection();
+        $this->connectors = new ArrayCollection();
     }
 
 
@@ -368,6 +375,33 @@ class Groups
     public function setQuota(?array $quota): static
     {
         $this->quota = $quota;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Connector>
+     */
+    public function getConnectors(): Collection
+    {
+        return $this->connectors;
+    }
+
+    public function addConnector(Connector $connector): static
+    {
+        if (!$this->connectors->contains($connector)) {
+            $this->connectors->add($connector);
+            $connector->addTargetGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConnector(Connector $connector): static
+    {
+        if ($this->connectors->removeElement($connector)) {
+            $connector->removeTargetGroup($this);
+        }
 
         return $this;
     }
