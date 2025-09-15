@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 RUN apt update
 RUN apt install -y opendkim libopendbx1-mysql rsyslog iproute2
