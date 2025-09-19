@@ -46,7 +46,7 @@ slow      unix  -       -       -       -       -       smtp
     -o slow_destination_concurrency_failed_cohort_limit=10
 
 # Amavis config
-amavisfeed unix    -       -       n        -      2     lmtp
+amavisfeed unix    -       -       n        -      $AMAVIS_PROCESSES     lmtp
     -o lmtp_data_done_timeout=1200
     -o lmtp_send_xforward_command=yes
     -o disable_dns_lookups=yes

@@ -16,4 +16,9 @@ sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/postfix-*/mysql-*.cf
 sed -i "s/\$DB_USER/$DB_USER/g" /etc/postfix-*/mysql-*.cf
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/postfix-*/mysql-*.cf
 
+# We configure one less Amavis process than the total to reserve a process for the "app" release system.
+AMAVIS_PROCESSES=${AMAVIS_PROCESSES:-3}
+AMAVIS_PROCESSES=$((AMAVIS_PROCESSES - 1))
+sed -i "s/\$AMAVIS_PROCESSES/${AMAVIS_PROCESSES}/g" /etc/postfix-*/master.cf
+
 /usr/sbin/postfix start-fg
