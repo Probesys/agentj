@@ -2,11 +2,14 @@
 
 namespace App\Command;
 
+use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
+use App\Repository\DomainRepository;
 use App\Service\LdapService;
 use App\Service\MailaddrService;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -99,6 +102,18 @@ class LDAPImportCommand extends Command
 
                 // We consider that the first email of the list is the main email of the user.
                 $emailAdress = $listEmails[0];
+
+                // Verify and recover the email domain
+                $emailDomain = Email::extractDomain($emailAdress);
+                $domain = $emailDomain ? $this->em->getRepository(Domain::class)->findOneByDomain($emailDomain) : null;
+
+                // If the domain does not exist in AgentJ, ignore the user.
+                // Note that this should never happen as `filterUserResultOnDomain`
+                // makes sure that the domain exists. It's just a second security.
+                if (!$domain) {
+                    continue;
+                }
+
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailAdress]);
 
                 $attribute = $entry->getAttribute($realNameAttribute);
@@ -107,7 +122,7 @@ class LDAPImportCommand extends Command
                 if (!$user) {
                     $user = new User();
 
-                    $user->setPolicy($this->connector->getDomain()->getPolicy());
+                    $user->setPolicy($domain->getPolicy());
                     $isNew = true;
                 }
                 $user->setLdapDN($entry->getDN());
@@ -116,7 +131,7 @@ class LDAPImportCommand extends Command
                 $user->setFullname($userName);
                 $user->setUsername($emailAdress);
                 $user->setEmail($emailAdress);
-                $user->setDomain($this->connector->getDomain());
+                $user->setDomain($domain);
                 $user->setPriority(MailaddrService::computePriority($emailAdress));
                 $user->setRoles('["ROLE_USER"]');
 
@@ -157,6 +172,15 @@ class LDAPImportCommand extends Command
             return;
         }
 
+        // Alias domain verification
+        $domainName = Email::extractDomain($aliasEmail);
+        $domain = $domainName ? $this->em->getRepository(Domain::class)->findOneByDomain($domainName) : null;
+
+        // If the domain is not managed, the alias is ignored.
+        if (!$domain) {
+            return;
+        }
+
         $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
         if (!$alias) {
             $alias = new User();
@@ -165,7 +189,7 @@ class LDAPImportCommand extends Command
         $alias->setEmail($aliasEmail);
         $alias->setUsername($aliasEmail);
         $alias->setOriginalUser($user);
-        $alias->setDomain($user->getDomain());
+        $alias->setDomain($domain);
         $this->em->persist($alias);
         $this->em->flush();
     }
@@ -202,12 +226,12 @@ class LDAPImportCommand extends Command
                     $group->setOverrideUser(false);
                     $group->setDomain($this->connector->getDomain());
                     $group->setWb("");
+                    $group->setOriginConnector($this->connector);
                     $isNew = true;
                     $priorityMax++;
                 }
 
                 $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
-                $group->setOriginConnector($this->connector);
                 $this->em->persist($group);
                 $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
                 $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;

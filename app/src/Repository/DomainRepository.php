@@ -53,4 +53,12 @@ class DomainRepository extends ServiceEntityRepository
 
         return $query;
     }
+
+    /**
+     * Find a domain by its name
+     */
+    public function findOneByDomain(string $domainName): ?Domain
+    {
+        return $this->findOneBy(['domain' => strtolower($domainName)]);
+    }
 }
