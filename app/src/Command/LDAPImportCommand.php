@@ -131,6 +131,9 @@ class LDAPImportCommand extends Command
                 $listAliases = array_unique($listAliases);
 
                 foreach ($listAliases as $aliasEmail) {
+                    if (!filter_var($aliasEmail, FILTER_VALIDATE_EMAIL)) {
+                        continue;
+                    }
                     $this->createAlias($user, $aliasEmail);
                 }
 
