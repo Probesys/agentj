@@ -4,7 +4,7 @@
 
 - [**Deploy in production**](/docs/administrators/deploy.md)
 - [Infrastructure overview](/docs/infrastructure.md)
-- [OAuth with Azure](/docs/administrators/auth_azure.md)
+- [Login with OAuth2](/docs/administrators/oauth2.md)
 - [Versioning policy](/docs/versioning.md)
 - [Changelog of AgentJ](/CHANGELOG.md)
 

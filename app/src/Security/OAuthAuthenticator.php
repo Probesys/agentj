@@ -8,6 +8,7 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Exception\InvalidStateException;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use KnpU\OAuth2ClientBundle\Security\Exception\IdentityProviderAuthenticationException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,8 +20,10 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationExc
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class OAuthAuthenticator extends OAuth2Authenticator
 {
@@ -31,28 +34,113 @@ class OAuthAuthenticator extends OAuth2Authenticator
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
         private RouterInterface $router,
+        private LoggerInterface $logger,
+        private TranslatorInterface $translator,
     ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return $request->attributes->get('_route') === 'connect_azure_check';
+        return (
+            $request->attributes->get('_route') === 'connect_azure_check' ||
+            $request->attributes->get('_route') === 'connect_oauth_check'
+        );
     }
 
     public function authenticate(Request $request): Passport
     {
+        if ($request->attributes->get('_route') === 'connect_azure_check') {
+            return $this->authenticateAzure($request);
+        } else {
+            return $this->authenticateOAuth($request);
+        }
+    }
+
+    /**
+     * Authenticate the user via a generic OAuth2 client.
+     */
+    private function authenticateOAuth(Request $request): Passport
+    {
+        $client = $this->clientRegistry->getClient('generic');
+        $session = $request->getSession();
+
+        try {
+            $accessToken = $this->fetchAccessToken($client);
+        } catch (\Exception $e) {
+            $this->logger->error('OAuth2 fetch access token failed: {message}', [
+                'exception' => $e,
+                'message' => $e->getMessage(),
+            ]);
+            $this->setAuthenticationError($session, new TranslatableMessage('Generics.messages.oauthInvalidSetup'));
+
+            throw new CustomUserMessageAuthenticationException(
+                new TranslatableMessage('Generics.messages.oauthInvalidSetup')
+            );
+        }
+
+        return new SelfValidatingPassport(
+            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client, $session) {
+                try {
+                    $oauthUser = $client->fetchUserFromToken($accessToken);
+                } catch (\Exception $e) {
+                    $this->logger->error('OAuth2 fetch user from token failed: {message}', [
+                        'exception' => $e,
+                        'message' => $e->getMessage(),
+                    ]);
+                    $this->setAuthenticationError(
+                        $session,
+                        new TranslatableMessage('Generics.messages.oauthInvalidSetup')
+                    );
+
+                    return null;
+                }
+
+                $oauthUserAttributes = $oauthUser->toArray();
+
+                if (!isset($oauthUserAttributes['email'])) {
+                    $this->logger->error('OAuth2 login failed: "email" is missing in userinfo');
+                    $this->setAuthenticationError(
+                        $session,
+                        new TranslatableMessage('Generics.messages.incorrectCredential')
+                    );
+
+                    return null;
+                }
+
+                $email = $oauthUserAttributes['email'];
+                $user = $this->userRepository->findOneByEmail($email);
+
+                if ($user === null) {
+                    $this->logger->error("OAuth2 login failed: user with email {$email} does not exist");
+                    $this->setAuthenticationError(
+                        $session,
+                        new TranslatableMessage('Generics.messages.incorrectCredential')
+                    );
+
+                    return null;
+                }
+
+                return $user;
+            })
+        );
+    }
+
+    /**
+     * Authenticate the user via Azure (deprecated, use OAuth2 instead).
+     */
+    private function authenticateAzure(Request $request): Passport
+    {
         $client = $this->clientRegistry->getClient('azure');
         try {
             $accessToken = $this->fetchAccessToken($client);
-        } catch (IdentityProviderAuthenticationException $ex) {
+        } catch (\Exception $e) {
+            $this->logger->error('Azure OAuth2 fetch access token failed: {message}', [
+                'exception' => $e,
+                'message' => $e->getMessage(),
+            ]);
+
             throw new CustomUserMessageAuthenticationException(
                 new TranslatableMessage('Generics.messages.azurOAuthInvalidIdentity'),
-                []
-            );
-        } catch (InvalidStateException $ex) {
-            throw new CustomUserMessageAuthenticationException(
-                new TranslatableMessage('Generics.messages.azurOAuthInvalidIdentity'),
-                []
             );
         }
 
@@ -95,5 +183,13 @@ class OAuthAuthenticator extends OAuth2Authenticator
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         throw $exception->getPrevious() ?? $exception;
+    }
+
+    private function setAuthenticationError(SessionInterface $session, TranslatableMessage $error): void
+    {
+        $session->set(
+            SecurityRequestAttributes::AUTHENTICATION_ERROR,
+            new CustomUserMessageAuthenticationException($this->translator->trans($error)),
+        );
     }
 }

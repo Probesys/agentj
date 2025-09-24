@@ -8,7 +8,9 @@ twig:
     globals:
         agentjVersion: '%app.agentj-version%'
         domain_mail_authentification_sender: '%app.domain_mail_authentification_sender%'
-        enable_azure_oauth: '%env(ENABLE_AZURE_OAUTH)%'
+        oauth_enabled: '%env(bool:ENABLE_OAUTH)%'
+        oauth_login_label: '%env(OAUTH_LOGIN_LABEL)%'
+        azure_oauth_enabled: '%env(bool:ENABLE_AZURE_OAUTH)%'
         locales:
             - fr
             - en

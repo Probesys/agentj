@@ -8,7 +8,7 @@ AgentJ can:
 - handle all *outgoing* mail *from* a domain. We speak of mail ***via*** agentj. Those mail are sent to the original recipient, so to whatever SMTP server on the internet
 - send mail on his own: alert, report or validation mail. Those mail are sent, depending of the configuration (in the web interface) or as `SMTP_FROM` (defined in the env file).
 
-> [!NOTICE]
+> [!NOTE]
 > agentj will accept any mail to configured domains on `smtp` container, but to send mail ***via*** agentj you'll need to allow the sender smtp ip in the web interface.
 
 **In a dev installation with the default tests data, all these mail are catched by mailpit**.

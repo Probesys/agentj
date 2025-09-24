@@ -71,6 +71,7 @@ Generics:
     EmailDoesNotExist: "The email account does not exist in the database"
     BadColumnsFile: "The number of columns is incorrect. Check your file."
     azurOAuthInvalidIdentity: The identification data for Microsoft is incorrect. Please contact your administrator.
+    oauthInvalidSetup: "An error occurred during connection. Please contact your administrator."
     incorrectCredential: Invalid credentials
     groupWithPriorityExists: "A group with same priority already exists for this domain. Please choose another one"
     helpAlert: "Alerts on blocked outgoing emails (quota exceeded, etc.)"

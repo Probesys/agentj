@@ -7,6 +7,7 @@
 - You can remove the `APP_DOMAIN` variable from the root `.env` file and you must add a `APP_URL` variable (ex. `https://agentj.example.com`).
 - You must add a `SMTP_FROM` variable in the root `.env` file as it's no longer computed from the domain. Recommended value is `no-reply@<domain>`.
 - You can add a `AMAVIS_PROCESSES` in the root `.env` file to modify the number of Amavis processes (default: 3)
+- The previous `OAUTH_AZURE` system is now deprecated, a new generic OAuth2 system is available and should be prefered ([see documentation](/docs/administrators/oauth2.md))
 
 ## 2025-09-09 - 2.2.2
 

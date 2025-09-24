@@ -18,6 +18,14 @@ sed -i "s|\$SMTP_FROM|$SMTP_FROM|g" $env_file
 sed -i "s|\$ENABLE_AZURE_OAUTH|$ENABLE_AZURE_OAUTH|g" $env_file
 sed -i "s|\$OAUTH_AZURE_CLIENT_ID|$OAUTH_AZURE_CLIENT_ID|g" $env_file
 sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET|$OAUTH_AZURE_CLIENT_SECRET|g" $env_file
+sed -i "s|\$ENABLE_OAUTH|$ENABLE_OAUTH|g" $env_file
+sed -i "s|\$OAUTH_CLIENT_ID|$OAUTH_CLIENT_ID|g" $env_file
+sed -i "s|\$OAUTH_CLIENT_SECRET|$OAUTH_CLIENT_SECRET|g" $env_file
+sed -i "s|\$OAUTH_URL_AUTHORIZE|$OAUTH_URL_AUTHORIZE|g" $env_file
+sed -i "s|\$OAUTH_URL_ACCESS_TOKEN|$OAUTH_URL_ACCESS_TOKEN|g" $env_file
+sed -i "s|\$OAUTH_URL_RESOURCE_OWNER_DETAILS|$OAUTH_URL_RESOURCE_OWNER_DETAILS|g" $env_file
+sed -i "s|\$OAUTH_SCOPES|$OAUTH_SCOPES|g" $env_file
+sed -i "s|\$OAUTH_LOGIN_LABEL|$OAUTH_LOGIN_LABEL|g" $env_file
 sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" $env_file
 sed -i "s|\$TZ|$TZ|g" $env_file
 sed -i "s|\$DEFAULT_LOCALE|$DEFAULT_LOCALE|g" $env_file
