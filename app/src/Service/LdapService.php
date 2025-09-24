@@ -55,27 +55,26 @@ class LdapService
 
     public function bindUser(User $user, string $password): bool
     {
-
         if (!$user->getLdapDN()) {
             return false;
         }
 
-        foreach ($user->getDomain()->getConnectors() as $connector) {
-            if ($connector instanceof LdapConnector) {
-                $ldap = Ldap::create('ext_ldap', [
-                            'host' => $connector->getLdapHost(),
-                            'port' => $connector->getLdapPort(),
-                ]);
-                try {
-                    $ldap->bind($user->getLdapDN(), $password);
-                    return true;
-                } catch (ConnectionException $exception) {
-                    continue;
-                }
-            }
+        $originConnector = $user->getOriginConnector();
+        if (!$originConnector instanceof LdapConnector) {
+            return false;
         }
 
-        return false;
+        $ldap = Ldap::create('ext_ldap', [
+            'host' => $originConnector->getLdapHost(),
+            'port' => $originConnector->getLdapPort(),
+        ]);
+
+        try {
+            $ldap->bind($user->getLdapDN(), $password);
+            return true;
+        } catch (ConnectionException $exception) {
+            return false;
+        }
     }
 
     public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void
