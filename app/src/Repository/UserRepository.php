@@ -84,7 +84,15 @@ class UserRepository extends ServiceEntityRepository
     }
 
 
-    /** @param array<string> $roles */
+    /**
+     * Return a paginable Doctrine Query to search users.
+     *
+     * Note that if you pass `isAlias: true`, you shouldn't pass any role as
+     * aliases don't always have one. If you pass both, results may be
+     * incoherent.
+     *
+     * @param array<string> $roles
+     */
     public function search(
         User $currentUser,
         ?array $roles = null,
