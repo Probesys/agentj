@@ -129,7 +129,7 @@ document.addEventListener("turbo:load", function () {
         $('.select2').select2(
           {
             width: 'resolve',
-            dropdownParent: $('#empModal')
+            dropdownParent: $('.modal-content')
           }
         );
         $('#empModal').modal('show');
@@ -142,7 +142,7 @@ document.addEventListener("turbo:load", function () {
     $('#empModal').modal('toggle');
   });
 
-  // Manage ajax form    
+  // Manage ajax form
 
   $('body').on('submit', 'form.modal-ajax-form', function (e) {
     e.preventDefault();

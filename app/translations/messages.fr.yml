@@ -616,11 +616,13 @@ Entities:
       add: "Ajouter un connecteur LDAP"
       edit: "Modifier le connecteur LDAP"
     fields:
+      advancedOptions: "Options avancées"
+      connectionInformation: "Informations de connexion"
       ldapHost: "Hôte"
       ldapPort: "Port (défaut 389)"
       allowAnonymousBind: "Connexion anonyme"
-      LdapBaseDN: "BaseDN"
-      ldapBindDn: "Bind Dn"
+      LdapBaseDN: "Base DN"
+      ldapBindDn: "Bind DN"
       LdapPassword: "Mot de passe"
       ldapRealNameField: "Champ LDAP pour le nom (ex : sn)"
       synchronizeGroup: "Synchronisez également les groupes"
@@ -631,6 +633,7 @@ Entities:
       ldapGroupMemberField: "Champ LDAP pour les utilisateurs du groupe"
       ldapUserFilter: "Filtre pour les utilisateurs"
       ldapGroupFilter: "Filtre pour les groupes"
+      usersInformation: "Informations utilisateurs"
   ImapConnector:
     labels:
     actions:

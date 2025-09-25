@@ -267,7 +267,6 @@ class LDAPImportCommand extends Command
         $this->groupService->updateWblist();
     }
 
-
     private function importGroups(): void
     {
         $realNameAttribute = $this->connector->getLdapGroupNameField();
