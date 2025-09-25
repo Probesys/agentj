@@ -1,5 +1,5 @@
-<form class="d-inline" action="{{ path('homepage', {'_switch_user': user.email }) }}" method="post">
-    <button type="submit" class="btn btn-sm btn-primary" title="{{ 'Generics.actions.connectAs'|trans }} {{ user.email }}">
+<form class="d-inline" action="{{ path('homepage', {'_switch_user': user.username }) }}" method="post">
+    <button type="submit" class="btn btn-sm btn-primary" title="{{ 'Generics.actions.connectAs'|trans }} {{ user.username }}">
         {{ 'Generics.actions.impersonate'|trans }}
     </button>
 </form>
