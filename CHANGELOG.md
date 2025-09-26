@@ -1,13 +1,61 @@
 # Changelog of AgentJ
 
-## unreleased
+## 2025-09-26 - 2.3.0
 
 ### Migration notes
 
 - You can remove the `APP_DOMAIN` variable from the root `.env` file and you must add a `APP_URL` variable (ex. `https://agentj.example.com`).
 - You must add a `SMTP_FROM` variable in the root `.env` file as it's no longer computed from the domain. Recommended value is `no-reply@<domain>`.
 - You can add a `AMAVIS_PROCESSES` in the root `.env` file to modify the number of Amavis processes (default: 3)
-- The previous `OAUTH_AZURE` system is now deprecated, a new generic OAuth2 system is available and should be prefered ([see documentation](/docs/administrators/oauth2.md))
+- The previous `OAUTH_AZURE` system is now deprecated; a new generic OAuth2 system is available and should be prefered ([see documentation](/docs/administrators/oauth2.md))
+
+### Features
+
+- Provide generic OAuth2 login ([a75cad97](https://github.com/Probesys/agentj/commit/a75cad97))
+- Improvements to the LDAP connector overall:
+    - Reorganize the LDAP form ([9825248a](https://github.com/Probesys/agentj/commit/9825248a))
+    - Allow to attach imported users to groups ([7c4df84a](https://github.com/Probesys/agentj/commit/7c4df84a))
+    - Allow to import shared mailboxes from LDAP ([e57bf934](https://github.com/Probesys/agentj/commit/e57bf934))
+    - Don't import aliases if they match the main email ([828f1244](https://github.com/Probesys/agentj/commit/828f1244))
+    - Handle unmanaged domains on import ([2a1f8b9d](https://github.com/Probesys/agentj/commit/2a1f8b9d))
+    - Ignore invalid emails when importing LDAP users ([db5225da](https://github.com/Probesys/agentj/commit/db5225da))
+    - Remove the unused connector login field ([5f8e9e2d](https://github.com/Probesys/agentj/commit/5f8e9e2d))
+    - Use the users' origin connectors for LDAP authentication ([54949d53](https://github.com/Probesys/agentj/commit/54949d53))
+    - Fix typos in the LDAP connector form ([9a189954](https://github.com/Probesys/agentj/commit/9a189954))
+- Add `Auto-Submitted` and `X-Auto-Response-Suppress` headers to the emails generated and sent by AgentJ ([ee109c5f](https://github.com/Probesys/agentj/commit/ee109c5f))
+
+### Maintenance
+
+- Add a `SMTP_FROM` env variable ([89cab663](https://github.com/Probesys/agentj/commit/89cab663))
+- Add ability to change the number of Amavis processes ([df20e98b](https://github.com/Probesys/agentj/commit/df20e98b))
+- Add more details to the IMAP connection errors' logs ([6e7adf48](https://github.com/Probesys/agentj/commit/6e7adf48))
+- Paginate resource-intensive pages on the backend:
+    - Advanced-search ([ef7c1627](https://github.com/Probesys/agentj/commit/ef7c1627))
+    - List of users ([16793045](https://github.com/Probesys/agentj/commit/16793045), [b92cc6e6](https://github.com/Probesys/agentj/commit/b92cc6e6), [d10faadc](https://github.com/Probesys/agentj/commit/d10faadc))
+    - Domains ([4dddd393](https://github.com/Probesys/agentj/commit/4dddd393))
+- Upgrade to PHPImap 6.2 ([7c8b2cd2](https://github.com/Probesys/agentj/commit/7c8b2cd2))
+- Upgrade OpenDKIM container to Trixie ([9a8aae25](https://github.com/Probesys/agentj/commit/9a8aae25))
+- Fix wording of the Office365 connector ([2404c189](https://github.com/Probesys/agentj/commit/2404c189))
+
+### Documentation
+
+- Reorganize the documentation ([36f37a92](https://github.com/Probesys/agentj/commit/36f37a92))
+- Document the versioning policy ([5ca3ae0b](https://github.com/Probesys/agentj/commit/5ca3ae0b))
+- Add missing instructions to load fixtures data ([26b4f529](https://github.com/Probesys/agentj/commit/26b4f529))
+- Add instructions to debug with Xdebug and VS Code ([891a1d43](https://github.com/Probesys/agentj/commit/891a1d43), [f912a3f0](https://github.com/Probesys/agentj/commit/f912a3f0))
+
+### Developers
+
+- Add new "make" commands to manage the database ([00094682](https://github.com/Probesys/agentj/commit/00094682))
+- Provide an `.editorconfig` file ([d0f8c3c8](https://github.com/Probesys/agentj/commit/d0f8c3c8))
+- Provide a LDAP server in development mode ([2fe36212](https://github.com/Probesys/agentj/commit/2fe36212), [9468ff12](https://github.com/Probesys/agentj/commit/9468ff12))
+- Build absolute URLs with urlGenerator ([5d3f536f](https://github.com/Probesys/agentj/commit/5d3f536f))
+- Refactor getting users' emails ([6adbcd33](https://github.com/Probesys/agentj/commit/6adbcd33))
+- Decrease tests timeout to 15 seconds ([d5da23c8](https://github.com/Probesys/agentj/commit/d5da23c8))
+- Replace calls to apt by apt-get ([12d9001f](https://github.com/Probesys/agentj/commit/12d9001f))
+- Don't set the lock setting as it broke generation of migrations ([f80393a3](https://github.com/Probesys/agentj/commit/f80393a3))
+- Add the `app/public/files` folder to gitignore ([bc1014a4](https://github.com/Probesys/agentj/commit/bc1014a4))
+- Remove unused code, templates and files ([48ad54de](https://github.com/Probesys/agentj/commit/48ad54de))
 
 ## 2025-09-26 - 2.2.3
 
