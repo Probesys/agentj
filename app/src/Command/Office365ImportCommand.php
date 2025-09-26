@@ -119,6 +119,7 @@ class Office365ImportCommand extends Command
 
         $nbUserCreated = 0;
         $nbUserUpdated = 0;
+        $nbAliasCreated = 0;
         foreach ($users as $graphUser) {
             /* @var $graphUser GraphUser */
             if (is_null($graphUser->getMail())) {
@@ -152,15 +153,17 @@ class Office365ImportCommand extends Command
             $user->setOriginConnector($this->connector);
             $user->setPriority(MailaddrService::computePriority($graphUser->getMail()));
             if (count($graphUser->getProxyAddresses()) > 1) {
-                $this->addAliases($user, $graphUser->getProxyAddresses());
+                $aliases = $this->addAliases($user, $graphUser->getProxyAddresses());
+                $nbAliasCreated += count($aliases);
             }
 
             $this->em->persist($user);
             $this->em->flush();
         }
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-                    '$NB_USER_CREATED' => $nbUserCreated,
-                    '$NB_USER_UPDATED' => $nbUserUpdated,
+            '$NB_USER_CREATED' => $nbUserCreated,
+            '$NB_USER_UPDATED' => $nbUserUpdated,
+            '$NB_ALIAS_CREATED' => $nbAliasCreated,
         ]));
     }
 
@@ -168,9 +171,11 @@ class Office365ImportCommand extends Command
      * Add aliases to a user
      *
      * @param array<string> $proxyAdresses
+     * @return User[]
      */
-    private function addAliases(User $user, array $proxyAdresses): void
+    private function addAliases(User $user, array $proxyAdresses): array
     {
+        $aliases = [];
         foreach ($proxyAdresses as $proxyAdresse) {
             if (strpos($proxyAdresse, "smtp") !== false) {
                 $aliasEmail = explode('smtp:', $proxyAdresse)[1];
@@ -186,9 +191,12 @@ class Office365ImportCommand extends Command
                     $alias->setOriginalUser($user);
                     $alias->setOriginConnector($this->connector);
                     $this->em->persist($alias);
+
+                    $aliases[] = $alias;
                 }
             }
         }
+        return $aliases;
     }
 
     private function importGroups(string $token): void
