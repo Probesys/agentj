@@ -1,5 +1,16 @@
 # Changelog of AgentJ
 
+## 2025-09-26 - 2.2.3
+
+### Bug fixes
+
+- Order messages by date desc by default ([44e67fb9](https://github.com/Probesys/agentj/commit/44e67fb9))
+- Fix user form when editing admins ([14888352](https://github.com/Probesys/agentj/commit/14888352))
+
+### Maintenance
+
+- Upgrade OpenDKIM container to Trixie ([cc3d155c](https://github.com/Probesys/agentj/commit/cc3d155c))
+
 ## 2025-09-09 - 2.2.2
 
 ### Bug fixes
