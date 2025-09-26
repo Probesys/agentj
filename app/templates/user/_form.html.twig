@@ -91,22 +91,24 @@
                 domainWarning.style.display = isChecked ? 'none' : 'block';
             }
 
-            // Initial check
-            checkDomains();
-
-            rolesSelect.addEventListener('change', function() {
+            function refreshOnRoleChange() {
                 const selectedRole = rolesSelect.value;
                 if (selectedRole === '["ROLE_SUPER_ADMIN"]') {
                     domainCheckboxes.forEach(checkbox => checkbox.checked = true);
                     submitButton.disabled = false;
                     document.getElementById('domain-selector').style.display = 'none';
                 } else {
-                    domainCheckboxes.forEach(checkbox => checkbox.checked = false);
                     document.getElementById('domain-selector').style.display = 'block';
                     checkDomains();
                 }
-            });
-            // Add event listeners to checkboxes
+            }
+
+            // Initial checks
+            checkDomains();
+            refreshOnRoleChange();
+
+            // Add event listeners
+            rolesSelect.addEventListener('change', refreshOnRoleChange);
             domainCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', checkDomains);
             });

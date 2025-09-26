@@ -158,6 +158,8 @@ class MessageController extends AbstractController
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
                 'distinct' => false,
+                'defaultSortFieldName' => 'm.timeNum',
+                'defaultSortDirection' => 'desc',
             ]
         );
         return $this->render('message/index.html.twig', [
