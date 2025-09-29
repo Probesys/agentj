@@ -166,8 +166,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     {
         /** @var User $user */
         $user = $token->getUser();
-        $request->getSession()->set('originalUser', $user->getUsername());
-
+        
         if ($user->getDomain() && $user->getDomain()->getDefaultLang()) {
             $request->getSession()->set('_locale', $user->getDomain()->getDefaultLang());
         }
