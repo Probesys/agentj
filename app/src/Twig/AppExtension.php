@@ -8,16 +8,18 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Doctrine\DBAL\Connection;
 
 class AppExtension extends AbstractExtension
 {
     public function __construct(
         private EntityManagerInterface $em,
         private MessageService $messageService,
+        private Security $security,
     ) {
     }
 
@@ -38,27 +40,26 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
+            new TwigFunction('get_original_user', [$this, 'getOriginalUser']),
         ];
     }
 
     public function lcfirst(string $strInput): string
     {
-
         return lcfirst($strInput);
     }
 
     public function streamGetcontent(mixed $input): string
     {
-
         if (!is_resource($input)) {
             return $input;
         }
 
         $clearContent = stream_get_contents($input, -1, 0);
-
         if ($clearContent === false) {
             return '';
         }
+
         return $clearContent;
     }
 
@@ -67,7 +68,6 @@ class AppExtension extends AbstractExtension
      */
     public function getUserGroups(int $userId): array
     {
-
         $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             return [];
@@ -92,12 +92,35 @@ class AppExtension extends AbstractExtension
      */
     public function wbListIsOverriden(array $wbInfo): bool
     {
-
         return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
     }
 
     public function messageReleaseToken(Msgs $message, User $user): string
     {
         return $this->messageService->getReleaseToken($message, $user);
+    }
+
+    /**
+     * Return the original user, or null if not impersonating.
+     */
+    public function getOriginalUser(): ?User
+    {
+        $token = $this->security->getToken();
+
+        if ($token === null) {
+            return null;
+        }
+
+        // Check if the token is a SwitchUserToken (impersonation active)
+        if ($token instanceof SwitchUserToken) {
+            $originalToken = $token->getOriginalToken();
+            $originalUser = $originalToken->getUser();
+
+            if ($originalUser instanceof User) {
+                return $originalUser;
+            }
+        }
+
+        return null;
     }
 }

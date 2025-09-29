@@ -59,10 +59,12 @@
                         <div class="dropdown-divider"></div>
                     {% endif %}
 
-                    {% if is_granted('IS_IMPERSONATOR') %}
-                        <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': '_exit'}) }}">&nbsp;<i class="fas fa-random"></i>
+                    {% set originalUser = get_original_user() %}
+                    {% if originalUser %}
+                        <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': '_exit'}) }}">
+                            <i class="fas fa-random"></i>
                             {{'Generics.actions.exitImpersonation'|trans}}
-                            {{ app.session.get('originalUser') }}
+                            {{ originalUser.username }}
                         </a>
 
                         <div class="dropdown-divider"></div>
