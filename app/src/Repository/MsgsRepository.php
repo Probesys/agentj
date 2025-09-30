@@ -2,11 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\Domain;
-use App\Amavis\MessageStatus;
+use App\Amavis\ContentType;
+use App\Amavis\DeliveryStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Amavis\ContentType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
@@ -193,7 +192,8 @@ class MsgsRepository extends ServiceEntityRepository
             LEFT JOIN maddr ms ON ms.id = m.sid
             LEFT JOIN maddr mr ON mr.id = msr.rid
             WHERE m.content != "C"
-            AND msr.content != "C"
+            AND msr.status_id IS NULL
+            AND msr.ds != :deliveryStatus
             AND mr.email = :emailRecipient
             AND ms.email = :emailSender
         SQL;
@@ -202,6 +202,7 @@ class MsgsRepository extends ServiceEntityRepository
         return $stmt->executeQuery([
             'emailRecipient' => $emailRecipient,
             'emailSender' => $emailSender,
+            'deliveryStatus' => DeliveryStatus::PASS,
         ])->fetchAllAssociative();
     }
 
