@@ -2,11 +2,11 @@
 
 namespace App\Repository;
 
-use App\Entity\Domain;
+use App\Amavis\ContentType;
+use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Amavis\ContentType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
@@ -180,11 +180,10 @@ class MsgsRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
-     * @todo chercher le content = spammy et le rajouter dans le where !=
+     * Get all messages from emailSender to emailRecipient and not delivered yet.
      * @return array<int, array<string, mixed>>
      */
-    public function getAllMessageRecipient(string $emailSender, string $emailRecipient): array
+    public function getMessagesToRelease(string $emailSender, string $emailRecipient): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -193,14 +192,20 @@ class MsgsRepository extends ServiceEntityRepository
             LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
             LEFT JOIN maddr ms ON ms.id = m.sid
             LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE m.content != "C"
-            AND msr.content != "C"
+            WHERE msr.ds != :deliveryPass
+            AND msr.content != :virusContent
+            AND msr.status_id != :statusAuthorized
+            AND msr.status_id != :statusRestored
             AND mr.email = :emailRecipient
             AND ms.email = :emailSender
         SQL;
 
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery([
+            'deliveryPass' => DeliveryStatus::PASS,
+            'virusContent' => ContentType::VIRUS,
+            'statusAuthorized' => MessageStatus::AUTHORIZED,
+            'statusRestored' => MessageStatus::RESTORED,
             'emailRecipient' => $emailRecipient,
             'emailSender' => $emailSender,
         ])->fetchAllAssociative();

@@ -180,7 +180,7 @@ class MessageService
 
                 //get all messages from email Sender and send all message for one user
                 $msgsRelease = $this->em->getRepository(Entity\Msgs::class)
-                                        ->getAllMessageRecipient($emailSender, $user);
+                                        ->getMessagesToRelease($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
                     if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
                         $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
