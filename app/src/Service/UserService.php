@@ -59,21 +59,32 @@ class UserService
 
     /**
      * Update groups and policy for user aliases
-     * @param User $originalUser
-     * @return void
      */
     public function updateAliasGroupsAndPolicyFromUser(User $originalUser): void
     {
+        $originalUserGroups = $originalUser->getGroups()->toArray();
+
         $aliases = $originalUser->getAliases();
+
         foreach ($aliases as $alias) {
-            /* @var $alias User */
-            $alias->getGroups()->clear();
-            $this->em->flush();
-            foreach ($originalUser->getGroups() as $group) {
+            $alias->setPolicy($originalUser->getPolicy());
+
+            $aliasGroups = $alias->getGroups()->toArray();
+
+            $groupsToAdd = array_diff($originalUserGroups, $aliasGroups);
+            $groupsToRemove = array_diff($aliasGroups, $originalUserGroups);
+
+            foreach ($groupsToAdd as $group) {
                 $alias->addGroup($group);
             }
-            $alias->setPolicy($originalUser->getPolicy());
-            $this->em->flush();
+
+            foreach ($groupsToRemove as $group) {
+                $alias->removeGroup($group);
+            }
+
+            $this->em->persist($alias);
         }
+
+        $this->em->flush();
     }
 }
