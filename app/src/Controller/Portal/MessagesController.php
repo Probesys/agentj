@@ -15,7 +15,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class MessagesController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
         private Service\LogService $logService,
         private Service\MessageService $messageService,
         private Repository\MsgrcptRepository $msgrcptRepository,
@@ -134,10 +133,10 @@ class MessagesController extends AbstractController
 
     private function checkMailAccess(Entity\User $user, Entity\Msgrcpt $messageRecipient): void
     {
-        $listAliases = $this->em->getRepository(Entity\User::class)->getListAliases($user);
+        $listAliases = $user->getAliases();
         $accessibleRecipientEmails = array_map(function ($item) {
             return $item->getEmail();
-        }, $listAliases);
+        }, $listAliases->toArray());
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
         if (!in_array($messageRecipient->getRid()->getEmailClear(), $accessibleRecipientEmails)) {

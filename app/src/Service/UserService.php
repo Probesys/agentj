@@ -29,7 +29,7 @@ class UserService
         $policy = $defaultGroup ? $defaultGroup->getPolicy() : $user->getDomain()->getPolicy();
         $user->setPolicy($policy);
         $this->em->persist($user);
-        $aliases = $this->userRepository->getListAliases($user);
+        $aliases = $user->getAliases();
         foreach ($aliases as $alias) {
             $alias->setPolicy($policy);
             $this->em->persist($alias);
@@ -64,7 +64,7 @@ class UserService
      */
     public function updateAliasGroupsAndPolicyFromUser(User $originalUser): void
     {
-        $aliases = $this->userRepository->getListAliases($originalUser);
+        $aliases = $originalUser->getAliases();
         foreach ($aliases as $alias) {
             /* @var $alias User */
             $alias->getGroups()->clear();

@@ -147,21 +147,6 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return User[]
-     */
-    public function getListAliases(User $user): array
-    {
-        $dql = $this->createQueryBuilder('u')
-                ->join('u.originalUser', 'a')
-                ->where('u.originalUser= :user')
-                ->setParameter('user', $user);
-
-        $query = $dql->getQuery();
-        return $query->getResult();
-    }
-
-
-    /**
      * autocomplete query
      * @param Domain[] $allowedomains
      *
