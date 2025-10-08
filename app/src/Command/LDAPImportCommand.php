@@ -257,8 +257,14 @@ class LDAPImportCommand extends Command
 
     private function assignGroupsToImportedUsers(): void
     {
+        $targetGroups = $this->connector->getTargetGroups();
+
+        if ($targetGroups->isEmpty()) {
+            return;
+        }
+
         foreach ($this->connector->getUsers() as $user) {
-            foreach ($this->connector->getTargetGroups() as $group) {
+            foreach ($targetGroups as $group) {
                 $user->addGroup($group);
             }
 
