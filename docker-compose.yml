@@ -4,7 +4,7 @@ services:
   db:
     image: mariadb:11.4
     command: ["--default-authentication-plugin=mysql_native_password"]
-    restart: always
+    restart: unless-stopped
     volumes:
       - db:/var/lib/mysql
       - ./mariadb-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
@@ -27,7 +27,7 @@ services:
     image: probesys38/agentj_amavis:$VERSION
     build:
       context: amavis/.
-    restart: always
+    restart: unless-stopped
     environment:
       - AMAVIS_CONF=amavisd.conf
     env_file:
@@ -42,7 +42,7 @@ services:
     image: probesys38/agentj_amavis:$VERSION
     build:
       context: amavis/.
-    restart: always
+    restart: unless-stopped
     environment:
       - AMAVIS_CONF=amavisd_out.conf
     env_file:
@@ -57,7 +57,7 @@ services:
     image: probesys38/agentj_app:$VERSION
     build:
       context: ./app
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -69,7 +69,7 @@ services:
     image: probesys38/agentj_smtp:$VERSION
     build:
       context: ./smtp/.
-    restart: always
+    restart: unless-stopped
     environment:
       - MAIL_CONFIG=/etc/postfix-in
     env_file:
@@ -85,7 +85,7 @@ services:
     image: probesys38/agentj_smtp:$VERSION
     build:
       context: ./smtp/.
-    restart: always
+    restart: unless-stopped
     environment:
       - MAIL_CONFIG=/etc/postfix-out
     env_file:
@@ -131,6 +131,7 @@ services:
     image: probesys38/agentj_senderverifmilter:${VERSION}
     build:
       context: senderverifmilter/
+    restart: unless-stopped
     environment:
       - DB_USER=opendkim
       - DB_HOST
@@ -142,6 +143,7 @@ services:
 
   clamav:
     image: clamav/clamav:stable
+    restart: unless-stopped
     user: clamav
     entrypoint: /init-unprivileged
     profiles: [clamav]
