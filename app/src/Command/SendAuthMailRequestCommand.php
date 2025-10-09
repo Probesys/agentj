@@ -75,6 +75,14 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
+                if ($msgrcpt->getBl() === 'Y' || $msgrcpt->getWl() === 'Y') {
+                    continue;
+                }
+
+                if ($msgrcpt->getStatus() !== null) {
+                    continue;
+                }
+
                 $user = $userRepository->findOneBy([
                     'email' => $maddr->getEmailClear()
                 ]);
