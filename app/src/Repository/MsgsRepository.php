@@ -137,6 +137,7 @@ class MsgsRepository extends ServiceEntityRepository
                 AND m.status IS NULL
                 AND m.sendCaptcha = 0
                 AND m.content NOT IN (:content)
+                AND DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) <= 7
             SQL);
 
         $query->setParameter('content', [
