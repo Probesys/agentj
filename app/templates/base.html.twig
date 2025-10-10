@@ -53,7 +53,7 @@
   </head>
 
   {% set bodyClass="" %}
-  {%  if app.request.get('_route') == 'check_message' %}
+  {%  if app.request.get('_route') == 'human_authentication' %}
     {% set bodyClass="validate-address" %}
   {% endif %}
 

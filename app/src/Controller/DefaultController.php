@@ -24,12 +24,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController
 {
     public function __construct(
-        private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private Security $security,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
@@ -252,88 +250,6 @@ class DefaultController extends AbstractController
         }
     }
 
-    #[Route(path: '/check/{token}', name: 'check_message', methods: 'GET|POST')]
-    public function checkCaptcha(
-        string $token,
-        Request $request,
-        WblistRepository $wblistRepository,
-        Service\MessageService $messageService,
-        Service\CryptEncryptService $cryptEncrypt,
-    ): Response {
-        $em = $this->em;
-        $confirm = "";
-
-        list($message, $domain, $messageRecipients) = $this->decryptMessageToken($cryptEncrypt, $token);
-
-        if (!$message) {
-            throw $this->createNotFoundException('The message does not exist.');
-        }
-
-        if (!$domain) {
-            throw $this->createNotFoundException('The domain does not exist.');
-        }
-
-        $sender = $message->getSid();
-        $senderEmail = $sender->getEmailClear();
-
-        // Keep only recipients that are NOT already in a wblist. This avoids,
-        // for a instance, a blocked sender to authorise himself.
-        $messageRecipients = array_filter(
-            $messageRecipients,
-            function ($recipient) use ($wblistRepository, $sender) {
-                return !$wblistRepository->isRecipientInSenderList($sender, $recipient->getRid());
-            }
-        );
-
-        if (!empty($domain->getMessage())) {
-            $content = $domain->getMessage();
-        } else {
-            $content = $this->translator->trans('Message.Captcha.defaultCaptchaPageContent');
-        }
-
-        $form = $this->createForm(CaptchaFormType::class, null);
-        $form->handleRequest($request); //todo gérer l'erreur si la page est rechargée
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if (!empty($domain->getConfirmCaptchaMessage())) {
-                $confirm = $domain->getConfirmCaptchaMessage();
-            } else {
-                $confirm = $this->translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
-            }
-
-            $recipient = $messageRecipients[0] ?? null;
-            if ($recipient) {
-                $emailDest = $recipient->getRid()->getEmailClear();
-                $emailDest = $emailDest ? $emailDest : '';
-                $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
-            }
-
-            // Test if the sender is the same than the posted email field and if the mail has not been yet treated
-            if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
-                if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
-                    $message->setValidateCaptcha(time());
-                    $em->persist($message);
-                    $em->flush();
-                } else {
-                    $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
-                }
-            } else {
-                $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
-            }
-        } else {
-            $form->get('email')->setData($senderEmail);
-        }
-
-        return $this->render('message/captcha.html.twig', [
-            'token' => $token,
-            'mailToValidate' => $senderEmail,
-            'form' => $form->createView(),
-            'confirm' => $confirm,
-            'content' => $content
-        ]);
-    }
-
     /**
      * Change the locale for the current user.
      */
@@ -377,45 +293,5 @@ class DefaultController extends AbstractController
         $newReferer = strtok($referer, '?') . '?' . $newQuery;
 
         return $referer ? $this->redirect($newReferer) : $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * @return array{?Msgs, ?Domain, Msgrcpt[]}
-     */
-    private function decryptMessageToken(Service\CryptEncryptService $cryptEncryptService, string $token): array
-    {
-        list($expiry, $decryptedToken) = $cryptEncryptService->decrypt($token);
-
-        if ($expiry < time()) {
-            throw $this->createNotFoundException('The token has expired.');
-        }
-
-        if ($decryptedToken === false) {
-            throw $this->createNotFoundException('The token is invalid.');
-        }
-
-        $tokenParts = explode('%%%', $decryptedToken);
-
-        if (count($tokenParts) < 4) {
-            throw $this->createNotFoundException('The token is invalid.');
-        }
-
-        $mailId = $tokenParts[0];
-        $partitionTag = (int) $tokenParts[2];
-        $domainId = $tokenParts[3];
-
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
-        $domain = $this->em->getRepository(Domain::class)->find($domainId);
-
-        $messageRecipients = [];
-        if ($message) {
-            $messageRecipients = $this->em->getRepository(Msgrcpt::class)->findByMessage($message);
-
-            $messageRecipients = array_filter($messageRecipients, function (Msgrcpt $msgrcpt) use ($domain) {
-                return $msgrcpt->getRid()->getReverseDomain() == $domain->getDomain();
-            });
-        }
-
-        return [$message, $domain, $messageRecipients];
     }
 }

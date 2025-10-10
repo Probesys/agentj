@@ -173,7 +173,7 @@ class SendAuthMailRequestCommand extends Command
             . '%%%' . $msg->getPartitionTag()
             . '%%%' . $domain->getId()
         );
-        $url = $this->urlGenerator->generate('check_message', [
+        $url = $this->urlGenerator->generate('human_authentication', [
             'token' => $token
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 

@@ -31,14 +31,14 @@
   {% set bodyClass="" %}
   {%  if app.request.get('_route') == 'app_login' %}
     {% set bodyClass="not-auth" %}
-  {% elseif app.request.get('_route') == 'check_message' %}
+  {% elseif app.request.get('_route') == 'human_authentication' %}
     {% set bodyClass="validate-address" %}
   {% endif %}
 
   <body id="page-top" data-base-path="{{ app.request.basePath }}" class="not-auth" data-turbo="false">
-    <div class="page-wrapper default-theme sidebar-bg bg1"> 
+    <div class="page-wrapper default-theme sidebar-bg bg1">
       <main class="page-content">
-        <div id="overlay" class="overlay"></div>         
+        <div id="overlay" class="overlay"></div>
 
         <div class="container-fluid mb-5 mt-5">
           {% block body %}
@@ -48,7 +48,7 @@
       </main>
       {% block footer %}
         {% include '_footer.html.twig' %}
-      {% endblock %}        
+      {% endblock %}
     </div>
 
 
