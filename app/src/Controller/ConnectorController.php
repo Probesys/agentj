@@ -23,7 +23,7 @@ class ConnectorController extends AbstractController
         TranslatorInterface $translator,
     ): Response {
         if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->query->get('_token'))) {
-            $connectorRepository->remove($connector, true);
+            $connectorRepository->remove($connector);
             $this->addFlash('success', $translator->trans('Message.Flash.deleteSuccesFull'));
         }
 

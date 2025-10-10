@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\ImapConnector;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ImapConnector>
+ * @extends BaseRepository<ImapConnector>
  */
-class ImapConnectorRepository extends ServiceEntityRepository
+class ImapConnectorRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

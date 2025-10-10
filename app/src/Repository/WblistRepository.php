@@ -8,14 +8,13 @@ use App\Entity\Maddr;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL;
 
 /**
- * @extends ServiceEntityRepository<Wblist>
+ * @extends BaseRepository<Wblist>
  */
-class WblistRepository extends ServiceEntityRepository
+class WblistRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -131,15 +130,15 @@ class WblistRepository extends ServiceEntityRepository
     public function insertFromGroup(): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority) 
+        $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority)
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
                                     CASE g.override_user
                                           WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE . " + g.priority" .
                 " WHEN 0 THEN " . Wblist::WBLIST_PRIORITY_GROUP . " + g.priority
-                                    END as 'priority'  from users u 
+                                    END as 'priority'  from users u
                                     inner join user_groups ug on ug.user_id =u.id
-                                    inner join groups g on g.id =ug.groups_id 
-                                    inner join groups_wblist gw on gw.group_id =g.id 
+                                    inner join groups g on g.id =ug.groups_id
+                                    inner join groups_wblist gw on gw.group_id =g.id
                                     where g.active = true and gw.wb !='' and g.priority is not null";
 
 

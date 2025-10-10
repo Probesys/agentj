@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\DomainKey;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<DomainKey>
+ * @extends BaseRepository<DomainKey>
  */
-class DomainKeyRepository extends ServiceEntityRepository
+class DomainKeyRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\Domain;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr;
@@ -12,9 +11,9 @@ use Doctrine\ORM\Query;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
- * @extends ServiceEntityRepository<User>
+ * @extends BaseRepository<User>
  */
-class UserRepository extends ServiceEntityRepository
+class UserRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

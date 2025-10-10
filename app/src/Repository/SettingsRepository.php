@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Settings;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Settings>
+ * @extends BaseRepository<Settings>
  */
-class SettingsRepository extends ServiceEntityRepository
+class SettingsRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

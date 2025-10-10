@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\DomainRelay;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<DomainRelay>
+ * @extends BaseRepository<DomainRelay>
  */
-class DomainRelayRepository extends ServiceEntityRepository
+class DomainRelayRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

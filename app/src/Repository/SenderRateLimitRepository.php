@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\SenderRateLimit;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<SenderRateLimit>
+ * @extends BaseRepository<SenderRateLimit>
  */
-class SenderRateLimitRepository extends ServiceEntityRepository
+class SenderRateLimitRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

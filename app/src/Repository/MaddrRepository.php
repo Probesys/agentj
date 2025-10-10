@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Maddr;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Maddr>
+ * @extends BaseRepository<Maddr>
  */
-class MaddrRepository extends ServiceEntityRepository
+class MaddrRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

@@ -44,7 +44,7 @@ class Office365ConnectorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $connectorRepository->add($connector, true);
+            $connectorRepository->save($connector);
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
         }
@@ -65,7 +65,7 @@ class Office365ConnectorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $connectorRepository->add($connector, true);
+            $connectorRepository->save($connector);
 
             return $this->redirectToRoute(
                 'domain_edit',

@@ -4,15 +4,14 @@ namespace App\Repository;
 
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
 
 /**
- * @extends ServiceEntityRepository<Msgrcpt>
+ * @extends BaseRepository<Msgrcpt>
  */
-class MsgrcptRepository extends ServiceEntityRepository
+class MsgrcptRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
