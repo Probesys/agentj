@@ -64,7 +64,7 @@ class LdapConnectorController extends AbstractController
                 $data->setLdapPassword($cryptedPass);
             }
 
-            $connectorRepository->add($connector, true);
+            $connectorRepository->save($connector);
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
         }
@@ -96,7 +96,7 @@ class LdapConnectorController extends AbstractController
                 $connector->setLdapPassword($oldPass);
             }
 
-            $connectorRepository->add($connector, true);
+            $connectorRepository->save($connector);
 
             return $this->redirectToRoute('domain_edit', [
                 'id' => $connector->getDomain()->getId(),

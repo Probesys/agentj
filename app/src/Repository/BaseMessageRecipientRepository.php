@@ -9,7 +9,6 @@ use App\Entity\Msgrcpt;
 use App\Entity\OutMsgrcpt;
 use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
@@ -17,17 +16,11 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @template T of MsgRcpt|OutMsgrcpt
- * @extends ServiceEntityRepository<T>
+ * @template T of Msgrcpt|OutMsgrcpt
+ * @extends BaseRepository<T>
  */
-abstract class BaseMessageRecipientRepository extends ServiceEntityRepository
+abstract class BaseMessageRecipientRepository extends BaseRepository
 {
-    public function __construct(ManagerRegistry $registry, string $entityClass)
-    {
-        parent::__construct($registry, $entityClass);
-    }
-
-
     abstract protected function getBaseQueryBuilder(): QueryBuilder;
 
     /**

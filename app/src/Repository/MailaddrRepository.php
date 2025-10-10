@@ -3,13 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Mailaddr;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Mailaddr>
+ * @extends BaseRepository<Mailaddr>
  */
-class MailaddrRepository extends ServiceEntityRepository
+class MailaddrRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

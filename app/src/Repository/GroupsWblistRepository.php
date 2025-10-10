@@ -4,13 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<GroupsWblist>
+ * @extends BaseRepository<GroupsWblist>
  */
-class GroupsWblistRepository extends ServiceEntityRepository
+class GroupsWblistRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

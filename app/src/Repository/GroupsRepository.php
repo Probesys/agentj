@@ -5,13 +5,12 @@ namespace App\Repository;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Groups>
+ * @extends BaseRepository<Groups>
  */
-class GroupsRepository extends ServiceEntityRepository
+class GroupsRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

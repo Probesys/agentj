@@ -3,14 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Policy;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Cocur\Slugify\Slugify;
 
 /**
- * @extends ServiceEntityRepository<Policy>
+ * @extends BaseRepository<Policy>
  */
-class PolicyRepository extends ServiceEntityRepository
+class PolicyRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
