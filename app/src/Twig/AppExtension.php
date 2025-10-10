@@ -2,6 +2,8 @@
 
 namespace App\Twig;
 
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use App\Entity\Groups;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -18,6 +20,7 @@ class AppExtension extends AbstractExtension
     public function __construct(
         private EntityManagerInterface $em,
         private MessageService $messageService,
+        private TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -38,6 +41,7 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
+            new TwigFunction('get_original_user', [$this, 'getOriginalUser']),
         ];
     }
 
@@ -99,5 +103,29 @@ class AppExtension extends AbstractExtension
     public function messageReleaseToken(Msgs $message, User $user): string
     {
         return $this->messageService->getReleaseToken($message, $user);
+    }
+        /**
+     * Get the original user when impersonating
+     * Returns the username of the original user, or empty string if not impersonating
+     */
+    public function getOriginalUser(): string
+    {
+        $token = $this->tokenStorage->getToken();
+
+        if ($token === null) {
+            return '';
+        }
+
+        // Vérifier si le token est un SwitchUserToken (impersonation active)
+        if ($token instanceof SwitchUserToken) {
+            $originalToken = $token->getOriginalToken();
+            $originalUser = $originalToken->getUser();
+
+            if ($originalUser instanceof User) {
+                return $originalUser->getUsername() ?? '';
+            }
+        }
+
+        return '';
     }
 }
