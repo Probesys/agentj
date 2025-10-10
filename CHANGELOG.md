@@ -57,6 +57,18 @@
 - Add the `app/public/files` folder to gitignore ([bc1014a4](https://github.com/Probesys/agentj/commit/bc1014a4))
 - Remove unused code, templates and files ([48ad54de](https://github.com/Probesys/agentj/commit/48ad54de))
 
+## 2025-10-10 - 2.2.4
+
+### Bug fixes
+
+- Don't try to release messages that have already been delivered ([db80c719](https://github.com/Probesys/agentj/commit/db80c719))
+- Dont send auth request if sender is in whitelist or blacklist ([3d9557ce](https://github.com/Probesys/agentj/commit/3d9557ce))
+- Dont send auth request if mail is too old ([71f4b923](https://github.com/Probesys/agentj/commit/71f4b923))
+
+### Maintenance
+
+- Restart Docker containers unless stopped ([8470d50d](https://github.com/Probesys/agentj/commit/8470d50d))
+
 ## 2025-09-26 - 2.2.3
 
 ### Bug fixes
