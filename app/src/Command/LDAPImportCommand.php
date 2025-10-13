@@ -33,9 +33,9 @@ class LDAPImportCommand extends Command
     private ?LdapConnector $connector;
     private Ldap $ldap;
     private SymfonyStyle $io;
-    private int $nbUserUpdated = 0;
-    private int $nbUserCreated = 0;
-    private int $nbAliasCreated = 0;
+    private int $nbUserUpdated;
+    private int $nbUserCreated;
+    private int $nbAliasCreated;
 
     /** @var array<User> */
     private array $newUsers = [];
@@ -57,6 +57,10 @@ class LDAPImportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->nbUserUpdated = 0;
+        $this->nbUserCreated = 0;
+        $this->nbAliasCreated = 0;
+
         $this->io = new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 

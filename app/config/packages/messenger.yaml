@@ -8,12 +8,13 @@ framework:
             # async: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
-            doctrine: '%env(MESSENGER_TRANSPORT_DSN)%'
+            async: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
-            'App\Message\CreateAlertMessage': doctrine
+            'App\Message\CreateAlertMessage': async
+            'App\Message\SynchronizeConnectors': async
 
 # when@test:
 #    framework:

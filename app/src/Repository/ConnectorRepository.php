@@ -14,4 +14,22 @@ class ConnectorRepository extends BaseRepository
     {
         parent::__construct($registry, Connector::class);
     }
+
+    /**
+     * @return Connector[]
+     */
+    public function getActiveConnectors(): array
+    {
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(<<<SQL
+            SELECT c
+            FROM App\Entity\Connector c
+            JOIN c.domain d
+            WHERE d.active = true
+
+        SQL);
+
+        return $query->getResult();
+    }
 }

@@ -7,6 +7,7 @@ use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\ConnectorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ConnectorRepository::class)]
@@ -53,6 +54,12 @@ class Connector
      */
     #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'connectors')]
     private Collection $targetGroups;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastSynchronizedAt = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $lastResultSynchronization = null;
 
     public function __construct()
     {
@@ -194,6 +201,30 @@ class Connector
     public function removeTargetGroup(Groups $targetGroup): static
     {
         $this->targetGroups->removeElement($targetGroup);
+
+        return $this;
+    }
+
+    public function getLastSynchronizedAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSynchronizedAt;
+    }
+
+    public function setLastSynchronizedAt(?\DateTimeImmutable $lastSynchronizedAt): static
+    {
+        $this->lastSynchronizedAt = $lastSynchronizedAt;
+
+        return $this;
+    }
+
+    public function getLastResultSynchronization(): ?string
+    {
+        return $this->lastResultSynchronization;
+    }
+
+    public function setLastResultSynchronization(?string $lastResultSynchronization): static
+    {
+        $this->lastResultSynchronization = $lastResultSynchronization;
 
         return $this;
     }
