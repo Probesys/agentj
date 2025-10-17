@@ -194,8 +194,12 @@ class MsgsRepository extends ServiceEntityRepository
             LEFT JOIN maddr mr ON mr.id = msr.rid
             WHERE msr.ds != :deliveryPass
             AND msr.content != :virusContent
-            AND msr.status_id != :statusAuthorized
-            AND msr.status_id != :statusRestored
+            AND (
+                msr.status_id IS NULL OR (
+                    msr.status_id != :statusAuthorized
+                    AND msr.status_id != :statusRestored
+                )
+            )
             AND mr.email = :emailRecipient
             AND ms.email = :emailSender
         SQL;
