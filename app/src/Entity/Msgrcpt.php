@@ -16,6 +16,9 @@ class Msgrcpt extends BaseMessageRecipient
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
     private Msgs $msgs;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $amavisReleaseAt = null;
+
     /**
      * @return Msgs|null
      */
@@ -31,6 +34,18 @@ class Msgrcpt extends BaseMessageRecipient
     public function setMsgs(?Msgs $msgs): self
     {
         $this->msgs = $msgs;
+
+        return $this;
+    }
+
+    public function getAmavisReleaseAt(): ?\DateTime
+    {
+        return $this->amavisReleaseAt;
+    }
+
+    public function setAmavisReleaseAt(?\DateTime $amavisReleaseAt): static
+    {
+        $this->amavisReleaseAt = $amavisReleaseAt;
 
         return $this;
     }

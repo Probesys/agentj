@@ -105,9 +105,20 @@ class BaseMessage
         return $this->partitionTag;
     }
 
-    public function getSecretId(): mixed
+    public function getSecretId(): ?string
     {
-        return $this->secretId;
+
+        $secretId = $this->secretId;
+
+        if (is_resource($secretId)) {
+            $secretId = stream_get_contents($secretId, -1, 0);
+        }
+
+        if (is_string($secretId)) {
+            return $secretId;
+        }
+
+        return null;
     }
 
     public function setSecretId(mixed $secretId): self
@@ -225,9 +236,19 @@ class BaseMessage
         return $this;
     }
 
-    public function getQuarLoc(): mixed
+    public function getQuarLoc(): ?string
     {
-        return $this->quarLoc;
+        $quarLoc = $this->quarLoc;
+
+        if (is_resource($quarLoc)) {
+            $quarLoc = stream_get_contents($quarLoc, -1, 0);
+        }
+
+        if (is_string($quarLoc)) {
+            return $quarLoc;
+        }
+
+        return null;
     }
 
     public function setQuarLoc(mixed $quarLoc): self

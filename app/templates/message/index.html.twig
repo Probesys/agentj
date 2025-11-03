@@ -61,11 +61,9 @@
 
 					{% for msgRecipient in messagesRecipients %}
 						{% set error_badge = "" %}
-						{% set error_badge_detail = "" %}
 						{% set bold = "bold" %}
 						{% if msgRecipient.status is not null and msgRecipient.status == 4 %}
-							{% set error_badge = 'Message.ErrorSendCaptcha' %}
-							{% set error_badge_detail = msgRecipient.messageError %}
+							{% set error_badge = 'Message.Status.Error' %}
 						{% endif %}
 						{% if msgRecipient.status is not null and msgRecipient.status is null %}
 							{% set status = 'Message.Status.untreated'|trans()  %}
@@ -111,7 +109,7 @@
 									<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msgRecipient.msgs.fromAddr }}">{{  msgRecipient.msgs.fromAddr }}</span>
 								{% endif %}
 								{% if error_badge %}
-									<span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
+									<span class="badge badge-pill badge-warning" title="{{ error_badge | trans }}">{{ error_badge | trans }}</span>
 								{% endif %}
 							</td>
 							<td data-title="{{'Message.Date'|trans }}">
