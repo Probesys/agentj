@@ -283,6 +283,7 @@ Message:
     messageDeleted: Message supprimé avec succès
     messageRestored: Message récupéré avec succès
     saved: Les changements ont été enregistrés.
+    messagePendingRelease: Le message va être délivré dans quelques instants.
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
     checkMailUnsuccessful: "Cette adresse email semble être invalide, ou a déjà été validée."

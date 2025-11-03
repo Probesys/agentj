@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 
@@ -74,12 +76,7 @@ class BaseMessageRecipient
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getRseqnum(): ?int
@@ -275,5 +272,12 @@ class BaseMessageRecipient
     public function isVirus(): bool
     {
         return $this->status === MessageStatus::VIRUS;
+    }
+
+    public function isAlreadyReleased(): bool
+    {
+        return $this->getDs() === DeliveryStatus::PASS
+            || $this->getStatus() === MessageStatus::AUTHORIZED
+            || $this->getStatus() === MessageStatus::RESTORED;
     }
 }

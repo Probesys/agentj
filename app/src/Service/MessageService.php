@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
+use App\Message\AmavisRelease;
 use App\Entity;
 use App\Repository\MsgrcptRepository;
 use App\Repository\UserRepository;
@@ -10,6 +11,7 @@ use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -18,8 +20,7 @@ class MessageService
 {
     public function __construct(
         private EntityManagerInterface $em,
-        #[Autowire(param: 'app.amavisd-release')]
-        private string $amavisdReleaseCommand,
+        private MessageBusInterface $bus,
         private MsgrcptRepository $msgrcptRepository,
         private UserRepository $userRepository,
         private CryptEncryptService $cryptEncryptService,
@@ -30,8 +31,6 @@ class MessageService
      * Authorize the message's sender and release the message.
      *
      * @param Entity\Msgrcpt[] $messageRecipients
-     *
-     * @throws ProcessFailedException
      */
     public function authorize(Entity\Msgs $message, array $messageRecipients, int $validationSource): bool
     {
@@ -50,41 +49,24 @@ class MessageService
 
     /**
      * Restore (release) the message for the provided recipient.
-     *
-     * @throws ProcessFailedException
      */
-    public function restore(Entity\Msgs $message, Entity\Msgrcpt $messageRecipient): bool
+    public function dispatchRelease(Entity\Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
     {
-        if ($message->getQuarLoc() && $message->getSecretId()) {
-            $mailRcpt = stream_get_contents($messageRecipient->getRid()->getEmail(), -1, 0);
-            $process = new Process([
-                $this->amavisdReleaseCommand,
-                stream_get_contents($message->getQuarLoc(), -1, 0),
-                stream_get_contents($message->getSecretId(), -1, 0),
-                $mailRcpt,
-            ]);
-            $process->run(
-                function ($type, $buffer) use ($messageRecipient) {
-                    $messageRecipient->setAmavisOutput($buffer);
-                }
-            );
+        $messageRecipient->setAmavisReleaseStartedAt(new \DateTimeImmutable());
+        $this->em->persist($messageRecipient);
+        $this->em->flush();
 
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
+        $this->bus->dispatch(new AmavisRelease(
+            mailId: $messageRecipient->getMailIdAsString(),
+            partitionTag: $messageRecipient->getPartitionTag(),
+            rseqnum: $messageRecipient->getRseqnum(),
+            finalStatus: $finalStatus
+        ));
+    }
 
-            $message->setStatus(MessageStatus::RESTORED);
-            $this->em->persist($message);
-
-            $messageRecipient->setStatus(MessageStatus::RESTORED);
-            $this->em->persist($messageRecipient);
-
-            $this->em->flush();
-
-            return true;
-        } else {
-            return false;
-        }
+    public function restore(Entity\Msgrcpt $messageRecipient): void
+    {
+        $this->dispatchRelease($messageRecipient, MessageStatus::RESTORED);
     }
 
     /**
@@ -109,7 +91,6 @@ class MessageService
      * @param 'W'|'B' $wb
      *
      * @throws NotFoundHttpException
-     * @throws ProcessFailedException
      */
     private function msgsToWblist(
         Entity\Msgs $message,
@@ -182,39 +163,20 @@ class MessageService
                 $msgsRelease = $this->em->getRepository(Entity\Msgs::class)
                                         ->getMessagesToRelease($emailSender, $user);
                 foreach ($msgsRelease as $msgRelease) {
-                    if (isset($msgRelease['quar_loc']) && isset($msgRelease['secret_id'])) {
-                        $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
-                            'partitionTag' => $msgRelease['partition_tag'],
-                            'mailId' => $msgRelease['mail_id'],
-                            'rid' => $msgRelease['rid']
-                        ]);
-                        //if W we deliver blokec messages if it has been released yet
-                        if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
-                            $process = new Process([
-                                $this->amavisdReleaseCommand,
-                                $msgRelease['quar_loc'],
-                                $msgRelease['secret_id'],
-                                $msgRelease['recept_mail'],
-                            ]);
-                            $process->getCommandLine();
-                            $process->run(
-                                function ($type, $buffer) use ($oneMsgRcpt) {
-                                    $oneMsgRcpt->setAmavisOutput($buffer);
-                                }
-                            );
-                            if (!$process->isSuccessful()) {
-                                throw new ProcessFailedException($process);
-                            }
-                        }
-
+                    $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
+                        'partitionTag' => $msgRelease['partition_tag'],
+                        'mailId' => $msgRelease['mail_id'],
+                        'rid' => $msgRelease['rid']
+                    ]);
+                    //if W we deliver blokec messages if it has been released yet
+                    if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
+                        $this->dispatchRelease($oneMsgRcpt, MessageStatus::AUTHORIZED);
+                    } else {
                         $oneMsgRcpt->setStatus($messageStatus);
                         $this->em->persist($oneMsgRcpt);
-                        $this->em->flush();
                     }
                 }
             }
-            $messageRecipient->setStatus($messageStatus);
-            $this->em->persist($messageRecipient);
         }
 
         $message->setStatus($messageStatus);

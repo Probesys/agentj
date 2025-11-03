@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
 use Doctrine\DBAL\Types\Types;
@@ -105,9 +106,9 @@ class BaseMessage
         return $this->partitionTag;
     }
 
-    public function getSecretId(): mixed
+    public function getSecretId(): ?string
     {
-        return $this->secretId;
+        return ResourceHelper::toString($this->secretId);
     }
 
     public function setSecretId(mixed $secretId): self
@@ -225,9 +226,9 @@ class BaseMessage
         return $this;
     }
 
-    public function getQuarLoc(): mixed
+    public function getQuarLoc(): ?string
     {
-        return $this->quarLoc;
+        return ResourceHelper::toString($this->quarLoc);
     }
 
     public function setQuarLoc(mixed $quarLoc): self
@@ -349,12 +350,7 @@ class BaseMessage
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getSendCaptcha(): ?int

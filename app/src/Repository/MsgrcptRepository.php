@@ -2,6 +2,9 @@
 
 namespace App\Repository;
 
+use App\Amavis\DeliveryStatus;
+use App\Amavis\ContentType;
+use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use Doctrine\DBAL;
@@ -70,23 +73,33 @@ class MsgrcptRepository extends BaseRepository
      * @todo chercher le content = spammy et le rajouter dans le where !=
      * @return array<array<string, mixed>>
      */
-    public function getAllMessageDomainRecipientsFromSender(string $emailSender, string $domain): array
+    public function getMessagesToReleaseForDomain(string $emailSender, string $domain): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = <<<SQL
-            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
+            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rseqnum FROM msgs m
             LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
             LEFT JOIN maddr ms ON ms.id = m.sid
             LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE m.content != "C"
-            AND msr.content != "C"
-            AND msr.status_id IS NULL
+            WHERE  msr.ds != :deliveryPass
+            AND msr.content != :virusContent
+            AND (
+                msr.status_id IS NULL OR (
+                    msr.status_id != :statusAuthorized
+                    AND msr.status_id != :statusRestored
+                )
+            )
             AND mr.domain = :domain
             AND ms.email = :emailSender
         SQL;
         $stmt = $conn->prepare($sql);
+        $stmt->bindValue('deliveryPass', DeliveryStatus::PASS);
+        $stmt->bindValue('virusContent', ContentType::VIRUS);
+        $stmt->bindValue('statusAuthorized', MessageStatus::AUTHORIZED);
+        $stmt->bindValue('statusRestored', MessageStatus::RESTORED);
         $stmt->bindValue('domain', $domain);
         $stmt->bindValue('emailSender', $emailSender);
+
         return $stmt->executeQuery()->fetchAllAssociative();
     }
 

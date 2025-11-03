@@ -7,7 +7,6 @@ use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Repository\UserRepository;
 use App\Repository\MsgsRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LogService;
@@ -19,15 +18,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\SemaphoreStore;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Amavis\DeliveryStatus;
+use App\Service\MessageService;
 use Symfony\Component\Mailer\MailerInterface;
 
 #[AsCommand(
@@ -46,6 +43,7 @@ class SendAuthMailRequestCommand extends Command
         private LocaleService $localeService,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
+        private MessageService $messageService,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         public readonly string $defaultSenderAdress,
     ) {
@@ -112,7 +110,7 @@ class SendAuthMailRequestCommand extends Command
                 }
 
                 if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null) {
-                    $this->releaseMessage($message, $msgrcpt, $user);
+                    $this->messageService->dispatchRelease($msgrcpt);
                     continue;
                 }
 
@@ -291,25 +289,6 @@ class SendAuthMailRequestCommand extends Command
             $this->em->flush();
             return false;
         }
-    }
-
-    private function releaseMessage(Msgs $message, Msgrcpt $msgRcpt, User $user): void
-    {
-        $process = new Process([
-            $this->amavisdRelease,
-            stream_get_contents($message->getQuarLoc(), -1, 0),
-            stream_get_contents($message->getSecretId(), -1, 0),
-            $user->getEmail(),
-        ]);
-
-        $process->run(
-            function ($type, $buffer) use ($msgRcpt) {
-                $msgRcpt->setAmavisOutput($buffer);
-            }
-        );
-        $msgRcpt->setStatus(MessageStatus::AUTHORIZED);
-        $this->em->persist($msgRcpt);
-        $this->em->flush();
     }
 
     private function getMailFrom(Domain $domain): string

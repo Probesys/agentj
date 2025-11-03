@@ -124,9 +124,8 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        if ($this->messageService->restore($message, $messageRecipient)) {
-            $this->logService->addLog('restore', $mailId);
-        }
+        $this->messageService->restore($messageRecipient);
+        $this->logService->addLog('restore', $mailId);
 
         return $this->render('portal/messages/restore.html.twig');
     }
