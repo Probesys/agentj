@@ -330,7 +330,7 @@ Message:
       <br/><br/> Thank you and good day '
     defaultCaptchaPageContent:
       "<strong>Confirmation of your email</strong> <br/> Please
-      validate your email by validating the captcha below"
+      validate your email by confirming your email address below"
     defaultCaptchaConfirmMsg: "Thank you and good day"
 Form:
   PolicyDomain: "Filter threshold"
@@ -448,9 +448,9 @@ Entities:
     index: "List of domains"
     edit: "Edit domain"
     fields:
-      mailMessage: "Text of the email validating the email address with the captcha link"
-      captachaMessage: "Presentation text on captcha page"
-      successCaptchaMessage: "Captcha validation message"
+      mailMessage: "Text of the email validating the email address with the human authentication link"
+      captachaMessage: "Presentation text on the human authentication page"
+      successCaptchaMessage: "Human authentication validation message"
       messageAlert: "Message of the report"
       domain: "Domain name"
       srvSmtp: "SMTP server"
@@ -488,7 +488,7 @@ Entities:
       alerts: ALERTS
       saveBeforeConnectors: Please register the domain first before adding connectors.
       dynamicsVariables:
-        URL_CAPTCHA: "Link to captcha"
+        URL_CAPTCHA: "Link to the human authentication page"
         EMAIL_DEST: "Email of recipient"
         URL_MSGS: "Link to pending emails"
         NB_AUTHORIZED_MESSAGES: "Authorized messages"
@@ -663,14 +663,14 @@ Entities:
       black: Blacklist
       typeLabelW:
         0: Validated by you
-        1: Validated by captcha
+        1: Validated by human authentication
         2: Validated by the group
         3: Validated by the administrator
         4: Validated by outgoing email
         5: Validated by file importation
       typeLabelB:
         0: Blocked by you
-        1: Blocked by captcha
+        1: Blocked by human authentication
         2: Blocked by the group
         3: Blocked by the administrator
     actions:

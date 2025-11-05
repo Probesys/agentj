@@ -330,7 +330,7 @@ Message:
       \ <br /><br /> Merci et bonne journée "
     defaultCaptchaPageContent:
       "<strong>Vérification de votre email</strong> <br />\
-      \ Merci de valider votre email en validant le captcha ci-dessous"
+      \ Merci de valider votre email en confirmant votre adresse ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
 Form:
   PolicyDomain: Seuil de filtrage
@@ -448,9 +448,9 @@ Entities:
     index: Liste des domaines
     edit: Edition du domaine
     fields:
-      mailMessage: Texte du mail de validation de l'email avec le lien captcha
-      captachaMessage: Texte de présentation sur la page de captcha
-      successCaptchaMessage: Message de validation du captcha
+      mailMessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
+      captachaMessage: Texte de présentation sur la page d'authentification humaine
+      successCaptchaMessage: Message de validation de l'authentification humaine
       messageAlert: Message du rapport
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
@@ -488,7 +488,7 @@ Entities:
       alerts: ALERTES
       saveBeforeConnectors: Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
       dynamicsVariables:
-        URL_CAPTCHA: Lien vers le captcha
+        URL_CAPTCHA: Lien vers la page d'authentification humaine
         EMAIL_DEST: Email du destinataire
         URL_MSGS: Lien vers les mails en attente
         NB_AUTHORIZED_MESSAGES: Nombre messages autorisés
@@ -663,14 +663,14 @@ Entities:
       black: Liste noire
       typeLabelW:
         0: Validé par vous
-        1: Validé par captcha
+        1: Validé par authentification humaine
         2: Validé par le groupe
         3: Validé par l'administrateur
         4: Validé par l'envoi d'un mail
         5: Validé par importation d'un fichier
       typeLabelB:
         0: Bloqué par vous
-        1: Bloqué par captcha
+        1: Bloqué par authentification humaine
         2: Bloqué par le groupe
         3: Bloqué par l'administrateur
     actions:
