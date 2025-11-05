@@ -326,7 +326,7 @@ Message:
       "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à\
       \ destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous\
       \ sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre\
-      \ email en cliquant sur le lien suivant : <br /> <a href='[URL_CAPTCHA]'>[URL_CAPTCHA]</a>\
+      \ email en cliquant sur le lien suivant : <br /> <a href='[URL_HUMAN_AUTHENTICATION]'>[URL_HUMAN_AUTHENTICATION]</a>\
       \ <br /><br /> Merci et bonne journée "
     defaultCaptchaPageContent:
       "<strong>Vérification de votre email</strong> <br />\
@@ -489,6 +489,7 @@ Entities:
       saveBeforeConnectors: Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs.
       dynamicsVariables:
         URL_CAPTCHA: Lien vers la page d'authentification humaine
+        URL_HUMAN_AUTHENTICATION: Lien vers la page d'authentification humaine
         EMAIL_DEST: Email du destinataire
         URL_MSGS: Lien vers les mails en attente
         NB_AUTHORIZED_MESSAGES: Nombre messages autorisés

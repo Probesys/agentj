@@ -326,7 +326,7 @@ Message:
       'Hello.<br/><br/> You tried to send an email to: [EMAIL_DEST]
       <br/><br/> For security reasons we are obliged to check your email. <br/>
       <br/>
-      Please confirm your email by clicking on the following link: <br/> <a href="[URL_CAPTCHA]">[URL_CAPTCHA]</a>
+      Please confirm your email by clicking on the following link: <br/> <a href="[URL_HUMAN_AUTHENTICATION]">[URL_HUMAN_AUTHENTICATION]</a>
       <br/><br/> Thank you and good day '
     defaultCaptchaPageContent:
       "<strong>Confirmation of your email</strong> <br/> Please
@@ -489,6 +489,7 @@ Entities:
       saveBeforeConnectors: Please register the domain first before adding connectors.
       dynamicsVariables:
         URL_CAPTCHA: "Link to the human authentication page"
+        URL_HUMAN_AUTHENTICATION: "Link to the human authentication page"
         EMAIL_DEST: "Email of recipient"
         URL_MSGS: "Link to pending emails"
         NB_AUTHORIZED_MESSAGES: "Authorized messages"

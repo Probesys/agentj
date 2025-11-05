@@ -6,11 +6,11 @@
 {% block body %}
     {% set _title = 'Entities.Domain.labels.domainMessages'|trans %}
     {% embed 'common/blockTitleAndButtons.html.twig' %}
-    {% endembed %}  
+    {% endembed %}
 
   {{ include('domain/_formMessage.html.twig', {'button_label': 'Update'}) }}
 
-  
+
 
   <script>CKEDITOR.replace('domain_message[message]');</script>
 
@@ -55,7 +55,11 @@
       // pour ckeditor
       if (typeof CKEDITOR != 'undefined' && currentCKeditor) {
         myValue = $(this).data("variable-name");
-        if (myValue == '[URL_CAPTCHA]' || myValue == '[URL_MSGS]') {
+        if (
+            myValue == '[URL_CAPTCHA]' ||
+            myValue == '[URL_HUMAN_AUTHENTICATION]' ||
+            myValue == '[URL_MSGS]'
+        ) {
           currentCKeditor.insertHtml('<a href="' + myValue + '">' + myValue + '</a>');
         } else {
           currentCKeditor.insertHtml(myValue);

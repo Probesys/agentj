@@ -187,6 +187,10 @@ class SendAuthMailRequestCommand extends Command
             return $recipient->getRid()->getEmailClear();
         }, $messageRecipients);
 
+        $body = str_replace('[URL_HUMAN_AUTHENTICATION]', $url, $body);
+        // URL_CAPTCHA is deprecated and has been replaced by URL_HUMAN_AUTHENTICATION.
+        // We must continue to support this variable as existing templates may
+        // still contain it.
         $body = str_replace('[URL_CAPTCHA]', $url, $body);
         $body = str_replace('[EMAIL_DEST]', implode(',', $recipientsMailAdresses), $body);
         $bodyTextPlain = preg_replace("/\r|\n|\t/", "", $body);
