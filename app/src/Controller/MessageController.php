@@ -657,4 +657,32 @@ class MessageController extends AbstractController
 
         return [$message, $messageRecipient];
     }
+
+
+    #[Route(
+        path: '/{partitionTag}/{mailId}/{rseqnum}/release-status',
+        name: 'message_release_status',
+        methods: ['GET'],
+    )]
+    public function checkReleaseStatus(int $partitionTag, string $mailId, int $rseqnum): JsonResponse
+    {
+        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rseqnum' => $rseqnum,
+        ]);
+
+        if (!$messageRecipient) {
+            return new JsonResponse(['error' => 'Message recipient not found'], 404);
+        }
+
+        $this->checkMailAccess($messageRecipient);
+
+        $releaseAt = $messageRecipient->getAmavisReleaseAt();
+
+        return new JsonResponse([
+            'released' => $releaseAt === null,
+            'releaseAt' => $releaseAt ? $releaseAt->format('c') : null,
+        ]);
+    }
 }
