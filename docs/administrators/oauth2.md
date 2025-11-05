@@ -5,6 +5,13 @@ AgentJ allows your users to login with your SSO through the OAuth2 protocol.
 > [!NOTE]
 > The users must exist in the database first in order to be able to login.
 
+## Information about the local login form
+
+When OAuth2 is enabled, the default form is removed from the login page.
+However, administrators may still need to login with this form.
+
+**To access the local login form, add the `local=true` parameter to the login URL, e.g. `https://agentj.example.com/login?local=true`**
+
 ## Setup your OAuth server
 
 Before enabling OAuth in AgentJ, you need to declare a new application on your OAuth server.
