@@ -4,8 +4,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    locale: "%env(DEFAULT_LOCALE)%"
-    app_locales: en|fr
     salt: "%env(TOKEN_ENCRYPTION_SALT)%"
     iv: "%env(TOKEN_ENCRYPTION_IV)%"
     app.agentj-version: "%env(AGENTJ_VERSION)%"

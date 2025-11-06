@@ -13,9 +13,6 @@ twig:
         azure_oauth_enabled: '%env(bool:ENABLE_AZURE_OAUTH)%'
         feature_flag_disable_dashboard: '%env(bool:FEATURE_FLAG_DISABLE_DASHBOARD)%'
         feature_flag_disable_sort_by_subject: '%env(bool:FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT)%'
-        locales:
-            - fr
-            - en
         per_pages: [10, 25, 50, 100, 500, 1000]
 
 when@test:
