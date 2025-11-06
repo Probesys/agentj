@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2025-11-06 - 2.3.2
+
+### Bug fixes
+
+- Fix releasing untreated messages ([ee0aaa64](https://github.com/Probesys/agentj/commit/ee0aaa64))
+- Fix creation of users failing because of uninitialized aliases collection ([3dca0332](https://github.com/Probesys/agentj/commit/3dca0332))
+
 ## 2025-10-10 - 2.3.1
 
 This release includes changes from 2.2.4.
