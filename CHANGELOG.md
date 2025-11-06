@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2025-11-06 - 2.3.2
+
+### Bug fixes
+
+- Fix releasing untreated messages ([ee0aaa64](https://github.com/Probesys/agentj/commit/ee0aaa64))
+- Fix creation of users failing because of uninitialized aliases collection ([3dca0332](https://github.com/Probesys/agentj/commit/3dca0332))
+
 ## 2025-10-10 - 2.3.1
 
 This release includes changes from 2.2.4.
@@ -70,6 +77,13 @@ This release includes changes from 2.2.4.
 - Don't set the lock setting as it broke generation of migrations ([f80393a3](https://github.com/Probesys/agentj/commit/f80393a3))
 - Add the `app/public/files` folder to gitignore ([bc1014a4](https://github.com/Probesys/agentj/commit/bc1014a4))
 - Remove unused code, templates and files ([48ad54de](https://github.com/Probesys/agentj/commit/48ad54de))
+
+## 2025-11-06 - 2.2.5
+
+### Bug fixes
+
+- Fix releasing untreated messages ([f3a5c471](https://github.com/Probesys/agentj/commit/f3a5c471))
+- Fix creation of users failing because of uninitialized aliases collection ([f5e9233a](https://github.com/Probesys/agentj/commit/f5e9233a))
 
 ## 2025-10-10 - 2.2.4
 
