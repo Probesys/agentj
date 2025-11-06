@@ -145,6 +145,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
 
+        $this->aliases = new ArrayCollection();
         $this->domains = new ArrayCollection();
         $this->sharedWith = new ArrayCollection();
         $this->groups = new ArrayCollection();
