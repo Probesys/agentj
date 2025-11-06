@@ -11,9 +11,6 @@ twig:
         oauth_enabled: '%env(bool:ENABLE_OAUTH)%'
         oauth_login_label: '%env(OAUTH_LOGIN_LABEL)%'
         azure_oauth_enabled: '%env(bool:ENABLE_AZURE_OAUTH)%'
-        locales:
-            - fr
-            - en
         per_pages: [10, 25, 50, 100, 500, 1000]
         domainMessages_availableFields:
             'Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION' : 'URL_HUMAN_AUTHENTICATION'
