@@ -7,6 +7,7 @@ use App\Entity\Groups;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Service\LocaleService;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -46,7 +47,16 @@ class AppExtension extends AbstractExtension
             new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
             new TwigFunction('get_original_user', [$this, 'getOriginalUser']),
             new TwigFunction('domain_logo_asset', [$this, 'domainLogoAsset']),
+            new TwigFunction('locales', [$this, 'locales']),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function locales(): array
+    {
+        return LocaleService::SUPPORTED_LOCALES;
     }
 
     public function lcfirst(string $strInput): string
