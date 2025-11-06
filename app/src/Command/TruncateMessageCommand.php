@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Log;
 use App\Entity\Msgs;
+use App\Entity\OutMsg;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -12,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'agentj:truncate-message-since-days',
-    description: 'Truncate tables msgs and msgrcpt since X days in argument, X more than 10, by default it is 30 days',
+    description: 'Truncate incoming and outgoing messages older than a number of days (minimum 10, 30 by default)',
 )]
 class TruncateMessageCommand extends Command
 {
@@ -40,15 +41,25 @@ class TruncateMessageCommand extends Command
             return Command::FAILURE;
         }
 
-        $userMsgsBlocked = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
+        // Truncate incoming messages
+        $deletedIncomingStats = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
 
         $message = date('Y-m-d H:i:s');
-        $message .= "\tdelete mail entries older than " . date('Y-m-d', $start);
-        $message .= "\t{$userMsgsBlocked['nbDeletedMsgs']} in msgs";
-        $message .= "\t{$userMsgsBlocked['nbDeletedMsgrcpt']} in msgrcpt";
-        $message .= "\t{$userMsgsBlocked['nbDeletedQuarantine']} in quarantine";
+        $message .= "\tdelete incoming mail entries older than " . date('Y-m-d', $start);
+        $message .= "\t{$deletedIncomingStats['nbDeletedMsgs']} in msgs";
+        $message .= "\t{$deletedIncomingStats['nbDeletedQuarantine']} in quarantine";
         $output->writeln($message);
 
+        // Truncate outgoing messages
+        $deletedOutgoingStats = $this->em->getRepository(OutMsg::class)->truncateMessageOlder($start);
+
+        $message = date('Y-m-d H:i:s');
+        $message .= "\tdelete outgoing mail entries older than " . date('Y-m-d', $start);
+        $message .= "\t{$deletedOutgoingStats['nbDeletedMsgs']} in out_msgs";
+        $message .= "\t{$deletedOutgoingStats['nbDeletedQuarantine']} in out_quarantine";
+        $output->writeln($message);
+
+        // Truncate logs
         $nbDeletedlogs = $this->em->getRepository(Log::class)->truncateOlder($days);
         $message = date('Y-m-d H:i:s');
         $message .= "\tdelete log entries older than " . date('Y-m-d', $start);

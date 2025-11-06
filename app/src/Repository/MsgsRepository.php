@@ -219,22 +219,12 @@ class MsgsRepository extends BaseMessageRepository
      *
      * @return array{
      *     nbDeletedMsgs: int,
-     *     nbDeletedMsgrcpt: int,
      *     nbDeletedQuarantine: int,
      * }
      */
     public function truncateMessageOlder(int $date): array
     {
         $conn = $this->getEntityManager()->getConnection();
-
-        $sql = ' DELETE mr FROM msgrcpt mr '
-            . ' LEFT JOIN  msgs m ON m.mail_id = mr.mail_id '
-            . ' WHERE m.time_num < :date';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bindValue('date', $date, DBAL\ParameterType::INTEGER);
-        $result = $stmt->executeQuery();
-        $nbDeletedMsgrcpt = $result->rowCount();
 
         $sql = ' DELETE q FROM quarantine q '
             . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
@@ -254,7 +244,6 @@ class MsgsRepository extends BaseMessageRepository
 
         return [
             'nbDeletedMsgs' => $nbDeletedMsgs,
-            'nbDeletedMsgrcpt' => $nbDeletedMsgrcpt,
             'nbDeletedQuarantine' => $nbDeletedQuarantine,
         ];
     }
