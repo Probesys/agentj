@@ -12,6 +12,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\DBAL\Types\Types;
+use App\Entity\Trait\ResourceToStringTrait;
 
 /**
  * Users
@@ -21,6 +22,8 @@ use Doctrine\DBAL\Types\Types;
 #[UniqueEntity(fields: ['email'], ignoreNull: true)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use ResourceToStringTrait;
+
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -186,17 +189,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmail(): ?string
     {
-        $email = $this->email;
-
-        if (is_resource($email)) {
-            $email = stream_get_contents($email, -1, 0);
-        }
-
-        if (is_string($email)) {
-            return $email;
-        }
-
-        return null;
+        return $this->convertResourceToString($this->email);
     }
 
     public function setEmail(mixed $email): self

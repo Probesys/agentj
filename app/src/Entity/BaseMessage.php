@@ -6,10 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
 use Doctrine\DBAL\Types\Types;
 use App\Entity\Maddr;
+use App\Entity\Trait\ResourceToStringTrait;
 
 #[ORM\MappedSuperclass]
 class BaseMessage
 {
+    use ResourceToStringTrait;
+
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     private int $partitionTag = 0;
@@ -107,18 +110,7 @@ class BaseMessage
 
     public function getSecretId(): ?string
     {
-
-        $secretId = $this->secretId;
-
-        if (is_resource($secretId)) {
-            $secretId = stream_get_contents($secretId, -1, 0);
-        }
-
-        if (is_string($secretId)) {
-            return $secretId;
-        }
-
-        return null;
+        return $this->convertResourceToString($this->secretId);
     }
 
     public function setSecretId(mixed $secretId): self
@@ -238,17 +230,7 @@ class BaseMessage
 
     public function getQuarLoc(): ?string
     {
-        $quarLoc = $this->quarLoc;
-
-        if (is_resource($quarLoc)) {
-            $quarLoc = stream_get_contents($quarLoc, -1, 0);
-        }
-
-        if (is_string($quarLoc)) {
-            return $quarLoc;
-        }
-
-        return null;
+        return $this->convertResourceToString($this->quarLoc);
     }
 
     public function setQuarLoc(mixed $quarLoc): self
@@ -370,12 +352,7 @@ class BaseMessage
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return $this->convertResourceToString($this->mailId, rewind: true) ?? '';
     }
 
     public function getSendCaptcha(): ?int

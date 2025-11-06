@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use App\Repository\MailaddrRepository;
+use App\Entity\Trait\ResourceToStringTrait;
 
 /**
  * Mailaddr
@@ -14,6 +15,8 @@ use App\Repository\MailaddrRepository;
 #[ORM\Entity(repositoryClass: MailaddrRepository::class)]
 class Mailaddr
 {
+    use ResourceToStringTrait;
+
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -50,12 +53,7 @@ class Mailaddr
 
     public function getEmailClear(): string
     {
-        $email = $this->email;
-        if (is_resource($email)) {
-            $email = stream_get_contents($email, -1, 0);
-            rewind($this->email);
-        }
-        return $email;
+        return $this->convertResourceToString($this->email, rewind: true) ?? '';
     }
 
     public function setEmail(string $email): self

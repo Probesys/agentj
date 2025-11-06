@@ -5,10 +5,13 @@ namespace App\Entity;
 use App\Amavis\MessageStatus;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use App\Entity\Trait\ResourceToStringTrait;
 
 #[ORM\MappedSuperclass]
 class BaseMessageRecipient
 {
+    use ResourceToStringTrait;
+
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
@@ -74,12 +77,7 @@ class BaseMessageRecipient
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return $this->convertResourceToString($this->mailId, rewind: true) ?? '';
     }
 
     public function getRseqnum(): ?int
