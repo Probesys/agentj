@@ -1,0 +1,42 @@
+{% extends 'domain/customisation/layout.html.twig' %}
+
+{% block title %}
+    {{ 'Entities.Domain.customisation.human_authentication.title' | trans({ '{{ domain }}': domain.domain }) }}
+{% endblock %}
+
+{% block customisation_body %}
+    {{ form_start(form) }}
+        <div class="row">
+            <div class="col-9">
+                {{ form_row(form.mailmessage) }}
+            </div>
+
+            <div class="col-3">
+                {{ include('domain/customisation/_variables_container.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-9">
+                {{ form_row(form.message) }}
+                {{ form_row(form.confirmCaptchaMessage) }}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">
+                {{ 'Generics.actions.save' | trans }}
+            </button>
+
+            <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">
+                {{ 'Generics.actions.backToTheList' | trans }}
+            </a>
+        </div>
+    {{ form_end(form) }}
+
+    <script>
+        CKEDITOR.replace('domain_customisation_human_authentication[mailmessage]');
+        CKEDITOR.replace('domain_customisation_human_authentication[message]');
+        CKEDITOR.replace('domain_customisation_human_authentication[confirmCaptchaMessage]');
+    </script>
+{% endblock %}

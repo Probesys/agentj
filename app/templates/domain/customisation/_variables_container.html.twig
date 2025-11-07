@@ -1,0 +1,52 @@
+<div id="container-variables">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-puzzle-piece"></i>
+            <strong>{{ 'Generics.labels.variables' | trans }}</strong>
+        </div>
+
+        <div class="card-body">
+            <ul class="card-text list-unstyled">
+                {% for key, label in availableVariables %}
+                    <li class="mb-2">
+                        <button
+                            type="button"
+                            data-variable-name="[{{ key }}]"
+                            class="btn btn-light text-left insertToBody"
+                        >
+                            <i class="far fa-caret-square-left"></i>
+                            <small class="name">{{ label | trans }}</small>
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentCKeditor = null;
+
+    CKEDITOR.on('instanceReady', function (event) {
+        event.editor.on('focus', function () {
+            currentCKeditor = this;
+        });
+    });
+
+    $('.insertToBody').on('click', function (e) {
+        e.preventDefault();
+
+        if (!currentCKeditor) {
+            return;
+        }
+
+        let variableName = $(this).data("variable-name");
+        if (variableName.startsWith('[URL_')) {
+            currentCKeditor.insertHtml(
+                `<a href="${variableName}">${variableName}</a>`
+            );
+        } else {
+            currentCKeditor.insertHtml(variableName);
+        }
+    });
+</script>
