@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Entity\Trait;
+namespace App\Util;
 
-trait ResourceToStringTrait
+abstract class ResourceHelper
 {
-    protected function convertResourceToString(mixed $value, bool $rewind = false): ?string
-    {
+    public static function toString(
+        mixed $value,
+        bool $rewind = false
+    ): ?string {
         $stringValue = $value;
 
         if (is_resource($value)) {

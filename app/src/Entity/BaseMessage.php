@@ -2,17 +2,15 @@
 
 namespace App\Entity;
 
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
 use Doctrine\DBAL\Types\Types;
 use App\Entity\Maddr;
-use App\Entity\Trait\ResourceToStringTrait;
 
 #[ORM\MappedSuperclass]
 class BaseMessage
 {
-    use ResourceToStringTrait;
-
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
     #[ORM\Id]
     private int $partitionTag = 0;
@@ -110,7 +108,7 @@ class BaseMessage
 
     public function getSecretId(): ?string
     {
-        return $this->convertResourceToString($this->secretId);
+        return ResourceHelper::toString($this->secretId);
     }
 
     public function setSecretId(mixed $secretId): self
@@ -230,7 +228,7 @@ class BaseMessage
 
     public function getQuarLoc(): ?string
     {
-        return $this->convertResourceToString($this->quarLoc);
+        return ResourceHelper::toString($this->quarLoc);
     }
 
     public function setQuarLoc(mixed $quarLoc): self
@@ -352,7 +350,7 @@ class BaseMessage
 
     public function getMailIdAsString(): string
     {
-        return $this->convertResourceToString($this->mailId, rewind: true) ?? '';
+        return ResourceHelper::toString($this->mailId, rewind: true) ?? '';
     }
 
     public function getSendCaptcha(): ?int
