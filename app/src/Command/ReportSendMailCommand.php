@@ -83,7 +83,7 @@ class ReportSendMailCommand extends Command
                 $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
                 $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
                 $domain = $user->getDomain();
-                
+
                 // Get user's locale for translation
                 $locale = $this->localeService->getUserLocale($user);
 
@@ -129,7 +129,9 @@ class ReportSendMailCommand extends Command
                 $bodyTextPlain = strip_tags($bodyTextPlain);
 
                 $message = new Email();
-                $message->subject($this->translator->trans('Message.Report.defaultMailSubject', locale: $locale) . $mailTo)
+                $message->subject(
+                    $this->translator->trans('Message.Report.defaultMailSubject', locale: $locale) . $mailTo
+                )
                         ->from($fromAddress)
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
