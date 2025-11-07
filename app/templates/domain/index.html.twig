@@ -79,10 +79,10 @@
                                         </a>
                                     </li>
                                     <li class="list-inline-item">
-                                        <a href="{{ path('domain_messages',{'id':domain.id}) }}" class='btn btn-sm btn-secondary ' title="{{ 'Entities.Domain.actions.messages'|trans() }}">
+                                        <a href="{{ path('domain_customisation_general', { 'id': domain.id }) }}" class="btn btn-sm btn-secondary">
                                             <i class="fas fa-comments d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                                             <span class="d-none d-lg-block">
-                                                {{ 'Entities.Domain.actions.messages'|trans() }}
+                                                {{ 'Entities.Domain.actions.customisation' | trans }}
                                             </span>
                                         </a>
                                     </li>

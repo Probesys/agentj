@@ -9,6 +9,9 @@ use App\Entity\Mailaddr;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Form\DomainCustomisationGeneralType;
+use App\Form\DomainCustomisationHumanAuthenticationType;
+use App\Form\DomainCustomisationReportType;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
@@ -28,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: '/domain')]
@@ -94,7 +98,6 @@ class DomainController extends AbstractController
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
     public function new(
         Request $request,
-        FileUploader $fileUploader,
         ParameterBagInterface $params,
         SettingsRepository $settingsRepository,
     ): Response {
@@ -175,15 +178,6 @@ class DomainController extends AbstractController
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
 
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
-
-
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
@@ -210,7 +204,7 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
-    public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response
+    public function edit(Request $request, Domain $domain): Response
     {
 
         $this->checkAccess($domain);
@@ -253,17 +247,6 @@ class DomainController extends AbstractController
             $rules = $form->get("rules")->getData();
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-
-            // Update users with domain policy
-
-
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
 
             if ($domain->getDomainKeys() === null) {
                 $this->generateOpenDkim($domain);
@@ -404,22 +387,120 @@ class DomainController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{id}/messages', name: 'domain_messages', methods: 'GET|POST')]
-    public function domainMessages(Request $request, Domain $domain): Response
-    {
+    #[Route(path: '/{id}/customisation', name: 'domain_customisation_general', methods: ['GET', 'POST'])]
+    public function customisationGeneral(
+        Request $request,
+        Domain $domain,
+        DomainRepository $domainRepository,
+        FileUploader $fileUploader,
+    ): Response {
         $this->checkAccess($domain);
-        $form = $this->createForm(DomainMessageType::class, $domain);
+
+        $form = $this->createForm(DomainCustomisationGeneralType::class, $domain);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->flush();
+            $domain = $form->getData();
 
-            return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);
+            $uploadedFile = $form->get('logoFile')->getData();
+            if ($uploadedFile) {
+                $uploadedLogo = $fileUploader->upload($uploadedFile);
+                $domain->setLogo($uploadedLogo);
+            }
+
+            $domainRepository->save($domain);
+
+            $this->addFlash('success', $this->translator->trans('Message.Flash.saved'));
+
+            return $this->redirectToRoute('domain_customisation_general', [
+                'id' => $domain->getId(),
+            ]);
         }
 
-        return $this->render('domain/messages.html.twig', [
+        return $this->render('domain/customisation/general.html.twig', [
             'domain' => $domain,
-            'form' => $form->createView(),
+            'form' => $form,
+        ]);
+    }
+
+    #[Route(
+        path: '/{id}/customisation/human-authentication',
+        name: 'domain_customisation_human_authentication',
+        methods: ['GET', 'POST'],
+    )]
+    public function customisationHumanAuthentication(
+        Request $request,
+        Domain $domain,
+        DomainRepository $domainRepository,
+    ): Response {
+        $this->checkAccess($domain);
+
+        $form = $this->createForm(DomainCustomisationHumanAuthenticationType::class, $domain);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $domain = $form->getData();
+
+            $domainRepository->save($domain);
+
+            $this->addFlash('success', $this->translator->trans('Message.Flash.saved'));
+
+            return $this->redirectToRoute('domain_customisation_human_authentication', [
+                'id' => $domain->getId(),
+            ]);
+        }
+
+        return $this->render('domain/customisation/human_authentication.html.twig', [
+            'domain' => $domain,
+            'form' => $form,
+            // phpcs:disable Generic.Files.LineLength
+            'availableVariables' => [
+                'URL_HUMAN_AUTHENTICATION' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION'),
+                'EMAIL_DEST' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.EMAIL_DEST'),
+            ],
+            // phpcs:enable Generic.Files.LineLength
+        ]);
+    }
+
+    #[Route(path: '/{id}/customisation/report', name: 'domain_customisation_report', methods: ['GET', 'POST'])]
+    public function customisationReport(
+        Request $request,
+        Domain $domain,
+        DomainRepository $domainRepository,
+    ): Response {
+        $this->checkAccess($domain);
+
+        $form = $this->createForm(DomainCustomisationReportType::class, $domain);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $domain = $form->getData();
+
+            $domainRepository->save($domain);
+
+            $this->addFlash('success', $this->translator->trans('Message.Flash.saved'));
+
+            return $this->redirectToRoute('domain_customisation_report', [
+                'id' => $domain->getId(),
+            ]);
+        }
+
+        return $this->render('domain/customisation/report.html.twig', [
+            'domain' => $domain,
+            'form' => $form,
+            // phpcs:disable Generic.Files.LineLength
+            'availableVariables' => [
+                'USERNAME' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.USERNAME'),
+                'URL_MSGS' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MSGS'),
+                'NB_UNTREATED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES'),
+                'NB_AUTHORIZED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES'),
+                'NB_SPAMMED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES'),
+                'NB_BANNED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_BANNED_MESSAGES'),
+                'NB_DELETED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES'),
+                'NB_RESTORED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES'),
+                'LIST_MAIL_MSGS' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS'),
+            ],
+            // phpcs:enable Generic.Files.LineLength
         ]);
     }
 

@@ -280,6 +280,7 @@ Message:
     ruleExists: "This rule already exists!"
     messageDeleted: "Message deleted successfully"
     messageRestored: "Message successfully recovered"
+    saved: "Changes have been saved."
     senderAuthorized: "The address is now authorized"
     senderBanned: "The address is now banned"
     checkMailUnsuccessful: "We couldn't check this email."
@@ -445,12 +446,23 @@ Entities:
       add_new: "Add a new policy"
   Domain:
     Name: Domain
+    customisation:
+      human_authentication:
+        title: "Human authentication customisation of domain {{ domain }}"
+        tab: "Human authentication"
+      general:
+        title: "General customisation of domain {{ domain }}"
+        tab: "General"
+      report:
+        title: "Report customisation of domain {{ domain }}"
+        tab: "Report"
+      title: "Customisation of domain {{ domain }}"
     index: "List of domains"
     edit: "Edit domain"
     fields:
-      mailMessage: "Text of the email validating the email address with the human authentication link"
-      captachaMessage: "Presentation text on the human authentication page"
-      successCaptchaMessage: "Human authentication validation message"
+      mailmessage: "Text of the email validating the email address with the human authentication link"
+      message: "Presentation text on the human authentication page"
+      confirmCaptchaMessage: "Human authentication validation message"
       messageAlert: "Message of the report"
       domain: "Domain name"
       srvSmtp: "SMTP server"
@@ -490,6 +502,7 @@ Entities:
       dynamicsVariables:
         URL_CAPTCHA: "Link to the human authentication page"
         URL_HUMAN_AUTHENTICATION: "Link to the human authentication page"
+        USERNAME: "User's name"
         EMAIL_DEST: "Email of recipient"
         URL_MSGS: "Link to pending emails"
         NB_AUTHORIZED_MESSAGES: "Authorized messages"
@@ -504,6 +517,7 @@ Entities:
       importUserAndAliases: "Import users and aliases"
       add_new: "Add a new domain"
       add_new_rule: "New rule"
+      customisation: "Customisation"
       deleteRule: "Delete rule"
       editDomainRule: "Amend a rule"
       WBList: List

@@ -280,6 +280,7 @@ Message:
     ruleExists: Cette règle existe déjà !
     messageDeleted: Message supprimé avec succès
     messageRestored: Message récupéré avec succès
+    saved: Les changements ont été enregistrés.
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
     checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
@@ -445,12 +446,23 @@ Entities:
       add_new: Ajouter une nouvelle stratégie
   Domain:
     Name: Domaine
+    customisation:
+      human_authentication:
+        title: "Personnalisation de l’authentification humaine du domaine {{ domain }}"
+        tab: "Authentification humaine"
+      general:
+        title: "Personnalisation générale du domaine {{ domain }}"
+        tab: "Général"
+      report:
+        title: "Personnalisation du rapport du domaine {{ domain }}"
+        tab: "Rapport"
+      title: "Personnalisation du domaine {{ domain }}"
     index: Liste des domaines
     edit: Edition du domaine
     fields:
-      mailMessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
-      captachaMessage: Texte de présentation sur la page d'authentification humaine
-      successCaptchaMessage: Message de validation de l'authentification humaine
+      mailmessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
+      message: Texte de présentation sur la page d'authentification humaine
+      confirmCaptchaMessage: Message de validation de l'authentification humaine
       messageAlert: Message du rapport
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
@@ -490,6 +502,7 @@ Entities:
       dynamicsVariables:
         URL_CAPTCHA: Lien vers la page d'authentification humaine
         URL_HUMAN_AUTHENTICATION: Lien vers la page d'authentification humaine
+        USERNAME: Nom de l'utilisateur
         EMAIL_DEST: Email du destinataire
         URL_MSGS: Lien vers les mails en attente
         NB_AUTHORIZED_MESSAGES: Nombre messages autorisés
@@ -504,6 +517,7 @@ Entities:
       importUserAndAliases: "Importer les utilisateurs et les alias"
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
+      customisation: Personnalisation
       deleteRule: Supprimer la règle
       editDomainRule: Modifier une règle
       WBList: Liste
