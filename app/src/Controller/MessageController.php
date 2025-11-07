@@ -423,12 +423,10 @@ class MessageController extends AbstractController
     public function msgsToWblistDomain(int $partitionTag, string $mailId, string $wb, int $rid): bool
     {
 
-        $msgs = $this->em->getRepository(Msgs::class)->findOneBy(
-            [
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-            ]
-        );
+        $msgs = $this->em->getRepository(Msgs::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+        ]);
 
         if (!$msgs) {
             throw $this->createNotFoundException('The message does not exist.');
