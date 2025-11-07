@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
 use App\Repository\MsgrcptSearchRepository;
+use App\Service\LocaleService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -35,6 +36,7 @@ class ReportSendMailCommand extends Command
         private string $defaultMailFrom,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
         private UrlGeneratorInterface $urlGenerator,
+        private LocaleService $localeService,
     ) {
         parent::__construct();
     }
@@ -82,10 +84,13 @@ class ReportSendMailCommand extends Command
                 $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
                 $domain = $user->getDomain();
 
+                // Get user's locale for translation
+                $locale = $this->localeService->getUserLocale($user);
+
                 if ($domain && !empty($domain->getMessageAlert())) {
                     $body = $domain->getMessageAlert();
                 } else {
-                    $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
+                    $body = $this->translator->trans('Message.Report.defaultAlertMailContent', locale: $locale);
                 }
 
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
@@ -109,7 +114,7 @@ class ReportSendMailCommand extends Command
                 if (!$from) {
                     $from = $this->defaultMailFrom;
                 }
-                $fromName = $this->translator->trans('Entities.Report.mailFromName');
+                $fromName = $this->translator->trans('Entities.Report.mailFromName', locale: $locale);
                 $fromAddress = new Address($from, $fromName);
 
                 $mailTo = $user->getEmail();
@@ -124,7 +129,9 @@ class ReportSendMailCommand extends Command
                 $bodyTextPlain = strip_tags($bodyTextPlain);
 
                 $message = new Email();
-                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
+                $message->subject(
+                    $this->translator->trans('Message.Report.defaultMailSubject', locale: $locale) . $mailTo
+                )
                         ->from($fromAddress)
                         ->to($toAddress)
                         ->html($body)->text(strip_tags($bodyTextPlain));
