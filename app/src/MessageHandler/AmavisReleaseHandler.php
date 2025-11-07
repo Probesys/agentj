@@ -38,10 +38,26 @@ final class AmavisReleaseHandler
             return;
         }
 
-        if (
-            $messageRecipient->getStatus() === MessageStatus::RESTORED
-            || $messageRecipient->getStatus() === MessageStatus::AUTHORIZED
-        ) {
+        if ($messageRecipient->getMsgs()->getQuarLoc() === null) {
+            $this->logger->error('Mail cannot be released  : invalid quartloc', [
+                'mailId' => $amavisRelease->getMailId(),
+                'partitionTag' => $amavisRelease->getPartitionTag(),
+                'rseqnum' => $amavisRelease->getRseqnum(),
+            ]);
+            return;
+        }
+
+        if ($messageRecipient->getMsgs()->getSecretId() === null) {
+            $this->logger->error('Mail cannot be released  : invalid secretid', [
+                'mailId' => $amavisRelease->getMailId(),
+                'partitionTag' => $amavisRelease->getPartitionTag(),
+                'rseqnum' => $amavisRelease->getRseqnum(),
+            ]);
+            return;
+        }
+
+
+        if ($messageRecipient->isAlreadyReleased()) {
             $this->logger->error('Mail cannot be released as it is already authorized or restored.', [
                 'mailId' => $amavisRelease->getMailId(),
                 'partitionTag' => $amavisRelease->getPartitionTag(),
