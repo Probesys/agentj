@@ -11,6 +11,7 @@ use Doctrine\Migrations\AbstractMigration;
  * Add LDAP encryption and version fields
  */
 // phpcs:disable Squiz.Classes.ValidClassName
+// phpcs:disable Generic.Files.LineLength
 final class Version20251107100000_add_ldap_encryption_and_version extends AbstractMigration
 {
     public function getDescription(): string
