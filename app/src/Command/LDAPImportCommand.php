@@ -248,6 +248,7 @@ class LDAPImportCommand extends Command
         $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
         if (!$alias) {
             $alias = new User();
+            $alias->setOriginConnector($this->connector);
             $this->nbAliasCreated++;
         }
 
