@@ -11,6 +11,7 @@ use App\Repository\UserRepository;
 use App\Repository\MsgsRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LogService;
+use App\Service\LocaleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -42,6 +43,7 @@ class SendAuthMailRequestCommand extends Command
         private CryptEncryptService $cryptEncryptService,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
+        private LocaleService $localeService,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
@@ -124,10 +126,17 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
+                $maddr = $messageRecipients[0]->getRid();
+                $user = null;
+                if ($maddr) {
+                    $user = $userRepository->findOneBy(['email' => $maddr->getEmailClear()]);
+                }
+
                 $mailFrom = $this->getMailFrom($domain);
                 $fromName = $this->getMailFromName($messageRecipients[0]);
-                $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients);
-                $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody);
+
+                $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients, $user);
+                $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody, $user);
 
                 if ($email === null) {
                     continue;
@@ -140,7 +149,7 @@ class SendAuthMailRequestCommand extends Command
                         $message->getMailIdAsString(),
                         $mailBody['html_body']
                     );
-                    $subject = $this->getSubject($message);
+                    $subject = $this->getSubject($message, $user);
                     $output->writeln(
                         date('Y-m-d H:i:s')
                         . "\t{$fromName} <{$mailFrom}>"
@@ -165,8 +174,10 @@ class SendAuthMailRequestCommand extends Command
      * @param Msgrcpt[] $messageRecipients
      * @return string[]
      */
-    private function createAuthEmailContent(Domain $domain, Msgs $msg, array $messageRecipients): array
+    private function createAuthEmailContent(Domain $domain, Msgs $msg, array $messageRecipients, ?User $user): array
     {
+        $locale = $this->localeService->getUserLocale($user);
+
         $token = $this->cryptEncryptService->encrypt(
             $msg->getMailIdAsString()
             . '%%%' . $msg->getSecretId()
@@ -180,7 +191,7 @@ class SendAuthMailRequestCommand extends Command
         if (!empty($domain->getMailmessage())) {
             $body = $domain->getMailmessage();
         } else {
-            $body = $this->translator->trans('Message.Captcha.defaultMailContent');
+            $body = $this->translator->trans('Message.Captcha.defaultMailContent', locale: $locale);
         }
 
         $recipientsMailAdresses = array_map(function (Msgrcpt $recipient) {
@@ -212,12 +223,14 @@ class SendAuthMailRequestCommand extends Command
     /**
      * Set the subject of the mail send captcha from original subject
      */
-    private function getSubject(Msgs $msg): string
+    private function getSubject(Msgs $msg, ?User $user): string
     {
+        $locale = $this->localeService->getUserLocale($user);
+
         if ($msg->getSubject()) {
             $subject = 'Re : ' . $msg->getSubject();
         } else {
-            $subject = $this->translator->trans('Message.Captcha.defaultMailSubject');
+            $subject = $this->translator->trans('Message.Captcha.defaultMailSubject', locale: $locale);
         }
         return $subject;
     }
@@ -230,11 +243,13 @@ class SendAuthMailRequestCommand extends Command
         Msgs $message,
         string $mailFrom,
         ?string $fromName,
-        array $body
+        array $body,
+        ?User $user,
     ): ?Email {
+        $locale = $this->localeService->getUserLocale($user);
         $mailTo = $message->getSid()->getEmailClear();
         try {
-            $subject = $this->getSubject($message);
+            $subject = $this->getSubject($message, $user);
             $email = new Email();
 
             $fromAddress = $fromName ? new Address($mailFrom, $fromName) : new Address($mailFrom);

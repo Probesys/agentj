@@ -15,7 +15,7 @@
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
               <a href="{{ url('portal_message_authorized',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.getMailIdAsString(),'recipientId':messageRecipient.rid.id}) }}"
-                 title={{ 'Message.Actions.AutorizedSender'|trans() }} style="font-size:16px;
+                 title={{ 'Message.Actions.AutorizedSender'|trans(locale: locale) }} style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
                  border-radius: 5px;
@@ -26,7 +26,7 @@
                  color: #fff;
                  text-decoration: none;
                  ">
-                {{ 'Message.Actions.Autorized'|trans() }}
+                {{ 'Message.Actions.Autorized'|trans(locale: locale) }}
               </a>
             </div>
           </td>
@@ -34,7 +34,7 @@
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
               <a href="{{ url('portal_message_restore',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.getMailIdAsString(),'recipientId':messageRecipient.rid.id}) }}"
-                 title="{{ 'Message.Actions.RestoreMessage'|trans() }}" style="font-size:16px;
+                 title="{{ 'Message.Actions.RestoreMessage'|trans(locale: locale) }}" style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
                  border-radius: 5px;
@@ -44,7 +44,7 @@
                  color: #fff;
                  text-decoration: none;
                  ">
-                {{ 'Message.Actions.Restore'|trans() }}</a>
+                {{ 'Message.Actions.Restore'|trans(locale: locale) }}</a>
             </div>
           </td>
 

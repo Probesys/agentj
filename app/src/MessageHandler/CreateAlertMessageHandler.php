@@ -9,6 +9,7 @@ use App\Entity\Alert;
 use App\Entity\User;
 use App\Entity\Domain;
 use App\Entity\Maddr;
+use App\Service\LocaleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Mailer\MailerInterface;
@@ -25,18 +26,21 @@ class CreateAlertMessageHandler
     private string $defaultMailFrom;
     private TranslatorInterface $translator;
     private MailerInterface $mailer;
+    private LocaleService $localeService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         ParameterBagInterface $params,
         TranslatorInterface $translator,
         MailerInterface $mailer,
+        LocaleService $localeService,
     ) {
         $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
         $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
         $this->translator = $translator;
         $this->mailer = $mailer;
+        $this->localeService = $localeService;
     }
 
     public function __invoke(CreateAlertMessage $message): void
@@ -94,14 +98,8 @@ class CreateAlertMessageHandler
                         ->getResult();
 
                     foreach ($users as $user) {
-                        // Set the locale for the translator
-                        if ($user->getPreferedLang() !== null) {
-                            $locale = $user->getPreferedLang();
-                        } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
-                            $locale = $user->getDomain()->getDefaultLang();
-                        } else {
-                            $locale = 'fr';
-                        }
+                        // Get the locale for the user using LocaleService
+                        $locale = $this->localeService->getUserLocale($user);
 
                         // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
                         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
@@ -168,14 +166,8 @@ class CreateAlertMessageHandler
                     );
                 } elseif ($target === 'user') {
                     if ($senderUser) {
-                        // Set the locale for the translator
-                        if ($senderUser->getPreferedLang() !== null) {
-                            $locale = $senderUser->getPreferedLang();
-                        } elseif ($senderUser->getDomain() && $senderUser->getDomain()->getDefaultLang() !== null) {
-                            $locale = $senderUser->getDomain()->getDefaultLang();
-                        } else {
-                            $locale = 'fr';
-                        }
+                        // Get the locale for the user using LocaleService
+                        $locale = $this->localeService->getUserLocale($senderUser);
 
                         if ($senderUser->getDomain()->getSendUserAlerts() === false) {
                             $this->output->writeln('Alerts disabled for user: ' . $senderUser->getId());
@@ -272,14 +264,8 @@ class CreateAlertMessageHandler
 
                 // Create a single alert for all admins and superadmins
                 foreach ($users as $user) {
-                    // Set the locale for the translator
-                    if ($user->getPreferedLang() !== null) {
-                        $locale = $user->getPreferedLang();
-                    } elseif ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null) {
-                        $locale = $user->getDomain()->getDefaultLang();
-                    } else {
-                        $locale = 'fr';
-                    }
+                    // Get the locale for the user using LocaleService
+                    $locale = $this->localeService->getUserLocale($user);
 
                     // Collect all sender users' email addresses
                     $senderEmails = [];
@@ -361,17 +347,8 @@ class CreateAlertMessageHandler
                             'email' => $fromAddr,
                         ]);
                         if ($senderUser) {
-                            // Set the locale for the translator
-                            if ($senderUser->getPreferedLang() !== null) {
-                                $locale = $senderUser->getPreferedLang();
-                            } elseif (
-                                $senderUser->getDomain() &&
-                                $senderUser->getDomain()->getDefaultLang() !== null
-                            ) {
-                                $locale = $senderUser->getDomain()->getDefaultLang();
-                            } else {
-                                $locale = 'fr';
-                            }
+                            // Get the locale for the user using LocaleService
+                            $locale = $this->localeService->getUserLocale($senderUser);
 
                             $processedSenders[$fromAddr] = true;
 

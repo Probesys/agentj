@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\Msgrcpt;
 use App\Amavis\MessageStatus;
 use App\Repository\MsgrcptSearchRepository;
+use App\Service\LocaleService;
 use App\Service\MessageService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -38,6 +39,7 @@ class ReportSendMailCommand extends Command
         private MsgrcptSearchRepository $msgrcptSearchRepository,
         private MessageService $messageService,
         private UrlGeneratorInterface $urlGenerator,
+        private LocaleService $localeService,
     ) {
         parent::__construct();
     }
@@ -80,7 +82,10 @@ class ReportSendMailCommand extends Command
             if (!$from) {
                 $from = $this->defaultMailFrom;
             }
-            $fromName = $this->translator->trans('Entities.Report.mailFromName');
+
+            $locale = $this->localeService->getUserLocale($user);
+            $fromName = $this->translator->trans('Entities.Report.mailFromName', locale: $locale);
+
             $fromAddress = new Address($from, $fromName);
 
             $mailTo = $user->getEmail();
@@ -94,8 +99,10 @@ class ReportSendMailCommand extends Command
             $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
             $bodyTextPlain = strip_tags($bodyTextPlain);
 
+            $subject = $this->translator->trans('Message.Report.defaultMailSubject', locale: $locale) . $mailTo;
+
             $message = new Email();
-            $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
+            $message->subject($subject)
                     ->from($fromAddress)
                     ->to($toAddress)
                     ->html($body)->text(strip_tags($bodyTextPlain));
@@ -140,16 +147,18 @@ class ReportSendMailCommand extends Command
         $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
 
         $domain = $user->getDomain();
+        $locale = $this->localeService->getUserLocale($user);
 
         if ($domain && !empty($domain->getMessageAlert())) {
             $body = $domain->getMessageAlert();
         } else {
-            $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
+            $body = $this->translator->trans('Message.Report.defaultAlertMailContent', locale: $locale);
         }
 
         $tableMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
             'untreatedMessageRecipients' => $untreatedMessageRecipients,
             'user' => $user,
+            'locale' => $locale,
         ]);
 
         $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
