@@ -106,7 +106,7 @@ class SendAuthMailRequestCommand extends Command
                 }
 
                 if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null) {
-                    $this->messageService->restore($msgrcpt);
+                    $this->messageService->dispatchRelease($msgrcpt);
                     continue;
                 }
 

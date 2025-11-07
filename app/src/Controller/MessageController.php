@@ -266,7 +266,7 @@ class MessageController extends AbstractController
                         $logService->addLog('delete batch', $mailId);
                         break;
                     case 'restore':
-                        $this->messageService->restore($messageRecipient);
+                        $this->messageService->dispatchRelease($messageRecipient);
                         $logService->addLog('restore batch', $mailId);
                         break;
                 }
@@ -370,7 +370,7 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        $this->messageService->restore($messageRecipient);
+        $this->messageService->dispatchRelease($messageRecipient);
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
         $logService->addLog('restore', $mailId);
 
@@ -488,7 +488,7 @@ class MessageController extends AbstractController
             ]);
 
             if ($wb == 'W') {
-                $this->messageService->restore($oneMsgRcptObj, MessageStatus::AUTHORIZED);
+                $this->messageService->dispatchRelease($oneMsgRcptObj, MessageStatus::AUTHORIZED);
             } else {
                 $oneMsgRcptObj->setStatus(MessageStatus::BANNED);
             }

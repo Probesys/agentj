@@ -50,7 +50,7 @@ class MessageService
     /**
      * Restore (release) the message for the provided recipient.
      */
-    public function restore(Entity\Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
+    public function dispatchRelease(Entity\Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
     {
         $messageRecipient->setAmavisReleaseAt(new \DateTime());
         $this->em->persist($messageRecipient);
@@ -165,7 +165,7 @@ class MessageService
                     ]);
                     //if W we deliver blokec messages if it has been released yet
                     if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
-                        $this->restore($oneMsgRcpt, MessageStatus::AUTHORIZED);
+                        $this->dispatchRelease($oneMsgRcpt, MessageStatus::AUTHORIZED);
                     } else {
                         $messageRecipient->setStatus($messageStatus);
                         $this->em->persist($messageRecipient);

@@ -124,7 +124,7 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        $this->messageService->restore($messageRecipient, \App\Amavis\MessageStatus::AUTHORIZED);
+        $this->messageService->dispatchRelease($messageRecipient, \App\Amavis\MessageStatus::AUTHORIZED);
         $this->logService->addLog('restore', $mailId);
 
         return $this->render('portal/messages/restore.html.twig');
