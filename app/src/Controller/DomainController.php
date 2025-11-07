@@ -9,12 +9,14 @@ use App\Entity\Mailaddr;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Form\DomainCustomisationGeneralType;
+use App\Form\DomainCustomisationHumanAuthenticationType;
+use App\Form\DomainCustomisationReportType;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\SettingsRepository;
 use App\Repository\DomainRepository;
-use App\Service\FileUploader;
 use App\Service\MailaddrService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -94,7 +96,6 @@ class DomainController extends AbstractController
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
     public function new(
         Request $request,
-        FileUploader $fileUploader,
         ParameterBagInterface $params,
         SettingsRepository $settingsRepository,
     ): Response {
@@ -175,15 +176,6 @@ class DomainController extends AbstractController
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
 
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
-
-
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);
@@ -210,7 +202,7 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
-    public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response
+    public function edit(Request $request, Domain $domain): Response
     {
 
         $this->checkAccess($domain);
@@ -253,17 +245,6 @@ class DomainController extends AbstractController
             $rules = $form->get("rules")->getData();
             $wblist->setWb($rules);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-
-            // Update users with domain policy
-
-
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
 
             if ($domain->getDomainKeys() === null) {
                 $this->generateOpenDkim($domain);
@@ -399,25 +380,6 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/newwblist.html.twig', [
-            'domain' => $domain,
-            'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route(path: '/{id}/messages', name: 'domain_messages', methods: 'GET|POST')]
-    public function domainMessages(Request $request, Domain $domain): Response
-    {
-        $this->checkAccess($domain);
-        $form = $this->createForm(DomainMessageType::class, $domain);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->flush();
-
-            return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);
-        }
-
-        return $this->render('domain/messages.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
         ]);

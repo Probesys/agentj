@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="bg-white p-2">
+        {% set _title = 'Entities.Domain.customisation.title' | trans({ '{{ domain }}': domain.domain }) %}
+        {% embed 'common/blockTitleAndButtons.html.twig' %}
+        {% endembed %}
+
+        <div class="p-2">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ app.request.get('_route') == 'domain_customisation_general' ? 'active' : '' }}"
+                        href="{{ path('domain_customisation_general', { id: domain.id }) }}"
+                        role="tab"
+                    >
+                        {{ 'Entities.Domain.customisation.general.tab' | trans }}
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ app.request.get('_route') == 'domain_customisation_human_authentication' ? 'active' : '' }}"
+                        href="{{ path('domain_customisation_human_authentication', { id: domain.id }) }}"
+                        role="tab"
+                    >
+                        {{ 'Entities.Domain.customisation.human_authentication.tab' | trans }}
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link {{ app.request.get('_route') == 'domain_customisation_report' ? 'active' : '' }}"
+                        href="{{ path('domain_customisation_report', { id: domain.id }) }}"
+                        role="tab"
+                    >
+                        {{ 'Entities.Domain.customisation.report.tab' | trans }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="p-2">
+            {% block customisation_body %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
