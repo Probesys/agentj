@@ -21,6 +21,8 @@ class LdapService
         $ldap = Ldap::create('ext_ldap', [
                     'host' => $connector->getLdapHost(),
                     'port' => $connector->getLdapPort(),
+                    'encryption' => $connector->getLdapEncryption(),
+                    'version' => $connector->getLdapVersion(),
         ]);
 
         if ($connector->isAllowAnonymousBind()) {
@@ -67,6 +69,8 @@ class LdapService
         $ldap = Ldap::create('ext_ldap', [
             'host' => $originConnector->getLdapHost(),
             'port' => $originConnector->getLdapPort(),
+            'encryption' => $originConnector->getLdapEncryption(),
+            'version' => $originConnector->getLdapVersion(),
         ]);
 
         try {
