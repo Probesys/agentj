@@ -52,6 +52,12 @@ class LdapConnector extends Connector
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ldapSharedWithField = null;
 
+    #[ORM\Column(type: 'string', length: 255, options: ['default' => 'none'])]
+    private string $ldapEncryption = 'none';
+
+    #[ORM\Column(type: 'integer', options: ['default' => 3])]
+    private int $ldapVersion = 3;
+
 
     public function getLdapHost(): ?string
     {
@@ -219,6 +225,30 @@ class LdapConnector extends Connector
     public function setLdapSharedWithField(?string $ldapSharedWithField): static
     {
         $this->ldapSharedWithField = $ldapSharedWithField;
+
+        return $this;
+    }
+
+    public function getLdapEncryption(): string
+    {
+        return $this->ldapEncryption;
+    }
+
+    public function setLdapEncryption(string $ldapEncryption): static
+    {
+        $this->ldapEncryption = $ldapEncryption;
+
+        return $this;
+    }
+
+    public function getLdapVersion(): int
+    {
+        return $this->ldapVersion;
+    }
+
+    public function setLdapVersion(int $ldapVersion): static
+    {
+        $this->ldapVersion = $ldapVersion;
 
         return $this;
     }

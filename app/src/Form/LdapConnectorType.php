@@ -6,6 +6,8 @@ use App\Entity\LdapConnector;
 use App\Entity\Groups;
 use App\Repository\GroupsRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,6 +29,19 @@ class LdapConnectorType extends ConnectorType
                 'required' => true,
                 'label' => 'Entities.LdapConnector.fields.ldapPort',
                 'attr' => ['pattern' => '[0-9]+']
+            ])
+            ->add('ldapEncryption', ChoiceType::class, [
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.ldapEncryption',
+                'choices' => [
+                    'None' => 'none',
+                    'SSL' => 'ssl',
+                    'TLS' => 'tls',
+                ],
+            ])
+            ->add('ldapVersion', IntegerType::class, [
+                'required' => true,
+                'label' => 'Entities.LdapConnector.fields.ldapVersion',
             ])
             ->add('LdapBaseDN', null, [
                 'required' => true,
