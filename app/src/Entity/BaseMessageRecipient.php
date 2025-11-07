@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
@@ -271,5 +272,12 @@ class BaseMessageRecipient
     public function isVirus(): bool
     {
         return $this->status === MessageStatus::VIRUS;
+    }
+
+    public function isAlreadyReleased(): bool
+    {
+        return $this->getDs() === DeliveryStatus::PASS
+        || $this->getStatus() === MessageStatus::AUTHORIZED
+        || $this->getStatus() === MessageStatus::RESTORED;
     }
 }
