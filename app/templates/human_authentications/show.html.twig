@@ -6,7 +6,11 @@
       <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
       {% if confirm is empty %}
         <div class="captcha-container">
-          <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" class="captcha-image">
+            {% if logoUploaded is defined and logoUploaded %}
+                <img src="{{ asset('files/upload/' ~ logoImg) }}" class="captcha-image">
+            {% else %}
+                <img src="{{ asset('img/' ~ logoImg) }}" class="captcha-image">
+            {% endif %}
         </div>
         <div class="">
           {{ content|raw }}<br />
