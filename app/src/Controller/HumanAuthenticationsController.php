@@ -89,12 +89,22 @@ class HumanAuthenticationsController extends AbstractController
             $form->get('email')->setData($senderEmail);
         }
 
+        // logo or default
+        /** @var Domain $domain */ //exception already thrown if not
+        $logoUploaded =
+            $domain &&
+            ($domainLogo = $domain->getLogo()) &&
+            file_exists($this->getParameter('app.upload_directory') . $domainLogo);
+        $logoImg = $logoUploaded ? $domainLogo : $this->getParameter('app.default_logo_filename');
+
         return $this->render('human_authentications/show.html.twig', [
             'token' => $token,
             'mailToValidate' => $senderEmail,
             'form' => $form,
             'confirm' => $confirm,
-            'content' => $content
+            'content' => $content,
+            'logoImg'       => $logoImg,
+            'logoUploaded'  => $logoUploaded,
         ]);
     }
 }

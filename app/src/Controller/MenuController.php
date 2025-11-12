@@ -42,26 +42,20 @@ class MenuController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $domain = $user->getDomain();
-        if (
+        
+        $logoUploaded =
             $domain &&
-            $domain->getLogo() &&
-            file_exists($this->getParameter('app.upload_directory') . $domain->getLogo())
-        ) {
-            $logoUploaded = true;
-            $logoImg = $domain->getLogo();
-        } else {
-            $logoUploaded = false;
-            $logoImg = 'agent-j-logo-desktop.svg';
-        }
+            ($domainLogo = $domain->getLogo()) &&
+            file_exists($this->getParameter('app.upload_directory') . $domainLogo);
 
         $sharedBoxes = $user->getOwnedSharedBoxes();
         return $this->render(
             'header.html.twig',
             [
-                        'logoUploaded' => $logoUploaded,
-                        'logoImg' => $logoImg,
-                        'sharedBoxes' => $sharedBoxes
-                    ]
+                'logoUploaded'  => $logoUploaded,
+                'logoImg'       => $logoUploaded ? $domainLogo : $this->getParameter('app.default_logo_filename'),
+                'sharedBoxes'   => $sharedBoxes
+            ]
         );
     }
 }

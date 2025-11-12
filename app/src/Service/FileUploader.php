@@ -20,9 +20,14 @@ class FileUploader
     public function upload(UploadedFile $file): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = (($fileExtension = $file->guessExtension() )?
+            '.'.$fileExtension:
+            ""
+        );
+        $fullFilename = $originalFilename.$extension;
         try {
-            $file->move($this->targetDirectory, $originalFilename);
-            return $originalFilename;
+            $file->move($this->targetDirectory, $fullFilename);
+            return $fullFilename;
         } catch (FileException $e) {
             return "";
         }
