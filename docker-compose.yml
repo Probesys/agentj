@@ -64,6 +64,9 @@ services:
       - amavis
     ports:
       - $PROXY_LISTEN_ADDR:$PROXY_PORT:80
+    volumes:
+      - var:/var/www/agentj/var
+      - files:/var/www/agentj/public/files
 
   smtp:
     image: probesys38/agentj_smtp:$VERSION
@@ -154,3 +157,5 @@ volumes:
   db:
   postqueue:
   outpostqueue:
+  var:
+  files:

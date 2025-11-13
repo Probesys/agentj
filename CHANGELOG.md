@@ -1,5 +1,21 @@
 # Changelog of AgentJ
 
+## Unreleased
+
+### Migration notes
+
+Persistent volumes are added for the `app` container to preserve data across restarts.
+
+**Before upgrading**, backup the following directories from the running container:
+
+- Backup var/log/ directory: `docker compose cp app:/var/www/agentj/var/log ./backup-log`
+- Backup public/files/ directory: `docker compose cp app:/var/www/agentj/public/files ./backup-files` (this command may fail if the directory doesn't exist, that's normal)
+
+**After the upgrade**, the new volumes will be created automatically. Restore the backed up data:
+
+- `docker compose cp ./backup-log app:/var/www/agentj/var/log`
+- `docker compose cp ./backup-files app:/var/www/agentj/public/files`
+
 ## 2025-11-19 - 2.3.3
 
 ### Maintenance

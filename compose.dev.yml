@@ -21,6 +21,8 @@ services:
         - GID
     volumes:
       - ./app/:/var/www/agentj
+      - ./app/var:/var/www/agentj/var
+      - ./app/public/files:/var/www/agentj/public/files
       - ./tests/results:/tmp/test_mails
     dns: 172.28.2.5
     networks:
