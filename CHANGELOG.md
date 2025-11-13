@@ -1,5 +1,25 @@
 # Changelog of AgentJ
 
+## TBD - 2.4.0
+
+### Technical
+
+Add persistent volumes for the `app` container to preserve data across restarts.
+
+**Before upgrading**, backup the following directories from the running container:
+
+- Backup var/ directory (logs, cache, sessions): `docker compose cp app:/var/www/agentj/var ./backup-var`
+- Backup public/files/ directory (uploaded files, quarantine attachments): `docker compose cp app:/var/www/agentj/public/files ./backup-files`
+
+After the upgrade, the new volumes will be created automatically. If needed, restore the backed up data:
+
+- `docker compose cp ./backup-var/. app:/var/www/agentj/var`
+- `docker compose cp ./backup-files/. app:/var/www/agentj/public/files`
+
+**Changes:**
+
+- Add persistent Docker volumes for `var/` and `public/files/` directories ([#287](https://github.com/Probesys/agentj/issues/287))
+
 ## 2025-11-06 - 2.3.2
 
 ### Bug fixes
