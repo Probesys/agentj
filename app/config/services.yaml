@@ -20,6 +20,7 @@ parameters:
     app.domain_mail_authentification_sender: "%env(SMTP_FROM)%"
     app.per_page_global: "25"
     timezone: "%env(TIMEZONE)%"
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -30,23 +31,9 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: "../src/"
-        exclude:
-            - "../src/DependencyInjection/"
-            - "../src/Entity/"
-            - "../src/Kernel.php"
-            - "../src/Tests/"
-
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: "../src/Controller/"
-        tags: ["controller.service_arguments"]
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    #    App.crypt_encrypt:
-    #       class: App\Service\CryptEncrypt
-    #       public: true
     App\Service\FileUploader:
         arguments: ["%app.upload_directory%", "@doctrine.orm.entity_manager"]
 
