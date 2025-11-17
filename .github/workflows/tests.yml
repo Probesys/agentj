@@ -97,7 +97,7 @@ jobs:
           echo "Migrations before: $BEFORE"
 
           # Try to generate migration
-          php bin/console make:migration --no-interaction || true
+          make:migration --no-interaction || true
 
           # Count migration files after
           AFTER=$(find migrations -name "Version*.php" 2>/dev/null | wc -l)
