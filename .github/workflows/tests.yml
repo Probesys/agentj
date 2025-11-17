@@ -48,7 +48,7 @@ jobs:
           cd ./app
           cp .env.example .env
           sed -i "s|\$AGENTJ_VERSION|dev|g" .env
-          sed -i "s|\$SF_APP_ENV|test|g" .env
+          sed -i "s|\$SF_APP_ENV|dev|g" .env
           sed -i "s|\$SF_APP_SECRET|change-me|g" .env
           sed -i "s|\$SF_TOKEN_ENCRYPTION_IV|change-me|g" .env
           sed -i "s|\$SF_TOKEN_ENCRYPTION_SALT|change-me|g" .env
@@ -70,7 +70,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./app
-          composer install --no-interaction --dev
+          SYMFONY_ENV=dev composer install --no-interaction
+        env:
+          APP_ENV: dev
 
       - name: Wait for database
         run: |
