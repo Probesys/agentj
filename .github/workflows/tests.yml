@@ -3,6 +3,17 @@ name: CI
 on: [pull_request]
 
 jobs:
+  safe-list:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for sensitive files
+        run: |
+          chmod +x .github/workflows/scripts/safe_list.sh
+          ./.github/workflows/scripts/safe_list.sh
+
   linters:
     env:
         NO_DOCKER: true
