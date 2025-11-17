@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./app
-          composer install --no-interaction
+          composer install --no-interaction --dev
 
       - name: Wait for database
         run: |
