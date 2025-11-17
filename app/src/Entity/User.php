@@ -50,6 +50,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'emailRecovery', type: 'string', length: 255, nullable: true)]
     private ?string $emailRecovery = null;
 
+    #[ORM\Column(name: 'test_field', type: 'string', length: 20, nullable: true)]
+    private ?string $test_field = null;
+
     #[ORM\Column(name: 'imapLogin', type: 'string', length: 255, nullable: true)]
     private ?string $imapLogin = null;
 
