@@ -6,7 +6,7 @@
       <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
       {% if confirm is empty %}
         <div class="captcha-container">
-          <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" class="captcha-image">
+            <img src="{{ domain_logo_asset(domain) }}" class="captcha-image">
         </div>
         <div class="">
           {{ content|raw }}<br />

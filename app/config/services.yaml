@@ -12,6 +12,7 @@ parameters:
     app.timezone: "%env(TIMEZONE)%"
     app.amavisd-release: "%env(AMAVIS_RELEASE__PATH)%"
     app.upload_directory: "%kernel.project_dir%/public/files/upload/"
+    app.default_logo_filename: 'agent-j-logo-desktop.svg'
     app.amavis_quarantine_dir: "%env(AMAVIS_QUARANTINE_DIR)%"
     app.amavis_quarantine_nbdays_before_delete: "%env(AMAVIS_QUARANTINE_NBDAYS_BEFORE_DELETE)%"
     app.domain_default_spam_level: "%env(DOMAIN_DEFAULT_SPAM_LEVEL)%"
@@ -49,6 +50,11 @@ services:
     #       public: true
     App\Service\FileUploader:
         arguments: ["%app.upload_directory%", "@doctrine.orm.entity_manager"]
+
+    App\Twig\AppExtension:
+        arguments:
+            $uploadDirectory: "%app.upload_directory%"
+            $defaultLogoFilename: "%app.default_logo_filename%"
 
     App\MessageHandler\CreateAlertMessageHandler:
         tags: ["messenger.message_handler"]

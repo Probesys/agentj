@@ -94,7 +94,8 @@ class HumanAuthenticationsController extends AbstractController
             'mailToValidate' => $senderEmail,
             'form' => $form,
             'confirm' => $confirm,
-            'content' => $content
+            'content' => $content,
+            'domain' => $domain,
         ]);
     }
 }

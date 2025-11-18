@@ -37,31 +37,15 @@ class MenuController extends AbstractController
 
     public function renderHeader(): Response
     {
-        $logoUploaded = false;
-        $logoImg = "";
         /** @var User $user */
         $user = $this->getUser();
+
         $domain = $user->getDomain();
-        if (
-            $domain &&
-            $domain->getLogo() &&
-            file_exists($this->getParameter('app.upload_directory') . $domain->getLogo())
-        ) {
-            $logoUploaded = true;
-            $logoImg = $domain->getLogo();
-        } else {
-            $logoUploaded = false;
-            $logoImg = 'agent-j-logo-desktop.svg';
-        }
 
         $sharedBoxes = $user->getOwnedSharedBoxes();
-        return $this->render(
-            'header.html.twig',
-            [
-                        'logoUploaded' => $logoUploaded,
-                        'logoImg' => $logoImg,
-                        'sharedBoxes' => $sharedBoxes
-                    ]
-        );
+        return $this->render('header.html.twig', [
+            'domain' => $domain,
+            'sharedBoxes' => $sharedBoxes,
+        ]);
     }
 }

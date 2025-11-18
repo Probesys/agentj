@@ -1,8 +1,4 @@
-{% if logoUploaded %}
-    {% set logoPath = asset('files/upload/') ~ logoImg %}
-{% else %}
-    {% set logoPath = asset('img/') ~ logoImg %}
-{% endif %}
+{% set logoPath = domain_logo_asset(domain) %}
 
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
     <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
