@@ -84,7 +84,6 @@ class ReportSendMailCommand extends Command
                 $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
                 $domain = $user->getDomain();
 
-                // Get user's locale for translation
                 $locale = $this->localeService->getUserLocale($user);
 
                 if ($domain && !empty($domain->getMessageAlert())) {
