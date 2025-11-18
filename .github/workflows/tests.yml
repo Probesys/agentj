@@ -3,7 +3,127 @@ name: CI
 on: [pull_request]
 
 jobs:
+
+  safe-list:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for sensitive files
+        run: |
+          chmod +x .github/workflows/scripts/safe_list.sh
+          ./.github/workflows/scripts/safe_list.sh
+
+  migration-check:
+    needs: safe-list
+    runs-on: ubuntu-24.04
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: agentj
+          MYSQL_USER: agentj
+          MYSQL_PASSWORD: secret
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: pdo_mysql
+
+      - name: Setup env
+        run: |
+          cd ./app
+          cp .env.example .env
+          sed -i "s|\$AGENTJ_VERSION|dev|g" .env
+          sed -i "s|\$SF_APP_ENV|dev|g" .env
+          sed -i "s|\$SF_APP_SECRET|change-me|g" .env
+          sed -i "s|\$SF_TOKEN_ENCRYPTION_IV|change-me|g" .env
+          sed -i "s|\$SF_TOKEN_ENCRYPTION_SALT|change-me|g" .env
+          sed -i "s|\$SF_SENTRY_DSN||g" .env
+          sed -i "s|\$DB_NAME|agentj|g" .env
+          sed -i "s|\$DB_USER|agentj|g" .env
+          sed -i "s|\$DB_PASSWORD|secret|g" .env
+          sed -i "s|\$DB_HOST|127.0.0.1|g" .env
+          sed -i "s|\$DOMAIN|example.com|g" .env
+          sed -i "s|\$APP_URL|http://example.com|g" .env
+          sed -i "s|\$SMTP_FROM|example@example.com|g" .env
+          sed -i "s|\$ENABLE_AZURE_OAUTH||g" .env
+          sed -i "s|\$OAUTH_AZURE_CLIENT_ID||g" .env
+          sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET||g" .env
+          sed -i "s|\$TRUSTED_PROXIES||g" .env
+          sed -i "s|\$TZ|Europe/Paris|g" .env
+          sed -i "s|\$DEFAULT_LOCALE|en|g" .env
+
+      - name: Install dependencies
+        run: |
+          cd ./app
+          SYMFONY_ENV=dev composer install --no-interaction
+        env:
+          APP_ENV: dev
+
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h127.0.0.1 -uagentj -psecret --silent; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run existing migrations
+        run: |
+          cd ./app
+          php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+      - name: Check for missing migrations
+        run: |
+          cd ./app
+
+          # Count migration files before
+          BEFORE=$(find migrations -name "Version*.php" 2>/dev/null | wc -l)
+          echo "Migrations before: $BEFORE"
+
+          # Try to generate migration (force dev environment)
+          APP_ENV=dev php bin/console make:migration --no-interaction || true
+
+          # Count migration files after
+          AFTER=$(find migrations -name "Version*.php" 2>/dev/null | wc -l)
+          echo "Migrations after: $AFTER"
+
+          # Check if new file was created
+          if [ $AFTER -gt $BEFORE ]; then
+            echo ""
+            echo "❌ ERROR: A migration file was generated!"
+            echo ""
+            echo "This means your database schema is out of sync with your entities."
+            echo ""
+            echo "To fix this:"
+            echo "  1. Run locally: php bin/console make:migration"
+            echo "  2. Review the generated migration file"
+            echo "  3. Commit it with your entity changes"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ No missing migrations detected"
+
   linters:
+    needs: safe-list
     env:
         NO_DOCKER: true
 
