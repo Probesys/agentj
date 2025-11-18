@@ -238,7 +238,7 @@ class SendAuthMailRequestCommand extends Command
         string $mailFrom,
         ?string $fromName,
         array $body,
-        ?User $user
+        ?User $user,
     ): ?Email {
         $locale = $this->localeService->getUserLocale($user);
         $mailTo = $message->getSid()->getEmailClear();
