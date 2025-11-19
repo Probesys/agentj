@@ -23,10 +23,12 @@ framework:
     php_errors:
         log: true
 
-    error_controller: 'App\Controller\CustomExceptionController::showAction'
-
 when@test:
     framework:
         test: true
         session:
             storage_id: session.storage.mock_file
+
+when@prod:
+    framework:
+        error_controller: 'App\Controller\CustomExceptionController::showAction'
