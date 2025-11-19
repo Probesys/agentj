@@ -280,6 +280,7 @@ Message:
     ruleExists: "This rule already exists!"
     messageDeleted: "Message deleted successfully"
     messageRestored: "Message successfully recovered"
+    messagePendingRelease: "The message will be delivered in a few moments."
     senderAuthorized: "The address is now authorized"
     senderBanned: "The address is now banned"
     checkMailUnsuccessful: "We couldn't check this email."

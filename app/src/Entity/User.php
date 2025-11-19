@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Policy;
 use App\Repository\UserRepository;
+use App\Util\ResourceHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -195,17 +196,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmail(): ?string
     {
-        $email = $this->email;
-
-        if (is_resource($email)) {
-            $email = stream_get_contents($email, -1, 0);
-        }
-
-        if (is_string($email)) {
-            return $email;
-        }
-
-        return null;
+        return ResourceHelper::toString($this->email);
     }
 
     public function setEmail(mixed $email): self

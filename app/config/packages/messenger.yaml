@@ -12,8 +12,7 @@ framework:
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
-            'App\Message\CreateAlertMessage': async
-            'App\Message\SynchronizeConnectors': async
+            'App\Message\*': async
 
 # when@test:
 #    framework:
