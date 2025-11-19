@@ -48,11 +48,7 @@ class DomainType extends AbstractType
             ->add('smtpPort', NumberType::class, [
                 'label' => 'Entities.Domain.fields.smtp_port',
                 'constraints' => [
-                    new Type(['type' => 'numeric']),
-                    new Range([
-                        'min' => 1,
-                        'max' => 65535
-                    ])
+                    new Range(min: 1, max: 65535),
                 ],
             ])
             ->add('active', null, [

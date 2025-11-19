@@ -85,7 +85,7 @@ class SearchFilterType extends AbstractType
             ->add('submit', SubmitType::class, ['label' => 'Search.Filter']);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([]);
     }
