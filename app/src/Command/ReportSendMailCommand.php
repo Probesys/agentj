@@ -95,6 +95,7 @@ class ReportSendMailCommand extends Command
                 $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
                     'untreatedMsgs' => $untreatedMsgs,
                     'user' => $user,
+                    'locale' => $locale,
                 ]);
 
                 $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
