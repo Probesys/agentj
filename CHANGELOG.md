@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2025-11-19 - 2.3.3
+
+### Maintenance
+
+- Upgrade to Symfony 7.3 ([bd2cc6df](https://github.com/Probesys/agentj/commit/bd2cc6df), [cf7e1bcf](https://github.com/Probesys/agentj/commit/cf7e1bcf))
+- Update the dependencies ([aa511934](https://github.com/Probesys/agentj/commit/aa511934))
+
 ## 2025-11-06 - 2.3.2
 
 ### Bug fixes
