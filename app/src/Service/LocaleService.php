@@ -31,6 +31,7 @@ class LocaleService
         string $defaultLocale,
     ) {
         if ($this->isAvailable($defaultLocale)) {
+            /** @var LocaleCode */
             $this->defaultLocale = $defaultLocale;
         } else {
             $this->defaultLocale = 'en';
@@ -63,11 +64,15 @@ class LocaleService
         }
 
         if ($user->getPreferedLang() !== null && $this->isAvailable($user->getPreferedLang())) {
-            return $user->getPreferedLang();
+            /** @var LocaleCode */
+            $locale = $user->getPreferedLang();
+            return $locale;
         }
 
         if ($user->getDomain() && $user->getDomain()->getDefaultLang() !== null && $this->isAvailable($user->getDomain()->getDefaultLang())) {
-            return $user->getDomain()->getDefaultLang();
+            /** @var LocaleCode */
+            $locale = $user->getDomain()->getDefaultLang();
+            return $locale;
         }
 
         return $this->defaultLocale;
