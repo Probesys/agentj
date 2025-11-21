@@ -1,0 +1,20 @@
+:root {
+    --outline-color: var(--color-primary9);
+    --outline-offset: 2px;
+    --outline-width: 2px;
+}
+
+*:focus {
+    outline: var(--outline-width) solid var(--outline-color);
+    outline-offset: var(--outline-offset);
+}
+
+.sr-only {
+    position: absolute;
+
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+
+    width: 1px;
+    height: 1px;
+}

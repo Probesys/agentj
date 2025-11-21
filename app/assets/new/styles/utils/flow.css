@@ -1,0 +1,23 @@
+.flow > * {
+    --flow-size: var(--space-medium);
+}
+
+.flow--smaller > * {
+    --flow-size: var(--space-smaller);
+}
+
+.flow--small > * {
+    --flow-size: var(--space-small);
+}
+
+.flow--large > * {
+    --flow-size: var(--space-large);
+}
+
+.flow--larger > * {
+    --flow-size: var(--space-larger);
+}
+
+.flow > * + * {
+    margin-top: var(--flow-size);
+}

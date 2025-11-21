@@ -333,6 +333,14 @@ Message:
       "<strong>Vérification de votre email</strong> <br />\
       \ Merci de valider votre email en confirmant votre adresse ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
+  HumanAuthentication:
+      toVerify:
+          title: "Vérification de l’email"
+          content: "Merci de confirmer votre adresse email en la saisissant ci-dessous."
+          submit: Valider
+      verified:
+          title: "Merci, passez une bonne journée\_!"
+          content: "Votre adresse email a été vérifiée avec succès."
 Form:
   PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer

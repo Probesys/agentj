@@ -49,40 +49,26 @@ class HumanAuthenticationsController extends AbstractController
             }
         );
 
-        if (!empty($domain->getMessage())) {
-            $content = $domain->getMessage();
-        } else {
-            $content = $translator->trans('Message.Captcha.defaultCaptchaPageContent');
-        }
-
         $form = $this->createForm(CaptchaFormType::class, null);
         $form->handleRequest($request);
 
-        $confirm = '';
+        $verified = false;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!empty($domain->getConfirmCaptchaMessage())) {
-                $confirm = $domain->getConfirmCaptchaMessage();
-            } else {
-                $confirm = $translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
-            }
-
-            $recipient = $messageRecipients[0] ?? null;
-            if ($recipient) {
-                $emailDest = $recipient->getRid()->getEmailClear();
-                $emailDest = $emailDest ? $emailDest : '';
-                $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
-            }
-
             // Test if the sender is the same than the posted email field and if the mail has not been yet treated
-            if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
-                if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
-                    $message->setValidateCaptcha(time());
-                    $messageRepository->save($message);
-                } else {
-                    $this->addFlash('error', $translator->trans('Message.Flash.checkMailUnsuccessful'));
-                }
+            if (
+                !$message->getStatus() &&
+                $form->has('email') &&
+                $form->get('email')->getData() == $senderEmail &&
+                // Test honeypot
+                $form->has('emailEmpty') &&
+                empty($form->get('emailEmpty')->getData())
+            ) {
+                $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
+                $message->setValidateCaptcha(time());
+                $messageRepository->save($message);
+
+                $verified = true;
             } else {
                 $this->addFlash('error', $translator->trans('Message.Flash.checkMailUnsuccessful'));
             }
@@ -91,12 +77,10 @@ class HumanAuthenticationsController extends AbstractController
         }
 
         return $this->render('human_authentications/show.html.twig', [
-            'token' => $token,
             'mailToValidate' => $senderEmail,
             'form' => $form,
-            'confirm' => $confirm,
-            'content' => $content,
             'domain' => $domain,
+            'verified' => $verified,
         ]);
     }
 

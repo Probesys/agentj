@@ -1,59 +1,69 @@
-{% extends 'base_security.html.twig' %}
+{% if verified %}
+    {% set title = 'Message.HumanAuthentication.verified.title' | trans %}
+{% else %}
+    {% set title = 'Message.HumanAuthentication.toVerify.title' | trans %}
+{% endif %}
 
-{% block head_css %}
-    {{ parent() }}
+<!DOCTYPE html>
+<html lang="TODO">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ title }}</title>
+        {{ encore_entry_script_tags('new/app') }}
+        {{ encore_entry_link_tags('new/app') }}
+        <link rel="stylesheet" href="{{ path('human_authentication_stylesheet', { id: domain.id }) }}">
+    </head>
 
-    <link rel="stylesheet" href="{{ path('human_authentication_stylesheet', { id: domain.id }) }}">
-{% endblock %}
+    <body class="layout layout--human-authentication">
+        <main class="layout__body wrapper wrapper--smaller wrapper--center">
+           <div class="panel panel--rounded flow flow--large">
+                <img src="{{ domain_logo_asset(domain) }}" class="human-authentication-logo">
 
-{% block body %}
-  <div class="h-100 ">
-      <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
-      {% if confirm is empty %}
-        <div class="captcha-container">
-            <img src="{{ domain_logo_asset(domain) }}" class="captcha-image">
-        </div>
-        <div class="">
-          {{ content|raw }}<br />
-        </div>
-        <div class="d-flex justify-content-center">
+                <div class="flow">
+                    {% if not verified %}
+                        {% if domain.message %}
+                            {{ domain.message | raw }}
+                        {% else %}
+                            <div class="flow flow--smaller">
+                                <h1>
+                                    {{ title }}
+                                </h1>
 
-          {{ form_start(form) }}
-          {{ form_widget(form) }}
-          <input type="submit" name="validate" class="btn btn-info" value="{{ button_label|default('Valider') }}"/>
-          {{ form_end(form) }}
-        </div>
-      {% else %}
-        <div class="captcha-container">
-          <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" class="captcha-image">
-        </div>
-        <div class="d-flex justify-content-center">
-          {{confirm|raw}}
-        </div>
-      {% endif %}
-      </div>
-  </div>
+                                <p class="text--secondary">
+                                    {{ 'Message.HumanAuthentication.toVerify.content' | trans }}
+                                </p>
+                            </div>
+                        {% endif %}
 
-  <style>
-      .captcha-container {
-          width: 100%;
-          height: auto;
-          overflow: hidden;
-      }
+                        {{ form_start(form, { attr: { class: 'flow' } }) }}
+                            {{ form_widget(form) }}
 
-      .captcha-image {
-          max-width: 100%;
-          max-height: 100%;
-          width: auto;
-          height: auto;
-      }
-  </style>
+                            <button class="button--primary button--block">
+                                {{ button_label|default('Message.HumanAuthentication.toVerify.submit' | trans) }}
+                            </button>
+                        {{ form_end(form) }}
+                    {% else %}
+                        {% if domain.confirmCaptchaMessage %}
+                            {{ domain.confirmCaptchaMessage | raw }}
+                        {% else %}
+                            <div class="flow flow--smaller">
+                                <h1>
+                                    {{ title }}
+                                </h1>
 
-{% endblock %}
+                                <p class="text--secondary">
+                                    {{ 'Message.HumanAuthentication.verified.content' | trans }}
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+           </div>
+        </main>
 
-
-
-
-
-
-
+        <footer class="layout__footer">
+            {# TODO #}
+        </footer>
+    </body>
+</html>
