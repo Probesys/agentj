@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Domain;
 use App\Entity\Wblist;
 use App\Form\CaptchaFormType;
 use App\Repository\MsgsRepository;
@@ -97,5 +98,20 @@ class HumanAuthenticationsController extends AbstractController
             'content' => $content,
             'domain' => $domain,
         ]);
+    }
+
+    #[Route(
+        path: '/portal/domains/{id}/human-authentication-stylesheet.css',
+        name: 'human_authentication_stylesheet',
+        methods: ['GET'],
+    )]
+    public function showStylesheet(Domain $domain): Response
+    {
+        $stylesheet = $domain->getHumanAuthenticationStylesheet();
+
+        $response = new Response($stylesheet);
+        $response->headers->set('Content-Type', 'text/css');
+
+        return $response;
     }
 }
