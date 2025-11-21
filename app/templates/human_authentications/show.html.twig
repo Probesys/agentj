@@ -1,5 +1,10 @@
-
 {% extends 'base_security.html.twig' %}
+
+{% block head_css %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ path('human_authentication_stylesheet', { id: domain.id }) }}">
+{% endblock %}
 
 {% block body %}
   <div class="h-100 ">

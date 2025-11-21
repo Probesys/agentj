@@ -62,6 +62,9 @@ class Domain
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $confirmCaptchaMessage;
 
+    #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
+    private string $humanAuthenticationStylesheet = '';
+
     /**
      * @var Collection<int, Groups>
      */
@@ -273,6 +276,18 @@ class Domain
     public function setConfirmCaptchaMessage(?string $confirmCaptchaMessage): self
     {
         $this->confirmCaptchaMessage = $confirmCaptchaMessage;
+
+        return $this;
+    }
+
+    public function getHumanAuthenticationStylesheet(): string
+    {
+        return $this->humanAuthenticationStylesheet;
+    }
+
+    public function setHumanAuthenticationStylesheet(string $humanAuthenticationStylesheet): static
+    {
+        $this->humanAuthenticationStylesheet = $humanAuthenticationStylesheet;
 
         return $this;
     }

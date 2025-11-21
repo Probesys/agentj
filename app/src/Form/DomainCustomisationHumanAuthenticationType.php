@@ -30,6 +30,11 @@ class DomainCustomisationHumanAuthenticationType extends AbstractType
                 'data-controller' => 'ckeditor',
             ],
         ]);
+        $builder->add('humanAuthenticationStylesheet', TextareaType::class, [
+            'required' => false,
+            'empty_data' => '',
+            'label' => 'Entities.Domain.fields.humanAuthenticationStylesheet',
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -463,6 +463,7 @@ Entities:
       mailmessage: "Text of the email validating the email address with the human authentication link"
       message: "Presentation text on the human authentication page"
       confirmCaptchaMessage: "Human authentication validation message"
+      humanAuthenticationStylesheet: "Custom stylesheet on the human authentication page"
       messageAlert: "Message of the report"
       domain: "Domain name"
       srvSmtp: "SMTP server"
