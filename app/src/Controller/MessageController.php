@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -166,6 +167,23 @@ class MessageController extends AbstractController
             'messagesRecipients' => $messagesRecipients,
             'messageStatus' => $messageStatus,
             'filter_form' => $filterForm->createView()
+        ]);
+    }
+
+    #[Route(path: '/stats/counts', name: 'message_counts', methods: ['GET'])]
+    public function countAll(MsgrcptSearchRepository $msgrcptSearchRepository): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return new JsonResponse([
+            'untreated' => $msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED),
+            'spammed' => $msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED),
+            'virus' => $msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS),
+            'authorized' => $msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED),
+            'banned' => $msgrcptSearchRepository->countByType($user, MessageStatus::BANNED),
+            'deleted' => $msgrcptSearchRepository->countByType($user, MessageStatus::DELETED),
+            'restored' => $msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED),
         ]);
     }
 

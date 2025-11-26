@@ -36,9 +36,4 @@ document.addEventListener("turbo:load", function () {
     $(".page-wrapper").toggleClass("toggled");
   });
 
-  $(".sidebar-content").mCustomScrollbar({
-    axis: "y",
-    autoHideScrollbar: true,
-    scrollInertia: 300
-  });
 });

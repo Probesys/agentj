@@ -1,139 +1,171 @@
+{% set route = app.request.get('_route') %}
+{% set route_params = app.request.get('_route_params') ?? {} %}
 
 <nav id="sidebar" class="sidebar-wrapper">
-  <div class="sidebar-content">
-    <!-- sidebar-menu  -->
-    <div class=" sidebar-item sidebar-menu">
-      <ul>
-        <li class="{% if route == 'homepage' %}active{% endif %}">
-          <a href="{{ path('homepage') }}">
-            <i class="fa fa-home"></i>
-            <span class="menu-text">{{'Navigation.Dashboard'|trans}}</span>
-          </a>
-        </li>
-        <li class="sidebar-dropdown {%  if route == 'message'%}active{% endif %}">
-          <a href="#" data-turbo="false">
-            <i class="fa fa-envelope"></i>
-            <span class="menu-text">{{'Navigation.mailBlocked'|trans()}}</span>
-          </a>
-          <div class="sidebar-submenu">
+    <div class="sidebar-content">
+        <!-- sidebar-menu  -->
+        <div class=" sidebar-item sidebar-menu">
             <ul>
-              <li class="{%  if route == 'message' and route_params['type'] == 'untreated'%}active{% endif %}" >
-                <a href="{{path('message',{'type':''})}}">
-                  <span class="badge badge-primary" style="min-width: 50px">{{ msgs['untreated'] }}</span>
-                  {{'Navigation.untreated'|trans}}
-                </a>
-              </li>
-
-              <li class="{%  if route == 'message' and route_params['type'] == 'spammed'%}active{% endif %}" >
-                <a href="{{path('message',{'type':'spam'})}}">
-                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-spammed-messages">{{ msgs['spammed'] }}</span>
-                  {{'Navigation.spammed'|trans}}
-                </a>
-              </li>
-
-              <li class="{%  if route == 'message' and route_params['type'] == 'virus'%}active{% endif %}" >
-                <a href="{{path('message',{'type':'virus'})}}">
-                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-spammed-messages">{{ msgs['virus'] }}</span>
-                  {{'Navigation.virus'|trans}}
-                </a>
-              </li>
-
-              <li class="{%  if route == 'message' and route_params['type'] == 'authorized'%}active{% endif %}" >
-                <a href="{{path('message',{'type':'authorized'})}}">
-                  <span class="badge badge-success" style="min-width: 50px">{{ msgs['authorized'] }}</span>
-                  {{'Navigation.authorized'|trans}}
-                </a>
-              </li>
-              <li class="{%  if route == 'message' and route_params['type'] == 'banned'%}active{% endif %}">
-                <a  href="{{path('message',{'type':'banned'})}}">
-                  <span class="badge  badge-danger"  style="min-width: 50px"id="nb-authorized-messages">{{ msgs['banned'] }}</span>
-                  {{'Navigation.banned'|trans}}
-                </a>
-              </li>
-
-              <li class="{%  if route == 'message' and route_params['type'] == 'delete'%}active{% endif %}">
-                <a  href="{{path('message',{'type':'delete'})}}">
-                  <span class="badge  badge-warning" style="min-width: 50px" id="nb-deleted-messages">{{ msgs['delete'] }}</span>
-                  {{'Navigation.Messagedelete'|trans}}
-                </a>
-              </li>
-
-
-              <li class="nav-link {%  if route == 'message' and route_params['type'] == 'restored'%}active{% endif %}">
-                <a  href="{{path('message',{'type':'restored'})}}">
-                  <span class="badge  badge-danger"  style="min-width: 50px"id="nb-restored-messages">{{ msgs['restored'] }}</span>
-                  {{'Navigation.MessageRestored'|trans}}
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-        <li class="{%  if route == 'wblist' and route_params['type']=='W' %}active{% endif %}">
-          <a href="{{path('wblist',{'type':'W'})}}">
-            <i class="fa fa-paper-plane"></i>
-            <span class="menu-text">{{'Navigation.whitelist'|trans}}</span>
-          </a>
-        </li>
-        <li class="{%  if route == 'wblist' and route_params['type']=='B'%}active{% endif %}">
-          <a href="{{path('wblist',{'type':'B'})}}">
-            <i class="fa fa-user-slash"></i>
-            <span class="menu-text">{{'Navigation.blacklist'|trans}}</span>
-          </a>
-        </li>
-
-        {% if is_granted('ROLE_ADMIN') %}
-          <li class="sidebar-dropdown {%  if (route == 'users_email_index' or route == 'users_local_index')  or route == 'users_email_alias_index' %} active {% endif %}">
-            <a href="#"  data-turbo="false">
-              <i class="fa fa-user-friends"></i>
-              <span class="menu-text">{{'Navigation.userlist.title'|trans}}</span>
-            </a>
-            <div class="sidebar-submenu">
-              <ul>
-                {% if is_granted('ROLE_SUPER_ADMIN') %}
-                  <li class="{%  if route == 'users_local_index'%}active{% endif %}">
-                    <a href="{{path('users_local_index')}}">
-                      {{'Navigation.userlist.localUsers'|trans}}
+                <li class="{% if route == 'homepage' %}active{% endif %}">
+                    <a href="{{ path('homepage') }}">
+                        <i class="fa fa-home"></i>
+                        <span class="menu-text">{{ 'Navigation.Dashboard'|trans }}</span>
                     </a>
-                  </li>
+                </li>
+                <li class="sidebar-dropdown {% if route == 'message' %}active{% endif %}">
+                    <a href="#" data-turbo="false">
+                        <i class="fa fa-envelope"></i>
+                        <span class="menu-text">{{ 'Navigation.mailBlocked'|trans() }}</span>
+                    </a>
+                    <div
+                        class="sidebar-submenu"
+                        data-controller="message-counter"
+                        data-message-counter-url-value="{{ path('message_counts') }}"
+                    >
+                        <ul>
+                            <li class="{% if route == 'message' and route_params['type'] == 'untreated' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': ''}) }}">
+                                    <span
+                                        data-message-counter-target="untreated"
+                                        class="badge badge-primary"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.untreated'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'spammed' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'spam'}) }}">
+                                    <span
+                                        data-message-counter-target="spammed"
+                                        class="badge badge-warning"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.spammed'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'virus' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'virus'}) }}">
+                                    <span
+                                        data-message-counter-target="virus"
+                                        class="badge badge-warning"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.virus'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'authorized' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'authorized'}) }}">
+                                    <span
+                                        data-message-counter-target="authorized"
+                                        class="badge badge-success"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.authorized'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'banned' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'banned'}) }}">
+                                    <span
+                                        data-message-counter-target="banned"
+                                        class="badge badge-danger"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.banned'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'delete' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'delete'}) }}">
+                                    <span
+                                        data-message-counter-target="deleted"
+                                        class="badge badge-warning"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.Messagedelete'|trans }}
+                                </a>
+                            </li>
+
+                            <li class="{% if route == 'message' and route_params['type'] == 'restored' %}active{% endif %}">
+                                <a href="{{ path('message', {'type': 'restored'}) }}">
+                                    <span
+                                        data-message-counter-target="restored"
+                                        class="badge badge-danger"
+                                        style="min-width: 50px"
+                                    >...</span>
+                                    {{ 'Navigation.MessageRestored'|trans }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="{% if route == 'wblist' and route_params['type'] == 'W' %}active{% endif %}">
+                    <a href="{{ path('wblist', {'type': 'W'}) }}">
+                        <i class="fa fa-paper-plane"></i>
+                        <span class="menu-text">{{ 'Navigation.whitelist'|trans }}</span>
+                    </a>
+                </li>
+                <li class="{% if route == 'wblist' and route_params['type'] == 'B' %}active{% endif %}">
+                    <a href="{{ path('wblist', {'type': 'B'}) }}">
+                        <i class="fa fa-user-slash"></i>
+                        <span class="menu-text">{{ 'Navigation.blacklist'|trans }}</span>
+                    </a>
+                </li>
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="sidebar-dropdown {% if (route == 'users_email_index' or route == 'users_local_index') or route == 'users_email_alias_index' %}active{% endif %}">
+                        <a href="#" data-turbo="false">
+                            <i class="fa fa-user-friends"></i>
+                            <span class="menu-text">{{ 'Navigation.userlist.title'|trans }}</span>
+                        </a>
+                        <div class="sidebar-submenu">
+                            <ul>
+                                {% if is_granted('ROLE_SUPER_ADMIN') %}
+                                    <li class="{% if route == 'users_local_index' %}active{% endif %}">
+                                        <a href="{{ path('users_local_index') }}">
+                                            {{ 'Navigation.userlist.localUsers'|trans }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li class="{% if route == 'users_email_index' %}active{% endif %}">
+                                    <a href="{{ path('users_email_index') }}">
+                                        {{ 'Navigation.userlist.emailUsers'|trans }}
+                                    </a>
+                                </li>
+                                <li class="{% if route == 'users_email_alias_index' %}active{% endif %}">
+                                    <a href="{{ path('users_email_alias_index') }}">
+                                        {{ 'Navigation.userlist.emailAliasUsers'|trans }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="{% if route == 'groups_index' %}active{% endif %}">
+                        <a href="{{ path('groups_index') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="menu-text">{{ 'Navigation.grouplist'|trans }}</span>
+                        </a>
+                    </li>
+                    <li class="{% if route == 'domain_index' %}active{% endif %}">
+                        <a href="{{ path('domain_index') }}">
+                            <i class="fa fa-globe"></i>
+                            <span class="menu-text">{{ 'Navigation.domainlist'|trans }}</span>
+                        </a>
+                    </li>
+
+                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                        <li class="{% if route == 'policy_index' %}active{% endif %}">
+                            <a href="{{ path('policy_index') }}">
+                                <i class="fa fa-gem"></i>
+                                <span class="menu-text">{{ 'Navigation.policy'|trans }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
-                <li class="{%  if route == 'users_email_index'%}active{% endif %}">
-                  <a  href="{{path('users_email_index')}}">
-                    {{'Navigation.userlist.emailUsers'|trans}}
-                  </a>
-                </li>
-                <li class="{%  if route == 'users_email_alias_index'%}active{% endif %}">
-                  <a href="{{path('users_email_alias_index')}}">
-                    {{'Navigation.userlist.emailAliasUsers'|trans}}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li class="{%  if route == 'groups_index'%}active{% endif %}">
-            <a href="{{path('groups_index')}}">
-              <i class="fa fa-users"></i>
-              <span class="menu-text">{{'Navigation.grouplist'|trans}}</span>
-            </a>
-          </li>
-          <li class="{%  if route == 'domain_index'%}active{% endif %}">
-            <a href="{{path('domain_index')}}">
-              <i class="fa fa-globe"></i>
-              <span class="menu-text">{{'Navigation.domainlist'|trans}}</span>
-            </a>
-          </li>
-
-          {% if is_granted('ROLE_SUPER_ADMIN') %}
-            <li class="{%  if route == 'policy_index'%}active{% endif %}">
-              <a href="{{path('policy_index')}}">
-                <i class="fa fa-gem"></i>
-                <span class="menu-text">{{'Navigation.policy'|trans}}</span>
-              </a>
-            </li>
-
-          {% endif %}
-        {% endif %}
-
-      </ul>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
