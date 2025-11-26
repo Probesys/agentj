@@ -65,11 +65,9 @@
                   )) }}
     {% endblock %}
     <div class="page-wrapper default-theme sidebar-bg bg1 toggled">
-      {% block leftnav %}
-          {{ render(controller(
-              'App\\Controller\\MenuController::renderSlideMenu',{'route':app.request.get('_route'),'routeParams':app.request.get('_route_params')}
-          )) }}
-      {% endblock %}
+
+      {% include 'navigation.html.twig' %}
+
       <main class="page-content">
         <div id="overlay" class="overlay"></div>
 
