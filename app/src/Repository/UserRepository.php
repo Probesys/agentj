@@ -280,4 +280,23 @@ class UserRepository extends BaseRepository
 
         return $conn->executeQuery($sql, $parameters, $types)->fetchAllAssociative();
     }
+
+    /**
+     * @param string[] $emails
+     * @return string[]
+     */
+    public function searchUsersByEmails(array $emails): array
+    {
+        if (empty($emails)) {
+            return [];
+        }
+
+        $queryBuilder = $this->createQueryBuilder('u');
+        $queryBuilder->select('u.email')
+                ->where("u.email IN (:emails) and u.roles is not null")
+                ->setParameter('emails', $emails);
+
+
+        return $queryBuilder->getQuery()->getSingleColumnResult();
+    }
 }

@@ -64,6 +64,11 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
 
         $query = $queryBuilder->getQuery();
 
+        $countQueryBuilder = clone $queryBuilder;
+        $countQueryBuilder->select('COUNT(mr.mailId)');
+        $countQuery = $countQueryBuilder->getQuery();
+        $query->setHint('knp_paginator.count', $countQuery->getSingleScalarResult());
+
         return $query;
     }
 
