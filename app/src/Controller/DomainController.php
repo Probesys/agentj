@@ -111,7 +111,6 @@ class DomainController extends AbstractController
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
-        $form->get('defaultLang')->setData($params->get('locale'));
 
         // set normal policy anf "block all mails" as default rule for new domain
         $policy = $this->em->getRepository(Policy::class)->find(5);
