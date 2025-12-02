@@ -71,12 +71,10 @@ class DefaultController extends AbstractController
             messageStatus: MessageStatus::VIRUS
         );
 
-        $latestMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery($user)->setMaxResults(5)->getResult();
-        $alerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC'], 5);
-        $allAlerts = $this->em->getRepository(Alert::class)->findBy(['user' => $user->getId()], ['date' => 'DESC']);
-        $unreadAlertsCount = count(array_filter($allAlerts, function ($alert) {
-            return !$alert->getIsRead();
-        }));
+        $latestMessageRecipients = $this->msgrcptSearchRepository
+            ->getSearchQuery($user)
+            ->setMaxResults(5)
+            ->getResult();
 
         $labels = array_map(function ($item) {
             return $item['timeIso'];
@@ -152,8 +150,6 @@ class DefaultController extends AbstractController
                     'nbVirusMsgByDay' => $nbVirusMsgByDay,
                     'latestMessageRecipients' => $latestMessageRecipients,
                     'users' => $users,
-                    'alerts' => $alerts,
-                    'unreadAlertsCount' => $unreadAlertsCount,
                     'msgs' => $msgs,
                     'domains' => $domains,
                     'data' => $data,
