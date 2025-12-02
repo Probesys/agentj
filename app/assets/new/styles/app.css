@@ -69,6 +69,7 @@
  * other classes when possible, but custom CSS is handy as it allows you to not
  * create code that is used only in a specific context.
  */
+@import "./custom/human_authentication.css";
 
 *,
 *::before,

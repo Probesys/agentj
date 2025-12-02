@@ -285,7 +285,7 @@ Message:
     saved: "Changes have been saved."
     senderAuthorized: "The address is now authorized"
     senderBanned: "The address is now banned"
-    checkMailUnsuccessful: "We couldn't check this email."
+    checkMailUnsuccessful: "This email address seems to be invalid, or has already been validated."
     connectionOk: "Connection success"
     connectionKo: "Unable to connect"
     invalidLdapQuery: "Invalid LDAP query"
@@ -335,6 +335,15 @@ Message:
       "<strong>Confirmation of your email</strong> <br/> Please
       validate your email by confirming your email address below"
     defaultCaptchaConfirmMsg: "Thank you and good day"
+  HumanAuthentication:
+      toVerify:
+          email: "Email address"
+          title: "Email verification"
+          content: "Please confirm your address by entering it below."
+          submit: Submit
+      verified:
+          title: "Thank you, have a nice day!"
+          content: "Your email address has been successfully verified."
 Form:
   Error: "Error"
   PolicyDomain: "Filter threshold"

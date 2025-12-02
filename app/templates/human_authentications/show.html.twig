@@ -1,59 +1,53 @@
-{% extends 'base_security.html.twig' %}
+{% extends 'base.new.html.twig' %}
 
-{% block head_css %}
-    {{ parent() }}
+{% form_theme form with ['forms/agentj_layout.html.twig'] only %}
 
+{% if verified %}
+    {% set title = 'Message.HumanAuthentication.verified.title' | trans %}
+{% else %}
+    {% set title = 'Message.HumanAuthentication.toVerify.title' | trans %}
+{% endif %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block custom_stylesheets %}
     <link rel="stylesheet" href="{{ path('human_authentication_stylesheet', { id: domain.id }) }}">
 {% endblock %}
 
 {% block body %}
-  <div class="h-100 ">
-      <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
-      {% if confirm is empty %}
-        <div class="captcha-container">
-            <img src="{{ domain_logo_asset(domain) }}" class="captcha-image">
-        </div>
-        <div class="">
-          {{ content|raw }}<br />
-        </div>
-        <div class="d-flex justify-content-center">
+    <div class="human-authentication wrapper wrapper--smaller wrapper--center">
+        <div class="panel panel--rounded panel--padding-large flow flow--large">
+            <img src="{{ domain_logo_asset(domain) }}" class="human-authentication__logo">
 
-          {{ form_start(form) }}
-          {{ form_widget(form) }}
-          <input type="submit" name="validate" class="btn btn-info" value="{{ button_label|default('Valider') }}"/>
-          {{ form_end(form) }}
-        </div>
-      {% else %}
-        <div class="captcha-container">
-          <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" class="captcha-image">
-        </div>
-        <div class="d-flex justify-content-center">
-          {{confirm|raw}}
-        </div>
-      {% endif %}
-      </div>
-  </div>
+            <div class="flow">
+                {% if not verified %}
+                    {% if domain.message %}
+                        {{ domain.message | raw }}
+                    {% else %}
+                        <div class="flow flow--small">
+                            <h1>{{ title }}</h1>
 
-  <style>
-      .captcha-container {
-          width: 100%;
-          height: auto;
-          overflow: hidden;
-      }
+                            <p class="text--secondary">
+                                {{ 'Message.HumanAuthentication.toVerify.content' | trans }}
+                            </p>
+                        </div>
+                    {% endif %}
 
-      .captcha-image {
-          max-width: 100%;
-          max-height: 100%;
-          width: auto;
-          height: auto;
-      }
-  </style>
+                    {{ form(form) }}
+                {% else %}
+                    {% if domain.confirmCaptchaMessage %}
+                        {{ domain.confirmCaptchaMessage | raw }}
+                    {% else %}
+                        <div class="flow flow--small">
+                            <h1>{{ title }}</h1>
 
+                            <p class="text--secondary">
+                                {{ 'Message.HumanAuthentication.verified.content' | trans }}
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
-
-
-
-
-
-
-

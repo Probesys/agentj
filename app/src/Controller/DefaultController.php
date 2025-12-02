@@ -11,7 +11,6 @@ use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Alert;
 use App\Entity\Wblist;
-use App\Form\CaptchaFormType;
 use App\Repository\UserRepository;
 use App\Repository\MsgrcptRepository;
 use App\Repository\WblistRepository;

@@ -285,7 +285,7 @@ Message:
     saved: Les changements ont été enregistrés.
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
-    checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
+    checkMailUnsuccessful: "Cette adresse email semble être invalide, ou a déjà été validée."
     connectionOk: "Connexion établie"
     connectionKo: "Connexion échouée"
     invalidLdapQuery: "Requête LDAP incorrecte"
@@ -335,6 +335,15 @@ Message:
       "<strong>Vérification de votre email</strong> <br />\
       \ Merci de valider votre email en confirmant votre adresse ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
+  HumanAuthentication:
+      toVerify:
+          email: "Adresse email"
+          title: "Vérification d’email"
+          content: "Merci de confirmer votre adresse email en la saisissant ci-dessous."
+          submit: "Valider"
+      verified:
+          title: "Merci, et bonne journée\_!"
+          content: "Votre adresse email a été vérifiée avec succès."
 Form:
   Error: Erreur
   PolicyDomain: Seuil de filtrage
