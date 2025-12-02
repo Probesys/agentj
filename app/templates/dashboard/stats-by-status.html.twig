@@ -1,0 +1,104 @@
+<turbo-frame id="dashboard-stats-by-status">
+    <div class="card-body h-100">
+        <canvas id="messagesChart"></canvas>
+        <a href="#"
+            data-toggle="modal"
+            data-target="#latestMessagesModal"
+            style="position: absolute; top: 10px; right: 10px;">
+            <i class="fas fa-expand-arrows-alt fa-2x"></i>
+        </a>
+    </div>
+    <div class="modal fade" id="latestMessagesModal" tabindex="-1" role="dialog" aria-labelledby="latestMessagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="latestMessagesModalLabel">{{ 'Generics.labels.latestMessages'|trans }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% include '/dashboard/_latest_messages.html.twig' %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var ctx = document.getElementById('messagesChart').getContext('2d');
+        var data = {
+            labels: [
+                Translator.trans('Navigation.untreated'),
+                Translator.trans('Navigation.authorized'),
+                Translator.trans('Navigation.banned'),
+                Translator.trans('Navigation.Messagedelete'),
+                Translator.trans('Navigation.MessageRestored'),
+                'Error',
+                'Spam',
+                'Virus'
+            ],
+            datasets: [
+                {
+                    data: [
+                        {{ msgs.untreated }},
+                        {{ msgs.authorized }},
+                        {{ msgs.banned }},
+                        {{ msgs.delete }},
+                        {{ msgs.restored }},
+                        {{ msgs.error }},
+                        {{ msgs.spammed }},{{ msgs.virus }}
+                    ],
+                    backgroundColor: [
+                        '#36A2EB', // Blue
+                        '#77DD77', // Green
+                        '#FF9F40', // Orange
+                        '#9966FF', // Purple
+                        '#4BC0C0', // Teal
+                        '#C9CBCF', // Light Gray
+                        '#FF5733', // Dark Orange
+                        '#FF6384' // Red
+                    ]
+                }
+            ]
+        };
+
+        // Filter out labels and data points that are zero
+        var filteredData = {
+            labels: data.labels.filter(
+                    (label, index) => data.datasets[0].data[index] > 0
+            ),
+            datasets: [
+                {
+                    data: data.datasets[0].data.filter(value => value > 0),
+                    backgroundColor: data.datasets[0].backgroundColor.filter(
+                            (color, index) => data.datasets[0].data[index] > 0
+                    )
+                }
+            ]
+        };
+
+        if (filteredData.datasets[0].data.length === 0) { // Display a message if there is no data
+            document.getElementById('messagesChart').style.display = 'none';
+            var noDataMessage = document.createElement('p');
+            noDataMessage.textContent = 'Aucun message bloqué';
+            noDataMessage.style.textAlign = 'center';
+            noDataMessage.style.marginTop = '20px';
+            document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
+        } else {
+            var messagesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: filteredData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'right'
+                    },
+                    title: {
+                        display: true,
+                        text: Translator.trans('Navigation.mailBlocked')
+                    }
+                }
+            });
+        }
+    </script>
+</turbo-frame>

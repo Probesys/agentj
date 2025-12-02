@@ -9,13 +9,15 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @extends BaseRepository<User>
  */
 class UserRepository extends BaseRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private CacheInterface $cache)
     {
         parent::__construct($registry, User::class);
     }
@@ -186,11 +188,18 @@ class UserRepository extends BaseRepository
      */
     public function getUsersWithRoleAndMessageCounts(User $user, ?Domain $domain = null): array
     {
-        $conn = $this->getEntityManager()->getConnection();
-        $parameters = [];
-        $types = [];
+        $domainId = $domain ? $domain->getId() : 'all';
+        $userId = $user->getId();
+        $cacheKey = "stats_users_messages_{$userId}_{$domainId}";
 
-        $sql = <<<SQL
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($user, $domain) {
+            $item->expiresAfter(3600);
+
+            $conn = $this->getEntityManager()->getConnection();
+            $parameters = [];
+            $types = [];
+
+            $sql = <<<SQL
             SELECT
                 u.email,
                 u.fullname,
@@ -245,31 +254,31 @@ class UserRepository extends BaseRepository
             WHERE u.roles LIKE '%"ROLE_USER"%'
         SQL;
 
-        if ($domain !== null) {
-            $sql .= ' AND u.domain_id = :domain';
-            $parameters['domain'] = $domain->getId();
-            $types['domain'] = DBAL\ParameterType::INTEGER;
-        }
-
-        // if $user is an admin, add a condition to check only the domains he administer
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            $domains = $user->getDomains()->toArray();
-            if ($user->getDomain()) {
-                $domains[] = $user->getDomain();
+            if ($domain !== null) {
+                $sql .= ' AND u.domain_id = :domain';
+                $parameters['domain'] = $domain->getId();
+                $types['domain'] = DBAL\ParameterType::INTEGER;
             }
 
-            if (empty($domains)) {
-                return [];
+            // if $user is an admin, add a condition to check only the domains he administer
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+                $domains = $user->getDomains()->toArray();
+                if ($user->getDomain()) {
+                    $domains[] = $user->getDomain();
+                }
+
+                if (empty($domains)) {
+                    return [];
+                }
+
+                $sql .= ' AND u.domain_id in (:domains) ';
+                $parameters['domains'] = array_map(function ($domain) {
+                    return $domain->getId();
+                }, $domains);
+                $types['domains'] = DBAL\ArrayParameterType::INTEGER;
             }
 
-            $sql .= ' AND u.domain_id in (:domains) ';
-            $parameters['domains'] = array_map(function ($domain) {
-                return $domain->getId();
-            }, $domains);
-            $types['domains'] = DBAL\ArrayParameterType::INTEGER;
-        }
-
-        $sql .= <<<SQL
+            $sql .= <<<SQL
             GROUP BY u.id,
                 outMsgCounts.outMsgCount,
                 msgCounts.msgCount,
@@ -278,7 +287,8 @@ class UserRepository extends BaseRepository
                 sqlLimitReportCounts.sqlLimitReportCount
         SQL;
 
-        return $conn->executeQuery($sql, $parameters, $types)->fetchAllAssociative();
+            return $conn->executeQuery($sql, $parameters, $types)->fetchAllAssociative();
+        });
     }
 
     /**

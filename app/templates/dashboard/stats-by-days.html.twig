@@ -1,14 +1,30 @@
-{# templates/_stats.html.twig #}
-<style>
-  canvas {
-    /* width:1000px !important; */
-    /* height:calc(100%- 250px)!important; */
-  }
-</style>
+<turbo-frame id="dashboard-stats-by-days">
+	<div class="card-body h-100">
+        <canvas class="statsChart" style="height:calc(100%- 300px)"></canvas>
+		<a href="#" data-toggle="modal" data-target="#statsModal" style="position: absolute; top: 10px; right: 10px;">
+			<i class="fas fa-expand-arrows-alt fa-2x"></i>
+		</a>
+	</div>
 
-<canvas class="statsChart" style="height:calc(100%- 300px)"></canvas>
+<div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="statsModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="statsModalLabel">{{ 'Generics.labels.statistics'|trans }}</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="card my-2" style="height: 300px; position: relative;">
+				<div class="modal-body">
+					<canvas class="statsChart" style="height:calc(100%- 300px)"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 <script>
-  document.addEventListener("turbo:load", function () {
+  document.addEventListener("turbo:frame-load", function () {
     var charts = document.querySelectorAll('.statsChart');
     charts.forEach(function(chart) {
       var ctx = chart.getContext('2d');
@@ -158,7 +174,7 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,            
+          maintainAspectRatio: false,
           scales: {
             yAxes: [{
               ticks: {
@@ -188,3 +204,4 @@
     });
   });
 </script>
+</turbo-frame>
