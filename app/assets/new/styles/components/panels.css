@@ -1,0 +1,25 @@
+.panel {
+    padding: var(--space-medium);
+
+    background-color: var(--color-grey1);
+}
+
+@media(max-width: 600px) {
+    .panel {
+        padding: var(--space-small);
+    }
+}
+
+.panel--padding-large {
+    padding: var(--space-larger);
+}
+
+@media(max-width: 600px) {
+    .panel--padding-large {
+        padding: var(--space-large);
+    }
+}
+
+.panel--rounded {
+    border-radius: var(--border-radius);
+}

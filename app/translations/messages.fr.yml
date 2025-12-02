@@ -195,6 +195,8 @@ Navigation:
     title: Imports
     users: Email/utilisateurs
     whiteliste: Liste blanche
+  poweredBy: "Propulsé par Agentj"
+  sourceCode: "Code source"
 Config:
   title: Configuration
   labels:
@@ -334,6 +336,7 @@ Message:
       \ Merci de valider votre email en confirmant votre adresse ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
 Form:
+  Error: Erreur
   PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer
 

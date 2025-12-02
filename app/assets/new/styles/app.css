@@ -1,0 +1,98 @@
+/**
+ * AgentJ (future) main stylesheets.
+ *
+ * We want to migrate the frontend from Bootstrap to our own design system.
+ * As it requires a lot of work, we will migrate parts of the application one
+ * by one. For now, only the "human authentication" page is using this theme.
+ *
+ * To use this design system, extends the "base.new.html.twig" template.
+ *
+ * We use BEM notation to organize the CSS code: https://getbem.com/naming/
+ * BEM has the advantage to create meaningful relations between CSS classes,
+ * while being readable. In a nutshell, BEM defines three types of classes:
+ *
+ * - Block: a standalone entity, meaningful on its own (e.g. `.panel`)
+ * - Element: a part of a block and have no standalone meaning (e.g. `.panel__title`)
+ * - Modifier: flags on blocks or elements to change appearance, behavior or
+ *   state (e.g. `.panel--rounded`).
+ */
+
+@import "./_reset.css";
+
+/**
+ * Variables defines a bunch of CSS variables that can (and must) be used in
+ * CSS classes.
+ *
+ * Colors are separated in two files: "tokens" defines the colors by their
+ * names, and "light" defines the colors semantically for the "light" mode
+ * theme. This prepares the work for a potential future "dark" mode. In the CSS
+ * classes, you must always prefer to use the semantic colors.
+ */
+@import "./variables/colors.tokens.css";
+@import "./variables/colors.light.css";
+@import "./variables/sizes.css";
+
+/**
+ * Utils files define a bunch of small CSS classes that can be used over the
+ * application, to e.g. hide an element on mobile, or change font size.
+ * In particular:
+ * - .cols classes allow to align elements on a same line easily
+ * - .flow classes allow to space child elements nicely
+ * - .wrapper classes allow to limit the max width of elements
+ */
+@import "./utils/accessibility.css";
+@import "./utils/cols.css";
+@import "./utils/flow.css";
+@import "./utils/fonts.css";
+@import "./utils/mobile.css";
+@import "./utils/text.css";
+@import "./utils/wrapper.css";
+
+/**
+ * Components are complete set of classes that define complex UI elements.
+ */
+@import "./components/anchors.css";
+@import "./components/buttons.css";
+@import "./components/forms/errors.css";
+@import "./components/forms/labels.css";
+@import "./components/forms/texts.css";
+@import "./components/images.css";
+@import "./components/panels.css";
+
+/**
+ * The layout file defines the classes for the base layout.
+ */
+@import "./layout.css";
+
+/**
+ * Custom files can be used to apply CSS on specific pages. You should use
+ * other classes when possible, but custom CSS is handy as it allows you to not
+ * create code that is used only in a specific context.
+ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+
+    font-size: 110%;
+    line-height: 1.4;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    color: var(--color-grey12);
+    font-family: 'Poppins', sans-serif;
+
+    background-color: var(--color-grey2);
+    background-image: url("../../img/fond-login-agent-j.png");
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+}

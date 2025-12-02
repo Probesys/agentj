@@ -1,0 +1,7 @@
+a {
+    color: var(--color-primary12);
+}
+
+.anchor--currentcolor {
+    color: currentcolor;
+}

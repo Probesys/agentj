@@ -1,0 +1,53 @@
+/**
+ * Colors are coming from https://www.radix-ui.com/colors
+ *
+ * - Colors 1 - 2: backgrounds
+ * - Colors 3 - 5: interactive components
+ * - Colors 6 - 8: borders and separators
+ * - Colors 9 - 10: solid colors
+ * - Colors 11 - 11: accessible text
+ *
+ * More information at https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale
+ */
+:root {
+    color-scheme: light;
+
+    --color-primary1: var(--color-cyan1);
+    --color-primary2: var(--color-cyan2);
+    --color-primary3: var(--color-cyan3);
+    --color-primary4: var(--color-cyan4);
+    --color-primary5: var(--color-cyan5);
+    --color-primary6: var(--color-cyan6);
+    --color-primary7: var(--color-cyan7);
+    --color-primary8: var(--color-cyan8);
+    --color-primary9: var(--color-cyan9);
+    --color-primary10: var(--color-cyan10);
+    --color-primary11: var(--color-cyan11);
+    --color-primary12: var(--color-cyan12);
+
+    --color-grey1: var(--color-slate1);
+    --color-grey2: var(--color-slate2);
+    --color-grey3: var(--color-slate3);
+    --color-grey4: var(--color-slate4);
+    --color-grey5: var(--color-slate5);
+    --color-grey6: var(--color-slate6);
+    --color-grey7: var(--color-slate7);
+    --color-grey8: var(--color-slate8);
+    --color-grey9: var(--color-slate9);
+    --color-grey10: var(--color-slate10);
+    --color-grey11: var(--color-slate11);
+    --color-grey12: var(--color-slate12);
+
+    --color-error1: var(--color-red1);
+    --color-error2: var(--color-red2);
+    --color-error3: var(--color-red3);
+    --color-error4: var(--color-red4);
+    --color-error5: var(--color-red5);
+    --color-error6: var(--color-red6);
+    --color-error7: var(--color-red7);
+    --color-error8: var(--color-red8);
+    --color-error9: var(--color-red9);
+    --color-error10: var(--color-red10);
+    --color-error11: var(--color-red11);
+    --color-error12: var(--color-red12);
+}

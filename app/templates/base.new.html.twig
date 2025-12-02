@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} | {{ 'Navigation.mainSubTitle' | trans }}</title>
+
+        {{ encore_entry_script_tags('new/app') }}
+        {% block custom_head_js %}{% endblock %}
+
+        {{ encore_entry_link_tags('new/app') }}
+        <link rel="stylesheet" href="{{ asset('lib/fontawesome/css/all.min.css')}}">
+        {% block custom_stylesheets %}{% endblock %}
+
+        <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" />
+    </head>
+
+    <body class="layout" data-route="{{ app.request.attributes.get('_route') }}">
+        <main class="layout__body">
+            {% block body %}{% endblock %}
+        </main>
+
+        {% block footer %}
+            <footer class="layout__footer">
+                <div class="wrapper wrapper--larger wrapper--center cols cols--gap-large">
+                    <p class="col--extend">
+                        © Copyright {{ "now"|date('Y') }}
+                        <a href="https://www.probesys.coop" target="_blank" class="anchor--currentcolor">
+                            Probesys
+                        </a>
+                    </p>
+
+                    <p class="cols cols--gap-large">
+                        <a href="https://agentj.io/" target="_blank" class="anchor--currentcolor">
+                            {{ "Navigation.poweredBy" | trans }} ({{ agentjVersion }})
+                        </a>
+
+                        <a href="https://github.com/Probesys/agentj" target="_blank" class="anchor--currentcolor">
+                            <i class="fab fa-github"></i>
+                            {{ "Navigation.sourceCode" | trans }}
+                        </a>
+                    </p>
+                </div>
+            </footer>
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,35 @@
+input,
+textarea {
+    width: 100%;
+    padding: var(--space-small);
+
+    color: inherit;
+    font-family: inherit;
+    font-size: var(--font-size-normal);
+    line-height: 1.5;
+
+    background-color: var(--color-grey1);
+    border: 1px solid var(--color-primary9);
+    border-radius: var(--border-radius);
+
+    transition:
+        background-color 0.2s ease-in-out,
+        border-color 0.2s ease-in-out;
+}
+
+textarea {
+    max-width: 100%;
+}
+
+input:disabled,
+textarea:disabled {
+    color: var(--color-grey11);
+
+    background-color: var(--color-grey3);
+    border-color: var(--color-grey8);
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: var(--color-error11);
+}

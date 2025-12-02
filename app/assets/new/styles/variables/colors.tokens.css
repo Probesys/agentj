@@ -1,0 +1,51 @@
+/**
+ * Colors are coming from https://www.radix-ui.com/colors
+ *
+ * - Colors 1 - 2: backgrounds
+ * - Colors 3 - 5: interactive components
+ * - Colors 6 - 8: borders and separators
+ * - Colors 9 - 10: solid colors
+ * - Colors 11 - 11: accessible text
+ *
+ * More information at https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale
+ */
+:root {
+    --color-cyan1: #fafdfe;
+    --color-cyan2: #f2fafb;
+    --color-cyan3: #def7f9;
+    --color-cyan4: #caf1f6;
+    --color-cyan5: #b5e9f0;
+    --color-cyan6: #9ddde7;
+    --color-cyan7: #7dcedc;
+    --color-cyan8: #3db9cf;
+    --color-cyan9: #00a2c7;
+    --color-cyan10: #0797b9;
+    --color-cyan11: #107d98;
+    --color-cyan12: #0d3c48;
+
+    --color-slate1: #fcfcfd;
+    --color-slate2: #f9f9fb;
+    --color-slate3: #f0f0f3;
+    --color-slate4: #e8e8ec;
+    --color-slate5: #e0e1e6;
+    --color-slate6: #d9d9e0;
+    --color-slate7: #cdced6;
+    --color-slate8: #b9bbc6;
+    --color-slate9: #8b8d98;
+    --color-slate10: #80838d;
+    --color-slate11: #60646c;
+    --color-slate12: #1c2024;
+
+    --color-red1: #fffcfc;
+    --color-red2: #fff7f7;
+    --color-red3: #feebec;
+    --color-red4: #ffdbdc;
+    --color-red5: #ffcdce;
+    --color-red6: #fdbdbe;
+    --color-red7: #f4a9aa;
+    --color-red8: #eb8e90;
+    --color-red9: #e5484d;
+    --color-red10: #dc3e42;
+    --color-red11: #ce2c31;
+    --color-red12: #641723;
+}
