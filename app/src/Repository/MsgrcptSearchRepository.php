@@ -103,6 +103,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
         $query = $queryBuilder->getQuery();
 
+        $query->enableResultCache(3600);
+
         return $query->getScalarResult();
     }
 
@@ -298,7 +300,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
         // Fulltext search only for terms that didn't match users
         if (count($termsWithoutUsers) > 0) {
-
             $safeTerms = array_map(function ($term) {
                 $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
                 return trim($safe ?: '');
