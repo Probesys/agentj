@@ -1,20 +1,24 @@
-# Roadmap
-Here, we list the different features that we will be develop
+# Roadmap 2026
 
-## Mars 2025
-- Token to release mail without authentification
+Here, we list the different features that we want to add to AgentJ.
 
-## June 2025
-- Better statistic integration with prometheus
-- More Help to check the config spf and Dkim of domain
+## AgentJ 2.4
 
-## October 2024
-- Better handle adding config in postfix and amavis;
-- better Statistics inside agentJ
+- More options to customise the human authentication page
+- Performance improvements
 
-## December 2024
-- update with last debian stable
-- More poweful notification system.
-- Add automatics functionals tests
+## AgentJ 2.5
 
+- [Prometheus](https://prometheus.io/) integration
+- Advanced search improvements
+- Daily report improvements
+- Logs management from an admin interface
 
+## AgentJ 3.0
+
+- Phishing campaign management
+- Graphic charter update
+- [Altcha](https://altcha.org/) protection
+- UX improvements to manage alias and shared mailboxes
+- Quota limits on the number of users
+- Technical stabilisation
