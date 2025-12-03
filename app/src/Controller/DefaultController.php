@@ -3,20 +3,11 @@
 namespace App\Controller;
 
 use App\Amavis\ContentType;
-use App\Entity\Domain;
 use App\Amavis\MessageStatus;
-use App\Entity\Mailaddr;
-use App\Entity\Msgrcpt;
-use App\Entity\Msgs;
 use App\Entity\User;
-use App\Entity\Alert;
-use App\Entity\Wblist;
 use App\Repository\UserRepository;
 use App\Repository\MsgrcptRepository;
-use App\Repository\WblistRepository;
-use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Repository\MsgrcptSearchRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -29,7 +20,6 @@ class DefaultController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private Security $security,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
     ) {
     }
 
@@ -38,100 +28,6 @@ class DefaultController extends AbstractController
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::UNTREATED
-        );
-        $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::AUTHORIZED
-        );
-        $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::BANNED
-        );
-        $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::DELETED
-        );
-        $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::RESTORED
-        );
-        $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::ERROR
-        );
-        $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::SPAMMED
-        );
-        $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
-            user: $user,
-            messageStatus: MessageStatus::VIRUS
-        );
-
-        $latestMessageRecipients = $this->msgrcptSearchRepository
-            ->getSearchQuery($user)
-            ->setMaxResults(5)
-            ->getResult();
-
-        $labels = array_map(function ($item) {
-            return $item['timeIso'];
-        }, $nbAutorizeMsgByDay);
-
-        $msgs['untreated'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
-        $msgs['authorized'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
-        $msgs['banned'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
-        $msgs['delete'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
-        $msgs['restored'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
-        $msgs['error'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::ERROR);
-        $msgs['spammed'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
-        $msgs['virus'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS);
-
-        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
-            $domains = $this->em->getRepository(Domain::class)->findAll();
-        } elseif ($this->isGranted('ROLE_ADMIN')) {
-            $domains = $user->getDomains();
-        } else {
-            $domains = [];
-        }
-
-        foreach ($domains as $domain) {
-            $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user, $domain);
-
-            $data[$domain->getId()] = [
-                'totalMsgCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['msgCount'];
-                }, 0),
-                'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['msgBlockedCount'];
-                }, 0),
-                'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['outMsgCount'];
-                }, 0),
-                'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['outMsgBlockedCount'];
-                }, 0),
-            ];
-        }
-        // Add data for "All" option
-        $users = $this->em->getRepository(User::class)->getUsersWithRoleAndMessageCounts($user);
-        $data['All'] = [
-            'totalMsgCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['msgCount'];
-            }, 0),
-            'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['msgBlockedCount'];
-            }, 0),
-            'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['outMsgCount'];
-            }, 0),
-            'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['outMsgBlockedCount'];
-            }, 0),
-        ];
-
         $showAlertWidget = true;
         if ($user->getDomain() && $user->getDomain()->getSendUserAlerts() == false) {
             $showAlertWidget = false;
@@ -139,20 +35,6 @@ class DefaultController extends AbstractController
 
         return $this->render('home/index.html.twig', [
                     'controller_name' => 'DefaultController',
-                    'listDay' => $labels,
-                    'nbUntreadtedMsgByDay' => $nbUntreadtedMsgByDay,
-                    'nbAutorizeMsgByDay' => $nbAutorizeMsgByDay,
-                    'nbBannedMsgByDay' => $nbBannedMsgByDay,
-                    'nbDeletedMsgByDay' => $nbDeletedMsgByDay,
-                    'nbRestoredMsgByDay' => $nbRestoredMsgByDay,
-                    'nbErrorMsgByDay' => $nbErrorMsgByDay,
-                    'nbSpammedMsgByDay' => $nbSpammedMsgByDay,
-                    'nbVirusMsgByDay' => $nbVirusMsgByDay,
-                    'latestMessageRecipients' => $latestMessageRecipients,
-                    'users' => $users,
-                    'msgs' => $msgs,
-                    'domains' => $domains,
-                    'data' => $data,
                     'showAlert' => $showAlertWidget
         ]);
     }
