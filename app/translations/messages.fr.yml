@@ -525,6 +525,12 @@ Entities:
         NB_DELETED_MESSAGES: Nombre de messages supprimés
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
+        FOREACH_MESSAGE: "Début de la boucle des messages"
+        ENDFOREACH_MESSAGE: "Fin de la boucle des messages"
+        MESSAGE_SENDER: "Nom de l'expéditeur du message"
+        MESSAGE_SUBJECT: "Sujet du message"
+        URL_MESSAGE_AUTHORIZE_SENDER: "URL autorisant l'expéditeur du message"
+        URL_MESSAGE_RESTORE: "URL récupérant le message"
     actions:
       add_connector: Ajouter un connecteur
       importUserAndAliases: "Importer les utilisateurs et les alias"

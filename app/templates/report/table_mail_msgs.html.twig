@@ -1,20 +1,20 @@
-{% if untreatedMsgs is not empty %}
+{% if untreatedMessageRecipients is not empty %}
   <table style="width:100%;background-color: #fff;">
     <tbody>
-      {% for msg in untreatedMsgs %}
-        {% set token = message_release_token(msg.msgs, user) %}
+      {% for messageRecipient in untreatedMessageRecipients %}
+        {% set token = message_release_token(messageRecipient.msgs, user) %}
         <tr>
 
           <td>
             <div>
-              <strong>{{ msg.msgs.fromAddr }}</strong><br>
-              <p style="font-size: 10px">{{ msg.msgs.subject }}</p>
+              <strong>{{ messageRecipient.msgs.fromAddr }}</strong><br>
+              <p style="font-size: 10px">{{ messageRecipient.msgs.subject }}</p>
             </div>
           </td>
 
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
-              <a href="{{ url('portal_message_authorized',{'token':token,'partitionTag':msg.partitionTag,'mailId':msg.getMailIdAsString(),'recipientId':msg.rid.id}) }}"
+              <a href="{{ url('portal_message_authorized',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.getMailIdAsString(),'recipientId':messageRecipient.rid.id}) }}"
                  title={{ 'Message.Actions.AutorizedSender'|trans() }} style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;
@@ -33,7 +33,7 @@
 
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
-              <a href="{{ url('portal_message_restore',{'token':token,'partitionTag':msg.partitionTag,'mailId':msg.getMailIdAsString(),'recipientId':msg.rid.id}) }}"
+              <a href="{{ url('portal_message_restore',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.getMailIdAsString(),'recipientId':messageRecipient.rid.id}) }}"
                  title="{{ 'Message.Actions.RestoreMessage'|trans() }}" style="font-size:16px;
                  -moz-border-radius: 5px;
                  -webkit-border-radius: 5px;

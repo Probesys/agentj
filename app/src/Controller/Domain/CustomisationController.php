@@ -127,6 +127,12 @@ class CustomisationController extends AbstractController
                 'NB_DELETED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES'),
                 'NB_RESTORED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES'),
                 'LIST_MAIL_MSGS' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS'),
+                'FOREACH_MESSAGE' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE'),
+                'ENDFOREACH_MESSAGE' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE'),
+                'MESSAGE_SENDER' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER'),
+                'MESSAGE_SUBJECT' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT'),
+                'URL_MESSAGE_AUTHORIZE_SENDER' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_AUTHORIZE_SENDER'),
+                'URL_MESSAGE_RESTORE' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE'),
             ],
             // phpcs:enable Generic.Files.LineLength
         ]);

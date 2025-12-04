@@ -525,6 +525,12 @@ Entities:
         NB_DELETED_MESSAGES: "Number of deleted messages"
         NB_RESTORED_MESSAGES: "Number of restored messages"
         LIST_MAIL_MSGS: "List of untreated messages"
+        FOREACH_MESSAGE: "Start of message loop"
+        ENDFOREACH_MESSAGE: "End of message loop"
+        MESSAGE_SENDER: "Name of the message's sender"
+        MESSAGE_SUBJECT: "Subject of the message"
+        URL_MESSAGE_AUTHORIZE_SENDER: "URL to authorize the message's sender"
+        URL_MESSAGE_RESTORE: "URL to recover the message"
     actions:
       add_connector: Add connector
       importUserAndAliases: "Import users and aliases"
