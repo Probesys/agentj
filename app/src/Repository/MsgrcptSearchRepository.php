@@ -341,7 +341,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $queryBuilder->select('u.email')
                 ->where(" u.email = :searchKey and u.roles is not null")
                 ->setParameter('searchKey', $searchKey);
-        ;
 
 
         return $queryBuilder->getQuery()->getSingleColumnResult();
