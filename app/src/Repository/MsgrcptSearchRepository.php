@@ -63,7 +63,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $count = $countQuery->getSingleScalarResult();
 
         $query->setHint('knp_paginator.count', $count);
-        $query->setMaxResults(10);
 
         return $query;
     }
