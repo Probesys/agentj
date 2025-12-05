@@ -110,8 +110,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     protected function getBaseQueryBuilder(): QueryBuilder
     {
-        // $queryBuilder = $this->createQueryBuilder('m');
-
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->innerJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
