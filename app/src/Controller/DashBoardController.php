@@ -18,14 +18,6 @@ final class DashBoardController extends AbstractController
     ) {
     }
 
-    #[Route('/dash/board', name: 'app_dash_board')]
-    public function index(): Response
-    {
-        return $this->render('home/index.html.twig', [
-
-        ]);
-    }
-
     #[Route('/dashboard/alerts', name: 'dashboard_alerts')]
     public function alerts(
         AlertRepository $alertRepository,
