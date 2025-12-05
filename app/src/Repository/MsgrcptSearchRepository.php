@@ -141,7 +141,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $countQueryBuilder->resetDQLPart('orderBy');
 
         $countQueryBuilder
-            ->from(MsgRcpt::class, 'mr')
+            ->from(Msgrcpt::class, 'mr')
             ->join(Maddr::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         $this->addUserSpecificJoins($countQueryBuilder, $user);
