@@ -26,22 +26,22 @@ export default class extends Controller {
         });
 
         fetch(this.urlValue)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(counts => {
-            Object.entries(counts).forEach(([key, value]) => {
-                const targetName = `${key}Target`;
-                this[targetName].textContent = value;
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(counts => {
+                Object.entries(counts).forEach(([key, value]) => {
+                    const targetName = `${key}Target`;
+                    this[targetName].textContent = value;
+                });
+            })
+            .catch(() => {
+                this.constructor.targets.forEach(name => {
+                    this[`${name}Target`].textContent = '#err';
+                });
             });
-        })
-        .catch(() => {
-            this.constructor.targets.forEach(name => {
-                 this[`${name}Target`].textContent = '#err';
-            });
-        });
     }
 }
