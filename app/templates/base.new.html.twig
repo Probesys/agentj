@@ -20,8 +20,8 @@
             {% block body %}{% endblock %}
         </main>
 
-        {% block footer %}
-            <footer class="layout__footer">
+        <footer class="layout__footer">
+            {% block footer %}
                 <div class="wrapper wrapper--larger wrapper--center cols cols--gap-large">
                     <p class="col--extend">
                         © Copyright {{ "now"|date('Y') }}
@@ -41,7 +41,7 @@
                         </a>
                     </p>
                 </div>
-            </footer>
-        {% endblock %}
+            {% endblock %}
+        </footer>
     </body>
 </html>

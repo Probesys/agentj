@@ -475,6 +475,7 @@ Entities:
       mailmessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
       message: Texte de présentation sur la page d'authentification humaine
       confirmCaptchaMessage: Message de validation de l'authentification humaine
+      humanAuthenticationFooter: Pied de page de la page d'authentification humaine
       humanAuthenticationStylesheet: Feuille de style personnalisée de la page d'authentification humaine
       messageAlert: Message du rapport
       domain: Nom de domaine

@@ -51,3 +51,11 @@
         </div>
     </div>
 {% endblock %}
+
+{% block footer %}
+    {% if domain.humanAuthenticationFooter %}
+        {{ domain.humanAuthenticationFooter | raw }}
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

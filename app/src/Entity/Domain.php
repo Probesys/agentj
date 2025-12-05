@@ -65,6 +65,9 @@ class Domain
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
     private string $humanAuthenticationStylesheet = '';
 
+    #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
+    private string $humanAuthenticationFooter = '';
+
     /**
      * @var Collection<int, Groups>
      */
@@ -288,6 +291,18 @@ class Domain
     public function setHumanAuthenticationStylesheet(string $humanAuthenticationStylesheet): static
     {
         $this->humanAuthenticationStylesheet = $humanAuthenticationStylesheet;
+
+        return $this;
+    }
+
+    public function getHumanAuthenticationFooter(): string
+    {
+        return $this->humanAuthenticationFooter;
+    }
+
+    public function setHumanAuthenticationFooter(string $humanAuthenticationFooter): static
+    {
+        $this->humanAuthenticationFooter = $humanAuthenticationFooter;
 
         return $this;
     }

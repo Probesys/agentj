@@ -18,18 +18,30 @@ class DomainCustomisationHumanAuthenticationType extends AbstractType
                 'data-controller' => 'ckeditor',
             ],
         ]);
+
         $builder->add('message', TextareaType::class, [
             'label' => 'Entities.Domain.fields.message',
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
         ]);
+
         $builder->add('confirmCaptchaMessage', TextareaType::class, [
             'label' => 'Entities.Domain.fields.confirmCaptchaMessage',
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
         ]);
+
+        $builder->add('humanAuthenticationFooter', TextareaType::class, [
+            'required' => false,
+            'empty_data' => '',
+            'label' => 'Entities.Domain.fields.humanAuthenticationFooter',
+            'attr' => [
+                'data-controller' => 'ckeditor',
+            ],
+        ]);
+
         $builder->add('humanAuthenticationStylesheet', TextareaType::class, [
             'required' => false,
             'empty_data' => '',
