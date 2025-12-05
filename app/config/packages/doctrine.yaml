@@ -20,7 +20,25 @@ doctrine:
                 alias: App
         dql:
             string_functions:
+                CONVERT: App\Doctrine\Extensions\ConvertFunction
+                MATCH: App\Doctrine\Extensions\MatchFunction
+            datetime_functions:
                 DATEDIFF: App\Doctrine\Extensions\DateDiff
+                DATE: App\Doctrine\Extensions\DateFunction
+                FROM_UNIXTIME: App\Doctrine\Extensions\FromUnixTimeFunction
+
+when@dev:
+    doctrine:
+        orm:
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
 
 when@prod:
     doctrine:

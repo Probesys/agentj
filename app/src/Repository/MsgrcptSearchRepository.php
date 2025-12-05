@@ -4,11 +4,13 @@ namespace App\Repository;
 
 use App\Amavis\ContentType;
 use App\Entity\Domain;
+use App\Entity\Maddr;
 use App\Entity\Msgrcpt;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
 use App\Repository\BaseMessageRecipientRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
@@ -20,8 +22,10 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private UserRepository $userRepository
+    ) {
         parent::__construct($registry, Msgrcpt::class);
     }
 
@@ -54,15 +58,22 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
         $query = $queryBuilder->getQuery();
 
+        $countQueryBuilder = $this->createCountQueryBuilder($queryBuilder, $user, $searchKey, $fromDate);
+        $countQuery = $countQueryBuilder->getQuery();
+        $count = $countQuery->getSingleScalarResult();
+
+        $query->setHint('knp_paginator.count', $count);
+
         return $query;
     }
+
 
     public function countByType(?User $user = null, ?int $messageStatus = null): int
     {
         $query = $this->getSearchQuery($user, $messageStatus);
-        $paginator = new Paginator($query);
+        $count = $query->getHint('knp_paginator.count');
 
-        return $paginator->count();
+        return $count;
     }
 
     /**
@@ -75,7 +86,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         ?User $user = null
     ): array {
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
-        $queryBuilder->select('COUNT(mr.mailId) as nb_result, m.timeIso, SUBSTRING(m.timeIso, 1, 8) as date_group');
+        $queryBuilder->select('COUNT(mr.mailId) as nb_result, m.timeIso, DATE(FROM_UNIXTIME(m.timeNum)) as date_group');
 
         if (!is_null($fromDate)) {
             $queryBuilder->andWhere('m.timeNum >= :date');
@@ -91,6 +102,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
         $query = $queryBuilder->getQuery();
 
+        $query->enableResultCache(3600);
+
         return $query->getScalarResult();
     }
 
@@ -98,10 +111,43 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     {
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
-            ->leftJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
-            ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->innerJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
+            ->innerJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+
 
         return $queryBuilder;
+    }
+
+    private function createCountQueryBuilder(
+        QueryBuilder $baseQueryBuilder,
+        ?User $user,
+        ?string $searchKey,
+        ?int $fromDate
+    ): QueryBuilder {
+        $countQueryBuilder = clone $baseQueryBuilder;
+
+        $hasFilters = !empty($searchKey) || $fromDate !== null;
+
+        if ($hasFilters) {
+            $countQueryBuilder->resetDQLPart('orderBy');
+            $countQueryBuilder->select('COUNT(mr.mailId)');
+
+            return $countQueryBuilder;
+        }
+
+        $countQueryBuilder->resetDQLPart('join');
+        $countQueryBuilder->resetDQLPart('from');
+        $countQueryBuilder->resetDQLPart('orderBy');
+
+        $countQueryBuilder
+            ->from(Msgrcpt::class, 'mr')
+            ->join(Maddr::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+
+        $this->addUserSpecificJoins($countQueryBuilder, $user);
+
+        $countQueryBuilder->select('COUNT(mr.mailId)');
+
+        return $countQueryBuilder;
     }
 
     private function getSearchQueryBuilder(
@@ -132,8 +178,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     private function addUserSpecificJoins(QueryBuilder $queryBuilder, ?User $user): void
     {
         if (!$user || $user->isAdmin()) {
-            $queryBuilder->leftJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email')
-               ->leftJoin('App\Entity\Domain', 'd', Join::WITH, 'd.id = u.domain');
+            $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email')
+               ->innerJoin('App\Entity\Domain', 'd', Join::WITH, 'd.id = u.domain');
         }
     }
 
@@ -142,13 +188,14 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         if ($messageStatus === MessageStatus::UNTREATED) {
             $queryBuilder
                 ->andWhere(<<<SQL
-                    (
-                        mr.status IS NULL
-                        OR mr.status = :messagestatusError
-                    )
+                    mr.ds != :ds
                     AND mr.bl != 'Y'
                     AND mr.content NOT IN (:content)
-                    AND mr.ds != :ds
+                    AND (
+                        COALESCE(mr.status,0) = 0
+                        OR mr.status = :messagestatusError
+                    )
+
                 SQL)
                 ->setParameter('messagestatusError', MessageStatus::ERROR)
                 ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN])
@@ -181,13 +228,13 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         }
 
         if ($messageStatus === MessageStatus::BANNED) {
-            $queryBuilder->andWhere('mr.status = :messageStatus or mr.bl = :bl')
+            $queryBuilder->andWhere('mr.bl = :bl or mr.status = :messageStatus')
                 ->setParameter('messageStatus', $messageStatus)
                 ->setParameter('bl', 'Y');
         }
 
         if ($messageStatus === MessageStatus::SPAMMED) {
-            $queryBuilder->andWhere('mr.status is null and mr.content not in (:content)')
+            $queryBuilder->andWhere('COALESCE(mr.status,0) = 0 and mr.content not in (:content)')
                 ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN]);
         }
 
@@ -223,15 +270,56 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             return $alias->getEmail();
         }, $aliases);
         $recipients[] = $user->getEmail();
-        $queryBuilder->andWhere('maddr.email IN (:recipients)')
+        $queryBuilder->andWhere('CONVERT(maddr.email USING \'utf8\') IN (:recipients)')
             ->setParameter('recipients', $recipients);
     }
 
     private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        $queryBuilder
-            ->andWhere('m.subject LIKE :searchKey OR maddr.email LIKE :searchKey OR m.fromAddr LIKE :searchKey')
-            ->setParameter('searchKey', '%' . $searchKey . '%');
+        // Split search key into individual terms
+        $terms = preg_split('/\s+/', trim($searchKey)) ?: [];
+        $terms = array_filter($terms, fn($t) => $t !== '');
+
+        // Search users for each term and track which terms matched users
+        $allUsers = [];
+        $termsWithoutUsers = [];
+        foreach ($terms as $term) {
+            $users = $this->searchUsers($term);
+            if (count($users) > 0) {
+                $allUsers = array_merge($allUsers, $users);
+            } else {
+                $termsWithoutUsers[] = $term;
+            }
+        }
+        $allUsers = array_unique($allUsers);
+
+        $whereClauses = [];
+
+        // Fulltext search only for terms that didn't match users
+        if (count($termsWithoutUsers) > 0) {
+            $safeTerms = array_map(function ($term) {
+                $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
+                return trim($safe ?: '');
+            }, $termsWithoutUsers);
+            $safeTerms = array_filter($safeTerms, fn($t) => $t !== '');
+
+            if (count($safeTerms) > 0) {
+                $booleanTerms = array_map(fn($t) => '+' . $t, $safeTerms);
+                $booleanSearch = implode(' ', $booleanTerms);
+
+                $whereClauses[] = "MATCH(m.subject, m.fromAddr, m.messageId) AGAINST(:searchKey boolean) > 0";
+                $queryBuilder->setParameter('searchKey', $booleanSearch);
+            }
+        }
+
+        if (count($allUsers) > 0) {
+            $whereClauses[] = "CONVERT(maddr.email USING 'utf8') IN (:users)";
+            $queryBuilder->setParameter('users', $allUsers);
+        }
+
+        if (count($whereClauses) > 0) {
+            $queryBuilder->andWhere(implode(' AND ', $whereClauses));
+        }
     }
 
     private function addDomainCondition(QueryBuilder $queryBuilder, User $user): void
@@ -240,5 +328,20 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $queryBuilder->andWhere('u.domain in (:domain)')
                 ->setParameter('domain', $user->getDomains());
         }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function searchUsers(string $searchKey): array
+    {
+
+        $queryBuilder = $this->userRepository->createQueryBuilder('u');
+        $queryBuilder->select('u.email')
+                ->where(" u.email = :searchKey and u.roles is not null")
+                ->setParameter('searchKey', $searchKey);
+
+
+        return $queryBuilder->getQuery()->getSingleColumnResult();
     }
 }
