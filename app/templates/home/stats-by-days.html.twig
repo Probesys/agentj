@@ -25,7 +25,6 @@
 </div>
 <script>
   document.addEventListener("turbo:frame-load", function () {
-    console.log('turbo:frame-load');
     var charts = document.querySelectorAll('.statsChart');
     charts.forEach(function(chart) {
       var ctx = chart.getContext('2d');
