@@ -68,6 +68,21 @@ services:
       - var:/var/www/agentj/var
       - files:/var/www/agentj/public/files
 
+  worker:
+    image: probesys38/agentj_app:$VERSION
+    build:
+      context: ./app
+    command: "php /var/www/agentj/bin/console messenger:consume async scheduler_default --memory-limit=128M"
+    entrypoint: "/entrypoint-worker.sh"
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - app
+    volumes:
+      - var:/var/www/agentj/var
+      - files:/var/www/agentj/public/files
+
   smtp:
     image: probesys38/agentj_smtp:$VERSION
     build:

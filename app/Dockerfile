@@ -90,7 +90,9 @@ COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
+COPY docker/setup-env.sh /setup-env.sh
 COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint-worker.sh /entrypoint-worker.sh
 COPY docker/files/amavisd-release /usr/local/bin/amavisd-release
 
 EXPOSE 9000
