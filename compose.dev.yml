@@ -30,6 +30,24 @@ services:
         ipv4_address: 172.28.2.1
     working_dir: /var/www/agentj
 
+  worker:
+    build:
+      context: app/
+      dockerfile: Dockerfile.dev
+      args:
+        - UID
+        - GID
+    volumes:
+      - ./app/:/var/www/agentj
+      - ./app/var:/var/www/agentj/var
+      - ./app/public/files:/var/www/agentj/public/files
+      - ./tests/results:/tmp/test_mails
+    dns: 172.28.2.5
+    networks:
+      default:
+        ipv4_address: 172.28.2.2
+    working_dir: /var/www/agentj
+
   watcher:
    image: node:18-alpine
    user: ${UID}:${GID}
