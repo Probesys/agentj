@@ -657,6 +657,8 @@ Entities:
       connectionInformation: "Connection information"
       ldapHost: "Host"
       ldapPort: "Port (default 389)"
+      ldapEncryption: "Encryption"
+      ldapVersion: "LDAP version"
       allowAnonymousBind: "Anonymous connection"
       LdapBaseDN: "Base DN"
       ldapBindDn: "Bind DN"
