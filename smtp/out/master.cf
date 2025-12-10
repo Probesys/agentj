@@ -69,7 +69,7 @@ amavisfeed unix    -       -       n        -      $AMAVIS_PROCESSES     lmtp
     -o smtpd_hard_error_limit=1000
     -o smtpd_client_connection_count_limit=0
     -o smtpd_client_connection_rate_limit=0
-    -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks,no_milters
+    -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
     -o local_header_rewrite_clients=
 
 postlog   unix-dgram n  -       n       -       1       postlogd
