@@ -9,6 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 
 #[ORM\MappedSuperclass]
+#[ORM\Index(name: 'msgrcpt_content_idx', columns: ['content'])]
+#[ORM\Index(name: 'msgrcpt_ds_status_idx', columns: ['ds', 'status_id'])]
+#[ORM\Index(name: 'msgrcpt_bl_status_idx', columns: ['bl', 'status_id'])]
+#[ORM\Index(name: 'msgrcpt_status_content_idx', columns: ['status_id', 'content'])]
+#[ORM\Index(name: 'msgrcpt_filter_idx', columns: ['rid','bspam_level', 'ds', 'bl','content','status_id'])]
 class BaseMessageRecipient
 {
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
