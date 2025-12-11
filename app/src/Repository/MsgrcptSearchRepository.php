@@ -276,51 +276,42 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        // Split search key into individual terms
-        $terms = preg_split('/\s+/', trim($searchKey)) ?: [];
-        $terms = array_filter($terms, fn($t) => $t !== '');
+        $terms = preg_split('/\s+/', trim($searchKey), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-        // Search users for each term and track which terms matched users
-        $allUsers = [];
-        $termsWithoutUsers = [];
+        $potentialEmails = [];
         foreach ($terms as $term) {
-            $users = $this->searchUsers($term);
-            if (count($users) > 0) {
-                $allUsers = array_merge($allUsers, $users);
-            } else {
-                $termsWithoutUsers[] = $term;
+            if (filter_var($term, FILTER_VALIDATE_EMAIL)) {
+                $potentialEmails[] = $term;
             }
         }
-        $allUsers = array_unique($allUsers);
 
-        $whereClauses = [];
+        $foundUserEmails = $this->userRepository->searchUsersByEmails($potentialEmails);
 
-        // Fulltext search only for terms that didn't match users
-        if (count($termsWithoutUsers) > 0) {
-            $safeTerms = array_map(function ($term) {
-                $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
-                return trim($safe ?: '');
-            }, $termsWithoutUsers);
-            $safeTerms = array_filter($safeTerms, fn($t) => $t !== '');
+        $allUsers = array_unique($foundUserEmails);
 
-            if (count($safeTerms) > 0) {
-                $booleanTerms = array_map(fn($t) => '+' . $t, $safeTerms);
-                $booleanSearch = implode(' ', $booleanTerms);
+        $safeTerms = array_map(static function ($term) {
+            $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
+            return trim($safe ?: '');
+        }, $terms);
 
-                $whereClauses[] = "MATCH(m.subject, m.fromAddr, m.messageId) AGAINST(:searchKey boolean) > 0";
-                $queryBuilder->setParameter('searchKey', $booleanSearch);
-            }
+        $safeTerms = array_filter($safeTerms, fn($t) => $t !== '');
+
+        if (count($safeTerms) > 0) {
+            $booleanTerms = array_map(fn($t) => '+' . $t, $safeTerms);
+            $booleanSearch = implode(' ', $booleanTerms);
+
+            $queryBuilder->andWhere('MATCH(m.subject, m.fromAddr, m.messageId) AGAINST(:searchKey BOOLEAN) > 0');
+            $queryBuilder->setParameter('searchKey', $booleanSearch);
         }
 
         if (count($allUsers) > 0) {
-            $whereClauses[] = "CONVERT(maddr.email USING 'utf8') IN (:users)";
+            $queryBuilder->innerJoin('App\Entity\Maddr', 'maddrSender', Join::WITH, 'maddrSender.id = m.sid');
+
+            $queryBuilder->andWhere('(maddr.email IN (:users) OR maddrSender.email IN (:users))');
             $queryBuilder->setParameter('users', $allUsers);
         }
-
-        if (count($whereClauses) > 0) {
-            $queryBuilder->andWhere(implode(' AND ', $whereClauses));
-        }
     }
+
 
     private function addDomainCondition(QueryBuilder $queryBuilder, User $user): void
     {
@@ -328,20 +319,5 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $queryBuilder->andWhere('u.domain in (:domain)')
                 ->setParameter('domain', $user->getDomains());
         }
-    }
-
-    /**
-     * @return string[]
-     */
-    private function searchUsers(string $searchKey): array
-    {
-
-        $queryBuilder = $this->userRepository->createQueryBuilder('u');
-        $queryBuilder->select('u.email')
-                ->where(" u.email = :searchKey and u.roles is not null")
-                ->setParameter('searchKey', $searchKey);
-
-
-        return $queryBuilder->getQuery()->getSingleColumnResult();
     }
 }
