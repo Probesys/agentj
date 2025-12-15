@@ -22,7 +22,6 @@ class HumanAuthenticationsController extends AbstractController
     public function show(
         string $token,
         Request $request,
-        MsgsRepository $messageRepository,
         WblistRepository $wblistRepository,
         MessageService $messageService,
         HumanAuthenticationService $humanAuthenticationService,
@@ -67,9 +66,8 @@ class HumanAuthenticationsController extends AbstractController
                     }
                 );
 
-                $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                 $message->setValidateCaptcha(time());
-                $messageRepository->save($message);
+                $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
 
                 $verified = true;
             } else {

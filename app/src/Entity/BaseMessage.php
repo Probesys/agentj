@@ -343,9 +343,9 @@ class BaseMessage
         return $this;
     }
 
-    public function getMailId(): mixed
+    public function getMailId(): string
     {
-        return $this->mailId;
+        return $this->getMailIdAsString();
     }
 
     public function getMailIdAsString(): string
