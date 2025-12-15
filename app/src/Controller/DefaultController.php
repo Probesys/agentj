@@ -260,7 +260,6 @@ class DefaultController extends AbstractController
         Service\MessageService $messageService,
         Service\CryptEncryptService $cryptEncrypt,
     ): Response {
-        $em = $this->em;
         $confirm = "";
 
         list($message, $domain, $messageRecipients) = $this->decryptMessageToken($cryptEncrypt, $token);
@@ -311,10 +310,8 @@ class DefaultController extends AbstractController
             // Test if the sender is the same than the posted email field and if the mail has not been yet treated
             if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
                 if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                     $message->setValidateCaptcha(time());
-                    $em->persist($message);
-                    $em->flush();
+                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
                 } else {
                     $this->addFlash('error', $this->translator->trans('Message.Flash.checkMailUnsuccessful'));
                 }
