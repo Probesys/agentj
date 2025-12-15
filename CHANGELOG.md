@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2025-12-15 - 2.3.4
+
+### Bug fixes
+
+- Add DKIM signature to all outgoing emails ([4fac5137](https://github.com/Probesys/agentj/commit/4fac5137))
+- Fix saving status and captcha time on human authorization ([2be8f836](https://github.com/Probesys/agentj/commit/2be8f836))
+
 ## 2025-11-19 - 2.3.3
 
 ### Maintenance
