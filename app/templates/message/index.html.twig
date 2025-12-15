@@ -174,7 +174,7 @@
                                             <i class="fas fa-info"></i>
                                         </a>
                                     </li>
-                                    {% if messageStatus is null %}
+                                    {% if msgRecipient.msgs.isInQuarantine %}
                                         <li class="list-inline-item">
                                             <a href="#"
                                                 title="{{ 'Entities.Message.labels.preview' | trans }}"

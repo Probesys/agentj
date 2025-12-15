@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Entity\Msgrcpt;
+use App\Repository\MsgsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\Msgrcpt;
-use App\Repository\MsgsRepository;
+use Webklex\PHPIMAP\Message as Email;
 
 /**
  * Msgs
@@ -27,10 +28,16 @@ class Msgs extends BaseMessage
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $msgRcpts;
 
+    /** @var Collection<int, Quarantine> $quarantineChunks */
+    #[ORM\OneToMany(mappedBy: 'message', targetEntity: Quarantine::class)]
+    #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
+    #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
+    private Collection $quarantineChunks;
 
     public function __construct()
     {
         $this->msgRcpts = new ArrayCollection();
+        $this->quarantineChunks = new ArrayCollection();
     }
 
     /**
@@ -61,5 +68,34 @@ class Msgs extends BaseMessage
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Quarantine>
+     */
+    public function getQuarantineChunks(): Collection
+    {
+        return $this->quarantineChunks;
+    }
+
+    public function isInQuarantine(): bool
+    {
+        return !$this->quarantineChunks->isEmpty();
+    }
+
+    public function getQuarantineContent(): string
+    {
+        $rawMail = "";
+
+        foreach ($this->getQuarantineChunks() as $chunk) {
+            $rawMail .= $chunk->getMailText() ?? '';
+        }
+
+        return mb_convert_encoding($rawMail, 'UTF-8', 'auto');
+    }
+
+    public function getQuarantineEmail(): Email
+    {
+        return Email::fromString($this->getQuarantineContent());
     }
 }

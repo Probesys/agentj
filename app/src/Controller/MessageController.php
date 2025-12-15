@@ -548,10 +548,6 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $mailChunks = $this->em->getRepository(Quarantine::class)->findBy([
-            'partitionTag' => $partitionTag,
-            'mailId' => $mailId,
-        ]);
         $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -564,31 +560,23 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($msgRcpt);
 
-        if (!$mailChunks) {
-            throw $this->createNotFoundException('The message does not exist.');
+        $message = $msgRcpt->getMsgs();
+
+        if (!$message->isInQuarantine()) {
+            throw $this->createNotFoundException('The message is not in quarantine.');
         }
 
-        $rawMail = "";
-        foreach ($mailChunks as $mailChunk) {
-            $rawMail .= stream_get_contents($mailChunk->getMailText(), -1, 0);
-        }
-        $rawMail = mb_convert_encoding($rawMail, 'UTF-8', 'auto');
-
-        if (!$rawMail) {
-            throw $this->createNotFoundException('The message does not exist.');
-        }
-
-        $message = Message::fromString($rawMail);
-        $subject = $message->getSubject();
+        $email = $message->getQuarantineEmail();
+        $subject = $email->getSubject();
 
         //get attachments
-        $attachments = $message->getAttachments()->filter(function ($attachment) {
+        $attachments = $email->getAttachments()->filter(function ($attachment) {
             return $attachment->disposition !== 'inline';
         });
 
-        $from = $message->getFrom();
-        $textBody = $message->getTextBody();
-        $htmlBody = $message->getHtmlBody();
+        $from = $email->getFrom();
+        $textBody = $email->getTextBody();
+        $htmlBody = $email->getHtmlBody();
 
         //Remove all script tags
         $htmlBody = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $htmlBody);
