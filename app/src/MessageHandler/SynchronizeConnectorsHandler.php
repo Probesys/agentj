@@ -14,6 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -32,6 +34,17 @@ final class SynchronizeConnectorsHandler
 
     public function __invoke(SynchronizeConnectors $message): void
     {
+        $store = new SemaphoreStore();
+        $factory = new LockFactory($store);
+        $lock = $factory->createLock('synchronize-connectors', ttl: 3600);
+
+        if (!$lock->acquire()) {
+            $this->logger->warning(
+                'Cannot acquire the synchronize-connectors lock, the handler is probably already running.'
+            );
+            return;
+        }
+
         $connectors = $this->connectorRepository->getActiveConnectors();
 
         foreach ($connectors as $connector) {
@@ -66,5 +79,7 @@ final class SynchronizeConnectorsHandler
             }
         }
         $this->entityManager->flush();
+
+        $lock->release();
     }
 }
