@@ -187,12 +187,12 @@ class MessageService
 
     /**
      * Return a secure token containing the id of the user and of the message.
-     * The token is valid for 48h.
+     * The token is valid for 7 days.
      */
     public function getReleaseToken(Entity\Msgs $message, Entity\User $user): string
     {
         $data = $user->getId() . '%%%' . $message->getMailIdAsString();
-        return $this->cryptEncryptService->encrypt($data, lifetime: 48 * 3600);
+        return $this->cryptEncryptService->encrypt($data, lifetime: 7 * 24 * 3600);
     }
 
     /**
