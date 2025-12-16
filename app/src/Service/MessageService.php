@@ -214,16 +214,14 @@ class MessageService
             return null;
         }
 
-        // The previous version of token does not have mailId, only userId.
-        // TODO remove this condition in AgentJ >= 2.3
-        if (strpos($decryptedToken, '%%%') === false) {
-            $userId = (int) $decryptedToken;
-            $mailId = null;
-        } else {
-            $tokenParts = explode('%%%', $decryptedToken);
-            $userId = (int) $tokenParts[0];
-            $mailId = $tokenParts[1];
+        $tokenParts = explode('%%%', $decryptedToken);
+
+        if (count($tokenParts) !== 2) {
+            return null;
         }
+
+        $userId = (int) $tokenParts[0];
+        $mailId = $tokenParts[1];
 
         $user = $this->userRepository->find($userId);
 
