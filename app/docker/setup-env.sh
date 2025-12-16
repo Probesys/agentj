@@ -30,3 +30,4 @@ sed -i "s|\$OAUTH_LOGIN_LABEL|$OAUTH_LOGIN_LABEL|g" $env_file
 sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" $env_file
 sed -i "s|\$TZ|$TZ|g" $env_file
 sed -i "s|\$DEFAULT_LOCALE|$DEFAULT_LOCALE|g" $env_file
+sed -i "s|\$HISTORY_RETENTION_DAYS|${HISTORY_RETENTION_DAYS:-30}|g" $env_file

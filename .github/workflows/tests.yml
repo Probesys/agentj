@@ -38,6 +38,7 @@ jobs:
             sed -i "s|\$TRUSTED_PROXIES||g" .env
             sed -i "s|\$TZ|Europe/Paris|g" .env
             sed -i "s|\$DEFAULT_LOCALE|en|g" .env
+            sed -i "s|\$HISTORY_RETENTION_DAYS|30|g" .env
 
       - name: Install the dependencies
         run: |

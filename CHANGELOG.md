@@ -4,6 +4,8 @@
 
 ### Migration notes
 
+#### Persistent volumes
+
 Persistent volumes are added for the `app` container to preserve data across restarts.
 
 **Before upgrading**, backup the following directories from the running container:
@@ -15,6 +17,13 @@ Persistent volumes are added for the `app` container to preserve data across res
 
 - `docker compose cp ./backup-log app:/var/www/agentj/var/log`
 - `docker compose cp ./backup-files app:/var/www/agentj/public/files`
+
+#### History retention
+
+You can now configure the number of days of history retention.
+This impacts the history of incoming/outgoing emails and logs as well.
+To change the number of days of retention, set the `HISTORY_RETENTION_DAYS` environment variable in your `.env` file.
+It defaults to 30 days, as before, so it is not required to set this value if you want to keep the existing behaviour.
 
 ## 2025-12-15 - 2.3.4
 
