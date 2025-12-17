@@ -11,6 +11,8 @@ use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
 use App\Repository\BaseMessageRecipientRepository;
 use App\Repository\UserRepository;
+use App\Util\Email;
+use App\Util\Search;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
@@ -276,45 +278,18 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        // Split the searchKey in terms tokens
-        $terms = preg_split('/\s+/', trim($searchKey), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-
-        // Extract the terms looking like emails to perform a first search in
-        // the users.
-        $potentialEmails = [];
-        foreach ($terms as $term) {
-            if (filter_var($term, FILTER_VALIDATE_EMAIL)) {
-                $potentialEmails[] = $term;
-            }
-        }
-
+        $potentialEmails = Email::extractEmailsFromText($searchKey);
         $foundUserEmails = $this->userRepository->searchUsersByEmails($potentialEmails);
-
         $allUserEmails = array_unique($foundUserEmails);
 
-        // Exclude the terms that matched a user's email from the $terms array.
-        // The emails will be used to search against the recipient or the
-        // sender emails, while the other $terms will be used to perform a
-        // boolean search against subject, from and the message's id.
-        if ($allUserEmails) {
-            $terms = array_filter($terms, function ($term) use ($allUserEmails) {
-                return !in_array($term, $allUserEmails);
-            });
-        }
-
-        // Sanitize the terms to perform a boolean search.
-        $safeTerms = array_map(static function ($term) {
-            $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
-            return trim($safe ?: '');
-        }, $terms);
-
-        $safeTerms = array_filter($safeTerms, fn($t) => $t !== '');
+        // Create the boolean search string by excluding the terms that matched
+        // a user's email. The emails will be used to search against the
+        // recipient or the sender emails, while the other terms will be used
+        // to perform a boolean search against subject, from and the message's id.
+        $booleanSearch = Search::textToMariadbBooleanSearch($searchKey, excludeTerms: $allUserEmails);
 
         // Add the boolean search condition.
-        if (count($safeTerms) > 0) {
-            $booleanTerms = array_map(fn($t) => '+' . $t, $safeTerms);
-            $booleanSearch = implode(' ', $booleanTerms);
-
+        if ($booleanSearch) {
             $queryBuilder->andWhere('MATCH(m.subject, m.fromAddr, m.messageId) AGAINST(:searchKey BOOLEAN) > 0');
             $queryBuilder->setParameter('searchKey', $booleanSearch);
         }

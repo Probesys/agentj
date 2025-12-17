@@ -13,6 +13,25 @@ class Email
     }
 
     /**
+     * Return a list of emails contained in a string.
+     *
+     * @return string[]
+     */
+    public static function extractEmailsFromText(string $text): array
+    {
+        $terms = preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        $emails = [];
+        foreach ($terms as $term) {
+            if (self::validate($term)) {
+                $emails[] = $term;
+            }
+        }
+
+        return $emails;
+    }
+
+    /**
      * Extract the domain from an email address
      */
     public static function extractDomain(string $email): ?string
