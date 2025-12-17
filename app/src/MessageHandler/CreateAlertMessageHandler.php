@@ -61,15 +61,8 @@ class CreateAlertMessageHandler
         $mailId = $message->getId();
         $this->output->writeln('Handler invoked for OutMsg ID: ' . $mailId);
 
-        // Convert mailId back to binary
-        $binaryMailId = hex2bin($mailId);
-        if ($binaryMailId === false) {
-            $this->output->writeln('Error: Failed to convert mailId to binary');
-            return;
-        }
-
         // Ensure the field name matches the database column
-        $outMsg = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
+        $outMsg = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $mailId]);
         $this->output->writeln('OutMsg fetched: ' . ($outMsg ? 'Yes' : 'No'));
 
         if ($outMsg) {

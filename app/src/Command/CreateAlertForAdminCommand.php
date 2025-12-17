@@ -44,25 +44,15 @@ class CreateAlertForAdminCommand extends Command
 
         foreach ($outMsgs as $outMsg) {
             $mailId = $outMsg->getMailId();
-            $output->writeln('Retrieved mail ID: ' . $mailId);
 
-            // Add a check to ensure mailId is not empty
-            if (empty($mailId)) {
-                $output->writeln('Error: mailId is empty for OutMsg with ID: ' . $outMsg->getId());
-                continue;
-            }
-
-            $output->writeln('Dispatching message for mail ID: ' . $mailId);
+            $output->writeln('Creating alert for mail ID: ' . $mailId);
             $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'admin'));
 
-            $binaryMailId = hex2bin($mailId);
-
-            // Mark the outmsg as processedAdmin
-            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
-            $outMsgToSave->setProcessedAdmin(true);
-            $this->entityManager->persist($outMsgToSave);
-            $this->entityManager->flush();
+            $outMsg->setProcessedAdmin(true);
+            $this->entityManager->persist($outMsg);
         }
+
+        $this->entityManager->flush();
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
             ->select('r.id, r.mailId, r.date, r.recipientCount, r.delta, r.processedAdmin, COUNT(r) as reportCount')
@@ -117,8 +107,6 @@ class CreateAlertForAdminCommand extends Command
         }
 
         $output->writeln('Finished create-alert-for-admin command.');
-
-        sleep(60);
 
         return Command::SUCCESS;
     }
