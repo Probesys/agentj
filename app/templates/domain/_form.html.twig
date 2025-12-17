@@ -211,11 +211,13 @@
                             id="domain-spam-level">{{ domainSpamLevel }}</span></label>
                 <div class="col-sm-12">{{ form_widget(form.level) }}</div>
             </div>
-            <div class="form-group row">
-                <label for="domain_level"
-                       class="col-sm-12">{{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
-                    ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})</label>
-                <div class="col-sm-12">{{ form_widget(form.mailAuthenticationSender) }}</div>
+
+            <div class="form-group">
+                <label for="domain_mailAuthenticationSender" class="col-form-label col-sm-12">
+                    {{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
+                    ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
+                </label>
+                {{ form_widget(form.mailAuthenticationSender) }}
             </div>
 
         </div>
