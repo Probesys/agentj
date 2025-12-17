@@ -1,6 +1,6 @@
 # Changelog of AgentJ
 
-## Unreleased
+## 2025-12-17 - 2.4.0
 
 ### Migration notes
 
@@ -24,6 +24,65 @@ You can now configure the number of days of history retention.
 This impacts the history of incoming/outgoing emails and logs as well.
 To change the number of days of retention, set the `HISTORY_RETENTION_DAYS` environment variable in your `.env` file.
 It defaults to 30 days, as before, so it is not required to set this value if you want to keep the existing behaviour.
+
+### Features
+
+- Improve the customisation options of the human authentication workflow
+    - Allow to customise the human authentication page stylesheet ([1818c951](https://github.com/Probesys/agentj/commit/1818c951))
+    - Use the custom domain logo on the human authentication page ([3ff4acf9](https://github.com/Probesys/agentj/commit/3ff4acf9))
+    - Redesign the human authentication page ([3fa49177](https://github.com/Probesys/agentj/commit/3fa49177))
+    - Allow to customise the human authentication footer ([0b954598](https://github.com/Probesys/agentj/commit/0b954598))
+- Allow to always display the content of mails in quarantine ([8b2f6f1b](https://github.com/Probesys/agentj/commit/8b2f6f1b))
+- Allow to change the number of days of history retention ([6fc56557](https://github.com/Probesys/agentj/commit/6fc56557))
+- Allow to select LDAP "encryption" and "version" ([54677058](https://github.com/Probesys/agentj/commit/54677058))
+- Change the domain "messages" in a "customisation" section ([fe6d0cbe](https://github.com/Probesys/agentj/commit/fe6d0cbe))
+- Allow to customise the list of messages in the report ([4fbe79a4](https://github.com/Probesys/agentj/commit/4fbe79a4))
+
+### Improvements
+
+- Extend the report token lifetime to 7 days ([a292d9c4](https://github.com/Probesys/agentj/commit/a292d9c4))
+- Improve the performance of the dashboard ([27182a9b](https://github.com/Probesys/agentj/commit/27182a9b))
+- Improve the performance of the navigation ([a4ba1284](https://github.com/Probesys/agentj/commit/a4ba1284))
+- Improve the performance of the list of messages ([6382259e](https://github.com/Probesys/agentj/commit/6382259e), [3892e0d2](https://github.com/Probesys/agentj/commit/3892e0d2), [a02a6392](https://github.com/Probesys/agentj/commit/a02a6392))
+- Improve the performance of the advanced search ([07f973a9](https://github.com/Probesys/agentj/commit/07f973a9), [19ad042e](https://github.com/Probesys/agentj/commit/19ad042e))
+- Hide the local login form when OAuth2 is enabled ([2ebba4b5](https://github.com/Probesys/agentj/commit/2ebba4b5))
+- Rename the "captcha" term into "human authentication" in the interface ([188706f8](https://github.com/Probesys/agentj/commit/188706f8))
+- Add a `URL_HUMAN_AUTHENTICATION` variable similar to `URL_CAPTCHA` ([d5eb5cc1](https://github.com/Probesys/agentj/commit/d5eb5cc1))
+
+### Bug fixes
+
+- Fix the creation of alerts ([209cd3b6](https://github.com/Probesys/agentj/commit/209cd3b6))
+- Fix the "back to user" button not showing original user after session expiration ([4ad3836f](https://github.com/Probesys/agentj/commit/4ad3836f))
+- Associate LDAP aliases to their connector ([32d0efa9](https://github.com/Probesys/agentj/commit/32d0efa9))
+- Append file extension to the uploaded filenames ([ea53f84e](https://github.com/Probesys/agentj/commit/ea53f84e))
+- Use the user locale to translate the emails ([b692ba44](https://github.com/Probesys/agentj/commit/b692ba44))
+- Fix the sender email input in the domain form ([ac56cf60](https://github.com/Probesys/agentj/commit/ac56cf60))
+
+### Administration
+
+- Add persistent Docker volumes for app data ([19f9e749](https://github.com/Probesys/agentj/commit/19f9e749))
+- Schedule synchronization of the connectors each 12 hours ([e7400add](https://github.com/Probesys/agentj/commit/e7400add))
+- Run Symfony Messenger worker with a Docker service ([cd485617](https://github.com/Probesys/agentj/commit/cd485617))
+- Send emails asynchronously with Messenger ([294476c8](https://github.com/Probesys/agentj/commit/294476c8))
+- Truncate outgoing messages in truncate-message-since-days command ([e8e28b10](https://github.com/Probesys/agentj/commit/e8e28b10))
+- Add a command to "auto release" messages ([f49c0541](https://github.com/Probesys/agentj/commit/f49c0541))
+
+### Documentation
+
+- Update the roadmap for 2026 ([4f612745](https://github.com/Probesys/agentj/commit/4f612745))
+
+### Maintenance
+
+- Install the Symfony Scheduler component ([09e7dcc2](https://github.com/Probesys/agentj/commit/09e7dcc2))
+- Create a BaseRepository for all the repositories ([c1a7bdda](https://github.com/Probesys/agentj/commit/c1a7bdda))
+- Provide a new frontend stack base ([56730428](https://github.com/Probesys/agentj/commit/56730428))
+- Display custom error page only in production ([d8ed3097](https://github.com/Probesys/agentj/commit/d8ed3097))
+- Add a lock on the synchronize connectors handler ([2999aef0](https://github.com/Probesys/agentj/commit/2999aef0))
+- Don't try to assign groups if target groups are empty ([e264830d](https://github.com/Probesys/agentj/commit/e264830d))
+- Refactor decrypting the report token ([ddfd1a90](https://github.com/Probesys/agentj/commit/ddfd1a90))
+- Fix the markup of the header ([bcd82d58](https://github.com/Probesys/agentj/commit/bcd82d58))
+- Update the default email templates ([a14d8510](https://github.com/Probesys/agentj/commit/a14d8510))
+- Extract a `HumanAuthentications` controller ([af91f841](https://github.com/Probesys/agentj/commit/af91f841))
 
 ## 2025-12-15 - 2.3.4
 
