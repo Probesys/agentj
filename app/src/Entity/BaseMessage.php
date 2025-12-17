@@ -10,6 +10,7 @@ use App\Entity\Maddr;
 
 #[ORM\MappedSuperclass]
 #[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
+#[ORM\Index(name: 'msg_subject_fulltext_idx', columns: ['subject'], flags: ['fulltext'])]
 class BaseMessage
 {
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
