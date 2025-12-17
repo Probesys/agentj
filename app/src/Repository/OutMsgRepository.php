@@ -17,36 +17,19 @@ class OutMsgRepository extends BaseMessageRepository
     }
 
     /**
-     * Delete outgoing messages older than $date
-     *
-     * @return array{
-     *     nbDeletedMsgs: int,
-     *     nbDeletedQuarantine: int,
-     * }
+     * Delete outgoing messages older than the given date and return the number of deleted rows.
      */
-    public function truncateMessageOlder(int $date): array
+    public function truncateOlder(\DateTimeInterface $date): int
     {
-        $conn = $this->getEntityManager()->getConnection();
+        $entityManager = $this->getEntityManager();
 
-        $sql = ' DELETE q FROM out_quarantine q '
-            . ' LEFT JOIN  out_msgs m ON m.mail_id = q.mail_id '
-            . ' WHERE m.time_num < :date';
+        $deleteQuery = $entityManager->createQuery(<<<SQL
+            DELETE App\Entity\OutMsg m
+            WHERE m.timeNum < :date
+        SQL);
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bindValue('date', $date, DBAL\ParameterType::INTEGER);
-        $result = $stmt->executeQuery();
-        $nbDeletedQuarantine = $result->rowCount();
+        $deleteQuery->setParameter('date', $date->getTimestamp());
 
-        $sql = ' DELETE FROM out_msgs WHERE time_num < :date';
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bindValue('date', $date, DBAL\ParameterType::INTEGER);
-        $result = $stmt->executeQuery();
-        $nbDeletedMsgs = $result->rowCount();
-
-        return [
-            'nbDeletedMsgs' => $nbDeletedMsgs,
-            'nbDeletedQuarantine' => $nbDeletedQuarantine,
-        ];
+        return $deleteQuery->execute();
     }
 }

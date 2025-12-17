@@ -35,36 +35,20 @@ class TruncateMessageCommand extends Command
             $days = 30;
         }
 
-        $now = time();
-        $start = strtotime('-' . $days . ' day', $now);
-        if ($start === false) {
-            return Command::FAILURE;
-        }
+        $date = (new \DateTimeImmutable())->modify("-{$days} days");
+        $formattedDate = $date->format('Y-m-d');
 
-        // Truncate incoming messages
-        $deletedIncomingStats = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
+        $output->writeln("Deleting data older than {$formattedDate}...");
 
-        $message = date('Y-m-d H:i:s');
-        $message .= "\tdelete incoming mail entries older than " . date('Y-m-d', $start);
-        $message .= "\t{$deletedIncomingStats['nbDeletedMsgs']} in msgs";
-        $message .= "\t{$deletedIncomingStats['nbDeletedQuarantine']} in quarantine";
-        $output->writeln($message);
+        $nbDeletedIncomingMessages = $this->em->getRepository(Msgs::class)->truncateOlder($date);
+        $output->writeln("Deleted {$nbDeletedIncomingMessages} incoming mails");
 
-        // Truncate outgoing messages
-        $deletedOutgoingStats = $this->em->getRepository(OutMsg::class)->truncateMessageOlder($start);
+        $nbDeletedOutgoingMessages = $this->em->getRepository(OutMsg::class)->truncateOlder($date);
+        $output->writeln("Deleted {$nbDeletedOutgoingMessages} outgoing mails");
 
-        $message = date('Y-m-d H:i:s');
-        $message .= "\tdelete outgoing mail entries older than " . date('Y-m-d', $start);
-        $message .= "\t{$deletedOutgoingStats['nbDeletedMsgs']} in out_msgs";
-        $message .= "\t{$deletedOutgoingStats['nbDeletedQuarantine']} in out_quarantine";
-        $output->writeln($message);
+        $nbDeletedLogs = $this->em->getRepository(Log::class)->truncateOlder($days);
+        $output->writeln("Deleted {$nbDeletedLogs} logs");
 
-        // Truncate logs
-        $nbDeletedlogs = $this->em->getRepository(Log::class)->truncateOlder($days);
-        $message = date('Y-m-d H:i:s');
-        $message .= "\tdelete log entries older than " . date('Y-m-d', $start);
-        $message .= "\t{$nbDeletedlogs} deleted";
-        $output->writeln($message);
         return Command::SUCCESS;
     }
 }
