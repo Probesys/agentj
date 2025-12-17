@@ -56,8 +56,8 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
         }
 
         if (isset($filters['mailId'])) {
-            $queryBuilder->andWhere('mr.mailId like :mailId');
-            $queryBuilder->setParameter('mailId', '%' . $filters['mailId'] . '%');
+            $queryBuilder->andWhere('mr.mailId = :mailId');
+            $queryBuilder->setParameter('mailId', $filters['mailId']);
         }
 
         $this->addDateCondition($queryBuilder, $filters);
