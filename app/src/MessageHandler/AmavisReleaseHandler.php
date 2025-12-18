@@ -82,13 +82,16 @@ final class AmavisReleaseHandler
 
         if (!$process->isSuccessful()) {
             $this->logger->error('Amavis release failed', [
-                'mailId' => $messageRecipient->getMailId(),
+                'mailId' => $messageRecipient->getMailIdAsString(),
                 'partitionTag' => $messageRecipient->getPartitionTag(),
                 'rseqnum' => $messageRecipient->getRseqnum(),
                 'output' => $process->getErrorOutput(),
             ]);
             $messageRecipient->setStatus(MessageStatus::ERROR);
         } else {
+            $this->logger->info('Amavis successfully released mail ', [
+                'mailId' => $messageRecipient->getMailIdAsString()
+            ]);
             $messageRecipient->setStatus($amavisRelease->getFinalStatus());
         }
 

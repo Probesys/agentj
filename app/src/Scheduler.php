@@ -21,6 +21,8 @@ class Scheduler implements ScheduleProviderInterface
         $from = new \DateTimeImmutable('02:00');
         $schedule->add(RecurringMessage::every('24 hours', new Message\CleanData(), $from));
 
+        $schedule->add(RecurringMessage::every('1 min', new Message\AmavisAutoRelease()));
+
         return $schedule;
     }
 }
