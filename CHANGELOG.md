@@ -1,5 +1,13 @@
 # Changelog of AgentJ
 
+## 2025-12-18 - 2.4.1
+
+### Maintenance
+
+- Schedule the auto release of emails for users without human authentication ([63bc4ec0](https://github.com/Probesys/agentj/commit/63bc4ec0))
+- No longer release messages when sending authentication mail ([d0b72d7c](https://github.com/Probesys/agentj/commit/d0b72d7c))
+- Fix the CI failing randomly ([047c4867](https://github.com/Probesys/agentj/commit/047c4867))
+
 ## 2025-12-17 - 2.4.0
 
 ### Migration notes
