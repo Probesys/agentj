@@ -7,6 +7,7 @@
 - [Login with OAuth2](/docs/administrators/oauth2.md)
 - [Versioning policy](/docs/versioning.md)
 - [Changelog of AgentJ](/CHANGELOG.md)
+- [Administration via the web interface](/docs/administrators/webinterface.md)
 
 ## The Developers' Guides
 
