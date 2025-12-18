@@ -124,8 +124,8 @@ AgentJ allows you to customize the way it filters emails. You can choose to disa
 On the `Filters & Rates` tab of a domain, you have the following parameters:
 
 - Filter threshold:
-    - Block all emails: FIXME:
-    - Allow all emails: FIXME:
+    - Block all emails: Enable human authentication on incoming emails.
+    - Allow all emails: Disable human authentication on incoming emails.
 - Policy for the domain: Choose one policy created in the `Policy` tab. See the dedicated section.
 - Spam threshold: Each received email is rated with a score. The higher the score, the higher the chance that an email is spam. AgentJ marks an email as spam if its score is higher than this threshold. Depending on the context, you can choose to adjust this score in order to balance the number of false positives/false negatives.
 - Email address that sends authentication requests: The noreply email address used to send authentication requests and reports.

@@ -272,7 +272,7 @@ Message:
   Flash:
     deleteSuccesFull: "Successful deletion"
     domainCreatd: "The domain has been successfully created"
-    domainUpdated: "The field has been successfully updated"
+    domainUpdated: "The domain has been successfully updated"
     missingRuleForDomain: "A rule must first be created for this domain"
     ruleExistForDomain: "A similar rule already exists in this area"
     domainRuleCreated: "The domain rule was created with success"
@@ -488,26 +488,26 @@ Entities:
       imapFlag: "IMAP security"
       active: "Active domain"
       transport: Transport
-      policy: "Policy for the field"
+      policy: "Policy for the domain"
       level: "Spam threshold"
-      mailAuthenticationSender: "Email address that sends authentication request"
+      mailAuthenticationSender: "Email address that sends authentication requests"
       imapNoValidateCert: Do not validate certificates
       defaultLang: "Default language"
       quota: Rate Limit
       quota_emails: Number of email during the period
       quota_seconds: Period duration
       addQuota: "Add a rate limit"
-      sendUserAlerts: "Send alerts to users dashboard in AgentJ"
+      sendUserAlerts: "Send alerts to users on the dashboard in AgentJ"
       sendUserMailAlerts: "Send alerts to users by email"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"
       connectors: "Connectors"
       rules: Rules
-      domainrules: "Rules of the field"
+      domainrules: "Rules of the domain"
       domaineSender: "sending domain"
-      domainMessages: "Messages from the field"
-      ipAddresses: "IP Address"
+      domainMessages: "Messages from the domain"
+      ipAddresses: "IP Address of the sending server"
       dns: "DNS"
       domain: DOMAIN
       auth: AUTH, USERS & ALIAS
