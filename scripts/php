@@ -3,4 +3,9 @@
 SCRIPT_PATH=$(dirname $(realpath -s $0))
 export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
 
-docker compose exec -T app php "$@"
+XDEBUG_ENV=""
+if [[ "$@" == *"--coverage"* ]] ; then
+    XDEBUG_ENV="-e XDEBUG_MODE=coverage"
+fi
+
+docker compose exec -T $XDEBUG_ENV app php "$@"

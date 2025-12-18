@@ -170,6 +170,21 @@
             "phpstan.dist.neon"
         ]
     },
+    "phpunit/phpunit": {
+        "version": "11.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "11.1",
+            "ref": "1117deb12541f35793eec9fff7494d7aa12283fc"
+        },
+        "files": [
+            ".env.test",
+            "phpunit.dist.xml",
+            "tests/bootstrap.php",
+            "bin/phpunit"
+        ]
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -457,15 +472,6 @@
     },
     "symfony/password-hasher": {
         "version": "v5.3.4"
-    },
-    "symfony/phpunit-bridge": {
-        "version": "7.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "7.3",
-            "ref": "dc13fec96bd527bd399c3c01f0aab915c67fd544"
-        }
     },
     "symfony/polyfill-intl-grapheme": {
         "version": "v1.22.1"

@@ -24,6 +24,20 @@ ifndef FORCE
 endif
 	docker compose down -v
 
+.PHONY: test
+test: FILE ?= ./tests
+ifdef FILTER
+test: override FILTER := --filter=$(FILTER)
+endif
+test: COVERAGE ?= --coverage-html ./coverage
+test: ## Run the test suite (can take FILE, FILTER and COVERAGE arguments)
+	$(PHP) vendor/bin/phpunit \
+		-c phpunit.xml.dist \
+		--testdox \
+		$(COVERAGE) \
+		$(FILTER) \
+		$(FILE)
+
 .PHONY: lint
 lint: LINTER ?= all
 lint: ## Execute the linters (can take a LINTER argument)
