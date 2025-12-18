@@ -24,7 +24,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Amavis\DeliveryStatus;
-use App\Service\MessageService;
 use Symfony\Component\Mailer\MailerInterface;
 
 #[AsCommand(
@@ -43,7 +42,6 @@ class SendAuthMailRequestCommand extends Command
         private LocaleService $localeService,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
-        private MessageService $messageService,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         public readonly string $defaultSenderAdress,
     ) {
@@ -109,8 +107,7 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
-                if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null) {
-                    $this->messageService->dispatchRelease($msgrcpt);
+                if ($user->getBypassHumanAuth()) {
                     continue;
                 }
 
