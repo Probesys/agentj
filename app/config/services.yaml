@@ -52,3 +52,12 @@ services:
             $twig: '@twig'
         tags:
             - { name: 'controller.service_arguments' }
+
+when@test:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+
+        App\Tests\Factory\:
+            resource: '../tests/Factory'
