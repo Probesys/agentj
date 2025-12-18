@@ -11,12 +11,6 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 /public/build/
@@ -25,3 +19,6 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 .yarn/install-state.gz
+
+/.phpunit.result.cache
+/coverage
