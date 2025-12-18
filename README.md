@@ -1,7 +1,7 @@
 <h1 align="center">AgentJ</h1>
 
 <p align="center">
-    <strong>Libre antispam system with human authentication</strong><br>
+    <strong>Libre antispam system with human authentication.</strong><br>
     <a href="https://agentj.io/">agentj.io</a>
 </p>
 
@@ -15,6 +15,8 @@ Features include:
 - spam/virus detection, for received and sent messages;
 - quota, shared mailbox, aliases;
 - and a lot more to come: [see our roadmap to learn more](/ROADMAP.md).
+
+![Screenshot of dashboard of AgentJ.](app/public/img/screenshot.webp)
 
 It runs on a Docker stack and uses well-known projects and technologies:
 
