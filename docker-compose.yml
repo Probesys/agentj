@@ -67,6 +67,10 @@ services:
     volumes:
       - var:/var/www/agentj/var
       - files:/var/www/agentj/public/files
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/healthy.txt"]
+      interval: 5s
+      retries: 30
 
   worker:
     image: probesys38/agentj_app:$VERSION
@@ -78,10 +82,15 @@ services:
     env_file:
       - .env
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     volumes:
       - var:/var/www/agentj/var
       - files:/var/www/agentj/public/files
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/healthy.txt"]
+      interval: 5s
+      retries: 30
 
   smtp:
     image: probesys38/agentj_smtp:$VERSION

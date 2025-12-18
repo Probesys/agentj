@@ -2,9 +2,19 @@
 
 dx='docker compose exec -u www-data app'
 
+worker_status() {
+    service_id=`docker compose ps -q worker`
+
+    if [ "$service_id" != "" ]; then
+        echo `docker inspect --format "{{ .State.Health.Status }}" $service_id`
+    else
+        echo 'not started'
+    fi
+}
+
 source .env
-echo "waiting app"
-while [ "$(curl -so /dev/null -w '%{http_code}' "http://localhost:$PROXY_PORT/login")" -ne 200 ];
+echo "Waiting for the worker service to be healthy"
+while [ "`worker_status`" != "healthy" ];
 do
 	echo -n '.'
 	sleep 1

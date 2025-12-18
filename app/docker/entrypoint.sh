@@ -38,4 +38,6 @@ fi
 
 cd /
 
+touch /tmp/healthy.txt
+
 exec "$@"
