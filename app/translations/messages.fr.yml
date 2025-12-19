@@ -622,6 +622,7 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
+    noBlockedMessages: 'Aucun message bloqué'
     labels:
       infos: "Informations sur les refus"
       preview: "Aperçu du message"

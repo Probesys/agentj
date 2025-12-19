@@ -79,7 +79,7 @@
         if (filteredData.datasets[0].data.length === 0) { // Display a message if there is no data
             document.getElementById('messagesChart').style.display = 'none';
             var noDataMessage = document.createElement('p');
-            noDataMessage.textContent = 'Aucun message bloqué';
+            noDataMessage.textContent = '{{ 'Entities.Message.noBlockedMessages' | trans }}';
             noDataMessage.style.textAlign = 'center';
             noDataMessage.style.marginTop = '20px';
             document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
