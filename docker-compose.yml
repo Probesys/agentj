@@ -76,7 +76,7 @@ services:
     image: probesys38/agentj_app:$VERSION
     build:
       context: ./app
-    command: "php /var/www/agentj/bin/console messenger:consume async scheduler_default --memory-limit=128M"
+    command: "sudo -u www-data php /var/www/agentj/bin/console messenger:consume async scheduler_default --memory-limit=128M"
     entrypoint: "/entrypoint-worker.sh"
     restart: unless-stopped
     env_file:
