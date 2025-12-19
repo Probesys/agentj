@@ -66,6 +66,16 @@ class UserRepository extends BaseRepository
     }
 
     /**
+     * @return User[]
+     */
+    public function findAllWithoutHumanAuthentication(): array
+    {
+        return $this->findBy([
+            'bypassHumanAuth' => true,
+        ]);
+    }
+
+    /**
      * Return all users from active domains
      *
      * @return array<int, array<string, int>>

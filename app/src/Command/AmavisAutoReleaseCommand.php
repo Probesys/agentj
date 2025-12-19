@@ -20,7 +20,7 @@ use Symfony\Component\Lock\Store\SemaphoreStore;
 )]
 class AmavisAutoReleaseCommand extends Command
 {
-    private int $batchSize = 1000;
+    private int $batchSize = 500;
 
     public function __construct(
         private MsgrcptSearchRepository $msgrcptSearchRepository,
@@ -43,28 +43,20 @@ class AmavisAutoReleaseCommand extends Command
             return Command::FAILURE;
         }
 
-        $searchQuery = $this->msgrcptSearchRepository->getSearchQuery(
-            null,
-            MessageStatus::UNTREATED
-        );
+        $users = $this->userRepository->findAllWithoutHumanAuthentication();
 
-        $messageRecipients = $searchQuery->setMaxResults($this->batchSize)->getResult();
+        foreach ($users as $user) {
+            $searchQuery = $this->msgrcptSearchRepository->getSearchQuery(
+                $user,
+                MessageStatus::UNTREATED
+            );
 
-        foreach ($messageRecipients as $messageRecipient) {
-            if ($messageRecipient->isAmavisReleaseOngoing()) {
-                continue;
-            }
+            $messageRecipients = $searchQuery->setMaxResults($this->batchSize)->getResult();
 
-            $user = $this->userRepository->findOneBy([
-                'email' => $messageRecipient->getRid()->getEmailClear()
-            ]);
-
-            if (!$user) {
-                continue;
-            }
-
-            if ($user->getBypassHumanAuth()) {
-                $this->messageService->dispatchRelease($messageRecipient);
+            foreach ($messageRecipients as $messageRecipient) {
+                if (!$messageRecipient->isAmavisReleaseOngoing()) {
+                    $this->messageService->dispatchRelease($messageRecipient);
+                }
             }
         }
 
