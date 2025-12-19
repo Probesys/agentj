@@ -58,7 +58,9 @@ In order to add a connector, go to the `AUTH, USERS & ALIAS` in your domain conf
 
 - Connector name: The display name you want to use for the connector.
 - Host: The domain name or IP address of your LDAP server.
-- Port: The port of your LDAP server (usually 389/TCP).
+- Port: The port of your LDAP server (389/TCP with no encryption, 636/tcp with encryption).
+- Encryption: The encryption protocol used to reach your LDAP server. Choose between None, SSL and TLS. None by default.
+- LDAP version: The version of your LDAP protocol. Choose between 2 and 3. 3 by default.
 
 Connection information
 
