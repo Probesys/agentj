@@ -1,5 +1,14 @@
 # Changelog of AgentJ
 
+## 2025-12-19 - 2.4.2
+
+### Bug fixes
+
+- Execute the `messenger:consume` command as `www-data` ([0ad0113e](https://github.com/Probesys/agentj/commit/0ad0113e))
+- Fix setting the default locale ([b428b41d](https://github.com/Probesys/agentj/commit/b428b41d))
+- Fix autorelease with a high number of untreated messages ([faccbb2c](https://github.com/Probesys/agentj/commit/faccbb2c))
+- Fix an English translation in the dashboard stats ([e9b39cdf](https://github.com/Probesys/agentj/commit/e9b39cdf))
+
 ## 2025-12-18 - 2.4.1
 
 ### Maintenance
