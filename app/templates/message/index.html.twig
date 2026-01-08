@@ -35,7 +35,7 @@
                         {% endif %}
                         {% if is_granted('ROLE_ADMIN') %}
                             <th>
-                                {{ knp_pagination_sortable(messagesRecipients, 'Message.Recipient'|trans,'m.fromAddr') }}
+                                {{ knp_pagination_sortable(messagesRecipients, 'Message.Recipient'|trans,'maddr.email') }}
                             </th>
                         {% endif %}
                         {#            <th>{{ 'Message.Status'|trans() }}</th> #}
