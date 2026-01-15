@@ -179,6 +179,12 @@ class Office365ImportCommand extends Command
         foreach ($proxyAdresses as $proxyAdresse) {
             if (str_starts_with(strtolower($proxyAdresse), 'smtp:')) {
                 $aliasEmail = substr($proxyAdresse, strlen('smtp:'));
+
+                // Don't mark the initial user as an alias of himself
+                if ($aliasEmail === $user->getEmail()) {
+                    continue;
+                }
+
                 $domainAlias = explode('@', $aliasEmail)[1];
                 if ($domainAlias == $this->connector->getDomain()->getDomain()) {
                     $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
