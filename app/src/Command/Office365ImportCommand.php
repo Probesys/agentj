@@ -7,6 +7,7 @@ use App\Entity\Groups;
 use App\Entity\Office365Connector;
 use App\Entity\User as User;
 use App\Service\MailaddrService;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -176,31 +177,48 @@ class Office365ImportCommand extends Command
     private function addAliases(User $user, array $proxyAdresses): array
     {
         $aliases = [];
-        foreach ($proxyAdresses as $proxyAdresse) {
-            if (str_starts_with(strtolower($proxyAdresse), 'smtp:')) {
-                $aliasEmail = substr($proxyAdresse, strlen('smtp:'));
-
-                // Don't mark the initial user as an alias of himself
-                if ($aliasEmail === $user->getEmail()) {
-                    continue;
-                }
-
-                $domainAlias = explode('@', $aliasEmail)[1];
-                if ($domainAlias == $this->connector->getDomain()->getDomain()) {
-                    $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
-                    if (!$alias) {
-                        $alias = clone $user;
-                    }
-                    $alias->setUid(null);
-                    $alias->setEmail($aliasEmail);
-                    $alias->setUserName($aliasEmail);
-                    $alias->setOriginalUser($user);
-                    $alias->setOriginConnector($this->connector);
-                    $this->em->persist($alias);
-
-                    $aliases[] = $alias;
-                }
+        foreach ($proxyAdresses as $proxyAdress) {
+            if (!str_starts_with(strtolower($proxyAdress), 'smtp:')) {
+                continue;
             }
+
+            $aliasEmail = substr($proxyAdress, strlen('smtp:'));
+            if (!Email::validate($aliasEmail)) {
+                continue;
+            }
+
+            // Don't mark the initial user as an alias of himself
+            if ($aliasEmail === $user->getEmail()) {
+                continue;
+            }
+
+            // Get the domain associated to the email address
+            $domainName = Email::extractDomain($aliasEmail);
+            if (!$domainName) {
+                continue;
+            }
+
+            $domain = $this->em->getRepository(Domain::class)->findOneByDomain($domainName);
+            if (!$domain || $domain->getId() !== $this->connector->getDomain()->getId()) {
+                continue;
+            }
+
+            // Create the alias if it doesn't exist yet
+            $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
+            if (!$alias) {
+                $alias = new User();
+                $alias->setOriginConnector($this->connector);
+            }
+
+            // And update information
+            $alias->setEmail($aliasEmail);
+            $alias->setUsername($aliasEmail);
+            $alias->setOriginalUser($user);
+            $alias->setDomain($domain);
+
+            $this->em->persist($alias);
+
+            $aliases[] = $alias;
         }
         return $aliases;
     }
