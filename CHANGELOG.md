@@ -1,5 +1,17 @@
 # Changelog of AgentJ
 
+## 2026-01-16 - 2.4.3
+
+### Bug fixes
+
+- Fix sorting messages by recipient address ([e03a9501](https://github.com/Probesys/agentj/commit/e03a9501))
+- Don't mark initial user as an alias of himself when importing from M365 ([ed4cff1e](https://github.com/Probesys/agentj/commit/ed4cff1e))
+- Fix checking proxy address when importing alias from M365 ([927adcc7](https://github.com/Probesys/agentj/commit/927adcc7))
+
+### Maintenance
+
+- Refactor creation of aliases ([f24fb50c](https://github.com/Probesys/agentj/commit/f24fb50c))
+
 ## 2025-12-19 - 2.4.2
 
 ### Bug fixes
