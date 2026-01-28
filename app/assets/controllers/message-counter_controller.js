@@ -25,7 +25,13 @@ export default class extends Controller {
             this[`${name}Target`].textContent = '...';
         });
 
-        fetch(this.urlValue)
+        fetch(this.urlValue, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);

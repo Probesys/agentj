@@ -10,6 +10,7 @@ use App\Form\ImportType;
 use App\Entity\Domain;
 use App\Repository\WblistRepository;
 use App\Service\LogService;
+use App\Service\Referrer;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,7 @@ class WblistController extends AbstractController
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
+        private Referrer $referrer,
     ) {
     }
 
@@ -106,11 +108,7 @@ class WblistController extends AbstractController
             $this->addFlash('error', 'Invalid csrf token');
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     private function deleteWbList(
@@ -153,8 +151,7 @@ class WblistController extends AbstractController
             $this->em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
 
@@ -185,8 +182,7 @@ class WblistController extends AbstractController
             }
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/wblist/admin/import', name: 'import_wblist', options: ['expose' => true])]
@@ -206,8 +202,8 @@ class WblistController extends AbstractController
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
-            $referer = $request->headers->get('referer');
-            return $this->redirect($referer);
+
+            return new RedirectResponse($this->referrer->get());
         }
         return $this->render('import/index_wblist.html.twig', [
                     'controller_name' => 'ImportController',

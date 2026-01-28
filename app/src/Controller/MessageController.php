@@ -32,7 +32,8 @@ class MessageController extends AbstractController
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
-        private Service\MessageService $messageService
+        private Service\MessageService $messageService,
+        private Service\Referrer $referrer,
     ) {
     }
 
@@ -249,11 +250,7 @@ class MessageController extends AbstractController
             $logService->addLog('delete', $mailId);
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/batch/{action}', name: 'message_batch', methods: 'POST', options: ['expose' => true])]
@@ -290,8 +287,7 @@ class MessageController extends AbstractController
             }
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
@@ -321,11 +317,7 @@ class MessageController extends AbstractController
             $logService->addLog('authorized', $mailId);
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
@@ -355,11 +347,7 @@ class MessageController extends AbstractController
             $logService->addLog('banned', $mailId);
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     /**
@@ -391,11 +379,7 @@ class MessageController extends AbstractController
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
         $logService->addLog('restore', $mailId);
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -412,8 +396,7 @@ class MessageController extends AbstractController
             $logService->addLog('authorize for domain ', $mailId);
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -430,8 +413,7 @@ class MessageController extends AbstractController
             $logService->addLog('banned for domain ', $mailId);
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     /**

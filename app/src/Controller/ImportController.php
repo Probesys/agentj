@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ImportType;
 use App\Service\GroupService;
+use App\Service\Referrer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -26,15 +27,12 @@ class ImportController extends AbstractController
     use ControllerCommonTrait;
     use ControllerWBListTrait;
 
-    private TranslatorInterface $translator;
-    private EntityManagerInterface $em;
-    private GroupService $groupService;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em, GroupService $groupService)
-    {
-        $this->translator = $translator;
-        $this->em = $em;
-        $this->groupService = $groupService;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+        private GroupService $groupService,
+        private Referrer $referrer,
+    ) {
     }
 
     #[Route(path: '/users', name: 'import_user_email', options: ['expose' => true])]
@@ -66,8 +64,8 @@ class ImportController extends AbstractController
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
-            $referer = $request->headers->get('referer');
-            return $this->redirect($referer);
+
+            return $this->redirect($this->referrer->get());
         }
 
         return $this->render('import/index.html.twig', [
@@ -270,8 +268,8 @@ class ImportController extends AbstractController
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
-            $referer = $request->headers->get('referer');
-            return $this->redirect($referer);
+
+            return $this->redirect($this->referrer->get());
         }
 
         return $this->render('import/index_alias.html.twig', [

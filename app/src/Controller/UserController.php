@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
+use App\Service\Referrer;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,13 +29,11 @@ class UserController extends AbstractController
 {
     use ControllerWBListTrait;
 
-    private TranslatorInterface $translator;
-    private EntityManagerInterface $em;
-
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $em)
-    {
-        $this->translator = $translator;
-        $this->em = $em;
+    public function __construct(
+        private TranslatorInterface $translator,
+        private EntityManagerInterface $em,
+        private Referrer $referrer,
+    ) {
     }
 
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
@@ -302,8 +301,7 @@ class UserController extends AbstractController
             $this->em->flush();
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+        return $this->redirect($this->referrer->get());
     }
 
     #[Route(path: '/email/batchDelete', name: 'user_email_batch_delete', methods: 'POST')]
@@ -314,8 +312,7 @@ class UserController extends AbstractController
 
         if (!$this->isCsrfTokenValid('delete user', $csrfToken)) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken', [], 'errors'));
-            $referer = $request->headers->get('referer');
-            return $this->redirect($referer);
+            return $this->redirect($this->referrer->get());
         }
 
         foreach ($request->request->all('id') as $id) {
@@ -325,8 +322,8 @@ class UserController extends AbstractController
             }
         }
         $this->em->flush();
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+
+        return $this->redirect($this->referrer->get());
     }
 
     #[Route(path: '/email/newUser', name: 'user_email_new', methods: 'GET|POST')]
