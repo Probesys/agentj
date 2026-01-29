@@ -24,6 +24,10 @@ export default class extends Controller {
             const url = this.urlValue;
             const response = await fetch(url, {
                 method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
             });
 
             if (!response.ok) {

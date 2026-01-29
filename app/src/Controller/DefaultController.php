@@ -7,6 +7,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Repository\MsgrcptRepository;
+use App\Service\Referrer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -19,6 +20,7 @@ class DefaultController extends AbstractController
 {
     public function __construct(
         private Security $security,
+        private Referrer $referrer,
     ) {
     }
 
@@ -49,11 +51,6 @@ class DefaultController extends AbstractController
             $request->getSession()->set('_locale', $language);
         }
 
-        $url = $request->headers->get('referer');
-        if (empty($url)) {
-            $url = $this->container->get('router')->generate('message');
-        }
-
         /** @var User $user */
         $user = $this->getUser();
         if (!$this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
@@ -66,21 +63,22 @@ class DefaultController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        return new RedirectResponse($url);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route('/per_page/{nbItems}', name: 'per_page')]
     public function perPage(int $nbItems, Request $request): Response
     {
-        $referer = $request->headers->get('referer');
         $session = $request->getSession();
         $session->set('perPage', $nbItems);
-        $urlParts = parse_url($referer);
+
+        $referrer = $this->referrer->get();
+        $urlParts = parse_url($referrer);
         parse_str($urlParts['query'] ?? '', $query);
         $query['page'] = 1;
         $newQuery = http_build_query($query);
-        $newReferer = strtok($referer, '?') . '?' . $newQuery;
+        $newReferrer = strtok($referrer, '?') . '?' . $newQuery;
 
-        return $referer ? $this->redirect($newReferer) : $this->redirectToRoute('homepage');
+        return new RedirectResponse($newReferrer);
     }
 }
