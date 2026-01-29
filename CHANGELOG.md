@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-01-29 - 2.4.4
+
+### Bug fixes
+
+- Fix redirecting to the "Referer" URL ([ec585b3a](https://github.com/Probesys/agentj/commit/ec585b3a))
+
 ## 2026-01-16 - 2.4.3
 
 ### Bug fixes
