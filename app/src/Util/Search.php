@@ -25,7 +25,7 @@ class Search
         // Sanitize the terms to perform a boolean search.
         $safeTerms = [];
         foreach ($terms as $term) {
-            $safeTerm = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
+            $safeTerm = preg_replace('/[+\-><()~*"@\.]+/', ' ', $term);
             $safeTerm = trim($safeTerm ?: '');
             $explodedSafeTerm = explode(' ', $safeTerm);
             $safeTerms = array_merge($safeTerms, $explodedSafeTerm);
