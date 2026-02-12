@@ -278,15 +278,26 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function addSearchKeyCondition(QueryBuilder $queryBuilder, string $searchKey): void
     {
-        $potentialEmails = Email::extractEmailsFromText($searchKey);
-        $foundUserEmails = $this->userRepository->searchUsersByEmails($potentialEmails);
+        $potentialEmails = Email::extractEmailsFromText($searchKey, looseMode: true);
+        $foundUserEmails = $this->userRepository->searchEmails($potentialEmails);
         $allUserEmails = array_unique($foundUserEmails);
+
+        // Get the list of "potential emails" that matched a real email in the
+        // database to exclude them from the boolean search below.
+        $termsToExclude = [];
+        foreach ($potentialEmails as $potentialEmail) {
+            foreach ($allUserEmails as $email) {
+                if (str_contains($email, $potentialEmail)) {
+                    $termsToExclude[] = $potentialEmail;
+                }
+            }
+        }
 
         // Create the boolean search string by excluding the terms that matched
         // a user's email. The emails will be used to search against the
         // recipient or the sender emails, while the other terms will be used
         // to perform a boolean search against subject, from and the message's id.
-        $booleanSearch = Search::textToMariadbBooleanSearch($searchKey, excludeTerms: $allUserEmails);
+        $booleanSearch = Search::textToMariadbBooleanSearch($searchKey, excludeTerms: $termsToExclude);
 
         // Add the boolean search condition.
         if ($booleanSearch) {

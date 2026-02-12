@@ -305,17 +305,23 @@ class UserRepository extends BaseRepository
      * @param string[] $emails
      * @return string[]
      */
-    public function searchUsersByEmails(array $emails): array
+    public function searchEmails(array $emails): array
     {
         if (empty($emails)) {
             return [];
         }
 
         $queryBuilder = $this->createQueryBuilder('u');
-        $queryBuilder->select('u.email')
-                ->where("u.email IN (:emails) and u.roles is not null")
-                ->setParameter('emails', $emails);
+        $queryBuilder->select('u.email');
+        $queryBuilder->where("u.roles is not null");
 
+        $expr = new Expr\Orx();
+        foreach ($emails as $key => $email) {
+            $expr->add("u.email LIKE :email{$key}");
+            $queryBuilder->setParameter("email{$key}", "%{$email}%");
+        }
+
+        $queryBuilder->andWhere($expr);
 
         return $queryBuilder->getQuery()->getSingleColumnResult();
     }
