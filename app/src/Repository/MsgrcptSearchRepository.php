@@ -96,8 +96,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         }
 
         if ($domain) {
-            $queryBuilder->andWhere('d.id = :domain');
-            $queryBuilder->setParameter('domain', $domain->getId());
+            $queryBuilder->andWhere('u.domain = :domain');
+            $queryBuilder->setParameter('domain', $domain);
         }
 
         $queryBuilder->groupBy('date_group');
