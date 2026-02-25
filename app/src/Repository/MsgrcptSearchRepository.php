@@ -9,6 +9,7 @@ use App\Entity\Msgrcpt;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
 use App\Amavis\DeliveryStatus;
+use App\Doctrine\SqlIndexWalker;
 use App\Repository\BaseMessageRecipientRepository;
 use App\Repository\UserRepository;
 use App\Util\Email;
@@ -32,6 +33,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         private UserRepository $userRepository,
         #[Autowire(env: 'bool:FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT')]
         private bool $featureFlagDisableSortBySubject,
+        #[Autowire(env: 'bool:FEATURE_FLAG_HINT_INDEX')]
+        private bool $featureFlagHintIndex,
     ) {
         parent::__construct($registry, Msgrcpt::class);
     }
@@ -46,7 +49,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         ?array $sortParams = null,
         ?int $fromDate = null
     ): Query {
-
 
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
 
@@ -74,6 +76,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         }
 
         $query = $queryBuilder->getQuery();
+
+        $this->hintQueryWithIndexes($query, $user, $sortParams, $searchKey, $fromDate);
 
         $countQueryBuilder = $this->createCountQueryBuilder($queryBuilder, $user, $searchKey, $fromDate);
         $countQuery = $countQueryBuilder->getQuery();
@@ -259,6 +263,61 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         if (count($user->getDomains()) > 0) {
             $queryBuilder->andWhere('u.domain in (:domain)')
                 ->setParameter('domain', $user->getDomains());
+        }
+    }
+
+    /**
+     * @param ?array{sort: string, direction: string} $sortParams
+     */
+    private function hintQueryWithIndexes(
+        Query $query,
+        ?User $user,
+        ?array $sortParams,
+        ?string $searchKey,
+        ?int $fromDate,
+    ): void {
+        if (!$this->featureFlagHintIndex) {
+            // The "hint index" feature flag isn't enabled, so don't try to
+            // optimize the requests.
+            return;
+        }
+
+        $hintIndex = [];
+
+        if ($user && !$user->isAdmin()) {
+            // If the request is made by a normal user, there should be not a
+            // lot of emails to list. We want to priviledge the use of
+            // idx_maddr_email index when joining the maddr column.
+            $hintIndex['maddr'] = 'USE INDEX (idx_maddr_email)';
+        } elseif ($fromDate) {
+            // This is a tricky one as, depending on the given time, the index
+            // may be worth, or really not. Here, we consider it's often
+            // worth for admins, but almost never for standard users.
+            $hintIndex['m'] = 'USE INDEX (msgs_idx_time_num)';
+        } elseif ($sortParams) {
+            // If results are sorted, the database should use indexes
+            // accordingly as it will help listing the results more quickly.
+            // There is no hint for the subject sort as there is no index on
+            // it. We recommand to disable sorting on subject instead (with the
+            // corresponding feature flag) as it doesn't seem really useful.
+            if ($sortParams['sort'] === 'maddr.email') {
+                $hintIndex['maddr'] = 'USE INDEX (idx_maddr_email)';
+            } elseif ($sortParams['sort'] === 'm.fromAddr') {
+                $hintIndex['m'] = 'USE INDEX (msgs_idx_from_addr)';
+            } elseif ($sortParams['sort'] === 'm.timeNum') {
+                $hintIndex['m'] = 'USE INDEX (msgs_idx_time_num)';
+            }
+        }
+
+        if ($searchKey) {
+            // If search key is passed, we absolutely need to use the fulltext
+            // index.
+            $hintIndex['m'] = 'USE INDEX (msg_fulltext_idx)';
+        }
+
+        if ($hintIndex) {
+            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, SqlIndexWalker::class);
+            $query->setHint(SqlIndexWalker::HINT_INDEX, $hintIndex);
         }
     }
 }
