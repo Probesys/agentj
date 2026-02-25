@@ -31,3 +31,4 @@ sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" $env_file
 sed -i "s|\$TZ|$TZ|g" $env_file
 sed -i "s|\$DEFAULT_LOCALE|$DEFAULT_LOCALE|g" $env_file
 sed -i "s|\$HISTORY_RETENTION_DAYS|${HISTORY_RETENTION_DAYS:-30}|g" $env_file
+sed -i "s|\$FEATURE_FLAG_HINT_INDEX|${FEATURE_FLAG_HINT_INDEX:-false}|g" $env_file
