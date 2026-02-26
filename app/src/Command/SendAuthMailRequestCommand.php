@@ -75,7 +75,7 @@ class SendAuthMailRequestCommand extends Command
                     continue;
                 }
 
-                if ($msgrcpt->getStatus() !== null) {
+                if ($msgrcpt->getStatus() !== MessageStatus::UNTREATED) {
                     continue;
                 }
 

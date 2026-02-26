@@ -111,7 +111,7 @@ class MessageController extends AbstractController
                 'Message.Actions.Delete' => 'delete',
             ];
             $subTitle = 'Entities.Message.untreated';
-            $messageStatus = null;
+            $messageStatus = MessageStatus::UNTREATED;
         }
 
         $filterForm = $this->createForm(ActionsFilterType::class, options: [

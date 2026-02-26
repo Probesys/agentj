@@ -55,29 +55,18 @@
         <div class="col-md-4">
             {{ 'Message.Status.title' | trans }}
         </div>
-        <div
-            class="col-md-8">
-            {# If the message as an agentJ status #}
-            {% if msgRcpt.status is not null %}
-                {#   authorized or restored status     #}
-                {% set msgsStatus = msgRcpt.getStatusName() %}
+        <div class="col-md-8">
+            {% if msgRcpt.isAlreadyReleased %}
+                {% set deliveryStatusClass = 'text-success' %}
+                {% set msgsStatus = msgRcpt.statusName %}
                 {% set response = msgRcpt.amavisOutput %}
-                {% if msgRcpt.status == 2 or msgRcpt.status == 5  %}
-                    {% set deliverySatusClass = 'text-success' %}
-                {% else %}
-                    {% set deliverySatusClass = 'text-danger' %}
-                {% endif %}
             {% else %}
+                {% set deliveryStatusClass = 'text-danger' %}
                 {% set msgsStatus = msgDeliveryStatus[msgRcpt.ds] %}
                 {% set response = msgRcpt.smtpResp %}
-                {% if msgRcpt.ds == 'P' %}
-                    {% set deliverySatusClass = 'text-success' %}
-                {% else %}
-                    {% set deliverySatusClass = 'text-danger' %}
-                {% endif %}
             {% endif %}
 
-            <span class="{{ deliverySatusClass }}">
+            <span class="{{ deliveryStatusClass }}">
                 {{ msgsStatus }}
             </span>
             <br>

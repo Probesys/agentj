@@ -185,13 +185,9 @@ class MsgsRepository extends BaseMessageRepository
             LEFT JOIN maddr ms ON ms.id = m.sid
             LEFT JOIN maddr mr ON mr.id = msr.rid
             WHERE msr.ds != :deliveryPass
-            AND msr.content != :virusContent
-            AND (
-                msr.status_id IS NULL OR (
-                    msr.status_id != :statusAuthorized
-                    AND msr.status_id != :statusRestored
-                )
-            )
+            AND msr.status_id != :statusVirus
+            AND msr.status_id != :statusAuthorized
+            AND msr.status_id != :statusRestored
             AND mr.email = :emailRecipient
             AND ms.email = :emailSender
         SQL;
@@ -199,7 +195,7 @@ class MsgsRepository extends BaseMessageRepository
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery([
             'deliveryPass' => DeliveryStatus::PASS,
-            'virusContent' => ContentType::VIRUS,
+            'statusVirus' => MessageStatus::VIRUS,
             'statusAuthorized' => MessageStatus::AUTHORIZED,
             'statusRestored' => MessageStatus::RESTORED,
             'emailRecipient' => $emailRecipient,

@@ -63,7 +63,7 @@
 					</td>
 					<td>{{ messageRecipient.bspamLevel }}</td>
 					<td>
-						{% set href = messageRecipient.status is null ? '/message' : '/message/'  %}
+						{% set href = messageRecipient.isUntreated ? '/message' : '/message/'  %}
 						<a href="{{ href }}" class="btn btn-primary float-right">
 							<i class="fas fa-link"></i>
 						</a>

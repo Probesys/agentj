@@ -82,19 +82,15 @@ class MsgrcptRepository extends BaseRepository
             LEFT JOIN maddr ms ON ms.id = m.sid
             LEFT JOIN maddr mr ON mr.id = msr.rid
             WHERE  msr.ds != :deliveryPass
-            AND msr.content != :virusContent
-            AND (
-                msr.status_id IS NULL OR (
-                    msr.status_id != :statusAuthorized
-                    AND msr.status_id != :statusRestored
-                )
-            )
+            AND msr.status_id != :statusVirus
+            AND msr.status_id != :statusAuthorized
+            AND msr.status_id != :statusRestored
             AND mr.domain = :domain
             AND ms.email = :emailSender
         SQL;
         $stmt = $conn->prepare($sql);
         $stmt->bindValue('deliveryPass', DeliveryStatus::PASS);
-        $stmt->bindValue('virusContent', ContentType::VIRUS);
+        $stmt->bindValue('statusVirus', MessageStatus::VIRUS);
         $stmt->bindValue('statusAuthorized', MessageStatus::AUTHORIZED);
         $stmt->bindValue('statusRestored', MessageStatus::RESTORED);
         $stmt->bindValue('domain', $domain);
@@ -117,5 +113,42 @@ class MsgrcptRepository extends BaseRepository
         $query->setParameter('email', $email);
 
         return $query;
+    }
+
+    public function consolidateStatus(): int
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        // phpcs:disable Generic.Files.LineLength
+        $statement = $connection->prepare(<<<SQL
+            UPDATE msgrcpt mr
+            INNER JOIN maddr ma ON (mr.rid = ma.id)
+            INNER JOIN users u ON (ma.email = u.email)
+            INNER JOIN domain d ON (u.domain_id = d.id)
+            SET status_id = CASE
+                WHEN mr.ds = :ds_pass AND mr.wl = 'Y' THEN :status_authorized
+                WHEN mr.ds = :ds_pass AND mr.wl != 'Y' THEN :status_restored
+                WHEN mr.ds != :ds_pass AND mr.content = :content_virus THEN :status_virus
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl = 'Y' THEN :status_banned
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y' AND mr.bspam_level > d.level THEN :status_spam
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y' AND mr.bspam_level <= d.level THEN :status_untreated
+                ELSE NULL
+            END
+            WHERE status_id IS NULL
+        SQL);
+        // phpcs:enable Generic.Files.LineLength
+
+        $statement->bindValue('ds_pass', DeliveryStatus::PASS);
+        $statement->bindValue('content_virus', ContentType::VIRUS);
+        $statement->bindValue('status_authorized', MessageStatus::AUTHORIZED);
+        $statement->bindValue('status_restored', MessageStatus::RESTORED);
+        $statement->bindValue('status_virus', MessageStatus::VIRUS);
+        $statement->bindValue('status_banned', MessageStatus::BANNED);
+        $statement->bindValue('status_spam', MessageStatus::SPAMMED);
+        $statement->bindValue('status_untreated', MessageStatus::UNTREATED);
+
+        $result = $statement->execute();
+
+        return $result->rowCount();
     }
 }
