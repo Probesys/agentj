@@ -272,7 +272,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             return $alias->getEmail();
         }, $aliases);
         $recipients[] = $user->getEmail();
-        $queryBuilder->andWhere('CONVERT(maddr.email USING \'utf8\') IN (:recipients)')
+        $queryBuilder->andWhere('maddr.email IN (:recipients)')
             ->setParameter('recipients', $recipients);
     }
 
