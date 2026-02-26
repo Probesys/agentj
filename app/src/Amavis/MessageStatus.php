@@ -4,7 +4,6 @@ namespace App\Amavis;
 
 class MessageStatus
 {
-    public const UNTREATED = null;
     public const BANNED = 1;
     public const AUTHORIZED = 2;
     public const DELETED = 3;
@@ -12,6 +11,7 @@ class MessageStatus
     public const RESTORED = 5;
     public const SPAMMED = 6;
     public const VIRUS = 7;
+    public const UNTREATED = 8;
 
     public static function getStatusName(?int $status): string
     {

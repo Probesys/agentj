@@ -67,16 +67,15 @@
 
                     {% for msgRecipient in messagesRecipients %}
                         {% set error_badge = "" %}
-                        {% set bold = "bold" %}
-                        {% if msgRecipient.status is not null and msgRecipient.status == 4 %}
+                        {% set bold = "" %}
+
+                        {% if msgRecipient.isUntreated %}
+                            {% set bold = "bold" %}
+                        {% elseif msgRecipient.isError %}
+                            {% set bold = "bold" %}
                             {% set error_badge = 'Message.Status.Error' %}
                         {% endif %}
-                        {% if msgRecipient.status is not null and msgRecipient.status is null %}
-                            {% set status = 'Message.Status.untreated'|trans()  %}
-                        {% elseif msgRecipient.status is not null %}
-                            {% set status = msgRecipient.status %}
-                            {% set bold = "" %}
-                        {% endif %}
+
                         {% set keyPairMessage =  [msgRecipient.partitionTag, msgRecipient.getMailIdAsString(),msgRecipient.rid.id] %}
                         <tr
                             class="{{bold}} ">
@@ -150,8 +149,7 @@
                                     {{msgRecipient.msgs.timeNum | format_datetime('short', 'short')}}
                                 </span>
                             </td>
-                            {# it not virus #}
-                            {% if messageStatus != '7' %}
+                            {% if not msgRecipient.isVirus %}
                                 <td>
                                     {{ msgRecipient.bspamLevel }}
                                 </td>
@@ -196,8 +194,7 @@
                                 </ul>
                             </td>
 
-                            {# it not virus #}
-                            {% if messageStatus != '7' %}
+                            {% if not msgRecipient.isVirus %}
                                 <td>
                                     {% if msgRecipient.isAmavisReleaseOngoing %}
                                         <div
@@ -222,8 +219,7 @@
                                             </button>
                                             <div class="dropdown-menu" style="z-index:10300">
 
-                                                {% if messageStatus == '1' %}
-                                                    {# banned #}
+                                                {% if msgRecipient.isBanned %}
                                                     <a
                                                         href="{{path('message_restore',
                                                         {
@@ -255,8 +251,8 @@
                                                         {{ 'Message.Actions.Autorized'|trans() }}
                                                     </a>
                                                 {% endif %}
-                                                {% if messageStatus == '2' %}
-                                                    {# authorized #}
+
+                                                {% if msgRecipient.isAuthorized %}
                                                     <a
                                                         href="{{path('message_banned',{
                                                             'partitionTag':msgRecipient.partitionTag,
@@ -272,7 +268,8 @@
                                                         {{ 'Message.Actions.Banned'|trans() }}
                                                     </a>
                                                 {% endif %}
-                                                {% if messageStatus is empty or messageStatus == '4'  %}
+
+                                                {% if msgRecipient.isUntreated or msgRecipient.isError %}
                                                     <a
                                                         href="{{path('message_restore',{
                                                             'partitionTag':msgRecipient.partitionTag,
@@ -316,8 +313,8 @@
                                                         {{ 'Message.Actions.Banned'|trans() }}
                                                     </a>
                                                 {% endif %}
-                                                {% if messageStatus == '6'  %}
-                                                    {# spam compared to the level #}
+
+                                                {% if msgRecipient.isSpam %}
                                                     <a
                                                         href="{{path('message_restore',{
                                                             'partitionTag':msgRecipient.partitionTag,
@@ -361,7 +358,8 @@
                                                         {{ 'Message.Actions.Banned'|trans() }}
                                                     </a>
                                                 {% endif %}
-                                                {% if messageStatus == '3' %}
+
+                                                {% if msgRecipient.isDeleted %}
                                                     <a
                                                         href="{{path('message_restore',{
                                                             'partitionTag':msgRecipient.partitionTag,
@@ -405,7 +403,8 @@
                                                         {{ 'Message.Actions.Banned'|trans() }}
                                                     </a>
                                                 {% endif %}
-                                                {% if messageStatus != '3' %}
+
+                                                {% if not msgRecipient.isDeleted %}
                                                     <a
                                                         href="{{path('message_delete',{
                                                             'partitionTag':msgRecipient.partitionTag,

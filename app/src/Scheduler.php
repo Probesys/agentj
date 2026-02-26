@@ -23,6 +23,8 @@ class Scheduler implements ScheduleProviderInterface
 
         $schedule->add(RecurringMessage::every('1 min', new Message\AmavisAutoRelease()));
 
+        $schedule->add(RecurringMessage::every('30 seconds', new Message\ConsolidateAmavisData()));
+
         return $schedule;
     }
 }

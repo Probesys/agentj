@@ -36,7 +36,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
      */
     public function getSearchQuery(
         ?User $user,
-        ?int $messageStatus = null,
+        ?int $messageStatus = MessageStatus::UNTREATED,
         ?string $searchKey = null,
         ?array $sortParams = null,
         ?int $fromDate = null
@@ -70,7 +70,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     }
 
 
-    public function countByType(?User $user = null, ?int $messageStatus = null): int
+    public function countByType(?User $user = null, ?int $messageStatus = MessageStatus::UNTREATED): int
     {
         $query = $this->getSearchQuery($user, $messageStatus);
         $count = $query->getHint('knp_paginator.count');
@@ -84,7 +84,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     public function countByTypeAndDays(
         ?Domain $domain = null,
         ?int $fromDate = null,
-        ?int $messageStatus = null,
+        ?int $messageStatus = MessageStatus::UNTREATED,
         ?User $user = null
     ): array {
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
@@ -154,7 +154,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function getSearchQueryBuilder(
         ?User $user = null,
-        ?int $messageStatus = null
+        ?int $messageStatus = MessageStatus::UNTREATED,
     ): QueryBuilder {
         $queryBuilder = $this->getBaseQueryBuilder();
 
@@ -166,13 +166,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $this->addRecipientsCondition($queryBuilder, $user);
         }
 
-        if ($messageStatus === MessageStatus::UNTREATED) {
-            $this->addSpamCondition($queryBuilder, $user, isSpam: false);
-        } elseif ($messageStatus === MessageStatus::SPAMMED) {
-            $this->addSpamCondition($queryBuilder, $user, isSpam: true);
-        }
-
-        $this->addStatusCondition($queryBuilder, $messageStatus);
+        $queryBuilder->andWhere('mr.status = :messageStatus');
+        $queryBuilder->setParameter('messageStatus', $messageStatus);
 
         return $queryBuilder;
     }
@@ -180,88 +175,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     private function addUserSpecificJoins(QueryBuilder $queryBuilder, ?User $user): void
     {
         if (!$user || $user->isAdmin()) {
-            $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email')
-               ->innerJoin('App\Entity\Domain', 'd', Join::WITH, 'd.id = u.domain');
-        }
-    }
-
-    private function addStatusCondition(QueryBuilder $queryBuilder, ?int $messageStatus): void
-    {
-        if ($messageStatus === MessageStatus::UNTREATED) {
-            $queryBuilder
-                ->andWhere(<<<SQL
-                    mr.ds != :ds
-                    AND mr.bl != 'Y'
-                    AND mr.content NOT IN (:content)
-                    AND (
-                        COALESCE(mr.status,0) = 0
-                        OR mr.status = :messagestatusError
-                    )
-
-                SQL)
-                ->setParameter('messagestatusError', MessageStatus::ERROR)
-                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN])
-                ->setParameter('ds', DeliveryStatus::PASS);
-        }
-
-        if ($messageStatus === MessageStatus::DELETED) {
-            $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
-                ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', ContentType::VIRUS);
-        }
-
-        if ($messageStatus === MessageStatus::RESTORED) {
-            $queryBuilder->andWhere('mr.status = :messageStatus and mr.content != :content')
-                ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', ContentType::VIRUS);
-        }
-
-        if ($messageStatus === MessageStatus::AUTHORIZED) {
-            $queryBuilder
-                ->andWhere(<<<SQL
-                    mr.status = :messageStatus
-                    or (
-                        mr.ds = :ds
-                        and (mr.status is null or mr.status = :messageStatus)
-                    )
-                SQL)
-                ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('ds', DeliveryStatus::PASS);
-        }
-
-        if ($messageStatus === MessageStatus::BANNED) {
-            $queryBuilder->andWhere('mr.bl = :bl or mr.status = :messageStatus')
-                ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('bl', 'Y');
-        }
-
-        if ($messageStatus === MessageStatus::SPAMMED) {
-            $queryBuilder->andWhere('COALESCE(mr.status,0) = 0 and mr.content not in (:content)')
-                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN]);
-        }
-
-        if ($messageStatus === MessageStatus::VIRUS) {
-            $queryBuilder->andWhere('mr.content = :content')
-                ->setParameter('content', ContentType::VIRUS);
-        }
-
-        if ($messageStatus === MessageStatus::ERROR) {
-            $queryBuilder->andWhere('mr.status = :messageStatus and mr.content not in (:content)')
-                ->setParameter('messageStatus', $messageStatus)
-                ->setParameter('content', [ContentType::VIRUS, ContentType::CLEAN]);
-        }
-    }
-
-    private function addSpamCondition(QueryBuilder $queryBuilder, ?User $user, bool $isSpam): void
-    {
-        $comparisonOperator = $isSpam ? '>' : '<=';
-
-        if (!$user || $user->isAdmin()) {
-            $queryBuilder->andWhere('mr.bspamLevel ' . $comparisonOperator . ' d.level');
-        } else {
-            $level = $user->getDomain()->getLevel();
-            $queryBuilder->andWhere('mr.bspamLevel ' . $comparisonOperator . ' :level')
-                ->setParameter('level', $level);
+            $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email');
         }
     }
 
