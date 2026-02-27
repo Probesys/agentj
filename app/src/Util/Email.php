@@ -7,9 +7,13 @@ class Email
     /**
      * Return whether the email address is valid or not
      */
-    public static function validate(string $email): bool
+    public static function validate(string $email, bool $looseMode = false): bool
     {
-        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+        if ($looseMode) {
+            return str_contains($email, '@');
+        } else {
+            return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+        }
     }
 
     /**
@@ -17,13 +21,13 @@ class Email
      *
      * @return string[]
      */
-    public static function extractEmailsFromText(string $text): array
+    public static function extractEmailsFromText(string $text, bool $looseMode = false): array
     {
         $terms = preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         $emails = [];
         foreach ($terms as $term) {
-            if (self::validate($term)) {
+            if (self::validate($term, $looseMode)) {
                 $emails[] = $term;
             }
         }

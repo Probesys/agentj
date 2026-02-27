@@ -23,10 +23,13 @@ class Search
         });
 
         // Sanitize the terms to perform a boolean search.
-        $safeTerms = array_map(static function ($term) {
-            $safe = preg_replace('/[+\-><()~*"@]+/', ' ', $term);
-            return trim($safe ?: '');
-        }, $terms);
+        $safeTerms = [];
+        foreach ($terms as $term) {
+            $safeTerm = preg_replace('/[+\-><()~*"@\.]+/', ' ', $term);
+            $safeTerm = trim($safeTerm ?: '');
+            $explodedSafeTerm = explode(' ', $safeTerm);
+            $safeTerms = array_merge($safeTerms, $explodedSafeTerm);
+        }
 
         // Remove stop words and words with less than 3 chars because searching
         // for them will return no results (as they are not indexed by MariaDB).

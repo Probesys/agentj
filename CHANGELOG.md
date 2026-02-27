@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-02-27 - 2.4.5
+
+### Bug fixes
+
+- Fix search of messages ([d7319776](https://github.com/Probesys/agentj/commit/d7319776), [613b7532](https://github.com/Probesys/agentj/commit/613b7532), [57bc0c7a](https://github.com/Probesys/agentj/commit/57bc0c7a))
+
 ## 2026-01-29 - 2.4.4
 
 ### Bug fixes
