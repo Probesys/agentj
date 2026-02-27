@@ -132,6 +132,11 @@ class MessageController extends AbstractController
                 'sort' => $request->query->getString('sort'),
                 'direction' => $request->query->getString('direction'),
             ];
+        } else {
+            $sortParams = [
+                'sort' => 'm.timeNum',
+                'direction' => 'desc',
+            ];
         }
 
         $searchKey = trim($request->query->getString('search'));
@@ -159,8 +164,6 @@ class MessageController extends AbstractController
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
                 'distinct' => false,
-                'defaultSortFieldName' => 'm.timeNum',
-                'defaultSortDirection' => 'desc',
             ]
         );
         return $this->render('message/index.html.twig', [
