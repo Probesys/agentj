@@ -8,6 +8,7 @@ use App\Repository\MsgrcptRepository;
 #[ORM\Table(name: 'msgrcpt')]
 #[ORM\Index(name: 'msgrcpt_idx_mail_id', columns: ['mail_id'])]
 #[ORM\Index(name: 'msgrcpt_idx_rid', columns: ['rid'])]
+#[ORM\Index(name: 'msgrcpt_idx_bspam_level', columns: ['bspam_level'])]
 #[ORM\Entity(repositoryClass: MsgrcptRepository::class)]
 class Msgrcpt extends BaseMessageRecipient
 {
