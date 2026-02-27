@@ -2,6 +2,14 @@
 
 namespace App\Util;
 
+/**
+ * Utility methods to ease building safe search requests.
+ *
+ * @phpstan-type SortParams array{
+ *     sort: string,
+ *     direction: string
+ * }
+ */
 class Search
 {
     /**
@@ -95,6 +103,39 @@ class Search
             'und',
             'the',
             'www',
+        ];
+    }
+
+    /**
+     * @param ?SortParams $sortParams
+     * @param string[] $authorizedSortFields
+     * @return ?SortParams
+     */
+    public static function sanitizeSortParams(
+        ?array $sortParams,
+        array $authorizedSortFields,
+        string $defaultSortField,
+    ): ?array {
+        if (!$sortParams) {
+            return null;
+        }
+
+        $sortField = $sortParams['sort'];
+        $sortDirection = strtolower($sortParams['direction']);
+
+        $sortFieldIsAuthorized = in_array($sortField, $authorizedSortFields);
+
+        if (!$sortFieldIsAuthorized) {
+            $sortField = $defaultSortField;
+        }
+
+        if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
+            $sortDirection = 'desc';
+        }
+
+        return [
+            'sort' => $sortField,
+            'direction' => $sortDirection,
         ];
     }
 }

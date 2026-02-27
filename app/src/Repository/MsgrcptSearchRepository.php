@@ -21,6 +21,8 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends BaseMessageRecipientRepository<Msgrcpt>
+ *
+ * @phpstan-import-type SortParams from Search
  */
 class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 {
@@ -32,7 +34,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     }
 
     /**
-     * @param ?array{sort: string, direction: string} $sortParams
+     * @param ?SortParams $sortParams
      */
     public function getSearchQuery(
         ?User $user,
@@ -53,6 +55,13 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $queryBuilder->andWhere('m.timeNum > :date');
             $queryBuilder->setParameter('date', $fromDate);
         }
+
+        $authorizedSortFields = ['m.timeNum', 'm.fromAddr', 'm.subject'];
+        if ($user && $user->isAdmin()) {
+            $authorizedSortFields[] = 'maddr.email';
+        }
+        $defaultSortField = 'm.timeNum';
+        $sortParams = Search::sanitizeSortParams($sortParams, $authorizedSortFields, $defaultSortField);
 
         if ($sortParams) {
             $queryBuilder->orderBy($sortParams['sort'], $sortParams['direction']);

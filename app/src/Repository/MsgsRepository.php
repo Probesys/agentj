@@ -7,11 +7,14 @@ use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Util\Search;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends BaseMessageRepository<Msgs>
+ *
+ * @phpstan-import-type SortParams from Search
  */
 class MsgsRepository extends BaseMessageRepository
 {
@@ -29,10 +32,7 @@ class MsgsRepository extends BaseMessageRepository
     }
 
     /**
-     * @param ?array{
-     *     sort: string,
-     *     direction: string,
-     * } $sortParams
+     * @param ?SortParams $sortParams
      * @return array<int, array<string, mixed>>
      */
     public function advancedSearch(
@@ -101,19 +101,12 @@ class MsgsRepository extends BaseMessageRepository
             $types['domains'] = DBAL\ArrayParameterType::INTEGER;
         }
 
+        $authorizedSortFields = ['mail_id', 'from_addr', 'email', 'subject', 'time_iso'];
+        $defaultSortField = 'm.time_num';
+        $sortParams = Search::sanitizeSortParams($sortParams, $authorizedSortFields, $defaultSortField);
+
         if ($sortParams) {
-            $sortField = $sortParams['sort'];
-            $sortDirection = $sortParams['direction'];
-
-            if (!in_array($sortField, ['mail_id', 'from_addr', 'email', 'subject', 'time_iso'])) {
-                $sortField = 'm.time_num';
-            }
-
-            if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
-                $sortDirection = 'desc';
-            }
-
-            $sql .= " ORDER BY {$sortField} {$sortDirection}";
+            $sql .= " ORDER BY {$sortParams['sort']} {$sortParams['direction']}";
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id';
         }
