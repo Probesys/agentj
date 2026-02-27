@@ -18,21 +18,26 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * @extends BaseMessageRecipientRepository<Msgrcpt>
+ *
+ * @phpstan-import-type SortParams from Search
  */
 class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 {
     public function __construct(
         ManagerRegistry $registry,
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        #[Autowire(env: 'bool:FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT')]
+        private bool $featureFlagDisableSortBySubject,
     ) {
         parent::__construct($registry, Msgrcpt::class);
     }
 
     /**
-     * @param ?array{sort: string, direction: string} $sortParams
+     * @param ?SortParams $sortParams
      */
     public function getSearchQuery(
         ?User $user,
@@ -53,6 +58,16 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $queryBuilder->andWhere('m.timeNum > :date');
             $queryBuilder->setParameter('date', $fromDate);
         }
+
+        $authorizedSortFields = ['m.timeNum', 'm.fromAddr'];
+        if (!$this->featureFlagDisableSortBySubject) {
+            $authorizedSortFields[] = 'm.subject';
+        }
+        if ($user && $user->isAdmin()) {
+            $authorizedSortFields[] = 'maddr.email';
+        }
+        $defaultSortField = 'm.timeNum';
+        $sortParams = Search::sanitizeSortParams($sortParams, $authorizedSortFields, $defaultSortField);
 
         if ($sortParams) {
             $queryBuilder->orderBy($sortParams['sort'], $sortParams['direction']);
