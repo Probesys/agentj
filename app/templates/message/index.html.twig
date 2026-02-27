@@ -40,7 +40,11 @@
                         {% endif %}
                         {#            <th>{{ 'Message.Status'|trans() }}</th> #}
                         <th>
-                            {{ knp_pagination_sortable(messagesRecipients, 'Message.Object'|trans, 'm.subject') }}
+                            {% if feature_flag_disable_sort_by_subject %}
+                                {{ 'Message.Object'|trans }}
+                            {% else %}
+                                {{ knp_pagination_sortable(messagesRecipients, 'Message.Object'|trans, 'm.subject') }}
+                            {% endif %}
                         </th>
                         <th>
                             {{ knp_pagination_sortable(messagesRecipients, 'Message.Sender'|trans, 'm.fromAddr') }}

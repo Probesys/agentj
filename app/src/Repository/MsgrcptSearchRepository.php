@@ -18,6 +18,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * @extends BaseMessageRecipientRepository<Msgrcpt>
@@ -28,7 +29,9 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 {
     public function __construct(
         ManagerRegistry $registry,
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        #[Autowire(env: 'bool:FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT')]
+        private bool $featureFlagDisableSortBySubject,
     ) {
         parent::__construct($registry, Msgrcpt::class);
     }
@@ -56,7 +59,10 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             $queryBuilder->setParameter('date', $fromDate);
         }
 
-        $authorizedSortFields = ['m.timeNum', 'm.fromAddr', 'm.subject'];
+        $authorizedSortFields = ['m.timeNum', 'm.fromAddr'];
+        if (!$this->featureFlagDisableSortBySubject) {
+            $authorizedSortFields[] = 'm.subject';
+        }
         if ($user && $user->isAdmin()) {
             $authorizedSortFields[] = 'maddr.email';
         }
