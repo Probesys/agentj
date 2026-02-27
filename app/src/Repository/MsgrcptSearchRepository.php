@@ -96,8 +96,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         }
 
         if ($domain) {
-            $queryBuilder->andWhere('d.id = :domain');
-            $queryBuilder->setParameter('domain', $domain->getId());
+            $queryBuilder->andWhere('u.domain = :domain');
+            $queryBuilder->setParameter('domain', $domain);
         }
 
         $queryBuilder->groupBy('date_group');
@@ -272,7 +272,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             return $alias->getEmail();
         }, $aliases);
         $recipients[] = $user->getEmail();
-        $queryBuilder->andWhere('CONVERT(maddr.email USING \'utf8\') IN (:recipients)')
+        $queryBuilder->andWhere('maddr.email IN (:recipients)')
             ->setParameter('recipients', $recipients);
     }
 
