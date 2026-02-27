@@ -6,12 +6,15 @@
         <!-- sidebar-menu  -->
         <div class=" sidebar-item sidebar-menu">
             <ul>
-                <li class="{% if route == 'homepage' %}active{% endif %}">
-                    <a href="{{ path('homepage') }}">
-                        <i class="fa fa-home"></i>
-                        <span class="menu-text">{{ 'Navigation.Dashboard'|trans }}</span>
-                    </a>
-                </li>
+                {% if not feature_flag_disable_dashboard %}
+                    <li class="{% if route == 'homepage' %}active{% endif %}">
+                        <a href="{{ path('homepage') }}">
+                            <i class="fa fa-home"></i>
+                            <span class="menu-text">{{ 'Navigation.Dashboard'|trans }}</span>
+                        </a>
+                    </li>
+                {% endif %}
+
                 <li class="sidebar-dropdown {% if route == 'message' %}active{% endif %}">
                     <a href="#" data-turbo="false">
                         <i class="fa fa-envelope"></i>
