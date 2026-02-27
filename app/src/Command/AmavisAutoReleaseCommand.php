@@ -60,6 +60,8 @@ class AmavisAutoReleaseCommand extends Command
             }
         }
 
+        $lock->release();
+
         return Command::SUCCESS;
     }
 }
