@@ -11,6 +11,7 @@ use App\Service\Referrer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,8 +26,14 @@ class DefaultController extends AbstractController
     }
 
     #[Route(path: '/', name: 'homepage')]
-    public function index(): Response
-    {
+    public function index(
+        #[Autowire(env: 'bool:FEATURE_FLAG_DISABLE_DASHBOARD')]
+        bool $featureFlagDisableDashboard,
+    ): Response {
+        if ($featureFlagDisableDashboard) {
+            return $this->redirect('message');
+        }
+
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $showAlertWidget = true;
@@ -35,8 +42,7 @@ class DefaultController extends AbstractController
         }
 
         return $this->render('home/index.html.twig', [
-                    'controller_name' => 'DefaultController',
-                    'showAlert' => $showAlertWidget
+            'showAlert' => $showAlertWidget
         ]);
     }
 
