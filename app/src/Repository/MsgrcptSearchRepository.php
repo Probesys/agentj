@@ -156,9 +156,17 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $countQueryBuilder->resetDQLPart('from');
         $countQueryBuilder->resetDQLPart('orderBy');
 
-        $countQueryBuilder
-            ->from(Msgrcpt::class, 'mr')
-            ->join(Maddr::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+        $countQueryBuilder->from(Msgrcpt::class, 'mr');
+
+        if ($user && !$user->isSuperAdmin()) {
+            // When counting, maddr is used only to filter messages by email
+            // (for an end-user), or by the domains (for a simple admin).
+            // Super-admins have access to all the domains and all the
+            // messages, so we don't need to join this table.
+            // It can be used for the "searchKey" filter too, but the "hasFilters"
+            // condition above takes care of this case.
+            $countQueryBuilder->join(Maddr::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+        }
 
         $this->addUserSpecificJoins($countQueryBuilder, $user);
 
@@ -189,7 +197,10 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function addUserSpecificJoins(QueryBuilder $queryBuilder, ?User $user): void
     {
-        if (!$user || $user->isAdmin()) {
+        if ($user && $user->isAdmin() && !$user->isSuperAdmin()) {
+            // Users table is only used to filter the messages by the domains
+            // of a "simple" admin. As super-admins have access to all the
+            // domains, we don't need it in this case.
             $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email');
         }
     }
