@@ -65,6 +65,7 @@ jobs:
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
           sed -i "s|#MAILPIT_WEB_PORT=.*|MAILPIT_WEB_PORT=8025|g" .env
+          echo 'SCHEDULER_CONSOLIDATE_FREQUENCY="1 second"' >> .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1

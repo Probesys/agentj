@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Message;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -11,6 +12,12 @@ use Symfony\Component\Scheduler\ScheduleProviderInterface;
 #[AsSchedule]
 class Scheduler implements ScheduleProviderInterface
 {
+    public function __construct(
+        #[Autowire(env: 'SCHEDULER_CONSOLIDATE_FREQUENCY')]
+        private string $consolidateFrequency,
+    ) {
+    }
+
     public function getSchedule(): Schedule
     {
         $schedule = new Schedule();
@@ -23,7 +30,7 @@ class Scheduler implements ScheduleProviderInterface
 
         $schedule->add(RecurringMessage::every('1 min', new Message\AmavisAutoRelease()));
 
-        $schedule->add(RecurringMessage::every('30 seconds', new Message\ConsolidateAmavisData()));
+        $schedule->add(RecurringMessage::every($this->consolidateFrequency, new Message\ConsolidateAmavisData()));
 
         return $schedule;
     }
