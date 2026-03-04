@@ -1,5 +1,35 @@
 # Changelog of AgentJ
 
+## 2026-03-04 - 2.5.0
+
+### Features
+
+- Allow to include spams in the report ([affdd534](https://github.com/Probesys/agentj/commit/affdd534))
+- Remove the "support" email link from the header ([25da45f6](https://github.com/Probesys/agentj/commit/25da45f6))
+
+### Bug fixes
+
+- Release the lock of AmavisAutoRelease command ([7a0201bb](https://github.com/Probesys/agentj/commit/7a0201bb))
+
+### Maintenance
+
+- Performance improvements
+    - Consolidate status of mails ([cdc6a001](https://github.com/Probesys/agentj/commit/cdc6a001))
+    - Hint index use in mail searches ([4588bf43](https://github.com/Probesys/agentj/commit/4588bf43))
+    - Add indexes on `msgrcpt.bspam_level` and `msgs.from_addr` ([a301966a](https://github.com/Probesys/agentj/commit/a301966a))
+    - Join maddr in count search requests only when needed ([065a6caf](https://github.com/Probesys/agentj/commit/065a6caf))
+    - Optimize checking domain in countByTypeAndDays ([fed97a90](https://github.com/Probesys/agentj/commit/fed97a90))
+    - Don't convert `maddr.email` to utf8 when searching for recipients ([8773e14c](https://github.com/Probesys/agentj/commit/8773e14c))
+- Allow to disable the dashboard ([3b5ae5f4](https://github.com/Probesys/agentj/commit/3b5ae5f4))
+- Allow to disable sorting by subject ([c7d38e1f](https://github.com/Probesys/agentj/commit/c7d38e1f))
+- Update the dependencies ([f948dd47](https://github.com/Probesys/agentj/commit/f948dd47))
+- Refactor sanitizing the sort parameters ([fb1ddf1b](https://github.com/Probesys/agentj/commit/fb1ddf1b))
+- Refactor display of domain level slider ([58828b0a](https://github.com/Probesys/agentj/commit/58828b0a))
+
+### Documentation
+
+- docs: Add a screenshot to the README (531a86b5)
+
 ## 2026-03-04 - 2.4.6
 
 ### Bug fixes
