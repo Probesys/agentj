@@ -56,7 +56,9 @@ class DomainType extends AbstractType
                 'attr' => [
                     'min' => $options['minSpamLevel'],
                     'max' => $options['maxSpamLevel'],
-                    'step' => 0.1
+                    'step' => 0.1,
+                    'data-slider-target' => 'slider',
+                    'data-action' => 'slider#refresh',
                 ]
             ])
             ->add('mailAuthenticationSender', null, [

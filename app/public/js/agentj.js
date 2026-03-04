@@ -189,21 +189,6 @@ document.addEventListener("turbo:load", function () {
     $(this).next('.custom-file-label').html(fileName);
   });
 
-  // range input management
-  var slider = $("#domain_level");
-  var output = $("#domain-spam-level");
-  output.innerHTML = slider.value; // Display the default slider value
-
-  $(document).on('input', '#domain_level', function (e) {
-    $("#domain-spam-level").html($(this).val());
-
-  });
-
-  // Update the current slider value (each time you drag the slider handle)
-  slider.oninput = function () {
-    output.innerHTML = this.value;
-  }
-
 
   $('#resultsPerPage, #massive-actions-form_per_page').change(function () {
     var url = $(location).attr('pathname') + $(location).attr('search').replace('page=' + $_GET('page'), 'page=1');

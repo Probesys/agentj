@@ -190,13 +190,13 @@ class DomainController extends AbstractController
 
             return $this->redirectToRoute('domain_new');
         } else {
-            $form->get('level')->setData(0.5);
+            $defaultSpamLevel = $this->getParameter('app.domain_default_spam_level');
+            $form->get('level')->setData($defaultSpamLevel);
         }
 
         return $this->render('domain/new.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
-            'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
         ]);
     }
 
