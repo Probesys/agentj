@@ -678,11 +678,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isAdmin(): bool
+    /**
+     * Return whether the user is an admin or not.
+     *
+     * If $superAdmin is true (default), then a super-admin is considered as
+     * admin. If it is false, the method returns false for super-admins.
+     */
+    public function isAdmin(bool $superAdmin = true): bool
     {
-        return in_array('ROLE_ADMIN', $this->getRoles()) || in_array('ROLE_SUPER_ADMIN', $this->getRoles());
+        return (
+            in_array('ROLE_ADMIN', $this->getRoles()) ||
+            ($superAdmin && $this->isSuperAdmin())
+        );
     }
 
+    /**
+     * Return whether the user is a super-admin or not.
+     */
     public function isSuperAdmin(): bool
     {
         return in_array('ROLE_SUPER_ADMIN', $this->getRoles());

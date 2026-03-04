@@ -191,11 +191,15 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
     ): QueryBuilder {
         $queryBuilder = $this->getBaseQueryBuilder();
 
-        $this->addUserSpecificJoins($queryBuilder, $user);
-
-        if ($user?->isAdmin()) {
-            $this->addDomainCondition($queryBuilder, $user);
-        } elseif ($user) {
+        if ($user && $user->isAdmin(superAdmin: false)) {
+            // Filter messages on corresponding domains for simple admins as
+            // they must not have access to all the messages.
+            $this->addUserSpecificJoins($queryBuilder, $user);
+            $queryBuilder->andWhere('u.domain in (:domain)');
+            $queryBuilder->setParameter('domain', $user->getDomains());
+        } elseif ($user && !$user->isAdmin()) {
+            // If the user is a standard user, filter messages by his email
+            // addresses (including aliases).
             $this->addRecipientsCondition($queryBuilder, $user);
         }
 
@@ -207,7 +211,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
     private function addUserSpecificJoins(QueryBuilder $queryBuilder, ?User $user): void
     {
-        if ($user && $user->isAdmin() && !$user->isSuperAdmin()) {
+        if ($user && $user->isAdmin(superAdmin: false)) {
             // Users table is only used to filter the messages by the domains
             // of a "simple" admin. As super-admins have access to all the
             // domains, we don't need it in this case.
@@ -261,14 +265,6 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
             $queryBuilder->andWhere('(maddr.email IN (:users) OR maddrSender.email IN (:users))');
             $queryBuilder->setParameter('users', $allUserEmails);
-        }
-    }
-
-    private function addDomainCondition(QueryBuilder $queryBuilder, User $user): void
-    {
-        if (count($user->getDomains()) > 0) {
-            $queryBuilder->andWhere('u.domain in (:domain)')
-                ->setParameter('domain', $user->getDomains());
         }
     }
 
