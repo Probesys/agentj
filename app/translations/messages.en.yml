@@ -764,3 +764,11 @@ Entities:
   DomainRelay:
     fields:
       ipAddress: "IP Address"
+Portal:
+    Messages:
+        authorized:
+            backToMessages: 'See my authorized mails'
+            senderAuthorized: 'The address is now authorized.'
+        restore:
+            backToMessages: 'See my recovered mails'
+            messageRestored: 'Message successfully recovered.'
