@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-03-04 - 2.4.6
+
+### Bug fixes
+
+- Fix infinite redirection after clicking report link for logged-in users ([2388db6d](https://github.com/Probesys/agentj/commit/2388db6d))
+
 ## 2026-02-27 - 2.4.5
 
 ### Bug fixes

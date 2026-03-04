@@ -33,16 +33,6 @@ class MessagesController extends AbstractController
         int $recipientId,
         Request $request,
     ): Response {
-        $isConnected = $this->getUser() !== null;
-
-        if ($isConnected) {
-            return $this->redirectToRoute('message_authorized', [
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rid' => $recipientId,
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -87,16 +77,6 @@ class MessagesController extends AbstractController
         string $mailId,
         int $recipientId,
     ): Response {
-        $isConnected = $this->getUser() !== null;
-
-        if ($isConnected) {
-            return $this->redirectToRoute('message_restore', [
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rid' => $recipientId,
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
