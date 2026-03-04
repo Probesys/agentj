@@ -47,7 +47,8 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         ?int $messageStatus = MessageStatus::UNTREATED,
         ?string $searchKey = null,
         ?array $sortParams = null,
-        ?int $fromDate = null
+        ?int $fromDate = null,
+        ?float $maxSpamLevel = null,
     ): Query {
 
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
@@ -59,6 +60,11 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         if (!is_null($fromDate)) {
             $queryBuilder->andWhere('m.timeNum > :date');
             $queryBuilder->setParameter('date', $fromDate);
+        }
+
+        if (!is_null($maxSpamLevel)) {
+            $queryBuilder->andWhere('mr.bspamLevel <= :maxSpamLevel');
+            $queryBuilder->setParameter('maxSpamLevel', $maxSpamLevel);
         }
 
         if ($sortParams) {

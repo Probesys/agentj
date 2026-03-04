@@ -479,6 +479,7 @@ Entities:
       humanAuthenticationFooter: Pied de page de la page d'authentification humaine
       humanAuthenticationStylesheet: Feuille de style personnalisée de la page d'authentification humaine
       messageAlert: Message du rapport
+      reportSpamLevel: "Inclure les spams au rapport dont le niveau est inférieur à\_:"
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
       srvImap: Serveur IMAP

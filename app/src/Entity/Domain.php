@@ -68,6 +68,9 @@ class Domain
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
     private string $humanAuthenticationFooter = '';
 
+    #[ORM\Column(options: ['default' => 0])]
+    private float $reportSpamLevel = 0;
+
     /**
      * @var Collection<int, Groups>
      */
@@ -303,6 +306,18 @@ class Domain
     public function setHumanAuthenticationFooter(string $humanAuthenticationFooter): static
     {
         $this->humanAuthenticationFooter = $humanAuthenticationFooter;
+
+        return $this;
+    }
+
+    public function getReportSpamLevel(): ?float
+    {
+        return $this->reportSpamLevel;
+    }
+
+    public function setReportSpamLevel(float $reportSpamLevel): static
+    {
+        $this->reportSpamLevel = $reportSpamLevel;
 
         return $this;
     }

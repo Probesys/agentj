@@ -66,16 +66,13 @@ class ReportSendMailCommand extends Command
                 continue;
             }
 
-            $untreatedMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
-                $user,
-                fromDate: $user->getDateLastReport()
-            )->getResult();
+            $messageRecipients = $this->getMessageRecipients($user);
 
-            if (count($untreatedMessageRecipients) === 0) {
+            if (count($messageRecipients) === 0) {
                 continue;
             }
 
-            $body = $this->createEmailContent($user, $untreatedMessageRecipients);
+            $body = $this->createEmailContent($user, $messageRecipients);
 
             $domain = $user->getDomain();
             $from = $domain->getMailAuthenticationSender();
@@ -134,11 +131,11 @@ class ReportSendMailCommand extends Command
     }
 
     /**
-     * @param Msgrcpt[] $untreatedMessageRecipients
+     * @param Msgrcpt[] $messageRecipients
      */
-    private function createEmailContent(User $user, array $untreatedMessageRecipients): string
+    private function createEmailContent(User $user, array $messageRecipients): string
     {
-        $untreatedMessageRecipients = array_slice($untreatedMessageRecipients, 0, 10);
+        $messageRecipients = array_slice($messageRecipients, 0, 10);
         $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
         $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
         $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
@@ -156,7 +153,7 @@ class ReportSendMailCommand extends Command
         }
 
         $tableMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
-            'untreatedMessageRecipients' => $untreatedMessageRecipients,
+            'messageRecipients' => $messageRecipients,
             'user' => $user,
             'locale' => $locale,
         ]);
@@ -173,18 +170,18 @@ class ReportSendMailCommand extends Command
         $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
         $body = str_replace('[URL_MSGS]', $url, $body);
 
-        $body = $this->replaceForeachMessages($body, $user, $untreatedMessageRecipients);
+        $body = $this->replaceForeachMessages($body, $user, $messageRecipients);
 
         return $body;
     }
 
     /**
-     * @param Msgrcpt[] $untreatedMessageRecipients
+     * @param Msgrcpt[] $messageRecipients
      */
     private function replaceForeachMessages(
         string $body,
         User $user,
-        array $untreatedMessageRecipients
+        array $messageRecipients
     ): string {
         // Get the part of the body before [FOREACH_MESSAGE].
         $splittedBody = explode('[FOREACH_MESSAGE]', $body, 2);
@@ -211,7 +208,7 @@ class ReportSendMailCommand extends Command
         $messageTemplate = $splittedBody[0];
 
         $bodyMessages = '';
-        foreach ($untreatedMessageRecipients as $messageRecipient) {
+        foreach ($messageRecipients as $messageRecipient) {
             $message = $messageRecipient->getMsgs();
             $token = $this->messageService->getReleaseToken($message, $user);
 
@@ -239,5 +236,33 @@ class ReportSendMailCommand extends Command
         }
 
         return $bodyStart . $bodyMessages . $bodyEnd;
+    }
+
+    /**
+     * @return Msgrcpt[]
+     */
+    private function getMessageRecipients(User $user): array
+    {
+        $messageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+            $user,
+            messageStatus: MessageStatus::UNTREATED,
+            fromDate: $user->getDateLastReport(),
+        )->getResult();
+
+        $domain = $user->getDomain();
+        $reportSpamLevel = $domain->getReportSpamLevel();
+
+        if ($reportSpamLevel > 0) {
+            $spamMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+                $user,
+                messageStatus: MessageStatus::SPAMMED,
+                maxSpamLevel: $reportSpamLevel,
+                fromDate: $user->getDateLastReport(),
+            )->getResult();
+
+            $messageRecipients = array_merge($messageRecipients, $spamMessageRecipients);
+        }
+
+        return $messageRecipients;
     }
 }

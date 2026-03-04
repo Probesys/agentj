@@ -479,6 +479,7 @@ Entities:
       humanAuthenticationFooter: "Footer of the human authentication page"
       humanAuthenticationStylesheet: "Custom stylesheet on the human authentication page"
       messageAlert: "Message of the report"
+      reportSpamLevel: 'Include spam in the report whose level is lower than:'
       domain: "Domain name"
       srvSmtp: "SMTP server"
       srvImap: "IMAP server"

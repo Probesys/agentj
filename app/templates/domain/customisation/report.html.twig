@@ -9,6 +9,15 @@
         <div class="row">
             <div class="col-9">
                 {{ form_row(form.messageAlert) }}
+
+                <div class="form-group" data-controller="slider">
+                    <label for="{{ field_id(form.reportSpamLevel) }}" class="col-sm-12 col-form-label col-form-label col-sm-2 required">
+                        {{ field_label(form.reportSpamLevel) }}
+                        <span data-slider-target="output"></span>
+                    </label>
+
+                    {{ form_widget(form.reportSpamLevel) }}
+                </div>
             </div>
 
             <div class="col-3">

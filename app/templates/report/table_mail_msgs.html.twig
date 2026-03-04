@@ -1,7 +1,7 @@
-{% if untreatedMessageRecipients is not empty %}
+{% if messageRecipients is not empty %}
   <table style="width:100%;background-color: #fff;">
     <tbody>
-      {% for messageRecipient in untreatedMessageRecipients %}
+      {% for messageRecipient in messageRecipients %}
         {% set token = message_release_token(messageRecipient.msgs, user) %}
         <tr>
 
