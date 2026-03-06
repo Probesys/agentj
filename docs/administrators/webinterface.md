@@ -126,9 +126,9 @@ AgentJ allows you to customize the way it filters emails. You can choose to disa
 On the `Filters & Rates` tab of a domain, you have the following parameters:
 
 - Filter threshold:
-    - Block all emails: Enable human authentication on incoming emails.
-    - Allow all emails: Disable human authentication on incoming emails.
-- Policy for the domain: Choose one policy created in the `Policy` tab. See the dedicated section.
+    - Block all emails: Let AgentJ filter incoming emails.
+    - Allow all emails: Let all incoming emails through, without any filtering. Will let spam go through!
+- Policy for the domain: Choose one policy created in the `Policies` tab. See the dedicated section.
 - Spam threshold: Each received email is rated with a score. The higher the score, the higher the chance that an email is spam. AgentJ marks an email as spam if its score is higher than this threshold. Depending on the context, you can choose to adjust this score in order to balance the number of false positives/false negatives.
 - Email address that sends authentication requests: The noreply email address used to send authentication requests and reports.
 - Rate limit: Refer to the previous section.
@@ -194,6 +194,6 @@ Each email sent to an alias is managed exactly as it was received directly by th
 ### Policies
 
 > [!CAUTION]
-> Don't modify these settings unless you known exactly what you are doing!
+> Don't modify these settings unless you known exactly what you are doing! You must have knowledge of the way Amavis works!
 
 This section allows you to fine tune AgentJ behavior by altering Amavis configuration.
