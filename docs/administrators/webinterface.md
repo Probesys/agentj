@@ -191,7 +191,22 @@ Each email sent to an alias is managed exactly as it was received directly by th
 > [!NOTE]
 > Even if the alias is created correctly in AgentJ, it has to be created accordingly on your email server. Refer to its documentation for that.
 
-### Policies
+## Groups
+
+You can create groups in order to use the same parameters for a group of users. Groups are managed under the `Groups` tab.
+
+When you create or edit a group, there is the following fields:
+
+- Group name: The display name of the group.
+- Override user choices: Tick the box if the group parameters should take precedence over user parameters.
+- Policy: Choose one policy created in the `Policies` tab. See the dedicated section.
+- Filter threshold: See the `Configure filter levels` section.
+- Priority: The priority the group should have. If an user is in multiple groups, the parameters of the group with the higher score will prevail.
+- Associated domains: The domain associated with the group. A group can be linked with only one domain.
+- Active: Tick to enable the group and apply its parameters.
+- Rate limit: See the `Adding rate limits` section.
+
+## Policies
 
 > [!CAUTION]
 > Don't modify these settings unless you known exactly what you are doing! You must have knowledge of the way Amavis works!
