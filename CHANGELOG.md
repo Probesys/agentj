@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2026-03-06 - 2.5.1
+
+### Bug fixes
+
+- Fix getting messages for super-admins attached to domains ([9e42f07c](https://github.com/Probesys/agentj/commit/9e42f07c))
+- Fix plural typo about groups' domain ([d3fa5239](https://github.com/Probesys/agentj/commit/d3fa5239))
+
 ## 2026-03-04 - 2.5.0
 
 ### Features
