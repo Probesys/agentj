@@ -401,7 +401,7 @@ Entities:
       name: "Group name"
       rights: rights
       users: users
-      domain: "Associated domains"
+      domain: "Associated domain"
       overrideUser: "Override user choices"
   Policy:
     label: Policy

@@ -401,7 +401,7 @@ Entities:
       name: Nom du groupe
       rights: droits
       users: utilisateurs
-      domain: Domaines associés
+      domain: Domaine associé
       overrideUser: Supplante les choix utilisateurs
   Policy:
     label: Stratégie
