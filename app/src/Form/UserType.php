@@ -16,14 +16,15 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $labelEmail = 'Entities.User.fields.email';
+        $labelEmail = new TranslatableMessage('Entities.User.fields.email');
         if ($options['alias']) {
-            $labelEmail = 'Entities.User.fields.alias';
+            $labelEmail = new TranslatableMessage('Entities.User.fields.alias');
         }
         $allowedDomains = $options['allowedDomains'];
 
@@ -37,34 +38,34 @@ class UserType extends AbstractType
                 'required' => !$adminForm,
             ])
             ->add('emailRecovery', EmailType::class, [
-                'label' => 'Entities.User.fields.emailRecovery',
+                'label' => new TranslatableMessage('Entities.User.fields.emailRecovery'),
                 'required' => false,
             ])
             ->add('fullname', null, [
-                'label' => 'Entities.User.fields.fullName',
+                'label' => new TranslatableMessage('Entities.User.fields.fullName'),
             ])
             ->add('username', null, [
-                'label' => 'Entities.User.fields.userName',
+                'label' => new TranslatableMessage('Entities.User.fields.userName'),
                 'required' => true,
                 'trim' => true,
             ])
             ->add('roles', ChoiceType::class, [
-                'label' => 'Entities.User.fields.roles',
+                'label' => new TranslatableMessage('Entities.User.fields.roles'),
                 'attr' => ['class' => 'select2'],
                 'choices' => ['Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'],
                 'mapped' => false
             ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'label' => 'Entities.User.fields.password',
+                'label' => new TranslatableMessage('Entities.User.fields.password'),
                 'invalid_message' => 'The password fields must match.',
                 'options' => ['attr' => ['class' => 'password-field']],
-                'first_options' => ['label' => 'Entities.User.fields.password'],
-                'second_options' => ['label' => 'Entities.User.fields.repeatPassword'],
+                'first_options' => ['label' => new TranslatableMessage('Entities.User.fields.password')],
+                'second_options' => ['label' => new TranslatableMessage('Entities.User.fields.repeatPassword')],
                 'mapped' => false,
             ])
             ->add('groups', EntityType::class, [
-                'label' => 'Entities.User.fields.groups',
+                'label' => new TranslatableMessage('Entities.User.fields.groups'),
                 'class' => Groups::class,
                 'multiple' => true,           // This allows multiple checkboxes to be checked
                 'expanded' => true,           // This makes it render as checkboxes
@@ -84,24 +85,24 @@ class UserType extends AbstractType
                 'attr' => ['style' => 'height:auto;']
             ])
             ->add('domain', null, [
-                'label' => 'Entities.User.fields.domain',
+                'label' => new TranslatableMessage('Entities.User.fields.domain'),
                 'attr' => [
                     'class' => 'select2',
                     'onChange' => 'toggleImapLogin(this)'  // JavaScript function for handling changes
                 ]
             ])
             ->add('report', null, [
-                'label' => 'Entities.User.fields.report',
+                'label' => new TranslatableMessage('Entities.User.fields.report'),
             ])
             ->add('originalUser', UserAutocompleteField::class, [
                 'multiple' => false,
                 'required' => true,
-                'label' => 'Entities.User.fields.originalUser',
+                'label' => new TranslatableMessage('Entities.User.fields.originalUser'),
             ])
             ->add('sharedWith', UserAutocompleteField::class, [
                 'multiple' => true,
                 'required' => false,
-                'label' => 'Entities.User.fields.sharedWith',
+                'label' => new TranslatableMessage('Entities.User.fields.sharedWith'),
             ]);
 
         if ($adminForm) {
@@ -110,7 +111,7 @@ class UserType extends AbstractType
                 'multiple' => true,
                 'expanded' => true,
                 'required' => true,
-                'label' => 'Entities.User.fields.domain',
+                'label' => new TranslatableMessage('Entities.User.fields.domain'),
                 'attr' => ['style' => 'height:auto;']
             ]);
         }

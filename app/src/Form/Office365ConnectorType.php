@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class Office365ConnectorType extends ConnectorType
 {
@@ -17,13 +18,13 @@ class Office365ConnectorType extends ConnectorType
 
         $builder
             ->add('tenant', TextType::class, [
-                'label' => 'Entities.Office365Connector.fields.tenant',
+                'label' => new TranslatableMessage('Entities.Office365Connector.fields.tenant'),
             ])
             ->add('clientId', TextType::class, [
-                'label' => 'Entities.Office365Connector.fields.clientId',
+                'label' => new TranslatableMessage('Entities.Office365Connector.fields.clientId'),
             ])
             ->add('clientSecret', PasswordType::class, [
-                'label' => 'Entities.Office365Connector.fields.clientSecret',
+                'label' => new TranslatableMessage('Entities.Office365Connector.fields.clientSecret'),
             ])
         ;
     }

@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WblistController extends AbstractController
@@ -36,9 +37,11 @@ class WblistController extends AbstractController
             throw $this->createNotFoundException("Type {$type} is invalid");
         }
 
-        $actionLabel = $type === 'B' ? 'Message.Actions.Unlock' : 'Message.Actions.Delete';
+        $actionLabel = $type === 'B' ?
+            new TranslatableMessage('Message.Actions.Unlock') :
+            new TranslatableMessage('Message.Actions.Delete');
         $filterForm = $this->createForm(ActionsFilterType::class, null, [
-            'avalaibleActions' => [$actionLabel => 'delete'],
+            'avalaibleActions' => [$actionLabel->getMessage() => 'delete'],
             'action' => $this->generateUrl('wblist_batch'),
         ]);
 

@@ -340,7 +340,7 @@ class DomainController extends AbstractController
             'choice_label' => function (string $choice): TranslatableMessage {
                 return new TranslatableMessage("Entities.WBList.rules.{$choice}");
             },
-            'label' => 'Entities.WBList.fields.wbRule',
+            'label' => new TranslatableMessage('Entities.WBList.fields.wbRule'),
         ]);
 
         $form = $formBuilder->getForm();

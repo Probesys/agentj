@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class ImportType extends AbstractType
 {
@@ -18,6 +19,7 @@ class ImportType extends AbstractType
             ->add('attachment', FileType::class, ['label' => false])
             ->add('domain', EntityType::class, [
                 'class' => Domain::class,
+                'label' => new TranslatableMessage('Entities.WBList.fields.domain'),
                 'multiple' => false,
                 'attr' => ['class' => 'select2'],
                 'query_builder' => function (DomainRepository $rep) {

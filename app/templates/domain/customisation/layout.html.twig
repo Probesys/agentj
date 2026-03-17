@@ -2,7 +2,7 @@
 
 {% block body %}
     <div class="bg-white p-2">
-        {% set _title = 'Entities.Domain.customisation.title' | trans({ '{{ domain }}': domain.domain }) %}
+        {% set _title = 'Entities.Domain.customisation.title' | trans({ 'domain': domain.domain }) %}
         {% embed 'common/blockTitleAndButtons.html.twig' %}
         {% endembed %}
 

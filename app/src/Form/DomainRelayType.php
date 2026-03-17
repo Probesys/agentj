@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class DomainRelayType extends AbstractType
 {
@@ -14,7 +15,7 @@ class DomainRelayType extends AbstractType
     {
         $builder
             ->add('ipAddress', TextType::class, [
-                'label' => 'Entities.DomainRelay.fields.ipAddress',
+                'label' => new TranslatableMessage('Entities.DomainRelay.fields.ipAddress'),
             ])
         ;
     }

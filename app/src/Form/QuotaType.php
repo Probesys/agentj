@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class QuotaType extends AbstractType
 {
@@ -13,10 +14,10 @@ class QuotaType extends AbstractType
     {
         $builder
             ->add('quota_emails', IntegerType::class, [
-                'label' => 'Entities.Domain.fields.quota_emails',
+                'label' => new TranslatableMessage('Entities.Domain.fields.quota_emails'),
             ])
             ->add('quota_seconds', IntegerType::class, [
-                'label' => 'Entities.Domain.fields.quota_seconds',
+                'label' => new TranslatableMessage('Entities.Domain.fields.quota_seconds'),
             ]);
     }
 

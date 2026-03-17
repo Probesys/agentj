@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\UX\Autocomplete\Form\AsEntityAutocompleteField;
 use Symfony\UX\Autocomplete\Form\BaseEntityAutocompleteType;
 
@@ -20,7 +21,7 @@ class UserAutocompleteField extends AbstractType
     {
         $resolver->setDefaults([
             'class' => User::class,
-            'placeholder' => 'Generics.actions.chooseUser',
+            'placeholder' => new TranslatableMessage('Generics.actions.chooseUser'),
             'autocomplete_url' => $this->router->generate('autocomplete_user'),
         ]);
     }
