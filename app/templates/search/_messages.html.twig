@@ -37,6 +37,22 @@
                 <a href="#" data-modal-method-type="GET"
                    data-url-modal-content="{{ path('message_show', {'partitionTag' : messageRecipient.partitionTag, 'mailId' : messageRecipient.getMailIdAsString(), 'rid' : messageRecipient.rid.id}) }}"
                    class="btn-open-modal btn btn-info float-right"><i class="fas fa-info"></i></a>
+
+                {% if messageRecipient.msgs.isInQuarantine %}
+                        <a
+                            href="#"
+                            title="{{ 'Entities.Message.labels.preview' | trans }}"
+                            data-modal-method-type="GET"
+                            data-url-modal-content="{{ path('message_show_content', {
+                                'partitionTag' : messageRecipient.partitionTag,
+                                'mailId' : messageRecipient.getMailIdAsString(),
+                                'rid' : messageRecipient.rid.id
+                            }) }}"
+                            class="btn-open-modal btn btn-info float-right"
+                        >
+                            <i class="fas fa-envelope-open"></i>
+                        </a>
+                {% endif %}
             {% else %}
                 <a href="#" data-modal-method-type="GET"
                    data-url-modal-content="{{ path('out_message_show', {'partitionTag' : messageRecipient.partitionTag, 'mailId' : messageRecipient.getMailIdAsString(), 'rid' : messageRecipient.rid.id}) }}"
