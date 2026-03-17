@@ -135,7 +135,6 @@ class ReportSendMailCommand extends Command
      */
     private function createEmailContent(User $user, array $messageRecipients): string
     {
-        $messageRecipients = array_slice($messageRecipients, 0, 10);
         $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
         $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
         $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
