@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class ConnectorType extends AbstractType
 {
@@ -14,12 +15,12 @@ class ConnectorType extends AbstractType
     {
         $builder
             ->add('name', null, [
-                'label' => 'Entities.Connector.fields.name'
+                'label' => new TranslatableMessage('Entities.Connector.fields.name'),
             ])
             ->add('type', HiddenType::class)
             ->add('synchronizeGroup', null, [
                 'required' => false,
-                'label' => 'Entities.LdapConnector.fields.synchronizeGroup',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.synchronizeGroup'),
             ])
         ;
     }

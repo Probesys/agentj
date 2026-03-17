@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class DomainCustomisationGeneralType extends AbstractType
 {
@@ -29,12 +30,12 @@ class DomainCustomisationGeneralType extends AbstractType
     {
         $builder->add('defaultLang', ChoiceType::class, [
             'choices' => $this->tabLanguages,
-            'label' => 'Entities.Domain.fields.defaultLang',
+            'label' => new TranslatableMessage('Entities.Domain.fields.defaultLang'),
             'required' => false,
         ]);
 
         $builder->add('logoFile', FileType::class, [
-            'label' => 'Logo',
+            'label' => new TranslatableMessage('Entities.Domain.fields.logo'),
             'mapped' => false,
             'required' => false,
         ]);

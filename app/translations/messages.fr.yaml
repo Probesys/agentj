@@ -1,0 +1,391 @@
+Entities.Alert.actions.delete: Supprimer
+Entities.Alert.actions.read: 'Marquer comme lu'
+Entities.Alert.messages.admin.quota.content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés : '
+Entities.Alert.messages.admin.quota.title: 'Limite de quota franchie'
+Entities.Alert.messages.admin.virus.content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné : '
+Entities.Alert.messages.admin.virus.title: 'Mail sortant contenant un virus bloqué'
+Entities.Alert.messages.user.quota.content: "Vous avez dépassé le quota. Votre mail n'a pas été distribué."
+Entities.Alert.messages.user.quota.title: 'Vous avez dépassé le quota'
+Entities.Alert.messages.user.virus.content: 'Un virus a été détecté dans un mail que vous avez envoyé.'
+Entities.Alert.messages.user.virus.title: 'Votre mail sortant a été bloqué'
+Entities.Connector.fields.name: 'Nom du connecteur'
+Entities.Connector.fields.targetGroups: 'Affecter les utilisateurs au(x) groupe(s)'
+Entities.Connector.fields.type: 'Type de connecteur'
+Entities.Domain.Name: Domaine
+Entities.Domain.actions.WBList: Liste
+Entities.Domain.actions.add_connector: 'Ajouter un connecteur'
+Entities.Domain.actions.add_new: 'Ajouter un nouveau domaine'
+Entities.Domain.actions.add_new_rule: 'Nouvelle règle'
+Entities.Domain.actions.allowAllMails: 'Autoriser tous les mails'
+Entities.Domain.actions.backToDomainList: 'Retour à la liste des domaines'
+Entities.Domain.actions.blockAllMails: 'Bloquer tous les mails'
+Entities.Domain.actions.customisation: Personnalisation
+Entities.Domain.actions.deleteRule: 'Supprimer la règle'
+Entities.Domain.actions.editDomainRule: 'Modifier une règle'
+Entities.Domain.actions.importUserAndAliases: 'Importer les utilisateurs et les alias'
+Entities.Domain.customisation.general.tab: Général
+Entities.Domain.customisation.general.title: 'Personnalisation générale du domaine {{ domain }}'
+Entities.Domain.customisation.human_authentication.tab: 'Authentification humaine'
+Entities.Domain.customisation.human_authentication.title: 'Personnalisation de l’authentification humaine du domaine {{ domain }}'
+Entities.Domain.customisation.report.tab: Rapport
+Entities.Domain.customisation.report.title: 'Personnalisation du rapport du domaine {{ domain }}'
+Entities.Domain.customisation.title: 'Personnalisation du domaine {{ domain }}'
+Entities.Domain.edit: 'Edition du domaine'
+Entities.Domain.fields.addQuota: 'Ajouter un quota'
+Entities.Domain.fields.mailAuthenticationSender: "Adresse mail qui envoie les demandes d'authentification"
+Entities.Domain.fields.quota: Quota
+Entities.Domain.index: 'Liste des domaines'
+Entities.Domain.labels.alerts: ALERTES
+Entities.Domain.labels.auth: 'AUTH, UTILISATEURS & ALIAS'
+Entities.Domain.labels.connectors: Connecteurs
+Entities.Domain.labels.dns: DNS
+Entities.Domain.labels.domain: DOMAINE
+Entities.Domain.labels.domainrules: 'Règles du domaine'
+Entities.Domain.labels.dynamicsVariables.EMAIL_DEST: 'Email du destinataire'
+Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE: 'Fin de la boucle des messages'
+Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE: 'Début de la boucle des messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'Liste des messages non traités'
+Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER: "Nom de l'expéditeur du message"
+Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT: 'Sujet du message'
+Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES: 'Nombre messages autorisés'
+Entities.Domain.labels.dynamicsVariables.NB_BANNED_MESSAGES: 'Nombre de messages bannis'
+Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES: 'Nombre de messages supprimés'
+Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES: 'Nombre de messages restaurés'
+Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES: 'Nombre de messages en spam'
+Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES: 'Nombre de messages non traités'
+Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION: "Lien vers la page d'authentification humaine"
+Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_AUTHORIZE_SENDER: "URL autorisant l'expéditeur du message"
+Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL récupérant le message'
+Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Lien vers les mails en attente'
+Entities.Domain.labels.dynamicsVariables.USERNAME: "Nom de l'utilisateur"
+Entities.Domain.labels.filters: 'FILTRES & QUOTAS'
+Entities.Domain.labels.ipAddresses: "IP du serveur d'envoi"
+Entities.Domain.labels.rules: Règles
+Entities.Domain.labels.saveBeforeConnectors: "Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs."
+Entities.Group.Actions.Delete: Supprimer
+Entities.Group.Actions.New: 'Créer un groupe'
+Entities.Group.Actions.Updated: Modifier
+Entities.Group.Actions.addRule: 'Ajouter une règle'
+Entities.Group.Actions.addRuleToGroup: 'Ajouter une règle au groupe'
+Entities.Group.Actions.backToGroupList: 'Retour à la liste des groupes'
+Entities.Group.Actions.deleteRule: 'Supprimer la règle'
+Entities.Group.Actions.editRuleGroup: 'Modifier la règle du groupe'
+Entities.Group.Actions.list: Actions
+Entities.Group.Actions.updateGroup: 'Modifier le groupe'
+Entities.Group.Name: Nom
+Entities.Group.Title: 'Gérer les groupes'
+Entities.Group.Updated: 'Mise à jour'
+Entities.Group.labels.grouprules: 'Règles du groupe'
+Entities.Group.labels.rules: Règles
+Entities.Group.labels.usersGroup: 'Utilisateurs du groupe'
+Entities.ImapConnector.actions.add: 'Ajouter un connecteur IMAP'
+Entities.ImapConnector.actions.edit: 'Editer le connecteur IMAP'
+Entities.ImapConnector.fields.imapHost: Hôte
+Entities.ImapConnector.fields.imapPort: Port
+Entities.ImapConnector.fields.imapProtocol: Chiffrement
+Entities.Import.Alias.description: "Le fichier doit être encodé en utf8 au format csv séparé par des points virgules.<br /> La structure est la suivante : Prénom ; Nom; Email ; Email de l'alias<br />"
+Entities.Import.Alias.title: 'Importer des alias'
+Entities.Import.Alias.warning: 'Attention : les utilisateurs importés existant déjà dans la base de données seront mis à jour.'
+Entities.Import.Users.description: 'Le fichier doit être encodé en utf8 au format csv séparé par des points virgules.<br /> La structure est la suivante : email ; Nom; Prénom; Groupe<br />'
+Entities.Import.Users.title: 'Importer des utilisateurs'
+Entities.Import.Users.warning: 'Attention : les utilisateurs importés existant déjà dans la base de données seront mis à jour.'
+Entities.Import.Wbliste.description: 'Le fichier doit être un fichier texte (.txt) encodé en UTF8. Chaque ligne doit comporter une adresse mail ou un domaine valide.'
+Entities.Import.Wbliste.title: 'Liste blanche : importer une liste'
+Entities.Import.actions.import: Importer
+Entities.LdapConnector.actions.add: 'Ajouter un connecteur LDAP'
+Entities.LdapConnector.actions.edit: 'Modifier le connecteur LDAP'
+Entities.LdapConnector.fields.LdapBaseDN: 'Base DN'
+Entities.LdapConnector.fields.LdapPassword: 'Mot de passe'
+Entities.LdapConnector.fields.advancedOptions: 'Options avancées'
+Entities.LdapConnector.fields.connectionInformation: 'Informations de connexion'
+Entities.LdapConnector.fields.ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
+Entities.LdapConnector.fields.ldapBindDn: 'Bind DN'
+Entities.LdapConnector.fields.ldapEmailField: "Champ LDAP pour l'email"
+Entities.LdapConnector.fields.ldapEncryption: Chiffrement
+Entities.LdapConnector.fields.ldapGroupFilter: 'Filtre pour les groupes'
+Entities.LdapConnector.fields.ldapGroupMemberField: 'Champ LDAP pour les utilisateurs du groupe'
+Entities.LdapConnector.fields.ldapGroupNameField: 'Champ LDAP pour le nom du groupe (ex : sn)'
+Entities.LdapConnector.fields.ldapHost: Hôte
+Entities.LdapConnector.fields.ldapPort: 'Port (défaut 389)'
+Entities.LdapConnector.fields.ldapRealNameField: 'Champ LDAP pour le nom (ex : sn)'
+Entities.LdapConnector.fields.ldapSharedWithField: 'Champ LDAP pour les boites partagées'
+Entities.LdapConnector.fields.ldapUserFilter: 'Filtre pour les utilisateurs'
+Entities.LdapConnector.fields.ldapVersion: 'Version LDAP'
+Entities.LdapConnector.fields.usersInformation: 'Informations utilisateurs'
+Entities.Message.dateAuthRequestAt: "Demande d'authentification envoyée le"
+Entities.Message.index: 'Liste des messages'
+Entities.Message.informationMessage: 'Les messages seront automatiquement effacés au bout de 30 jours.'
+Entities.Message.isMailingList: 'Mailing liste ? '
+Entities.Message.labels.imgDisabled: 'Image désactivée'
+Entities.Message.labels.infos: 'Informations sur les refus'
+Entities.Message.labels.linkDisabled: 'Lien désactivé'
+Entities.Message.labels.preview: 'Aperçu du message'
+Entities.Message.labels.reason: 'Type de refus'
+Entities.Message.noBlockedMessages: 'Aucun message bloqué'
+Entities.Message.spamLevel: Note
+Entities.Msgrcpt.fields.bspamLevel: 'Note de spam'
+Entities.Msgrcpt.labels.appliedRule: 'Informations sur le message'
+Entities.Msgrcpt.labels.infos: 'Informations sur le message'
+Entities.Office365Connector.actions.add: 'Ajouter un connecteur Office365'
+Entities.Office365Connector.actions.edit: 'Editer le connecteur Office365'
+Entities.Policy.actions.add_new: 'Ajouter une nouvelle stratégie'
+Entities.Policy.fields.badHeaderLover: 'Aime les mauvais entêtes'
+Entities.Policy.fields.bannedFilesLover: 'Aime les fichiers bannis'
+Entities.Policy.fields.spamLover: 'Aime le spam'
+Entities.Policy.fields.virusLover: 'Aime les virus'
+Entities.Policy.index: 'Liste des stratégies'
+Entities.Policy.label: Stratégie
+Entities.Policy.tabs.other: Autre
+Entities.Policy.tabs.policy: Stratégie
+Entities.Policy.tabs.quarantine: Quarantaine
+Entities.Policy.tabs.tagLevel: 'Niveau de tag'
+Entities.Report.mailFromName: 'Rapport AgentJ'
+Entities.Report.numberMessage: Nombre
+Entities.Report.stateMessage: État
+Entities.Report.title: "Rapport d'activité"
+Entities.Report.titleDay: 'Sur les dernières 24h'
+Entities.Report.titleMonth: 'Sur le dernier mois'
+Entities.Report.typeMessage: Type
+Entities.User.actions.add_new: 'Nouvel utilisateur'
+Entities.User.actions.add_new_alias: 'Ajouter un nouvel alias'
+Entities.User.actions.edit: "Edition d'un utilisateur"
+Entities.User.fields.alias: Alias
+Entities.User.fields.bypassHumanAuth: "Désactiver l'authentification humaine"
+Entities.User.fields.domain: Domaine
+Entities.User.fields.email: Email
+Entities.User.fields.fullName: Nom
+Entities.User.fields.groups: Groupe
+Entities.User.fields.inMsgBlockedCount: 'Nombre de messages entrants bloqués'
+Entities.User.fields.inMsgCount: 'Nombre de messages entrants'
+Entities.User.fields.incoming: Entrant
+Entities.User.fields.office365PrincipalName: 'Nom principal M365'
+Entities.User.fields.outMsgBlockedCount: 'Nombre de messages sortants bloqués'
+Entities.User.fields.outMsgCount: 'Nombre de messages sortants'
+Entities.User.fields.outgoing: Sortant
+Entities.User.fields.password: 'Mot de passe'
+Entities.User.fields.policy: Stratégie
+Entities.User.fields.repeatPassword: 'Confirmer le mot de passe'
+Entities.User.fields.report: 'Envoyer le rapport'
+Entities.User.fields.roles: Rôle
+Entities.User.fields.userName: Login
+Entities.User.indexAlias: 'Liste des alias emails'
+Entities.User.indexEmail: 'Liste des comptes emails'
+Entities.User.indexLocal: 'Liste des administrateurs'
+Entities.User.labels.defaultDomainParameters: 'Paramètre par défaut du domaine'
+Entities.WBList.fields.typeB: 'Type de blocage'
+Entities.WBList.fields.typeW: 'Type de validation'
+Entities.WBList.fields.user: Utilisateur
+Form.Error: Erreur
+Form.ImportFile: 'Sélectionnez un fichier à importer'
+Generics.actions.addIpAddress: 'Ajouter une adresse IP'
+Generics.actions.backToPreviousPage: 'Retour à la page précédente'
+Generics.actions.backToTheList: 'Retour à la liste'
+Generics.actions.cancel: Annuler
+Generics.actions.changePassword: 'Changer de mot de passe'
+Generics.actions.confirmDelete: 'Êtes vous certain de vouloir réaliser cette suppression ?'
+Generics.actions.connectAs: 'Se connecter en tant que'
+Generics.actions.connectWithMicrosoft: 'Se connecter avec Microsoft'
+Generics.actions.delete: Supprimer
+Generics.actions.deleteSelection: 'Supprimer la sélection'
+Generics.actions.display: Afficher
+Generics.actions.edit: Éditer
+Generics.actions.exitImpersonation: 'Revenir à'
+Generics.actions.impersonate: 'Se connecter'
+Generics.actions.import: Importer
+Generics.actions.importFile: 'Importer depuis un fichier'
+Generics.actions.rememberme: 'Se souvenir de moi'
+Generics.actions.save: Enregistrer
+Generics.actions.search: Rechercher
+Generics.actions.showMore: 'Voir plus'
+Generics.actions.showNbItemPerPage: 'Afficher %nbItems% éléments par page'
+Generics.fields.active: Actif
+Generics.fields.attachments: 'Pièce(s) jointe(s)'
+Generics.fields.date: Date
+Generics.fields.datemod: 'date de modification'
+Generics.fields.inactive: Inactif
+Generics.fields.list: Liste
+Generics.fields.name: Intitulé
+Generics.fields.object: Objet
+Generics.fields.priority: Priorité
+Generics.fields.recipient: Destinataire
+Generics.fields.sender: Expéditeur
+Generics.flash.ExistingUser: "Ligne [ROW] : Utilisateur [EMAIL] existe déjà dans la base de données et n'est pas un alias."
+Generics.flash.ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
+Generics.flash.ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
+Generics.flash.ImportExisting: 'Les utilisateurs suivants existaient déjà dans la base de données et ont été mis à jours : <br> [LIST_DUPES]'
+Generics.flash.ImportSuccess: 'Il y a [NB_USER] comptes emails qui ont été importés avec succès !'
+Generics.flash.IncorrectColumns: 'Ligne [ROW] : Nombre de colonnes incorrect.'
+Generics.flash.InvalidEmail: 'Ligne [ROW] : Adresse e-mail invalide.'
+Generics.flash.NonexistantDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
+Generics.flash.NonexistantUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+Generics.flash.addSuccess: 'Ajout effectué avec succès !'
+Generics.flash.aliasAlreadyExist: "Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser"
+Generics.flash.domainNotExist: "Le domaine n'existe pas"
+Generics.flash.editSuccess: 'La mise à jour a été effectuée avec succès'
+Generics.flash.emailAlreadyExist: "Cet email est déjà utilisé. Vous ne pouvez pas l'utiliser"
+Generics.flash.genericFormError: "Une erreur s'est produite lors du traitement du formulaire"
+Generics.flash.groupNameAlreadyExist: 'Ce groupe existe déjà pour domaine. Vous ne pouvez pas utiliser ce nom'
+Generics.flash.imapLoginAlreadyExist: "Ce login IMAP est déjà utilisé. Vous ne pouvez pas l'utiliser"
+Generics.flash.invalidCsrfToken: 'Token CSRF invalide'
+Generics.flash.passwordNotMatching: "La confirmation du mot de passe n'est pas valide"
+Generics.flash.userNameAlreadyExist: "Ce login existe déjà. Vous ne pouvez pas l'utiliser"
+Generics.labels.actions: Actions
+Generics.labels.alerts: Alertes
+Generics.labels.all: Tous
+Generics.labels.blockedMessages: 'Messages bloqués'
+Generics.labels.byDefault: 'par défaut'
+Generics.labels.filters: Filtres
+Generics.labels.incomingMails: 'Mails entrants'
+Generics.labels.item_per_page: "Nombre d'éléments par page (sur %totalItemFound% trouvés)"
+Generics.labels.latestMessages: 'Derniers messages'
+Generics.labels.no: Non
+Generics.labels.outgoingMails: 'Mail sortants'
+Generics.labels.previewLatestMessages: 'Aperçu des 5 derniers mails bloqués'
+Generics.labels.previewUsers: 'Aperçu des utilisateurs'
+Generics.labels.recentAlerts: 'Alertes récentes'
+Generics.labels.statTable: 'Tableau des statistiques'
+Generics.labels.statistics: Statistiques
+Generics.labels.unblockedMessages: 'Messages non bloqués'
+Generics.labels.unreadAlerts: 'Alerte non lue|Alertes non lues'
+Generics.labels.variables: Variables
+Generics.labels.yes: Oui
+Generics.messages.azurOAuthInvalidIdentity: "Les données d'identification à Microsoft sont erronées. Veuillez contacter votre administrateur"
+Generics.messages.cannotPreviewMailWithvirus: 'Vous ne pouvez pas visualiser ce message car il contient un virus'
+Generics.messages.groupWithPriorityExists: 'Un groupe avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'
+Generics.messages.helpAlert: 'Alertes sur les mails sortant bloqués (quota dépassé, etc...)'
+Generics.messages.incorrectCredential: 'Identifiants incorrects'
+Generics.messages.no_records_found: 'Aucun résultat trouvé'
+Generics.messages.oauthInvalidSetup: 'Une erreur est survenue lors de la connexion. Veuillez contacter votre administrateur.'
+Generics.messages.selectAtLeastOneDomain: 'Veuillez sélectionner au moins un domaine'
+Generics.messages.welcome: Bienvenue
+Generics.messages.welcomeAgentJ: 'Bienvenue sur AgentJ'
+Generics.messages.welcomeHomeMessage: "Bienvenue sur <span style='white-space: nowrap'>AgentJ</span>,<br> veuillez vous authentifier"
+Message.Actions.Autorized: Autoriser
+Message.Actions.AutorizedDomain: "Autoriser l'expéditeur à l'ensemble des utilisateurs"
+Message.Actions.AutorizedSender: "Autoriser l'expéditeur"
+Message.Actions.Banned: Bannir
+Message.Actions.BannedDomain: "Bannir l'expéditeur à l'ensemble des utilisateurs"
+Message.Actions.BannedSender: "Bannir l'expéditeur"
+Message.Actions.Delete: Supprimer
+Message.Actions.DeleteMessage: 'Supprimer le message'
+Message.Actions.Restore: Récupérer
+Message.Actions.RestoreMessage: 'Récupérer le message'
+Message.Actions.list: Actions
+Message.Actions.massiveActionContent: 'Êtes-vous sûr de vouloir effectuer cette action sur tous les éléments sélectionnés ?'
+Message.Captcha.defaultMailContent: "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre email en cliquant sur le lien suivant : <br /> <a href='[URL_HUMAN_AUTHENTICATION]'>[URL_HUMAN_AUTHENTICATION]</a> <br /><br /> Merci et bonne journée "
+Message.Captcha.defaultMailSubject: 'Vérification Email'
+Message.Connector.resultImportGroup: '$NB_GROUP_CREATED groupes créé(s), $NB_GROUP_UPDATED synchronisés'
+Message.Connector.resultImportUser: '$NB_USER_CREATED utilisateurs créé(s), $NB_USER_UPDATED synchronisés, $NB_ALIAS_CREATED alias créés'
+Message.Date: Date
+Message.Dialogs.confirmAuthorizedDomainMsgContent: "Êtes-vous sur d'autoriser l'expéditeur pour tous les utilisateurs ?"
+Message.Dialogs.confirmAuthorizedDomainMsgtitle: "Autoriser l'expéditeur pour tous les utilisateurs"
+Message.Dialogs.confirmAuthorizedMsgContent: "Êtes-vous sur d'autoriser l'expéditeur ?"
+Message.Dialogs.confirmAuthorizedMsgtitle: "Autoriser l'expéditeur"
+Message.Dialogs.confirmBannedDomainMsgContent: "Êtes-vous sur de bannir l'expéditeur pour tous les utilisateurs ?"
+Message.Dialogs.confirmBannedDomainMsgtitle: "Bannir l'expéditeur pour tous les utilisateurs"
+Message.Dialogs.confirmBannedMsgContent: "Êtes-vous sur de vouloir bannir l'expéditeur ?"
+Message.Dialogs.confirmBannedMsgtitle: "Bannir l'expéditeur"
+Message.Dialogs.confirmDeleteDomainContent: 'Êtes-vous sur de vouloir supprimer ce domaine ?'
+Message.Dialogs.confirmDeleteGroupContent: 'Êtes-vous sûr de vouloir supprimer ce groupe ?'
+Message.Dialogs.confirmDeleteGroupTitle: 'Supprimer ce groupe ?'
+Message.Dialogs.confirmDeleteMsgContent: 'Êtes-vous sur de vouloir supprimer le message ?'
+Message.Dialogs.confirmDeleteMsgtitle: 'Supprimer le message'
+Message.Dialogs.confirmDeleteUserContent: 'Êtes-vous sur de vouloir supprimer cet utilisateur ?'
+Message.Dialogs.confirmRemoveConnectorContent: 'Êtes-vous sûr de vouloir supprimer ce connecteur ?'
+Message.Dialogs.confirmRemoveConnectorTitle: 'Supprimer le connecteur.'
+Message.Dialogs.confirmRemoveRuleContent: 'Êtes-vous sûr de vouloir supprimer cette règle ?'
+Message.Dialogs.confirmRemoveRuleTitle: 'Supprimer la règle ?'
+Message.Dialogs.confirmRemoveUserFromGroupContent: 'Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?'
+Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Supprimer du groupe ?'
+Message.Dialogs.confirmRestoreMsgContent: 'Êtes-vous sur de vouloir récupérer le message ?'
+Message.Dialogs.confirmRestoreMsgtitle: 'Récupérer le message'
+Message.Flash.checkMailUnsuccessful: 'Cette adresse email semble être invalide, ou a déjà été validée.'
+Message.Flash.connectionKo: 'Connexion échouée'
+Message.Flash.connectionOk: 'Connexion établie'
+Message.Flash.deleteSuccesFull: 'Suppression effectuée avec succès'
+Message.Flash.domainCreatd: 'Le domaine a été créé avec succès'
+Message.Flash.domainUpdated: 'Le domaine a modifié avec succès'
+Message.Flash.failedToGeneratePrivateKey: __Message.Flash.failedToGeneratePrivateKey
+Message.Flash.failedToGeneratePublicKey: __Message.Flash.failedToGeneratePublicKey
+Message.Flash.invalidLdapQuery: 'Requête LDAP incorrecte'
+Message.Flash.ldapNbGroupfound: '$NB_GROUP groupe(s) trouvé(s)'
+Message.Flash.ldapNbUserfound: '$NB_USER utilisateur(s) trouvé(s)'
+Message.Flash.messageDeleted: 'Message supprimé avec succès'
+Message.Flash.messagePendingRelease: 'Le message va être délivré dans quelques instants.'
+Message.Flash.missingRuleForDomain: "Une première règle doit d'abord être créée pour ce domaine"
+Message.Flash.newRuleCreated: 'Nouvelle règle créée !'
+Message.Flash.ruleExistForDomain: 'Une règle similaire existe déjà pour ce domaine'
+Message.Flash.ruleExists: 'Cette règle existe déjà !'
+Message.Flash.ruleUpdated: 'Règle modifiée !'
+Message.Flash.saved: 'Les changements ont été enregistrés.'
+Message.Flash.senderAuthorized: "L'adresse est désormais autorisée"
+Message.Flash.senderBanned: "L'adresse est désormais bannie"
+Message.HumanAuthentication.toVerify.content: 'Merci de confirmer votre adresse email en la saisissant ci-dessous.'
+Message.HumanAuthentication.toVerify.title: 'Vérification d’email'
+Message.HumanAuthentication.verified.content: 'Votre adresse email a été vérifiée avec succès.'
+Message.HumanAuthentication.verified.title: "Merci, et bonne journée\_!"
+Message.Object: Objet
+Message.Office365Connector.tokenError: 'Impossible se connecter à votre compte. Veuillez vérifier vos paramètres'
+Message.Recipient: Destinataire
+Message.Report.defaultAlertMailContent: "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attentes de validation.<br /><br /> Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à AgentJ. <br /><br /> Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br /> Merci et bonne journée. "
+Message.Report.defaultMailSubject: 'Messages en attente sur AgentJ pour '
+Message.Sender: Expéditeur
+Message.Status.title: Statut
+Message.Toast.defaultTitle: Information
+Message.http.403.description: "Vous n'avez pas les droits suffisants pour afficher cette page."
+Message.http.403.title: 'Accès non autorisé'
+Message.http.404.description: "La page demandée n'a pas été trouvée. Vérifiez l'url ou retournez sur la page d'accueil."
+Message.http.404.title: 'Page non trouvée'
+Message.http.500.description: "Une erreur s'est produite qui empêche l'affichage de cette page. <br /><br /> Nous nous efforçons de régler ce problème le plus rapidement possible.<br /><br /> Veuillez nous excuser pour la gêne occasionnée"
+Message.http.500.title: "Une erreur s'est produite"
+Navigation.Dashboard: 'Tableau de bord'
+Navigation.MessageRestored: Récupérés
+Navigation.Messagedelete: Supprimés
+Navigation.all: Tous
+Navigation.authorized: Autorisés
+Navigation.banned: Bannis
+Navigation.blacklist: 'Expéditeurs bloqués'
+Navigation.domainlist: Domaines
+Navigation.grouplist: Groupes
+Navigation.login: Connexion
+Navigation.logout: 'Se déconnecter'
+Navigation.mailBlocked: 'Mails bloqués'
+Navigation.mainSubTitle: 'Solution antispam AgentJ'
+Navigation.policy: Stratégies
+Navigation.poweredBy: 'Propulsé par Agentj'
+Navigation.sourceCode: 'Code source'
+Navigation.spammed: 'Spam détectés'
+Navigation.untreated: 'Non traités'
+Navigation.user_profil: 'Mon compte'
+Navigation.userlist.emailAliasUsers: Alias
+Navigation.userlist.emailUsers: 'Comptes email'
+Navigation.userlist.localUsers: Administrateur
+Navigation.userlist.title: Utilisateurs
+Navigation.virus: 'Virus détectés'
+Navigation.whitelist: 'Expéditeurs autorisés'
+Portal.Messages.authorized.backToMessages: 'Voir mes mails autorisés'
+Portal.Messages.authorized.senderAuthorized: 'L’adresse est désormais autorisée.'
+Portal.Messages.restore.backToMessages: 'Voir mes mails récupérés'
+Portal.Messages.restore.messageRestored: 'Message récupéré avec succès.'
+Search.AdvancedFilter: 'Filtres avancés'
+Search.AmavisOutput: 'Score de spam'
+Search.BSpamLevelMax: 'Score de spam maximum'
+Search.BSpamLevelMin: 'Score de spam minimum'
+Search.Date: Date
+Search.EndDate: 'Date de fin'
+Search.Filter: Filtrer
+Search.Host: "Domaine de l'expéditeur"
+Search.Incoming: Reçu
+Search.MailId: 'Mail ID'
+Search.MessageType: 'Type de message'
+Search.Outgoing: Envoyé
+Search.Recipient: Destinataire
+Search.ReplyTo: 'Réponse à un message'
+Search.ResetFilters: Réinitialiser
+Search.Sender: Expéditeur
+Search.Size: Taille
+Search.SizeMax: 'Taille maximum'
+Search.SizeMin: 'Taille minimum'
+Search.StartDate: 'Date de début'
+Search.Subject: Objet
+Search.Title: 'Recherche avancée'

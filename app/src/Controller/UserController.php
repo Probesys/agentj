@@ -311,7 +311,7 @@ class UserController extends AbstractController
         $csrfToken = $request->request->getString('_csrf_token', 'delete');
 
         if (!$this->isCsrfTokenValid('delete user', $csrfToken)) {
-            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken', [], 'errors'));
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
             return $this->redirect($this->referrer->get());
         }
 

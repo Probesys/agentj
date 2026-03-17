@@ -61,6 +61,11 @@ db-rollback: ## Rollback the database to the previous version
 db-fixtures: ## Load the fixtures in the database
 	$(CONSOLE) doctrine:fixtures:load --append
 
+.PHONY: translations
+translations: ## Update the translations from the code
+	$(CONSOLE) translation:extract --format=yaml --force --clean --sort=asc en
+	$(CONSOLE) translation:extract --format=yaml --force --clean --sort=asc fr
+
 .PHONY: release
 release: ## Release a new version (take a VERSION argument)
 ifndef VERSION

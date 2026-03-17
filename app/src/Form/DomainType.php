@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class DomainType extends AbstractType
 {
@@ -23,36 +24,36 @@ class DomainType extends AbstractType
 
         $builder
             ->add('domain', null, [
-                'label' => 'Entities.Domain.fields.domain',
+                'label' => new TranslatableMessage('Entities.Domain.fields.domain'),
                 'disabled' => $isEdit, // Make the field read-only if in edit mode
             ])
             ->add('srvSmtp', null, [
-                'label' => 'Entities.Domain.fields.srvSmtp',
+                'label' => new TranslatableMessage('Entities.Domain.fields.srvSmtp'),
                 'required' => true,
             ])
             ->add('smtpPort', NumberType::class, [
-                'label' => 'Entities.Domain.fields.smtp_port',
+                'label' => new TranslatableMessage('Entities.Domain.fields.smtp_port'),
                 'constraints' => [
                     new Range(min: 1, max: 65535),
                 ],
             ])
             ->add('active', null, [
-                'label' => 'Entities.Domain.fields.active',
+                'label' => new TranslatableMessage('Entities.Domain.fields.active'),
                 'required' => false,
             ])
             ->add('rules', ChoiceType::class, [
                 'choices' => $actions,
                 'mapped' => false,
-                'label' => 'Form.PolicyDomain',
+                'label' => new TranslatableMessage('Form.PolicyDomain'),
                 'required' => false,
             ])
             ->add('policy', null, [
-                'label' => 'Entities.Domain.fields.policy',
+                'label' => new TranslatableMessage('Entities.Domain.fields.policy'),
                 'required' => true,
                 'placeholder' => ''
             ])
             ->add('level', RangeType::class, [
-                'label' => 'Entities.Domain.fields.level',
+                'label' => new TranslatableMessage('Entities.Domain.fields.level'),
                 'attr' => [
                     'min' => $options['minSpamLevel'],
                     'max' => $options['maxSpamLevel'],
@@ -62,7 +63,7 @@ class DomainType extends AbstractType
                 ]
             ])
             ->add('mailAuthenticationSender', null, [
-                'label' => 'Entities.Domain.fields.mailAuthenticationSender',
+                'label' => new TranslatableMessage('Entities.Domain.fields.mailAuthenticationSender'),
                 'required' => false,
             ])
             ->add('domainRelays', CollectionType::class, [
@@ -83,11 +84,11 @@ class DomainType extends AbstractType
                 'required' => false,
             ])
             ->add('sendUserAlerts', CheckboxType::class, [
-                'label' => 'Entities.Domain.fields.sendUserAlerts',
+                'label' => new TranslatableMessage('Entities.Domain.fields.sendUserAlerts'),
                 'required' => false,
             ])
             ->add('sendUserMailAlerts', CheckboxType::class, [
-                'label' => 'Entities.Domain.fields.sendUserMailAlerts',
+                'label' => new TranslatableMessage('Entities.Domain.fields.sendUserMailAlerts'),
                 'required' => false,
             ]);
     }

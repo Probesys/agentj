@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class ActionsFilterType extends AbstractType
 {
@@ -13,7 +14,7 @@ class ActionsFilterType extends AbstractType
     {
         $builder
             ->add('actions', ChoiceType::class, [
-                'label' => 'Actions',
+                'label' => new TranslatableMessage('Generics.labels.actions'),
                 'required' => false,
                 'choices' => $options['avalaibleActions'],
                 'attr' => [
@@ -21,7 +22,7 @@ class ActionsFilterType extends AbstractType
                 ],
             ])
             ->add('per_page', ChoiceType::class, [
-                'label' => 'Generics.labels.item_per_page',
+                'label' => new TranslatableMessage('Generics.labels.item_per_page'),
                 'attr' => [
                     'class' => 'form-control form-control-sm'
                 ],
