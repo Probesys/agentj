@@ -8,6 +8,7 @@ use App\Repository\MsgrcptRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Process\Process;
 
 #[AsMessageHandler]
@@ -18,6 +19,7 @@ final class AmavisReleaseHandler
         private string $amavisdReleaseCommand,
         private MsgrcptRepository $messageRecipientRepository,
         private LoggerInterface $logger,
+        private LockFactory $lockFactory,
     ) {
     }
 
@@ -67,6 +69,19 @@ final class AmavisReleaseHandler
             return;
         }
 
+        $lockName = (
+            'amavis-release'
+            . "-{$amavisRelease->getPartitionTag()}"
+            . "-{$amavisRelease->getMailId()}"
+            . "-{$amavisRelease->getRseqnum()}"
+        );
+        $lock = $this->lockFactory->createLock($lockName, ttl: 10 * 60);
+
+        if (!$lock->acquire()) {
+            $this->logger->info("Can't acquire the {$lockName} lock, the release is probably already running.");
+            return;
+        }
+
         $process = new Process([
             $this->amavisdReleaseCommand,
             $messageRecipient->getMsgs()->getQuarLoc(),
@@ -97,5 +112,7 @@ final class AmavisReleaseHandler
 
         $messageRecipient->setAmavisReleaseEndedAt(new \DateTimeImmutable());
         $this->messageRecipientRepository->save($messageRecipient);
+
+        $lock->release();
     }
 }
