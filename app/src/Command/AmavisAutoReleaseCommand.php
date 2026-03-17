@@ -12,7 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 
 #[AsCommand(
     name: 'agentj:auto-release-message',
@@ -26,6 +25,7 @@ class AmavisAutoReleaseCommand extends Command
         private MsgrcptSearchRepository $msgrcptSearchRepository,
         private UserRepository $userRepository,
         private MessageService $messageService,
+        private LockFactory $lockFactory,
     ) {
         parent::__construct();
     }
@@ -34,9 +34,7 @@ class AmavisAutoReleaseCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
-        $store = new SemaphoreStore();
-        $factory = new LockFactory($store);
-        $lock = $factory->createLock('msgs-auto-release', 1800);
+        $lock = $this->lockFactory->createLock('msgs-auto-release', ttl: 1800);
 
         if (!$lock->acquire()) {
             $output->writeln("Can't acquire the msgs-auto-release lock, the command is probably already running.");

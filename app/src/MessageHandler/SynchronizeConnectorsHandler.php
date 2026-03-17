@@ -15,7 +15,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -27,16 +26,15 @@ final class SynchronizeConnectorsHandler
         KernelInterface $kernel,
         private ConnectorRepository $connectorRepository,
         private LoggerInterface $logger,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private LockFactory $lockFactory,
     ) {
         $this->application = new Application($kernel);
     }
 
     public function __invoke(SynchronizeConnectors $message): void
     {
-        $store = new SemaphoreStore();
-        $factory = new LockFactory($store);
-        $lock = $factory->createLock('synchronize-connectors', ttl: 3600);
+        $lock = $this->lockFactory->createLock('synchronize-connectors', ttl: 3600);
 
         if (!$lock->acquire()) {
             $this->logger->warning(

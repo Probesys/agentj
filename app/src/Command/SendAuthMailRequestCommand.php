@@ -17,7 +17,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\SemaphoreStore;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -40,6 +39,7 @@ class SendAuthMailRequestCommand extends Command
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
         private LocaleService $localeService,
+        private LockFactory $lockFactory,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
@@ -50,9 +50,7 @@ class SendAuthMailRequestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $store = new SemaphoreStore();
-        $factory = new LockFactory($store);
-        $lock = $factory->createLock('msgs-send-mail-token', 1800);
+        $lock = $this->lockFactory->createLock('msgs-send-mail-token', ttl: 1800);
 
         if (!$lock->acquire()) {
             $output->writeln("Can't acquire the msgs-send-mail-token lock, the command is probably already running.");
