@@ -160,7 +160,7 @@ class ReportSendMailCommand extends Command
 
         $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $body = str_replace('[USERNAME]', $user->getFullname(), $body);
+        $body = str_replace('[USERNAME]', $this->escape($user->getFullname()), $body);
         $body = str_replace('[LIST_MAIL_MSGS]', $tableMessages, $body);
         $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
         $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
@@ -227,8 +227,8 @@ class ReportSendMailCommand extends Command
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $bodyMessage = $messageTemplate;
-            $bodyMessage = str_replace('[MESSAGE_SENDER]', $message->getFromAddr(), $bodyMessage);
-            $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $message->getSubject(), $bodyMessage);
+            $bodyMessage = str_replace('[MESSAGE_SENDER]', $this->escape($message->getFromAddr()), $bodyMessage);
+            $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $this->escape($message->getSubject()), $bodyMessage);
             $bodyMessage = str_replace('[URL_MESSAGE_AUTHORIZE_SENDER]', $urlAuthorize, $bodyMessage);
             $bodyMessage = str_replace('[URL_MESSAGE_RESTORE]', $urlRestore, $bodyMessage);
 
@@ -264,5 +264,10 @@ class ReportSendMailCommand extends Command
         }
 
         return $messageRecipients;
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
     }
 }
