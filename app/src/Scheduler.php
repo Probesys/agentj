@@ -15,6 +15,8 @@ class Scheduler implements ScheduleProviderInterface
     public function __construct(
         #[Autowire(env: 'SCHEDULER_CONSOLIDATE_FREQUENCY')]
         private string $consolidateFrequency,
+        #[Autowire(env: 'SCHEDULER_AUTORELEASE_FREQUENCY')]
+        private string $autoreleaseFrequency,
     ) {
     }
 
@@ -28,7 +30,7 @@ class Scheduler implements ScheduleProviderInterface
         $from = new \DateTimeImmutable('02:00');
         $schedule->add(RecurringMessage::every('24 hours', new Message\CleanData(), $from));
 
-        $schedule->add(RecurringMessage::every('1 min', new Message\AmavisAutoRelease()));
+        $schedule->add(RecurringMessage::every($this->autoreleaseFrequency, new Message\AmavisAutoRelease()));
 
         $schedule->add(RecurringMessage::every($this->consolidateFrequency, new Message\ConsolidateAmavisData()));
 
