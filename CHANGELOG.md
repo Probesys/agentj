@@ -1,5 +1,23 @@
 # Changelog of AgentJ
 
+## 2026-03-18 - 2.5.2
+
+### Features
+
+- Remove limit of 10 mails in the report ([bbf00335](https://github.com/Probesys/agentj/commit/bbf00335))
+- Allow to configure Amavis autorelease frequency ([dd055740](https://github.com/Probesys/agentj/commit/dd055740))
+- Add ability to enable TLS for incoming emails ([66701aaf](https://github.com/Probesys/agentj/commit/66701aaf))
+
+### Maintenance
+
+- Add a lock on mail release ([9ba9ec5f](https://github.com/Probesys/agentj/commit/9ba9ec5f))
+
+### Bug fixes
+
+- Escape variables in report template ([b6aeee55](https://github.com/Probesys/agentj/commit/b6aeee55))
+- Store locks in database ([fcc7b1d7](https://github.com/Probesys/agentj/commit/fcc7b1d7))
+- Use `EHLO_DOMAIN` in `smtpd_banner` ([eaf35bc3](https://github.com/Probesys/agentj/commit/eaf35bc3))
+
 ## 2026-03-06 - 2.5.1
 
 ### Bug fixes
