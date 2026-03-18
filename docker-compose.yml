@@ -105,6 +105,7 @@ services:
       - opendkim
     volumes:
       - postqueue:/var/spool/postfix
+      - sslcerts:/etc/postfix-in/ssl/
     ports:
       - $SMTP_LISTEN_ADDR:$SMTP_PORT:25
 
@@ -183,3 +184,4 @@ volumes:
   outpostqueue:
   var:
   files:
+  sslcerts:

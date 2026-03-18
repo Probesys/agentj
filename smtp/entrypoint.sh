@@ -16,6 +16,13 @@ sed -i "s/\$DB_HOST/$DB_HOST/g" /etc/postfix-*/mysql-*.cf
 sed -i "s/\$DB_USER/$DB_USER/g" /etc/postfix-*/mysql-*.cf
 sed -i "s/\$DB_PASSWORD/$DB_PASSWORD/g" /etc/postfix-*/mysql-*.cf
 
+if [ "$SMTPD_ENABLE_TLS" = "true" ] && [ -e "/etc/postfix-in/ssl/fullchain.pem" ]; then
+    chown root: "/etc/postfix-in/ssl/fullchain.pem"
+    chmod 640 "/etc/postfix-in/ssl/fullchain.pem"
+    sed -i "s/#smtpd_tls_security_level =/smtpd_tls_security_level = /g" /etc/postfix-in/main.cf
+    sed -i "s/#smtpd_tls_chain_files =/smtpd_tls_chain_files = /g" /etc/postfix-in/main.cf
+fi
+
 # We configure one less Amavis process than the total to reserve a process for the "app" release system.
 AMAVIS_PROCESSES=${AMAVIS_PROCESSES:-3}
 AMAVIS_PROCESSES=$((AMAVIS_PROCESSES - 1))
