@@ -27,6 +27,4 @@ chown -R amavis:amavis /var/run/amavis
 mkdir -p /var/amavis/tmp /var/amavis/db
 chown -R amavis:amavis /var/amavis/
 
-cron
-
 exec "$@"
