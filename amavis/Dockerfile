@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim 
+FROM debian:bookworm-slim
 
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
@@ -24,13 +24,13 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     libio-socket-ssl-perl \
     libnet-patricia-perl \
     libdbd-mysql-perl \
-    pyzor  \
+    pyzor \
     razor \
-    supervisor  \ 
-    tzdata  \
+    supervisor \
+    tzdata \
     iproute2 \
     cron \
-    patch  
+    patch
 
 
 COPY amavisd.patch /root/amavisd.patch
