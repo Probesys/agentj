@@ -49,6 +49,9 @@ class Domain
     #[ORM\Column(name: 'level', type: 'float', nullable: true)]
     private ?float $level = 20;
 
+    #[ORM\Column(options: ['default' => 5.0])]
+    private float $authorizedSendersSpamLevel = 5.0;
+
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private ?Policy $policy;
@@ -373,6 +376,18 @@ class Domain
     public function setLevel(?float $level): self
     {
         $this->level = $level;
+
+        return $this;
+    }
+
+    public function getAuthorizedSendersSpamLevel(): float
+    {
+        return $this->authorizedSendersSpamLevel;
+    }
+
+    public function setAuthorizedSendersSpamLevel(float $authorizedSendersSpamLevel): static
+    {
+        $this->authorizedSendersSpamLevel = $authorizedSendersSpamLevel;
 
         return $this;
     }
