@@ -7,6 +7,7 @@ use App\Amavis\ContentType;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
+use App\Entity\User;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
@@ -39,6 +40,30 @@ class MsgrcptRepository extends BaseRepository
             'partitionTag' => $message->getPartitionTag(),
             'mailId' => $message->getMailId(),
         ]);
+    }
+
+    /**
+     * Return all message recipients sent by $senderEmail to $recipientUser.
+     *
+     * @return Msgrcpt[]
+     */
+    public function findSentToUserByEmail(User $recipientUser, string $senderEmail): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mrcpt
+            FROM App\Entity\Msgrcpt mrcpt
+            JOIN mrcpt.msgs m
+            JOIN m.sid s
+            JOIN mrcpt.rid r
+            WHERE r.email = :recipientEmail
+            AND s.email = :senderEmail
+            AND mrcpt.status IS NOT NULL
+        SQL);
+
+        $query->setParameter('recipientEmail', $recipientUser->getEmail());
+        $query->setParameter('senderEmail', $senderEmail);
+
+        return $query->getResult();
     }
 
     /**
