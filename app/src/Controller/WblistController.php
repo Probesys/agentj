@@ -248,7 +248,7 @@ class WblistController extends AbstractController
                     $wblist = new Wblist($user, $mailaddrSender);
                 }
 
-                $wblist->setWbRule('allow');
+                $wblist->setWbRule('accept');
                 $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
                 $wblist->setType(Wblist::WBLIST_TYPE_IMPORT);
                 $this->em->persist($wblist);
