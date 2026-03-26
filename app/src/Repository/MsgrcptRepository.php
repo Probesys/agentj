@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\ContentType;
 use App\Amavis\MessageStatus;
+use App\Entity\Domain;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -67,6 +68,34 @@ class MsgrcptRepository extends BaseRepository
     }
 
     /**
+     * Return all message recipients sent by $senderEmail to $recipient.
+     *
+     * @return Msgrcpt[]
+     */
+    public function findSentToDomainByEmail(Domain $recipient, string $senderEmail): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mrcpt
+            FROM App\Entity\Msgrcpt mrcpt
+            JOIN mrcpt.msgs m
+            JOIN m.sid s
+            JOIN mrcpt.rid r
+            WHERE r.domain = :recipientReverseDomain
+            AND s.email = :senderEmail
+            AND mrcpt.status IS NOT NULL
+        SQL);
+
+        $domainName = $recipient->getDomain();
+        $domainParts = explode('.', $domainName);
+        $reverseDomain = implode('.', array_reverse($domainParts));
+
+        $query->setParameter('recipientReverseDomain', $reverseDomain);
+        $query->setParameter('senderEmail', $senderEmail);
+
+        return $query->getResult();
+    }
+
+    /**
      * Update the status of a message for one recipient
      */
     public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
@@ -91,37 +120,6 @@ class MsgrcptRepository extends BaseRepository
             'mailId' => DBAL\ParameterType::STRING,
             'rid' => DBAL\ParameterType::INTEGER,
         ]);
-    }
-
-    /**
-     * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
-     * @todo chercher le content = spammy et le rajouter dans le where !=
-     * @return array<array<string, mixed>>
-     */
-    public function getMessagesToReleaseForDomain(string $emailSender, string $domain): array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = <<<SQL
-            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rseqnum FROM msgs m
-            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
-            LEFT JOIN maddr ms ON ms.id = m.sid
-            LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE  msr.ds != :deliveryPass
-            AND msr.status_id != :statusVirus
-            AND msr.status_id != :statusAuthorized
-            AND msr.status_id != :statusRestored
-            AND mr.domain = :domain
-            AND ms.email = :emailSender
-        SQL;
-        $stmt = $conn->prepare($sql);
-        $stmt->bindValue('deliveryPass', DeliveryStatus::PASS);
-        $stmt->bindValue('statusVirus', MessageStatus::VIRUS);
-        $stmt->bindValue('statusAuthorized', MessageStatus::AUTHORIZED);
-        $stmt->bindValue('statusRestored', MessageStatus::RESTORED);
-        $stmt->bindValue('domain', $domain);
-        $stmt->bindValue('emailSender', $emailSender);
-
-        return $stmt->executeQuery()->fetchAllAssociative();
     }
 
     public function findByEmailRecipient(string $email): Query

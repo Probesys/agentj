@@ -78,6 +78,52 @@ class MessageService
     }
 
     /**
+     * Authorize the message's sender for the given recipient's domain and
+     * release the messages that he sent to it.
+     */
+    public function authorizeSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    {
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $recipientDomainName = $recipient->getReverseDomain();
+
+        $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
+
+        $this->wblistRepository->updateOrCreateRule(
+            $domainUser,
+            $senderMailaddr,
+            wb: 'W',
+            type: $validationSource,
+            priority: Wblist::WBLIST_PRIORITY_USER,
+        );
+
+        $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domainUser->getDomain(),
+            $senderEmail,
+        );
+
+        foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+            $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::AUTHORIZED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
+    }
+
+    /**
      * Ban the message's sender for the given recipient and reject the messages
      * that he sent to him.
      */
@@ -119,6 +165,57 @@ class MessageService
 
         // TODO do we need the message status?
         //$message->setStatus(MessageStatus::BANNED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * Ban the message's sender for the given recipient's domain and reject the
+     * messages that he sent to it.
+     */
+    public function banSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    {
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $recipientDomainName = $recipient->getReverseDomain();
+
+        $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
+
+        $this->wblistRepository->updateOrCreateRule(
+            $domainUser,
+            $senderMailaddr,
+            wb: 'B',
+            type: $validationSource,
+            priority: Wblist::WBLIST_PRIORITY_USER,
+        );
+
+        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domainUser->getDomain(),
+            $senderEmail,
+        );
+
+        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+            if ($messageRecipientToBan->isVirus() || $messageRecipientToBan->isAlreadyReleased()) {
+                continue;
+            }
+
+            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+            $this->messageRecipientRepository->save($messageRecipientToBan);
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::AUTHORIZED);
         //$this->em->persist($message);
         //$this->em->flush();
 

@@ -89,6 +89,13 @@ class UserRepository extends BaseRepository
         return array_merge([$mainUser], $aliases);
     }
 
+    public function findDomainUser(string $domainName): ?User
+    {
+        return $this->findOneBy([
+            'email' => '@' . $domainName,
+        ]);
+    }
+
     /**
      * @return User[]
      */
