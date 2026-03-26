@@ -4,9 +4,14 @@ namespace App\Service;
 
 use App\Amavis\MessageStatus;
 use App\Message\AmavisRelease;
-use App\Entity;
+use App\Entity\Msgrcpt;
+use App\Entity\Msgs;
+use App\Entity\User;
+use App\Entity\Wblist;
+use App\Repository\MailaddrRepository;
 use App\Repository\MsgrcptRepository;
 use App\Repository\UserRepository;
+use App\Repository\WblistRepository;
 use App\Service\CryptEncryptService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -21,37 +26,215 @@ class MessageService
     public function __construct(
         private EntityManagerInterface $em,
         private MessageBusInterface $bus,
-        private MsgrcptRepository $msgrcptRepository,
+        private MailaddrRepository $mailaddrRepository,
+        private MsgrcptRepository $messageRecipientRepository,
         private UserRepository $userRepository,
+        private WblistRepository $wblistRepository,
         private CryptEncryptService $cryptEncryptService,
     ) {
     }
 
     /**
-     * Authorize the message's sender and release the message.
-     *
-     * @param Entity\Msgrcpt[] $messageRecipients
+     * Authorize the message's sender for the given recipient and release the
+     * messages that he sent to him.
      */
-    public function authorize(Entity\Msgs $message, array $messageRecipients, int $validationSource): bool
+    public function authorizeSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
     {
-        return $this->msgsToWblist($message, $messageRecipients, 'W', $validationSource);
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+
+        foreach ($userAndAliases as $user) {
+            $this->wblistRepository->updateOrCreateRule(
+                $user,
+                $senderMailaddr,
+                wb: 'W',
+                type: $validationSource,
+                priority: Wblist::WBLIST_PRIORITY_USER,
+            );
+
+            $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail($user, $senderEmail);
+
+            foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+                $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+            }
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::AUTHORIZED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
     }
 
     /**
-     * Ban the message's sender and reject the message.
-     *
-     * @param Entity\Msgrcpt[] $messageRecipients
+     * Authorize the message's sender for the given recipient's domain and
+     * release the messages that he sent to it.
      */
-    public function ban(Entity\Msgs $message, array $messageRecipients, int $validationSource): bool
+    public function authorizeSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
     {
-        return $this->msgsToWblist($message, $messageRecipients, 'B', $validationSource);
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $recipientDomainName = $recipient->getReverseDomain();
+
+        $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
+
+        $this->wblistRepository->updateOrCreateRule(
+            $domainUser,
+            $senderMailaddr,
+            wb: 'W',
+            type: $validationSource,
+            priority: Wblist::WBLIST_PRIORITY_USER,
+        );
+
+        $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domainUser->getDomain(),
+            $senderEmail,
+        );
+
+        foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+            $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::AUTHORIZED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * Ban the message's sender for the given recipient and reject the messages
+     * that he sent to him.
+     */
+    public function banSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
+    {
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+
+        foreach ($userAndAliases as $user) {
+            $this->wblistRepository->updateOrCreateRule(
+                $user,
+                $senderMailaddr,
+                wb: 'B',
+                type: $validationSource,
+                priority: Wblist::WBLIST_PRIORITY_USER,
+            );
+
+            $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail($user, $senderEmail);
+
+            foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+                if ($messageRecipientToBan->isVirus() || $messageRecipientToBan->isAlreadyReleased()) {
+                    continue;
+                }
+
+                $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+                $this->messageRecipientRepository->save($messageRecipientToBan);
+            }
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::BANNED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * Ban the message's sender for the given recipient's domain and reject the
+     * messages that he sent to it.
+     */
+    public function banSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    {
+        $message = $messageRecipient->getMsgs();
+
+        $senderEmail = $message->getSenderEmail();
+
+        if (!$senderEmail) {
+            return false;
+        }
+
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+
+        $recipient = $messageRecipient->getRid();
+        $recipientDomainName = $recipient->getReverseDomain();
+
+        $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
+
+        $this->wblistRepository->updateOrCreateRule(
+            $domainUser,
+            $senderMailaddr,
+            wb: 'B',
+            type: $validationSource,
+            priority: Wblist::WBLIST_PRIORITY_USER,
+        );
+
+        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domainUser->getDomain(),
+            $senderEmail,
+        );
+
+        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+            if ($messageRecipientToBan->isVirus() || $messageRecipientToBan->isAlreadyReleased()) {
+                continue;
+            }
+
+            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+            $this->messageRecipientRepository->save($messageRecipientToBan);
+        }
+
+        // TODO do we need the message status?
+        //$message->setStatus(MessageStatus::AUTHORIZED);
+        //$this->em->persist($message);
+        //$this->em->flush();
+
+        return true;
     }
 
     /**
      * Restore (release) the message for the provided recipient.
      */
-    public function dispatchRelease(Entity\Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
+    public function dispatchRelease(Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
     {
+        if (
+            $messageRecipient->isAlreadyReleased() ||
+            $messageRecipient->isAmavisReleaseOngoing() ||
+            $messageRecipient->isVirus()
+        ) {
+            return;
+        }
+
         $messageRecipient->setAmavisReleaseStartedAt(new \DateTimeImmutable());
         $this->em->persist($messageRecipient);
         $this->em->flush();
@@ -64,7 +247,7 @@ class MessageService
         ));
     }
 
-    public function restore(Entity\Msgrcpt $messageRecipient): void
+    public function restore(Msgrcpt $messageRecipient): void
     {
         $this->dispatchRelease($messageRecipient, MessageStatus::RESTORED);
     }
@@ -72,9 +255,9 @@ class MessageService
     /**
      * Mark a message and its recipient as deleted.
      */
-    public function delete(Entity\Msgs $message, Entity\Msgrcpt $messageRecipient): bool
+    public function delete(Msgs $message, Msgrcpt $messageRecipient): bool
     {
-        $this->msgrcptRepository->changeStatus(
+        $this->messageRecipientRepository->changeStatus(
             $message->getPartitionTag(),
             $message->getMailIdAsString(),
             MessageStatus::DELETED,
@@ -85,111 +268,10 @@ class MessageService
     }
 
     /**
-     * Add the message's sender to a wblist and release (if $wb is 'W') the message.
-     *
-     * @param Entity\Msgrcpt[] $messageRecipients
-     * @param 'W'|'B' $wb
-     *
-     * @throws NotFoundHttpException
-     */
-    private function msgsToWblist(
-        Entity\Msgs $message,
-        array $messageRecipients,
-        string $wb,
-        int $type = Entity\Wblist::WBLIST_TYPE_USER,
-    ): bool {
-        $messageStatus = $wb === 'W' ? MessageStatus::AUTHORIZED : MessageStatus::BANNED;
-
-        //check if sender exists in the database
-        $emailSender = $message->getSid()->getEmailClear();
-        if ($emailSender === null) {
-            return false;
-        }
-        //check from_addr email. If it's different from $mailaddrSender we will use it from wblist
-
-        $fromAddr = $message->getFromMimeAddress()?->getAddress();
-
-        $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
-
-        $mailaddrSender = $this->em->getRepository(Entity\Mailaddr::class)->findOneBy(['email' => $emailSenderToWb]);
-
-        //if not we create email in Mailaddr
-        if (!$mailaddrSender) {
-            $mailaddrSender = new Entity\Mailaddr();
-            $mailaddrSender->setEmail($emailSenderToWb);
-            $mailaddrSender->setPriority(6);
-            $this->em->persist($mailaddrSender);
-        }
-
-        $userAndAliases = [];
-        foreach ($messageRecipients as $messageRecipient) {
-            $emailReceipt = stream_get_contents($messageRecipient->getRid()->getEmail(), -1, 0);
-            $mainUser = $this->em->getRepository(Entity\User::class)->findOneBy(['email' => $emailReceipt]);
-
-            // if adress in an alias we get the target mail
-            if ($mainUser && $mainUser->getOriginalUser()) {
-                $mainUser = $mainUser->getOriginalUser();
-            }
-
-            // we check if aliases exist
-            if ($mainUser) {
-                $userAndAliases = $this->em->getRepository(Entity\User::class)->findBy([
-                    'originalUser' => $mainUser->getId(),
-                ]);
-                array_unshift($userAndAliases, $mainUser);
-            }
-
-            foreach ($userAndAliases as $user) {
-                //add white liste
-                //        $sid = $mailaddrSender->getId();
-
-                //if the message is authorized we release all message of the same sender
-                //create Wblist with value White and user (User Object) and mailSender (Mailaddr Object)
-                $wblist = $this->em->getRepository(Entity\Wblist::class)->findOneBy([
-                    'sid' => $mailaddrSender,
-                    'rid' => $user,
-                ]);
-                if (!$wblist) {
-                    $wblist = new Entity\Wblist($user, $mailaddrSender);
-                }
-                $wblist->setWb($wb);
-                $wblist->setType($type);
-                $wblist->setPriority(Entity\Wblist::WBLIST_PRIORITY_USER);
-                $this->em->persist($wblist);
-
-
-
-                //get all messages from email Sender and send all message for one user
-                $msgsRelease = $this->em->getRepository(Entity\Msgs::class)
-                                        ->getMessagesToRelease($emailSender, $user);
-                foreach ($msgsRelease as $msgRelease) {
-                    $oneMsgRcpt = $this->em->getRepository(Entity\Msgrcpt::class)->findOneBy([
-                        'partitionTag' => $msgRelease['partition_tag'],
-                        'mailId' => $msgRelease['mail_id'],
-                        'rid' => $msgRelease['rid']
-                    ]);
-                    //if W we deliver blokec messages if it has been released yet
-                    if ($wb == 'W' && !$oneMsgRcpt->getAmavisOutput()) {
-                        $this->dispatchRelease($oneMsgRcpt, MessageStatus::AUTHORIZED);
-                    } else {
-                        $oneMsgRcpt->setStatus($messageStatus);
-                        $this->em->persist($oneMsgRcpt);
-                    }
-                }
-            }
-        }
-
-        $message->setStatus($messageStatus);
-        $this->em->persist($message);
-        $this->em->flush();
-        return true;
-    }
-
-    /**
      * Return a secure token containing the id of the user and of the message.
      * The token is valid for 7 days.
      */
-    public function getReleaseToken(Entity\Msgs $message, Entity\User $user): string
+    public function getReleaseToken(Msgs $message, User $user): string
     {
         $data = $user->getId() . '%%%' . $message->getMailIdAsString();
         return $this->cryptEncryptService->encrypt($data, lifetime: 7 * 24 * 3600);
@@ -200,7 +282,7 @@ class MessageService
      *
      * If the token is invalid or expired, it returns null.
      *
-     * @return ?array{Entity\User, ?string}
+     * @return ?array{User, ?string}
      */
     public function decryptReleaseToken(string $token): ?array
     {

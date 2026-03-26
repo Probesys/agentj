@@ -14,4 +14,18 @@ class MailaddrRepository extends BaseRepository
     {
         parent::__construct($registry, Mailaddr::class);
     }
+
+    public function findOneOrCreateByEmail(string $email, bool $flush = true): Mailaddr
+    {
+        $mailaddr = $this->findOneBy(['email' => $email]);
+
+        if (!$mailaddr) {
+            $mailaddr = new Mailaddr();
+            $mailaddr->setEmail($email);
+            $mailaddr->setPriority(6);
+            $this->save($mailaddr, $flush);
+        }
+
+        return $mailaddr;
+    }
 }
