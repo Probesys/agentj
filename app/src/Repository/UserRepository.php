@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
+use App\Entity\Maddr;
 use App\Entity\User;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
@@ -63,6 +64,29 @@ class UserRepository extends BaseRepository
                         ->setParameter('principalName', $principalName)
                         ->getQuery()
                         ->getOneOrNullResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findUserAndAliasesByMaddr(Maddr $maddr): array
+    {
+        $email = $maddr->getEmailClear();
+
+        $mainUser = $this->findOneBy(['email' => $email]);
+
+        if (!$mainUser) {
+            return [];
+        }
+
+        // Make sure to get the main user
+        while ($mainUser->getOriginalUser()) {
+            $mainUser = $mainUser->getOriginalUser();
+        }
+
+        $aliases = $mainUser->getAliases()->toArray();
+
+        return array_merge([$mainUser], $aliases);
     }
 
     /**

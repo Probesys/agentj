@@ -251,6 +251,30 @@ class WblistRepository extends BaseRepository
         return $wb ? $wb->getWb() : null;
     }
 
+    public function updateOrCreateRule(
+        User $recipientUser,
+        Mailaddr $senderMailaddr,
+        string $wb,
+        int $type,
+        int $priority,
+        bool $flush = true,
+    ): void {
+        $wblist = $this->findOneBy([
+            'rid' => $recipientUser,
+            'sid' => $senderMailaddr,
+        ]);
+
+        if (!$wblist) {
+            $wblist = new Wblist($recipientUser, $senderMailaddr);
+        }
+
+        $wblist->setWb($wb);
+        $wblist->setType($type);
+        $wblist->setPriority($priority);
+
+        $this->save($wblist, $flush);
+    }
+
     public function isRecipientInSenderList(Maddr $sender, Maddr $recipient): bool
     {
         $entityManager = $this->getEntityManager();

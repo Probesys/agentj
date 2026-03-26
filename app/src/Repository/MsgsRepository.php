@@ -172,38 +172,6 @@ class MsgsRepository extends BaseMessageRepository
     }
 
     /**
-     * Get all messages from emailSender to emailRecipient and not delivered yet.
-     * @return array<int, array<string, mixed>>
-     */
-    public function getMessagesToRelease(string $emailSender, string $emailRecipient): array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = <<<SQL
-            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
-            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
-            LEFT JOIN maddr ms ON ms.id = m.sid
-            LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE msr.ds != :deliveryPass
-            AND msr.status_id != :statusVirus
-            AND msr.status_id != :statusAuthorized
-            AND msr.status_id != :statusRestored
-            AND mr.email = :emailRecipient
-            AND ms.email = :emailSender
-        SQL;
-
-        $stmt = $conn->prepare($sql);
-        return $stmt->executeQuery([
-            'deliveryPass' => DeliveryStatus::PASS,
-            'statusVirus' => MessageStatus::VIRUS,
-            'statusAuthorized' => MessageStatus::AUTHORIZED,
-            'statusRestored' => MessageStatus::RESTORED,
-            'emailRecipient' => $emailRecipient,
-            'emailSender' => $emailSender,
-        ])->fetchAllAssociative();
-    }
-
-    /**
      * Delete message older $date
      *
      * @return array{

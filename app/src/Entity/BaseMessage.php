@@ -333,6 +333,21 @@ class BaseMessage
         return $this;
     }
 
+    public function getSenderEmail(): ?string
+    {
+        $sender = $this->getSid();
+
+        $senderEmail = $sender->getEmailClear();
+        $fromEmail = $this->getFromMimeAddress()?->getAddress();
+
+        if ($fromEmail && $senderEmail !== $fromEmail) {
+            // TODO why do we prefer to return the "From" email address?
+            return $fromEmail;
+        } else {
+            return $senderEmail;
+        }
+    }
+
     public function getStatus(): ?int
     {
         return $this->status;

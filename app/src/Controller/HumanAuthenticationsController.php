@@ -23,6 +23,7 @@ class HumanAuthenticationsController extends AbstractController
         string $token,
         Request $request,
         WblistRepository $wblistRepository,
+        MsgsRepository $messageRepository,
         MessageService $messageService,
         HumanAuthenticationService $humanAuthenticationService,
         TranslatorInterface $translator,
@@ -66,8 +67,15 @@ class HumanAuthenticationsController extends AbstractController
                     }
                 );
 
+                foreach ($messageRecipients as $messageRecipient) {
+                    $messageService->authorizeSenderForRecipient(
+                        $messageRecipient,
+                        Wblist::WBLIST_TYPE_AUTHENTICATION,
+                    );
+                }
+
                 $message->setValidateCaptcha(time());
-                $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
+                $messageRepository->save($message);
 
                 $verified = true;
             } else {

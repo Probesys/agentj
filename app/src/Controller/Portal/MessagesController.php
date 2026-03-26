@@ -46,13 +46,11 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->msgrcptRepository->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->msgrcptRepository->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $recipientId,
+        ]);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -60,7 +58,12 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        if ($this->messageService->authorize($message, [$messageRecipient], Entity\Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->authorizeSenderForRecipient(
+            $messageRecipient,
+            Entity\Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->logService->addLog('authorized', $mailId);
         }
 

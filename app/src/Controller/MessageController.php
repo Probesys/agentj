@@ -271,11 +271,17 @@ class MessageController extends AbstractController
 
                 switch ($action) {
                     case 'authorized':
-                        $this->messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
+                        $this->messageService->authorizeSenderForRecipient(
+                            $messageRecipient,
+                            Wblist::WBLIST_TYPE_USER,
+                        );
                         $logService->addLog('authorized batch', $mailId);
                         break;
                     case 'banned':
-                        $this->messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
+                        $this->messageService->banSenderForRecipient(
+                            $messageRecipient,
+                            Wblist::WBLIST_TYPE_USER,
+                        );
                         $logService->addLog('banned batch', $mailId);
                         break;
                     case 'delete':
@@ -295,29 +301,20 @@ class MessageController extends AbstractController
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
     public function authorized(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
-
-        if (!$messageRecipient) {
-            throw $this->createNotFoundException('Message recipient does not exist');
-        }
-
         $this->checkMailAccess($messageRecipient);
 
-        if ($this->messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->authorizeSenderForRecipient(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized', $mailId);
+            $logService->addLog('authorized', $messageRecipient->getMailIdAsString());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -325,29 +322,20 @@ class MessageController extends AbstractController
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
     public function banned(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
-
-        if (!$messageRecipient) {
-            throw $this->createNotFoundException('Message recipient does not exist');
-        }
-
         $this->checkMailAccess($messageRecipient);
 
-        if ($this->messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->banSenderForRecipient(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned', $mailId);
+            $logService->addLog('banned', $messageRecipient->getMailIdAsString());
         }
 
         return new RedirectResponse($this->referrer->get());
