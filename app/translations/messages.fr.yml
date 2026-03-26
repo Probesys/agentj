@@ -347,7 +347,6 @@ Message:
           content: "Votre adresse email a été vérifiée avec succès."
 Form:
   Error: Erreur
-  PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer
 
 Search:
@@ -500,6 +499,7 @@ Entities:
       addQuota: Ajouter un quota
       sendUserAlerts: Envoyer les alertes aux utilisateurs sur le Dashboard AgentJ
       sendUserMailAlerts: Envoyer les alertes aux utilisateurs par mail
+      wblistRule: Règle de filtrage
     labels:
       infos: "Informations"
       agentJConfig: "Paramètres AgentJ"
@@ -544,7 +544,7 @@ Entities:
       editDomainRule: Modifier une règle
       WBList: Liste
       messages: Messages
-      blockAllMails: Bloquer tous les mails
+      analyzeAllMails: Analyser tous les mails
       allowAllMails: Autoriser tous les mails
       allowWithSpamFilter: Autoriser avec filtre spam
       allowWithLightFilter: Autoriser avec filtre souple
@@ -561,6 +561,7 @@ Entities:
     indexAlias: Liste des alias emails
     labels:
       defaultDomainParameters: "Paramètre par défaut du domaine"
+      defaultGroupParameters: "Paramètre par défaut du groupe «\_{name}\_»"
     actions:
       add_new: Nouvel utilisateur
       add_new_alias: Ajouter un nouvel alias

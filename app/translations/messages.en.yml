@@ -347,7 +347,6 @@ Message:
           content: "Your email address has been successfully verified."
 Form:
   Error: "Error"
-  PolicyDomain: "Filter threshold"
   ImportFile: "Select a file to import"
 
 Search:
@@ -500,6 +499,7 @@ Entities:
       addQuota: "Add a rate limit"
       sendUserAlerts: "Send alerts to users dashboard in AgentJ"
       sendUserMailAlerts: "Send alerts to users by email"
+      wblistRule: "Filtering rule"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"
@@ -544,7 +544,7 @@ Entities:
       editDomainRule: "Amend a rule"
       WBList: List
       messages: Messages
-      blockAllMails: "Block all emails"
+      analyzeAllMails: "Analyze all emails"
       allowAllMails: "Allow all emails"
       allowWithSpamFilter: "Allow with spam filter"
       allowWithLightFilter: "Allow with light filter"
@@ -560,7 +560,8 @@ Entities:
     indexEmail: "List of email accounts"
     indexAlias: "List of email aliases"
     labels:
-      defaultDomainParameters: "Default domain parameters"
+      defaultDomainParameters: "Default domain setting"
+      defaultGroupParameters: "Default setting for group “{name}”"
     actions:
       add_new: "New user"
       add_new_alias: "Add a new alias"

@@ -106,7 +106,6 @@ class DomainController extends AbstractController
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => false,
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
@@ -115,7 +114,7 @@ class DomainController extends AbstractController
         // set normal policy anf "block all mails" as default rule for new domain
         $policy = $this->em->getRepository(Policy::class)->find(5);
         $form->get('policy')->setData($policy);
-        $form->get('rules')->setData(0);
+        $form->get('rules')->setData('analyzeAllMails');
 
         $form->handleRequest($request);
 
@@ -162,6 +161,11 @@ class DomainController extends AbstractController
 
             $rules = $form->get("rules")->getData();
 
+            $wb = match ($rules) {
+                'allowAllMails' => 'W',
+                default => 0,
+            };
+
             //for all domain @.
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
             if (!$mailaddr) {
@@ -171,7 +175,7 @@ class DomainController extends AbstractController
                 $this->em->persist($mailaddr);
             }
             $wblist = new Wblist($user, $mailaddr);
-            $wblist->setWb($rules);
+            $wblist->setWb($wb);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
 
@@ -207,7 +211,6 @@ class DomainController extends AbstractController
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => true,
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
@@ -219,8 +222,14 @@ class DomainController extends AbstractController
             throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
         }
 
-        $form->get('rules')->setData($wblist->getWb());
+        $rules = match ($wblist->getWb()) {
+            'W' => 'allowAllMails',
+            default => 'analyzeAllMails',
+        };
+
+        $form->get('rules')->setData($rules);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -242,7 +251,11 @@ class DomainController extends AbstractController
             $userDomain->setPolicy($policy);
 
             $rules = $form->get("rules")->getData();
-            $wblist->setWb($rules);
+            $wb = match ($rules) {
+                'allowAllMails' => 'W',
+                default => 0,
+            };
+            $wblist->setWb($wb);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
             if ($domain->getDomainKeys() === null) {
@@ -337,10 +350,12 @@ class DomainController extends AbstractController
             'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),
         ]);
         $formBuilder->add('email', TextType::class);
-        $actions = $this->getWBListUserActions();
 
         $formBuilder->add('wb', ChoiceType::class, [
-            'choices' => $actions,
+            'choices' => ['analyzeAllMails', 'allowAllMails', 'blockAllMails'],
+            'choice_label' => function (string $choice): TranslatableMessage {
+                return new TranslatableMessage("Entities.Domain.actions.{$choice}");
+            },
         ]);
 
         $form = $formBuilder->getForm();
@@ -369,6 +384,11 @@ class DomainController extends AbstractController
                 }
             }
             $wblist = new Wblist($user, $mailaddr);
+
+            $wb = match ($data['wb']) {
+                'allowAllMails' => 'W',
+                default => 0,
+            };
             $wblist->setWb($data['wb']);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 

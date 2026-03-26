@@ -61,10 +61,7 @@ class AccountController extends AbstractController
         }
 
         return $this->render('account/index.html.twig', [
-            'controller_name' => 'AccountController',
-            'domainDefaulWb' => $domainDefaulWb,
-            'groupDefaulWb' => $groupDefaulWb,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }

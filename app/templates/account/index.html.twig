@@ -101,16 +101,17 @@
                             {{ app.user.policy|trans() }}
                         </div>
                     </div>
-                    {% if app.user.groups and groupDefaulWb is not null %}
+
+                    {% for group in app.user.groups %}
                         <div class="row">
                             <div class="col-md-4">
-                                Paramètre par défaut du groupe
+                                {{ 'Entities.User.labels.defaultGroupParameters'|trans({ '{name}': group.name}) }}
                             </div>
                             <div class="col-md-8">
-                                {{ groupDefaulWb }}
+                                {{ group }}
                             </div>
                         </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
