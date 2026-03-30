@@ -16,8 +16,6 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     p7zip \
     rpm \
     spamassassin \
-    spamc \
-    spamd \
     gnupg \
     libmail-spf-perl \
     libencode-detect-perl \

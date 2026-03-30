@@ -1,1 +1,1 @@
-0 10 * * * root sleep $(shuf -i 0-25200 -n1); /usr/bin/sa-update && supervisorctl signal hup spamassassin
+0 10 * * * root sleep $(shuf -i 0-25200 -n1); /usr/bin/sa-update
