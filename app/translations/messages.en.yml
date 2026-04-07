@@ -347,7 +347,6 @@ Message:
           content: "Your email address has been successfully verified."
 Form:
   Error: "Error"
-  PolicyDomain: "Filter threshold"
   ImportFile: "Select a file to import"
 
 Search:
@@ -544,23 +543,14 @@ Entities:
       editDomainRule: "Amend a rule"
       WBList: List
       messages: Messages
-      blockAllMails: "Block all emails"
-      allowAllMails: "Allow all emails"
-      allowWithSpamFilter: "Allow with spam filter"
-      allowWithLightFilter: "Allow with light filter"
       backToDomainList: "Return to the list of domains"
-    rulesValues:
-      10: "Block all emails"
-      B: "Block all emails"
-      W: "Allow all emails"
-      0: "Allow with spam filter"
-      2: "Allow with flexible filter"
   User:
     indexLocal: "List of administrators"
     indexEmail: "List of email accounts"
     indexAlias: "List of email aliases"
     labels:
-      defaultDomainParameters: "Default domain parameters"
+      domainSetting: "Domain setting"
+      defaultGroupSetting: "Default group setting"
     actions:
       add_new: "New user"
       add_new_alias: "Add a new alias"
@@ -713,9 +703,16 @@ Entities:
         1: Blocked by human authentication
         2: Blocked by the group
         3: Blocked by the administrator
+      wbRule: 'Filtering rule'
     actions:
       deleteSenderW: "Delete sender"
       deleteSenderB: "Unlock the sender"
+    rules:
+      accept: 'Accept with spam filter'
+      allow: 'Allow all emails'
+      block: 'Block all emails'
+      enabled: 'Antispam enabled'
+      none: 'No rule'
   Import:
     Wbliste:
       title: "White list: import a list"

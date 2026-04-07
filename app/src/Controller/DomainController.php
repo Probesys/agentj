@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Mailaddr;
@@ -30,13 +29,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: '/domain')]
 class DomainController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -106,16 +104,15 @@ class DomainController extends AbstractController
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => false,
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
 
-        // set normal policy anf "block all mails" as default rule for new domain
+        // set normal policy and "enabled" as default rule for new domain
         $policy = $this->em->getRepository(Policy::class)->find(5);
         $form->get('policy')->setData($policy);
-        $form->get('rules')->setData(0);
+        $form->get('wbRule')->setData('enabled');
 
         $form->handleRequest($request);
 
@@ -160,7 +157,7 @@ class DomainController extends AbstractController
             $user->setPolicy($domain->getPolicy());
             $this->em->persist($user);
 
-            $rules = $form->get("rules")->getData();
+            $wbRule = $form->get("wbRule")->getData();
 
             //for all domain @.
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
@@ -171,7 +168,7 @@ class DomainController extends AbstractController
                 $this->em->persist($mailaddr);
             }
             $wblist = new Wblist($user, $mailaddr);
-            $wblist->setWb($rules);
+            $wblist->setWbRule($wbRule);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
 
@@ -207,7 +204,6 @@ class DomainController extends AbstractController
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => true,
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
@@ -219,8 +215,9 @@ class DomainController extends AbstractController
             throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
         }
 
-        $form->get('rules')->setData($wblist->getWb());
+        $form->get('wbRule')->setData($wblist->getWbRule());
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -241,8 +238,8 @@ class DomainController extends AbstractController
             }
             $userDomain->setPolicy($policy);
 
-            $rules = $form->get("rules")->getData();
-            $wblist->setWb($rules);
+            $wbRule = $form->get("wbRule")->getData();
+            $wblist->setWbRule($wbRule);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
             if ($domain->getDomainKeys() === null) {
@@ -337,10 +334,13 @@ class DomainController extends AbstractController
             'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),
         ]);
         $formBuilder->add('email', TextType::class);
-        $actions = $this->getWBListUserActions();
 
-        $formBuilder->add('wb', ChoiceType::class, [
-            'choices' => $actions,
+        $formBuilder->add('wbRule', ChoiceType::class, [
+            'choices' => ['block', 'allow'],
+            'choice_label' => function (string $choice): TranslatableMessage {
+                return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+            },
+            'label' => 'Entities.WBList.fields.wbRule',
         ]);
 
         $form = $formBuilder->getForm();
@@ -369,7 +369,7 @@ class DomainController extends AbstractController
                 }
             }
             $wblist = new Wblist($user, $mailaddr);
-            $wblist->setWb($data['wb']);
+            $wblist->setWbRule($data['wbRule']);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
             $this->em->persist($wblist);

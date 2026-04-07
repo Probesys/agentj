@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Controller\Traits\ControllerCommonTrait;
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\User;
@@ -25,7 +24,6 @@ use function dd;
 class ImportController extends AbstractController
 {
     use ControllerCommonTrait;
-    use ControllerWBListTrait;
 
     public function __construct(
         private TranslatorInterface $translator,
@@ -131,25 +129,12 @@ class ImportController extends AbstractController
                                         'name' => trim($data[3]),
                                     ]);
                                     if (!$group) {
-                                        //get rules of domain
-                                        if (!isset($domains[$domainEmail]['wb'])) {
-                                            $wblist = $em->getRepository(Wblist::class)
-                                                         ->findOneByRecipientDomain($domains[$domainEmail]['entity']);
-
-                                            if ($wblist === null) {
-                                                $errors[] = 'No wblist found for this domain ' . $domainEmail;
-                                                continue;
-                                            }
-                                            $domains[$domainEmail]['wb'] = $wblist->getWb();
-                                        }
                                         $group = new Groups();
                                         $group->setName($data[3]);
                                         $group->setDomain($domains[$domainEmail]['entity']);
+                                        $group->setWbRule('none');
                                         if ($domains[$domainEmail]['entity']->getPolicy()) {
                                             $group->setPolicy($domains[$domainEmail]['entity']->getPolicy());
-                                        }
-                                        if (isset($domains[$domainEmail]['wb'])) {
-                                            $group->setWb($domains[$domainEmail]['wb']);
                                         }
 
                                         $em->persist($group);

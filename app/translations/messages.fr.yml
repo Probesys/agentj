@@ -347,7 +347,6 @@ Message:
           content: "Votre adresse email a été vérifiée avec succès."
 Form:
   Error: Erreur
-  PolicyDomain: Seuil de filtrage
   ImportFile: Sélectionnez un fichier à importer
 
 Search:
@@ -544,23 +543,14 @@ Entities:
       editDomainRule: Modifier une règle
       WBList: Liste
       messages: Messages
-      blockAllMails: Bloquer tous les mails
-      allowAllMails: Autoriser tous les mails
-      allowWithSpamFilter: Autoriser avec filtre spam
-      allowWithLightFilter: Autoriser avec filtre souple
       backToDomainList: Retour à la liste des domaines
-    rulesValues:
-      10: Bloquer tous les mails
-      B: Bloquer tous les mails
-      W: Autoriser tous les mails
-      0: Autoriser avec filtre spam
-      2: Autoriser avec filtre souple
   User:
     indexLocal: Liste des administrateurs
     indexEmail: Liste des comptes emails
     indexAlias: Liste des alias emails
     labels:
-      defaultDomainParameters: "Paramètre par défaut du domaine"
+      domainSetting: "Paramètre du domaine"
+      defaultGroupSetting: "Paramètre du groupe par défaut"
     actions:
       add_new: Nouvel utilisateur
       add_new_alias: Ajouter un nouvel alias
@@ -713,9 +703,16 @@ Entities:
         1: Bloqué par authentification humaine
         2: Bloqué par le groupe
         3: Bloqué par l'administrateur
+      wbRule: 'Règle de filtrage'
     actions:
       deleteSenderW: Supprimer l'expéditeur
       deleteSenderB: Débloquer l'expéditeur
+    rules:
+      accept: 'Accepter avec filtre spam'
+      allow: 'Autoriser tous les mails'
+      block: 'Bloquer tous les mails'
+      enabled: 'Antispam activé'
+      none: 'Aucune règle'
   Import:
     Wbliste:
       title: "Liste blanche : importer une liste"

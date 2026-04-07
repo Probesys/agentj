@@ -14,6 +14,8 @@ use App\Repository\WblistRepository;
 #[ORM\Entity(repositoryClass: WblistRepository::class)]
 class Wblist
 {
+    use WbRuleTrait;
+
     public const WBLIST_PRIORITY_DOMAIN = 0;
     public const WBLIST_PRIORITY_GROUP = 50;
     public const WBLIST_PRIORITY_USER = 100;
@@ -47,7 +49,7 @@ class Wblist
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
-    private Groups $groups;
+    private ?Groups $groups;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[ORM\Id]

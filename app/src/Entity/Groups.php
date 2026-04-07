@@ -5,7 +5,6 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\DBAL\Types\Types;
 
@@ -16,6 +15,8 @@ use Doctrine\DBAL\Types\Types;
 #[ORM\Entity(repositoryClass: 'App\Repository\GroupsRepository')]
 class Groups
 {
+    use WbRuleTrait;
+
     /**
      * @var int
      */
@@ -208,7 +209,6 @@ class Groups
 
         return $this;
     }
-
 
     public function getSlug(): ?string
     {

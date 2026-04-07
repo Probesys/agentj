@@ -12,6 +12,8 @@ use App\Repository\GroupsWblistRepository;
 #[ORM\Entity(repositoryClass: GroupsWblistRepository::class)]
 class GroupsWblist
 {
+    use WbRuleTrait;
+
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups', inversedBy: 'groupsWbLists')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]

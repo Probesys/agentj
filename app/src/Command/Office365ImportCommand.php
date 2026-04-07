@@ -249,7 +249,7 @@ class Office365ImportCommand extends Command
                     $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
                     $localGroup->setDomain($this->connector->getDomain());
                     $localGroup->setOriginConnector($this->connector);
-                    $localGroup->setWb("");
+                    $localGroup->setWbRule('none');
                     $localGroup->setUid($m365group->getId());
                     $this->em->persist($localGroup);
                     $this->em->flush();

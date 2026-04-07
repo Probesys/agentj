@@ -8,10 +8,13 @@ use App\Entity\Maddr;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Util\Email;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL;
 
 /**
+ * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
+ *
  * @extends BaseRepository<Wblist>
  */
 class WblistRepository extends BaseRepository
@@ -64,10 +67,12 @@ class WblistRepository extends BaseRepository
         // The wblist.wb attribute can either be "W or Y / B or N / space / score".
         // Score can be positive (i.e. lean towards blacklisting) or negative
         // (i.e. lean towards whitelisting). Space is neutral.
-        // Score allows soft-wblisting, but we only want to handle
-        // hard-wblisting in this method for now.
+        // In AgentJ, we use the space to represent an "accepted" sender, in
+        // contrast to B for "blocked" senders, and W for "allowed" senders.
+        // We don't use score (except "0" at the domain level, but we don't
+        // care here). See WbRuleTrait for more details.
         if ($type === 'W') {
-            $dql->andWhere("wb.wb = 'W' OR wb.wb = 'Y'");
+            $dql->andWhere("wb.wb = 'W' OR wb.wb = 'Y' OR wb.wb = ' '");
         } elseif ($type === 'B') {
             $dql->andWhere("wb.wb = 'B' OR wb.wb = 'N'");
         }
@@ -139,7 +144,7 @@ class WblistRepository extends BaseRepository
                                     inner join user_groups ug on ug.user_id =u.id
                                     inner join groups g on g.id =ug.groups_id
                                     inner join groups_wblist gw on gw.group_id =g.id
-                                    where g.active = true and gw.wb !='' and g.priority is not null";
+                                    where g.active = true and gw.wb != BINARY '' and g.priority is not null";
 
 
         $stmt = $conn->prepare($sqlSelectGroupwbList);
@@ -147,114 +152,79 @@ class WblistRepository extends BaseRepository
     }
 
     /**
-     * Get wblist informations about a sender adress
+     * Get the list of Wblists that apply to the two given addresses.
      *
-     * @return array<int, array<string, mixed>>
+     * The list is ordered by priority, meaning that its first element is the
+     * one which applies to the addresses.
+     *
+     * @return Wblist[]
      */
-    public function getWbListInfoForSender(string $senderAdress, string $recipientAdress): array
+    public function findByMailAddresses(Maddr $sender, Maddr $recipient): array
     {
-        $infos = [];
+        $recipientAddresses = Email::getAddressLookups($recipient->getEmailClear());
+        $senderAddresses = Email::getAddressLookups($sender->getEmailClear());
 
-        $recipientDomain = explode('@', $recipientAdress)[1];
-        $recipientExt = explode('.', $recipientDomain)[1];
-        $recipientAddresses = [
-            $recipientAdress,
-            "@{$recipientDomain}",
-            "@.{$recipientDomain}",
-            "@.{$recipientExt}",
-            '@.',
-        ];
+        $entityManager = $this->getEntityManager();
+        $connection = $entityManager->getConnection();
 
-        $senderAddresses = [];
-        if (!empty($senderAdress)) {
-            $senderDomain = explode('@', $senderAdress)[1];
-            $senderExt = explode('.', $senderDomain)[1];
-            $senderAddresses = [
-                $senderAdress,
-                "@{$senderDomain}",
-                "@.{$senderDomain}",
-                "@.{$senderExt}",
-                '@.',
-            ];
-        }
-
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sqlSelectPolicy = <<<SQL
-            SELECT *, users.id
+        $sqlSelectUserIds = <<<SQL
+            SELECT users.id
             FROM users
-            LEFT JOIN policy ON users.policy_id=policy.id
             WHERE users.email IN (:recipientAddresses)
             ORDER BY users.priority DESC
         SQL;
 
-        $result = $conn->executeQuery($sqlSelectPolicy, [
+        $recipientUserIds = $connection->executeQuery($sqlSelectUserIds, [
             'recipientAddresses' => $recipientAddresses,
         ], [
             'recipientAddresses' => DBAL\ArrayParameterType::STRING,
-        ])->fetchAllAssociative();
+        ])->fetchFirstColumn();
 
-        foreach ($result as $row) {
-            $id = $row['id'];
-            $sqlSelectWhiteBlackList = <<<SQL
-                SELECT wb, wblist.priority, wblist.datemod, wblist.group_id, wblist.sid, wblist.rid
-                FROM wblist
-                JOIN mailaddr ON wblist.sid = mailaddr.id
-                WHERE wblist.rid = :rid
-                AND mailaddr.email IN (:senderAddresses)
-                ORDER BY wblist.priority DESC, mailaddr.priority DESC
-            SQL;
+        $wblists = [];
 
-            $result1 = $conn->executeQuery($sqlSelectWhiteBlackList, [
-                'rid' => $id,
-                'senderAddresses' => $senderAddresses,
-            ], [
-                'rid' => DBAL\ParameterType::INTEGER,
-                'senderAddresses' => DBAL\ArrayParameterType::STRING,
-            ])->fetchAllAssociative();
+        foreach ($recipientUserIds as $recipientUserId) {
+            $query = $entityManager->createQuery(<<<SQL
+                SELECT wb
+                FROM App\Entity\Wblist wb
+                JOIN wb.sid as s
+                WHERE wb.rid = :recipientId
+                AND s.email IN (:senderAddresses)
+                ORDER BY wb.priority DESC, s.priority DESC
+            SQL);
 
-            foreach ($result1 as $row1) {
-                $group = null;
-                if (!is_null($row1['group_id'])) {
-                    $group = $this->getEntityManager()->getRepository(Groups::class)->find($row1['group_id']);
-                }
-                $sender = $this->getEntityManager()->getRepository(Mailaddr::class)->find($row1['sid']);
-                $recipient = $this->getEntityManager()->getRepository(User::class)->find($row1['rid']);
+            $query->setParameter('recipientId', $recipientUserId);
+            $query->setParameter('senderAddresses', $senderAddresses);
+            $query->setMaxResults(1);
 
-                $seconds = 0;
+            $wblist = $query->getOneOrNullResult();
 
-                $infos[] = [
-                    'id' => $id,
-                    'wb' => $row1['wb'],
-                    'priority' => $row1['priority'],
-                    'group' => $group,
-                    'sender' => $sender,
-                    'recipient' => $recipient,
-                    'datemod' => $row1['datemod']
-                ];
+            if ($wblist) {
+                $wblists[] = $wblist;
             }
         }
 
-        return $infos;
+        return $wblists;
     }
 
     /**
      * Return the default Wb for a domain
      */
-    public function getDefaultDomainWBList(Domain $domain): ?string
+    public function getDefaultDomainWBList(Domain $domain): ?Wblist
     {
         $sid = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy(['email' => '@.']);
         $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy([
             'email' => '@' . $domain->getDomain(),
         ]);
-        $wb = $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
-        return $wb ? $wb->getWb() : null;
+        return $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
     }
 
+    /**
+     * @param WbRule $wbRule
+     */
     public function updateOrCreateRule(
         User $recipientUser,
         Mailaddr $senderMailaddr,
-        string $wb,
+        string $wbRule,
         int $type,
         int $priority,
         bool $flush = true,
@@ -268,7 +238,7 @@ class WblistRepository extends BaseRepository
             $wblist = new Wblist($recipientUser, $senderMailaddr);
         }
 
-        $wblist->setWb($wb);
+        $wblist->setWbRule($wbRule);
         $wblist->setType($type);
         $wblist->setPriority($priority);
 

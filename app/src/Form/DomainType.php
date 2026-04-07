@@ -11,6 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\Range;
 
@@ -18,7 +19,6 @@ class DomainType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $actions = $options['actions'];
         $isEdit = $options['is_edit'];
 
         $builder
@@ -40,11 +40,14 @@ class DomainType extends AbstractType
                 'label' => 'Entities.Domain.fields.active',
                 'required' => false,
             ])
-            ->add('rules', ChoiceType::class, [
-                'choices' => $actions,
+            ->add('wbRule', ChoiceType::class, [
+                'choices' => ['enabled', 'allow'],
+                'choice_label' => function (string $choice): TranslatableMessage {
+                    return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                },
                 'mapped' => false,
-                'label' => 'Form.PolicyDomain',
-                'required' => false,
+                'label' => 'Entities.WBList.fields.wbRule',
+                'required' => true,
             ])
             ->add('policy', null, [
                 'label' => 'Entities.Domain.fields.policy',
@@ -98,7 +101,6 @@ class DomainType extends AbstractType
             'data_class' => Domain::class,
             'minSpamLevel' => null,
             'maxSpamLevel' => null,
-            'actions' => null,
             'is_edit' => false,
         ]);
 

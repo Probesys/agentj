@@ -43,4 +43,45 @@ class Email
         $parts = explode('@', $email);
         return count($parts) === 2 ? strtolower($parts[1]) : null;
     }
+
+    /**
+     * Return a list of email address lookups.
+     *
+     * The list is built according to how Amavis is looking for emails when
+     * white/backlisting. For instance, considering the email
+     * "user@sub.example.com", the method returns the following:
+     *
+     * - user@sub.example.com
+     * - @sub.example.com
+     * - @.sub.example.com
+     * - @.example.com
+     * - @.com
+     * - @.
+     *
+     * @return string[]
+     */
+    public static function getAddressLookups(string $email): array
+    {
+        if (!self::validate($email)) {
+            return [];
+        }
+
+        list($localUser, $domain) = explode('@', $email, limit: 2);
+
+        $lookup = [];
+        $lookup[] = $email;
+
+        $lookup[] = '@' . $domain;
+
+        $domainParts = explode('.', $domain);
+
+        while (count($domainParts) > 0) {
+            $lookup[] = '@.' . implode('.', $domainParts);
+            array_shift($domainParts);
+        }
+
+        $lookup[] = '@.';
+
+        return $lookup;
+    }
 }

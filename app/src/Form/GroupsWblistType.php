@@ -7,16 +7,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class GroupsWblistType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $actions = $options['actions'];
         $builder
             ->add('email', TextType::class)
-            ->add('wb', ChoiceType::class, [
-                'choices' => $actions,
+            ->add('wbRule', ChoiceType::class, [
+                'choices' => ['block', 'allow'],
+                'choice_label' => function (string $choice): TranslatableMessage {
+                    return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                },
+                'label' => 'Entities.WBList.fields.wbRule',
+                'required' => true,
             ]);
     }
 
@@ -24,7 +29,6 @@ class GroupsWblistType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => null,
-            'actions' => null,
         ]);
     }
 }

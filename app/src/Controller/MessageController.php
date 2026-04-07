@@ -211,15 +211,15 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wbListInfos = $this->em->getRepository(Wblist::class)->getWbListInfoForSender(
-            $msg->getSid()->getEmailClear(),
-            $msgRcpt->getRid()->getEmailClear(),
+        $wblists = $this->em->getRepository(Wblist::class)->findByMailAddresses(
+            $msg->getSid(),
+            $msgRcpt->getRid(),
         );
+
         return $this->render('message/show.html.twig', [
-            'controller_name' => 'MessageController',
             'msg' => $msg,
             'msgRcpt' => $msgRcpt,
-            'wblistInfo' => $wbListInfos
+            'wblists' => $wblists
         ]);
     }
 

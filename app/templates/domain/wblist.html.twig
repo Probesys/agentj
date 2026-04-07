@@ -37,15 +37,14 @@
               {#            <td><input type="checkbox"></td>#}
               <td  data-title="{{'Generics.fields.sender'|trans }}">{{mail}}</td>
               <td data-title="{{'Entities.Domain.labels.rules'|trans }}">
-                {% set libelle = 'Entities.Domain.rulesValues.'~wb.getWb() %}
-                {{ libelle|trans }}
+                {{ wb.wbRuleName | trans }}
               </td>
               <td>
                 <ul class="list-inline list-unstyled">
                   <li class="list-inline-item">
-                    <a href="{{ path('domain_wblist_delete',{'rid' : wb.getRid().id, 'sid' : wb.getSid().id}) }}" class="btn btn-sm btn-danger confirmModal" 
+                    <a href="{{ path('domain_wblist_delete',{'rid' : wb.getRid().id, 'sid' : wb.getSid().id}) }}" class="btn btn-sm btn-danger confirmModal"
                        data-target="delete"
-                       data-dialog-title='{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}' 
+                       data-dialog-title='{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}'
                        data-dialog-content='{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}'
                        title="{{ 'Entities.Domain.actions.deleteRule'|trans }}">
                       <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>

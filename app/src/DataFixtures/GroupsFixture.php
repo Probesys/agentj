@@ -27,7 +27,7 @@ class GroupsFixture extends Fixture
         $group->setDomain($domain);
         $normalPolicy = $this->em->getRepository(Policy::class)->findOneBy(['policyName' => 'Normale']);
         $group->setPolicy($normalPolicy);
-        $group->setWb('0');
+        $group->setWbRule('none');
         $group->setSlug('group1');
         $group->setOverrideUser(false);
         $group->setQuota([["quota_emails" => 2, "quota_seconds" => 5]]);

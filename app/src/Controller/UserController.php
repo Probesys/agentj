@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\Policy;
@@ -27,8 +26,6 @@ use Knp\Component\Pager\PaginatorInterface;
 #[Route(path: 'admin/users')]
 class UserController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
