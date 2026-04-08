@@ -206,6 +206,24 @@ class WblistRepository extends BaseRepository
         return $wblists;
     }
 
+    public function isSenderAuthorizedByRecipient(Maddr $sender, Maddr $recipient): bool
+    {
+        $wblists = $this->findByMailAddresses($sender, $recipient);
+
+        $hasAuthorizedRule = false;
+        $hasBlockRule = false;
+
+        foreach ($wblists as $wblist) {
+            if ($wblist->isWbRuleAuthorized()) {
+                $hasAuthorizedRule = true;
+            } elseif ($wblist->getWbRule() === 'block') {
+                $hasBlockRule = true;
+            }
+        }
+
+        return $hasAuthorizedRule && !$hasBlockRule;
+    }
+
     /**
      * Return the default Wb for a domain
      */

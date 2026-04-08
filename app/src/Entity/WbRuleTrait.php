@@ -65,4 +65,13 @@ trait WbRuleTrait
 
         return $this->setWb($wb);
     }
+
+    /**
+     * Return true if the rule is either equal to "accept" or "allow".
+     */
+    public function isWbRuleAuthorized(): bool
+    {
+        $wbRule = $this->getWbRule();
+        return $wbRule === 'allow' || $wbRule === 'accept';
+    }
 }
