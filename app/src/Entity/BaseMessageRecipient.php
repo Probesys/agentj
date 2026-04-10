@@ -243,6 +243,14 @@ class BaseMessageRecipient
         return $this;
     }
 
+    /**
+     * Return true if the status needs to be consolidated, or if the mail
+     * hasn't be processed by the autorelease process (aka "unreleased").
+     */
+    public function isStatusRequiresProcessing(): bool
+    {
+        return $this->status === null || $this->status === MessageStatus::UNRELEASED;
+    }
 
     public function isUntreated(): bool
     {

@@ -119,24 +119,16 @@ class MsgsRepository extends BaseMessageRepository
      *
      * @return Msgs[]
      */
-    public function searchMsgsToSendAuthRequest(): array
+    public function searchMsgsToSendAuthRequest(\DateTimeImmutable $since): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m
             FROM App\Entity\Msgs m
-            WHERE
-                (m.isMlist IS NULL OR m.isMlist = 0)
-                AND m.status IS NULL
-                AND m.sendCaptcha = 0
-                AND m.content NOT IN (:content)
-                AND DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) <= 7
-            SQL);
+            WHERE m.sendCaptcha = 0
+            AND m.timeNum >= :sinceTimestamp
+        SQL);
 
-        $query->setParameter('content', [
-            ContentType::CLEAN,
-            ContentType::VIRUS,
-            ContentType::UNCHECKED,
-        ]);
+        $query->setParameter('sinceTimestamp', $since->getTimestamp());
 
         return $query->getResult();
     }
@@ -147,16 +139,15 @@ class MsgsRepository extends BaseMessageRepository
     public function getDaysSinceLastRequest(string $to, string $from): ?int
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
-            SELECT DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) as time_diff
+            SELECT m.sendCaptcha
             FROM App\Entity\Msgs m
-            LEFT JOIN App\Entity\Msgrcpt mr WITH m.mailId = mr.mailId AND m.partitionTag = mr.partitionTag
-            LEFT JOIN App\Entity\Maddr maddr WITH maddr.id = mr.rid
-            LEFT JOIN App\Entity\Maddr maddr_sender WITH maddr_sender.id = m.sid
-            WHERE
-                maddr.email = :to
-                AND maddr_sender.email = :from
-                AND m.sendCaptcha != 0
-            ORDER BY m.timeIso DESC
+            JOIN m.msgRcpts mr
+            JOIN mr.rid recipient
+            JOIN m.sid sender
+            WHERE recipient.email = :to
+            AND sender.email = :from
+            AND m.sendCaptcha != 0
+            ORDER BY m.sendCaptcha DESC
         SQL);
 
         $query->setParameter('to', $to);
@@ -164,8 +155,9 @@ class MsgsRepository extends BaseMessageRepository
         $query->setMaxResults(1);
 
         try {
-            $result = $query->getSingleScalarResult();
-            return (int) $result;
+            $sendCaptcha = (int) $query->getSingleScalarResult();
+            $sinceSeconds = time() - $sendCaptcha;
+            return (int) floor($sinceSeconds / (60 * 60 * 24));
         } catch (\Doctrine\ORM\NoResultException $e) {
             return null;
         }
