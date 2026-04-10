@@ -62,8 +62,9 @@ class HumanAuthenticationsController extends AbstractController
                 // for a instance, a blocked sender to authorise himself.
                 $messageRecipients = array_filter(
                     $messageRecipients,
-                    function ($recipient) use ($wblistRepository, $sender) {
-                        return !$wblistRepository->isRecipientInSenderList($sender, $recipient->getRid());
+                    function ($messageRecipient) use ($wblistRepository, $sender) {
+                        $recipient = $messageRecipient->getRid();
+                        return !$wblistRepository->isSenderInRecipientList($sender, $recipient);
                     }
                 );
 
