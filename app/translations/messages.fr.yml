@@ -499,6 +499,7 @@ Entities:
       addQuota: Ajouter un quota
       sendUserAlerts: Envoyer les alertes aux utilisateurs sur le Dashboard AgentJ
       sendUserMailAlerts: Envoyer les alertes aux utilisateurs par mail
+      authorizedSendersSpamLevel: "Accepter le spam des expéditeurs autorisés dont le niveau est inférieur à\_:"
     labels:
       infos: "Informations"
       agentJConfig: "Paramètres AgentJ"

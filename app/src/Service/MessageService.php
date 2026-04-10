@@ -57,7 +57,7 @@ class MessageService
             $this->wblistRepository->updateOrCreateRule(
                 $user,
                 $senderMailaddr,
-                wbRule: 'allow',
+                wbRule: 'accept',
                 type: $validationSource,
                 priority: Wblist::WBLIST_PRIORITY_USER,
             );
@@ -99,7 +99,7 @@ class MessageService
         $this->wblistRepository->updateOrCreateRule(
             $domainUser,
             $senderMailaddr,
-            wbRule: 'allow',
+            wbRule: 'accept',
             type: $validationSource,
             priority: Wblist::WBLIST_PRIORITY_USER,
         );
