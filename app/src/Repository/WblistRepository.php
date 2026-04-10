@@ -210,18 +210,22 @@ class WblistRepository extends BaseRepository
     {
         $wblists = $this->findByMailAddresses($sender, $recipient);
 
-        $hasAuthorizedRule = false;
-        $hasBlockRule = false;
-
-        foreach ($wblists as $wblist) {
-            if ($wblist->isWbRuleAuthorized()) {
-                $hasAuthorizedRule = true;
-            } elseif ($wblist->getWbRule() === 'block') {
-                $hasBlockRule = true;
-            }
+        if (count($wblists) === 0) {
+            return false;
         }
 
-        return $hasAuthorizedRule && !$hasBlockRule;
+        return $wblists[0]->isWbRuleAuthorized();
+    }
+
+    public function isSenderInRecipientList(Maddr $sender, Maddr $recipient): bool
+    {
+        $wblists = $this->findByMailAddresses($sender, $recipient);
+
+        if (count($wblists) === 0) {
+            return false;
+        }
+
+        return $wblists[0]->isWbRuleAuthorized() || $wblists[0]->isWbRuleBlocked();
     }
 
     /**
@@ -261,34 +265,6 @@ class WblistRepository extends BaseRepository
         $wblist->setPriority($priority);
 
         $this->save($wblist, $flush);
-    }
-
-    public function isRecipientInSenderList(Maddr $sender, Maddr $recipient): bool
-    {
-        $entityManager = $this->getEntityManager();
-
-        $query = $entityManager->createQuery(<<<SQL
-            SELECT wbl
-            FROM App\Entity\Wblist wbl
-            JOIN wbl.sid s
-            JOIN wbl.rid r
-            WHERE (wbl.wb = 'B' OR wbl.wb = 'W')
-            AND s.email = :sender_email
-            AND (
-                r.email = :recipient_email
-                OR r.email = :recipient_domain
-            )
-        SQL);
-
-        $recipientEmail = $recipient->getEmailClear();
-        $recipientDomain = $recipient->getReverseDomain();
-
-        $query->setParameter('sender_email', $sender->getEmailClear());
-        $query->setParameter('recipient_email', $recipientEmail);
-        $query->setParameter('recipient_domain', "@{$recipientDomain}");
-        $query->setMaxResults(1);
-
-        return $query->getOneOrNullResult() !== null;
     }
 
     /**

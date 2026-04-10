@@ -74,4 +74,13 @@ trait WbRuleTrait
         $wbRule = $this->getWbRule();
         return $wbRule === 'allow' || $wbRule === 'accept';
     }
+
+    /**
+     * Return true if the rule is equal to "block".
+     */
+    public function isWbRuleBlocked(): bool
+    {
+        $wbRule = $this->getWbRule();
+        return $wbRule === 'block';
+    }
 }
