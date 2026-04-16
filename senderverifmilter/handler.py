@@ -1,4 +1,4 @@
-
+import os
 
 class Handler:
     """Handle request"""
@@ -46,15 +46,29 @@ class Handler:
 
         self.db = self.db_pool.connection()
         self.cursor = self.db.cursor()
-        self.cursor.execute(
-                '''
-                select 1 from domain a
-                join domain_relay b on a.id = b.domain_id
-                join users c on a.id = c.domain_id
-                where b.ip_address = %s and c.email = %s
-                ''',
-                (request['client_address'], request['sender'])
-                )
+        # If the antispoofing protection is disabled we only check the domain, not the full email
+        # address
+        if 'DISABLE_OUTGOING_ANTISPOOFING_PROTECTION' in os.environ \
+                and os.environ['DISABLE_OUTGOING_ANTISPOOFING_PROTECTION'] == "true":
+            self.cursor.execute(
+                    '''
+                    select 1 from domain d
+                    join domain_relay dr on d.id = dr.domain_id
+                    where dr.ip_address = %s and d.domain = %s
+                    ''',
+                    (request['client_address'], request['sender'].split("@")[0])
+                    )
+        else:
+            self.cursor.execute(
+                    '''
+                    select 1 from domain d
+                    join domain_relay dr on d.id = dr.domain_id
+                    join users u on d.id = u.domain_id
+                    where dr.ip_address = %s and u.email = %s
+                    ''',
+                    (request['client_address'], request['sender'])
+                    )
+
         result = self.cursor.fetchone()
         if result is None:
             print('INVALID sender/ip pair:', request['client_address'], request['sender'])
