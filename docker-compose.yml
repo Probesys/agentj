@@ -165,6 +165,7 @@ services:
       - DB_HOST
       - DB_NAME
       - DB_PASSWORD=$DB_OPENDKIM_PASSWORD
+      - DISABLE_OUTGOING_ANTISPOOFING_PROTECTION
     depends_on:
       db:
         condition: service_healthy
