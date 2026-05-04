@@ -448,6 +448,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isSharedWith(User $user): bool
+    {
+        return $this->sharedWith->contains($user);
+    }
 
     /**
      * @return Collection<int, User>
