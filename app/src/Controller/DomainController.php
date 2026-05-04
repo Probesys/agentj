@@ -336,7 +336,7 @@ class DomainController extends AbstractController
         $formBuilder->add('email', TextType::class);
 
         $formBuilder->add('wbRule', ChoiceType::class, [
-            'choices' => ['block', 'allow'],
+            'choices' => ['accept', 'block', 'allow'],
             'choice_label' => function (string $choice): TranslatableMessage {
                 return new TranslatableMessage("Entities.WBList.rules.{$choice}");
             },

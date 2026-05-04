@@ -153,8 +153,7 @@ class MsgrcptRepository extends BaseRepository
                 WHEN mr.ds = :ds_pass AND mr.wl != 'Y' THEN :status_restored
                 WHEN mr.ds != :ds_pass AND mr.content = :content_virus THEN :status_virus
                 WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl = 'Y' THEN :status_banned
-                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y' AND mr.bspam_level > d.level THEN :status_spam
-                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y' AND mr.bspam_level <= d.level THEN :status_untreated
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y'  THEN :status_unreleased
                 ELSE NULL
             END
             WHERE status_id IS NULL
@@ -167,8 +166,7 @@ class MsgrcptRepository extends BaseRepository
         $statement->bindValue('status_restored', MessageStatus::RESTORED);
         $statement->bindValue('status_virus', MessageStatus::VIRUS);
         $statement->bindValue('status_banned', MessageStatus::BANNED);
-        $statement->bindValue('status_spam', MessageStatus::SPAMMED);
-        $statement->bindValue('status_untreated', MessageStatus::UNTREATED);
+        $statement->bindValue('status_unreleased', MessageStatus::UNRELEASED);
 
         $result = $statement->execute();
 

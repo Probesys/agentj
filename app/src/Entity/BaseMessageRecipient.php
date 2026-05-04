@@ -173,6 +173,11 @@ class BaseMessageRecipient
         return $this;
     }
 
+    public function isSpamAtLevel(float $level): bool
+    {
+        return $this->getBspamLevel() > $level;
+    }
+
     public function getSmtpResp(): string
     {
         return $this->smtpResp;

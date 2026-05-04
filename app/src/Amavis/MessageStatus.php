@@ -12,12 +12,15 @@ class MessageStatus
     public const SPAMMED = 6;
     public const VIRUS = 7;
     public const UNTREATED = 8;
+    public const UNRELEASED = 9;
 
     public static function getStatusName(?int $status): string
     {
         switch ($status) {
             case MessageStatus::UNTREATED:
                 return 'Untreated';
+            case MessageStatus::UNRELEASED:
+                return 'Unreleased';
             case MessageStatus::BANNED:
                 return 'Banned';
             case MessageStatus::AUTHORIZED:

@@ -64,6 +64,16 @@ class DomainType extends AbstractType
                     'data-action' => 'slider#refresh',
                 ]
             ])
+            ->add('authorizedSendersSpamLevel', RangeType::class, [
+                'label' => 'Entities.Domain.fields.authorizedSendersSpamLevel',
+                'attr' => [
+                    'min' => 0,
+                    'max' => 100,
+                    'step' => 0.5,
+                    'data-slider-target' => 'slider',
+                    'data-action' => 'slider#refresh',
+                ]
+            ])
             ->add('mailAuthenticationSender', null, [
                 'label' => 'Entities.Domain.fields.mailAuthenticationSender',
                 'required' => false,

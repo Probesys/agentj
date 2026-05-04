@@ -499,6 +499,7 @@ Entities:
       addQuota: "Add a rate limit"
       sendUserAlerts: "Send alerts to users dashboard in AgentJ"
       sendUserMailAlerts: "Send alerts to users by email"
+      authorizedSendersSpamLevel: "Accept spam from authorized senders whose level is lower than:"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"

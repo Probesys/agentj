@@ -66,14 +66,18 @@ class UserRepository extends BaseRepository
                         ->getOneOrNullResult();
     }
 
+    public function findOneByMailAddress(Maddr $maddr): ?User
+    {
+        $email = $maddr->getEmailClear();
+        return $this->findOneBy(['email' => $email]);
+    }
+
     /**
      * @return User[]
      */
     public function findUserAndAliasesByMaddr(Maddr $maddr): array
     {
-        $email = $maddr->getEmailClear();
-
-        $mainUser = $this->findOneBy(['email' => $email]);
+        $mainUser = $this->findOneByMailAddress($maddr);
 
         if (!$mainUser) {
             return [];
@@ -93,16 +97,6 @@ class UserRepository extends BaseRepository
     {
         return $this->findOneBy([
             'email' => '@' . $domainName,
-        ]);
-    }
-
-    /**
-     * @return User[]
-     */
-    public function findAllWithoutHumanAuthentication(): array
-    {
-        return $this->findBy([
-            'bypassHumanAuth' => true,
         ]);
     }
 
