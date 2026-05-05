@@ -118,6 +118,8 @@ services:
 
   amavis:
     dns: 172.28.2.5
+    volumes:
+      - ./sa_learn:/sa_learn
 
   outamavis:
     dns: 172.28.2.5

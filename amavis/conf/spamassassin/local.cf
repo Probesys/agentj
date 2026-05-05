@@ -1,3 +1,15 @@
+# Configure bayesian plugin
+use_bayes 1
+bayes_auto_learn 1
+use_bayes_rules 1
+
+# Store bayesian data in MySQL
+bayes_store_module Mail::SpamAssassin::BayesStore::MySQL
+bayes_sql_dsn      DBI:mysql:$DB_USER:$DB_HOST:$DB_NAME
+
+bayes_sql_username $DB_USER
+bayes_sql_password $DB_PASSWORD
+
 # SPF
 
 score SPF_SOFTFAIL 0 1.0 0 1.0

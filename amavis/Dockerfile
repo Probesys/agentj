@@ -40,6 +40,7 @@ RUN /usr/bin/sa-update
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/*.conf /etc/
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
+COPY sa-learn.sh /sa-learn.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 

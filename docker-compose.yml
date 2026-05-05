@@ -37,6 +37,7 @@ services:
         condition: service_healthy
     volumes:
       - amavis_in:/var/lib/amavis/
+      - sa_learn:/sa_learn
 
   outamavis:
     image: probesys38/agentj_amavis:$VERSION
@@ -180,6 +181,7 @@ services:
 volumes:
   amavis_out:
   amavis_in:
+  sa_learn:
   db:
   postqueue:
   outpostqueue:
