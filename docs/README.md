@@ -17,6 +17,7 @@
 - [Running the linters](/docs/developers/linters.md)
 - [Working with LDAP](/docs/developers/ldap.md)
 - [Working with Xdebug](/docs/developers/xdebug.md)
+- [Working with Bayes filtering](/docs/developers/bayes_filtering.md)
 
 Dedicated to the maintainers:
 
