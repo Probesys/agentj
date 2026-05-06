@@ -15,6 +15,7 @@ parameters:
     app.default_logo_filename: 'agent-j-logo-desktop.svg'
     app.amavis_quarantine_dir: "%env(AMAVIS_QUARANTINE_DIR)%"
     app.amavis_quarantine_nbdays_before_delete: "%env(AMAVIS_QUARANTINE_NBDAYS_BEFORE_DELETE)%"
+    app.spamassassin_learn_dir: "%kernel.project_dir%/sa_learn"
     app.domain_default_spam_level: "%env(DOMAIN_DEFAULT_SPAM_LEVEL)%"
     app.domain_min_spam_level: "%env(DOMAIN_MIN_SPAM_LEVEL)%"
     app.domain_max_spam_level: "%env(DOMAIN_MAX_SPAM_LEVEL)%"

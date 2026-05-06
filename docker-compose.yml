@@ -68,6 +68,7 @@ services:
     volumes:
       - var:/var/www/agentj/var
       - files:/var/www/agentj/public/files
+      - sa_learn:/var/www/agentj/sa_learn
     healthcheck:
       test: ["CMD", "test", "-f", "/tmp/healthy.txt"]
       interval: 5s
