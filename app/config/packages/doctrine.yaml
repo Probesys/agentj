@@ -23,7 +23,6 @@ doctrine:
                 CONVERT: App\Doctrine\Extensions\ConvertFunction
                 MATCH: App\Doctrine\Extensions\MatchFunction
             datetime_functions:
-                DATEDIFF: App\Doctrine\Extensions\DateDiff
                 DATE: App\Doctrine\Extensions\DateFunction
                 FROM_UNIXTIME: App\Doctrine\Extensions\FromUnixTimeFunction
 
