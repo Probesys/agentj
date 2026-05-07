@@ -1,26 +1,26 @@
 security:
     # encoders:
-    #     App\Entity\User: bcrypt  
+    #     App\Entity\User: bcrypt
     password_hashers:
         # use your user class name here
         App\Entity\User:
             # Use native password hasher, which auto-selects the best
             # possible hashing algorithm (starting from Symfony 5.3 this is "bcrypt")
-            algorithm: bcrypt        
+            algorithm: bcrypt
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     # providers:
     #     #in_memory: { memory: ~ }
     #     database_users:
-    #         entity: { class: App\Entity\User, property: username }    
-    providers:            
+    #         entity: { class: App\Entity\User, property: username }
+    providers:
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: username
     role_hierarchy:
-        ROLE_USER: [ROLE_ALLOWED_TO_SWITCH]
-        ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
-        ROLE_SUPER_ADMIN: [ROLE_ADMIN,ROLE_ALLOWED_TO_SWITCH]
+        ROLE_USER: []
+        ROLE_ADMIN: [ROLE_USER]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN]
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -34,7 +34,7 @@ security:
         main:
             lazy: true
 #            provider: users_in_memory
-            custom_authenticator: 
+            custom_authenticator:
              - App\Security\LoginFormAuthenticator
              - App\Security\OAuthAuthenticator
 #            entry_point: security_login
@@ -44,8 +44,8 @@ security:
                 secret:   '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
                 path:     /
-                always_remember_me: true            
-            switch_user: { role: ROLE_ALLOWED_TO_SWITCH }
+                always_remember_me: true
+            switch_user: { role: CAN_SWITCH_USER }
 #            context: agentj
 
             # activate different ways to authenticate
