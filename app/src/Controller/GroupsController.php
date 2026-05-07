@@ -11,6 +11,7 @@ use App\Form\GroupsType;
 use App\Service\GroupService;
 use App\Service\UserService;
 use App\Repository\UserRepository;
+use App\Repository\GroupsRepository;
 use App\Repository\GroupsWblistRepository;
 use App\Repository\MailaddrRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,8 +28,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/groups')]
 class GroupsController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private GroupsRepository $groupsRepository,
+        private TranslatorInterface $translator,
+    ) {
     }
 
     private function checkAccess(Groups $group): void
@@ -45,9 +49,13 @@ class GroupsController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        $groups = $this->em
-                ->getRepository(Groups::class)
-                ->findByDomains($user->getDomains()->toArray());
+
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $groups = $this->groupsRepository->findAll();
+        } else {
+            $userDomains = $user->getDomains()->toArray();
+            $groups = $this->groupsRepository->findByDomains($userDomains);
+        }
 
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }

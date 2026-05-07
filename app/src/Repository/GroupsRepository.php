@@ -42,12 +42,13 @@ class GroupsRepository extends BaseRepository
      */
     public function findByDomains(array $domains): array
     {
-        $dql = $this->createQueryBuilder('g');
-
-        if ($domains) {
-            $dql->where('g.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
+        if (count($domains) === 0) {
+            return [];
         }
+
+        $dql = $this->createQueryBuilder('g');
+        $dql->where('g.domain in (:domains)');
+        $dql->setParameter('domains', $domains);
 
         return $dql->getQuery()->getResult();
     }
