@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-05-07 - 2.5.3
+
+### Bug fixes
+
+- Fix switching user when connected as "simple" admin ([ab2ed40a](https://github.com/Probesys/agentj/commit/ab2ed40a))
+
 ## 2026-03-18 - 2.5.2
 
 ### Features
