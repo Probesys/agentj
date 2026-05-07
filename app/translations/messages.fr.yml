@@ -233,6 +233,8 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
+    MarkAsHam: Marquer comme acceptable
+    MarkAsSpam: Marquer comme spam
     ipAddressInvalid: Le format l'adresse IP est incorrect.
     ipAddressDuplicated: l'adresse IP est en double.
     massiveActionContent:
@@ -282,6 +284,8 @@ Message:
     ruleExists: Cette règle existe déjà !
     messageDeleted: Message supprimé avec succès
     messageRestored: Message récupéré avec succès
+    messageMarkedAsHam: Message marqué comme acceptable avec succès
+    messageMarkedAsSpam: Message marqué comme spam avec succès
     saved: Les changements ont été enregistrés.
     messagePendingRelease: Le message va être délivré dans quelques instants.
     senderAuthorized: L'adresse est désormais autorisée

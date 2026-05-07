@@ -457,6 +457,37 @@
                                                         {{ 'Message.Actions.Banned'|trans() }}
                                                     </a>
 
+                                                    {% if msgRecipient.isUntreated or msgRecipient.isSpam %}
+                                                        <div class="dropdown-divider"></div>
+
+                                                        {% if msgRecipient.isUntreated %}
+                                                            <a
+                                                                href="{{path('message_mark_as_spam',{
+                                                                    'partitionTag': msgRecipient.partitionTag,
+                                                                    'mailId': msgRecipient.mailIdAsString,
+                                                                    'rid': msgRecipient.rid.id
+                                                                })}}"
+                                                                class="dropdown-item"
+                                                            >
+                                                                <span class="fas fa-thumbs-down"></span>
+                                                                {{ 'Message.Actions.MarkAsSpam' | trans }}
+                                                            </a>
+                                                        {% endif %}
+
+                                                        {% if msgRecipient.isSpam %}
+                                                            <a
+                                                                href="{{path('message_mark_as_ham',{
+                                                                    'partitionTag': msgRecipient.partitionTag,
+                                                                    'mailId': msgRecipient.mailIdAsString,
+                                                                    'rid': msgRecipient.rid.id
+                                                                })}}"
+                                                                class="dropdown-item"
+                                                            >
+                                                                <span class="fas fa-thumbs-up"></span>
+                                                                {{ 'Message.Actions.MarkAsHam' | trans }}
+                                                            </a>
+                                                        {% endif %}
+                                                    {% endif %}
                                                 {% endif %}
                                             </div>
                                         </div>

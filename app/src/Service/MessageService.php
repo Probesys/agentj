@@ -31,6 +31,7 @@ class MessageService
         private UserRepository $userRepository,
         private WblistRepository $wblistRepository,
         private CryptEncryptService $cryptEncryptService,
+        private SpamassassinService $spamassassinService,
     ) {
     }
 
@@ -256,6 +257,59 @@ class MessageService
         );
 
         return true;
+    }
+
+    /**
+     * Mark a message as spam.
+     *
+     * Marking a message as spam put the message in a "spams" folder so
+     * Spamassassin will learn with Bayes classifier. It also moves the message
+     * to the "spam" menu for each recipient that would have it in "untreated"
+     * menu.
+     *
+     * It returns false if the message couldn't be put in the spams folder.
+     */
+    public function markMessageAsSpam(Msgs $message): bool
+    {
+        $result = $this->spamassassinService->marksAsSpam($message);
+
+        foreach ($message->getMsgRcpts() as $messageRecipient) {
+            if (!$messageRecipient->isUntreated()) {
+                continue;
+            }
+
+            $recipient = $messageRecipient->getRid();
+            $recipientEmail = $recipient->getEmailClear();
+
+            $messageRecipient->setStatus(MessageStatus::SPAMMED);
+            $this->messageRecipientRepository->save($messageRecipient);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Mark a message as ham.
+     *
+     * Marking a message as ham put the message in a "hams" folder so
+     * Spamassassin will learn with Bayes classifier. It also restores the
+     * message for each recipient that would have it in "spam" menu.
+     *
+     * It returns false if the message couldn't be put in the hams folder.
+     */
+    public function markMessageAsHam(Msgs $message): bool
+    {
+        $result = $this->spamassassinService->marksAsHam($message);
+
+        foreach ($message->getMsgRcpts() as $messageRecipient) {
+            if (!$messageRecipient->isSpam()) {
+                continue;
+            }
+
+            $this->restore($messageRecipient);
+        }
+
+        return $result;
     }
 
     /**

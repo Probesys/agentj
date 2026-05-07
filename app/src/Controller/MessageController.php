@@ -60,6 +60,9 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsHam'] = 'mark as ham';
+                    }
                     $messageStatus = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
@@ -100,6 +103,10 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                    }
+
                     $messageStatus = MessageStatus::UNTREATED;
                     break;
             }
@@ -110,6 +117,10 @@ class MessageController extends AbstractController
                 'Message.Actions.Banned' => 'banned',
                 'Message.Actions.Delete' => 'delete',
             ];
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+            }
+
             $subTitle = 'Entities.Message.untreated';
             $messageStatus = MessageStatus::UNTREATED;
         }
@@ -292,6 +303,16 @@ class MessageController extends AbstractController
                         $this->messageService->dispatchRelease($messageRecipient);
                         $logService->addLog('restore batch', $mailId);
                         break;
+                    case 'mark as spam':
+                        $message = $messageRecipient->getMsgs();
+                        $this->messageService->markMessageAsSpam($message);
+                        $logService->addLog('marked as spam batch', $mailId);
+                        break;
+                    case 'mark as ham':
+                        $message = $messageRecipient->getMsgs();
+                        $this->messageService->markMessageAsHam($message);
+                        $logService->addLog('marked as ham batch', $mailId);
+                        break;
                 }
             }
         }
@@ -412,6 +433,46 @@ class MessageController extends AbstractController
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
             $logService->addLog('banned for domain', $messageRecipient->getMailIdAsString());
+        }
+
+        return new RedirectResponse($this->referrer->get());
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsSpam', name: 'message_mark_as_spam')]
+    public function markAsSpam(
+        Msgrcpt $messageRecipient,
+        Request $request,
+        Service\LogService $logService,
+    ): RedirectResponse {
+        $this->checkMailAccess($messageRecipient);
+
+        $message = $messageRecipient->getMsgs();
+        $result = $this->messageService->markMessageAsSpam($message);
+
+        if ($result) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsSpam'));
+            $logService->addLog('marked as spam', $message->getMailId());
+        }
+
+        return new RedirectResponse($this->referrer->get());
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsHam', name: 'message_mark_as_ham')]
+    public function markAsHam(
+        Msgrcpt $messageRecipient,
+        Request $request,
+        Service\LogService $logService,
+    ): RedirectResponse {
+        $this->checkMailAccess($messageRecipient);
+
+        $message = $messageRecipient->getMsgs();
+        $result = $this->messageService->markMessageAsHam($message);
+
+        if ($result) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsHam'));
+            $logService->addLog('marked as ham', $message->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());

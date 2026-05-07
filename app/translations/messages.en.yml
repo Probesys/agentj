@@ -233,6 +233,8 @@ Message:
     DeleteMessage: "Delete the message"
     Restore: Recover
     RestoreMessage: "Recover the message"
+    MarkAsHam: "Mark as ham"
+    MarkAsSpam: "Mark as spam"
     ipAddressInvalid: "Invalid IP address."
     ipAddressDuplicated: "This IP address is already in the list."
     massiveActionContent:
@@ -282,6 +284,8 @@ Message:
     ruleExists: "This rule already exists!"
     messageDeleted: "Message deleted successfully"
     messageRestored: "Message successfully recovered"
+    messageMarkedAsHam: "Message successfully marked as ham"
+    messageMarkedAsSpam: "Message successfully marked as spam"
     saved: "Changes have been saved."
     messagePendingRelease: "The message will be delivered in a few moments."
     senderAuthorized: "The address is now authorized"
