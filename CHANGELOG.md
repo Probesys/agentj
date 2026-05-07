@@ -1,5 +1,30 @@
 # Changelog of AgentJ
 
+## 2026-05-07 - 2.6.0
+
+### Features
+
+- Provide full Bayes setup to learn spam ([079ff0fd](https://github.com/Probesys/agentj/commit/079ff0fd), [1d7aa4c2](https://github.com/Probesys/agentj/commit/1d7aa4c2), [b3e05c6c](https://github.com/Probesys/agentj/commit/b3e05c6c), [ecc816a1](https://github.com/Probesys/agentj/commit/ecc816a1))
+- Enforce analyze of emails from authorized senders ([355bb462](https://github.com/Probesys/agentj/commit/355bb462))
+- Add an option to disable antispoofing for outgoing emails ([688df4f3](https://github.com/Probesys/agentj/commit/688df4f3))
+- Add a command to display the content of the messages ([cb7e2ec7](https://github.com/Probesys/agentj/commit/cb7e2ec7))
+
+### Bug fixes
+
+- Fix sa-update cron ([8de5c29e](https://github.com/Probesys/agentj/commit/8de5c29e))
+
+### Maintenance
+
+- Update the dependencies ([dd41ba79](https://github.com/Probesys/agentj/commit/dd41ba79))
+- Improve the performance of sending authentication request emails ([a3bda1f6](https://github.com/Probesys/agentj/commit/a3bda1f6))
+- Tweak SpamAssassin's scores ([e56b4050](https://github.com/Probesys/agentj/commit/e56b4050))
+- Use Amavis::SpamControl::SpamAssassin instead of spamd ([5de30dad](https://github.com/Probesys/agentj/commit/5de30dad))
+- Add RBL and URIDNSBL ([dab20b66](https://github.com/Probesys/agentj/commit/dab20b66))
+- Refactor wblist actions ([c30f3075](https://github.com/Probesys/agentj/commit/c30f3075))
+- Refactor authorizing/banning a sender for a domain ([411b6aa0](https://github.com/Probesys/agentj/commit/411b6aa0))
+- Refactor authorizing/banning a sender for a recipient ([1e610e74](https://github.com/Probesys/agentj/commit/1e610e74))
+- Remove Doctrine extension DateDiff ([6b1ece8c](https://github.com/Probesys/agentj/commit/6b1ece8c))
+
 ## 2026-05-07 - 2.5.3
 
 ### Bug fixes
