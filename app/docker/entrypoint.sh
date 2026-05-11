@@ -6,6 +6,7 @@ sh /setup-env.sh
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 
 cd /var/www/agentj || exit 4
+rm -rf /var/www/agentj/var/cache
 
 if [ -x "$(which composer)" ] && [ -x "$(which yarnpkg)" ] ; then
 	echo "Installing libraries"
@@ -27,7 +28,6 @@ echo "update groups wblist"
 sudo -u www-data php bin/console agentj:update-groups-wblist
 
 # Allow web server user to write Symphony logs
-rm -rf /var/www/agentj/var/cache
 chown -R www-data:www-data /var/www/agentj/var
 find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 
