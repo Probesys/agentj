@@ -1,5 +1,12 @@
 # Changelog of AgentJ
 
+## 2026-05-11 - 2.6.1
+
+### Bug fixes
+
+- Fix: clear cache before running sf command in entry point ([949e77a](https://github.com/Probesys/agentj/commit/949e77a9a64032d50add666eb5e21c1e514a97be))
+
+
 ## 2026-05-07 - 2.6.0
 
 ### Features
