@@ -7,11 +7,14 @@ use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
+use App\Util\Search;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends BaseMessageRepository<Msgs>
+ *
+ * @phpstan-import-type SortParams from Search
  */
 class MsgsRepository extends BaseMessageRepository
 {
@@ -29,10 +32,7 @@ class MsgsRepository extends BaseMessageRepository
     }
 
     /**
-     * @param ?array{
-     *     sort: string,
-     *     direction: string,
-     * } $sortParams
+     * @param ?SortParams $sortParams
      * @return array<int, array<string, mixed>>
      */
     public function advancedSearch(
@@ -102,18 +102,11 @@ class MsgsRepository extends BaseMessageRepository
         }
 
         if ($sortParams) {
-            $sortField = $sortParams['sort'];
-            $sortDirection = $sortParams['direction'];
+            $authorizedSortFields = ['mail_id', 'from_addr', 'email', 'subject', 'time_iso'];
+            $defaultSortField = 'm.time_num';
+            $sortParams = Search::sanitizeSortParams($sortParams, $authorizedSortFields, $defaultSortField);
 
-            if (!in_array($sortField, ['mail_id', 'from_addr', 'email', 'subject', 'time_iso'])) {
-                $sortField = 'm.time_num';
-            }
-
-            if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
-                $sortDirection = 'desc';
-            }
-
-            $sql .= " ORDER BY {$sortField} {$sortDirection}";
+            $sql .= " ORDER BY {$sortParams['sort']} {$sortParams['direction']}";
         } else {
             $sql .= ' ORDER BY m.time_num desc, m.status_id';
         }
@@ -126,24 +119,16 @@ class MsgsRepository extends BaseMessageRepository
      *
      * @return Msgs[]
      */
-    public function searchMsgsToSendAuthRequest(): array
+    public function searchMsgsToSendAuthRequest(\DateTimeImmutable $since): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m
             FROM App\Entity\Msgs m
-            WHERE
-                (m.isMlist IS NULL OR m.isMlist = 0)
-                AND m.status IS NULL
-                AND m.sendCaptcha = 0
-                AND m.content NOT IN (:content)
-                AND DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) <= 7
-            SQL);
+            WHERE m.sendCaptcha = 0
+            AND m.timeNum >= :sinceTimestamp
+        SQL);
 
-        $query->setParameter('content', [
-            ContentType::CLEAN,
-            ContentType::VIRUS,
-            ContentType::UNCHECKED,
-        ]);
+        $query->setParameter('sinceTimestamp', $since->getTimestamp());
 
         return $query->getResult();
     }
@@ -154,16 +139,15 @@ class MsgsRepository extends BaseMessageRepository
     public function getDaysSinceLastRequest(string $to, string $from): ?int
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
-            SELECT DATEDIFF(CURRENT_TIMESTAMP(), m.timeIso) as time_diff
+            SELECT m.sendCaptcha
             FROM App\Entity\Msgs m
-            LEFT JOIN App\Entity\Msgrcpt mr WITH m.mailId = mr.mailId AND m.partitionTag = mr.partitionTag
-            LEFT JOIN App\Entity\Maddr maddr WITH maddr.id = mr.rid
-            LEFT JOIN App\Entity\Maddr maddr_sender WITH maddr_sender.id = m.sid
-            WHERE
-                maddr.email = :to
-                AND maddr_sender.email = :from
-                AND m.sendCaptcha != 0
-            ORDER BY m.timeIso DESC
+            JOIN m.msgRcpts mr
+            JOIN mr.rid recipient
+            JOIN m.sid sender
+            WHERE recipient.email = :to
+            AND sender.email = :from
+            AND m.sendCaptcha != 0
+            ORDER BY m.sendCaptcha DESC
         SQL);
 
         $query->setParameter('to', $to);
@@ -171,47 +155,12 @@ class MsgsRepository extends BaseMessageRepository
         $query->setMaxResults(1);
 
         try {
-            $result = $query->getSingleScalarResult();
-            return (int) $result;
+            $sendCaptcha = (int) $query->getSingleScalarResult();
+            $sinceSeconds = time() - $sendCaptcha;
+            return (int) floor($sinceSeconds / (60 * 60 * 24));
         } catch (\Doctrine\ORM\NoResultException $e) {
             return null;
         }
-    }
-
-    /**
-     * Get all messages from emailSender to emailRecipient and not delivered yet.
-     * @return array<int, array<string, mixed>>
-     */
-    public function getMessagesToRelease(string $emailSender, string $emailRecipient): array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = <<<SQL
-            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
-            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
-            LEFT JOIN maddr ms ON ms.id = m.sid
-            LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE msr.ds != :deliveryPass
-            AND msr.content != :virusContent
-            AND (
-                msr.status_id IS NULL OR (
-                    msr.status_id != :statusAuthorized
-                    AND msr.status_id != :statusRestored
-                )
-            )
-            AND mr.email = :emailRecipient
-            AND ms.email = :emailSender
-        SQL;
-
-        $stmt = $conn->prepare($sql);
-        return $stmt->executeQuery([
-            'deliveryPass' => DeliveryStatus::PASS,
-            'virusContent' => ContentType::VIRUS,
-            'statusAuthorized' => MessageStatus::AUTHORIZED,
-            'statusRestored' => MessageStatus::RESTORED,
-            'emailRecipient' => $emailRecipient,
-            'emailSender' => $emailSender,
-        ])->fetchAllAssociative();
     }
 
     /**

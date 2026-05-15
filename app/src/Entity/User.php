@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Policy;
 use App\Repository\UserRepository;
+use App\Util\ResourceHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -167,10 +168,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * A visual identifier that represents this user.
      *
      * @see UserInterface
+     *
+     * @return non-empty-string
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        $identifier = $this->username;
+
+        if (!$identifier) {
+            throw new \LogicException('User identifier (username) cannot be empty');
+        }
+
+        return $identifier;
     }
 
     public function getPriority(): ?int
@@ -187,17 +196,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmail(): ?string
     {
-        $email = $this->email;
-
-        if (is_resource($email)) {
-            $email = stream_get_contents($email, -1, 0);
-        }
-
-        if (is_string($email)) {
-            return $email;
-        }
-
-        return null;
+        return ResourceHelper::toString($this->email);
     }
 
     public function setEmail(mixed $email): self
@@ -449,6 +448,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isSharedWith(User $user): bool
+    {
+        return $this->sharedWith->contains($user);
+    }
 
     /**
      * @return Collection<int, User>
@@ -679,11 +682,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isAdmin(): bool
+    /**
+     * Return whether the user is an admin or not.
+     *
+     * If $superAdmin is true (default), then a super-admin is considered as
+     * admin. If it is false, the method returns false for super-admins.
+     */
+    public function isAdmin(bool $superAdmin = true): bool
     {
-        return in_array('ROLE_ADMIN', $this->getRoles()) || in_array('ROLE_SUPER_ADMIN', $this->getRoles());
+        return (
+            in_array('ROLE_ADMIN', $this->getRoles()) ||
+            ($superAdmin && $this->isSuperAdmin())
+        );
     }
 
+    /**
+     * Return whether the user is a super-admin or not.
+     */
     public function isSuperAdmin(): bool
     {
         return in_array('ROLE_SUPER_ADMIN', $this->getRoles());

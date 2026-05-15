@@ -12,14 +12,17 @@ parameters:
     app.timezone: "%env(TIMEZONE)%"
     app.amavisd-release: "%env(AMAVIS_RELEASE__PATH)%"
     app.upload_directory: "%kernel.project_dir%/public/files/upload/"
+    app.default_logo_filename: 'agent-j-logo-desktop.svg'
     app.amavis_quarantine_dir: "%env(AMAVIS_QUARANTINE_DIR)%"
     app.amavis_quarantine_nbdays_before_delete: "%env(AMAVIS_QUARANTINE_NBDAYS_BEFORE_DELETE)%"
+    app.spamassassin_learn_dir: "%kernel.project_dir%/sa_learn"
     app.domain_default_spam_level: "%env(DOMAIN_DEFAULT_SPAM_LEVEL)%"
     app.domain_min_spam_level: "%env(DOMAIN_MIN_SPAM_LEVEL)%"
     app.domain_max_spam_level: "%env(DOMAIN_MAX_SPAM_LEVEL)%"
     app.domain_mail_authentification_sender: "%env(SMTP_FROM)%"
     app.per_page_global: "25"
     timezone: "%env(TIMEZONE)%"
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -30,25 +33,16 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: "../src/"
-        exclude:
-            - "../src/DependencyInjection/"
-            - "../src/Entity/"
-            - "../src/Kernel.php"
-            - "../src/Tests/"
-
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: "../src/Controller/"
-        tags: ["controller.service_arguments"]
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    #    App.crypt_encrypt:
-    #       class: App\Service\CryptEncrypt
-    #       public: true
     App\Service\FileUploader:
         arguments: ["%app.upload_directory%", "@doctrine.orm.entity_manager"]
+
+    App\Twig\AppExtension:
+        arguments:
+            $uploadDirectory: "%app.upload_directory%"
+            $defaultLogoFilename: "%app.default_logo_filename%"
 
     App\MessageHandler\CreateAlertMessageHandler:
         tags: ["messenger.message_handler"]

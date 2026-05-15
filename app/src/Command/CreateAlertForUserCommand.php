@@ -44,25 +44,15 @@ class CreateAlertForUserCommand extends Command
 
         foreach ($outMsgs as $outMsg) {
             $mailId = $outMsg->getMailId();
-            $output->writeln('Retrieved mail ID: ' . $mailId);
 
-            // Add a check to ensure mailId is not empty
-            if (empty($mailId)) {
-                $output->writeln('Error: mailId is empty for OutMsg with ID: ' . $outMsg->getId());
-                continue;
-            }
-
-            $output->writeln('Dispatching message for mail ID: ' . $mailId);
+            $output->writeln('Creating alert for mail ID: ' . $mailId);
             $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'user'));
 
-            $binaryMailId = hex2bin($mailId);
-
-            // Mark the outmsg as processedUser
-            $outMsgToSave = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $binaryMailId]);
-            $outMsgToSave->setProcessedUser(true);
-            $this->entityManager->persist($outMsgToSave);
-            $this->entityManager->flush();
+            $outMsg->setProcessedUser(true);
+            $this->entityManager->persist($outMsg);
         }
+
+        $this->entityManager->flush();
 
         $reports = $this->entityManager->getRepository(SqlLimitReport::class)->createQueryBuilder('r')
             ->select('r.id, r.mailId, r.date, r.recipientCount, r.delta, r.processedUser, COUNT(r) as reportCount')
@@ -114,8 +104,6 @@ class CreateAlertForUserCommand extends Command
         }
 
         $output->writeln('Finished create-alert-for-user command.');
-
-        sleep(15);
 
         return Command::SUCCESS;
     }

@@ -1,333 +1,123 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ 'Generics.messages.welcome'|trans }}
-    !
+	{{ 'Generics.messages.welcome'|trans }}
+	!
 {% endblock %}
 
 {% block body %}
 
-    {% block stylesheets %}
-        <style>
-            .card .fa-expand-arrows-alt {
-                visibility: hidden;
+	{% block stylesheets %}
+		<style>
+			.card .fa-expand-arrows-alt {
+				visibility: hidden;
+				opacity: 0;
+				transition: visibility 0s, opacity 0.3s ease;
+			}
+			.card:hover .fa-expand-arrows-alt {
+				visibility: visible;
+				opacity: 1;
+				color: #212529;
+			}
+
+			@keyframes spinner-border {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+            .spinner-border {
+                display: inline-block;
+                width: 2rem;
+                height: 2rem;
+                vertical-align: text-bottom;
+                border: 0.25em solid currentColor;
+                border-right-color: transparent;
+                border-radius: 50%;
+                animation: spinner-border 0.75s linear infinite;
+            }
+
+            .spinner-border-sm {
+                width: 1rem;
+                height: 1rem;
+                border-width: 0.2em;
+            }
+
+            @keyframes spinner-grow {
+                0% {
+                    transform: scale(0);
+                }
+                50% {
+                    opacity: 1;
+                }
+            }
+
+            .spinner-grow {
+                display: inline-block;
+                width: 2rem;
+                height: 2rem;
+                vertical-align: text-bottom;
+                background-color: currentColor;
+                border-radius: 50%;
                 opacity: 0;
-                transition: visibility 0s, opacity 0.3s ease;
+                animation: spinner-grow 0.75s linear infinite;
             }
-            .card:hover .fa-expand-arrows-alt {
-                visibility: visible;
-                opacity: 1;
-                color: #212529;
+
+            .spinner-grow-sm {
+                width: 1rem;
+                height: 1rem;
             }
-        </style>
-    {% endblock %}
 
-    <h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
+		</style>
+	{% endblock %}
 
-    <div class="row">
-        {% if showAlert %}
-        <div class="col-12 col-sm-6">
-            <div class="card my-2" style="height: 300px; position: relative;">
-                <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                    <p class="display-1 text-danger">{{ unreadAlertsCount }}</p>
-                    <p class="h5">{{ 'Generics.labels.unreadAlerts'|trans({'%count%': unreadAlertsCount}, 'messages') }}</p>
-                    <a href="#" data-toggle="modal" data-target="#alertsModal" style="position: absolute; top: 10px; right: 10px;">
-                        <i class="fas fa-expand-arrows-alt fa-2x"></i>
-                    </a>
-                    <small class="form-text text-muted">{{ 'Generics.messages.helpAlert' | trans }}</small>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        <div class="col-12 col-sm-6">
-            <div class="card my-2" style="height: 300px; position: relative;">
-                <div class="card-body">
-                    <canvas id="messagesChart"></canvas>
-                    <a href="#" data-toggle="modal" data-target="#latestMessagesModal" style="position: absolute; top: 10px; right: 10px;">
-                        <i class="fas fa-expand-arrows-alt fa-2x"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 {% if not showAlert %}col-sm-6{% endif %}">
-            <div class="card my-2" style="height: 300px; position: relative;">
-                <div class="card-body">
-                    {% include '/home/_stats.html.twig' %}
-                    <a href="#" data-toggle="modal" data-target="#statsModal" style="position: absolute; top: 10px; right: 10px;">
-                        <i class="fas fa-expand-arrows-alt fa-2x"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if is_granted('ROLE_ADMIN') %}
-        <div
-            class="row mb-4">
-            <div class="col-md-1"></div> 
-            <div class="col-md-12">
-                <div class="card my-2" style="">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-2 d-flex align-items-center">
-                                <form id="domainForm">
-                                    <div class="form-group">
-                                        <label for="domainSelect">{{'Entities.Domain.Name' | trans }}
-                                            :</label>
-                                        <select class="form-control" id="domainSelect" name="domain">
-                                            <option value="All">{{'Generics.labels.all' | trans }}</option>
-                                            {% for domain in domains %}
-                                                <option value="{{ domain.id }}">{{ domain.domain }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="col-md-5" style="height: 250px;">
-                                <canvas id="msgsChart"></canvas>
-                            </div>
-                            <div class="col-md-5" style="height: 250px;">
-                                <canvas id="outMsgsChart"></canvas>
-                            </div>
-                        </div>
-                        <a href="#" data-toggle="modal" data-target="#statsTableModal" style="position: absolute; top: 10px; right: 10px;">
-                            <i class="fas fa-expand-arrows-alt fa-2x"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
+	<h1>{{ 'Generics.messages.welcomeAgentJ'|trans }}</h1>
 
-    <!-- Modals -->
-    <div class="modal fade" id="alertsModal" tabindex="-1" role="dialog" aria-labelledby="alertsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="alertsModalLabel">{{ 'Generics.labels.alerts'|trans }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {% include '/home/_alerts.html.twig' %}
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="row">
+		{% if showAlert %}
+			<div class="col-12 col-sm-6">
+				<div class="card my-2" style="height: 300px; position: relative;">
+					<turbo-frame id="dashboard-alerts" src="{{ path('dashboard_alerts') }}" loading="lazy" target="_top" class="w-100 h-100">
+						<div class="d-flex justify-content-center align-items-center h-100" style="background: #fff;">
+							<div class="spinner-border text-primary" role="status"></div>
+						</div>
+					</turbo-frame>
+				</div>
+			</div>
+		{% endif %}
+		<div class="col-12 col-sm-6">
+			<div class="card my-2" style="height: 300px; position: relative;">
+				<turbo-frame id="dashboard-stats-by-status" src="{{ path('dashboard_stats_by_status') }}" loading="lazy" target="_top" class="w-100 h-100">
+					<div class="d-flex justify-content-center align-items-center h-100" style="background: #fff;">
+						<div class="spinner-border text-primary" role="status"></div>
+					</div>
+				</turbo-frame>
+			</div>
+		</div>
+		<div class="col-12 {% if not showAlert %}col-sm-6{% endif %}">
+			<div class="card my-2" style="height: 300px; position: relative;">
+				<turbo-frame id="dashboard-stats-by-days" src="{{ path('dashboard_stats_by_days') }}" loading="lazy" target="_top" class="w-100 h-100">
+					<div class="d-flex justify-content-center align-items-center h-100" style="background: #fff;">
+						<div class="spinner-border text-primary" role="status"></div>
+					</div>
+				</turbo-frame>
+			</div>
 
-    <div class="modal fade" id="latestMessagesModal" tabindex="-1" role="dialog" aria-labelledby="latestMessagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="latestMessagesModalLabel">{{ 'Generics.labels.latestMessages'|trans }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {% include '/home/_latest_messages.html.twig' %}
-                </div>
-            </div>
-        </div>
-    </div>
+		</div>
+	</div>
+	{% if is_granted('ROLE_ADMIN') %}
+		<div class="row mt-3">
+			<div class="col-md-12">
+				<div class="card my-2" style="height: 300px; position: relative;">
+					<turbo-frame id="dashboard-stats-by-in-out" src="{{ path('dashboard_stats_by_in_out') }}" loading="lazy" target="_top" class="w-100 h-100">
+						<div class="d-flex justify-content-center align-items-center h-100" style="background: #fff;">
+							<div class="spinner-border text-primary" role="status"></div>
+						</div>
+					</turbo-frame>
+				</div>
 
-    <div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="statsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="statsModalLabel">{{ 'Generics.labels.statistics'|trans }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="card my-2" style="height: 300px; position: relative;">
-                    <div class="modal-body">
-                        {% include '/home/_stats.html.twig' %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	{% endif %}
 
-    {% if is_granted('ROLE_ADMIN') %}
-        <div class="modal fade" id="statsTableModal" tabindex="-1" role="dialog" aria-labelledby="statsTableModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="statsTableModalLabel">{{ 'Generics.labels.statTable'|trans }}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        {% include '/home/_stats_table.html.twig' %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% block javascripts %}
-        <script>
-            var ctx = document.getElementById('messagesChart').getContext('2d');
-            var data = {
-                labels: [
-                    Translator.trans('Navigation.untreated'),
-                    Translator.trans('Navigation.authorized'),
-                    Translator.trans('Navigation.banned'),
-                    Translator.trans('Navigation.Messagedelete'),
-                    Translator.trans('Navigation.MessageRestored'),
-                    'Error',
-                    'Spam',
-                    'Virus'
-                ],
-                datasets: [
-                    {
-                        data: [
-            {{ msgs.untreated }},
-            {{ msgs.authorized }},
-            {{ msgs.banned }},
-            {{ msgs.delete }},
-            {{ msgs.restored }},
-            {{ msgs.error }},
-            {{ msgs.spammed }},{{ msgs.virus }}
-                                                            ],
-                                                            backgroundColor: [
-                                                                '#36A2EB', // Blue
-                                                                '#77DD77', // Green
-                                                                '#FF9F40', // Orange
-                                                                '#9966FF', // Purple
-                                                                '#4BC0C0', // Teal
-                                                                '#C9CBCF', // Light Gray
-                                                                '#FF5733', // Dark Orange
-                                                                '#FF6384' // Red
-                                                            ]
-                                                        }
-                                                    ]
-                                                };
-
-// Filter out labels and data points that are zero
-                                                var filteredData = {
-                                                    labels: data.labels.filter(
-                                                            (label, index) => data.datasets[0].data[index] > 0
-                                                    ),
-                                                    datasets: [
-                                                        {
-                                                            data: data.datasets[0].data.filter(value => value > 0),
-                                                            backgroundColor: data.datasets[0].backgroundColor.filter(
-                                                                    (color, index) => data.datasets[0].data[index] > 0
-                                                            )
-                                                        }
-                                                    ]
-                                                };
-
-                                                if (filteredData.datasets[0].data.length === 0) { // Display a message if there is no data
-                                                    document.getElementById('messagesChart').style.display = 'none';
-                                                    var noDataMessage = document.createElement('p');
-                                                    noDataMessage.textContent = 'Aucun message bloqué';
-                                                    noDataMessage.style.textAlign = 'center';
-                                                    noDataMessage.style.marginTop = '20px';
-                                                    document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
-                                                } else {
-                                                    var messagesChart = new Chart(ctx, {
-                                                        type: 'doughnut',
-                                                        data: filteredData,
-                                                        options: {
-                                                            responsive: true,
-                                                            maintainAspectRatio: false,
-                                                            legend: {
-                                                                position: 'right'
-                                                            },
-                                                            title: {
-                                                                display: true,
-                                                                text: Translator.trans('Navigation.mailBlocked')
-                                                            }
-                                                        }
-                                                    });
-                                                }
-
-                                                var ctxMsgs = document.getElementById('msgsChart').getContext('2d');
-                                                var msgsData = {
-                                                    labels: [
-                                                        '{{ 'Generics.labels.unblockedMessages'|trans }}', '{{ 'Generics.labels.blockedMessages'|trans }}'
-                                                    ],
-                                                    datasets: [
-                                                        {
-                                                            data: [
-            {{ data['All'].totalMsgCount - data['All'].totalMsgBlockedCount }},{{ data['All'].totalMsgBlockedCount }}
-                                                    ],
-                                                    backgroundColor: [
-                                                        '#36A2EB', // Blue
-                                                        '#FF6384' // Red
-                                                    ]
-                                                }
-                                            ]
-                                        };
-
-                                        var msgsChart = new Chart(ctxMsgs, {
-                                            type: 'doughnut',
-                                            data: msgsData,
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                legend: {
-                                                    position: 'right'
-                                                },
-                                                title: {
-                                                    display: true,
-                                                    text: '{{ 'Generics.labels.incomingMails'|trans }}'
-                                                }
-                                            }
-                                        });
-
-                                        var ctxOutMsgs = document.getElementById('outMsgsChart').getContext('2d');
-                                        var outMsgsData = {
-                                            labels: [
-                                                '{{ 'Generics.labels.unblockedMessages'|trans }}', '{{ 'Generics.labels.blockedMessages'|trans }}'
-                                            ],
-                                            datasets: [
-                                                {
-                                                    data: [
-            {{ data['All'].totalOutMsgCount - data['All'].totalOutMsgBlockedCount }},{{ data['All'].totalOutMsgBlockedCount }}
-                                                    ],
-                                                    backgroundColor: [
-                                                        '#36A2EB', // Blue
-                                                        '#FF6384' // Red
-                                                    ]
-                                                }
-                                            ]
-                                        };
-
-                                        var outMsgsChart = new Chart(ctxOutMsgs, {
-                                            type: 'doughnut',
-                                            data: outMsgsData,
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                legend: {
-                                                    position: 'right'
-                                                },
-                                                title: {
-                                                    display: true,
-                                                    text: '{{ 'Generics.labels.outgoingMails'|trans }}'
-                                                }
-                                            }
-                                        });
-
-                                        var data = {{ data|json_encode|raw }};
-                                                document.getElementById('domainSelect').addEventListener('change', function () {
-                                            var selectedDomain = this.value;
-                                            var domainData = data[selectedDomain];
-
-// Update the charts with the new data
-                                            msgsChart.data.datasets[0].data = [
-                                                domainData.totalMsgCount - domainData.totalMsgBlockedCount,
-                                                domainData.totalMsgBlockedCount
-                                            ];
-                                            msgsChart.update();
-
-                                            outMsgsChart.data.datasets[0].data = [domainData.totalOutMsgCount, domainData.totalOutMsgBlockedCount];
-                                            outMsgsChart.update();
-                                        });
-        </script>
-    {% endblock %}
 {% endblock %}

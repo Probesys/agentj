@@ -8,7 +8,13 @@
             </div>
 
             <p>
-                {{ 'Message.Flash.messageRestored' | trans }}
+                {{ 'Portal.Messages.restore.messageRestored' | trans }}
+            </p>
+
+            <p>
+                <a class="btn btn-primary" href="{{ path('message', { type: 'restored' }) }}">
+                    {{ 'Portal.Messages.restore.backToMessages' | trans }}
+                </a>
             </p>
         </div>
     </div>

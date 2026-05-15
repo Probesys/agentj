@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
@@ -23,8 +22,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 #[Route(path: '/groups/wblist')]
 class GroupsWblistController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     private EntityManagerInterface $em;
     private TranslatorInterface $translator;
 
@@ -72,7 +69,6 @@ class GroupsWblistController extends AbstractController
         $groupsWblist = new GroupsWblist();
 
         $form = $this->createForm(GroupsWblistType::class, null, [
-            'actions' => $this->getWBListUserActions(),
             'action' => $this->generateUrl('groups_wblist_new', ['groupId' => $groups->getId()]),
         ]);
 
@@ -102,7 +98,7 @@ class GroupsWblistController extends AbstractController
             $groupsWblist->setMailaddr($mailaddr);
 
             $groupsWblist->setGroups($groups);
-            $groupsWblist->setWb($data['wb']);
+            $groupsWblist->setWbRule($data['wbRule']);
 
             $em->persist($groupsWblist);
             $em->flush();
@@ -135,7 +131,6 @@ class GroupsWblistController extends AbstractController
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
         $form = $this->createForm(GroupsWblistType::class, null, [
-            'actions' => $this->getWBListUserActions(),
             'action' => $this->generateUrl('groups_wblist_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
         ]);
         $form->handleRequest($request);
@@ -162,7 +157,7 @@ class GroupsWblistController extends AbstractController
 
             $groupWbList->setMailaddr($mailaddr);
             $groupWbList->setGroups($group);
-            $groupWbList->setWb($data['wb']);
+            $groupWbList->setWbRule($data['wbRule']);
 
             $em->persist($groupWbList);
             $em->flush();
@@ -173,7 +168,7 @@ class GroupsWblistController extends AbstractController
             return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
         } else {
             $form->get('email')->setData($groupWbList->getMailaddr()->getEmail());
-            $form->get('wb')->setData($groupWbList->getWb());
+            $form->get('wbRule')->setData($groupWbList->getWbRule());
         }
 
         return $this->render('groups_wblist/edit.html.twig', [

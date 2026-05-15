@@ -30,6 +30,7 @@ btnSubmitTarget.disabled = true
         method: 'POST',
         headers: {
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: formData
       })

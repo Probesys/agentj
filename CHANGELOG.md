@@ -1,5 +1,236 @@
 # Changelog of AgentJ
 
+## 2026-05-07 - 2.6.0
+
+### Features
+
+- Provide full Bayes setup to learn spam ([079ff0fd](https://github.com/Probesys/agentj/commit/079ff0fd), [1d7aa4c2](https://github.com/Probesys/agentj/commit/1d7aa4c2), [b3e05c6c](https://github.com/Probesys/agentj/commit/b3e05c6c), [ecc816a1](https://github.com/Probesys/agentj/commit/ecc816a1))
+- Enforce analyze of emails from authorized senders ([355bb462](https://github.com/Probesys/agentj/commit/355bb462))
+- Add an option to disable antispoofing for outgoing emails ([688df4f3](https://github.com/Probesys/agentj/commit/688df4f3))
+- Add a command to display the content of the messages ([cb7e2ec7](https://github.com/Probesys/agentj/commit/cb7e2ec7))
+
+### Bug fixes
+
+- Fix sa-update cron ([8de5c29e](https://github.com/Probesys/agentj/commit/8de5c29e))
+
+### Maintenance
+
+- Update the dependencies ([dd41ba79](https://github.com/Probesys/agentj/commit/dd41ba79))
+- Improve the performance of sending authentication request emails ([a3bda1f6](https://github.com/Probesys/agentj/commit/a3bda1f6))
+- Tweak SpamAssassin's scores ([e56b4050](https://github.com/Probesys/agentj/commit/e56b4050))
+- Use Amavis::SpamControl::SpamAssassin instead of spamd ([5de30dad](https://github.com/Probesys/agentj/commit/5de30dad))
+- Add RBL and URIDNSBL ([dab20b66](https://github.com/Probesys/agentj/commit/dab20b66))
+- Refactor wblist actions ([c30f3075](https://github.com/Probesys/agentj/commit/c30f3075))
+- Refactor authorizing/banning a sender for a domain ([411b6aa0](https://github.com/Probesys/agentj/commit/411b6aa0))
+- Refactor authorizing/banning a sender for a recipient ([1e610e74](https://github.com/Probesys/agentj/commit/1e610e74))
+- Remove Doctrine extension DateDiff ([6b1ece8c](https://github.com/Probesys/agentj/commit/6b1ece8c))
+
+## 2026-05-07 - 2.5.3
+
+### Bug fixes
+
+- Fix switching user when connected as "simple" admin ([ab2ed40a](https://github.com/Probesys/agentj/commit/ab2ed40a))
+
+## 2026-03-18 - 2.5.2
+
+### Features
+
+- Remove limit of 10 mails in the report ([bbf00335](https://github.com/Probesys/agentj/commit/bbf00335))
+- Allow to configure Amavis autorelease frequency ([dd055740](https://github.com/Probesys/agentj/commit/dd055740))
+- Add ability to enable TLS for incoming emails ([66701aaf](https://github.com/Probesys/agentj/commit/66701aaf))
+
+### Maintenance
+
+- Add a lock on mail release ([9ba9ec5f](https://github.com/Probesys/agentj/commit/9ba9ec5f))
+
+### Bug fixes
+
+- Escape variables in report template ([b6aeee55](https://github.com/Probesys/agentj/commit/b6aeee55))
+- Store locks in database ([fcc7b1d7](https://github.com/Probesys/agentj/commit/fcc7b1d7))
+- Use `EHLO_DOMAIN` in `smtpd_banner` ([eaf35bc3](https://github.com/Probesys/agentj/commit/eaf35bc3))
+
+## 2026-03-06 - 2.5.1
+
+### Bug fixes
+
+- Fix getting messages for super-admins attached to domains ([9e42f07c](https://github.com/Probesys/agentj/commit/9e42f07c))
+- Fix plural typo about groups' domain ([d3fa5239](https://github.com/Probesys/agentj/commit/d3fa5239))
+
+## 2026-03-04 - 2.5.0
+
+### Features
+
+- Allow to include spams in the report ([affdd534](https://github.com/Probesys/agentj/commit/affdd534))
+- Remove the "support" email link from the header ([25da45f6](https://github.com/Probesys/agentj/commit/25da45f6))
+
+### Bug fixes
+
+- Release the lock of AmavisAutoRelease command ([7a0201bb](https://github.com/Probesys/agentj/commit/7a0201bb))
+
+### Maintenance
+
+- Performance improvements
+    - Consolidate status of mails ([cdc6a001](https://github.com/Probesys/agentj/commit/cdc6a001))
+    - Hint index use in mail searches ([4588bf43](https://github.com/Probesys/agentj/commit/4588bf43))
+    - Add indexes on `msgrcpt.bspam_level` and `msgs.from_addr` ([a301966a](https://github.com/Probesys/agentj/commit/a301966a))
+    - Join maddr in count search requests only when needed ([065a6caf](https://github.com/Probesys/agentj/commit/065a6caf))
+    - Optimize checking domain in countByTypeAndDays ([fed97a90](https://github.com/Probesys/agentj/commit/fed97a90))
+    - Don't convert `maddr.email` to utf8 when searching for recipients ([8773e14c](https://github.com/Probesys/agentj/commit/8773e14c))
+- Allow to disable the dashboard ([3b5ae5f4](https://github.com/Probesys/agentj/commit/3b5ae5f4))
+- Allow to disable sorting by subject ([c7d38e1f](https://github.com/Probesys/agentj/commit/c7d38e1f))
+- Update the dependencies ([f948dd47](https://github.com/Probesys/agentj/commit/f948dd47))
+- Refactor sanitizing the sort parameters ([fb1ddf1b](https://github.com/Probesys/agentj/commit/fb1ddf1b))
+- Refactor display of domain level slider ([58828b0a](https://github.com/Probesys/agentj/commit/58828b0a))
+
+### Documentation
+
+- docs: Add a screenshot to the README (531a86b5)
+
+## 2026-03-04 - 2.4.6
+
+### Bug fixes
+
+- Fix infinite redirection after clicking report link for logged-in users ([2388db6d](https://github.com/Probesys/agentj/commit/2388db6d))
+
+## 2026-02-27 - 2.4.5
+
+### Bug fixes
+
+- Fix search of messages ([d7319776](https://github.com/Probesys/agentj/commit/d7319776), [613b7532](https://github.com/Probesys/agentj/commit/613b7532), [57bc0c7a](https://github.com/Probesys/agentj/commit/57bc0c7a))
+
+## 2026-01-29 - 2.4.4
+
+### Bug fixes
+
+- Fix redirecting to the "Referer" URL ([ec585b3a](https://github.com/Probesys/agentj/commit/ec585b3a))
+
+## 2026-01-16 - 2.4.3
+
+### Bug fixes
+
+- Fix sorting messages by recipient address ([e03a9501](https://github.com/Probesys/agentj/commit/e03a9501))
+- Don't mark initial user as an alias of himself when importing from M365 ([ed4cff1e](https://github.com/Probesys/agentj/commit/ed4cff1e))
+- Fix checking proxy address when importing alias from M365 ([927adcc7](https://github.com/Probesys/agentj/commit/927adcc7))
+
+### Maintenance
+
+- Refactor creation of aliases ([f24fb50c](https://github.com/Probesys/agentj/commit/f24fb50c))
+
+## 2025-12-19 - 2.4.2
+
+### Bug fixes
+
+- Execute the `messenger:consume` command as `www-data` ([0ad0113e](https://github.com/Probesys/agentj/commit/0ad0113e))
+- Fix setting the default locale ([b428b41d](https://github.com/Probesys/agentj/commit/b428b41d))
+- Fix autorelease with a high number of untreated messages ([faccbb2c](https://github.com/Probesys/agentj/commit/faccbb2c))
+- Fix an English translation in the dashboard stats ([e9b39cdf](https://github.com/Probesys/agentj/commit/e9b39cdf))
+
+## 2025-12-18 - 2.4.1
+
+### Maintenance
+
+- Schedule the auto release of emails for users without human authentication ([63bc4ec0](https://github.com/Probesys/agentj/commit/63bc4ec0))
+- No longer release messages when sending authentication mail ([d0b72d7c](https://github.com/Probesys/agentj/commit/d0b72d7c))
+- Fix the CI failing randomly ([047c4867](https://github.com/Probesys/agentj/commit/047c4867))
+
+## 2025-12-17 - 2.4.0
+
+### Migration notes
+
+#### Persistent volumes
+
+Persistent volumes are added for the `app` container to preserve data across restarts.
+
+**Before upgrading**, backup the following directories from the running container:
+
+- Backup var/log/ directory: `docker compose cp app:/var/www/agentj/var/log ./backup-log`
+- Backup public/files/ directory: `docker compose cp app:/var/www/agentj/public/files ./backup-files` (this command may fail if the directory doesn't exist, that's normal)
+
+**After the upgrade**, the new volumes will be created automatically. Restore the backed up data:
+
+- `docker compose cp ./backup-log app:/var/www/agentj/var/log`
+- `docker compose cp ./backup-files app:/var/www/agentj/public/files`
+
+#### History retention
+
+You can now configure the number of days of history retention.
+This impacts the history of incoming/outgoing emails and logs as well.
+To change the number of days of retention, set the `HISTORY_RETENTION_DAYS` environment variable in your `.env` file.
+It defaults to 30 days, as before, so it is not required to set this value if you want to keep the existing behaviour.
+
+### Features
+
+- Improve the customisation options of the human authentication workflow
+    - Allow to customise the human authentication page stylesheet ([1818c951](https://github.com/Probesys/agentj/commit/1818c951))
+    - Use the custom domain logo on the human authentication page ([3ff4acf9](https://github.com/Probesys/agentj/commit/3ff4acf9))
+    - Redesign the human authentication page ([3fa49177](https://github.com/Probesys/agentj/commit/3fa49177))
+    - Allow to customise the human authentication footer ([0b954598](https://github.com/Probesys/agentj/commit/0b954598))
+- Allow to always display the content of mails in quarantine ([8b2f6f1b](https://github.com/Probesys/agentj/commit/8b2f6f1b))
+- Allow to change the number of days of history retention ([6fc56557](https://github.com/Probesys/agentj/commit/6fc56557))
+- Allow to select LDAP "encryption" and "version" ([54677058](https://github.com/Probesys/agentj/commit/54677058))
+- Change the domain "messages" in a "customisation" section ([fe6d0cbe](https://github.com/Probesys/agentj/commit/fe6d0cbe))
+- Allow to customise the list of messages in the report ([4fbe79a4](https://github.com/Probesys/agentj/commit/4fbe79a4))
+
+### Improvements
+
+- Extend the report token lifetime to 7 days ([a292d9c4](https://github.com/Probesys/agentj/commit/a292d9c4))
+- Improve the performance of the dashboard ([27182a9b](https://github.com/Probesys/agentj/commit/27182a9b))
+- Improve the performance of the navigation ([a4ba1284](https://github.com/Probesys/agentj/commit/a4ba1284))
+- Improve the performance of the list of messages ([6382259e](https://github.com/Probesys/agentj/commit/6382259e), [3892e0d2](https://github.com/Probesys/agentj/commit/3892e0d2), [a02a6392](https://github.com/Probesys/agentj/commit/a02a6392))
+- Improve the performance of the advanced search ([07f973a9](https://github.com/Probesys/agentj/commit/07f973a9), [19ad042e](https://github.com/Probesys/agentj/commit/19ad042e))
+- Hide the local login form when OAuth2 is enabled ([2ebba4b5](https://github.com/Probesys/agentj/commit/2ebba4b5))
+- Rename the "captcha" term into "human authentication" in the interface ([188706f8](https://github.com/Probesys/agentj/commit/188706f8))
+- Add a `URL_HUMAN_AUTHENTICATION` variable similar to `URL_CAPTCHA` ([d5eb5cc1](https://github.com/Probesys/agentj/commit/d5eb5cc1))
+
+### Bug fixes
+
+- Fix the creation of alerts ([209cd3b6](https://github.com/Probesys/agentj/commit/209cd3b6))
+- Fix the "back to user" button not showing original user after session expiration ([4ad3836f](https://github.com/Probesys/agentj/commit/4ad3836f))
+- Associate LDAP aliases to their connector ([32d0efa9](https://github.com/Probesys/agentj/commit/32d0efa9))
+- Append file extension to the uploaded filenames ([ea53f84e](https://github.com/Probesys/agentj/commit/ea53f84e))
+- Use the user locale to translate the emails ([b692ba44](https://github.com/Probesys/agentj/commit/b692ba44))
+- Fix the sender email input in the domain form ([ac56cf60](https://github.com/Probesys/agentj/commit/ac56cf60))
+
+### Administration
+
+- Add persistent Docker volumes for app data ([19f9e749](https://github.com/Probesys/agentj/commit/19f9e749))
+- Schedule synchronization of the connectors each 12 hours ([e7400add](https://github.com/Probesys/agentj/commit/e7400add))
+- Run Symfony Messenger worker with a Docker service ([cd485617](https://github.com/Probesys/agentj/commit/cd485617))
+- Send emails asynchronously with Messenger ([294476c8](https://github.com/Probesys/agentj/commit/294476c8))
+- Truncate outgoing messages in truncate-message-since-days command ([e8e28b10](https://github.com/Probesys/agentj/commit/e8e28b10))
+- Add a command to "auto release" messages ([f49c0541](https://github.com/Probesys/agentj/commit/f49c0541))
+
+### Documentation
+
+- Update the roadmap for 2026 ([4f612745](https://github.com/Probesys/agentj/commit/4f612745))
+
+### Maintenance
+
+- Install the Symfony Scheduler component ([09e7dcc2](https://github.com/Probesys/agentj/commit/09e7dcc2))
+- Create a BaseRepository for all the repositories ([c1a7bdda](https://github.com/Probesys/agentj/commit/c1a7bdda))
+- Provide a new frontend stack base ([56730428](https://github.com/Probesys/agentj/commit/56730428))
+- Display custom error page only in production ([d8ed3097](https://github.com/Probesys/agentj/commit/d8ed3097))
+- Add a lock on the synchronize connectors handler ([2999aef0](https://github.com/Probesys/agentj/commit/2999aef0))
+- Don't try to assign groups if target groups are empty ([e264830d](https://github.com/Probesys/agentj/commit/e264830d))
+- Refactor decrypting the report token ([ddfd1a90](https://github.com/Probesys/agentj/commit/ddfd1a90))
+- Fix the markup of the header ([bcd82d58](https://github.com/Probesys/agentj/commit/bcd82d58))
+- Update the default email templates ([a14d8510](https://github.com/Probesys/agentj/commit/a14d8510))
+- Extract a `HumanAuthentications` controller ([af91f841](https://github.com/Probesys/agentj/commit/af91f841))
+
+## 2025-12-15 - 2.3.4
+
+### Bug fixes
+
+- Add DKIM signature to all outgoing emails ([4fac5137](https://github.com/Probesys/agentj/commit/4fac5137))
+- Fix saving status and captcha time on human authorization ([2be8f836](https://github.com/Probesys/agentj/commit/2be8f836))
+
+## 2025-11-19 - 2.3.3
+
+### Maintenance
+
+- Upgrade to Symfony 7.3 ([bd2cc6df](https://github.com/Probesys/agentj/commit/bd2cc6df), [cf7e1bcf](https://github.com/Probesys/agentj/commit/cf7e1bcf))
+- Update the dependencies ([aa511934](https://github.com/Probesys/agentj/commit/aa511934))
+
 ## 2025-11-06 - 2.3.2
 
 ### Bug fixes

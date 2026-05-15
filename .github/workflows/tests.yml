@@ -158,6 +158,7 @@ jobs:
             sed -i "s|\$TRUSTED_PROXIES||g" .env
             sed -i "s|\$TZ|Europe/Paris|g" .env
             sed -i "s|\$DEFAULT_LOCALE|en|g" .env
+            sed -i "s|\$HISTORY_RETENTION_DAYS|30|g" .env
 
       - name: Install the dependencies
         run: |
@@ -184,6 +185,8 @@ jobs:
           sed -i "s|#UID=.*|UID=`id -u`|g" .env
           sed -i "s|#GID=.*|GID=`id -g`|g" .env
           sed -i "s|#MAILPIT_WEB_PORT=.*|MAILPIT_WEB_PORT=8025|g" .env
+          echo 'SCHEDULER_CONSOLIDATE_FREQUENCY="1 second"' >> .env
+          echo 'SCHEDULER_AUTORELEASE_FREQUENCY="1 second"' >> .env
 
       - name: Run docker-compose
         uses: hoverkraft-tech/compose-action@v2.0.1

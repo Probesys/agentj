@@ -49,6 +49,9 @@ class Domain
     #[ORM\Column(name: 'level', type: 'float', nullable: true)]
     private ?float $level = 20;
 
+    #[ORM\Column(options: ['default' => 5.0])]
+    private float $authorizedSendersSpamLevel = 5.0;
+
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
     private ?Policy $policy;
@@ -61,6 +64,15 @@ class Domain
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $confirmCaptchaMessage;
+
+    #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
+    private string $humanAuthenticationStylesheet = '';
+
+    #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
+    private string $humanAuthenticationFooter = '';
+
+    #[ORM\Column(options: ['default' => 0])]
+    private float $reportSpamLevel = 0;
 
     /**
      * @var Collection<int, Groups>
@@ -277,6 +289,42 @@ class Domain
         return $this;
     }
 
+    public function getHumanAuthenticationStylesheet(): string
+    {
+        return $this->humanAuthenticationStylesheet;
+    }
+
+    public function setHumanAuthenticationStylesheet(string $humanAuthenticationStylesheet): static
+    {
+        $this->humanAuthenticationStylesheet = $humanAuthenticationStylesheet;
+
+        return $this;
+    }
+
+    public function getHumanAuthenticationFooter(): string
+    {
+        return $this->humanAuthenticationFooter;
+    }
+
+    public function setHumanAuthenticationFooter(string $humanAuthenticationFooter): static
+    {
+        $this->humanAuthenticationFooter = $humanAuthenticationFooter;
+
+        return $this;
+    }
+
+    public function getReportSpamLevel(): ?float
+    {
+        return $this->reportSpamLevel;
+    }
+
+    public function setReportSpamLevel(float $reportSpamLevel): static
+    {
+        $this->reportSpamLevel = $reportSpamLevel;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Groups>
      */
@@ -328,6 +376,18 @@ class Domain
     public function setLevel(?float $level): self
     {
         $this->level = $level;
+
+        return $this;
+    }
+
+    public function getAuthorizedSendersSpamLevel(): float
+    {
+        return $this->authorizedSendersSpamLevel;
+    }
+
+    public function setAuthorizedSendersSpamLevel(float $authorizedSendersSpamLevel): static
+    {
+        $this->authorizedSendersSpamLevel = $authorizedSendersSpamLevel;
 
         return $this;
     }

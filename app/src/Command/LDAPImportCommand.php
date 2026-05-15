@@ -248,6 +248,7 @@ class LDAPImportCommand extends Command
         $alias = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
         if (!$alias) {
             $alias = new User();
+            $alias->setOriginConnector($this->connector);
             $this->nbAliasCreated++;
         }
 
@@ -306,7 +307,7 @@ class LDAPImportCommand extends Command
                     $group->setPriority($priorityMax);
                     $group->setOverrideUser(false);
                     $group->setDomain($this->connector->getDomain());
-                    $group->setWb("");
+                    $group->setWbRule('none');
                     $group->setOriginConnector($this->connector);
                     $isNew = true;
                     $priorityMax++;

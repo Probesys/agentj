@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\Msgs;
 use App\Entity\User;
@@ -9,6 +10,7 @@ use App\Entity\Wblist;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Asset\Packages;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -20,6 +22,9 @@ class AppExtension extends AbstractExtension
         private EntityManagerInterface $em,
         private MessageService $messageService,
         private Security $security,
+        private Packages $packages,
+        private string $uploadDirectory,
+        private string $defaultLogoFilename,
     ) {
     }
 
@@ -41,6 +46,7 @@ class AppExtension extends AbstractExtension
         return [
             new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
             new TwigFunction('get_original_user', [$this, 'getOriginalUser']),
+            new TwigFunction('domain_logo_asset', [$this, 'domainLogoAsset']),
         ];
     }
 
@@ -122,5 +128,31 @@ class AppExtension extends AbstractExtension
         }
 
         return null;
+    }
+
+    /**
+     * Returns the domain logo asset path if the domain has a logo uploaded.
+     * If not, returns the default logo asset path.
+     * If the domain is null/undefined (falsey), returns the default logo asset path.
+     */
+    public function domainLogoAsset(?Domain $domain): string
+    {
+        // default logo filename set in service.yaml
+        $defaultLogoAsset = $this->packages->getUrl('img/' . $this->defaultLogoFilename);
+
+        // if the domain is null/undefined
+        if (!$domain) {
+            return $defaultLogoAsset;
+        }
+
+        $domainLogo = $domain->getLogo();
+
+        // if the domain has no logo of the file doesn't exist
+        // default logo upload directory also set in service.yaml
+        if (!$domainLogo || !file_exists($this->uploadDirectory . $domainLogo)) {
+            return $defaultLogoAsset;
+        }
+
+        return $this->packages->getUrl('files/upload/' . $domainLogo);
     }
 }

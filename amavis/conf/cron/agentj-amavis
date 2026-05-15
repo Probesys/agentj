@@ -1,1 +1,2 @@
-0 10 * * * sleep $(($RANDOM % 25200)); /usr/bin/sa-update
+0 10 * * * root sleep $(shuf -i 0-25200 -n1); /usr/bin/sa-update
+5 * * * * root /sa-learn.sh

@@ -17,10 +17,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -32,7 +31,9 @@ class MessageController extends AbstractController
 {
     public function __construct(
         private TranslatorInterface $translator,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private Service\MessageService $messageService,
+        private Service\Referrer $referrer,
     ) {
     }
 
@@ -59,6 +60,9 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsHam'] = 'mark as ham';
+                    }
                     $messageStatus = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
@@ -99,6 +103,10 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                    }
+
                     $messageStatus = MessageStatus::UNTREATED;
                     break;
             }
@@ -109,8 +117,12 @@ class MessageController extends AbstractController
                 'Message.Actions.Banned' => 'banned',
                 'Message.Actions.Delete' => 'delete',
             ];
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+            }
+
             $subTitle = 'Entities.Message.untreated';
-            $messageStatus = null;
+            $messageStatus = MessageStatus::UNTREATED;
         }
 
         $filterForm = $this->createForm(ActionsFilterType::class, options: [
@@ -130,6 +142,11 @@ class MessageController extends AbstractController
             $sortParams = [
                 'sort' => $request->query->getString('sort'),
                 'direction' => $request->query->getString('direction'),
+            ];
+        } else {
+            $sortParams = [
+                'sort' => 'm.timeNum',
+                'direction' => 'desc',
             ];
         }
 
@@ -158,8 +175,6 @@ class MessageController extends AbstractController
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
                 'distinct' => false,
-                'defaultSortFieldName' => 'm.timeNum',
-                'defaultSortDirection' => 'desc',
             ]
         );
         return $this->render('message/index.html.twig', [
@@ -167,6 +182,23 @@ class MessageController extends AbstractController
             'messagesRecipients' => $messagesRecipients,
             'messageStatus' => $messageStatus,
             'filter_form' => $filterForm->createView()
+        ]);
+    }
+
+    #[Route(path: '/stats/counts', name: 'message_counts', methods: ['GET'])]
+    public function countAll(MsgrcptSearchRepository $msgrcptSearchRepository): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return new JsonResponse([
+            'untreated' => $msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED),
+            'spammed' => $msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED),
+            'virus' => $msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS),
+            'authorized' => $msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED),
+            'banned' => $msgrcptSearchRepository->countByType($user, MessageStatus::BANNED),
+            'deleted' => $msgrcptSearchRepository->countByType($user, MessageStatus::DELETED),
+            'restored' => $msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED),
         ]);
     }
 
@@ -190,15 +222,15 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wbListInfos = $this->em->getRepository(Wblist::class)->getWbListInfoForSender(
-            $msg->getSid()->getEmailClear(),
-            $msgRcpt->getRid()->getEmailClear(),
+        $wblists = $this->em->getRepository(Wblist::class)->findByMailAddresses(
+            $msg->getSid(),
+            $msgRcpt->getRid(),
         );
+
         return $this->render('message/show.html.twig', [
-            'controller_name' => 'MessageController',
             'msg' => $msg,
             'msgRcpt' => $msgRcpt,
-            'wblistInfo' => $wbListInfos
+            'wblists' => $wblists
         ]);
     }
 
@@ -212,7 +244,6 @@ class MessageController extends AbstractController
         int $rid,
         Request $request,
         Service\LogService $logService,
-        Service\MessageService $messageService,
     ): Response {
         $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
 
@@ -228,23 +259,18 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->delete($message, $messageRecipient)) {
+        if ($this->messageService->delete($message, $messageRecipient)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
             $logService->addLog('delete', $mailId);
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/batch/{action}', name: 'message_batch', methods: 'POST', options: ['expose' => true])]
     public function batchMessageAction(
         Request $request,
         Service\LogService $logService,
-        Service\MessageService $messageService,
         ?string $action = null,
     ): Response {
         if ($action) {
@@ -256,97 +282,84 @@ class MessageController extends AbstractController
 
                 switch ($action) {
                     case 'authorized':
-                        $messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
+                        $this->messageService->authorizeSenderForRecipient(
+                            $messageRecipient,
+                            Wblist::WBLIST_TYPE_USER,
+                        );
                         $logService->addLog('authorized batch', $mailId);
                         break;
                     case 'banned':
-                        $messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER);
+                        $this->messageService->banSenderForRecipient(
+                            $messageRecipient,
+                            Wblist::WBLIST_TYPE_USER,
+                        );
                         $logService->addLog('banned batch', $mailId);
                         break;
                     case 'delete':
-                        $messageService->delete($message, $messageRecipient);
+                        $this->messageService->delete($message, $messageRecipient);
                         $logService->addLog('delete batch', $mailId);
                         break;
                     case 'restore':
-                        $messageService->restore($message, $messageRecipient);
+                        $this->messageService->dispatchRelease($messageRecipient);
                         $logService->addLog('restore batch', $mailId);
+                        break;
+                    case 'mark as spam':
+                        $message = $messageRecipient->getMsgs();
+                        $this->messageService->markMessageAsSpam($message);
+                        $logService->addLog('marked as spam batch', $mailId);
+                        break;
+                    case 'mark as ham':
+                        $message = $messageRecipient->getMsgs();
+                        $this->messageService->markMessageAsHam($message);
+                        $logService->addLog('marked as ham batch', $mailId);
                         break;
                 }
             }
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
     public function authorized(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
-        Service\MessageService $messageService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
-
-        if (!$messageRecipient) {
-            throw $this->createNotFoundException('Message recipient does not exist');
-        }
-
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->authorize($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->authorizeSenderForRecipient(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized', $mailId);
+            $logService->addLog('authorized', $messageRecipient->getMailIdAsString());
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
     public function banned(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
-        Service\MessageService $messageService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
-
-        if (!$messageRecipient) {
-            throw $this->createNotFoundException('Message recipient does not exist');
-        }
-
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->ban($message, [$messageRecipient], Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->banSenderForRecipient(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned', $mailId);
+            $logService->addLog('banned', $messageRecipient->getMailIdAsString());
         }
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     /**
@@ -359,7 +372,6 @@ class MessageController extends AbstractController
         int $rid,
         Request $request,
         Service\LogService $logService,
-        Service\MessageService $messageService,
     ): Response {
         $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
 
@@ -375,153 +387,95 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        if ($messageService->restore($message, $messageRecipient)) {
-            $this->addFlash('success', $this->translator->trans('Message.Flash.messageRestored'));
-            $logService->addLog('restore', $mailId);
-        }
+        $this->messageService->dispatchRelease($messageRecipient);
+        $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
+        $logService->addLog('restore', $mailId);
 
-        if (!empty($request->headers->get('referer'))) {
-            return new RedirectResponse($request->headers->get('referer'));
-        } else {
-            return $this->redirectToRoute("message");
-        }
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
-        if ($this->msgsToWblistDomain($partitionTag, $mailId, "W", $rid)) {
+        $this->checkMailAccess($messageRecipient);
+
+        $result = $this->messageService->authorizeSenderForDomain(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorize for domain ', $mailId);
+            $logService->addLog('authorized for domain', $messageRecipient->getMailIdAsString());
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/bannedDomain', name: 'message_banned_domain')]
     public function bannedDomain(
-        int $partitionTag,
-        string $mailId,
-        int $rid,
+        Msgrcpt $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
-        if ($this->msgsToWblistDomain($partitionTag, $mailId, "B", $rid)) {
+        $this->checkMailAccess($messageRecipient);
+
+        $result = $this->messageService->banSenderForDomain(
+            $messageRecipient,
+            Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned for domain ', $mailId);
+            $logService->addLog('banned for domain', $messageRecipient->getMailIdAsString());
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        return new RedirectResponse($this->referrer->get());
     }
 
-    /**
-     * Create rules of domain and change the message status and type.
-     */
-    public function msgsToWblistDomain(int $partitionTag, string $mailId, string $wb, int $rid): bool
-    {
-        $em = $this->em;
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsSpam', name: 'message_mark_as_spam')]
+    public function markAsSpam(
+        Msgrcpt $messageRecipient,
+        Request $request,
+        Service\LogService $logService,
+    ): RedirectResponse {
+        $this->checkMailAccess($messageRecipient);
 
-        //select msgs and msgcpt
-        $msgs = $em->getRepository(Msgs::class)->findOneBy(['partitionTag' => $partitionTag, 'mailId' => $mailId]);
-        if (!$msgs) {
-            throw $this->createNotFoundException('The message does not exist.');
+        $message = $messageRecipient->getMsgs();
+        $result = $this->messageService->markMessageAsSpam($message);
+
+        if ($result) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsSpam'));
+            $logService->addLog('marked as spam', $message->getMailId());
         }
 
-        $msgrcpt = $em->getRepository(Msgrcpt::class)->findOneBy([
-            'partitionTag' => $partitionTag,
-            'mailId' => $mailId,
-            'rid' => $rid,
-        ]);
+        return new RedirectResponse($this->referrer->get());
+    }
 
-        $emailSender = $msgs->getSid()->getEmailClear();
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsHam', name: 'message_mark_as_ham')]
+    public function markAsHam(
+        Msgrcpt $messageRecipient,
+        Request $request,
+        Service\LogService $logService,
+    ): RedirectResponse {
+        $this->checkMailAccess($messageRecipient);
 
-        if ($emailSender === null) {
-            throw $this->createNotFoundException('Unable to retrieve the email sender');
+        $message = $messageRecipient->getMsgs();
+        $result = $this->messageService->markMessageAsHam($message);
+
+        if ($result) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsHam'));
+            $logService->addLog('marked as ham', $message->getMailId());
         }
 
-        $fromAddr = $msgs->getFromMimeAddress()?->getAddress();
-
-        $emailSenderToWb = ($fromAddr && $emailSender != $fromAddr) ? $fromAddr : $emailSender;
-
-        $emailRecipient = $msgrcpt->getRid()->getEmailClear();
-
-        if ($emailRecipient === null) {
-            throw $this->createNotFoundException('Unable to retrieve the email recipient');
-        }
-
-        $domainEmailRecipient = strtolower(substr($emailRecipient, strpos($emailRecipient, '@') + 1));
-
-        $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domainEmailRecipient]);
-        //todo check right of user connected admin of domain access
-        $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $emailSenderToWb]));
-
-        if (!$mailaddr) {
-            $mailaddr = new Mailaddr();
-            $mailaddr->setEmail($emailSenderToWb);
-            $mailaddr->setPriority(6); //priority for email by default
-            $em->persist($mailaddr);
-        }
-        $wblist = $this->em->getRepository(Wblist::class)->findOneBy((['rid' => $userDomain, 'sid' => $mailaddr]));
-        if (!$wblist) {
-            $wblist = new Wblist($userDomain, $mailaddr);
-        }
-        $wblist->setWb($wb);
-        $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
-
-        $em->persist($wblist);
-        $em->flush();
-
-        $listeMsgToRelease = $msgrcpt = $em->getRepository(Msgrcpt::class)->getAllMessageDomainRecipientsFromSender(
-            $emailSender,
-            $msgrcpt->getRid()->getDomain()
-        );
-        foreach ($listeMsgToRelease as $oneRcpt) {
-            $oneMsgRcptObj = $em->getRepository(Msgrcpt::class)->findOneBy([
-                'partitionTag' => $oneRcpt['partition_tag'],
-                'mailId' => $oneRcpt['mail_id'],
-                'rid' => $oneRcpt['rid'],
-            ]);
-            if ($wb == 'W') {
-                $process = new Process([
-                    $this->getParameter('app.amavisd-release'),
-                    $oneRcpt['quar_loc'],
-                    $oneRcpt['secret_id'],
-                    $oneRcpt['recept_mail'],
-                ]);
-                $process->getCommandLine();
-                $process->run(
-                    function ($type, $buffer) use ($oneMsgRcptObj) {
-                        $oneMsgRcptObj->setAmavisOutput($buffer);
-                    }
-                );
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                $messageStatus = MessageStatus::AUTHORIZED;
-            } else {
-                $messageStatus = MessageStatus::BANNED;
-            }
-
-            $oneMsgRcptObj->setStatus($messageStatus);
-            $em->persist($oneMsgRcptObj);
-            $em->flush();
-
-            $logService = new Service\LogService($em);
-            $logService->addLog('authorized by white list', $mailId);
-        }
-
-        $state = true;
-        $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
-        return $state;
+        return new RedirectResponse($this->referrer->get());
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
@@ -550,10 +504,6 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $mailChunks = $this->em->getRepository(Quarantine::class)->findBy([
-            'partitionTag' => $partitionTag,
-            'mailId' => $mailId,
-        ]);
         $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -566,31 +516,23 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($msgRcpt);
 
-        if (!$mailChunks) {
-            throw $this->createNotFoundException('The message does not exist.');
+        $message = $msgRcpt->getMsgs();
+
+        if (!$message->isInQuarantine()) {
+            throw $this->createNotFoundException('The message is not in quarantine.');
         }
 
-        $rawMail = "";
-        foreach ($mailChunks as $mailChunk) {
-            $rawMail .= stream_get_contents($mailChunk->getMailText(), -1, 0);
-        }
-        $rawMail = mb_convert_encoding($rawMail, 'UTF-8', 'auto');
-
-        if (!$rawMail) {
-            throw $this->createNotFoundException('The message does not exist.');
-        }
-
-        $message = Message::fromString($rawMail);
-        $subject = $message->getSubject();
+        $email = $message->getQuarantineEmail();
+        $subject = $email->getSubject();
 
         //get attachments
-        $attachments = $message->getAttachments()->filter(function ($attachment) {
+        $attachments = $email->getAttachments()->filter(function ($attachment) {
             return $attachment->disposition !== 'inline';
         });
 
-        $from = $message->getFrom();
-        $textBody = $message->getTextBody();
-        $htmlBody = $message->getHtmlBody();
+        $from = $email->getFrom();
+        $textBody = $email->getTextBody();
+        $htmlBody = $email->getHtmlBody();
 
         //Remove all script tags
         $htmlBody = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $htmlBody);
@@ -673,5 +615,32 @@ class MessageController extends AbstractController
         }
 
         return [$message, $messageRecipient];
+    }
+
+
+    #[Route(
+        path: '/{partitionTag}/{mailId}/{rseqnum}/release-status',
+        name: 'message_release_status',
+        methods: ['GET'],
+    )]
+    public function checkReleaseStatus(int $partitionTag, string $mailId, int $rseqnum): JsonResponse
+    {
+        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rseqnum' => $rseqnum,
+        ]);
+
+        if (!$messageRecipient) {
+            return new JsonResponse(['error' => 'Message recipient not found'], 404);
+        }
+
+        $this->checkMailAccess($messageRecipient);
+
+        return new JsonResponse([
+            'released' => $messageRecipient->isAlreadyReleased(),
+            'releaseStartedAt' => $messageRecipient->getAmavisReleaseStartedAt(),
+            'releaseEndedAt' => $messageRecipient->getAmavisReleaseEndedAt(),
+        ]);
     }
 }

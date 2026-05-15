@@ -1,8 +1,4 @@
-{% if logoUploaded %}
-    {% set logoPath = asset('files/upload/') ~ logoImg %}
-{% else %}
-    {% set logoPath = asset('img/') ~ logoImg %}
-{% endif %}
+{% set logoPath = domain_logo_asset(domain) %}
 
 <nav id="topnav" class="navbar navbar-expand  bg-white fixed-top">
     <a class="navbar-brand mr-1" href="#sidebar" data-turbo="false" id="toggle-sidebar">
@@ -21,12 +17,6 @@
 
     <div class="d-md-inline-block">
         <ul class="navbar-nav ml-auto ml-md-0">
-            <li class="nav-item ">
-                <a href="mailto:support@probesys.coop" class="nav-link">
-                    <i class="fas fa-ambulance text-success">&nbsp;</i>
-                </a>
-            </li>
-
             {% if locales|length > 1 %}
                 <li class="nav-item dropdown no-arrow mx-1">
                     <a data-turbo="false" class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use App\Repository\MailaddrRepository;
@@ -50,12 +51,7 @@ class Mailaddr
 
     public function getEmailClear(): string
     {
-        $email = $this->email;
-        if (is_resource($email)) {
-            $email = stream_get_contents($email, -1, 0);
-            rewind($this->email);
-        }
-        return $email;
+        return ResourceHelper::toString($this->email) ?? '';
     }
 
     public function setEmail(string $email): self

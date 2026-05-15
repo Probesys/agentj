@@ -1,0 +1,26 @@
+<div id="container-variables">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-puzzle-piece"></i>
+            <strong>{{ 'Generics.labels.variables' | trans }}</strong>
+        </div>
+
+        <div class="card-body">
+            <ul class="card-text list-unstyled" data-controller="ckeditor-variables">
+                {% for key, label in availableVariables %}
+                    <li class="mb-2">
+                        <button
+                            type="button"
+                            data-action="ckeditor-variables#insert"
+                            data-variable="[{{ key }}]"
+                            class="btn btn-light text-left insertToBody"
+                        >
+                            <i class="far fa-caret-square-left"></i>
+                            <small class="name">{{ label | trans }}</small>
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

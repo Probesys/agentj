@@ -2,9 +2,19 @@
 
 dx='docker compose exec -u www-data app'
 
+worker_status() {
+    service_id=`docker compose ps -q worker`
+
+    if [ "$service_id" != "" ]; then
+        echo `docker inspect --format "{{ .State.Health.Status }}" $service_id`
+    else
+        echo 'not started'
+    fi
+}
+
 source .env
-echo "waiting app"
-while [ "$(curl -so /dev/null -w '%{http_code}' "http://localhost:$PROXY_PORT/login")" -ne 200 ];
+echo "Waiting for the worker service to be healthy"
+while [ "`worker_status`" != "healthy" ];
 do
 	echo -n '.'
 	sleep 1
@@ -159,7 +169,7 @@ then
 	send 'in_bloc_known_virus' 'in' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"
 	send 'in_pass_known_virus' 'in' 'user@laissepasser.fr' 1 1 "--attach @tests/eicar.com.txt"
 
-	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 1 1 "--body @tests/gtube"
+	send 'in_bloc_known_spam' 'in' 'user@blocnormal.fr' 0 1 "--body @tests/gtube"
 	send 'in_pass_known_spam' 'in' 'user@laissepasser.fr' 1 1 "--body @tests/gtube"
 
 	send 'out_bloc_virus' 'out' 'user@blocnormal.fr' 0 1 "--attach @tests/eicar.com.txt"

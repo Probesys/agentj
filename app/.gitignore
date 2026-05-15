@@ -4,7 +4,10 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
+/var/*
+!/var/.keep
+/public/files/*
+!/public/files/.keep
 /vendor/
 ###< symfony/framework-bundle ###
 

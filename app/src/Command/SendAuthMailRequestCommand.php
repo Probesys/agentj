@@ -7,22 +7,19 @@ use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Repository\DomainRepository;
 use App\Repository\MsgsRepository;
+use App\Repository\UserRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LogService;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\LocaleService;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
-use Symfony\Component\Lock\Store\SemaphoreStore;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -33,114 +30,137 @@ use Symfony\Component\Mailer\MailerInterface;
     name: 'agentj:send-auth-mail-token',
     description: 'Send email with url token to validate email sender address',
 )]
-class SendAuthMailRequestCommand extends Command
+class SendAuthMailRequestCommand
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private MsgsRepository $msgsRepository,
+        private DomainRepository $domainRepository,
+        private MsgsRepository $messageRepository,
+        private UserRepository $userRepository,
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
+        private LogService $logService,
+        private LocaleService $localeService,
+        private LockFactory $lockFactory,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         public readonly string $defaultSenderAdress,
     ) {
-        parent::__construct();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $store = new SemaphoreStore();
-        $factory = new LockFactory($store);
-        $lock = $factory->createLock('msgs-send-mail-token', 1800);
+    public function __invoke(
+        OutputInterface $output,
+        #[Option('Indicates the number of days since which received emails must be analysed.')]
+        int $sinceDays = 1,
+    ): int {
+        $lock = $this->lockFactory->createLock('msgs-send-mail-token', ttl: 1800);
 
         if (!$lock->acquire()) {
             $output->writeln("Can't acquire the msgs-send-mail-token lock, the command is probably already running.");
             return Command::FAILURE;
         }
 
-        $messagesToHandle = $this->msgsRepository->searchMsgsToSendAuthRequest();
-        $userRepository = $this->em->getRepository(User::class);
+        if ($sinceDays < 0) {
+            $output->writeln('Days must be greater or equal to 0');
+            return Command::FAILURE;
+        }
+
+        $since = new \DateTimeImmutable("-{$sinceDays} days");
+        $messagesToHandle = $this->messageRepository->searchMsgsToSendAuthRequest($since);
 
         foreach ($messagesToHandle as $message) {
-            $recipientsByDomain = [];
+            // Don't send the authentication request to the mailing lists, but
+            // set the sendCaptcha attribute so the mail isn't fetched at the
+            // next call of the command.
+            if ($message->getIsMlist()) {
+                $message->setSendCaptcha(time());
+                $this->messageRepository->save($message);
+                continue;
+            }
 
-            foreach ($message->getMsgrcpts() as $msgrcpt) {
-                $maddr = $msgrcpt->getRid();
-                if (!$maddr) {
+            $requiresProcessing = false;
+            $recipientUsersByDomains = [];
+
+            foreach ($message->getMsgrcpts() as $messageRecipient) {
+                // If the status of a message recipient still requires to be
+                // processed (null or unreleased), it means that AgentJ didn't
+                // have time to consolidate its status. To put it another way:
+                // we don't know yet if the mail is authorized, a spam, or
+                // untreated. As the consolidation should be done in a few
+                // seconds, we skip the message and we will reprocess it at the
+                // next call of the command.
+                if ($messageRecipient->isStatusRequiresProcessing()) {
+                    $requiresProcessing = true;
+                    break;
+                }
+
+                // Send the mail only for untreated emails
+                if (!$messageRecipient->isUntreated()) {
                     continue;
                 }
 
-                if ($msgrcpt->getBl() === 'Y' || $msgrcpt->getWl() === 'Y') {
+                $recipient = $messageRecipient->getRid();
+                if (!$recipient) {
                     continue;
                 }
 
-                if ($msgrcpt->getStatus() !== null) {
+                $recipientUser = $this->userRepository->findOneByMailAddress($recipient);
+                if (!$recipientUser) {
                     continue;
                 }
 
-                $user = $userRepository->findOneBy([
-                    'email' => $maddr->getEmailClear()
-                ]);
-                if ($user === null) {
+                $senderEmail = $message->getFromMimeAddress()?->getAddress();
+                if (!$senderEmail) {
                     continue;
                 }
 
-                $fromAddr = $message->getFromAddr();
-                if (!$fromAddr) {
-                    continue;
-                }
-
-                $messageIsPassed = $msgrcpt->getDs() === DeliveryStatus::PASS;
-                $messageIsSpam = $msgrcpt->getBspamLevel() > $user->getDomain()->getLevel();
-
-                if ($messageIsPassed || $messageIsSpam) {
-                    continue;
-                }
-
-                $nbDaysLastSentMsgToUser = $this->msgsRepository->getDaysSinceLastRequest(
-                    $maddr->getEmailClear(),
-                    $fromAddr
+                // Send only one mail per day and per recipient to the sender.
+                $nbDaysLastSentMsgToUser = $this->messageRepository->getDaysSinceLastRequest(
+                    $recipientUser->getEmail(),
+                    $senderEmail
                 );
-
                 if ($nbDaysLastSentMsgToUser === 0) {
                     continue;
                 }
 
-                if ($user->getBypassHumanAuth() && $msgrcpt->getStatus() === null) {
-                    $this->releaseMessage($message, $msgrcpt, $user);
-                    continue;
-                }
-
-                $recipientsByDomain[$msgrcpt->getRid()->getReverseDomain()][] = $msgrcpt;
+                $recipientUsersByDomains[$recipient->getReverseDomain()][] = $recipientUser;
             }
 
-            foreach ($recipientsByDomain as $domainName => $messageRecipients) {
-                $domainRepository = $this->em->getRepository(Domain::class);
-                $domain = $domainRepository->findOneBy(['domain' => $domainName]);
+            if ($requiresProcessing) {
+                continue;
+            }
+
+            foreach ($recipientUsersByDomains as $domainName => $recipientUsers) {
+                $domain = $this->domainRepository->findOneByDomain($domainName);
+
                 if (!$domain) {
                     continue;
                 }
 
+                // Pick the first recipient in the list to use its name in the
+                // "From" header and to use his locale when building the email.
+                $recipientUser = $recipientUsers[0];
+
                 $mailFrom = $this->getMailFrom($domain);
-                $fromName = $this->getMailFromName($messageRecipients[0]);
-                $mailBody = $this->createAuthEmailContent($domain, $message, $messageRecipients);
-                $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody);
+                $fromName = $recipientUser->getFullName();
+                $locale = $this->localeService->getUserLocale($recipientUser);
+
+                $mailBody = $this->createAuthEmailContent($domain, $message, $recipientUsers, $locale);
+                $email = $this->createAuthEmail($message, $mailFrom, $fromName, $mailBody, $locale);
 
                 if ($email === null) {
                     continue;
                 }
 
                 if ($this->sendAuthEmail($message, $email)) {
-                    $logService = new LogService($this->em);
-                    $logService->addLog(
+                    $this->logService->addLog(
                         'Authentification request sent',
                         $message->getMailIdAsString(),
                         $mailBody['html_body']
                     );
-                    $subject = $this->getSubject($message);
+                    $subject = $this->getSubject($message, $locale);
                     $output->writeln(
                         date('Y-m-d H:i:s')
                         . "\t{$fromName} <{$mailFrom}>"
@@ -152,8 +172,7 @@ class SendAuthMailRequestCommand extends Command
             }
 
             $message->setSendCaptcha(time());
-            $this->em->persist($message);
-            $this->em->flush();
+            $this->messageRepository->save($message);
         }
 
         $lock->release();
@@ -162,10 +181,10 @@ class SendAuthMailRequestCommand extends Command
 
     /**
      * Create the message content for the authentication request
-     * @param Msgrcpt[] $messageRecipients
+     * @param User[] $recipientUsers
      * @return string[]
      */
-    private function createAuthEmailContent(Domain $domain, Msgs $msg, array $messageRecipients): array
+    private function createAuthEmailContent(Domain $domain, Msgs $msg, array $recipientUsers, string $locale): array
     {
         $token = $this->cryptEncryptService->encrypt(
             $msg->getMailIdAsString()
@@ -180,12 +199,12 @@ class SendAuthMailRequestCommand extends Command
         if (!empty($domain->getMailmessage())) {
             $body = $domain->getMailmessage();
         } else {
-            $body = $this->translator->trans('Message.Captcha.defaultMailContent');
+            $body = $this->translator->trans('Message.Captcha.defaultMailContent', locale: $locale);
         }
 
-        $recipientsMailAdresses = array_map(function (Msgrcpt $recipient) {
-            return $recipient->getRid()->getEmailClear();
-        }, $messageRecipients);
+        $recipientsMailAdresses = array_map(function (User $recipientUser) {
+            return $recipientUser->getEmail();
+        }, $recipientUsers);
 
         $body = str_replace('[URL_HUMAN_AUTHENTICATION]', $url, $body);
         // URL_CAPTCHA is deprecated and has been replaced by URL_HUMAN_AUTHENTICATION.
@@ -212,12 +231,12 @@ class SendAuthMailRequestCommand extends Command
     /**
      * Set the subject of the mail send captcha from original subject
      */
-    private function getSubject(Msgs $msg): string
+    private function getSubject(Msgs $msg, string $locale): string
     {
         if ($msg->getSubject()) {
             $subject = 'Re : ' . $msg->getSubject();
         } else {
-            $subject = $this->translator->trans('Message.Captcha.defaultMailSubject');
+            $subject = $this->translator->trans('Message.Captcha.defaultMailSubject', locale: $locale);
         }
         return $subject;
     }
@@ -230,11 +249,12 @@ class SendAuthMailRequestCommand extends Command
         Msgs $message,
         string $mailFrom,
         ?string $fromName,
-        array $body
+        array $body,
+        string $locale,
     ): ?Email {
         $mailTo = $message->getSid()->getEmailClear();
         try {
-            $subject = $this->getSubject($message);
+            $subject = $this->getSubject($message, $locale);
             $email = new Email();
 
             $fromAddress = $fromName ? new Address($mailFrom, $fromName) : new Address($mailFrom);
@@ -252,8 +272,7 @@ class SendAuthMailRequestCommand extends Command
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
             $message->setStatus(MessageStatus::ERROR);
-            $this->em->persist($message);
-            $this->em->flush();
+            $this->messageRepository->save($message);
             $email = null;
         }
         return $email;
@@ -272,29 +291,9 @@ class SendAuthMailRequestCommand extends Command
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
             $message->setStatus(MessageStatus::ERROR);
-            $this->em->persist($message);
-            $this->em->flush();
+            $this->messageRepository->save($message);
             return false;
         }
-    }
-
-    private function releaseMessage(Msgs $message, Msgrcpt $msgRcpt, User $user): void
-    {
-        $process = new Process([
-            $this->amavisdRelease,
-            stream_get_contents($message->getQuarLoc(), -1, 0),
-            stream_get_contents($message->getSecretId(), -1, 0),
-            $user->getEmail(),
-        ]);
-
-        $process->run(
-            function ($type, $buffer) use ($msgRcpt) {
-                $msgRcpt->setAmavisOutput($buffer);
-            }
-        );
-        $msgRcpt->setStatus(MessageStatus::AUTHORIZED);
-        $this->em->persist($msgRcpt);
-        $this->em->flush();
     }
 
     private function getMailFrom(Domain $domain): string
@@ -310,13 +309,5 @@ class SendAuthMailRequestCommand extends Command
         }
 
         return $mailFrom;
-    }
-
-    private function getMailFromName(Msgrcpt $msgrcpt): ?string
-    {
-        $userRepository = $this->em->getRepository(User::class);
-        $user = $userRepository->findOneBy(['email' => $msgrcpt->getRid()->getEmailClear()]);
-
-        return $user ? $user->getFullName() : $msgrcpt->getRid()->getEmailClear();
     }
 }

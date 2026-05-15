@@ -1,0 +1,27 @@
+{% extends 'domain/customisation/layout.html.twig' %}
+
+{% block title %}
+    {{ 'Entities.Domain.customisation.general.title' | trans({ '{{ domain }}': domain.domain }) }}
+{% endblock %}
+
+{% block customisation_body %}
+    {{ form_start(form) }}
+        {{ form_row(form.defaultLang) }}
+        {{ form_row(form.logoFile) }}
+
+        {% if domain.logo %}
+            {% set logoPath = asset('files/upload/' ~ domain.logo) %}
+            <img src="{{ logoPath }}" class="logo">
+        {% endif %}
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">
+                {{ 'Generics.actions.save' | trans }}
+            </button>
+
+            <a class="btn btn-outline-secondary" href="{{ path('domain_index') }}">
+                {{ 'Generics.actions.backToTheList' | trans }}
+            </a>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

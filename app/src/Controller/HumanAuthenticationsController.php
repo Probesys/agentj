@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Domain;
 use App\Entity\Wblist;
-use App\Form\CaptchaFormType;
+use App\Form\HumanAuthenticationType;
 use App\Repository\MsgsRepository;
 use App\Repository\WblistRepository;
 use App\Service\HumanAuthenticationService;
 use App\Service\MessageService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,8 +22,8 @@ class HumanAuthenticationsController extends AbstractController
     public function show(
         string $token,
         Request $request,
-        MsgsRepository $messageRepository,
         WblistRepository $wblistRepository,
+        MsgsRepository $messageRepository,
         MessageService $messageService,
         HumanAuthenticationService $humanAuthenticationService,
         TranslatorInterface $translator,
@@ -39,62 +41,69 @@ class HumanAuthenticationsController extends AbstractController
         $sender = $message->getSid();
         $senderEmail = $sender->getEmailClear();
 
-        // Keep only recipients that are NOT already in a wblist. This avoids,
-        // for a instance, a blocked sender to authorise himself.
-        $messageRecipients = array_filter(
-            $messageRecipients,
-            function ($recipient) use ($wblistRepository, $sender) {
-                return !$wblistRepository->isRecipientInSenderList($sender, $recipient->getRid());
-            }
-        );
-
-        if (!empty($domain->getMessage())) {
-            $content = $domain->getMessage();
-        } else {
-            $content = $translator->trans('Message.Captcha.defaultCaptchaPageContent');
-        }
-
-        $form = $this->createForm(CaptchaFormType::class, null);
+        $form = $this->createForm(HumanAuthenticationType::class, [
+            'email' => $senderEmail,
+        ]);
         $form->handleRequest($request);
 
-        $confirm = '';
+        $verified = false;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!empty($domain->getConfirmCaptchaMessage())) {
-                $confirm = $domain->getConfirmCaptchaMessage();
-            } else {
-                $confirm = $translator->trans('Message.Captcha.defaultCaptchaConfirmMsg');
-            }
-
-            $recipient = $messageRecipients[0] ?? null;
-            if ($recipient) {
-                $emailDest = $recipient->getRid()->getEmailClear();
-                $emailDest = $emailDest ? $emailDest : '';
-                $confirm = str_replace('[EMAIL_DEST]', $emailDest, $confirm);
-            }
-
             // Test if the sender is the same than the posted email field and if the mail has not been yet treated
-            if (!$message->getStatus() && $form->has('email') && $form->get('email')->getData() == $senderEmail) {
-                if ($form->has('emailEmpty') && empty($form->get('emailEmpty')->getData())) { // Test HoneyPot
-                    $messageService->authorize($message, $messageRecipients, Wblist::WBLIST_TYPE_AUTHENTICATION);
-                    $message->setValidateCaptcha(time());
-                    $messageRepository->save($message);
-                } else {
-                    $this->addFlash('error', $translator->trans('Message.Flash.checkMailUnsuccessful'));
+            if (
+                !$message->getStatus() &&
+                $form->has('email') &&
+                $form->get('email')->getData() == $senderEmail &&
+                // Test honeypot
+                $form->has('emailEmpty') &&
+                empty($form->get('emailEmpty')->getData())
+            ) {
+                // Keep only recipients that are NOT already in a wblist. This avoids,
+                // for a instance, a blocked sender to authorise himself.
+                $messageRecipients = array_filter(
+                    $messageRecipients,
+                    function ($messageRecipient) use ($wblistRepository, $sender) {
+                        $recipient = $messageRecipient->getRid();
+                        return !$wblistRepository->isSenderInRecipientList($sender, $recipient);
+                    }
+                );
+
+                foreach ($messageRecipients as $messageRecipient) {
+                    $messageService->authorizeSenderForRecipient(
+                        $messageRecipient,
+                        Wblist::WBLIST_TYPE_AUTHENTICATION,
+                    );
                 }
+
+                $message->setValidateCaptcha(time());
+                $messageRepository->save($message);
+
+                $verified = true;
             } else {
-                $this->addFlash('error', $translator->trans('Message.Flash.checkMailUnsuccessful'));
+                $error = new FormError($translator->trans('Message.Flash.checkMailUnsuccessful'));
+                $form->get('email')->addError($error);
             }
-        } else {
-            $form->get('email')->setData($senderEmail);
         }
 
         return $this->render('human_authentications/show.html.twig', [
-            'token' => $token,
-            'mailToValidate' => $senderEmail,
             'form' => $form,
-            'confirm' => $confirm,
-            'content' => $content
+            'domain' => $domain,
+            'verified' => $verified,
         ]);
+    }
+
+    #[Route(
+        path: '/portal/domains/{id}/human-authentication-stylesheet.css',
+        name: 'human_authentication_stylesheet',
+        methods: ['GET'],
+    )]
+    public function showStylesheet(Domain $domain): Response
+    {
+        $stylesheet = $domain->getHumanAuthenticationStylesheet();
+
+        $response = new Response($stylesheet);
+        $response->headers->set('Content-Type', 'text/css');
+
+        return $response;
     }
 }

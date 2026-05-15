@@ -21,12 +21,27 @@ services:
         - GID
     volumes:
       - ./app/:/var/www/agentj
+      - ./app/var:/var/www/agentj/var
+      - ./app/public/files:/var/www/agentj/public/files
+      - ./sa_learn:/var/www/agentj/sa_learn
       - ./tests/results:/tmp/test_mails
     dns: 172.28.2.5
     networks:
       default:
         ipv4_address: 172.28.2.1
     working_dir: /var/www/agentj
+
+  worker:
+    build:
+      context: app/
+      dockerfile: Dockerfile.dev
+      args:
+        - UID
+        - GID
+    volumes:
+      - ./app/:/var/www/agentj
+      - ./app/var:/var/www/agentj/var
+      - ./app/public/files:/var/www/agentj/public/files
 
   watcher:
    image: node:18-alpine
@@ -104,6 +119,8 @@ services:
 
   amavis:
     dns: 172.28.2.5
+    volumes:
+      - ./sa_learn:/sa_learn
 
   outamavis:
     dns: 172.28.2.5

@@ -29,6 +29,7 @@ export default class extends Controller {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: formData
       })
@@ -74,6 +75,7 @@ export default class extends Controller {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: formData
       })
@@ -100,6 +102,7 @@ export default class extends Controller {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: formData
       })
@@ -113,8 +116,8 @@ export default class extends Controller {
     }
 
   }
-  
-  
+
+
   showHideGroupInfoEventClick(event) {
     this.showHideGroupInfo(event.target.checked);
   }
@@ -140,7 +143,7 @@ export default class extends Controller {
   showHideBindInfoEventClick(event) {
 
     this.showHideBindInfo(event.target.checked);
-  }  
+  }
 
   showHideBindInfo(checked) {
     const divBindingInfo = this.element.querySelector('#info-binding-ldap');
@@ -158,5 +161,5 @@ export default class extends Controller {
       });
     }
     this.checkConnection();
-  }    
+  }
 }

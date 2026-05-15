@@ -2,8 +2,14 @@
 
 namespace App\Repository;
 
+use App\Amavis\DeliveryStatus;
+use App\Amavis\ContentType;
+use App\Amavis\MessageStatus;
+use App\Entity\Domain;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
+use App\Entity\User;
+use App\Util\Url;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query;
@@ -39,6 +45,57 @@ class MsgrcptRepository extends BaseRepository
     }
 
     /**
+     * Return all message recipients sent by $senderEmail to $recipientUser.
+     *
+     * @return Msgrcpt[]
+     */
+    public function findSentToUserByEmail(User $recipientUser, string $senderEmail): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mrcpt
+            FROM App\Entity\Msgrcpt mrcpt
+            JOIN mrcpt.msgs m
+            JOIN m.sid s
+            JOIN mrcpt.rid r
+            WHERE r.email = :recipientEmail
+            AND s.email = :senderEmail
+            AND mrcpt.status IS NOT NULL
+        SQL);
+
+        $query->setParameter('recipientEmail', $recipientUser->getEmail());
+        $query->setParameter('senderEmail', $senderEmail);
+
+        return $query->getResult();
+    }
+
+    /**
+     * Return all message recipients sent by $senderEmail to $recipientDomain.
+     *
+     * @return Msgrcpt[]
+     */
+    public function findSentToDomainByEmail(Domain $recipientDomain, string $senderEmail): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mrcpt
+            FROM App\Entity\Msgrcpt mrcpt
+            JOIN mrcpt.msgs m
+            JOIN m.sid s
+            JOIN mrcpt.rid r
+            WHERE r.domain = :recipientReverseDomainName
+            AND s.email = :senderEmail
+            AND mrcpt.status IS NOT NULL
+        SQL);
+
+        $domainName = $recipientDomain->getDomain();
+        $reverseDomainName = Url::reverseDomainName($domainName);
+
+        $query->setParameter('recipientReverseDomainName', $reverseDomainName);
+        $query->setParameter('senderEmail', $senderEmail);
+
+        return $query->getResult();
+    }
+
+    /**
      * Update the status of a message for one recipient
      */
     public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
@@ -65,31 +122,6 @@ class MsgrcptRepository extends BaseRepository
         ]);
     }
 
-    /**
-     * Get all message from emailSender and rid of receipt with status is null and not clean (content != C)
-     * @todo chercher le content = spammy et le rajouter dans le where !=
-     * @return array<array<string, mixed>>
-     */
-    public function getAllMessageDomainRecipientsFromSender(string $emailSender, string $domain): array
-    {
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = <<<SQL
-            SELECT m.*, mr.email as recept_mail, ms.email as sender_email,msr.rid FROM msgs m
-            LEFT JOIN msgrcpt msr ON m.mail_id = msr.mail_id
-            LEFT JOIN maddr ms ON ms.id = m.sid
-            LEFT JOIN maddr mr ON mr.id = msr.rid
-            WHERE m.content != "C"
-            AND msr.content != "C"
-            AND msr.status_id IS NULL
-            AND mr.domain = :domain
-            AND ms.email = :emailSender
-        SQL;
-        $stmt = $conn->prepare($sql);
-        $stmt->bindValue('domain', $domain);
-        $stmt->bindValue('emailSender', $emailSender);
-        return $stmt->executeQuery()->fetchAllAssociative();
-    }
-
     public function findByEmailRecipient(string $email): Query
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
@@ -104,5 +136,40 @@ class MsgrcptRepository extends BaseRepository
         $query->setParameter('email', $email);
 
         return $query;
+    }
+
+    public function consolidateStatus(): int
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        // phpcs:disable Generic.Files.LineLength
+        $statement = $connection->prepare(<<<SQL
+            UPDATE msgrcpt mr
+            INNER JOIN maddr ma ON (mr.rid = ma.id)
+            INNER JOIN users u ON (ma.email = u.email)
+            INNER JOIN domain d ON (u.domain_id = d.id)
+            SET status_id = CASE
+                WHEN mr.ds = :ds_pass AND mr.wl = 'Y' THEN :status_authorized
+                WHEN mr.ds = :ds_pass AND mr.wl != 'Y' THEN :status_restored
+                WHEN mr.ds != :ds_pass AND mr.content = :content_virus THEN :status_virus
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl = 'Y' THEN :status_banned
+                WHEN mr.ds != :ds_pass AND mr.content != :content_virus AND mr.bl != 'Y'  THEN :status_unreleased
+                ELSE NULL
+            END
+            WHERE status_id IS NULL
+        SQL);
+        // phpcs:enable Generic.Files.LineLength
+
+        $statement->bindValue('ds_pass', DeliveryStatus::PASS);
+        $statement->bindValue('content_virus', ContentType::VIRUS);
+        $statement->bindValue('status_authorized', MessageStatus::AUTHORIZED);
+        $statement->bindValue('status_restored', MessageStatus::RESTORED);
+        $statement->bindValue('status_virus', MessageStatus::VIRUS);
+        $statement->bindValue('status_banned', MessageStatus::BANNED);
+        $statement->bindValue('status_unreleased', MessageStatus::UNRELEASED);
+
+        $result = $statement->execute();
+
+        return $result->rowCount();
     }
 }

@@ -7,15 +7,15 @@
   {% set _title = 'Entities.Group.labels.grouprules'|trans ~ ' : ' ~ groups.name %}
   {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-    {% block content_button_actions %} 
+    {% block content_button_actions %}
       <a href="#" data-url-modal-content="{{ path('groups_edit',{'id':groups.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
       <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('groups_wblist_new',{'groupId':groups.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
         <i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.addRule'|trans() }}
       </a>
 
-    {% endblock %}          
+    {% endblock %}
 
-  {% endembed %}  
+  {% endembed %}
 
 
   <div class="col bg-white">
@@ -40,34 +40,33 @@
           {% for groups_wblist in groups_wblists %}
             {% set email = groups_wblist.getMailaddr().email %}
             {% if  email != "@." %}
-              <tr>  
+              <tr>
                 {#          <td><input type="checkbox"></td>#}
                 <td data-title="{{'Generics.fields.sender'|trans }}">{{email}}</td>
                 <td data-title="{{'Entities.Group.labels.rules'|trans }}">
-                  {%  set WBLabel = 'Entities.Domain.rulesValues.'~groups_wblist.wb %}
-                  {{ WBLabel|trans }}
+                  {{ groups_wblist.wbRuleName | trans }}
                 </td>
                 <td>
                   <ul class="list-inline list-unstyled">
                     <li class="list-inline-item">
-                      <a href="#" 
-                         data-modal-method-type="GET" data-url-modal-content="{{ path('groups_wblist_edit',{'sid':groups_wblist.mailaddr.id,'groupId':groups_wblist.groups.id,}) }}" 
+                      <a href="#"
+                         data-modal-method-type="GET" data-url-modal-content="{{ path('groups_wblist_edit',{'sid':groups_wblist.mailaddr.id,'groupId':groups_wblist.groups.id,}) }}"
                          class='btn-open-modal btn btn-sm btn-success ' title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}">
                         <i class="fas fa-edit  d-none d-md-block d-lg-none"></i>
                         <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Updated'|trans() }}</span>
                       </a>
-                    </li>              
+                    </li>
                     <li class="list-inline-item">
-                      <a href="{{ path('groups_wblist_delete',{'groupId':groups_wblist.groups.id,'sid':groups_wblist.mailaddr.id}) }}" class='btn btn-sm btn-danger confirmModal' 
-                         data-target='delete' 
-                         data-dialog-title='{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}' 
-                         data-dialog-content='{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}'                     
+                      <a href="{{ path('groups_wblist_delete',{'groupId':groups_wblist.groups.id,'sid':groups_wblist.mailaddr.id}) }}" class='btn btn-sm btn-danger confirmModal'
+                         data-target='delete'
+                         data-dialog-title='{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}'
+                         data-dialog-content='{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}'
                          title="{{ 'Entities.Group.Actions.deleteRule'|trans() }}">
                         <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
                         <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.deleteRule'|trans() }}</span>
                       </a>
                     </li>
-                  </ul>    
+                  </ul>
                 </td>
               </tr>
             {% endif %}
@@ -79,9 +78,9 @@
     <div class="d-flex justify-content-center">
       <a class="btn btn-outline-secondary"  href="{{ path('groups_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
 
-    </div>  
+    </div>
 
-    {% include 'alertsPopup.html.twig' %}        
+    {% include 'alertsPopup.html.twig' %}
 
 
   {% endblock %}

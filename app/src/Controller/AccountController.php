@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserPreferencesType;
@@ -12,15 +11,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AccountController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     public function __construct(
         private EntityManagerInterface $em,
-        private TranslatorInterface $translator,
     ) {
     }
 
@@ -38,33 +33,14 @@ class AccountController extends AbstractController
             $this->em->flush();
         }
 
-        $wbDomain = $this->em->getRepository(Wblist::class)->getDefaultDomainWBList($user->getDomain());
-        $domainDefaulWb = array_keys(array_filter(
-            $this->getWBListDomainActions(),
-            function ($item) use ($wbDomain) {
-                return $item == $wbDomain;
-            }
-        ))[0];
+        $domainWblist = $this->em->getRepository(Wblist::class)->getDefaultDomainWBList($user->getDomain());
 
-        $groupDefaulWb = null;
-        if ($user->getGroups() && count($user->getGroups()) > 0) {
-            $defaultGroup = $groupsRepository->getMainUserGroup($user);
-            if ($defaultGroup) {
-                $wbGroup = $defaultGroup->getWb();
-                $groupDefaulWb = array_keys(array_filter(
-                    $this->getWBListUserActions(),
-                    function ($item) use ($wbGroup) {
-                        return $item == $wbGroup;
-                    }
-                ))[0];
-            }
-        }
+        $defaultGroup = $groupsRepository->getMainUserGroup($user);
 
         return $this->render('account/index.html.twig', [
-            'controller_name' => 'AccountController',
-            'domainDefaulWb' => $domainDefaulWb,
-            'groupDefaulWb' => $groupDefaulWb,
-            'form' => $form->createView(),
+            'form' => $form,
+            'domainWblist' => $domainWblist,
+            'defaultGroup' => $defaultGroup,
         ]);
     }
 }

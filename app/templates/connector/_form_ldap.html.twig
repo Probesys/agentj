@@ -34,6 +34,26 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="ldap_connector_ldapEncryption">
+                    {{ 'Entities.LdapConnector.fields.ldapEncryption'|trans }}
+                </label>
+                {{ form_widget(form.ldapEncryption) }}
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="ldap_connector_ldapVersion">
+                    {{ 'Entities.LdapConnector.fields.ldapVersion'|trans }}
+                </label>
+                {{ form_widget(form.ldapVersion) }}
+            </div>
+        </div>
+    </div>
+
     <fieldset>
         <legend>
             {{ 'Entities.LdapConnector.fields.connectionInformation' | trans }}

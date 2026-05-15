@@ -1,4 +1,4 @@
-smtpd_banner = $myhostname AgentJ ESMTP (libre antispam system)
+smtpd_banner = $EHLO_DOMAIN AgentJ ESMTP (libre antispam system)
 biff = no
 smtp_host_lookup = dns, native
 message_size_limit = 40960000

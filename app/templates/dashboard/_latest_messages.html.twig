@@ -1,0 +1,75 @@
+<h2 class="mx-2">{{ 'Generics.labels.previewLatestMessages'|trans }}</h2>
+<div class="table-responsive">
+	<table id="table_msgs" class="table table-hover">
+		<thead>
+			<tr>
+				{% if is_granted('ROLE_ADMIN') %}
+					<th class="bg-transparent"></th>
+				{% endif %}
+				{% if is_granted('ROLE_ADMIN') %}
+					<th class="bg-transparent">{{ 'Message.Recipient'|trans }}</th>
+				{% endif %}
+				<th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
+				<th class="bg-transparent">{{ 'Message.Sender'|trans }}</th>
+				<th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
+				<th class="bg-transparent">{{ 'Entities.Message.spamLevel'|trans }}</th>
+				<th class="bg-transparent"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for messageRecipient in latestMessageRecipients %}
+				{% set error_badge = "" %}
+				{% set error_badge_detail = "" %}
+				{% if messageRecipient.isError() %}
+					{% set error_badge = 'Message.ErrorSendCaptcha' %}
+					{% set error_badge_detail = messageRecipient.messageError %}
+				{% endif %}
+				{% set keyPairMessage =  [messageRecipient.partitionTag, messageRecipient.mailId,messageRecipient.rid] %}
+				<tr>
+					{% if is_granted('ROLE_ADMIN') %}
+						<td>
+							<span title="{{ messageRecipient.getMailIdAsString() }}">{{ messageRecipient.getMailIdAsString() }}</span>
+						</td>
+					{% endif %}
+					{% if is_granted('ROLE_ADMIN') %}
+						<td data-title="{{'Message.Recipient'|trans }}">
+							<span title="{{messageRecipient.rid.getEmailClear()}}">{{messageRecipient.rid.getEmailClear()}}</span>
+						</td>
+					{% endif %}
+					<td data-title="{{'Message.Object'|trans }}">
+						<span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{messageRecipient.msgs.subject|replace({'_':' '})}}">{{messageRecipient.msgs.subject|slice(0,30)|replace({'_':' '})}}</span>
+					</td>
+					<td data-title="{{'Message.Sender'|trans }}">
+						{% if messageRecipient.msgs.fromAddr | length > 35 %}
+							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.msgs.fromAddr }}">
+								{% for senderSplit in messageRecipient.msgs.fromAddr |split('<') %}
+									{% if (senderSplit | length > 35) and ('@' in senderSplit ) %}
+										{% set email = senderSplit |split('@') %}
+										{{ email.0 }}<br/>@{{ email.1 |replace({'>':''})}}
+									{% else %}
+										{{ senderSplit|replace({'>':''}) }}
+									{% endif %}
+								{% endfor %}
+							</span>
+						{% else %}
+							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.msgs.fromAddr }}">{{  messageRecipient.msgs.fromAddr }}</span>
+						{% endif %}
+						{% if error_badge %}
+							<span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
+						{% endif %}
+					</td>
+					<td data-title="{{'Message.Date'|trans }}">
+						<span title="{{'Message.Date'|trans ~ ' : ' ~ messageRecipient.msgs.timeNum | format_datetime('short', 'short') }}">{{messageRecipient.msgs.timeNum | format_datetime('short', 'short')}}</span>
+					</td>
+					<td>{{ messageRecipient.bspamLevel }}</td>
+					<td>
+						{% set href = messageRecipient.isUntreated ? '/message' : '/message/'  %}
+						<a href="{{ href }}" class="btn btn-primary float-right">
+							<i class="fas fa-link"></i>
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

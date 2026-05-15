@@ -36,6 +36,16 @@ $ docker compose up
 
 You can then access the web interface to configure your email domain.
 
+## Optional: Run several workers
+
+If the application starts to struggle with processing the asynchronous tasks (e.g. releasing Amavis messages or sending emails), you can run more workers in parallel using this command:
+
+```console
+$ docker compose up -d --scale worker=X
+```
+
+Where `X` is the number of workers to run.
+
 ## Upgrade
 
 > [!IMPORTANT]

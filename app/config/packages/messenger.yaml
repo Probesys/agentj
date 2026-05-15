@@ -5,16 +5,15 @@ framework:
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+            sync: 'sync://'
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
-            'App\Message\CreateAlertMessage': async
-            'App\Message\SynchronizeConnectors': async
+            'App\Message\*': async
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
 
 # when@test:
 #    framework:

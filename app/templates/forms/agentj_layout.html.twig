@@ -1,0 +1,82 @@
+{% use "form_div_layout.html.twig" %}
+
+{%- block submit_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('button--primary'))|trim}) -%}
+    {{- parent() -}}
+{%- endblock submit_widget %}
+
+{% block form_help -%}
+    {%- if help is not empty -%}
+        {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' text--secondary text--small')|trim}) -%}
+        <p id="{{ id ~ '_help' }}"{% with { attr: help_attr } %}{{ block('attributes') }}{% endwith %}>
+            {{- block('form_help_content') -}}
+        </p>
+    {%- endif -%}
+{%- endblock form_help %}
+
+{%- block form_row -%}
+    {%- if compound is defined and compound and label is not same as(false) -%}
+        {%- set element = 'fieldset' -%}
+    {%- endif -%}
+    {%- set row_class = row_class|default(row_attr.class|default('flow flow--small')|trim) -%}
+    {%- set row_attr = row_attr|merge({class: row_class}) -%}
+
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
+    {%- endif -%}
+
+    <{{ element|default('div') }}{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_help(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_errors(form) -}}
+    </{{ element|default('div') }}>
+{%- endblock form_row %}
+
+{%- block form_errors -%}
+    {%- if errors|length == 1 -%}
+        <p class="form__error" role="alert" id="{{ id ~ '_error' }}">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="sr-only">{{ 'Form.Error' | trans }}</span>
+            {{ errors[0].message }}
+        </p>
+    {%- elseif errors|length > 1 -%}
+        <div class="form__error" role="alert" id="{{ id ~ '_error' }}">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="sr-only">{{ 'Form.Error' | trans }}</span>
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error.message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
+{%- block widget_attributes -%}
+    {%- if not valid %}
+        {% set attr = attr|merge({'aria-invalid': 'true', 'aria-errormessage': id ~ '_error'}) %}
+    {% endif -%}
+    {{ parent() }}
+{%- endblock widget_attributes -%}
+
+{%- block form_label -%}
+    {% if label is not same as(false) -%}
+        {%- set parent_label_class = parent_label_class|default(label_attr.class|default('')) -%}
+        {%- if compound is defined and compound -%}
+            {%- set element = 'legend' -%}
+        {%- else -%}
+            {%- set row_class = row_class|default(row_attr.class|default('')) -%}
+            {%- set label_attr = label_attr|merge({for: id}) -%}
+        {%- endif -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_label %}
+
+{%- block form_widget_compound -%}
+    {%- if form is rootform -%}
+        {%- set attr = attr|merge({class: (attr.class|default('flow'))|trim}) -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_compound -%}

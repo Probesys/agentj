@@ -1,6 +1,97 @@
-# spoofing + phishing campaigns are getting more and more frequent:
-# score spf softfail and spf fail more severely. +1.5 when no learning,
-# +1 when learning. Parens denote a relative increase.
-score SPF_SOFTFAIL (0) (0.528) (0) (0.335)
-score SPF_FAIL     (0) (0.581) (0) (0.999)
+# Configure bayesian plugin
+use_bayes 1
+bayes_auto_learn 1
+use_bayes_rules 1
 
+# Store bayesian data in MySQL
+bayes_store_module Mail::SpamAssassin::BayesStore::MySQL
+bayes_sql_dsn      DBI:mysql:$DB_USER:$DB_HOST:$DB_NAME
+
+bayes_sql_username $DB_USER
+bayes_sql_password $DB_PASSWORD
+
+# SPF
+
+score SPF_SOFTFAIL 0 1.0 0 1.0
+score SPF_FAIL     0 3.0 0 3.0
+
+# DKIM
+
+score DKIM_INVALID 0 1.5 0 1.5
+
+# RBL
+
+score RCVD_IN_MSPIKE_ZBI 0 2.7   0 2.7
+score RCVD_IN_MSPIKE_L5  0 2.5   0 2.5
+score RCVD_IN_MSPIKE_L4  0 1.7   0 1.7
+score RCVD_IN_MSPIKE_L3  0 0.9   0 0.9
+score RCVD_IN_MSPIKE_H2  0 -0.01 0 -0.01
+score RCVD_IN_MSPIKE_H3  0 -0.01 0 -0.01
+score RCVD_IN_MSPIKE_H4  0 -0.01 0 -0.01
+score RCVD_IN_MSPIKE_H5  0 -1.0  0 -1.0
+score RCVD_IN_MSPIKE_BL  0 0.01  0 0.01
+score RCVD_IN_MSPIKE_WL  0 -0.01 0 -0.01
+
+header RCVD_IN_SEMBACKSCATTER eval:check_rbl('sembackscatter-lastexternal', 'backscatter.spameatingmonkey.net')
+tflags RCVD_IN_SEMBACKSCATTER net
+describe RCVD_IN_SEMBACKSCATTER Received from an IP listed by SEM-BACKSCATTER
+score RCVD_IN_SEMBACKSCATTER 0.5
+
+header RCVD_IN_SEMBLACK eval:check_rbl('semblack-lastexternal', 'bl.spameatingmonkey.net')
+tflags RCVD_IN_SEMBLACK net
+describe RCVD_IN_SEMBLACK Received from an IP listed by SEM-BLACK
+score RCVD_IN_SEMBLACK 0.5
+
+header RCVD_IN_SEMNETBLACK eval:check_rbl('semnetblack-lastexternal', 'netbl.spameatingmonkey.net')
+tflags RCVD_IN_SEMNETBLACK net
+describe RCVD_IN_SEMNETBLACK Received from an IP listed by SEM-NETBLACK
+score RCVD_IN_SEMNETBLACK 0.5
+
+header RCVD_IN_0SPAM eval:check_rbl('0spam-rbl', 'rbl.0spam.org')
+describe RCVD_IN_0SPAM Received from an IP listed by 0SPAM
+tflags RCVD_IN_0SPAM net
+score RCVD_IN_0SPAM 0.5
+
+header RCVD_IN_ANONMAILS eval:check_rbl('anonmails-lastexternal', 'spam.dnsbl.anonmails.de.')
+describe RCVD_IN_ANONMAILS Received from an IP listed by spam.dnsbl.anonmails.de
+tflags RCVD_IN_ANONMAILS net
+score RCVD_IN_ANONMAILS 0.5
+
+header RCVD_IN_BRBL_LASTEXT eval:check_rbl('brbl-lastexternal','bb.barracudacentral.org')
+describe RCVD_IN_BRBL_LASTEXT Received from an IP listed by BRBL LASTEXT
+tflags RCVD_IN_BRBL_LASTEXT net
+score RCVD_IN_BRBL_LASTEXT 0.5
+
+header RCVD_IN_BLOCKLISTDE eval:check_rbl_txt('blocklistde', 'bl.blocklist.de.')
+describe RCVD_IN_BLOCKLISTDE Received from an IP listed by BLOCKLISTDE
+tflags RCVD_IN_BLOCKLISTDE net
+score RCVD_IN_BLOCKLISTDE 0.5
+
+header RCVD_IN_GBUDB eval:check_rbl('gbudb', 'truncate.gbudb.net.', '127.0.0.2')
+describe RCVD_IN_GBUDB Listed in truncate.gbudb.net
+tflags RCVD_IN_GBUDB net
+score RCVD_IN_GBUDB 0.5
+
+header RCVD_IN_SPAMRATS_ALL eval:check_rbl('spamratsall-lastexternal','all.spamrats.com.')
+describe RCVD_IN_SPAMRATS_ALL Sender listed in spamratsall
+tflags RCVD_IN_SPAMRATS_ALL net
+score RCVD_IN_SPAMRATS_ALL 0.5
+
+header RCVD_IN_PSBL eval:check_rbl('psbl-lastexternal','psbl.surriel.com.')
+describe RCVD_IN_PSBL Received via a relay in PSBL (psbl.surriel.com)
+tflags RCVD_IN_PSBL net
+score RCVD_IN_PSBL 0.5
+
+# URIBL
+
+urirhssub SEM_FRESH30 fresh30.spameatingmonkey.net. A 2
+body SEM_FRESH30 eval:check_uridnsbl('SEM_FRESH30')
+describe SEM_FRESH30 Contains a domain registered less than 30 days ago
+tflags SEM_FRESH30 net
+score SEM_FRESH30 0.5
+
+urirhssub SEM_URI uribl.spameatingmonkey.net. A 2
+body SEM_URI eval:check_uridnsbl('SEM_URI')
+describe SEM_URI Contains a URI listed by SEM-URI
+tflags SEM_URI net
+score SEM_URI 0.5

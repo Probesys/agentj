@@ -13,12 +13,12 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class GroupsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $actions = $options['actions'];
         $user = $options['user'];
 
         $builder
@@ -37,10 +37,13 @@ class GroupsType extends AbstractType
                 'required' => true,
                 'placeholder' => 'Generics.actions.choosePolicy'
             ])
-            ->add('wb', ChoiceType::class, [
-                'choices' => $actions,
-                'label' => 'Form.PolicyDomain',
-                'required' => false
+            ->add('wbRule', ChoiceType::class, [
+                'choices' => ['none', 'block', 'allow'],
+                'choice_label' => function (string $choice): TranslatableMessage {
+                    return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                },
+                'label' => 'Entities.WBList.fields.wbRule',
+                'required' => true,
             ])
             ->add('priority', NumberType::class, [
                 'label' => 'Generics.fields.priority',
@@ -93,7 +96,6 @@ class GroupsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Groups::class,
-            'actions' => null,
             'user' => null,
         ]);
     }

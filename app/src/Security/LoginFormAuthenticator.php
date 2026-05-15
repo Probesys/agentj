@@ -164,18 +164,6 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        /** @var User $user */
-        $user = $token->getUser();
-
-        if ($user->getDomain() && $user->getDomain()->getDefaultLang()) {
-            $request->getSession()->set('_locale', $user->getDomain()->getDefaultLang());
-        }
-
-
-        if ($user->getPreferedLang()) {
-            $request->getSession()->set('_locale', $user->getPreferedLang());
-        }
-
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }

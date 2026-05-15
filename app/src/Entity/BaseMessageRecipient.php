@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 
 #[ORM\MappedSuperclass]
+#[ORM\Index(name: 'msgrcpt_content_idx', columns: ['content'])]
+#[ORM\Index(name: 'msgrcpt_ds_status_idx', columns: ['ds', 'status_id'])]
+#[ORM\Index(name: 'msgrcpt_bl_status_idx', columns: ['bl', 'status_id'])]
+#[ORM\Index(name: 'msgrcpt_status_content_idx', columns: ['status_id', 'content'])]
+#[ORM\Index(name: 'msgrcpt_filter_idx', columns: ['rid','bspam_level', 'ds', 'bl','content','status_id'])]
 class BaseMessageRecipient
 {
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
@@ -74,12 +81,7 @@ class BaseMessageRecipient
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getRseqnum(): ?int
@@ -171,6 +173,11 @@ class BaseMessageRecipient
         return $this;
     }
 
+    public function isSpamAtLevel(float $level): bool
+    {
+        return $this->getBspamLevel() > $level;
+    }
+
     public function getSmtpResp(): string
     {
         return $this->smtpResp;
@@ -236,6 +243,14 @@ class BaseMessageRecipient
         return $this;
     }
 
+    /**
+     * Return true if the status needs to be consolidated, or if the mail
+     * hasn't be processed by the autorelease process (aka "unreleased").
+     */
+    public function isStatusRequiresProcessing(): bool
+    {
+        return $this->status === null || $this->status === MessageStatus::UNRELEASED;
+    }
 
     public function isUntreated(): bool
     {
@@ -275,5 +290,12 @@ class BaseMessageRecipient
     public function isVirus(): bool
     {
         return $this->status === MessageStatus::VIRUS;
+    }
+
+    public function isAlreadyReleased(): bool
+    {
+        return $this->getDs() === DeliveryStatus::PASS
+            || $this->getStatus() === MessageStatus::AUTHORIZED
+            || $this->getStatus() === MessageStatus::RESTORED;
     }
 }

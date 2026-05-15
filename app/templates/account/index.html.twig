@@ -87,10 +87,10 @@
                 <div class="tab-pane fade" id="account-rules" role="tabpanel" aria-labelledby="account-rules-tab">
                     <div class="row">
                         <div class="col-md-4">
-                            {{ 'Entities.User.labels.defaultDomainParameters'|trans() }}
+                            {{ 'Entities.User.labels.domainSetting' | trans }}
                         </div>
                         <div class="col-md-8">
-                            {{ domainDefaulWb }}
+                            {{ domainWblist.wbRuleName | trans }}
                         </div>
                     </div>
                     <div class="row">
@@ -101,13 +101,14 @@
                             {{ app.user.policy|trans() }}
                         </div>
                     </div>
-                    {% if app.user.groups and groupDefaulWb is not null %}
+
+                    {% if defaultGroup %}
                         <div class="row">
                             <div class="col-md-4">
-                                Paramètre par défaut du groupe
+                                {{ 'Entities.User.labels.defaultGroupSetting' | trans }}
                             </div>
                             <div class="col-md-8">
-                                {{ groupDefaulWb }}
+                                {{ defaultGroup.wbRuleName | trans }}
                             </div>
                         </div>
                     {% endif %}

@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
 use Doctrine\DBAL\Types\Types;
 use App\Entity\Maddr;
 
 #[ORM\MappedSuperclass]
+#[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
+#[ORM\Index(name: 'msg_subject_fulltext_idx', columns: ['subject'], flags: ['fulltext'])]
 class BaseMessage
 {
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
@@ -105,9 +108,9 @@ class BaseMessage
         return $this->partitionTag;
     }
 
-    public function getSecretId(): mixed
+    public function getSecretId(): ?string
     {
-        return $this->secretId;
+        return ResourceHelper::toString($this->secretId);
     }
 
     public function setSecretId(mixed $secretId): self
@@ -225,9 +228,9 @@ class BaseMessage
         return $this;
     }
 
-    public function getQuarLoc(): mixed
+    public function getQuarLoc(): ?string
     {
-        return $this->quarLoc;
+        return ResourceHelper::toString($this->quarLoc);
     }
 
     public function setQuarLoc(mixed $quarLoc): self
@@ -330,6 +333,35 @@ class BaseMessage
         return $this;
     }
 
+    /**
+     * Return either the envelope sender address, or the "From" header address
+     * if it exists.
+     *
+     * This method is used to get the address to authorize or ban. However,
+     * please note that Amavis looks exclusively the envelope sender address
+     * when allowing/blocking an email. Said otherwise, if both envelope
+     * address and "From" address are different, the future emails sent with
+     * the envelop address will not be automatically allowed (nor blocked). It
+     * is a known drawback of the authorizing/banning mechanism.
+     *
+     * Luckily, it is still possible to authorize/ban an email again manually.
+     *
+     * A better idea may be to authorize/ban both addresses though.
+     */
+    public function getSenderEmail(): ?string
+    {
+        $sender = $this->getSid();
+
+        $senderEmail = $sender->getEmailClear();
+        $fromEmail = $this->getFromMimeAddress()?->getAddress();
+
+        if ($fromEmail && $senderEmail !== $fromEmail) {
+            return $fromEmail;
+        } else {
+            return $senderEmail;
+        }
+    }
+
     public function getStatus(): ?int
     {
         return $this->status;
@@ -342,19 +374,14 @@ class BaseMessage
         return $this;
     }
 
-    public function getMailId(): mixed
+    public function getMailId(): string
     {
-        return $this->mailId;
+        return $this->getMailIdAsString();
     }
 
     public function getMailIdAsString(): string
     {
-        $strMailId = $this->mailId;
-        if (is_resource($strMailId)) {
-            $strMailId = stream_get_contents($this->mailId, -1, 0);
-            rewind($this->mailId);
-        }
-        return $strMailId;
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getSendCaptcha(): ?int

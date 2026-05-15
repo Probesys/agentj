@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
@@ -28,8 +27,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/groups')]
 class GroupsController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator)
     {
     }
@@ -61,13 +58,11 @@ class GroupsController extends AbstractController
         $group = new Groups();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-                'actions' => $this->getWBListUserActions(),
                 'action' => $this->generateUrl('groups_new'),
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
             $form = $this->createForm(GroupsType::class, $group, [
-                'actions' => $this->getWBListUserActions(),
                 'user' => $this->getUser(),
                 'action' => $this->generateUrl('groups_new'),
             ]);
@@ -122,13 +117,11 @@ class GroupsController extends AbstractController
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupsType::class, $group, [
-                'actions' => $this->getWBListUserActions(),
                 'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
             $form = $this->createForm(GroupsType::class, $group, [
-                'actions' => $this->getWBListUserActions(),
                 'user' => $this->getUser(),
                 'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']

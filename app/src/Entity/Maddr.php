@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use App\Repository\MaddrRepository;
+use App\Util\Url;
 
 /**
  * Maddr
@@ -82,8 +83,7 @@ class Maddr
      */
     public function getReverseDomain(): string
     {
-        $parts = explode('.', $this->domain);
-        return implode('.', array_reverse($parts));
+        return Url::reverseDomainName($this->domain);
     }
 
     public function setDomain(string $domain): self

@@ -195,6 +195,8 @@ Navigation:
     title: Imports
     users: Email/users
     whiteliste: "White list"
+  poweredBy: "Powered by Agentj"
+  sourceCode: "Source code"
 Config:
   title: Configuration
   labels:
@@ -231,6 +233,8 @@ Message:
     DeleteMessage: "Delete the message"
     Restore: Recover
     RestoreMessage: "Recover the message"
+    MarkAsHam: "Mark as ham"
+    MarkAsSpam: "Mark as spam"
     ipAddressInvalid: "Invalid IP address."
     ipAddressDuplicated: "This IP address is already in the list."
     massiveActionContent:
@@ -280,9 +284,13 @@ Message:
     ruleExists: "This rule already exists!"
     messageDeleted: "Message deleted successfully"
     messageRestored: "Message successfully recovered"
+    messageMarkedAsHam: "Message successfully marked as ham"
+    messageMarkedAsSpam: "Message successfully marked as spam"
+    saved: "Changes have been saved."
+    messagePendingRelease: "The message will be delivered in a few moments."
     senderAuthorized: "The address is now authorized"
     senderBanned: "The address is now banned"
-    checkMailUnsuccessful: "We couldn't check this email."
+    checkMailUnsuccessful: "This email address seems to be invalid, or has already been validated."
     connectionOk: "Connection success"
     connectionKo: "Unable to connect"
     invalidLdapQuery: "Invalid LDAP query"
@@ -332,8 +340,17 @@ Message:
       "<strong>Confirmation of your email</strong> <br/> Please
       validate your email by confirming your email address below"
     defaultCaptchaConfirmMsg: "Thank you and good day"
+  HumanAuthentication:
+      toVerify:
+          email: "Email address"
+          title: "Email verification"
+          content: "Please confirm your address by entering it below."
+          submit: Submit
+      verified:
+          title: "Thank you, have a nice day!"
+          content: "Your email address has been successfully verified."
 Form:
-  PolicyDomain: "Filter threshold"
+  Error: "Error"
   ImportFile: "Select a file to import"
 
 Search:
@@ -387,7 +404,7 @@ Entities:
       name: "Group name"
       rights: rights
       users: users
-      domain: "Associated domains"
+      domain: "Associated domain"
       overrideUser: "Override user choices"
   Policy:
     label: Policy
@@ -445,13 +462,27 @@ Entities:
       add_new: "Add a new policy"
   Domain:
     Name: Domain
+    customisation:
+      human_authentication:
+        title: "Human authentication customisation of domain {{ domain }}"
+        tab: "Human authentication"
+      general:
+        title: "General customisation of domain {{ domain }}"
+        tab: "General"
+      report:
+        title: "Report customisation of domain {{ domain }}"
+        tab: "Report"
+      title: "Customisation of domain {{ domain }}"
     index: "List of domains"
     edit: "Edit domain"
     fields:
-      mailMessage: "Text of the email validating the email address with the human authentication link"
-      captachaMessage: "Presentation text on the human authentication page"
-      successCaptchaMessage: "Human authentication validation message"
+      mailmessage: "Text of the email validating the email address with the human authentication link"
+      message: "Presentation text on the human authentication page"
+      confirmCaptchaMessage: "Human authentication validation message"
+      humanAuthenticationFooter: "Footer of the human authentication page"
+      humanAuthenticationStylesheet: "Custom stylesheet on the human authentication page"
       messageAlert: "Message of the report"
+      reportSpamLevel: 'Include spam in the report whose level is lower than:'
       domain: "Domain name"
       srvSmtp: "SMTP server"
       srvImap: "IMAP server"
@@ -472,6 +503,7 @@ Entities:
       addQuota: "Add a rate limit"
       sendUserAlerts: "Send alerts to users dashboard in AgentJ"
       sendUserMailAlerts: "Send alerts to users by email"
+      authorizedSendersSpamLevel: "Accept spam from authorized senders whose level is lower than:"
     labels:
       infos: "Informations"
       agentJConfig: "AgentJ configuration"
@@ -490,6 +522,7 @@ Entities:
       dynamicsVariables:
         URL_CAPTCHA: "Link to the human authentication page"
         URL_HUMAN_AUTHENTICATION: "Link to the human authentication page"
+        USERNAME: "User's name"
         EMAIL_DEST: "Email of recipient"
         URL_MSGS: "Link to pending emails"
         NB_AUTHORIZED_MESSAGES: "Authorized messages"
@@ -499,32 +532,30 @@ Entities:
         NB_DELETED_MESSAGES: "Number of deleted messages"
         NB_RESTORED_MESSAGES: "Number of restored messages"
         LIST_MAIL_MSGS: "List of untreated messages"
+        FOREACH_MESSAGE: "Start of message loop"
+        ENDFOREACH_MESSAGE: "End of message loop"
+        MESSAGE_SENDER: "Name of the message's sender"
+        MESSAGE_SUBJECT: "Subject of the message"
+        URL_MESSAGE_AUTHORIZE_SENDER: "URL to authorize the message's sender"
+        URL_MESSAGE_RESTORE: "URL to recover the message"
     actions:
       add_connector: Add connector
       importUserAndAliases: "Import users and aliases"
       add_new: "Add a new domain"
       add_new_rule: "New rule"
+      customisation: "Customisation"
       deleteRule: "Delete rule"
       editDomainRule: "Amend a rule"
       WBList: List
       messages: Messages
-      blockAllMails: "Block all emails"
-      allowAllMails: "Allow all emails"
-      allowWithSpamFilter: "Allow with spam filter"
-      allowWithLightFilter: "Allow with light filter"
       backToDomainList: "Return to the list of domains"
-    rulesValues:
-      10: "Block all emails"
-      B: "Block all emails"
-      W: "Allow all emails"
-      0: "Allow with spam filter"
-      2: "Allow with flexible filter"
   User:
     indexLocal: "List of administrators"
     indexEmail: "List of email accounts"
     indexAlias: "List of email aliases"
     labels:
-      defaultDomainParameters: "Default domain parameters"
+      domainSetting: "Domain setting"
+      defaultGroupSetting: "Default group setting"
     actions:
       add_new: "New user"
       add_new_alias: "Add a new alias"
@@ -587,6 +618,7 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Authentication request sent the"
     isMailingList: "Mailing list? "
+    noBlockedMessages: 'No blocked messages'
     labels:
       infos: "Information about the blockage"
       preview: "Preview of the message"
@@ -622,6 +654,8 @@ Entities:
       connectionInformation: "Connection information"
       ldapHost: "Host"
       ldapPort: "Port (default 389)"
+      ldapEncryption: "Encryption"
+      ldapVersion: "LDAP version"
       allowAnonymousBind: "Anonymous connection"
       LdapBaseDN: "Base DN"
       ldapBindDn: "Bind DN"
@@ -674,9 +708,16 @@ Entities:
         1: Blocked by human authentication
         2: Blocked by the group
         3: Blocked by the administrator
+      wbRule: 'Filtering rule'
     actions:
       deleteSenderW: "Delete sender"
       deleteSenderB: "Unlock the sender"
+    rules:
+      accept: 'Accept with spam filter'
+      allow: 'Allow all emails'
+      block: 'Block all emails'
+      enabled: 'Antispam enabled'
+      none: 'No rule'
   Import:
     Wbliste:
       title: "White list: import a list"
@@ -726,3 +767,11 @@ Entities:
   DomainRelay:
     fields:
       ipAddress: "IP Address"
+Portal:
+    Messages:
+        authorized:
+            backToMessages: 'See my authorized mails'
+            senderAuthorized: 'The address is now authorized.'
+        restore:
+            backToMessages: 'See my recovered mails'
+            messageRestored: 'Message successfully recovered.'

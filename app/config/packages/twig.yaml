@@ -11,21 +11,12 @@ twig:
         oauth_enabled: '%env(bool:ENABLE_OAUTH)%'
         oauth_login_label: '%env(OAUTH_LOGIN_LABEL)%'
         azure_oauth_enabled: '%env(bool:ENABLE_AZURE_OAUTH)%'
+        feature_flag_disable_dashboard: '%env(bool:FEATURE_FLAG_DISABLE_DASHBOARD)%'
+        feature_flag_disable_sort_by_subject: '%env(bool:FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT)%'
         locales:
             - fr
             - en
         per_pages: [10, 25, 50, 100, 500, 1000]
-        domainMessages_availableFields:
-            'Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION' : 'URL_HUMAN_AUTHENTICATION'
-            'Entities.Domain.labels.dynamicsVariables.EMAIL_DEST' : 'EMAIL_DEST'
-            'Entities.Domain.labels.dynamicsVariables.URL_MSGS' : 'URL_MSGS'
-            'Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES' : 'NB_UNTREATED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES' : 'NB_AUTHORIZED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES' : 'NB_SPAMMED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.NB_BANNED_MESSAGES' : 'NB_BANNED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES' : 'NB_DELETED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.NB_RESTORED_MESSAGES' : 'NB_RESTORED_MESSAGES'
-            'Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS' : 'LIST_MAIL_MSGS'
 
 when@test:
     twig:

@@ -3,8 +3,11 @@
 namespace App\Command;
 
 use App\Entity\User;
+use App\Entity\Msgrcpt;
 use App\Amavis\MessageStatus;
 use App\Repository\MsgrcptSearchRepository;
+use App\Service\LocaleService;
+use App\Service\MessageService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,7 +37,9 @@ class ReportSendMailCommand extends Command
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageService $messageService,
         private UrlGeneratorInterface $urlGenerator,
+        private LocaleService $localeService,
     ) {
         parent::__construct();
     }
@@ -57,94 +62,63 @@ class ReportSendMailCommand extends Command
 
         foreach ($allUsers as $userId) {
             $user = $em->getRepository(User::class)->find($userId);
-            if ($user && $user->getReport()) {
-                /**
-                 * Récupérer les liste des messages non traités depuis le dernier envoie du rapport
-                 * N'envoyer le rapport que si ce nombre est > 0
-                 */
+            if (!$user || !$user->getReport()) {
+                continue;
+            }
 
-                $untreatedMsgs = $this->msgrcptSearchRepository->getSearchQuery(
-                    $user,
-                    fromDate: $user->getDateLastReport()
-                )->getResult();
-                $totalUnread = count($untreatedMsgs);
+            $messageRecipients = $this->getMessageRecipients($user);
 
-                if ($totalUnread == 0) {
-                    continue;
-                }
+            if (count($messageRecipients) === 0) {
+                continue;
+            }
 
-                $untreatedMsgs = array_slice($untreatedMsgs, 0, 10);
-                $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
-                $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
-                $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
-                $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
-                $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
-                $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
-                $domain = $user->getDomain();
+            $body = $this->createEmailContent($user, $messageRecipients);
 
-                if ($domain && !empty($domain->getMessageAlert())) {
-                    $body = $domain->getMessageAlert();
-                } else {
-                    $body = $this->translator->trans('Message.Report.defaultAlertMailContent');
-                }
+            $domain = $user->getDomain();
+            $from = $domain->getMailAuthenticationSender();
+            if (!$from) {
+                $from = $this->defaultMailFrom;
+            }
 
-                $tableMsgs = $this->twig->render('report/table_mail_msgs.html.twig', [
-                    'untreatedMsgs' => $untreatedMsgs,
-                    'user' => $user,
-                ]);
+            $locale = $this->localeService->getUserLocale($user);
+            $fromName = $this->translator->trans('Entities.Report.mailFromName', locale: $locale);
 
-                $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            $fromAddress = new Address($from, $fromName);
 
-                $body = str_replace('[USERNAME]', $user->getFullname(), $body);
-                $body = str_replace('[LIST_MAIL_MSGS]', $tableMsgs, $body);
-                $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
-                $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
-                $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
-                $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
-                $body = str_replace('[NB_RESTORED_MESSAGES]', (string) $nbRestored, $body);
-                $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
-                $body = str_replace('[URL_MSGS]', $url, $body);
+            $mailTo = $user->getEmail();
 
-                $from = $domain->getMailAuthenticationSender();
-                if (!$from) {
-                    $from = $this->defaultMailFrom;
-                }
-                $fromName = $this->translator->trans('Entities.Report.mailFromName');
-                $fromAddress = new Address($from, $fromName);
+            if ($mailTo === null) {
+                continue;
+            }
 
-                $mailTo = $user->getEmail();
+            $toAddress = new Address($mailTo);
 
-                if ($mailTo === null) {
-                    continue;
-                }
+            $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
+            $bodyTextPlain = strip_tags($bodyTextPlain);
 
-                $toAddress = new Address($mailTo);
+            $subject = $this->translator->trans('Message.Report.defaultMailSubject', locale: $locale) . $mailTo;
 
-                $bodyTextPlain = preg_replace('/<br(\s+)?\/?>/i', "\n", $body);
-                $bodyTextPlain = strip_tags($bodyTextPlain);
+            $message = new Email();
+            $message->subject($subject)
+                    ->from($fromAddress)
+                    ->to($toAddress)
+                    ->html($body)->text(strip_tags($bodyTextPlain));
 
-                $message = new Email();
-                $message->subject($this->translator->trans('Message.Report.defaultMailSubject') . $mailTo)
-                        ->from($fromAddress)
-                        ->to($toAddress)
-                        ->html($body)->text(strip_tags($bodyTextPlain));
+            $message->getHeaders()->addTextHeader('Auto-Submitted', 'auto-generated');
+            $message->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
 
-                $message->getHeaders()->addTextHeader('Auto-Submitted', 'auto-generated');
-                $message->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
+            try {
+                $this->mailer->send($message);
+                $user->setDateLastReport(time());
+                $em->persist($user);
+                $em->flush();
 
-                try {
-                    $this->mailer->send($message);
-                    $user->setDateLastReport(time());
-                    $em->persist($user);
-                    $em->flush();
-
-                    $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
-                    $i++;
-                } catch (\Exception $e) {
-                    //catch error and save this in msgs + change status to error
-                    $messageError = $e->getMessage();
-                    $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
-                }
+                $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
+                $i++;
+            } catch (\Exception $e) {
+                //catch error and save this in msgs + change status to error
+                $messageError = $e->getMessage();
+                $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
             }
         }
 
@@ -154,5 +128,145 @@ class ReportSendMailCommand extends Command
             $io->success($i . ' messages sent.');
         }
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param Msgrcpt[] $messageRecipients
+     */
+    private function createEmailContent(User $user, array $messageRecipients): string
+    {
+        $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
+        $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+        $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
+        $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
+        $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
+        $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
+
+        $domain = $user->getDomain();
+        $locale = $this->localeService->getUserLocale($user);
+
+        if ($domain && !empty($domain->getMessageAlert())) {
+            $body = $domain->getMessageAlert();
+        } else {
+            $body = $this->translator->trans('Message.Report.defaultAlertMailContent', locale: $locale);
+        }
+
+        $tableMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'messageRecipients' => $messageRecipients,
+            'user' => $user,
+            'locale' => $locale,
+        ]);
+
+        $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $body = str_replace('[USERNAME]', $this->escape($user->getFullname()), $body);
+        $body = str_replace('[LIST_MAIL_MSGS]', $tableMessages, $body);
+        $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
+        $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
+        $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
+        $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
+        $body = str_replace('[NB_RESTORED_MESSAGES]', (string) $nbRestored, $body);
+        $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
+        $body = str_replace('[URL_MSGS]', $url, $body);
+
+        $body = $this->replaceForeachMessages($body, $user, $messageRecipients);
+
+        return $body;
+    }
+
+    /**
+     * @param Msgrcpt[] $messageRecipients
+     */
+    private function replaceForeachMessages(
+        string $body,
+        User $user,
+        array $messageRecipients
+    ): string {
+        // Get the part of the body before [FOREACH_MESSAGE].
+        $splittedBody = explode('[FOREACH_MESSAGE]', $body, 2);
+
+        if (count($splittedBody) !== 2) {
+            return $body;
+        }
+
+        $bodyStart = $splittedBody[0];
+
+        // Get the part of the body after [ENDFOREACH_MESSAGE].
+        $bodyRest = $splittedBody[1];
+
+        $splittedBody = explode('[ENDFOREACH_MESSAGE]', $bodyRest, 2);
+
+        if (count($splittedBody) !== 2) {
+            return $body;
+        }
+
+        $bodyEnd = $splittedBody[1];
+
+        // The remaining section is the one between the two previous tags, i.e.
+        // the message template.
+        $messageTemplate = $splittedBody[0];
+
+        $bodyMessages = '';
+        foreach ($messageRecipients as $messageRecipient) {
+            $message = $messageRecipient->getMsgs();
+            $token = $this->messageService->getReleaseToken($message, $user);
+
+            $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
+                'token' => $token,
+                'partitionTag' => $messageRecipient->getPartitionTag(),
+                'mailId' => $messageRecipient->getMailIdAsString(),
+                'recipientId' => $messageRecipient->getRid()->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+            $urlRestore = $this->urlGenerator->generate('portal_message_restore', [
+                'token' => $token,
+                'partitionTag' => $messageRecipient->getPartitionTag(),
+                'mailId' => $messageRecipient->getMailIdAsString(),
+                'recipientId' => $messageRecipient->getRid()->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+            $bodyMessage = $messageTemplate;
+            $bodyMessage = str_replace('[MESSAGE_SENDER]', $this->escape($message->getFromAddr()), $bodyMessage);
+            $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $this->escape($message->getSubject()), $bodyMessage);
+            $bodyMessage = str_replace('[URL_MESSAGE_AUTHORIZE_SENDER]', $urlAuthorize, $bodyMessage);
+            $bodyMessage = str_replace('[URL_MESSAGE_RESTORE]', $urlRestore, $bodyMessage);
+
+            $bodyMessages .= $bodyMessage;
+        }
+
+        return $bodyStart . $bodyMessages . $bodyEnd;
+    }
+
+    /**
+     * @return Msgrcpt[]
+     */
+    private function getMessageRecipients(User $user): array
+    {
+        $messageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+            $user,
+            messageStatus: MessageStatus::UNTREATED,
+            fromDate: $user->getDateLastReport(),
+        )->getResult();
+
+        $domain = $user->getDomain();
+        $reportSpamLevel = $domain->getReportSpamLevel();
+
+        if ($reportSpamLevel > 0) {
+            $spamMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+                $user,
+                messageStatus: MessageStatus::SPAMMED,
+                maxSpamLevel: $reportSpamLevel,
+                fromDate: $user->getDateLastReport(),
+            )->getResult();
+
+            $messageRecipients = array_merge($messageRecipients, $spamMessageRecipients);
+        }
+
+        return $messageRecipients;
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
     }
 }

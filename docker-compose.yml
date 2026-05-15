@@ -37,6 +37,7 @@ services:
         condition: service_healthy
     volumes:
       - amavis_in:/var/lib/amavis/
+      - sa_learn:/sa_learn
 
   outamavis:
     image: probesys38/agentj_amavis:$VERSION
@@ -64,6 +65,34 @@ services:
       - amavis
     ports:
       - $PROXY_LISTEN_ADDR:$PROXY_PORT:80
+    volumes:
+      - var:/var/www/agentj/var
+      - files:/var/www/agentj/public/files
+      - sa_learn:/var/www/agentj/sa_learn
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/healthy.txt"]
+      interval: 5s
+      retries: 30
+
+  worker:
+    image: probesys38/agentj_app:$VERSION
+    build:
+      context: ./app
+    command: "sudo -u www-data php /var/www/agentj/bin/console messenger:consume async scheduler_default --memory-limit=128M"
+    entrypoint: "/entrypoint-worker.sh"
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - var:/var/www/agentj/var
+      - files:/var/www/agentj/public/files
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/healthy.txt"]
+      interval: 5s
+      retries: 30
 
   smtp:
     image: probesys38/agentj_smtp:$VERSION
@@ -78,6 +107,7 @@ services:
       - opendkim
     volumes:
       - postqueue:/var/spool/postfix
+      - sslcerts:/etc/postfix-in/ssl/
     ports:
       - $SMTP_LISTEN_ADDR:$SMTP_PORT:25
 
@@ -137,6 +167,7 @@ services:
       - DB_HOST
       - DB_NAME
       - DB_PASSWORD=$DB_OPENDKIM_PASSWORD
+      - DISABLE_OUTGOING_ANTISPOOFING_PROTECTION
     depends_on:
       db:
         condition: service_healthy
@@ -151,6 +182,10 @@ services:
 volumes:
   amavis_out:
   amavis_in:
+  sa_learn:
   db:
   postqueue:
   outpostqueue:
+  var:
+  files:
+  sslcerts:

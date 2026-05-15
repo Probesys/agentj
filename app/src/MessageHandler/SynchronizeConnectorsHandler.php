@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -25,13 +26,23 @@ final class SynchronizeConnectorsHandler
         KernelInterface $kernel,
         private ConnectorRepository $connectorRepository,
         private LoggerInterface $logger,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private LockFactory $lockFactory,
     ) {
         $this->application = new Application($kernel);
     }
 
     public function __invoke(SynchronizeConnectors $message): void
     {
+        $lock = $this->lockFactory->createLock('synchronize-connectors', ttl: 3600);
+
+        if (!$lock->acquire()) {
+            $this->logger->info(
+                'Cannot acquire the synchronize-connectors lock, the handler is probably already running.'
+            );
+            return;
+        }
+
         $connectors = $this->connectorRepository->getActiveConnectors();
 
         foreach ($connectors as $connector) {
@@ -66,5 +77,7 @@ final class SynchronizeConnectorsHandler
             }
         }
         $this->entityManager->flush();
+
+        $lock->release();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\ResourceHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 
@@ -30,6 +31,11 @@ class Quarantine
     #[ORM\Column(name: 'mail_text', type: 'blob', length: 65535, nullable: false)]
     private mixed $mailText = null;
 
+    #[ORM\ManyToOne(inversedBy: 'quarantineChunks')]
+    #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
+    private Msgs $message;
+
     public function getPartitionTag(): int
     {
         return $this->partitionTag;
@@ -45,14 +51,19 @@ class Quarantine
         return $this->chunkInd;
     }
 
-    public function getMailText(): mixed
+    public function getMailText(): ?string
     {
-        return $this->mailText;
+        return ResourceHelper::toString($this->mailText);
     }
 
-    public function setMailText(mixed $mailText): self
+    public function getMessage(): Msgs
     {
-        $this->mailText = $mailText;
+        return $this->message;
+    }
+
+    public function setMessage(Msgs $message): self
+    {
+        $this->message = $message;
 
         return $this;
     }

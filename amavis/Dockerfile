@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim 
+FROM debian:bookworm-slim
 
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
@@ -16,21 +16,19 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     p7zip \
     rpm \
     spamassassin \
-    spamc \
-    spamd \
     gnupg \
     libmail-spf-perl \
     libencode-detect-perl \
     libio-socket-ssl-perl \
     libnet-patricia-perl \
     libdbd-mysql-perl \
-    pyzor  \
+    pyzor \
     razor \
-    supervisor  \ 
-    tzdata  \
+    supervisor \
+    tzdata \
     iproute2 \
     cron \
-    patch  
+    patch
 
 
 COPY amavisd.patch /root/amavisd.patch
@@ -42,6 +40,7 @@ RUN /usr/bin/sa-update
 COPY conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY conf/amavis/*.conf /etc/
 COPY conf/cron/agentj-amavis /etc/cron.d/agentj-amavis
+COPY sa-learn.sh /sa-learn.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 

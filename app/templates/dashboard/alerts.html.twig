@@ -1,0 +1,26 @@
+<turbo-frame id="dashboard-alerts">
+	<div class="card-body d-flex flex-column justify-content-center align-items-center h-100">
+		<p class="display-1 text-danger">{{ unreadAlertsCount }}</p>
+		<p class="h5">{{ 'Generics.labels.unreadAlerts'|trans({'%count%': unreadAlertsCount}, 'messages') }}</p>
+		<a href="#" data-toggle="modal" data-target="#alertsModal" style="position: absolute; top: 10px; right: 10px;">
+			<i class="fas fa-expand-arrows-alt fa-2x"></i>
+		</a>
+		<small class="form-text text-muted">{{ 'Generics.messages.helpAlert' | trans }}</small>
+	</div>
+
+	<div class="modal fade" id="alertsModal" tabindex="-1" role="dialog" aria-labelledby="alertsModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="alertsModalLabel">{{ 'Generics.labels.alerts'|trans }}</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					{% include 'dashboard/_alerts.html.twig' %}
+				</div>
+			</div>
+		</div>
+	</div>
+</turbo-frame>

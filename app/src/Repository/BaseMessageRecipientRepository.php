@@ -3,12 +3,13 @@
 namespace App\Repository;
 
 use App\Amavis\ContentType;
+use App\Amavis\DeliveryStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\User;
 use App\Entity\Msgrcpt;
 use App\Entity\OutMsgrcpt;
-use App\Amavis\MessageStatus;
-use App\Amavis\DeliveryStatus;
+use App\Util\Search;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
@@ -37,9 +38,11 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
             $queryBuilder->setParameter('host', '%' . $filters['host'] . '%');
         }
 
-        if (isset($filters['subject'])) {
-            $queryBuilder->andWhere('m.subject like :subject');
-            $queryBuilder->setParameter('subject', '%' . $filters['subject'] . '%');
+        $subjectSearch = Search::textToMariadbBooleanSearch($filters['subject'] ?? '');
+
+        if ($subjectSearch) {
+            $queryBuilder->andWhere('MATCH(m.subject) AGAINST(:searchKey BOOLEAN) > 0');
+            $queryBuilder->setParameter('searchKey', $subjectSearch);
         }
 
         if (isset($filters['fromAddr'])) {
@@ -53,8 +56,8 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
         }
 
         if (isset($filters['mailId'])) {
-            $queryBuilder->andWhere('mr.mailId like :mailId');
-            $queryBuilder->setParameter('mailId', '%' . $filters['mailId'] . '%');
+            $queryBuilder->andWhere('mr.mailId = :mailId');
+            $queryBuilder->setParameter('mailId', $filters['mailId']);
         }
 
         $this->addDateCondition($queryBuilder, $filters);
@@ -63,6 +66,11 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
         $this->addSizeCondition($queryBuilder, $filters);
 
         $query = $queryBuilder->getQuery();
+
+        $countQueryBuilder = clone $queryBuilder;
+        $countQueryBuilder->select('COUNT(mr.mailId)');
+        $countQuery = $countQueryBuilder->getQuery();
+        $query->setHint('knp_paginator.count', $countQuery->getSingleScalarResult());
 
         return $query;
     }

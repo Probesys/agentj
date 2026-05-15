@@ -2,19 +2,20 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerWBListTrait;
 use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Mailaddr;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
+use App\Form\DomainCustomisationGeneralType;
+use App\Form\DomainCustomisationHumanAuthenticationType;
+use App\Form\DomainCustomisationReportType;
 use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\SettingsRepository;
 use App\Repository\DomainRepository;
-use App\Service\FileUploader;
 use App\Service\MailaddrService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,13 +29,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: '/domain')]
 class DomainController extends AbstractController
 {
-    use ControllerWBListTrait;
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -94,7 +94,6 @@ class DomainController extends AbstractController
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
     public function new(
         Request $request,
-        FileUploader $fileUploader,
         ParameterBagInterface $params,
         SettingsRepository $settingsRepository,
     ): Response {
@@ -105,17 +104,15 @@ class DomainController extends AbstractController
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => false,
             'minSpamLevel' => $this->getParameter('app.domain_min_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
-        $form->get('defaultLang')->setData($params->get('locale'));
 
-        // set normal policy anf "block all mails" as default rule for new domain
+        // set normal policy and "enabled" as default rule for new domain
         $policy = $this->em->getRepository(Policy::class)->find(5);
         $form->get('policy')->setData($policy);
-        $form->get('rules')->setData(0);
+        $form->get('wbRule')->setData('enabled');
 
         $form->handleRequest($request);
 
@@ -160,7 +157,7 @@ class DomainController extends AbstractController
             $user->setPolicy($domain->getPolicy());
             $this->em->persist($user);
 
-            $rules = $form->get("rules")->getData();
+            $wbRule = $form->get("wbRule")->getData();
 
             //for all domain @.
             $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
@@ -171,18 +168,9 @@ class DomainController extends AbstractController
                 $this->em->persist($mailaddr);
             }
             $wblist = new Wblist($user, $mailaddr);
-            $wblist->setWb($rules);
+            $wblist->setWbRule($wbRule);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
-
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
-
 
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
@@ -199,24 +187,23 @@ class DomainController extends AbstractController
 
             return $this->redirectToRoute('domain_new');
         } else {
-            $form->get('level')->setData(0.5);
+            $defaultSpamLevel = $this->getParameter('app.domain_default_spam_level');
+            $form->get('level')->setData($defaultSpamLevel);
         }
 
         return $this->render('domain/new.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
-            'domainSpamLevel' => $this->getParameter('app.domain_default_spam_level')
         ]);
     }
 
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
-    public function edit(Request $request, Domain $domain, FileUploader $fileUploader): Response
+    public function edit(Request $request, Domain $domain): Response
     {
 
         $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
-            'actions' => $this->getWBListDomainActions(),
             'is_edit' => true,
             'minSpamLevel' => $this->getParameter('app.domain_default_spam_level'),
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
@@ -228,8 +215,9 @@ class DomainController extends AbstractController
             throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
         }
 
-        $form->get('rules')->setData($wblist->getWb());
+        $form->get('wbRule')->setData($wblist->getWbRule());
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
@@ -250,20 +238,9 @@ class DomainController extends AbstractController
             }
             $userDomain->setPolicy($policy);
 
-            $rules = $form->get("rules")->getData();
-            $wblist->setWb($rules);
+            $wbRule = $form->get("wbRule")->getData();
+            $wblist->setWbRule($wbRule);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-
-            // Update users with domain policy
-
-
-            if ($form->has('logoFile')) {
-                $uploadedFile = $form['logoFile']->getData();
-                if ($uploadedFile) {
-                    $uploadedLogo = $fileUploader->upload($uploadedFile);
-                    $domain->setLogo($uploadedLogo);
-                }
-            }
 
             if ($domain->getDomainKeys() === null) {
                 $this->generateOpenDkim($domain);
@@ -357,10 +334,13 @@ class DomainController extends AbstractController
             'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),
         ]);
         $formBuilder->add('email', TextType::class);
-        $actions = $this->getWBListUserActions();
 
-        $formBuilder->add('wb', ChoiceType::class, [
-            'choices' => $actions,
+        $formBuilder->add('wbRule', ChoiceType::class, [
+            'choices' => ['accept', 'block', 'allow'],
+            'choice_label' => function (string $choice): TranslatableMessage {
+                return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+            },
+            'label' => 'Entities.WBList.fields.wbRule',
         ]);
 
         $form = $formBuilder->getForm();
@@ -389,7 +369,7 @@ class DomainController extends AbstractController
                 }
             }
             $wblist = new Wblist($user, $mailaddr);
-            $wblist->setWb($data['wb']);
+            $wblist->setWbRule($data['wbRule']);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 
             $this->em->persist($wblist);
@@ -399,25 +379,6 @@ class DomainController extends AbstractController
         }
 
         return $this->render('domain/newwblist.html.twig', [
-            'domain' => $domain,
-            'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route(path: '/{id}/messages', name: 'domain_messages', methods: 'GET|POST')]
-    public function domainMessages(Request $request, Domain $domain): Response
-    {
-        $this->checkAccess($domain);
-        $form = $this->createForm(DomainMessageType::class, $domain);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->flush();
-
-            return $this->redirectToRoute('domain_index', ['id' => $domain->getId()]);
-        }
-
-        return $this->render('domain/messages.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
         ]);

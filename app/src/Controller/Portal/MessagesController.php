@@ -33,16 +33,6 @@ class MessagesController extends AbstractController
         int $recipientId,
         Request $request,
     ): Response {
-        $isConnected = $this->getUser() !== null;
-
-        if ($isConnected) {
-            return $this->redirectToRoute('message_authorized', [
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rid' => $recipientId,
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -56,13 +46,11 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
-
-        if (!$message) {
-            throw $this->createNotFoundException('Message does not exist');
-        }
-
-        $messageRecipient = $this->msgrcptRepository->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->msgrcptRepository->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rid' => $recipientId,
+        ]);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -70,7 +58,12 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        if ($this->messageService->authorize($message, [$messageRecipient], Entity\Wblist::WBLIST_TYPE_USER)) {
+        $result = $this->messageService->authorizeSenderForRecipient(
+            $messageRecipient,
+            Entity\Wblist::WBLIST_TYPE_USER,
+        );
+
+        if ($result) {
             $this->logService->addLog('authorized', $mailId);
         }
 
@@ -87,16 +80,6 @@ class MessagesController extends AbstractController
         string $mailId,
         int $recipientId,
     ): Response {
-        $isConnected = $this->getUser() !== null;
-
-        if ($isConnected) {
-            return $this->redirectToRoute('message_restore', [
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rid' => $recipientId,
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -124,9 +107,8 @@ class MessagesController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        if ($this->messageService->restore($message, $messageRecipient)) {
-            $this->logService->addLog('restore', $mailId);
-        }
+        $this->messageService->restore($messageRecipient);
+        $this->logService->addLog('restore', $mailId);
 
         return $this->render('portal/messages/restore.html.twig');
     }

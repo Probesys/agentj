@@ -12,6 +12,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
+/**
+ * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
+ */
 class DomainFixture extends Fixture
 {
     private EntityManagerInterface $em;
@@ -57,7 +60,7 @@ class DomainFixture extends Fixture
             TXT);
         // phpcs:enable Generic.Files.LineLength
 
-        $this->fillDomainCommon($blocnormal, $mailaddr, '0');
+        $this->fillDomainCommon($blocnormal, $mailaddr, wbRule: 'enabled');
 
         $laissepasser = new Domain();
         $laissepasser->setDomain('laissepasser.fr');
@@ -81,14 +84,17 @@ class DomainFixture extends Fixture
             TXT);
         // phpcs:enable Generic.Files.LineLength
 
-        $this->fillDomainCommon($laissepasser, $mailaddr, 'W');
+        $this->fillDomainCommon($laissepasser, $mailaddr, wbRule: 'allow');
 
         $manager->persist($blocnormal);
         $manager->persist($laissepasser);
         $manager->flush();
     }
 
-    public function fillDomainCommon(Domain $domain, Mailaddr $mailaddr, string $wb): void
+    /**
+     * @param WbRule $wbRule
+     */
+    public function fillDomainCommon(Domain $domain, Mailaddr $mailaddr, string $wbRule): void
     {
         $domain->setLevel(0.5);
         $domain->setSrvSmtp('smtp.test');
@@ -105,7 +111,7 @@ class DomainFixture extends Fixture
         $this->manager->persist($user);
 
         $wblist = new Wblist($user, $mailaddr);
-        $wblist->setWb($wb);
+        $wblist->setWbRule($wbRule);
         $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
         $this->manager->persist($wblist);
         $dkim = $domain->getDomainKeys();

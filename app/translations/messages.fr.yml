@@ -195,6 +195,8 @@ Navigation:
     title: Imports
     users: Email/utilisateurs
     whiteliste: Liste blanche
+  poweredBy: "Propulsé par Agentj"
+  sourceCode: "Code source"
 Config:
   title: Configuration
   labels:
@@ -231,6 +233,8 @@ Message:
     DeleteMessage: Supprimer le message
     Restore: Récupérer
     RestoreMessage: Récupérer le message
+    MarkAsHam: Marquer comme acceptable
+    MarkAsSpam: Marquer comme spam
     ipAddressInvalid: Le format l'adresse IP est incorrect.
     ipAddressDuplicated: l'adresse IP est en double.
     massiveActionContent:
@@ -280,9 +284,13 @@ Message:
     ruleExists: Cette règle existe déjà !
     messageDeleted: Message supprimé avec succès
     messageRestored: Message récupéré avec succès
+    messageMarkedAsHam: Message marqué comme acceptable avec succès
+    messageMarkedAsSpam: Message marqué comme spam avec succès
+    saved: Les changements ont été enregistrés.
+    messagePendingRelease: Le message va être délivré dans quelques instants.
     senderAuthorized: L'adresse est désormais autorisée
     senderBanned: L'adresse est désormais bannie
-    checkMailUnsuccessful: Nous n'avons pas pu vérifier cet email.
+    checkMailUnsuccessful: "Cette adresse email semble être invalide, ou a déjà été validée."
     connectionOk: "Connexion établie"
     connectionKo: "Connexion échouée"
     invalidLdapQuery: "Requête LDAP incorrecte"
@@ -332,8 +340,17 @@ Message:
       "<strong>Vérification de votre email</strong> <br />\
       \ Merci de valider votre email en confirmant votre adresse ci-dessous"
     defaultCaptchaConfirmMsg: "Merci et bonne journée"
+  HumanAuthentication:
+      toVerify:
+          email: "Adresse email"
+          title: "Vérification d’email"
+          content: "Merci de confirmer votre adresse email en la saisissant ci-dessous."
+          submit: "Valider"
+      verified:
+          title: "Merci, et bonne journée\_!"
+          content: "Votre adresse email a été vérifiée avec succès."
 Form:
-  PolicyDomain: Seuil de filtrage
+  Error: Erreur
   ImportFile: Sélectionnez un fichier à importer
 
 Search:
@@ -387,7 +404,7 @@ Entities:
       name: Nom du groupe
       rights: droits
       users: utilisateurs
-      domain: Domaines associés
+      domain: Domaine associé
       overrideUser: Supplante les choix utilisateurs
   Policy:
     label: Stratégie
@@ -445,13 +462,27 @@ Entities:
       add_new: Ajouter une nouvelle stratégie
   Domain:
     Name: Domaine
+    customisation:
+      human_authentication:
+        title: "Personnalisation de l’authentification humaine du domaine {{ domain }}"
+        tab: "Authentification humaine"
+      general:
+        title: "Personnalisation générale du domaine {{ domain }}"
+        tab: "Général"
+      report:
+        title: "Personnalisation du rapport du domaine {{ domain }}"
+        tab: "Rapport"
+      title: "Personnalisation du domaine {{ domain }}"
     index: Liste des domaines
     edit: Edition du domaine
     fields:
-      mailMessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
-      captachaMessage: Texte de présentation sur la page d'authentification humaine
-      successCaptchaMessage: Message de validation de l'authentification humaine
+      mailmessage: Texte du mail de validation de l'email avec le lien d'authentification humaine
+      message: Texte de présentation sur la page d'authentification humaine
+      confirmCaptchaMessage: Message de validation de l'authentification humaine
+      humanAuthenticationFooter: Pied de page de la page d'authentification humaine
+      humanAuthenticationStylesheet: Feuille de style personnalisée de la page d'authentification humaine
       messageAlert: Message du rapport
+      reportSpamLevel: "Inclure les spams au rapport dont le niveau est inférieur à\_:"
       domain: Nom de domaine
       srvSmtp: Serveur SMTP
       srvImap: Serveur IMAP
@@ -472,6 +503,7 @@ Entities:
       addQuota: Ajouter un quota
       sendUserAlerts: Envoyer les alertes aux utilisateurs sur le Dashboard AgentJ
       sendUserMailAlerts: Envoyer les alertes aux utilisateurs par mail
+      authorizedSendersSpamLevel: "Accepter le spam des expéditeurs autorisés dont le niveau est inférieur à\_:"
     labels:
       infos: "Informations"
       agentJConfig: "Paramètres AgentJ"
@@ -490,6 +522,7 @@ Entities:
       dynamicsVariables:
         URL_CAPTCHA: Lien vers la page d'authentification humaine
         URL_HUMAN_AUTHENTICATION: Lien vers la page d'authentification humaine
+        USERNAME: Nom de l'utilisateur
         EMAIL_DEST: Email du destinataire
         URL_MSGS: Lien vers les mails en attente
         NB_AUTHORIZED_MESSAGES: Nombre messages autorisés
@@ -499,32 +532,30 @@ Entities:
         NB_DELETED_MESSAGES: Nombre de messages supprimés
         NB_RESTORED_MESSAGES: Nombre de messages restaurés
         LIST_MAIL_MSGS: Liste des messages non traités
+        FOREACH_MESSAGE: "Début de la boucle des messages"
+        ENDFOREACH_MESSAGE: "Fin de la boucle des messages"
+        MESSAGE_SENDER: "Nom de l'expéditeur du message"
+        MESSAGE_SUBJECT: "Sujet du message"
+        URL_MESSAGE_AUTHORIZE_SENDER: "URL autorisant l'expéditeur du message"
+        URL_MESSAGE_RESTORE: "URL récupérant le message"
     actions:
       add_connector: Ajouter un connecteur
       importUserAndAliases: "Importer les utilisateurs et les alias"
       add_new: Ajouter un nouveau domaine
       add_new_rule: Nouvelle règle
+      customisation: Personnalisation
       deleteRule: Supprimer la règle
       editDomainRule: Modifier une règle
       WBList: Liste
       messages: Messages
-      blockAllMails: Bloquer tous les mails
-      allowAllMails: Autoriser tous les mails
-      allowWithSpamFilter: Autoriser avec filtre spam
-      allowWithLightFilter: Autoriser avec filtre souple
       backToDomainList: Retour à la liste des domaines
-    rulesValues:
-      10: Bloquer tous les mails
-      B: Bloquer tous les mails
-      W: Autoriser tous les mails
-      0: Autoriser avec filtre spam
-      2: Autoriser avec filtre souple
   User:
     indexLocal: Liste des administrateurs
     indexEmail: Liste des comptes emails
     indexAlias: Liste des alias emails
     labels:
-      defaultDomainParameters: "Paramètre par défaut du domaine"
+      domainSetting: "Paramètre du domaine"
+      defaultGroupSetting: "Paramètre du groupe par défaut"
     actions:
       add_new: Nouvel utilisateur
       add_new_alias: Ajouter un nouvel alias
@@ -587,6 +618,7 @@ Entities:
     spamLevel: Note
     dateAuthRequestAt: "Demande d'authentification envoyée le"
     isMailingList: "Mailing liste ? "
+    noBlockedMessages: 'Aucun message bloqué'
     labels:
       infos: "Informations sur les refus"
       preview: "Aperçu du message"
@@ -622,6 +654,8 @@ Entities:
       connectionInformation: "Informations de connexion"
       ldapHost: "Hôte"
       ldapPort: "Port (défaut 389)"
+      ldapEncryption: "Chiffrement"
+      ldapVersion: "Version LDAP"
       allowAnonymousBind: "Connexion anonyme"
       LdapBaseDN: "Base DN"
       ldapBindDn: "Bind DN"
@@ -674,9 +708,16 @@ Entities:
         1: Bloqué par authentification humaine
         2: Bloqué par le groupe
         3: Bloqué par l'administrateur
+      wbRule: 'Règle de filtrage'
     actions:
       deleteSenderW: Supprimer l'expéditeur
       deleteSenderB: Débloquer l'expéditeur
+    rules:
+      accept: 'Accepter avec filtre spam'
+      allow: 'Autoriser tous les mails'
+      block: 'Bloquer tous les mails'
+      enabled: 'Antispam activé'
+      none: 'Aucune règle'
   Import:
     Wbliste:
       title: "Liste blanche : importer une liste"
@@ -726,3 +767,11 @@ Entities:
   DomainRelay:
     fields:
       ipAddress: "Adresse IP"
+Portal:
+    Messages:
+        authorized:
+            backToMessages: 'Voir mes mails autorisés'
+            senderAuthorized: 'L’adresse est désormais autorisée.'
+        restore:
+            backToMessages: 'Voir mes mails récupérés'
+            messageRestored: 'Message récupéré avec succès.'

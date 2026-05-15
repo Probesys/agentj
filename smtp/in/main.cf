@@ -1,9 +1,12 @@
-smtpd_banner = $myhostname AgentJ ESMTP (libre antispam system)
+smtpd_banner = $EHLO_DOMAIN AgentJ ESMTP (libre antispam system)
 biff = no
 smtp_host_lookup = dns, native
 message_size_limit = 40960000
 compatibility_level=3.6
 smtp_tls_security_level = may
+
+#smtpd_tls_security_level = may
+#smtpd_tls_chain_files = /etc/postfix-in/ssl/fullchain.pem
 
 myhostname = $DOMAIN
 smtp_helo_name = $EHLO_DOMAIN
