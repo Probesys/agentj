@@ -208,7 +208,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getFullname(): ?string
     {
-        return $this->fullname;
+        $fullname = $this->fullname;
+        if ($fullname === null || trim($fullname) === '') {
+            return $this->getEmail();
+        }
+
+        return $fullname;
     }
 
     public function setFullname(?string $fullname): self
