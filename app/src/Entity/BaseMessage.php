@@ -334,32 +334,12 @@ class BaseMessage
     }
 
     /**
-     * Return either the envelope sender address, or the "From" header address
-     * if it exists.
-     *
-     * This method is used to get the address to authorize or ban. However,
-     * please note that Amavis looks exclusively the envelope sender address
-     * when allowing/blocking an email. Said otherwise, if both envelope
-     * address and "From" address are different, the future emails sent with
-     * the envelop address will not be automatically allowed (nor blocked). It
-     * is a known drawback of the authorizing/banning mechanism.
-     *
-     * Luckily, it is still possible to authorize/ban an email again manually.
-     *
-     * A better idea may be to authorize/ban both addresses though.
+     * Return the envelope sender email address.
      */
     public function getSenderEmail(): ?string
     {
         $sender = $this->getSid();
-
-        $senderEmail = $sender->getEmailClear();
-        $fromEmail = $this->getFromMimeAddress()?->getAddress();
-
-        if ($fromEmail && $senderEmail !== $fromEmail) {
-            return $fromEmail;
-        } else {
-            return $senderEmail;
-        }
+        return $sender->getEmailClear();
     }
 
     public function getStatus(): ?int
