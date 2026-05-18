@@ -1,11 +1,18 @@
 # Changelog of AgentJ
 
+## 2026-05-18 - 2.6.2
+
+This release also includes changes from 2.5.4.
+
+### Bug fixes
+
+- Authorize senders by the envelope address instead of the `From` header ([d2e637c1](https://github.com/Probesys/agentj/commit/d2e637c1))
+
 ## 2026-05-11 - 2.6.1
 
 ### Bug fixes
 
 - Fix: clear cache before running sf command in entry point ([949e77a](https://github.com/Probesys/agentj/commit/949e77a9a64032d50add666eb5e21c1e514a97be))
-
 
 ## 2026-05-07 - 2.6.0
 
