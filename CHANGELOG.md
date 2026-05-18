@@ -1,5 +1,10 @@
 # Changelog of AgentJ
 
+## 2026-05-18 - 2.5.4
+
+- Return email if user fullname is null ([12f547bd](https://github.com/Probesys/agentj/commit/12f547bd), [3df4105f](https://github.com/Probesys/agentj/commit/3df4105f))
+- Show bottom of dropdown actions in messages ([b18c8e63](https://github.com/Probesys/agentj/commit/b18c8e63))
+
 ## 2026-05-07 - 2.5.3
 
 ### Bug fixes
