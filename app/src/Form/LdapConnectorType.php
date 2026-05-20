@@ -108,6 +108,9 @@ class LdapConnectorType extends ConnectorType
                 'label' => 'Entities.LdapConnector.fields.ldapGroupFilter',
                 'attr' => ['data-ldap-group' => 'true']
             ])
+            ->add('ldapAllowConnection', null, [
+                'label' => 'Entities.LdapConnector.fields.ldapAllowConnection',
+            ])
         ;
     }
 

@@ -670,6 +670,7 @@ Entities:
       ldapUserFilter: "Filter for users"
       ldapGroupFilter: "Filter for groups"
       usersInformation: "Users information"
+      ldapAllowConnection: "Allow LDAP authentication"
   ImapConnector:
     labels:
     actions:

@@ -58,6 +58,9 @@ class LdapConnector extends Connector
     #[ORM\Column(type: 'integer', options: ['default' => 3])]
     private int $ldapVersion = 3;
 
+    #[ORM\Column(nullable: false, options: ['default' => true])]
+    private ?bool $ldapAllowConnection = true;
+
 
     public function getLdapHost(): ?string
     {
@@ -249,6 +252,18 @@ class LdapConnector extends Connector
     public function setLdapVersion(int $ldapVersion): static
     {
         $this->ldapVersion = $ldapVersion;
+
+        return $this;
+    }
+
+    public function isLdapAllowConnection(): ?bool
+    {
+        return $this->ldapAllowConnection;
+    }
+
+    public function setLdapAllowConnection(bool $ldapAllowConnection): static
+    {
+        $this->ldapAllowConnection = $ldapAllowConnection;
 
         return $this;
     }
