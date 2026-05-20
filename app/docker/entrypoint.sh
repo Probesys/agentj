@@ -3,6 +3,8 @@ set -e
 
 sh /setup-env.sh
 
+sed -i "s|\[port\]|${PROXY_PORT}|g" /etc/nginx/sites-enabled/default
+
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
 
 cd /var/www/agentj || exit 4
