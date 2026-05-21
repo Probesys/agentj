@@ -58,6 +58,12 @@ class AmavisAutoReleaseCommand extends Command
             $sender = $messageRecipient->getMsgs()->getSid();
 
             $recipientUser = $this->userRepository->findOneByMailAddress($recipient);
+
+            $recipientOriginalUser = $recipientUser->getOriginalUser();
+            if ($recipientOriginalUser) {
+                $recipientUser = $recipientOriginalUser;
+            }
+
             $recipientDomain = $recipientUser->getDomain();
 
             $senderIsAuthorized = $this->wblistRepository->isSenderAuthorizedByRecipient($sender, $recipient);
