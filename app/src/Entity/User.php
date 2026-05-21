@@ -92,8 +92,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'originalUser')]
     private Collection $aliases;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $report;
+    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    private bool $report = true;
 
     /**
      * @var Collection<int, User>
@@ -110,8 +110,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $dateLastReport;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
-    private ?bool $bypassHumanAuth;
+    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    private bool $bypassHumanAuth = false;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private ?string $preferedLang;
