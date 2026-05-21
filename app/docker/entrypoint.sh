@@ -29,6 +29,10 @@ sudo -u www-data php bin/console agentj:update-groups-wblist
 
 # Allow web server user to write Symphony logs
 chown -R www-data:www-data /var/www/agentj/var
+
+# Allow web server user to write Spamassassin learn data
+chown -R www-data:www-data /var/www/agentj/sa_learn
+
 find /var/www/agentj/public -type d -exec chmod go+rwx {} \;
 
 echo "Installing crontabs"
