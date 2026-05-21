@@ -2,7 +2,6 @@
 
 namespace App\MessageHandler;
 
-use App\Command\TruncateMessageCommand;
 use App\Message\CleanData;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -33,7 +32,7 @@ final class CleanDataHandler
             $input = new ArrayInput([
                 'days' => $this->historyRetentionDays,
             ]);
-            $command = $this->application->find(TruncateMessageCommand::getDefaultName());
+            $command = $this->application->find('agentj:truncate-message-since-days');
 
             $command->run($input, $output);
 

@@ -2,8 +2,6 @@
 
 namespace App\MessageHandler;
 
-use App\Command\LDAPImportCommand;
-use App\Command\Office365ImportCommand;
 use App\Entity\LdapConnector;
 use App\Entity\Office365Connector;
 use App\Message\SynchronizeConnectors;
@@ -52,9 +50,9 @@ final class SynchronizeConnectorsHandler
                     'connectorId' => $connector->getId(),
                 ]);
                 if ($connector instanceof LdapConnector) {
-                    $command = $this->application->find(LDAPImportCommand::getDefaultName());
+                    $command = $this->application->find('agentj:import-ldap');
                 } elseif ($connector instanceof Office365Connector) {
-                    $command = $this->application->find(Office365ImportCommand::getDefaultName());
+                    $command = $this->application->find('agentj:import-office365');
                 } else {
                     continue;
                 }

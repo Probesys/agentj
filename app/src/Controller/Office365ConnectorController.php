@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Command\Office365ImportCommand;
 use App\Entity\Connector;
 use App\Entity\Domain;
 use App\Entity\Office365Connector;
@@ -87,7 +86,7 @@ class Office365ConnectorController extends AbstractController
             $input = new ArrayInput([
                 'connectorId' => $connector->getId(),
             ]);
-            $command = $this->application->find(Office365ImportCommand::getDefaultName());
+            $command = $this->application->find('agentj:import-office365');
             $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
             $command->run($input, $output);
             $this->addFlash('success', nl2br($output->fetch()));

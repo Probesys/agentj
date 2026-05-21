@@ -6,7 +6,6 @@ use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
-use App\Repository\DomainRepository;
 use App\Service\GroupService;
 use App\Service\LdapService;
 use App\Service\MailaddrService;

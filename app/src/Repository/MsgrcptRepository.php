@@ -185,7 +185,7 @@ class MsgrcptRepository extends BaseRepository
         $statement->bindValue('status_banned', MessageStatus::BANNED);
         $statement->bindValue('status_unreleased', MessageStatus::UNRELEASED);
 
-        $result = $statement->execute();
+        $result = $statement->executeQuery();
 
         return $result->rowCount();
     }

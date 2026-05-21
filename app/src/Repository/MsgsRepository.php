@@ -2,9 +2,6 @@
 
 namespace App\Repository;
 
-use App\Amavis\ContentType;
-use App\Amavis\DeliveryStatus;
-use App\Amavis\MessageStatus;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Util\Search;

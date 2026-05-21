@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Command\LDAPImportCommand;
 use App\Entity\Connector;
 use App\Entity\Domain;
 use App\Entity\LdapConnector;
@@ -11,7 +10,6 @@ use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LdapService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -116,7 +114,7 @@ class LdapConnectorController extends AbstractController
             $input = new ArrayInput([
                 'connectorId' => $connector->getId(),
             ]);
-            $command = $this->application->find(LDAPImportCommand::getDefaultName());
+            $command = $this->application->find('agentj:import-ldap');
             $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
             $command->run($input, $output);
             $this->addFlash('success', nl2br($output->fetch()));

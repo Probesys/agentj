@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
 use App\Entity\Maddr;
 use App\Entity\Mailaddr;
 use App\Entity\User;
@@ -11,6 +10,7 @@ use App\Entity\Wblist;
 use App\Util\Email;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL;
+use Doctrine\DBAL\Statement;
 
 /**
  * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
@@ -115,7 +115,7 @@ class WblistRepository extends BaseRepository
                 . " WHERE group_id  is not null";
         $stmt = $conn->prepare($sql);
 
-        return $stmt->execute();
+        return $stmt->executeQuery();
     }
 
     public function delete(int $rid, int $sid, int $priority): mixed
@@ -148,7 +148,7 @@ class WblistRepository extends BaseRepository
 
 
         $stmt = $conn->prepare($sqlSelectGroupwbList);
-        return $stmt->execute();
+        return $stmt->executeQuery();
     }
 
     /**
