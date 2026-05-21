@@ -167,6 +167,22 @@
 
         <div class="row">
             <div class="col-md-12">
+                <div class="form-group">
+                    {{ form_widget(form.ldapReport) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+            <div class="form-group">
+                {{ form_widget(form.ldapBypassHumanAuth) }}
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
                 <label for="ldap_connector_targetGroups">
                     {{ 'Entities.Connector.fields.targetGroups'|trans }}
                 </label>

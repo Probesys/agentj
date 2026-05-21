@@ -671,6 +671,8 @@ Entities:
       ldapGroupFilter: "Filter for groups"
       usersInformation: "Users information"
       ldapAllowConnection: "Allow LDAP authentication"
+      bypassHumanAuth: "Deactivate human authentication for created users"
+      report: "Send the daily report for created users"
   ImapConnector:
     labels:
     actions:
