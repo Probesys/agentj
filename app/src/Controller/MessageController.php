@@ -246,8 +246,8 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wblists = $this->em->getRepository(Wblist::class)->findByMailAddresses(
-            $msg->getSid(),
+        $wblists = $this->em->getRepository(Wblist::class)->findBySenderEmailAndRecipient(
+            $msg->getSenderEmail(),
             $msgRcpt->getRid(),
         );
 

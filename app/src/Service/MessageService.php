@@ -63,9 +63,17 @@ class MessageService
                 priority: Wblist::WBLIST_PRIORITY_USER,
             );
 
-            $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail($user, $senderEmail);
+            $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
+                $user,
+                $message->getFromAddr()
+            );
 
             foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+                $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+                if (!$isSameSender) {
+                    continue;
+                }
+
                 $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
             }
         }
@@ -107,10 +115,15 @@ class MessageService
 
         $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
             $domainUser->getDomain(),
-            $senderEmail,
+            $message->getFromAddr(),
         );
 
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+            $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+            if (!$isSameSender) {
+                continue;
+            }
+
             $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
         }
 
@@ -148,10 +161,18 @@ class MessageService
                 priority: Wblist::WBLIST_PRIORITY_USER,
             );
 
-            $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail($user, $senderEmail);
+            $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
+                $user,
+                $message->getFromAddr()
+            );
 
             foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-                if ($messageRecipientToBan->isVirus() || $messageRecipientToBan->isAlreadyReleased()) {
+                $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+                if (
+                    !$isSameSender ||
+                    $messageRecipientToBan->isVirus() ||
+                    $messageRecipientToBan->isAlreadyReleased()
+                ) {
                     continue;
                 }
 
@@ -197,11 +218,16 @@ class MessageService
 
         $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
             $domainUser->getDomain(),
-            $senderEmail,
+            $message->getFromAddr(),
         );
 
         foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            if ($messageRecipientToBan->isVirus() || $messageRecipientToBan->isAlreadyReleased()) {
+            $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+            if (
+                !$isSameSender ||
+                $messageRecipientToBan->isVirus() ||
+                $messageRecipientToBan->isAlreadyReleased()
+            ) {
                 continue;
             }
 
