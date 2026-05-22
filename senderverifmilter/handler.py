@@ -44,6 +44,12 @@ class Handler:
         # request.get('cc_address'),
         # request.get('bcc_address'),
 
+        # https://datatracker.ietf.org/doc/html/rfc2821.html#section-3.7
+        if 'sender' not in request:
+            print('OK ', request['client_address'], "without sender")
+            self.send_response('OK')
+            return
+
         self.db = self.db_pool.connection()
         self.cursor = self.db.cursor()
         # If the antispoofing protection is disabled we only check the domain, not the full email
