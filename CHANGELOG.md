@@ -39,6 +39,12 @@ This release also includes changes from 2.5.4.
 - Refactor authorizing/banning a sender for a recipient ([1e610e74](https://github.com/Probesys/agentj/commit/1e610e74))
 - Remove Doctrine extension DateDiff ([6b1ece8c](https://github.com/Probesys/agentj/commit/6b1ece8c))
 
+## 2026-05-22 - 2.5.5
+
+### Bug fixes
+
+- Fix app redirections when using a non-default HTTP port ([3d3c9b74](https://github.com/Probesys/agentj/commit/3d3c9b74))
+
 ## 2026-05-18 - 2.5.4
 
 ### Bug fixes
