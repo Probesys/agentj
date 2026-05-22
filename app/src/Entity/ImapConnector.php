@@ -11,15 +11,10 @@ class ImapConnector extends Connector
 {
     public const PORT_RANGE = [1, 65535];
 
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $imapHost = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer', nullable: true)]
     #[Assert\Range(
         min: self::PORT_RANGE[0],
         max: self::PORT_RANGE[1],
@@ -29,7 +24,7 @@ class ImapConnector extends Connector
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $imapProtocol = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $imapNoValidateCert = null;
 
     public function __construct()

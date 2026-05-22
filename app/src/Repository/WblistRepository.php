@@ -10,7 +10,6 @@ use App\Entity\Wblist;
 use App\Util\Email;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL;
-use Doctrine\DBAL\Statement;
 
 /**
  * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait

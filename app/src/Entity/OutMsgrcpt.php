@@ -15,7 +15,7 @@ class OutMsgrcpt extends BaseMessageRecipient
     #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private OutMsg $msgs;
+    private ?OutMsg $msgs;
 
     public function getMsgs(): ?OutMsg
     {

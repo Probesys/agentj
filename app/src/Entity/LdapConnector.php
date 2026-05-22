@@ -59,7 +59,7 @@ class LdapConnector extends Connector
     private int $ldapVersion = 3;
 
     #[ORM\Column(nullable: false, options: ['default' => true])]
-    private ?bool $ldapAllowConnection = true;
+    private bool $ldapAllowConnection = true;
 
     #[ORM\Column(nullable: false, options: ['default' => false])]
     private bool $ldapBypassHumanAuth = false;

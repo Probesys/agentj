@@ -17,13 +17,13 @@ class GroupsWblist
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups', inversedBy: 'groupsWbLists')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
-    private ?Groups $groups = null;
+    private Groups $groups;
 
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr', fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
-    private ?Mailaddr $mailaddr = null;
+    private Mailaddr $mailaddr;
 
     /**
      * @var string

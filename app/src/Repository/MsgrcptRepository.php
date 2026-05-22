@@ -115,7 +115,7 @@ class MsgrcptRepository extends BaseRepository
     /**
      * Update the status of a message for one recipient
      */
-    public function changeStatus(int $partitiontag, string $mailId, int $status, int $rid): void
+    public function changeStatus(int $partitiontag, string $mailId, int $status, string $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -135,7 +135,7 @@ class MsgrcptRepository extends BaseRepository
             'status' => DBAL\ParameterType::INTEGER,
             'partitionTag' => DBAL\ParameterType::STRING,
             'mailId' => DBAL\ParameterType::STRING,
-            'rid' => DBAL\ParameterType::INTEGER,
+            'rid' => DBAL\ParameterType::STRING,
         ]);
     }
 

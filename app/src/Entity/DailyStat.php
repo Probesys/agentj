@@ -39,7 +39,7 @@ class DailyStat
 
     #[ORM\ManyToOne(inversedBy: 'dailyStats')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?Domain $domain = null;
+    private Domain $domain;
 
     public function getId(): ?int
     {

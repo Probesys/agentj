@@ -81,7 +81,6 @@ class BaseMessage
     #[ORM\Column(
         name: 'validate_captcha',
         type: 'integer',
-        nullable: true,
         options: ['unsigned' => true, 'default' => 0],
     )]
     private int $validateCaptcha;

@@ -42,10 +42,10 @@ class Wblist
     private string $wb;
 
     #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private \DateTimeInterface $datemod ;
+    private ?\DateTimeInterface $datemod ;
 
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
-    private int $type;
+    private ?int $type;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
@@ -53,7 +53,7 @@ class Wblist
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[ORM\Id]
-    private int $priority;
+    private ?int $priority;
 
     public function __construct(User $user, Mailaddr $mailaddr)
     {

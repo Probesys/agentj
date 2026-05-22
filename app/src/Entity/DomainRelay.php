@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use App\Repository\DomainRelayRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: DomainRelayRepository::class)]
 #[ORM\Table(name: 'domain_relay')]
@@ -16,12 +14,12 @@ class DomainRelay
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $ipAddress = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $ipAddress;
 
     #[ORM\ManyToOne(inversedBy: 'domainRelays')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Domain $domain = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Domain $domain;
 
     public function getId(): ?int
     {

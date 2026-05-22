@@ -11,13 +11,14 @@ trait EntityBlameableTrait
     #[Gedmo\Blameable(on: 'create')]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(referencedColumnName: 'id', onDelete: 'SET NULL')]
-    protected User $createdBy;
+    protected ?User $createdBy;
 
 
     #[Gedmo\Blameable(on: 'update')]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(referencedColumnName: 'id', onDelete: 'SET NULL')]
-    protected User $updatedBy;
+    protected ?User $updatedBy;
+
     /**
      * Set createdBy.
      *

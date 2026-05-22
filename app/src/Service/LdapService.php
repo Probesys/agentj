@@ -6,6 +6,7 @@ use App\Entity\LdapConnector;
 use App\Entity\User;
 use Symfony\Component\Ldap\Adapter\CollectionInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
+use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Ldap;
 
 class LdapService
@@ -86,10 +87,14 @@ class LdapService
         }
     }
 
-    public function filterUserResultOnDomain(CollectionInterface &$result, LdapConnector $connector): void
-    {
-
-        $result = array_filter($result->toArray(), function ($user) use ($connector) {
+    /**
+     * @return array<int,Entry>
+     */
+    public function filterUserResultOnDomain(
+        CollectionInterface $ldapUsers,
+        LdapConnector $connector,
+    ): array {
+        return array_filter($ldapUsers->toArray(), function ($user) use ($connector) {
             $attribute = $user->getAttribute($connector->getLdapEmailField());
             $email = $attribute ? $attribute[0] : null;
             $emailIsValid = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
@@ -99,10 +104,14 @@ class LdapService
         });
     }
 
-    public function filterGroupResultWihtoutMembers(CollectionInterface &$result, string $groupMemberAttribute): void
-    {
-
-        $result = array_filter($result->toArray(), function ($ldapGroup) use ($groupMemberAttribute) {
+    /**
+     * @return array<int,Entry>
+     */
+    public function filterGroupResultWihtoutMembers(
+        CollectionInterface $ldapGroups,
+        string $groupMemberAttribute,
+    ): array {
+        return array_filter($ldapGroups->toArray(), function ($ldapGroup) use ($groupMemberAttribute) {
             $attribute = $ldapGroup->getAttribute($groupMemberAttribute);
             $nbMembers = $attribute ? count($attribute) : 0;
             return $nbMembers > 0;

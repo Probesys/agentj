@@ -19,10 +19,10 @@ class Maddr
     #[ORM\Column(name: 'id', type: 'bigint', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private ?int $id = null;
+    private string $id;
 
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: true)]
-    private int $partitionTag = 0;
+    private ?int $partitionTag = 0;
 
     #[ORM\Column(name: 'email', type: Types::BINARY, nullable: false)]
     private mixed $email;
@@ -33,7 +33,7 @@ class Maddr
     #[ORM\Column(name: 'domain', type: 'string', length: 255, nullable: false)]
     private string $domain;
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

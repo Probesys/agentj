@@ -23,19 +23,12 @@ class Msgrcpt extends BaseMessageRecipient
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseEndedAt = null;
 
-    /**
-     * @return Msgs|null
-     */
-    public function getMsgs(): ?Msgs
+    public function getMsgs(): Msgs
     {
         return $this->msgs;
     }
 
-    /**
-     * @param Msgs|null $msgs
-     * @return $this
-     */
-    public function setMsgs(?Msgs $msgs): self
+    public function setMsgs(Msgs $msgs): self
     {
         $this->msgs = $msgs;
 

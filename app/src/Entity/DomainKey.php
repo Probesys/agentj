@@ -21,7 +21,7 @@ class DomainKey
     private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: 'App\Entity\Domain', mappedBy: 'domainKeys', cascade: ['persist'])]
-    private Domain $domain;
+    private ?Domain $domain;
 
     #[ORM\Column(name: 'domain_name', type: 'string', length: 255, nullable: false)]
     private string $domainName;
@@ -40,7 +40,7 @@ class DomainKey
         return $this->id;
     }
 
-    public function getDomain(): Domain
+    public function getDomain(): ?Domain
     {
         return $this->domain;
     }

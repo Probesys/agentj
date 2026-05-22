@@ -261,15 +261,20 @@ final class DashboardController extends AbstractController
     {
         if ($message['status'] !== null) {
             return MessageStatus::getStatusName($message['status']);
-        } elseif (
-            $message['status'] === null && $message['bspamLevel'] > $level
-            && $message['content'] !== ContentType::CLEAN && $message['content'] !== ContentType::VIRUS
+        }
+
+        if (
+            $message['bspamLevel'] > $level &&
+            $message['content'] !== ContentType::CLEAN &&
+            $message['content'] !== ContentType::VIRUS
         ) {
             return 'spam';
-        } elseif ($message['content'] === ContentType::VIRUS) {
-            return 'virus';
-        } else {
-            return 'untreated';
         }
+
+        if ($message['content'] === ContentType::VIRUS) {
+            return 'virus';
+        }
+
+        return 'untreated';
     }
 }

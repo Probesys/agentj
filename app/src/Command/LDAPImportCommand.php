@@ -97,7 +97,7 @@ class LDAPImportCommand extends Command
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
             $results = $query->execute();
-            $this->ldapService->filterUserResultOnDomain($results, $this->connector);
+            $results = $this->ldapService->filterUserResultOnDomain($results, $this->connector);
 
             foreach ($results as $entry) {
                 $listEmails = $entry->getAttribute($mailAttribute) ?? [];
@@ -294,7 +294,7 @@ class LDAPImportCommand extends Command
             $results = $query->execute();
             $nbGroupUpdated = 0;
             $nbGroupCreated = 0;
-            $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
+            $results = $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
 
             foreach ($results as $ldapGroup) {
                 /* @var $ldapGroup Entry */

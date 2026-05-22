@@ -187,7 +187,7 @@ class LdapConnectorController extends AbstractController
                 $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
                 try {
                     $results = $query->execute();
-                    $ldapService->filterUserResultOnDomain($results, $testConnector);
+                    $results = $ldapService->filterUserResultOnDomain($results, $testConnector);
                     return new JsonResponse([
                         'status' => 'success',
                         'message' => $this->translator->trans('Message.Flash.ldapNbUserfound', [
@@ -231,9 +231,6 @@ class LdapConnectorController extends AbstractController
             }
 
             $testConnector->setLdapPassword($pass);
-            $return = [
-                'status' => ''
-            ];
 
             try {
                 $ldap = $ldapService->bind($testConnector);
@@ -241,7 +238,10 @@ class LdapConnectorController extends AbstractController
                 $query = $ldap->query($testConnector->getLdapBaseDN(), $ldapQuery);
                 try {
                     $groups = $query->execute();
-                    $ldapService->filterGroupResultWihtoutMembers($groups, $testConnector->getLdapGroupMemberField());
+                    $groups = $ldapService->filterGroupResultWihtoutMembers(
+                        $groups,
+                        $testConnector->getLdapGroupMemberField(),
+                    );
 
                     return new JsonResponse([
                         'status' => 'error',

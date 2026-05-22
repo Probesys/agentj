@@ -43,33 +43,11 @@ class Msgs extends BaseMessage
     }
 
     /**
-     * @return Collection<int, MsgRcpt>
+     * @return Collection<int, Msgrcpt>
      */
     public function getMsgRcpts(): Collection
     {
         return $this->msgRcpts;
-    }
-
-    public function addMsgRcpt(MsgRcpt $msgRcpt): self
-    {
-        if (!$this->msgRcpts->contains($msgRcpt)) {
-            $this->msgRcpts[] = $msgRcpt;
-            $msgRcpt->setMsgs($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMsgRcpt(MsgRcpt $msgRcpt): self
-    {
-        if ($this->msgRcpts->removeElement($msgRcpt)) {
-            // set the owning side to null (unless already changed)
-            if ($msgRcpt->getMsgs() === $this) {
-                $msgRcpt->setMsgs(null);
-            }
-        }
-
-        return $this;
     }
 
     /**
@@ -93,7 +71,7 @@ class Msgs extends BaseMessage
             $rawMail .= $chunk->getMailText() ?? '';
         }
 
-        return mb_convert_encoding($rawMail, 'UTF-8', 'auto');
+        return mb_convert_encoding($rawMail, 'UTF-8', 'auto') ?: $rawMail;
     }
 
     public function getQuarantineEmail(): Email
