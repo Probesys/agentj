@@ -1,5 +1,29 @@
 # Changelog of AgentJ
 
+## 2026-05-22 - 2.6.3
+
+This release also includes changes from 2.5.5.
+
+### Features
+
+- Improve actions on messages ([fee96a96](https://github.com/Probesys/agentj/commit/fee96a96))
+- Add toggles to manage human auth bypass and report sending in the LDAP connector ([8becbbf2](https://github.com/Probesys/agentj/commit/8becbbf2))
+- Allow to disable login through the LDAP connector ([d8b88a04](https://github.com/Probesys/agentj/commit/d8b88a04))
+
+### Bug fixes
+
+- Authorize senders using the From header from messages ([0a629d6b](https://github.com/Probesys/agentj/commit/0a629d6b))
+- Consider original user when checking for "bypass human auth" option ([b3e546fc](https://github.com/Probesys/agentj/commit/b3e546fc))
+- Don't autorize spam when authorizing a sender ([2f63f13e](https://github.com/Probesys/agentj/commit/2f63f13e))
+- Disable actions on the show virus message ([00f201a4](https://github.com/Probesys/agentj/commit/00f201a4))
+- Add default values to user `report` and `bypass_human_auth` ([eb75e398](https://github.com/Probesys/agentj/commit/eb75e398))
+
+### Maintenance
+
+- Tweak SpamAssassin scores ([95d3f85a](https://github.com/Probesys/agentj/commit/95d3f85a))
+- Allow empty senders in senderverifmilter ([c630cdb9](https://github.com/Probesys/agentj/commit/c630cdb9))
+- Fix permissions on `sa_learn` docker volume ([de9e9826](https://github.com/Probesys/agentj/commit/de9e9826))
+
 ## 2026-05-18 - 2.6.2
 
 This release also includes changes from 2.5.4.
