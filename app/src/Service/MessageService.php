@@ -68,9 +68,13 @@ class MessageService
                 $message->getFromAddr()
             );
 
+            $domain = $user->getDomain();
+            $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+
             foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
                 $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
-                if (!$isSameSender) {
+                $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
+                if (!$isSameSender || $isSpam) {
                     continue;
                 }
 
@@ -104,6 +108,8 @@ class MessageService
         $recipientDomainName = $recipient->getReverseDomain();
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
+        $domain = $domainUser->getDomain();
+        $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
         $this->wblistRepository->updateOrCreateRule(
             $domainUser,
@@ -114,13 +120,14 @@ class MessageService
         );
 
         $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
-            $domainUser->getDomain(),
+            $domain,
             $message->getFromAddr(),
         );
 
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
             $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
-            if (!$isSameSender) {
+            $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
+            if (!$isSameSender || $isSpam) {
                 continue;
             }
 
