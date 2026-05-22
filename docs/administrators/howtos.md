@@ -5,8 +5,7 @@
 If you want to known why an email has been flagged as spam, you can't use the web interface and you'll have to resort to shell. Before that, you'll have to get the ID of the email (first column in the web interface).
 
 1. Connect to your AgentJ server and go to the folder where AgentJ is installed.
-.
-2. Run the following command: `docker compose exec db sh -c 'mariadb -uroot -p$MYSQL_ROOT_PASSWORD -e "SELECT * FROM quarantine WHERE mail_id=\"EMAILID\";" agentj'`. Modify the last `agentj` with your database name defined in the `.env` file and replace `EMAILID` by the ID of the email.
+2. Run the following command: `docker compose exec app ./bin/console agentj:messages:display EMAILID`. Replace `EMAILID` by the ID of the email.
 3. Identify the `X-Spam-Status` header in the email body. In this header you have the list of tests that contributed to the scoring.
 
 ## How to import from LDAP connector from CLI
