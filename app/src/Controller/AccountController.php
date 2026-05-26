@@ -2,15 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\UserPreferencesType;
 use App\Repository\GroupsRepository;
-use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class AccountController extends AbstractController
 {
@@ -31,6 +31,10 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($this->getUser());
             $this->em->flush();
+
+            $this->addFlash('success', new TranslatableMessage('Generics.flash.accountUpdated'));
+
+            return $this->redirect('account');
         }
 
         $domainWblist = $this->em->getRepository(Wblist::class)->getDefaultDomainWBList($user->getDomain());

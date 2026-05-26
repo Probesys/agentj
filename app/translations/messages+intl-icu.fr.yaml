@@ -321,6 +321,7 @@ Generics.flash.IncorrectColumns: 'Ligne [ROW] : Nombre de colonnes incorrect.'
 Generics.flash.InvalidEmail: 'Ligne [ROW] : Adresse e-mail invalide.'
 Generics.flash.NonexistantDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
 Generics.flash.NonexistantUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+Generics.flash.accountUpdated: 'Compte mis à jour'
 Generics.flash.addSuccess: 'Ajout effectué avec succès !'
 Generics.flash.aliasAlreadyExist: "Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser"
 Generics.flash.domainNotExist: "Le domaine n'existe pas"

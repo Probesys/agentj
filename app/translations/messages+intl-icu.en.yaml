@@ -321,6 +321,7 @@ Generics.flash.IncorrectColumns: 'Row [ROW]: Incorrect number of columns.'
 Generics.flash.InvalidEmail: 'Row [ROW]: email address is invalid.'
 Generics.flash.NonexistantDomain: 'Row [ROW]: Domain [DOMAIN] does not exist in the database.'
 Generics.flash.NonexistantUser: 'Row [ROW]: User [EMAIL] does not exist in the database.'
+Generics.flash.accountUpdated: 'Account updated'
 Generics.flash.addSuccess: 'Added successfully!'
 Generics.flash.aliasAlreadyExist: "This alias is already used. You can't use it"
 Generics.flash.domainNotExist: 'The domain does not exist'
