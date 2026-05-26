@@ -61,8 +61,13 @@ class LdapService
             return false;
         }
 
+
         $originConnector = $user->getOriginConnector();
         if (!$originConnector instanceof LdapConnector) {
+            return false;
+        }
+
+        if (!$originConnector->isLdapAllowConnection()) {
             return false;
         }
 

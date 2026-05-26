@@ -58,6 +58,14 @@ class LdapConnector extends Connector
     #[ORM\Column(type: 'integer', options: ['default' => 3])]
     private int $ldapVersion = 3;
 
+    #[ORM\Column(nullable: false, options: ['default' => true])]
+    private ?bool $ldapAllowConnection = true;
+
+    #[ORM\Column(nullable: false, options: ['default' => false])]
+    private bool $ldapBypassHumanAuth = false;
+
+    #[ORM\Column(nullable: false, options: ['default' => true])]
+    private bool $ldapReport = true;
 
     public function getLdapHost(): ?string
     {
@@ -249,6 +257,42 @@ class LdapConnector extends Connector
     public function setLdapVersion(int $ldapVersion): static
     {
         $this->ldapVersion = $ldapVersion;
+
+        return $this;
+    }
+
+    public function isLdapAllowConnection(): ?bool
+    {
+        return $this->ldapAllowConnection;
+    }
+
+    public function setLdapAllowConnection(bool $ldapAllowConnection): static
+    {
+        $this->ldapAllowConnection = $ldapAllowConnection;
+
+        return $this;
+    }
+
+    public function isLdapBypassHumanAuth(): bool
+    {
+        return $this->ldapBypassHumanAuth;
+    }
+
+    public function setLdapBypassHumanAuth(bool $ldapBypassHumanAuth): static
+    {
+        $this->ldapBypassHumanAuth = $ldapBypassHumanAuth;
+
+        return $this;
+    }
+
+    public function isLdapReport(): bool
+    {
+        return $this->ldapReport;
+    }
+
+    public function setLdapReport(bool $ldapReport): static
+    {
+        $this->ldapReport = $ldapReport;
 
         return $this;
     }

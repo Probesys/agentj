@@ -45,44 +45,61 @@ class MsgrcptRepository extends BaseRepository
     }
 
     /**
-     * Return all message recipients sent by $senderEmail to $recipientUser.
+     * Return all message recipients sent by $senderFrom to $recipientUser.
+     *
+     * This method is used to fetch the messages sent by a sender who just had
+     * been authorized or banned by a user. It fetches the messages by using
+     * the raw "From" value. We cannot pass the "senderEmail" value because it
+     * is either the email part of the From value, or the envelope sender
+     * address if From is empty. In other words, this value cannot be used to
+     * fetch the mails, and the envelope sender address is not reliable as it
+     * can be some random emails (e.g. mails sent by newsletter operators).
+     *
+     * It is highly recommended to recheck the senderEmail on the messages
+     * returned by this method in order to be sure to release or ban the
+     * correct messages.
      *
      * @return Msgrcpt[]
      */
-    public function findSentToUserByEmail(User $recipientUser, string $senderEmail): array
+    public function findSentToUserByEmail(User $recipientUser, string $senderFrom): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mrcpt
             FROM App\Entity\Msgrcpt mrcpt
             JOIN mrcpt.msgs m
-            JOIN m.sid s
             JOIN mrcpt.rid r
             WHERE r.email = :recipientEmail
-            AND s.email = :senderEmail
+            AND m.fromAddr = :senderFrom
             AND mrcpt.status IS NOT NULL
         SQL);
 
         $query->setParameter('recipientEmail', $recipientUser->getEmail());
-        $query->setParameter('senderEmail', $senderEmail);
+        $query->setParameter('senderFrom', $senderFrom);
 
         return $query->getResult();
     }
 
     /**
-     * Return all message recipients sent by $senderEmail to $recipientDomain.
+     * Return all message recipients sent by $senderFrom to $recipientDomain.
+     *
+     * As for findSentToUserByEmail, this method fetches the messages by using
+     * the raw "From" value. See above for the reasons.
+     *
+     * It is highly recommended to recheck the senderEmail on the messages
+     * returned by this method in order to be sure to release or ban the
+     * correct messages.
      *
      * @return Msgrcpt[]
      */
-    public function findSentToDomainByEmail(Domain $recipientDomain, string $senderEmail): array
+    public function findSentToDomainByEmail(Domain $recipientDomain, string $senderFrom): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mrcpt
             FROM App\Entity\Msgrcpt mrcpt
             JOIN mrcpt.msgs m
-            JOIN m.sid s
             JOIN mrcpt.rid r
             WHERE r.domain = :recipientReverseDomainName
-            AND s.email = :senderEmail
+            AND m.fromAddr = :senderFrom
             AND mrcpt.status IS NOT NULL
         SQL);
 
@@ -90,7 +107,7 @@ class MsgrcptRepository extends BaseRepository
         $reverseDomainName = Url::reverseDomainName($domainName);
 
         $query->setParameter('recipientReverseDomainName', $reverseDomainName);
-        $query->setParameter('senderEmail', $senderEmail);
+        $query->setParameter('senderFrom', $senderFrom);
 
         return $query->getResult();
     }

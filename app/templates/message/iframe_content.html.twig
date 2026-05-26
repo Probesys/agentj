@@ -1,4 +1,4 @@
-{% if msgRcpt.content != 'V' %}
+{% if not msgRcpt.isVirus %}
 	<div class="row">
 		<div class="col-md-3 font-weight-bold">
 			{{ 'Generics.fields.sender' | trans }}

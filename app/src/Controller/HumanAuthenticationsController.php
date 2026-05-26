@@ -38,8 +38,7 @@ class HumanAuthenticationsController extends AbstractController
             throw $this->createNotFoundException('The domain does not exist.');
         }
 
-        $sender = $message->getSid();
-        $senderEmail = $sender->getEmailClear();
+        $senderEmail = $message->getSenderEmail();
 
         $form = $this->createForm(HumanAuthenticationType::class, [
             'email' => $senderEmail,
@@ -59,12 +58,12 @@ class HumanAuthenticationsController extends AbstractController
                 empty($form->get('emailEmpty')->getData())
             ) {
                 // Keep only recipients that are NOT already in a wblist. This avoids,
-                // for a instance, a blocked sender to authorise himself.
+                // for instance, a blocked sender to authorise himself.
                 $messageRecipients = array_filter(
                     $messageRecipients,
-                    function ($messageRecipient) use ($wblistRepository, $sender) {
+                    function ($messageRecipient) use ($wblistRepository, $senderEmail) {
                         $recipient = $messageRecipient->getRid();
-                        return !$wblistRepository->isSenderInRecipientList($sender, $recipient);
+                        return !$wblistRepository->isSenderInRecipientList($senderEmail, $recipient);
                     }
                 );
 

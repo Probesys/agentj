@@ -75,9 +75,13 @@ class MessageController extends AbstractController
                     $subTitle = new TranslatableMessage('Entities.Message.banned');
                     $messageStatus = MessageStatus::BANNED;
                     $messageActions = [
+                        'Message.Actions.Restore' => 'restore',
                         'Message.Actions.Autorized' => 'authorized',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                    }
                     break;
                 case 'authorized':
                     $subTitle = new TranslatableMessage('Entities.Message.authorized');
@@ -85,14 +89,34 @@ class MessageController extends AbstractController
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
                     ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                    }
                     $messageStatus = MessageStatus::AUTHORIZED;
                     break;
                 case 'delete':
                     $subTitle = new TranslatableMessage('Entities.Message.deleted');
+                    $messageActions = [
+                        'Message.Actions.Restore' => 'restore',
+                        'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Banned' => 'banned',
+                    ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                    }
                     $messageStatus = MessageStatus::DELETED;
                     break;
                 case 'restored':
                     $subTitle = new TranslatableMessage('Entities.Message.restored');
+                    $messageActions = [
+                        'Message.Actions.Autorized' => 'authorized',
+                        'Message.Actions.Banned' => 'banned',
+                        'Message.Actions.Delete' => 'delete',
+                    ];
+                    if ($this->isGranted('ROLE_ADMIN')) {
+                        $messageActions['Message.Actions.MarkAsSpam'] = 'mark as spam';
+                        $messageActions['Message.Actions.MarkAsHam'] = 'mark as ham';
+                    }
                     $messageStatus = MessageStatus::RESTORED;
                     break;
 
@@ -131,7 +155,7 @@ class MessageController extends AbstractController
             'action' => $this->generateUrl('message_batch')
         ]);
 
-        if ($messageStatus === MessageStatus::DELETED || $messageStatus === MessageStatus::VIRUS) {
+        if ($messageStatus === MessageStatus::VIRUS) {
             $filterForm->remove('actions');
         }
 
@@ -223,8 +247,8 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wblists = $this->em->getRepository(Wblist::class)->findByMailAddresses(
-            $msg->getSid(),
+        $wblists = $this->em->getRepository(Wblist::class)->findBySenderEmailAndRecipient(
+            $msg->getSenderEmail(),
             $msgRcpt->getRid(),
         );
 

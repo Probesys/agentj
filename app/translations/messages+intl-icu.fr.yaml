@@ -122,8 +122,10 @@ Entities.LdapConnector.fields.LdapBaseDN: 'Base DN'
 Entities.LdapConnector.fields.LdapPassword: 'Mot de passe'
 Entities.LdapConnector.fields.advancedOptions: 'Options avancées'
 Entities.LdapConnector.fields.allowAnonymousBind: 'Connexion anonyme'
+Entities.LdapConnector.fields.bypassHumanAuth: "Désactiver l'authentification humaine pour les utilisateurs créés"
 Entities.LdapConnector.fields.connectionInformation: 'Informations de connexion'
 Entities.LdapConnector.fields.ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
+Entities.LdapConnector.fields.ldapAllowConnection: "Autoriser l'authentification par LDAP"
 Entities.LdapConnector.fields.ldapBindDn: 'Bind DN'
 Entities.LdapConnector.fields.ldapEmailField: "Champ LDAP pour l'email"
 Entities.LdapConnector.fields.ldapEncryption: Chiffrement
@@ -136,6 +138,7 @@ Entities.LdapConnector.fields.ldapRealNameField: 'Champ LDAP pour le nom (ex : s
 Entities.LdapConnector.fields.ldapSharedWithField: 'Champ LDAP pour les boites partagées'
 Entities.LdapConnector.fields.ldapUserFilter: 'Filtre pour les utilisateurs'
 Entities.LdapConnector.fields.ldapVersion: 'Version LDAP'
+Entities.LdapConnector.fields.report: 'Envoyer le rapport journalier pour les utilisateurs créés'
 Entities.LdapConnector.fields.synchronizeGroup: 'Synchronisez également les groupes'
 Entities.LdapConnector.fields.usersInformation: 'Informations utilisateurs'
 Entities.Message.authorized: Autorisés

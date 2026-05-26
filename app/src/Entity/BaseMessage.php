@@ -334,12 +334,29 @@ class BaseMessage
     }
 
     /**
-     * Return the envelope sender email address.
+     * Return the email value from the "From" header address, or the envelope
+     * sender address as fallback if From is not set.
+     *
+     * This method is used to get the address email to authorize or ban.
+     *
+     * It considers the "From" header in priority because the envelope sender
+     * address can change for a same sender. For instance, a newsletter will
+     * always be sent using the same "From", but some services will use a
+     * unique and random envelope address for each delivery. Thus, we must rely
+     * on the stable "From" value.
      */
     public function getSenderEmail(): ?string
     {
         $sender = $this->getSid();
-        return $sender->getEmailClear();
+        $senderEmail = $sender->getEmailClear();
+
+        $fromEmail = $this->getFromMimeAddress()?->getAddress();
+
+        if ($fromEmail) {
+            return $fromEmail;
+        } else {
+            return $senderEmail;
+        }
     }
 
     public function getStatus(): ?int

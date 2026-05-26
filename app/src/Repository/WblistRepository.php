@@ -159,10 +159,10 @@ class WblistRepository extends BaseRepository
      *
      * @return Wblist[]
      */
-    public function findByMailAddresses(Maddr $sender, Maddr $recipient): array
+    public function findBySenderEmailAndRecipient(string $senderEmail, Maddr $recipient): array
     {
         $recipientAddresses = Email::getAddressLookups($recipient->getEmailClear());
-        $senderAddresses = Email::getAddressLookups($sender->getEmailClear());
+        $senderAddresses = Email::getAddressLookups($senderEmail);
 
         $entityManager = $this->getEntityManager();
         $connection = $entityManager->getConnection();
@@ -206,9 +206,9 @@ class WblistRepository extends BaseRepository
         return $wblists;
     }
 
-    public function isSenderAuthorizedByRecipient(Maddr $sender, Maddr $recipient): bool
+    public function isSenderAuthorizedByRecipient(string $senderEmail, Maddr $recipient): bool
     {
-        $wblists = $this->findByMailAddresses($sender, $recipient);
+        $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 
         if (count($wblists) === 0) {
             return false;
@@ -217,9 +217,9 @@ class WblistRepository extends BaseRepository
         return $wblists[0]->isWbRuleAuthorized();
     }
 
-    public function isSenderInRecipientList(Maddr $sender, Maddr $recipient): bool
+    public function isSenderInRecipientList(string $senderEmail, Maddr $recipient): bool
     {
-        $wblists = $this->findByMailAddresses($sender, $recipient);
+        $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 
         if (count($wblists) === 0) {
             return false;

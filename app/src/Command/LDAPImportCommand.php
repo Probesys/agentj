@@ -212,6 +212,8 @@ class LDAPImportCommand extends Command
         $user->setDomain($domain);
         $user->setPriority(MailaddrService::computePriority($emailAddress));
         $user->setRoles('["ROLE_USER"]');
+        $user->setBypassHumanAuth($this->connector->isLdapBypassHumanAuth());
+        $user->setReport($this->connector->isLdapReport());
         $this->em->persist($user);
         $this->em->flush();
         $this->nbUserCreated++;

@@ -109,6 +109,15 @@ class LdapConnectorType extends ConnectorType
                 'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapGroupFilter'),
                 'attr' => ['data-ldap-group' => 'true']
             ])
+            ->add('ldapAllowConnection', null, [
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapAllowConnection'),
+            ])
+            ->add('ldapReport', null, [
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.report'),
+            ])
+            ->add('ldapBypassHumanAuth', null, [
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.bypassHumanAuth'),
+            ])
         ;
     }
 
