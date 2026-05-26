@@ -188,33 +188,44 @@ class WblistController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/wblist/admin/import', name: 'import_wblist', options: ['expose' => true])]
-    public function importWbListAction(Request $request): Response
+    #[Route(path: '/wblist/admin/import/{type}', name: 'import_wblist', options: ['expose' => true])]
+    public function importWbListAction(Request $request, string $type): Response
     {
+        if ($type !== 'W' && $type !== 'B') {
+            return new Response("Type has to be either `W` or `B`", 422);
+        }
+        $rule = $type === 'W' ? 'accept' : 'block';
+
         $form = $this->createForm(ImportType::class, null, [
-            'action' => $this->generateUrl('import_wblist'),
+            'action' => $this->generateUrl('import_wblist', ['type' => $type]),
             'user' => $this->getUser()
         ]);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
             if ($fileUpload->getClientMimeType() == "text/plain") {
                 $filename = 'import-wblist-agentj-' . time() . ".txt";
                 $file = $fileUpload->move('/tmp/', $filename);
-                $this->importWbList($file->getPathname(), $form->get('domain')->getData());
+                $this->importWbList($file->getPathname(), $form->get('domain')->getData(), $rule);
             } else {
                 $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
             }
 
             return new RedirectResponse($this->referrer->get());
         }
+
         return $this->render('import/index_wblist.html.twig', [
-                    'controller_name' => 'ImportController',
-                    'form' => $form,
+            'controller_name' => 'ImportController',
+            'form' => $form,
+            'wbTypeList' => $type,
         ]);
     }
 
-    private function importWbList(string $pathfile, Domain $domain): void
+    /**
+     * @param 'accept'|'block' $rule
+     */
+    private function importWbList(string $pathfile, Domain $domain, string $rule): void
     {
         $tabWblist = [];
         if (($handle = fopen($pathfile, "r"))) {
@@ -251,7 +262,7 @@ class WblistController extends AbstractController
                     $wblist = new Wblist($user, $mailaddrSender);
                 }
 
-                $wblist->setWbRule('accept');
+                $wblist->setWbRule($rule);
                 $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
                 $wblist->setType(Wblist::WBLIST_TYPE_IMPORT);
                 $this->em->persist($wblist);

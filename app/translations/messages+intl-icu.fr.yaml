@@ -113,8 +113,9 @@ Entities.Import.Alias.warning: 'Attention : les utilisateurs importés existant 
 Entities.Import.Users.description: 'Le fichier doit être encodé en utf8 au format csv séparé par des points virgules.<br /> La structure est la suivante : email ; Nom; Prénom; Groupe<br />'
 Entities.Import.Users.title: 'Importer des utilisateurs'
 Entities.Import.Users.warning: 'Attention : les utilisateurs importés existant déjà dans la base de données seront mis à jour.'
-Entities.Import.Wbliste.description: 'Le fichier doit être un fichier texte (.txt) encodé en UTF8. Chaque ligne doit comporter une adresse mail ou un domaine valide.'
-Entities.Import.Wbliste.title: 'Liste blanche : importer une liste'
+Entities.Import.Wblist.description: 'Le fichier doit être un fichier texte (.txt) encodé en UTF8. Chaque ligne doit comporter une adresse mail ou un domaine valide.'
+Entities.Import.Wblist.titleAuthorized: "Importer une liste d'utilisateurs autorisés"
+Entities.Import.Wblist.titleBan: "Importer une liste d'utilisateurs bannis"
 Entities.Import.actions.import: Importer
 Entities.LdapConnector.actions.add: 'Ajouter un connecteur LDAP'
 Entities.LdapConnector.actions.edit: 'Modifier le connecteur LDAP'
@@ -262,6 +263,7 @@ Entities.WBList.fields.typeLabelB.0: 'Bloqué par vous'
 Entities.WBList.fields.typeLabelB.1: 'Bloqué par authentification humaine'
 Entities.WBList.fields.typeLabelB.2: 'Bloqué par le groupe'
 Entities.WBList.fields.typeLabelB.3: "Bloqué par l'administrateur"
+Entities.WBList.fields.typeLabelB.5: "Validé par importation d'un fichier"
 Entities.WBList.fields.typeLabelW.0: 'Validé par vous'
 Entities.WBList.fields.typeLabelW.1: 'Validé par authentification humaine'
 Entities.WBList.fields.typeLabelW.2: 'Validé par le groupe'

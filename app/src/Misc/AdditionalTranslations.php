@@ -29,6 +29,7 @@ new TranslatableMessage('Entities.WBList.fields.typeLabelB.0');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.1');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.2');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.3');
+new TranslatableMessage('Entities.WBList.fields.typeLabelB.5');
 
 new TranslatableMessage('Generics.labels.cancel');
 

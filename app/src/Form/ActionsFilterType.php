@@ -12,7 +12,6 @@ class ActionsFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // dd($options['avalaibleActions']);
         $builder
             ->add('actions', ChoiceType::class, [
                 'label' => new TranslatableMessage('Generics.labels.actions'),
