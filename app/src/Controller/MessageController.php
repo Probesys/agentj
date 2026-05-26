@@ -25,6 +25,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Webklex\PHPIMAP\Message;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Translation\TranslatableMessage;
 
 #[Route(path: '/message')]
 class MessageController extends AbstractController
@@ -53,7 +54,7 @@ class MessageController extends AbstractController
         if ($type) {
             switch ($type) {
                 case 'spam':
-                    $subTitle = 'Entities.Message.spammedDetect';
+                    $subTitle = new TranslatableMessage('Entities.Message.spammedDetect');
                     $messageActions = [
                         'Message.Actions.Restore' => 'restore',
                         'Message.Actions.Autorized' => 'authorized',
@@ -66,12 +67,12 @@ class MessageController extends AbstractController
                     $messageStatus = MessageStatus::SPAMMED;
                     break;
                 case 'virus':
-                    $subTitle = 'Entities.Message.virus';
+                    $subTitle = new TranslatableMessage('Entities.Message.virus');
                     $messageStatus = MessageStatus::VIRUS;
                     $messageActions = [];
                     break;
                 case 'banned':
-                    $subTitle = 'Entities.Message.banned';
+                    $subTitle = new TranslatableMessage('Entities.Message.banned');
                     $messageStatus = MessageStatus::BANNED;
                     $messageActions = [
                         'Message.Actions.Autorized' => 'authorized',
@@ -79,7 +80,7 @@ class MessageController extends AbstractController
                     ];
                     break;
                 case 'authorized':
-                    $subTitle = 'Entities.Message.authorized';
+                    $subTitle = new TranslatableMessage('Entities.Message.authorized');
                     $messageActions = [
                         'Message.Actions.Banned' => 'banned',
                         'Message.Actions.Delete' => 'delete',
@@ -87,16 +88,16 @@ class MessageController extends AbstractController
                     $messageStatus = MessageStatus::AUTHORIZED;
                     break;
                 case 'delete':
-                    $subTitle = 'Entities.Message.delete';
+                    $subTitle = new TranslatableMessage('Entities.Message.deleted');
                     $messageStatus = MessageStatus::DELETED;
                     break;
                 case 'restored':
-                    $subTitle = 'Entities.Message.restored';
+                    $subTitle = new TranslatableMessage('Entities.Message.restored');
                     $messageStatus = MessageStatus::RESTORED;
                     break;
 
                 default:
-                    $subTitle = 'Entities.Message.untreated';
+                    $subTitle = new TranslatableMessage('Entities.Message.untreated');
                     $messageActions = [
                         'Message.Actions.Restore' => 'restore',
                         'Message.Actions.Autorized' => 'authorized',

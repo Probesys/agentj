@@ -27,26 +27,26 @@ class GroupsType extends AbstractType
                 'mapped' => false,
             ])
             ->add('name', null, [
-                'label' => 'Entities.Group.fields.name'
+                'label' => new TranslatableMessage('Entities.Group.fields.name'),
             ])
             ->add('overrideUser', null, [
-                'label' => 'Entities.Group.fields.overrideUser'
+                'label' => new TranslatableMessage('Entities.Group.fields.overrideUser'),
             ])
             ->add('policy', null, [
-                'label' => 'Entities.Group.fields.policy',
+                'label' => new TranslatableMessage('Entities.Group.fields.policy'),
                 'required' => true,
-                'placeholder' => 'Generics.actions.choosePolicy'
+                'placeholder' => new TranslatableMessage('Generics.actions.choosePolicy'),
             ])
             ->add('wbRule', ChoiceType::class, [
                 'choices' => ['none', 'block', 'allow'],
                 'choice_label' => function (string $choice): TranslatableMessage {
                     return new TranslatableMessage("Entities.WBList.rules.{$choice}");
                 },
-                'label' => 'Entities.WBList.fields.wbRule',
+                'label' => new TranslatableMessage('Entities.WBList.fields.wbRule'),
                 'required' => true,
             ])
             ->add('priority', NumberType::class, [
-                'label' => 'Generics.fields.priority',
+                'label' => new TranslatableMessage('Generics.fields.priority'),
                 'required' => true,
                 'attr' => [
                     'data-action' => 'blur->form-group#checkPriorityValidity',
@@ -54,14 +54,14 @@ class GroupsType extends AbstractType
                 ]
             ])
             ->add('domain', EntityType::class, [
-                'label' => 'Entities.Group.fields.domain',
+                'label' => new TranslatableMessage('Entities.Group.fields.domain'),
                 'class' => Domain::class,
                 'multiple' => false,
                 'attr' => [
                     'data-form-group-target' => 'domain',
                     'data-action' => 'change->form-group#checkPriorityValidity',
                 ],
-                'placeholder' => 'Generics.actions.chooseDomain',
+                'placeholder' => new TranslatableMessage('Generics.actions.chooseDomain'),
                 'required' => true,
                 'query_builder' => function (DomainRepository $rep) use ($user) {
                     $builder = $rep->createQueryBuilder('d')
@@ -78,7 +78,7 @@ class GroupsType extends AbstractType
                 },
             ])
             ->add('active', null, [
-                'label' => 'Generics.fields.active'
+                'label' => new TranslatableMessage('Generics.fields.active'),
             ])
             ->add('quota', CollectionType::class, [
                 'entry_type' => QuotaType::class,

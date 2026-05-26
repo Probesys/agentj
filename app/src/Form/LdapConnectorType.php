@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class LdapConnectorType extends ConnectorType
 {
@@ -23,16 +24,16 @@ class LdapConnectorType extends ConnectorType
         $builder
             ->add('ldapHost', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapHost',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapHost'),
             ])
             ->add('ldapPort', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapPort',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapPort'),
                 'attr' => ['pattern' => '[0-9]+']
             ])
             ->add('ldapEncryption', ChoiceType::class, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapEncryption',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapEncryption'),
                 'choices' => [
                     'None' => 'none',
                     'SSL' => 'ssl',
@@ -41,23 +42,23 @@ class LdapConnectorType extends ConnectorType
             ])
             ->add('ldapVersion', IntegerType::class, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapVersion',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapVersion'),
             ])
             ->add('LdapBaseDN', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.LdapBaseDN',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.LdapBaseDN'),
             ])
             ->add('allowAnonymousBind', null, [
-                'label' => 'Entities.LdapConnector.fields.allowAnonymousBind',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.allowAnonymousBind'),
             ])
             ->add('ldapBindDn', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapBindDn',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapBindDn'),
                 'attr' => ['data-ldap-bind' => 'true']
             ])
             ->add('LdapPassword', PasswordType::class, [
                 'required' => is_null($builder->getData()->getId()),
-                'label' => 'Entities.LdapConnector.fields.LdapPassword',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.LdapPassword'),
                 'attr' => ['data-ldap-bind' => 'true']
             ])
             ->add('targetGroups', EntityType::class, [
@@ -71,41 +72,41 @@ class LdapConnectorType extends ConnectorType
                         ->where('g.domain = :domain')
                         ->setParameter('domain', $domain);
                 },
-                'label' => 'Entities.Connector.fields.targetGroups',
+                'label' => new TranslatableMessage('Entities.Connector.fields.targetGroups'),
             ])
             ->add('ldapRealNameField', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapRealNameField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapRealNameField'),
             ])
             ->add('ldapEmailField', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapEmailField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapEmailField'),
             ])
             ->add('ldapAliasField', null, [
                 'required' => false,
-                'label' => 'Entities.LdapConnector.fields.ldapAliasField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapAliasField'),
             ])
             ->add('ldapSharedWithField', null, [
                 'required' => false,
-                'label' => 'Entities.LdapConnector.fields.ldapSharedWithField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapSharedWithField'),
             ])
             ->add('ldapGroupNameField', null, [
                 'required' => false,
-                'label' => 'Entities.LdapConnector.fields.ldapGroupNameField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapGroupNameField'),
                 'attr' => ['data-ldap-group' => 'true']
             ])
             ->add('ldapGroupMemberField', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapGroupMemberField',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapGroupMemberField'),
                 'attr' => ['data-ldap-group' => 'true']
             ])
             ->add('ldapUserFilter', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapUserFilter',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapUserFilter'),
             ])
             ->add('ldapGroupFilter', null, [
                 'required' => true,
-                'label' => 'Entities.LdapConnector.fields.ldapGroupFilter',
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.ldapGroupFilter'),
                 'attr' => ['data-ldap-group' => 'true']
             ])
         ;
