@@ -61,6 +61,9 @@ class Connector
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $lastResultSynchronization = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $importStartedAt = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -225,6 +228,18 @@ class Connector
     public function setLastResultSynchronization(?string $lastResultSynchronization): static
     {
         $this->lastResultSynchronization = $lastResultSynchronization;
+
+        return $this;
+    }
+
+    public function getImportStartedAt(): ?\DateTimeImmutable
+    {
+        return $this->importStartedAt;
+    }
+
+    public function setImportStartedAt(?\DateTimeImmutable $importStartedAt): static
+    {
+        $this->importStartedAt = $importStartedAt;
 
         return $this;
     }

@@ -69,6 +69,10 @@ class LDAPImportCommand extends Command
             return Command::FAILURE;
         }
 
+        $this->connector->setImportStartedAt(new \DateTimeImmutable());
+        $this->em->persist($this->connector);
+        $this->em->flush();
+
         try {
             $this->ldap = $this->ldapService->bind($this->connector);
         } catch (ConnectionException $exception) {
@@ -82,6 +86,12 @@ class LDAPImportCommand extends Command
         }
 
         $this->groupService->updateWblist();
+
+        sleep(5);
+
+        $this->connector->setImportStartedAt(null);
+        $this->em->persist($this->connector);
+        $this->em->flush();
 
         return Command::SUCCESS;
     }

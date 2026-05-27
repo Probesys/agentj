@@ -112,7 +112,7 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane fade mb-3" id="auth" role="tabpanel" aria-labelledby="auth-tab">
+    <div class="tab-pane fade mb-3 auth" id="auth" role="tabpanel" aria-labelledby="auth-tab">
             <div class="card-header mt-2" style="background-color: #ffffff; font-size: 1.25rem">
                 <h5>{{ 'Entities.Domain.labels.connectors' | trans() }}</h5>
                 <div class="dropdown float-right">
@@ -165,7 +165,7 @@
                                 <td>{{ connector.name }}</td>
                                 <td>{{ connector.type }}</td>
                                 <td>
-                                    {% if connector.type != 'IMAP' %}
+                                    {% if connector.type != 'IMAP' and connector.importStartedAt === null %}
                                         <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
                                           class='btn btn-sm btn-success'
                                           title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">

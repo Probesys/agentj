@@ -32,6 +32,8 @@ final class SynchronizeConnectorsHandler
 
     public function __invoke(SynchronizeConnectors $message): void
     {
+        $type = $message->getType();
+
         $lock = $this->lockFactory->createLock('synchronize-connectors', ttl: 3600);
 
         if (!$lock->acquire()) {
@@ -49,20 +51,27 @@ final class SynchronizeConnectorsHandler
                 $input = new ArrayInput([
                     'connectorId' => $connector->getId(),
                 ]);
-                if ($connector instanceof LdapConnector) {
+                if ($connector instanceof LdapConnector && ($type === 'ldap' || $type === 'all')) {
                     $command = $this->application->find('agentj:import-ldap');
-                } elseif ($connector instanceof Office365Connector) {
+                } elseif ($connector instanceof Office365Connector && ($type === 'o365' || $type === 'all')) {
                     $command = $this->application->find('agentj:import-office365');
                 } else {
                     continue;
                 }
 
+                $connector->setImportStartedAt(new \DateTimeImmutable());
+                $this->entityManager->persist($connector);
+                $this->entityManager->flush();
+
                 $command->run($input, $output);
 
+                $connector->setImportStartedAt(null);
                 $connector->setLastSynchronizedAt(new \DateTimeImmutable());
                 $connector->setLastResultSynchronization($output->fetch());
+                $this->entityManager->persist($connector);
+                $this->entityManager->flush();
 
-                $this->logger->info('Connector synchronized', [
+                $this->logger->error('Connector synchronized', [
                     'connector_id' => $connector->getId(),
                     'connector_type' => $connector->getType(),
                 ]);
