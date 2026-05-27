@@ -414,3 +414,8 @@ table thead tr {
 table thead tr th {
   background-color: transparent !important;
 }
+
+.connector__import-buttons[data-import-ongoing="true"] .btn {
+    pointer-events: none;
+    opacity: 0.7;
+}

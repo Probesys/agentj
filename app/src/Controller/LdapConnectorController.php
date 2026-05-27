@@ -6,43 +6,37 @@ use App\Entity\Connector;
 use App\Entity\Domain;
 use App\Entity\LdapConnector;
 use App\Form\LdapConnectorType;
+use App\Message\SynchronizeConnectors;
 use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LdapService;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Exception\LdapException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/ldap')]
 class LdapConnectorController extends AbstractController
 {
-    private Application $application;
-
     public function __construct(
-        KernelInterface $kernel,
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
+        private MessageBusInterface $bus,
     ) {
-        $this->application = new Application($kernel);
     }
 
     #[Route('/{domain}/new', name: 'app_connector_ldap_new', methods: ['GET', 'POST'])]
     public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
     {
-
         $connector = new LdapConnector();
         $connector->setDomain($domain);
         $form = $this->createForm(LdapConnectorType::class, $connector, [
@@ -112,16 +106,12 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/{id}/sync-user', name: 'app_ldap_connector_sync')]
-    public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
+    public function syncUser(Request $request, Connector $connector): Response
     {
         if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
-            $input = new ArrayInput([
-                'connectorId' => $connector->getId(),
-            ]);
-            $command = $this->application->find('agentj:import-ldap');
-            $output = new BufferedOutput(OutputInterface::VERBOSITY_DEBUG);
-            $command->run($input, $output);
-            $this->addFlash('success', nl2br($output->fetch()));
+            $this->bus->dispatch(new SynchronizeConnectors($connector->getId()));
+
+            $this->addFlash('success', new TranslatableMessage('Message.Connector.syncStarted'));
         }
 
         return $this->redirectToRoute('domain_edit', [
@@ -184,9 +174,6 @@ class LdapConnectorController extends AbstractController
             }
 
             $testConnector->setLdapPassword($pass);
-            $return = [
-                'status' => ''
-            ];
 
             try {
                 $ldap = $ldapService->bind($testConnector);

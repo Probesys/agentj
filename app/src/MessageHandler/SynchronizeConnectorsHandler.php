@@ -2,11 +2,11 @@
 
 namespace App\MessageHandler;
 
+use App\Entity\Connector;
 use App\Entity\LdapConnector;
 use App\Entity\Office365Connector;
 use App\Message\SynchronizeConnectors;
 use App\Repository\ConnectorRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -24,7 +24,6 @@ final class SynchronizeConnectorsHandler
         KernelInterface $kernel,
         private ConnectorRepository $connectorRepository,
         private LoggerInterface $logger,
-        private EntityManagerInterface $entityManager,
         private LockFactory $lockFactory,
     ) {
         $this->application = new Application($kernel);
@@ -32,6 +31,8 @@ final class SynchronizeConnectorsHandler
 
     public function __invoke(SynchronizeConnectors $message): void
     {
+        $id = $message->getId();
+
         $lock = $this->lockFactory->createLock('synchronize-connectors', ttl: 3600);
 
         if (!$lock->acquire()) {
@@ -42,6 +43,9 @@ final class SynchronizeConnectorsHandler
         }
 
         $connectors = $this->connectorRepository->getActiveConnectors();
+        $connectors = array_filter($connectors, function (Connector $connector) use ($id): bool {
+            return $id === 'all' || $connector->getId() === $id;
+        });
 
         foreach ($connectors as $connector) {
             try {
@@ -59,9 +63,6 @@ final class SynchronizeConnectorsHandler
 
                 $command->run($input, $output);
 
-                $connector->setLastSynchronizedAt(new \DateTimeImmutable());
-                $connector->setLastResultSynchronization($output->fetch());
-
                 $this->logger->info('Connector synchronized', [
                     'connector_id' => $connector->getId(),
                     'connector_type' => $connector->getType(),
@@ -74,7 +75,6 @@ final class SynchronizeConnectorsHandler
                 ]);
             }
         }
-        $this->entityManager->flush();
 
         $lock->release();
     }

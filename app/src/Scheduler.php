@@ -25,7 +25,7 @@ class Scheduler implements ScheduleProviderInterface
         $schedule = new Schedule();
 
         $from = new \DateTimeImmutable('01:00');
-        $schedule->add(RecurringMessage::every('12 hours', new Message\SynchronizeConnectors(), $from));
+        $schedule->add(RecurringMessage::every('12 hours', new Message\SynchronizeConnectors('all'), $from));
 
         $from = new \DateTimeImmutable('02:00');
         $schedule->add(RecurringMessage::every('24 hours', new Message\CleanData(), $from));

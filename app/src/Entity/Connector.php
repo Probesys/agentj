@@ -5,11 +5,18 @@ namespace App\Entity;
 use App\Entity\Traits\EntityBlameableTrait;
 use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\ConnectorRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @phpstan-type ConnectorSuccessResult array{
+ *     users?: array<string, int>,
+ *     groups?: array<string, int>|null,
+ * }
+ */
 #[ORM\Entity(repositoryClass: ConnectorRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
@@ -56,10 +63,23 @@ class Connector
     private Collection $targetGroups;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $lastSynchronizedAt = null;
+    private ?DateTimeImmutable $importStartedAt = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $lastResultSynchronization = null;
+    /**
+     * @var ConnectorSuccessResult
+     */
+    #[ORM\Column(options: ['default' => '[]'])]
+    private array $lastSuccessResult = [];
+
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $lastSuccessAt = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: false, options: ['default' => ''])]
+    private string $lastErrorResult = '';
+
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $lastErrorAt = null;
+
 
     public function __construct()
     {
@@ -205,27 +225,139 @@ class Connector
         return $this;
     }
 
-    public function getLastSynchronizedAt(): ?\DateTimeImmutable
+    public function getImportStartedAt(): ?DateTimeImmutable
     {
-        return $this->lastSynchronizedAt;
+        return $this->importStartedAt;
     }
 
-    public function setLastSynchronizedAt(?\DateTimeImmutable $lastSynchronizedAt): static
+    public function isImportOngoing(): bool
     {
-        $this->lastSynchronizedAt = $lastSynchronizedAt;
+        $tenHoursAgo = (new \DateTimeImmutable())->modify('-10 hours');
+        return $this->importStartedAt !== null && $this->importStartedAt >= $tenHoursAgo;
+    }
+
+    public function setImportStartedAt(?DateTimeImmutable $importStartedAt): static
+    {
+        $this->importStartedAt = $importStartedAt;
 
         return $this;
     }
 
-    public function getLastResultSynchronization(): ?string
+    public function startImport(): static
     {
-        return $this->lastResultSynchronization;
-    }
-
-    public function setLastResultSynchronization(?string $lastResultSynchronization): static
-    {
-        $this->lastResultSynchronization = $lastResultSynchronization;
+        $this->setImportStartedAt(new DateTimeImmutable());
 
         return $this;
+    }
+
+    /**
+     * @param ConnectorSuccessResult $result
+     */
+    public function finishImportWithSuccess(array $result): static
+    {
+        $this->setLastSuccessAt(new DateTimeImmutable());
+        $this->setLastSuccessResult($result);
+        $this->setImportStartedAt(null);
+
+        return $this;
+    }
+
+    public function finishImportWithError(string $error): static
+    {
+        $this->setLastErrorAt(new DateTimeImmutable());
+        $this->setLastErrorResult($error);
+        $this->setImportStartedAt(null);
+
+        return $this;
+    }
+
+    /**
+     * @return ConnectorSuccessResult
+     */
+    public function getLastSuccessResult(): array
+    {
+        return $this->lastSuccessResult;
+    }
+
+    /**
+     * @param ConnectorSuccessResult $result
+     */
+    public function setLastSuccessResult(array $result): static
+    {
+        $this->lastSuccessResult = $result;
+
+        return $this;
+    }
+
+    public function getLastSuccessAt(): ?DateTimeImmutable
+    {
+        return $this->lastSuccessAt;
+    }
+
+    public function setLastSuccessAt(?DateTimeImmutable $lastSuccessAt): static
+    {
+        $this->lastSuccessAt = $lastSuccessAt;
+
+        return $this;
+    }
+
+    public function getLastErrorResult(): string
+    {
+        return $this->lastErrorResult;
+    }
+
+    public function setLastErrorResult(?string $result): static
+    {
+        $this->lastErrorResult = $result;
+
+        return $this;
+    }
+
+    public function getLastErrorAt(): ?DateTimeImmutable
+    {
+        return $this->lastErrorAt;
+    }
+
+    public function setLastErrorAt(?DateTimeImmutable $lastErrorAt): static
+    {
+        $this->lastErrorAt = $lastErrorAt;
+
+        return $this;
+    }
+
+    /**
+     * @return array{
+     *     type: 'None'|'Success'|'Error',
+     *     date: ?DateTimeImmutable,
+     * }
+     */
+    public function getLastExecution(): array
+    {
+        $lastSuccess = $this->getLastSuccessAt();
+        $lastError = $this->getLastErrorAt();
+
+        if ($lastSuccess === null && $lastError === null) {
+            return [
+                'type' => 'None',
+                'date' => null,
+            ];
+        } elseif ($lastSuccess === null) {
+            return [
+                'type' => 'Error',
+                'date' => $lastError,
+            ];
+        } elseif ($lastError === null) {
+            return [
+                'type' => 'Success',
+                'date' => $lastSuccess,
+            ];
+        }
+
+        $isError = $lastError > $lastSuccess;
+
+        return [
+            'type' => $isError ? 'Error' : 'Success',
+            'date' => $isError ? $lastError : $lastSuccess,
+        ];
     }
 }

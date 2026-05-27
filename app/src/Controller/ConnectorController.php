@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Connector;
 use App\Repository\ConnectorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,6 +31,23 @@ class ConnectorController extends AbstractController
         return $this->redirectToRoute('domain_edit', [
             'id' => $connector->getDomain()->getId(),
             '_fragment' => 'auth',
+        ]);
+    }
+
+    #[Route('/sync/{id}/result', name: 'app_connector_sync_result', methods: ['GET'])]
+    public function syncResult(Connector $connector): Response
+    {
+        return $this->render('connector/sync_result.html.twig', [
+            'connector' => $connector,
+        ]);
+    }
+
+    #[Route('/sync/{id}/status', name: 'app_connector_sync_status', methods: ['GET'])]
+    public function syncStatus(Connector $connector): JsonResponse
+    {
+        return new JsonResponse([
+            'isImportOngoing' => $connector->isImportOngoing(),
+            'lastExecution' => $connector->getLastExecution(),
         ]);
     }
 }

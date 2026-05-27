@@ -356,17 +356,20 @@ Generics.labels.all: Tous
 Generics.labels.blockedMessages: 'Messages bloqués'
 Generics.labels.byDefault: 'par défaut'
 Generics.labels.cancel: Annuler
+Generics.labels.error: Erreur
 Generics.labels.filters: Filtres
 Generics.labels.incomingMails: 'Mails entrants'
 Generics.labels.item_per_page: "Nombre d'éléments par page"
 Generics.labels.latestMessages: 'Derniers messages'
 Generics.labels.no: Non
+Generics.labels.none: Aucun
 Generics.labels.outgoingMails: 'Mail sortants'
 Generics.labels.previewLatestMessages: 'Aperçu des 5 derniers mails bloqués'
 Generics.labels.previewUsers: 'Aperçu des utilisateurs'
 Generics.labels.recentAlerts: 'Alertes récentes'
 Generics.labels.statTable: 'Tableau des statistiques'
 Generics.labels.statistics: Statistiques
+Generics.labels.success: Succès
 Generics.labels.unblockedMessages: 'Messages non bloqués'
 Generics.labels.unreadAlerts: '{count, plural, one {Alerte non lue} other {Alertes non lues}}'
 Generics.labels.variables: Variables
@@ -400,8 +403,14 @@ Message.Actions.list: Actions
 Message.Actions.massiveActionContent: 'Êtes-vous sûr de vouloir effectuer cette action sur tous les éléments sélectionnés ?'
 Message.Captcha.defaultMailContent: "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre email en cliquant sur le lien suivant : <br /> <a href='[URL_HUMAN_AUTHENTICATION]'>[URL_HUMAN_AUTHENTICATION]</a> <br /><br /> Merci et bonne journée "
 Message.Captcha.defaultMailSubject: 'Vérification Email'
-Message.Connector.resultImportGroup: '{nb_groups_created, plural, one {# groupe créé}  other {# groupes créés}}, {nb_groups_updated, plural, one {# groupe synchronisé} other {# groupes synchronisés}}'
-Message.Connector.resultImportUser: '{nb_users_created, plural, one {# utilisateur créé} other {# utilisateurs créés}}, {nb_users_updated, plural, one {# utilisateur synchronisé} other {# utilisateurs synchronisés}}, {nb_aliases_created, plural, one {# alias créé} other {# alias créés}}'
+Message.Connector.lastExecutionAt: "Dernière synchro\_:"
+Message.Connector.resultImportGroups: '{nb_groups_created, plural, one {# groupe créé}  other {# groupes créés}}, {nb_groups_updated, plural, one {# groupe synchronisé} other {# groupes synchronisés}}'
+Message.Connector.resultImportUsers: '{nb_users_created, plural, one {# utilisateur créé} other {# utilisateurs créés}}, {nb_users_updated, plural, one {# utilisateur synchronisé} other {# utilisateurs synchronisés}}, {nb_aliases_created, plural, one {# alias créé} other {# alias créés}}'
+Message.Connector.resultTitle: 'Résultat de la dernière synchronisation'
+Message.Connector.syncResult.date: "Date\_:"
+Message.Connector.syncResult.information: "Informations\_:"
+Message.Connector.syncResult.result: "Résultat\_:"
+Message.Connector.syncStarted: 'La synchronisation a commencé.'
 Message.Date: Date
 Message.Dialogs.confirmAuthorizedDomainMsgContent: "Êtes-vous sur d'autoriser l'expéditeur pour tous les utilisateurs ?"
 Message.Dialogs.confirmAuthorizedDomainMsgtitle: "Autoriser l'expéditeur pour tous les utilisateurs"
@@ -456,7 +465,6 @@ Message.HumanAuthentication.toVerify.title: 'Vérification d’email'
 Message.HumanAuthentication.verified.content: 'Votre adresse email a été vérifiée avec succès.'
 Message.HumanAuthentication.verified.title: "Merci, et bonne journée\_!"
 Message.Object: Objet
-Message.Office365Connector.tokenError: 'Impossible se connecter à votre compte. Veuillez vérifier vos paramètres'
 Message.Recipient: Destinataire
 Message.Report.defaultAlertMailContent: "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attentes de validation.<br /><br /> Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à AgentJ. <br /><br /> Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br /> Merci et bonne journée. "
 Message.Report.defaultMailSubject: 'Messages en attente sur AgentJ pour '

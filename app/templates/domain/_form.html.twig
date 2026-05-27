@@ -1,26 +1,70 @@
-<ul class="nav nav-tabs" id="policyTab" role="tablist">
+<ul class="nav nav-tabs" id="policyTab" role="tablist" data-controller="domain-tabs">
     <li class="nav-item">
-        <a class="nav-link active" id="policy-tab" data-toggle="tab" href="#domain" role="tab" aria-controls="domain"
-           aria-selected="true">{{ 'Entities.Domain.labels.domain' | trans() }}</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" id="quarantine-tab" data-toggle="tab" href="#auth" role="tab" aria-controls="auth"
-           aria-selected="false">{{ 'Entities.Domain.labels.auth' | trans() }}
+        <a
+            class="nav-link active"
+            id="policy-tab"
+            data-toggle="tab"
+            href="#domain"
+            role="tab"
+            aria-controls="domain"
+            aria-selected="true"
+            data-domain-tabs-target="domain"
+        >
+            {{ 'Entities.Domain.labels.domain' | trans() }}
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="tagLevel-tab" data-toggle="tab" href="#filter" role="tab" aria-controls="filter"
-           aria-selected="false">{{ 'Entities.Domain.labels.filters' | trans() }}</a>
+        <a
+            class="nav-link"
+            id="quarantine-tab"
+            data-toggle="tab"
+            href="#auth"
+            role="tab"
+            aria-controls="auth"
+            aria-selected="false"
+            data-domain-tabs-target="auth"
+        >
+           {{ 'Entities.Domain.labels.auth' | trans() }}
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="alert-tab" data-toggle="tab" href="#alert" role="tab" aria-controls="filter"
-           aria-selected="false">{{ 'Entities.Domain.labels.alerts' | trans() }}</a>
+        <a
+            class="nav-link"
+            id="tagLevel-tab"
+            data-toggle="tab"
+            href="#filter"
+            role="tab"
+            aria-controls="filter"
+            aria-selected="false"
+            data-domain-tabs-target="filter"
+        >
+            {{ 'Entities.Domain.labels.filters' | trans() }}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a
+            class="nav-link"
+            id="alert-tab"
+            data-toggle="tab"
+            href="#alert"
+            role="tab"
+            aria-controls="filter"
+            aria-selected="false"
+            data-domain-tabs-target="alert"
+        >
+            {{ 'Entities.Domain.labels.alerts' | trans() }}
+        </a>
     </li>
 </ul>
 
 {{ form_start(form) }}
 <div class="tab-content" id="policyTabContent">
-    <div class="tab-pane fade show active p-3" id="domain" role="tabpanel" aria-labelledby="domain-tab">
+    <div
+        class="tab-pane fade show active p-3"
+        id="domain"
+        role="tabpanel"
+        aria-labelledby="domain-tab"
+    >
         <p>
             {{ form_row(form.active) }}
             {{ form_row(form.domain) }}
@@ -112,94 +156,169 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane fade mb-3" id="auth" role="tabpanel" aria-labelledby="auth-tab">
-            <div class="card-header mt-2" style="background-color: #ffffff; font-size: 1.25rem">
-                <h5>{{ 'Entities.Domain.labels.connectors' | trans() }}</h5>
-                <div class="dropdown float-right">
-                    {% if domain.id is not null %}
-                        <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" id="dropdownMenuLink"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {{ 'Entities.Domain.actions.add_connector' | trans() }}
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            <a class="dropdown-item btn-open-modal"
-                               data-url-modal-content="{{ path('app_connector_o365_new', {'domain' : domain.id}) }}"
-                               href="#">Office 365</a>
-                            <a class="dropdown-item btn-open-modal"
-                               data-url-modal-content="{{ path('app_connector_ldap_new', {'domain' : domain.id}) }}"
-                               href="#">LDAP</a>
-                            <a class="dropdown-item btn-open-modal"
-                               data-url-modal-content="{{ path('app_connector_imap_new', {'domain' : domain.id}) }}"
-                               href="#">IMAP</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card-body">
-                {% if domain.id is null %}
-                    {{ 'Entities.Domain.labels.saveBeforeConnectors' | trans() }}
-                {% endif %}
+    <div
+        class="tab-pane fade mb-3"
+        id="auth"
+        role="tabpanel"
+        aria-labelledby="auth-tab"
+    >
+        <div class="card-header mt-2" style="background-color: #ffffff; font-size: 1.25rem">
+            <h5>{{ 'Entities.Domain.labels.connectors' | trans() }}</h5>
+            <div class="dropdown float-right">
                 {% if domain.id is not null %}
-                    <table class="table">
-                        <thead>
+                    <a
+                        class="btn btn-secondary dropdown-toggle btn-sm"
+                        href="#"
+                        role="button"
+                        id="dropdownMenuLink"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                    >
+                        {{ 'Entities.Domain.actions.add_connector' | trans() }}
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a
+                            class="dropdown-item btn-open-modal"
+                            data-url-modal-content="{{ path('app_connector_o365_new', {'domain' : domain.id}) }}"
+                            href="#"
+                        >
+                            Office 365
+                        </a>
+
+                        <a
+                            class="dropdown-item btn-open-modal"
+                            data-url-modal-content="{{ path('app_connector_ldap_new', {'domain' : domain.id}) }}"
+                            href="#"
+                        >
+                            LDAP
+                        </a>
+
+                        <a
+                            class="dropdown-item btn-open-modal"
+                            data-url-modal-content="{{ path('app_connector_imap_new', {'domain' : domain.id}) }}"
+                            href="#"
+                        >
+                            IMAP
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            {% if domain.id is null %}
+                {{ 'Entities.Domain.labels.saveBeforeConnectors' | trans() }}
+            {% endif %}
+
+            {% if domain.id is not null %}
+                <table class="table">
+                    <thead>
                         <tr>
                             <th>{{ 'Entities.Connector.fields.name' | trans }}</th>
                             <th>{{ 'Entities.Connector.fields.type' | trans }}</th>
                             <th></th>
                             <th></th>
                         </tr>
-                        </thead>
-                        {% for connector in domain.connectors %}
-                            {% if connector.type == 'LDAP' %}
-                                {% set urlEdit = path('app_connector_ldap_edit', {'id': connector.id}) %}
-                                {% set urlSync = path('app_ldap_connector_sync', {'id': connector.id}) %}
-                            {% endif %}
-                            {% if connector.type == 'Office365' %}
-                                {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
-                                {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
-                            {% endif %}
-                            {% if connector.type == 'IMAP' %}
-                                {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
-                            {% endif %}
-                            <tr>
-                                <td>{{ connector.name }}</td>
-                                <td>{{ connector.type }}</td>
-                                <td>
-                                    {% if connector.type != 'IMAP' %}
-                                        <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
-                                          class='btn btn-sm btn-success'
-                                          title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
-                                            <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                            <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="#" data-url-modal-content="{{ urlEdit }}"
-                                       class='btn btn-sm btn-success btn-open-modal'
-                                       title="{{ 'Generics.actions.edit'|trans() }}">
-                                        <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                        <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                                    </a>
-                                    <a href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}"
-                                       class='btn btn-sm btn-danger confirmModal'
-                                       data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}'
-                                       data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
-                                       title="{{ 'Generics.actions.delete'|trans() }}">
-                                        <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                        <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                {% endif %}
-            </div>
+                    </thead>
 
+                    {% for connector in domain.connectors %}
+                        {% if connector.type == 'LDAP' %}
+                            {% set urlEdit = path('app_connector_ldap_edit', {'id': connector.id}) %}
+                            {% set urlSync = path('app_ldap_connector_sync', {'id': connector.id}) %}
+                        {% endif %}
+                        {% if connector.type == 'Office365' %}
+                            {% set urlEdit = path('app_connector_o365_edit', {'id': connector.id}) %}
+                            {% set urlSync = path('app_office365_connector_sync', {'id': connector.id}) %}
+                        {% endif %}
+                        {% if connector.type == 'IMAP' %}
+                            {% set urlEdit =  path('app_connector_imap_edit', {'id' : connector.id}) %}
+                        {% endif %}
+
+                        <tr>
+                            <td>{{ connector.name }}</td>
+
+                            <td>{{ connector.type }}</td>
+
+                            <td>
+                                {% if connector.type != 'IMAP' %}
+                                    <div
+                                        class="connector__import-buttons"
+                                        data-controller="connector-import"
+                                        data-connector-import-url-value="{{ path('app_connector_sync_status', { 'id': connector.id }) }}"
+                                        data-connector-import-success-label-value="{{ 'Generics.labels.success' | trans }}"
+                                        data-connector-import-error-label-value="{{ 'Generics.labels.error' | trans }}"
+                                        {% if connector.importOngoing %}
+                                            data-import-ongoing="true"
+                                        {% endif %}
+                                    >
+                                        <a
+                                            href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
+                                            class="btn btn-sm btn-success"
+                                            title="{{ 'Entities.Domain.actions.importUserAndAliases' | trans }}"
+                                            data-turbo="false"
+                                        >
+                                            <i class="fas fa-sync"></i>
+                                            <span class="d-none d-lg-inline">{{ 'Generics.actions.import' | trans }}</span>
+                                        </a>
+
+                                        <button
+                                            type="button"
+                                            data-url-modal-content="{{ path('app_connector_sync_result', { 'id': connector.id }) }}"
+                                            data-modal-method-type="GET"
+                                            class="btn btn-sm btn-success btn-open-modal"
+                                            data-connector-import-target="resultButton"
+                                            {% if connector.lastExecution.type === 'None' %}
+                                                hidden
+                                            {% endif %}
+                                        >
+                                            <i class="fas {{ connector.lastExecution.type === 'Success' ? 'fa-info-circle' : 'fa-exclamation-triangle' }}"></i>
+                                        </button>
+
+                                        <p>
+                                            {{ 'Message.Connector.lastExecutionAt' | trans }}
+                                            <span data-connector-import-target="lastExecution">
+                                                —
+                                            </span>
+                                        </p>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a
+                                    href="#"
+                                    data-url-modal-content="{{ urlEdit }}"
+                                    class='btn btn-sm btn-success btn-open-modal'
+                                    title="{{ 'Generics.actions.edit'|trans() }}"
+                                >
+                                    <i class="fas fa-edit d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                    <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+                                </a>
+
+                                <a
+                                    href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}"
+                                    class='btn btn-sm btn-danger confirmModal'
+                                    data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}'
+                                    data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
+                                    title="{{ 'Generics.actions.delete'|trans() }}"
+                                >
+                                    <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                    <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="tab-pane fade p-3 mb-3" id="filter" role="tabpanel" aria-labelledby="filter-tab">
-
+    <div
+        class="tab-pane fade p-3 mb-3"
+        id="filter"
+        role="tabpanel"
+        aria-labelledby="filter-tab"
+    >
         <div class="filter mt-4">
             <h5>{{ 'Generics.labels.filters' | trans() }}</h5>
 
@@ -235,25 +354,31 @@
 
         </div>
         {% include 'partials/_quota_form.html.twig' with {'form': form} %}
-
     </div>
 
-    <div class="tab-pane fade p-3 mb-3" id="alert" role="tabpanel" aria-labelledby="alert-tab">
-
+    <div
+        class="tab-pane fade p-3 mb-3"
+        id="alert"
+        role="tabpanel"
+        aria-labelledby="alert-tab"
+    >
         <div class="filter mt-4">
             <h5>{{ 'Generics.labels.alerts' | trans() }}</h5>
             {{ form_row(form.sendUserAlerts) }}
             {{ form_row(form.sendUserMailAlerts) }}
         </div>
-
     </div>
+
 </div>
+
 {{ form_rest(form) }}
+
 <div class="d-flex justify-content-center mb-3">
     <input type="submit" class="btn btn-primary" value="{{ 'Generics.actions.save'|trans() }}">&nbsp;
     <a class="btn btn-outline-secondary"
        href="{{ path('domain_index') }}">{{ 'Generics.actions.backToTheList'|trans() }}</a>
 </div>
+
 {{ form_end(form) }}
 
 <style>

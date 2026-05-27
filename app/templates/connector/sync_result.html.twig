@@ -1,0 +1,60 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+    {{ 'Message.Connector.resultTitle' | trans }}
+{% endblock %}
+
+{% block modalContent %}
+    <div>
+        {% if connector.lastExecution.type == 'Success' %}
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.result' | trans }}</strong>
+                {{ 'Generics.labels.success' | trans }}
+            </p>
+
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.date' | trans }}</strong>
+                {{ connector.lastSuccessAt | format_datetime('long', 'medium') }}
+            </p>
+
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.information' | trans }}</strong>
+
+                {{ 'Message.Connector.resultImportUsers' | trans({
+                    'nb_users_created': connector.lastSuccessResult.users.nb_users_created,
+                    'nb_users_updated': connector.lastSuccessResult.users.nb_users_updated,
+                    'nb_aliases_created': connector.lastSuccessResult.users.nb_aliases_created,
+                }) }}
+
+                {% if connector.lastSuccessResult.groups and connector.lastSuccessResult.groups.nb_groups_created and connector.lastSuccessResult.groups.nb_groups_updated %}
+                    <br>
+
+                    {{ 'Message.Connector.resultImportGroups' | trans({
+                        'nb_groups_created': connector.lastSuccessResult.groups.nb_groups_created,
+                        'nb_groups_updated': connector.lastSuccessResult.groups.nb_groups_updated,
+                    }) }}
+                {% endif %}
+            </p>
+        {% elseif connector.lastExecution.type == 'Error' %}
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.result' | trans }}</strong>
+                {{ 'Generics.labels.error' | trans }}
+            </p>
+
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.date' | trans }}</strong>
+                {{ connector.lastSuccessAt | format_datetime('long', 'medium') }}
+            </p>
+
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.information' | trans }}</strong>
+                {{ connector.lastErrorResult }}
+            </p>
+        {% else %}
+            <p>
+                <strong>{{ 'Message.Connector.syncResult.result' | trans }}</strong>
+                {{ 'Generics.labels.none' | trans }}
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}
