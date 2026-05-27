@@ -161,9 +161,9 @@ class Office365ImportCommand extends Command
             $this->em->flush();
         }
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-            '$NB_USER_CREATED' => $nbUserCreated,
-            '$NB_USER_UPDATED' => $nbUserUpdated,
-            '$NB_ALIAS_CREATED' => $nbAliasCreated,
+            'nb_users_created' => $nbUserCreated,
+            'nb_users_updated' => $nbUserUpdated,
+            'nb_aliases_created' => $nbAliasCreated,
         ]));
     }
 
@@ -279,8 +279,8 @@ class Office365ImportCommand extends Command
         } catch (GuzzleException $exc) {
         }
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
-                    '$NB_GROUP_CREATED' => $nbGroupCreated,
-                    '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+            'nb_groups_created' => $nbGroupCreated,
+            'nb_groups_updated' => $nbGroupUpdated,
         ]));
     }
 

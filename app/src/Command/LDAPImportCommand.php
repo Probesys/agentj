@@ -151,9 +151,9 @@ class LDAPImportCommand extends Command
         }
 
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-            '$NB_USER_CREATED' => $this->nbUserCreated,
-            '$NB_USER_UPDATED' => $this->nbUserUpdated,
-            '$NB_ALIAS_CREATED' => $this->nbAliasCreated,
+            'nb_users_created' => $this->nbUserCreated,
+            'nb_users_updated' => $this->nbUserUpdated,
+            'nb_aliases_created' => $this->nbAliasCreated,
         ]));
 
         $this->em->flush();
@@ -322,8 +322,8 @@ class LDAPImportCommand extends Command
             }
 
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
-                '$NB_GROUP_CREATED' => $nbGroupCreated,
-                '$NB_GROUP_UPDATED' => $nbGroupUpdated,
+                'nb_groups_created' => $nbGroupCreated,
+                'nb_groups_updated' => $nbGroupUpdated,
             ]));
 
             $this->em->flush();

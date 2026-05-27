@@ -67,9 +67,9 @@
             <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
             <td>
               {% if wb.email != '@.' and (wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')) %}
-                  {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList | trans %}
-                  {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList %}
-                  {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList %}
+                  {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList | trans() %}
+                  {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList | trans() %}
+                  {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList | trans() %}
                   <a href="{{path('wblist_delete',{'rid':wb.rid,'sid':wb.sid,'priority' : wb.priority})}}?_token={{ csrf_token('delete_wblist' ~ wb.rid ~ wb.sid)}}" class='btn btn-sm btn-danger confirmModal'
                      data-dialog-title='{{ deleteConfirmTitle|trans }}'
                      data-dialog-content='{{ deleteConfirmContent|trans }}'

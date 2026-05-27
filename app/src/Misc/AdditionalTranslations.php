@@ -29,3 +29,10 @@ new TranslatableMessage('Entities.WBList.fields.typeLabelB.0');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.1');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.2');
 new TranslatableMessage('Entities.WBList.fields.typeLabelB.3');
+
+new TranslatableMessage('Generics.labels.cancel');
+
+new TranslatableMessage('Message.Dialogs.confirmDeleteSenderContentB');
+new TranslatableMessage('Message.Dialogs.confirmDeleteSenderContentW');
+new TranslatableMessage('Message.Dialogs.confirmDeleteSenderTitleB');
+new TranslatableMessage('Message.Dialogs.confirmDeleteSenderTitleW');
