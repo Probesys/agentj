@@ -5,30 +5,31 @@
 
 {% block modalContent %}
     <table class="table table-sm">
-    <thead>
+        <thead>
+            <tr>
+                <th>{{ 'Entities.Message.labels.reason' | trans }}</th>
+                <th>{{ 'Entities.User.fields.incoming' | trans }}</th>
+                <th>{{ 'Entities.User.fields.outgoing' | trans }}</th>
+            </tr>
+        </thead>
+
+        {% set totalIncoming = 0 %}
+        {% set totalOutgoing = 0 %}
+
+        {% for status, count in statusCounts %}
+            <tr>
+                <td>{{ count.label | trans }}</td>
+                <td>{{ count.quantity }}</td>
+                <td>{{ count.quantityOut }}</td>
+                {% set totalIncoming = totalIncoming + count.quantity %}
+                {% set totalOutgoing = totalOutgoing + count.quantityOut %}
+            </tr>
+        {% endfor %}
+
         <tr>
-            <th>{{ 'Entities.Message.labels.reason' | trans }}</th>
-            <th>{{ 'Entities.User.fields.incoming' | trans }}</th>
-            <th>{{ 'Entities.User.fields.outgoing' | trans }}</th>
-        </tr>
-    </thead>
-    {% set nbMsg = 0 %}
-    {% set nbMsgOut = 0 %}
-    {% for status in msgs_status %}
-        <tr>
-            {% set statusKey = 'Message.Status.' ~ status.name %}
-            {% set status_description = statusKey|trans %}
-            <td>{{ status_description }}</td>
-            <td>{{ status.qty }}</td>
-            <td>{{ status.qty_out }}</td>
-            {% set nbMsg = nbMsg + status.qty %}
-            {% set nbMsgOut = nbMsgOut + status.qty_out %}
-        </tr>
-    {% endfor %}
-        <tr>
-            <td>{{'Navigation.all'|trans }}</td>
-            <td>{{nbMsg}}</td>
-            <td>{{nbMsgOut}}</td>
+            <th>{{ 'Navigation.all' | trans }}</th>
+            <td>{{ totalIncoming }}</td>
+            <td>{{ totalOutgoing }}</td>
         </tr>
     </table>
 {% endblock %}

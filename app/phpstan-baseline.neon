@@ -121,12 +121,6 @@ parameters:
 			path: src/Repository/DomainRepository.php
 
 		-
-			message: '#^Method App\\Repository\\MsgrcptRepository\:\:findByEmailRecipient\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Repository/MsgrcptRepository.php
-
-		-
 			message: '#^Method App\\Repository\\MsgrcptSearchRepository\:\:getSearchQuery\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
 			identifier: missingType.generics
 			count: 1

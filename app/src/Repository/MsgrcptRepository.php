@@ -139,20 +139,21 @@ class MsgrcptRepository extends BaseRepository
         ]);
     }
 
-    public function findByEmailRecipient(string $email): Query
+    /**
+     * @return Msgrcpt[]
+     */
+    public function findByEmailRecipient(User $user): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
             FROM App\Entity\Msgrcpt mr
-            LEFT JOIN App\Entity\Maddr maddr WITH maddr.id = mr.rid
-            LEFT JOIN App\Entity\Msgs msgs WITH msgs.mailId = mr.mailId AND msgs.partitionTag = mr.partitionTag
-            WHERE maddr.email = :email
-            AND msgs.quarType != ''
-            SQL);
+            JOIN mr.rid AS r
+            WHERE r.email = :email
+        SQL);
 
-        $query->setParameter('email', $email);
+        $query->setParameter('email', $user->getEmail());
 
-        return $query;
+        return $query->getResult();
     }
 
     public function consolidateStatus(): int

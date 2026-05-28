@@ -4,20 +4,23 @@ namespace App\Controller;
 
 use App\Amavis\ContentType;
 use App\Amavis\MessageStatus;
+use App\Entity\User;
+use App\Entity\Msgrcpt;
 use App\Repository\AlertRepository;
 use App\Repository\DomainRepository;
+use App\Repository\LimitReportRepository;
 use App\Repository\MsgrcptRepository;
 use App\Repository\MsgrcptSearchRepository;
+use App\Repository\OutMsgrcptRepository;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 
 final class DashboardController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,
         private MsgrcptSearchRepository $msgrcptSearchRepository,
     ) {
     }
@@ -126,12 +129,6 @@ final class DashboardController extends AbstractController
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $latestMessageRecipients = $this->msgrcptSearchRepository
-            ->getSearchQuery($user)
-            ->setMaxResults(5)
-            ->getResult();
-
-
 
         if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $domains = $domainRepository->findAll();
@@ -141,140 +138,102 @@ final class DashboardController extends AbstractController
             $domains = [];
         }
 
-        foreach ($domains as $domain) {
-            $users = $userRepository->getUsersWithRoleAndMessageCounts($user, $domain);
-
-            $data[$domain->getId()] = [
-                'totalMsgCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['msgCount'];
-                }, 0),
-                'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['msgBlockedCount'];
-                }, 0),
-                'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['outMsgCount'];
-                }, 0),
-                'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                    return $carry + $user['outMsgBlockedCount'];
-                }, 0),
-            ];
-        }
-        // Add data for "All" option
-        $users = $userRepository->getUsersWithRoleAndMessageCounts($user);
-
-        $data['All'] = [
-            'totalMsgCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['msgCount'];
-            }, 0),
-            'totalMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['msgBlockedCount'];
-            }, 0),
-            'totalOutMsgCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['outMsgCount'];
-            }, 0),
-            'totalOutMsgBlockedCount' => array_reduce($users, function ($carry, $user) {
-                return $carry + $user['outMsgBlockedCount'];
-            }, 0),
+        $users = [];
+        $data = [];
+        $dataAll = [
+            'totalMsgCount' => 0,
+            'totalMsgBlockedCount' => 0,
+            'totalOutMsgCount' => 0,
+            'totalOutMsgBlockedCount' => 0,
         ];
 
+        foreach ($domains as $domain) {
+            $domainUsers = $userRepository->getUsersWithMessageCountsByDomain($domain);
+            $users = array_merge($users, $domainUsers);
+
+            $totalMsgCount = array_reduce($domainUsers, function ($carry, $user) {
+                return $carry + $user['msgCount'];
+            }, 0);
+            $totalMsgBlockedCount = array_reduce($domainUsers, function ($carry, $user) {
+                return $carry + $user['msgBlockedCount'];
+            }, 0);
+            $totalOutMsgCount = array_reduce($domainUsers, function ($carry, $user) {
+                return $carry + $user['outMsgCount'];
+            }, 0);
+            $totalOutMsgBlockedCount = array_reduce($domainUsers, function ($carry, $user) {
+                return $carry + $user['outMsgBlockedCount'];
+            }, 0);
+
+            $data[$domain->getId()] = [
+                'totalMsgCount' => $totalMsgCount,
+                'totalMsgBlockedCount' => $totalMsgBlockedCount,
+                'totalOutMsgCount' => $totalOutMsgCount,
+                'totalOutMsgBlockedCount' => $totalOutMsgBlockedCount,
+            ];
+
+            $dataAll['totalMsgCount'] += $totalMsgCount;
+            $dataAll['totalMsgBlockedCount'] += $totalMsgBlockedCount;
+            $dataAll['totalOutMsgCount'] += $totalOutMsgCount;
+            $dataAll['totalOutMsgBlockedCount'] += $totalOutMsgBlockedCount;
+        }
+
+        $data['All'] = $dataAll;
+
         return $this->render('dashboard/stats-by-in-out.html.twig', [
-            'latestMessageRecipients' => $latestMessageRecipients,
             'domains' => $domains,
             'users' => $users,
             'data' => $data,
         ]);
     }
 
-    #[Route(path: '{userEmail}/messages_stats/', name: 'messages_stats', methods: 'GET')]
+    #[Route(path: '{email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
     public function showMessagesStats(
-        string $userEmail,
-        MsgrcptRepository $msgrcptRepository,
-        UserRepository $userRepository
+        User $user,
+        MsgrcptRepository $messageRecipientRepository,
+        OutMsgrcptRepository $outMessageRecipientRepository,
+        LimitReportRepository $limitReportRepository,
     ): Response {
-        $connection = $this->em->getConnection();
+        $messages = array_merge(
+            $messageRecipientRepository->findByEmailRecipient($user),
+            $outMessageRecipientRepository->findByEmailSender($user),
+        );
 
-        $user = $userRepository->findOneBy(['email' => $userEmail]);
-
-        $query = $msgrcptRepository->findByEmailRecipient($userEmail);
-        $messages = $query->getArrayResult();
-
-        $sqlOutMessages = '
-            SELECT out_msgs.*, mr.status_id as status, mr.bspam_level as bspamLevel, mr.content
-            FROM out_msgs
-            JOIN out_msgrcpt AS mr ON out_msgs.mail_id = mr.mail_id
-            WHERE out_msgs.from_addr = :userEmail
-        ';
-        $stmtOutMessages = $connection->executeQuery($sqlOutMessages, ['userEmail' => $userEmail]);
-        $outMessages = $stmtOutMessages->fetchAllAssociative();
-
-        // Determine status using provided logic
         $statusCounts = [];
 
         foreach ($messages as $message) {
-            $status = $this->determineStatus($message, $user->getDomain()->getLevel());
-            if (!isset($statusCounts[$status])) {
-                $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
+            if ($message->isAuthorized() || $message->isRestored()) {
+                continue;
             }
-            $statusCounts[$status]['qty']++;
+
+            $status = $message->getStatusName();
+            if (!isset($statusCounts[$status])) {
+                $statusCounts[$status] = [
+                    'label' => $message->getStatusLabel(),
+                    'quantity' => 0,
+                    'quantityOut' => 0,
+                ];
+            }
+
+            if ($message instanceof Msgrcpt) {
+                $statusCounts[$status]['quantity']++;
+            } else {
+                $statusCounts[$status]['quantityOut']++;
+            }
         }
 
-        foreach ($outMessages as $outMessage) {
-            $status = $this->determineStatus($outMessage, $user->getDomain()->getLevel());
-            if (!isset($statusCounts[$status])) {
-                $statusCounts[$status] = ['name' => $status, 'qty' => 0, 'qty_out' => 0];
-            }
-            if ($status != 'untreated') {
-                $statusCounts[$status]['qty_out']++;
-            }
+        // Add limit reports to the list as mails blocked because of quota
+        // aren't saved as "out messages", but we still wan't to count them.
+        $countLimitReports = $limitReportRepository->countByUser($user);
+        if ($countLimitReports > 0) {
+            $statusCounts['quota'] = [
+                'label' => new TranslatableMessage('Entities.Message.Quota'),
+                'quantity' => 0,
+                'quantityOut' => $countLimitReports,
+            ];
         }
-
-        // Convert to array and return to view
-        $messagesStatus = array_values($statusCounts);
-
-        // Get the count of sql_limit_report entries where id = $userEmail
-        $sqlLimitReports = '
-            SELECT COUNT(*) AS count
-            FROM sql_limit_report
-            WHERE mail_id = :userEmail
-        ';
-        $stmtLimitReports = $connection->executeQuery($sqlLimitReports, ['userEmail' => $userEmail]);
-        $limitReports = $stmtLimitReports->fetchAssociative();
-
-        // Add Sql_Limit_Report to $messagesStatus
-        $messagesStatus[] = [
-            'name' => 'quota',
-            'qty' => 0,
-            'qty_out' => $limitReports ? $limitReports['count'] : 0
-        ];
 
         return $this->render('dashboard/messages_stats.html.twig', [
-            'msgs_status' => $messagesStatus,
+            'statusCounts' => $statusCounts,
         ]);
-    }
-
-    /**
-     * Determine the status of a message based on its properties
-     * @param array<string, mixed> $message
-     * @return string
-     */
-    private function determineStatus(array $message, float $level): string
-    {
-        if ($message['status'] !== null) {
-            return MessageStatus::getStatusName($message['status']);
-        }
-
-        if (
-            $message['bspamLevel'] > $level &&
-            $message['content'] !== ContentType::CLEAN &&
-            $message['content'] !== ContentType::VIRUS
-        ) {
-            return 'spam';
-        }
-
-        if ($message['content'] === ContentType::VIRUS) {
-            return 'virus';
-        }
-
-        return 'untreated';
     }
 }

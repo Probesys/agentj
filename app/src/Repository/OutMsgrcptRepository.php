@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\OutMsgrcpt;
+use App\Entity\User;
 use App\Repository\BaseMessageRecipientRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr\Join;
@@ -31,5 +32,23 @@ class OutMsgrcptRepository extends BaseMessageRecipientRepository
             ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         return $queryBuilder;
+    }
+
+    /**
+     * @return OutMsgrcpt[]
+     */
+    public function findByEmailSender(User $user): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT omr
+            FROM App\Entity\OutMsgrcpt omr
+            JOIN omr.msgs AS om
+            JOIN om.sid AS s
+            WHERE s.email = :email
+        SQL);
+
+        $query->setParameter('email', $user->getEmail());
+
+        return $query->getResult();
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Amavis\DeliveryStatus;
+use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\Maddr;
 use App\Entity\User;
@@ -221,13 +223,11 @@ class UserRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function getUsersWithRoleAndMessageCounts(User $user, ?Domain $domain = null): array
+    public function getUsersWithMessageCountsByDomain(Domain $domain): array
     {
-        $domainId = $domain ? $domain->getId() : 'all';
-        $userId = $user->getId();
-        $cacheKey = "stats_users_messages_{$userId}_{$domainId}";
+        $cacheKey = "stats_users_messages_{$domain->getId()}";
 
-        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($user, $domain) {
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($domain) {
             $item->expiresAfter(3600);
 
             $conn = $this->getEntityManager()->getConnection();
@@ -235,92 +235,70 @@ class UserRepository extends BaseRepository
             $types = [];
 
             $sql = <<<SQL
-            SELECT
-                u.email,
-                u.fullname,
-                d.id AS domain_id,
-                d.domain AS domain,
-                msgCounts.msgCount,
-                msgCounts.msgBlockedCount,
-                (
-                    outMsgCounts.outMsgCount +
-                    COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
-                ) AS outMsgCount,
-                (
-                    outMsgCounts.outMsgBlockedCount +
-                    COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
-                ) AS outMsgBlockedCount
-            FROM users u
-            LEFT JOIN domain d ON u.domain_id = d.id
-            LEFT JOIN (
                 SELECT
-                    om.from_addr,
-                    COUNT(DISTINCT om.mail_id) AS outMsgCount,
-                    COUNT(DISTINCT om.mail_id) - SUM(CASE
-                        WHEN (
-                            om.status_id = 2
-                            OR om.content = 'C'
-                            OR (om.status_id IS NULL AND om.spam_level < d.level AND om.content NOT IN ('C', 'V'))
-                        ) THEN 1
-                        ELSE 0
-                    END) AS outMsgBlockedCount
-                FROM out_msgs om
-                LEFT JOIN users u ON om.from_addr = u.email
-                LEFT JOIN domain d ON u.domain_id = d.id
-                GROUP BY om.from_addr
-            ) AS outMsgCounts ON outMsgCounts.from_addr = u.email
-            LEFT JOIN (
-                SELECT
-                    ma.email,
-                    COUNT(DISTINCT m.mail_id) AS msgCount,
-                    COUNT(DISTINCT m.mail_id) - SUM(CASE WHEN m.quar_type = "" THEN 1 ELSE 0 END) AS msgBlockedCount
-                FROM maddr ma
-                LEFT JOIN msgrcpt mr ON ma.id = mr.rid
-                LEFT JOIN msgs m ON mr.mail_id = m.mail_id
-                GROUP BY ma.email
-            ) AS msgCounts ON msgCounts.email = u.email
-            LEFT JOIN (
-                SELECT
-                    slr.mail_id,
-                    COUNT(slr.mail_id) AS sqlLimitReportCount
-                FROM sql_limit_report slr
-                GROUP BY slr.mail_id
-            ) AS sqlLimitReportCounts ON sqlLimitReportCounts.mail_id = u.email
-            WHERE u.roles LIKE '%"ROLE_USER"%'
-        SQL;
+                    u.email,
+                    u.fullname,
+                    d.id AS domain_id,
+                    d.domain AS domain,
+                    msgCounts.msgCount,
+                    msgCounts.msgBlockedCount,
+                    (
+                        outMsgCounts.outMsgCount +
+                        COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
+                    ) AS outMsgCount,
+                    (
+                        outMsgCounts.outMsgBlockedCount +
+                        COALESCE(sqlLimitReportCounts.sqlLimitReportCount, 0)
+                    ) AS outMsgBlockedCount
+                FROM users u
+                JOIN domain d ON u.domain_id = d.id
+                LEFT JOIN (
+                    SELECT
+                        oma.email,
+                        COUNT(omr.mail_id) AS outMsgCount,
+                        COUNT(CASE
+                            WHEN omr.ds <> :deliveryStatus THEN om.mail_id
+                        END) AS outMsgBlockedCount
+                    FROM out_msgrcpt omr
+                    JOIN out_msgs om ON om.mail_id = omr.mail_id
+                    JOIN maddr oma ON oma.id = om.sid
+                    GROUP BY oma.email
+                ) AS outMsgCounts ON outMsgCounts.email = u.email
+                LEFT JOIN (
+                    SELECT
+                        ma.email,
+                        COUNT(mr.mail_id) AS msgCount,
+                        COUNT(CASE WHEN mr.status_id NOT IN (
+                            :msgStatusAuthorized,
+                            :msgStatusRestored
+                        ) THEN ma.email END) AS msgBlockedCount
+                    FROM msgrcpt mr
+                    JOIN maddr ma ON ma.id = mr.rid
+                    GROUP BY ma.email
+                ) AS msgCounts ON msgCounts.email = u.email
+                LEFT JOIN (
+                    SELECT
+                        slr.mail_id AS email,
+                        COUNT(slr.mail_id) AS sqlLimitReportCount
+                    FROM sql_limit_report slr
+                    GROUP BY slr.mail_id
+                ) AS sqlLimitReportCounts ON sqlLimitReportCounts.email = u.email
+                WHERE u.roles LIKE '%"ROLE_USER"%'
+                AND u.domain_id = :domain
+                GROUP BY u.id
+            SQL;
 
-            if ($domain !== null) {
-                $sql .= ' AND u.domain_id = :domain';
-                $parameters['domain'] = $domain->getId();
-                $types['domain'] = DBAL\ParameterType::INTEGER;
-            }
+            $parameters['deliveryStatus'] = DeliveryStatus::PASS;
+            $types['deliveryStatus'] = DBAL\ParameterType::STRING;
 
-            // if $user is an admin, add a condition to check only the domains he administer
-            if (in_array('ROLE_ADMIN', $user->getRoles())) {
-                $domains = $user->getDomains()->toArray();
-                if ($user->getDomain()) {
-                    $domains[] = $user->getDomain();
-                }
+            $parameters['msgStatusAuthorized'] = MessageStatus::AUTHORIZED;
+            $types['msgStatusAuthorized'] = DBAL\ParameterType::INTEGER;
 
-                if (empty($domains)) {
-                    return [];
-                }
+            $parameters['msgStatusRestored'] = MessageStatus::RESTORED;
+            $types['msgStatusRestored'] = DBAL\ParameterType::INTEGER;
 
-                $sql .= ' AND u.domain_id in (:domains) ';
-                $parameters['domains'] = array_map(function ($domain) {
-                    return $domain->getId();
-                }, $domains);
-                $types['domains'] = DBAL\ArrayParameterType::INTEGER;
-            }
-
-            $sql .= <<<SQL
-            GROUP BY u.id,
-                outMsgCounts.outMsgCount,
-                msgCounts.msgCount,
-                outMsgCounts.outMsgBlockedCount,
-                msgCounts.msgBlockedCount,
-                sqlLimitReportCounts.sqlLimitReportCount
-        SQL;
+            $parameters['domain'] = $domain->getId();
+            $types['domain'] = DBAL\ParameterType::INTEGER;
 
             return $conn->executeQuery($sql, $parameters, $types)->fetchAllAssociative();
         });
