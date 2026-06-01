@@ -28,7 +28,7 @@ endif
 lint: LINTER ?= all
 lint: ## Execute the linters (can take a LINTER argument)
 ifeq ($(LINTER), $(filter $(LINTER), all phpstan))
-	$(PHP) vendor/bin/phpstan analyse -v
+	$(PHP) vendor/bin/phpstan analyse -v --generate-baseline
 endif
 ifeq ($(LINTER), $(filter $(LINTER), all phpcs))
 	$(PHP) vendor/bin/phpcs

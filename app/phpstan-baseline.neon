@@ -1,0 +1,151 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Doctrine\\SqlIndexWalker\:\:__construct\(\) has parameter \$query with generic class Doctrine\\ORM\\Query but does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Doctrine/SqlIndexWalker.php
+
+		-
+			message: '#^Class App\\Form\\ActionsFilterType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/ActionsFilterType.php
+
+		-
+			message: '#^Class App\\Form\\ConnectorType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/ConnectorType.php
+
+		-
+			message: '#^Class App\\Form\\DomainCustomisationGeneralType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/DomainCustomisationGeneralType.php
+
+		-
+			message: '#^Class App\\Form\\DomainCustomisationHumanAuthenticationType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/DomainCustomisationHumanAuthenticationType.php
+
+		-
+			message: '#^Class App\\Form\\DomainCustomisationReportType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/DomainCustomisationReportType.php
+
+		-
+			message: '#^Class App\\Form\\DomainRelayType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/DomainRelayType.php
+
+		-
+			message: '#^Class App\\Form\\DomainType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/DomainType.php
+
+		-
+			message: '#^Class App\\Form\\GroupsType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/GroupsType.php
+
+		-
+			message: '#^Class App\\Form\\GroupsWblistType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/GroupsWblistType.php
+
+		-
+			message: '#^Class App\\Form\\HumanAuthenticationType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/HumanAuthenticationType.php
+
+		-
+			message: '#^Class App\\Form\\ImportType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/ImportType.php
+
+		-
+			message: '#^Class App\\Form\\PolicyType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/PolicyType.php
+
+		-
+			message: '#^Class App\\Form\\QuotaType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/QuotaType.php
+
+		-
+			message: '#^Class App\\Form\\SearchFilterType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/SearchFilterType.php
+
+		-
+			message: '#^Class App\\Form\\UserAutocompleteField extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/UserAutocompleteField.php
+
+		-
+			message: '#^Class App\\Form\\UserPreferencesType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/UserPreferencesType.php
+
+		-
+			message: '#^Class App\\Form\\UserType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/UserType.php
+
+		-
+			message: '#^Method App\\Repository\\BaseMessageRecipientRepository\:\:getAdvancedSearchQuery\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/BaseMessageRecipientRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DomainRepository\:\:getSearchQuery\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DomainRepository.php
+
+		-
+			message: '#^Method App\\Repository\\MsgrcptRepository\:\:findByEmailRecipient\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/MsgrcptRepository.php
+
+		-
+			message: '#^Method App\\Repository\\MsgrcptSearchRepository\:\:getSearchQuery\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/MsgrcptSearchRepository.php
+
+		-
+			message: '#^Method App\\Repository\\MsgrcptSearchRepository\:\:hintQueryWithIndexes\(\) has parameter \$query with generic class Doctrine\\ORM\\Query but does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/MsgrcptSearchRepository.php
+
+		-
+			message: '#^Method App\\Repository\\UserRepository\:\:search\(\) return type with generic class Doctrine\\ORM\\Query does not specify its types\: TKey, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/UserRepository.php
+
+		-
+			message: '#^Class App\\Security\\SwitchToUserVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Security/SwitchToUserVoter.php
