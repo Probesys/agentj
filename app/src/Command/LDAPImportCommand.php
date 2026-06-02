@@ -82,7 +82,7 @@ class LDAPImportCommand extends Command
             $this->importGroups();
         }
 
-        $this->assignGroupsToImportedUsers();
+        $this->groupService->updateWblist();
 
         return Command::SUCCESS;
     }
@@ -148,6 +148,8 @@ class LDAPImportCommand extends Command
                         }
                     }
                 }
+
+                $this->assignTargetGroupsToUser($user);
             }
         }
 
@@ -262,7 +264,7 @@ class LDAPImportCommand extends Command
         $this->em->flush();
     }
 
-    private function assignGroupsToImportedUsers(): void
+    private function assignTargetGroupsToUser(User $user): void
     {
         $targetGroups = $this->connector->getTargetGroups();
 
@@ -270,14 +272,11 @@ class LDAPImportCommand extends Command
             return;
         }
 
-        foreach ($this->connector->getUsers() as $user) {
-            foreach ($targetGroups as $group) {
-                $user->addGroup($group);
-            }
-
-            $this->userService->updateAliasGroupsAndPolicyFromUser($user);
+        foreach ($targetGroups as $group) {
+            $user->addGroup($group);
         }
-        $this->groupService->updateWblist();
+
+        $this->userService->updateAliasGroupsAndPolicyFromUser($user);
     }
 
     private function importGroups(): void
