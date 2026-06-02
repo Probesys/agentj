@@ -4,15 +4,15 @@
   "description": "Lutte antispam by Probesys",
   "icons": [
       {
-        "src": "img/favicon.ico",
+        "src": "/favicon.ico",
         "sizes": "16x16",
-        "type": "image/png"
+        "type": "image/x-icon"
       },
         {
           "src": "img/logo-512.png",
           "sizes": "512x512",
           "type": "image/png"
-        }   
+        }
       ],
   "start_url": "/",
   "scope": "/",
