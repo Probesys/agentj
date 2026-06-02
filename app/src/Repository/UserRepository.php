@@ -68,7 +68,7 @@ class UserRepository extends BaseRepository
 
     public function findOneByMailAddress(Maddr $maddr): ?User
     {
-        $email = $maddr->getEmailClear();
+        $email = $maddr->getEmail();
         return $this->findOneBy(['email' => $email]);
     }
 

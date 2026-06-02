@@ -157,15 +157,15 @@ class SendAuthMailRequestCommand
                 if ($this->sendAuthEmail($message, $email)) {
                     $this->logService->addLog(
                         'Authentification request sent',
-                        $message->getMailIdAsString(),
+                        $message->getMailId(),
                         $mailBody['html_body']
                     );
                     $subject = $this->getSubject($message, $locale);
                     $output->writeln(
                         date('Y-m-d H:i:s')
                         . "\t{$fromName} <{$mailFrom}>"
-                        . "\t{$message->getMailIdAsString()}"
-                        . "\t{$message->getSid()->getEmailClear()}"
+                        . "\t{$message->getMailId()}"
+                        . "\t{$message->getSid()->getEmail()}"
                         . "\t{$subject}"
                     );
                 }
@@ -187,7 +187,7 @@ class SendAuthMailRequestCommand
     private function createAuthEmailContent(Domain $domain, Msgs $msg, array $recipientUsers, string $locale): array
     {
         $token = $this->cryptEncryptService->encrypt(
-            $msg->getMailIdAsString()
+            $msg->getMailId()
             . '%%%' . $msg->getSecretId()
             . '%%%' . $msg->getPartitionTag()
             . '%%%' . $domain->getId()
@@ -252,7 +252,7 @@ class SendAuthMailRequestCommand
         array $body,
         string $locale,
     ): ?Email {
-        $mailTo = $message->getSid()->getEmailClear();
+        $mailTo = $message->getSid()->getEmail();
         try {
             $subject = $this->getSubject($message, $locale);
             $email = new Email();

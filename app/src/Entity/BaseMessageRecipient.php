@@ -24,7 +24,7 @@ class BaseMessageRecipient
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private mixed $mailId = null;
+    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
 
     #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
     #[ORM\Id]
@@ -74,12 +74,7 @@ class BaseMessageRecipient
         return $this->partitionTag;
     }
 
-    public function getMailId(): mixed
-    {
-        return $this->mailId;
-    }
-
-    public function getMailIdAsString(): string
+    public function getMailId(): string
     {
         return ResourceHelper::toString($this->mailId) ?? '';
     }

@@ -35,7 +35,6 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFilter('lcfirst', [$this, 'lcfirst']),
-            new TwigFilter('stream_get_contents', [$this, 'streamGetcontent']),
             new TwigFilter('user_groups', [$this, 'getUserGroups']),
             new TwigFilter('wblist_is_overridden', [$this, 'wbListIsOverriden']),
         ];
@@ -53,20 +52,6 @@ class AppExtension extends AbstractExtension
     public function lcfirst(string $strInput): string
     {
         return lcfirst($strInput);
-    }
-
-    public function streamGetcontent(mixed $input): string
-    {
-        if (!is_resource($input)) {
-            return $input;
-        }
-
-        $clearContent = stream_get_contents($input, -1, 0);
-        if ($clearContent === false) {
-            return '';
-        }
-
-        return $clearContent;
     }
 
     /**

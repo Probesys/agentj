@@ -17,13 +17,13 @@
             {{ 'Generics.fields.sender' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msg.sid.getEmailClear }}
+            {{ msg.sid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msgRcpt.rid.getEmailClear }}
+            {{ msgRcpt.rid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
@@ -108,7 +108,7 @@
                             {{ wblist.rid.email }}
                         </td>
                         <td>
-                            {{ wblist.sid.emailClear }}
+                            {{ wblist.sid.email }}
                         </td>
                         <td>
                             {{ wblist.wbRuleName | trans }}

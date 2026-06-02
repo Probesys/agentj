@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use App\Repository\MaddrRepository;
+use App\Util\ResourceHelper;
 use App\Util\Url;
 
 /**
@@ -50,19 +51,9 @@ class Maddr
         return $this;
     }
 
-    public function getEmail(): mixed
+    public function getEmail(): string
     {
-        return $this->email;
-    }
-
-
-    public function getEmailClear(): ?string
-    {
-        $emailClear = stream_get_contents($this->email, -1, 0);
-        if ($emailClear === false) {
-            return null;
-        }
-        return $emailClear;
+        return ResourceHelper::toString($this->email) ?? '';
     }
 
     public function setEmail(string $email): self

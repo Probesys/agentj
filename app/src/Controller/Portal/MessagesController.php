@@ -121,7 +121,7 @@ class MessagesController extends AbstractController
         }, $listAliases->toArray());
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
-        if (!in_array($messageRecipient->getRid()->getEmailClear(), $accessibleRecipientEmails)) {
+        if (!in_array($messageRecipient->getRid()->getEmail(), $accessibleRecipientEmails)) {
             throw new AccessDeniedException();
         }
     }

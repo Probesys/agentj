@@ -19,7 +19,7 @@ class BaseMessage
 
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
-    private mixed $mailId = null;
+    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
 
     #[ORM\Column(name: 'secret_id', type: Types::BINARY, nullable: true)]
     private mixed $secretId = null;
@@ -347,7 +347,7 @@ class BaseMessage
     public function getSenderEmail(): ?string
     {
         $sender = $this->getSid();
-        $senderEmail = $sender->getEmailClear();
+        $senderEmail = $sender->getEmail();
 
         $fromEmail = $this->getFromMimeAddress()?->getAddress();
 
@@ -371,11 +371,6 @@ class BaseMessage
     }
 
     public function getMailId(): string
-    {
-        return $this->getMailIdAsString();
-    }
-
-    public function getMailIdAsString(): string
     {
         return ResourceHelper::toString($this->mailId) ?? '';
     }

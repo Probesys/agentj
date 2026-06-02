@@ -28,12 +28,12 @@
 				<tr>
 					{% if is_granted('ROLE_ADMIN') %}
 						<td>
-							<span title="{{ messageRecipient.getMailIdAsString() }}">{{ messageRecipient.getMailIdAsString() }}</span>
+							<span title="{{ messageRecipient.mailId() }}">{{ messageRecipient.mailId() }}</span>
 						</td>
 					{% endif %}
 					{% if is_granted('ROLE_ADMIN') %}
 						<td data-title="{{'Message.Recipient'|trans }}">
-							<span title="{{messageRecipient.rid.getEmailClear()}}">{{messageRecipient.rid.getEmailClear()}}</span>
+							<span title="{{messageRecipient.rid.getEmail()}}">{{messageRecipient.rid.getEmail()}}</span>
 						</td>
 					{% endif %}
 					<td data-title="{{'Message.Object'|trans }}">

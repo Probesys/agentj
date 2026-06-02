@@ -214,14 +214,14 @@ class ReportSendMailCommand extends Command
             $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
                 'token' => $token,
                 'partitionTag' => $messageRecipient->getPartitionTag(),
-                'mailId' => $messageRecipient->getMailIdAsString(),
+                'mailId' => $messageRecipient->getMailId(),
                 'recipientId' => $messageRecipient->getRid()->getId(),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $urlRestore = $this->urlGenerator->generate('portal_message_restore', [
                 'token' => $token,
                 'partitionTag' => $messageRecipient->getPartitionTag(),
-                'mailId' => $messageRecipient->getMailIdAsString(),
+                'mailId' => $messageRecipient->getMailId(),
                 'recipientId' => $messageRecipient->getRid()->getId(),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 

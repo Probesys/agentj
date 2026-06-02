@@ -301,7 +301,7 @@ class MessageController extends AbstractController
         if ($action) {
             foreach ($request->request->all('id') as $obj) {
                 list($message, $messageRecipient) = $this->fetchMessageFromBatchId($obj);
-                $mailId = $message->getMailIdAsString();
+                $mailId = $message->getMailId();
 
                 $this->checkMailAccess($messageRecipient);
 
@@ -360,7 +360,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized', $messageRecipient->getMailIdAsString());
+            $logService->addLog('authorized', $messageRecipient->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -381,7 +381,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned', $messageRecipient->getMailIdAsString());
+            $logService->addLog('banned', $messageRecipient->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -435,7 +435,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized for domain', $messageRecipient->getMailIdAsString());
+            $logService->addLog('authorized for domain', $messageRecipient->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -457,7 +457,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned for domain', $messageRecipient->getMailIdAsString());
+            $logService->addLog('banned for domain', $messageRecipient->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -608,7 +608,7 @@ class MessageController extends AbstractController
 
         if (
             !$this->isGranted("ROLE_ADMIN") &&
-            !in_array($msgRcpt->getRid()->getEmailClear(), $accessibleRecipientEmails)
+            !in_array($msgRcpt->getRid()->getEmail(), $accessibleRecipientEmails)
         ) {
             throw new AccessDeniedException();
         }

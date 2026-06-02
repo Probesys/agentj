@@ -160,7 +160,7 @@ class WblistRepository extends BaseRepository
      */
     public function findBySenderEmailAndRecipient(string $senderEmail, Maddr $recipient): array
     {
-        $recipientAddresses = Email::getAddressLookups($recipient->getEmailClear());
+        $recipientAddresses = Email::getAddressLookups($recipient->getEmail());
         $senderAddresses = Email::getAddressLookups($senderEmail);
 
         $entityManager = $this->getEntityManager();

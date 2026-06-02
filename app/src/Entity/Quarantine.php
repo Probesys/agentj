@@ -21,7 +21,7 @@ class Quarantine
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private mixed $mailId = null;
+    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
 
     #[ORM\Column(name: 'chunk_ind', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
@@ -41,9 +41,9 @@ class Quarantine
         return $this->partitionTag;
     }
 
-    public function getMailId(): mixed
+    public function getMailId(): string
     {
-        return $this->mailId;
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getChunkInd(): int

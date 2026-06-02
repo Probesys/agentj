@@ -265,7 +265,7 @@ class MessageService
         $this->messageRecipientRepository->save($messageRecipient);
 
         $this->bus->dispatch(new AmavisRelease(
-            mailId: $messageRecipient->getMailIdAsString(),
+            mailId: $messageRecipient->getMailId(),
             partitionTag: $messageRecipient->getPartitionTag(),
             rseqnum: $messageRecipient->getRseqnum(),
             finalStatus: $finalStatus
@@ -284,7 +284,7 @@ class MessageService
     {
         $this->messageRecipientRepository->changeStatus(
             $message->getPartitionTag(),
-            $message->getMailIdAsString(),
+            $message->getMailId(),
             MessageStatus::DELETED,
             $messageRecipient->getRid()->getId(),
         );
@@ -312,7 +312,7 @@ class MessageService
             }
 
             $recipient = $messageRecipient->getRid();
-            $recipientEmail = $recipient->getEmailClear();
+            $recipientEmail = $recipient->getEmail();
 
             $messageRecipient->setStatus(MessageStatus::SPAMMED);
             $this->messageRecipientRepository->save($messageRecipient);
@@ -351,7 +351,7 @@ class MessageService
      */
     public function getReleaseToken(Msgs $message, User $user): string
     {
-        $data = $user->getId() . '%%%' . $message->getMailIdAsString();
+        $data = $user->getId() . '%%%' . $message->getMailId();
         return $this->cryptEncryptService->encrypt($data, lifetime: 7 * 24 * 3600);
     }
 

@@ -18,7 +18,7 @@ class Mailaddr
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
     private int $priority = 7;
@@ -44,12 +44,7 @@ class Mailaddr
         return $this;
     }
 
-    public function getEmail(): mixed
-    {
-        return stream_get_contents($this->email, -1, 0);
-    }
-
-    public function getEmailClear(): string
+    public function getEmail(): string
     {
         return ResourceHelper::toString($this->email) ?? '';
     }
