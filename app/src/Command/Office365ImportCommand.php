@@ -50,11 +50,12 @@ class Office365ImportCommand extends Command
         $this->io =  new SymfonyStyle($input, $output);
         $connectorId = $input->getArgument('connectorId');
 
-        $this->connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
-        if (!$this->connector) {
+        $connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
+        if (!$connector) {
             $this->io->error('Connector not found');
             return Command::FAILURE;
         }
+        $this->connector = $connector;
 
         $token = $this->getToken();
         if (!$token) {

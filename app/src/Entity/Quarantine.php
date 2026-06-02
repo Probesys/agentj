@@ -34,7 +34,7 @@ class Quarantine
     #[ORM\ManyToOne(inversedBy: 'quarantineChunks')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private Msgs $message;
+    private ?Msgs $message;
 
     public function getPartitionTag(): int
     {

@@ -15,7 +15,7 @@ class Msgrcpt extends BaseMessageRecipient
     #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private Msgs $msgs;
+    private ?Msgs $msgs;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseStartedAt = null;
