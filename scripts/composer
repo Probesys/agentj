@@ -3,4 +3,4 @@
 SCRIPT_PATH=$(dirname $(realpath -s $0))
 export COMPOSE_FILE=$SCRIPT_PATH/../docker-compose.yml
 
-docker compose exec -T app composer "$@"
+docker compose exec -u www-data -T app composer "$@"
