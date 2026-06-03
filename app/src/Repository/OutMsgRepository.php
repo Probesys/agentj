@@ -20,8 +20,8 @@ class OutMsgRepository extends BaseMessageRepository
      * Delete outgoing messages older than $date
      *
      * @return array{
-     *     nbDeletedMsgs: int,
-     *     nbDeletedQuarantine: int,
+     *     nbDeletedMsgs: int|string,
+     *     nbDeletedQuarantine: int|string,
      * }
      */
     public function truncateMessageOlder(int $date): array

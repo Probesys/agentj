@@ -164,8 +164,8 @@ class MsgsRepository extends BaseMessageRepository
      * Delete message older $date
      *
      * @return array{
-     *     nbDeletedMsgs: int,
-     *     nbDeletedQuarantine: int,
+     *     nbDeletedMsgs: int|string,
+     *     nbDeletedQuarantine: int|string,
      * }
      */
     public function truncateMessageOlder(int $date): array

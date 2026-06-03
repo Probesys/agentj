@@ -2,10 +2,9 @@
 
 namespace App\Entity;
 
-use App\Util\ResourceHelper;
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\DBAL\Types\Types;
 use App\Repository\MailaddrRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Mailaddr
@@ -24,8 +23,8 @@ class Mailaddr
     private int $priority = 7;
 
 
-    #[ORM\Column(name: 'email', type: Types::BINARY, nullable: false)]
-    private mixed $email;
+    #[ORM\Column(name: 'email', type: Types::BINARY, length: 255, nullable: false)]
+    private string $email;
 
     public function getId(): int
     {
@@ -46,7 +45,7 @@ class Mailaddr
 
     public function getEmail(): string
     {
-        return ResourceHelper::toString($this->email) ?? '';
+        return $this->email;
     }
 
     public function setEmail(string $email): self

@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Entity\Mailaddr;
 use App\Repository\WblistRepository;
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Wblist
@@ -41,7 +42,7 @@ class Wblist
     #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
     private string $wb;
 
-    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => new CurrentTimestamp()])]
     private ?\DateTimeInterface $datemod ;
 
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]

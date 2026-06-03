@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Doctrine\DBAL\Types\Types;
 
 /**
  * Groups
@@ -28,7 +28,7 @@ class Groups
     #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
     private string $name;
 
-    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => new CurrentTimestamp()])]
     private ?\DateTimeInterface $datemod = null;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Policy')]

@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
+use App\Repository\DomainRepository;
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Doctrine\DBAL\Types\Types;
-use App\Repository\DomainRepository;
 
 /**
  * Domain
@@ -28,7 +29,7 @@ class Domain
     #[ORM\Column(name: 'srv_smtp', type: 'string', length: 255, nullable: false)]
     private string $srvSmtp;
 
-    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(name: 'datemod', type: 'datetime', nullable: true, options: ['default' => new CurrentTimestamp()])]
     private ?\DateTimeInterface $datemod;
 
     #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]

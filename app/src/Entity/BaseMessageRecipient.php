@@ -4,9 +4,8 @@ namespace App\Entity;
 
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
-use App\Util\ResourceHelper;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Translation\TranslatableMessage;
 
 #[ORM\MappedSuperclass]
@@ -22,10 +21,10 @@ class BaseMessageRecipient
     #[ORM\GeneratedValue(strategy: 'NONE')]
     private int $partitionTag = 0;
 
-    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, length: 255, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
+    private string $mailId; /** @phpstan-ignore property.onlyRead */
 
     #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
     #[ORM\Id]
@@ -77,7 +76,7 @@ class BaseMessageRecipient
 
     public function getMailId(): string
     {
-        return ResourceHelper::toString($this->mailId) ?? '';
+        return $this->mailId;
     }
 
     public function getRseqnum(): ?int

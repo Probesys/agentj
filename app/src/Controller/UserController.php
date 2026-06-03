@@ -20,7 +20,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Repository\DomainRepository;
-use App\Util\ResourceHelper;
 use Knp\Component\Pager\PaginatorInterface;
 
 //use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -551,7 +550,7 @@ class UserController extends AbstractController
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
             } elseif (
-                ResourceHelper::toString($oldUserData['email']) != $form->get('email')->getData() && $emailExist
+                $oldUserData['email'] != $form->get('email')->getData() && $emailExist
             ) {
                 $return = [
                     'status' => 'danger',
@@ -628,7 +627,7 @@ class UserController extends AbstractController
             $data = $form->getData();
             $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if (ResourceHelper::toString($oldUser['email']) != $form->get('email')->getData() && $emailExist) {
+            if ($oldUser['email'] != $form->get('email')->getData() && $emailExist) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
@@ -738,7 +737,7 @@ class UserController extends AbstractController
         );
 
         foreach ($entities as $entity) {
-            $label = '' . ResourceHelper::toString($entity['email']);
+            $label = '' . $entity['email'];
 
             $items[] = ['value' => $entity['id'], 'text' => $label];
         }

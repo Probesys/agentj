@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\DBAL\Types\Types;
 use App\Repository\MaddrRepository;
-use App\Util\ResourceHelper;
 use App\Util\Url;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Maddr
@@ -20,13 +19,13 @@ class Maddr
     #[ORM\Column(name: 'id', type: 'bigint', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    private string $id;
+    private int|string $id;
 
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: true)]
     private ?int $partitionTag = 0;
 
-    #[ORM\Column(name: 'email', type: Types::BINARY, nullable: false)]
-    private mixed $email;
+    #[ORM\Column(name: 'email', type: Types::BINARY, length: 255, nullable: false)]
+    private string $email;
 
     #[ORM\Column(name: 'is_invalid', type: 'boolean', nullable: true)]
     private ?bool $isInvalid = null;
@@ -34,7 +33,7 @@ class Maddr
     #[ORM\Column(name: 'domain', type: 'string', length: 255, nullable: false)]
     private string $domain;
 
-    public function getId(): string
+    public function getId(): int|string
     {
         return $this->id;
     }
@@ -53,7 +52,7 @@ class Maddr
 
     public function getEmail(): string
     {
-        return ResourceHelper::toString($this->email) ?? '';
+        return $this->email;
     }
 
     public function setEmail(string $email): self

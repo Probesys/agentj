@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use App\Util\ResourceHelper;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Quarantine
@@ -18,10 +18,10 @@ class Quarantine
     #[ORM\GeneratedValue(strategy: 'NONE')]
     private int $partitionTag = 0;
 
-    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, length: 255, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
+    private string $mailId; /** @phpstan-ignore property.onlyRead */
 
     #[ORM\Column(name: 'chunk_ind', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
@@ -43,7 +43,7 @@ class Quarantine
 
     public function getMailId(): string
     {
-        return ResourceHelper::toString($this->mailId) ?? '';
+        return $this->mailId;
     }
 
     public function getChunkInd(): int

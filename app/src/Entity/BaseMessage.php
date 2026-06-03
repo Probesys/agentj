@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
-use App\Util\ResourceHelper;
+use App\Entity\Maddr;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address;
-use Doctrine\DBAL\Types\Types;
-use App\Entity\Maddr;
 
 #[ORM\MappedSuperclass]
 #[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
@@ -17,12 +16,12 @@ class BaseMessage
     #[ORM\Id]
     private int $partitionTag = 0;
 
-    #[ORM\Column(name: 'mail_id', type: Types::BINARY, nullable: false)]
+    #[ORM\Column(name: 'mail_id', type: Types::BINARY, length: 255, nullable: false)]
     #[ORM\Id]
-    private mixed $mailId; /** @phpstan-ignore property.onlyRead */
+    private string $mailId; /** @phpstan-ignore property.onlyRead */
 
-    #[ORM\Column(name: 'secret_id', type: Types::BINARY, nullable: true)]
-    private mixed $secretId = null;
+    #[ORM\Column(name: 'secret_id', type: Types::BINARY, length: 255, nullable: true)]
+    private ?string $secretId = null;
 
     #[ORM\Column(name: 'am_id', type: 'string', length: 20, nullable: false)]
     private string $amId;
@@ -57,8 +56,8 @@ class BaseMessage
     #[ORM\Column(name: 'quar_type', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private ?string $quarType;
 
-    #[ORM\Column(name: 'quar_loc', type: Types::BINARY, nullable: true)]
-    private mixed $quarLoc = null;
+    #[ORM\Column(name: 'quar_loc', type: Types::BINARY, length: 255, nullable: true)]
+    private ?string $quarLoc = null;
 
     #[ORM\Column(name: 'dsn_sent', type: 'string', length: 1, nullable: true, options: ['fixed' => true])]
     private ?string $dsnSent;
@@ -109,10 +108,10 @@ class BaseMessage
 
     public function getSecretId(): ?string
     {
-        return ResourceHelper::toString($this->secretId);
+        return $this->secretId;
     }
 
-    public function setSecretId(mixed $secretId): self
+    public function setSecretId(string $secretId): self
     {
         $this->secretId = $secretId;
 
@@ -229,10 +228,10 @@ class BaseMessage
 
     public function getQuarLoc(): ?string
     {
-        return ResourceHelper::toString($this->quarLoc);
+        return $this->quarLoc;
     }
 
-    public function setQuarLoc(mixed $quarLoc): self
+    public function setQuarLoc(string $quarLoc): self
     {
         $this->quarLoc = $quarLoc;
 
@@ -372,7 +371,7 @@ class BaseMessage
 
     public function getMailId(): string
     {
-        return ResourceHelper::toString($this->mailId) ?? '';
+        return $this->mailId;
     }
 
     public function getSendCaptcha(): ?int

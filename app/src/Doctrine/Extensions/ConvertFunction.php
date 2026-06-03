@@ -14,7 +14,7 @@ class ConvertFunction extends FunctionNode
     public Node $charset;
 
 
-    public function parse(Parser $parser)
+    public function parse(Parser $parser): void
     {
         $parser->match(TokenType::T_IDENTIFIER);
         $parser->match(TokenType::T_OPEN_PARENTHESIS);

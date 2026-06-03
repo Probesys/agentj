@@ -4,9 +4,9 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 use App\Repository\AlertRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AlertRepository::class)]
 #[ORM\Table(name: 'alert')]
@@ -20,7 +20,7 @@ class Alert
     #[ORM\Column(type: 'string', length: 255)]
     private string $alertType;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', length: 255)]
     private string $refId;
 
     #[ORM\Column(type: 'datetime')]

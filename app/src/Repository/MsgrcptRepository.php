@@ -115,7 +115,7 @@ class MsgrcptRepository extends BaseRepository
     /**
      * Update the status of a message for one recipient
      */
-    public function changeStatus(int $partitiontag, string $mailId, int $status, string $rid): void
+    public function changeStatus(int $partitiontag, string $mailId, int $status, int|string $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -156,7 +156,7 @@ class MsgrcptRepository extends BaseRepository
         return $query->getResult();
     }
 
-    public function consolidateStatus(): int
+    public function consolidateStatus(): int|string
     {
         $connection = $this->getEntityManager()->getConnection();
 

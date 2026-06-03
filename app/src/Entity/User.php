@@ -4,15 +4,14 @@ namespace App\Entity;
 
 use App\Entity\Policy;
 use App\Repository\UserRepository;
-use App\Util\ResourceHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\ORM\Mapping\OrderBy;
-use Doctrine\DBAL\Types\Types;
 
 /**
  * Users
@@ -30,8 +29,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'priority', type: 'integer', nullable: false, options: ['default' => 7])]
     private int $priority = 7;
 
-    #[ORM\Column(name: 'email', type: Types::BINARY, nullable: true, unique: true)]
-    private mixed $email = null;
+    #[ORM\Column(name: 'email', type: Types::BINARY, length: 255, nullable: true, unique: true)]
+    private ?string $email = null;
 
     #[ORM\Column(name: 'fullname', type: 'string', length: 255, nullable: true)]
     private ?string $fullname = null;
@@ -196,10 +195,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmail(): ?string
     {
-        return ResourceHelper::toString($this->email);
+        return $this->email;
     }
 
-    public function setEmail(mixed $email): self
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 
