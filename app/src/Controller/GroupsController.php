@@ -10,10 +10,12 @@ use App\Entity\User;
 use App\Form\GroupsType;
 use App\Service\GroupService;
 use App\Service\UserService;
-use App\Repository\UserRepository;
+use App\Repository\GroupsRepository;
 use App\Repository\GroupsWblistRepository;
+use App\Repository\UserRepository;
 use App\Repository\MailaddrRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,13 +43,31 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/', name: 'groups_index', methods: 'GET')]
-    public function index(): Response
-    {
+    public function index(
+        Request $request,
+        GroupsRepository $groupsRepository,
+        PaginatorInterface $paginator
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        $groups = $this->em
-                ->getRepository(Groups::class)
-                ->findByDomains($user->getDomains()->toArray());
+
+        $groupsQuery = $groupsRepository->getSearchQuery(
+            domains: $user->getDomains()->toArray(),
+            searchKey: $request->query->getString('search', '')
+        );
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+        $groups = $paginator->paginate(
+            $groupsQuery,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'g.name',
+                'defaultSortDirection' => 'asc',
+            ]
+        );
 
         return $this->render('groups/index.html.twig', ['groups' => $groups]);
     }
@@ -199,6 +219,7 @@ class GroupsController extends AbstractController
         GroupService $groupService,
         UserRepository $userRepository,
     ): Response {
+
         if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
             $group->removeUser($user);
 
@@ -234,24 +255,33 @@ class GroupsController extends AbstractController
         }
     }
 
-    #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'GET')]
+    #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'POST')]
     public function delete(
         Request $request,
         Groups $group,
         UserService $userService,
         GroupService $groupService,
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->query->get('_token'))) {
-            $groupUsers = $group->getUsers()->toArray();
 
-            $this->em->remove($group);
-            $this->em->flush();
-            $groupService->updateWblist();
-            foreach ($groupUsers as $user) {
-                $userService->updateUserAndAliasPolicy($user);
-            }
-            $this->em->flush();
+        $csrfToken = $request->request->getString('_token', '');
+
+        if (!$this->isCsrfTokenValid('delete' . $group->getId(), $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirectToRoute('groups_index');
         }
+
+        $groupUsers = $group->getUsers()->toArray();
+
+        $this->em->remove($group);
+        $this->em->flush();
+
+        $groupService->updateWblist();
+
+        foreach ($groupUsers as $user) {
+            $userService->updateUserAndAliasPolicy($user);
+        }
+
+        $this->em->flush();
 
         return $this->redirectToRoute('groups_index');
     }
