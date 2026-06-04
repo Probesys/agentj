@@ -2,11 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Mailaddr;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
-use App\Entity\Quarantine;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
@@ -20,7 +18,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Webklex\PHPIMAP\Message;

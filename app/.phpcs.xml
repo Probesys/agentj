@@ -6,6 +6,8 @@
     <file>src</file>
     <file>migrations</file>
 
+    <exclude-pattern>config/reference\.php$</exclude-pattern>
+
     <arg name="extensions" value="php" />
 
     <rule ref="PSR12" />

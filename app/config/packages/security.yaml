@@ -2,11 +2,14 @@ security:
     # encoders:
     #     App\Entity\User: bcrypt
     password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
         # use your user class name here
+
         App\Entity\User:
             # Use native password hasher, which auto-selects the best
             # possible hashing algorithm (starting from Symfony 5.3 this is "bcrypt")
             algorithm: bcrypt
+  
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     # providers:
     #     #in_memory: { memory: ~ }
@@ -23,7 +26,8 @@ security:
         ROLE_SUPER_ADMIN: [ROLE_ADMIN]
     firewalls:
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            # Ensure dev tools and static assets are always allowed
+            pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
         check:
             pattern: ^/check
@@ -48,14 +52,13 @@ security:
             switch_user: { role: CAN_SWITCH_USER }
 #            context: agentj
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#firewalls-authentication
+            # Activate different ways to authenticate:
+            # https://symfony.com/doc/current/security.html#the-firewall
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Note: Only the *first* matching rule is applied
     access_control:
          - { path: ^/login, roles: PUBLIC_ACCESS }
          - { path: ^/connect, roles: PUBLIC_ACCESS }
@@ -64,3 +67,14 @@ security:
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
          - { path: ^/, roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

@@ -7,6 +7,7 @@ use App\Entity\Groups;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Repository\DomainRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
 use App\Service\Referrer;
@@ -17,12 +18,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Repository\DomainRepository;
 use Knp\Component\Pager\PaginatorInterface;
 
-//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 #[Route(path: 'admin/users')]
 class UserController extends AbstractController
 {

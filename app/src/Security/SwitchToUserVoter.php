@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class SwitchToUserVoter extends Voter
@@ -23,6 +24,7 @@ class SwitchToUserVoter extends Voter
         string $attribute,
         mixed $subject,
         TokenInterface $token,
+        ?Vote $vote = null,
     ): bool {
         $user = $token->getUser();
 

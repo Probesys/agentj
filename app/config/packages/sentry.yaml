@@ -1,8 +1,6 @@
 when@prod:
     sentry:
         dsn: '%env(string:default::SENTRY_DSN)%'
-        register_error_listener: false
-        register_error_handler: false
         options:
             release: '%app.agentj-version%'
             # Add request headers, cookies, IP address and the authenticated user
@@ -11,3 +9,23 @@ when@prod:
             ignore_exceptions:
                 - 'Symfony\Component\ErrorHandler\Error\FatalError'
                 - 'Symfony\Component\Debug\Exception\FatalErrorException'
+        # If you are using Monolog, you also need this additional configuration to log the errors correctly:
+        # https://docs.sentry.io/platforms/php/guides/symfony/integrations/monolog/
+        register_error_listener: false
+        register_error_handler: false
+
+    monolog:
+        handlers:
+            sentry_logs:
+                type: service
+                id: Sentry\SentryBundle\Monolog\LogsHandler
+
+    services:
+        Sentry\SentryBundle\Monolog\LogsHandler:
+            arguments:
+                - !php/const Monolog\Logger::WARNING
+
+        Sentry\Monolog\BreadcrumbHandler:
+            arguments:
+                $hub: '@Sentry\State\HubInterface'
+                $level: !php/const Monolog\Logger::INFO
