@@ -142,6 +142,17 @@ Entities.LdapConnector.fields.ldapVersion: 'LDAP version'
 Entities.LdapConnector.fields.report: 'Send the daily report for created users'
 Entities.LdapConnector.fields.synchronizeGroup: 'Also synchronize groups'
 Entities.LdapConnector.fields.usersInformation: 'Users information'
+Entities.Message.Quota: Quota
+Entities.Message.Status.Authorized: Authorized
+Entities.Message.Status.Banned: Banned
+Entities.Message.Status.Deleted: Deleted
+Entities.Message.Status.Error: 'In error'
+Entities.Message.Status.Restored: Restored
+Entities.Message.Status.Spam: Spam
+Entities.Message.Status.Unknown: Unknown
+Entities.Message.Status.Unreleased: Unreleased
+Entities.Message.Status.Untreated: Untreated
+Entities.Message.Status.Virus: Virus
 Entities.Message.authorized: 'that have been Authorized'
 Entities.Message.banned: 'that have been Banned'
 Entities.Message.dateAuthRequestAt: 'Authentication request sent the'

@@ -58,7 +58,7 @@
         <div class="col-md-8">
             {% if msgRcpt.isAlreadyReleased %}
                 {% set deliveryStatusClass = 'text-success' %}
-                {% set msgsStatus = msgRcpt.statusName %}
+                {% set msgsStatus = msgRcpt.statusLabel | trans %}
                 {% set response = msgRcpt.amavisOutput %}
             {% else %}
                 {% set deliveryStatusClass = 'text-danger' %}

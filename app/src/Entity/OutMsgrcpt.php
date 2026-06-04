@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Amavis\ContentType;
+use App\Amavis\DeliveryStatus;
+use App\Amavis\MessageStatus;
 use App\Repository\OutMsgrcptRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'out_msgrcpt')]
 #[ORM\Index(name: 'out_msgrcpt_idx_mail_id', columns: ['mail_id'])]
@@ -27,5 +30,37 @@ class OutMsgrcpt extends BaseMessageRecipient
         $this->msgs = $msgs;
 
         return $this;
+    }
+
+    /**
+     * Return the status of the outgoing message.
+     *
+     * As status is not consolidated for outgoing messages (thus, not set),
+     * this method return a coherent status based on Amavis fields.
+     *
+     * @see \App\Repository\MsgrcptRepository::consolidateStatus
+     */
+    public function getStatus(): int
+    {
+        if ($this->getDs() === DeliveryStatus::PASS) {
+            return MessageStatus::AUTHORIZED;
+        }
+
+        if ($this->getContent() === ContentType::VIRUS) {
+            return MessageStatus::VIRUS;
+        }
+
+        if ($this->getBl() === 'Y') {
+            return MessageStatus::BANNED;
+        }
+
+        if ($this->getContent() === ContentType::SPAM) {
+            return MessageStatus::SPAMMED;
+        }
+
+        // There is no "untreated" status for outgoing messages. If we get
+        // there, it's probably another kind of error. If you need to know
+        // more, check the "content" field.
+        return MessageStatus::ERROR;
     }
 }
