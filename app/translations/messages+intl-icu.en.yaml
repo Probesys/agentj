@@ -92,7 +92,7 @@ Entities.Group.Actions.editRuleGroup: 'Edit the group rule'
 Entities.Group.Actions.list: Actions
 Entities.Group.Actions.updateGroup: 'Modify the group'
 Entities.Group.Name: Name
-Entities.Group.Title: 'Managing groups'
+Entities.Group.Title: 'List of groups'
 Entities.Group.Updated: Update
 Entities.Group.fields.domain: 'Associated domain'
 Entities.Group.fields.name: 'Group name'

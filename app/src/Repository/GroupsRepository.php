@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\User;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -36,20 +37,25 @@ class GroupsRepository extends BaseRepository
     }
 
     /**
-     * Return the groups associated to one or more domains
      * @param Domain[] $domains
-     * @return Groups[]
+     * @return Query<Groups>
      */
-    public function findByDomains(array $domains): array
+    public function getSearchQuery(array $domains, string $searchKey = ''): Query
     {
-        $dql = $this->createQueryBuilder('g');
+        $queryBuilder = $this->createQueryBuilder('g')
+                ->join('g.domain', 'd');
 
         if ($domains) {
-            $dql->where('g.domain in (:domains)');
-            $dql->setParameter('domains', $domains);
+            $queryBuilder->where('g.domain in (:domains)');
+            $queryBuilder->setParameter('domains', $domains);
         }
 
-        return $dql->getQuery()->getResult();
+        if ($searchKey !== '') {
+            $queryBuilder->andWhere('g.name LIKE :search OR d.domain LIKE :search')
+                ->setParameter('search', '%' . $searchKey . '%');
+        }
+
+        return $queryBuilder->getQuery();
     }
 
     /**
