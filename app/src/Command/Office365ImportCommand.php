@@ -4,7 +4,8 @@ namespace App\Command;
 
 use App\Entity\Domain;
 use App\Entity\Office365Connector;
-use App\Entity\User as User;
+use App\Entity\Groups;
+use App\Entity\User;
 use App\Service\MailaddrService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
@@ -73,9 +74,9 @@ class Office365ImportCommand extends Command
 
         $this->importUsers();
 
-        // if ($this->connector->isSynchronizeGroup()) {
-        //     $this->importGroups();
-        // }
+        if ($this->connector->isSynchronizeGroup()) {
+            $this->importGroups();
+        }
 
         return Command::SUCCESS;
     }
@@ -149,6 +150,7 @@ class Office365ImportCommand extends Command
             $this->em->persist($user);
             $this->em->flush();
         }
+
         $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
             'nb_users_created' => $nbUserCreated,
             'nb_users_updated' => $nbUserUpdated,
@@ -211,116 +213,127 @@ class Office365ImportCommand extends Command
         return $aliases;
     }
 
-    // private function importGroups(string $token): void
-    // {
-    //     $graph = new Graph();
-    //     $graph->setAccessToken($token);
-    //     $domain = $this->connector->getDomain();
-    //     $nbGroupCreated = 0;
-    //     $nbGroupUpdated = 0;
-    //     try {
-    //         $endpoint = '/groups' . '?$filter=endsWith(mail,\'@' . $domain->getDomain() . '\' )&$count=true';
-    //         $groups = $graph->createRequest('GET', $endpoint)
-    //                         ->setReturnType(GraphGroup::class)
-    //                         ->addHeaders(['ConsistencyLevel' => 'eventual'])
-    //                         ->execute();
-    //         $priorityMax = $this->em->getRepository(Groups::class)
-    //                                 ->getMaxPriorityforDomain($this->connector->getDomain());
+    private function importGroups(): void
+    {
+        $groups = [];
+        $domain = $this->connector->getDomain();
 
-    //         foreach ($groups as $m365group) {
-    //             $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
-    //             if (!$localGroup) {
-    //                 $localGroup = new Groups();
-    //                 $localGroup->setPriority($priorityMax + 1);
-    //                 $localGroup->setName($m365group->getDisplayName());
-    //                 $localGroup->setActive(false);
-    //                 $localGroup->setPolicy($this->connector->getDomain()->getPolicy());
-    //                 $localGroup->setDomain($this->connector->getDomain());
-    //                 $localGroup->setOriginConnector($this->connector);
-    //                 $localGroup->setWbRule('none');
-    //                 $localGroup->setUid($m365group->getId());
-    //                 $this->em->persist($localGroup);
-    //                 $this->em->flush();
-    //                 $priorityMax++;
-    //             }
-    //             /* @var $group GraphGroup */
-    //             $userGroup = $this->em->getRepository(User::class)->findOneByUid($m365group->getId());
-    //             if (!$userGroup) {
-    //                 $userGroup = new User();
-    //                 $userGroup->setEmail($m365group->getMail());
-    //                 $nbGroupCreated++;
-    //             } else {
-    //                 $nbGroupUpdated++;
-    //             }
-    //             $userGroup->setUsername($m365group->getMail());
-    //             $userGroup->setFullname($m365group->getDisplayName());
-    //             $userGroup->setReport(true);
-    //             $userGroup->setRoles('["ROLE_USER"]');
-    //             $userGroup->setDomain($domain);
-    //             $userGroup->setUid($m365group->getId());
-    //             $userGroup->setPolicy($domain->getPolicy());
-    //             $userGroup->setPriority(MailaddrService::computePriority($m365group->getMail()));
-    //             $this->em->persist($userGroup);
-    //             $this->em->flush();
-    //             $this->addUserGroupOwners($token, $userGroup);
-    //             $this->addMembersToGroup($token, $localGroup);
-    //         }
-    //     } catch (GuzzleException $exc) {
-    //     }
-    //     $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
-    //         'nb_groups_created' => $nbGroupCreated,
-    //         'nb_groups_updated' => $nbGroupUpdated,
-    //     ]));
-    // }
+        $requestConfiguration = new GroupsRequestBuilderGetRequestConfiguration();
+        $headers = [
+            'ConsistencyLevel' => 'eventual',
+        ];
+        $requestConfiguration->headers = $headers;
 
-    // private function addMembersToGroup(string $token, Groups $group): void
-    // {
-    //     $members = [];
-    //     $graph = new Graph();
-    //     $graph->setAccessToken($token);
+        $queryParameters = GroupsRequestBuilderGetRequestConfiguration::createQueryParameters(
+            count: true,
+            select: ['id', 'displayName', 'mail'],
+            filter: "endsWith(mail,'@" . $domain->getDomain() . "')",
+        );
+        $requestConfiguration->queryParameters = $queryParameters;
 
-    //     try {
-    //         $members = $graph->createRequest("GET", '/groups/' . $group->getUid() . '/members')
-    //                 ->setReturnType(GraphUser::class)
-    //                 ->execute();
-    //     } catch (GuzzleException $exc) {
-    //     }
+        $nbGroupCreated = 0;
+        $nbGroupUpdated = 0;
 
-    //     foreach ($members as $member) {
-    //         $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $member->getId()]);
-    //         if ($user) {
-    //             $group->addUser($user);
-    //             $this->em->persist($user);
-    //         }
-    //     }
-    //     $this->em->flush();
-    // }
+        try {
+            $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
+            $groups = $result->getValue();
+        } catch (Exception $exc) {
+            $this->io->writeln($exc->getMessage());
+        }
 
-    // /**
-    //  * Get owners of office 365 group. Share the group email with is members
-    //  */
-    // private function addUserGroupOwners(string $token, User $userGroup): void
-    // {
-    //     $owners = [];
-    //     $graph = new Graph();
-    //     $graph->setAccessToken($token);
+        $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($domain);
 
-    //     try {
-    //         $owners = $graph->createRequest("GET", '/groups/' . $userGroup->getUId() . '/owners')
-    //                 ->setReturnType(GraphUser::class)
-    //                 ->execute();
-    //     } catch (GuzzleException $exc) {
-    //     }
+        foreach ($groups as $m365group) {
+            $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
 
-    //     // user created from group
-    //     foreach ($owners as $owner) {
-    //         $user = $this->em->getRepository(User::class)->findOneBy([
-    //             'uid' => $owner->getId(),
-    //             'email' => $owner->getMail(),
-    //         ]);
-    //         if ($user) {
-    //             $userGroup->addSharedWith($user);
-    //         }
-    //     }
-    // }
+            if (!$localGroup) {
+                $localGroup = new Groups();
+                $localGroup->setPriority($priorityMax + 1);
+                $localGroup->setName($m365group->getDisplayName());
+                $localGroup->setActive(false);
+                $localGroup->setPolicy($domain->getPolicy());
+                $localGroup->setDomain($domain);
+                $localGroup->setOriginConnector($this->connector);
+                $localGroup->setWbRule('none');
+                $localGroup->setUid($m365group->getId());
+                $this->em->persist($localGroup);
+                $this->em->flush();
+                $priorityMax++;
+            }
+
+            /* @var $group GraphGroup */
+            $userGroup = $this->em->getRepository(User::class)->findOneByUid($m365group->getId());
+            if (!$userGroup) {
+                $userGroup = new User();
+                $userGroup->setEmail($m365group->getMail());
+                $nbGroupCreated++;
+            } else {
+                $nbGroupUpdated++;
+            }
+
+            $userGroup->setUsername($m365group->getMail());
+            $userGroup->setFullname($m365group->getDisplayName());
+            $userGroup->setReport(true);
+            $userGroup->setRoles('["ROLE_USER"]');
+            $userGroup->setDomain($domain);
+            $userGroup->setUid($m365group->getId());
+            $userGroup->setPolicy($domain->getPolicy());
+            $userGroup->setPriority(MailaddrService::computePriority($m365group->getMail()));
+            $this->em->persist($userGroup);
+            $this->em->flush();
+
+            $this->addUserGroupOwners($userGroup);
+            $this->addMembersToGroup($localGroup);
+        }
+
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+            'nb_groups_created' => $nbGroupCreated,
+            'nb_groups_updated' => $nbGroupUpdated,
+        ]));
+    }
+
+    /**
+     * Get owners of office 365 group. Share the group email with is members
+     */
+    private function addUserGroupOwners(User $userGroup): void
+    {
+        $owners = [];
+
+        try {
+            $result = $this->graphServiceClient->groups()->byGroupId($userGroup->getUid())->owners()->get()->wait();
+            $owners = $result->getValue();
+        } catch (Exception $exc) {
+            $this->io->writeln($exc->getMessage());
+        }
+
+        // user created from group
+        foreach ($owners as $owner) {
+            if (!$owner instanceof GraphUser) {
+                continue;
+            }
+
+            $user = $this->em->getRepository(User::class)->findOneBy([
+                'uid' => $owner->getId(),
+                'email' => $owner->getMail(),
+            ]);
+            if ($user) {
+                $userGroup->addSharedWith($user);
+            }
+        }
+    }
+
+    private function addMembersToGroup(Groups $group): void
+    {
+        $result = $this->graphServiceClient->groups()->byGroupId($group->getUid())->members()->get()->wait();
+        $members = $result->getValue();
+
+        foreach ($members as $member) {
+            $user = $this->em->getRepository(User::class)->findOneBy(['uid' => $member->getId()]);
+            if ($user) {
+                $group->addUser($user);
+                $this->em->persist($user);
+            }
+        }
+        $this->em->flush();
+    }
 }

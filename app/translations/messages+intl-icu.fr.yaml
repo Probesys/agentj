@@ -400,7 +400,7 @@ Message.Actions.list: Actions
 Message.Actions.massiveActionContent: 'Êtes-vous sûr de vouloir effectuer cette action sur tous les éléments sélectionnés ?'
 Message.Captcha.defaultMailContent: "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre email en cliquant sur le lien suivant : <br /> <a href='[URL_HUMAN_AUTHENTICATION]'>[URL_HUMAN_AUTHENTICATION]</a> <br /><br /> Merci et bonne journée "
 Message.Captcha.defaultMailSubject: 'Vérification Email'
-Message.Connector.resultImportGroup: '{nb_groups_created, plural, one {# groupe créé}  other {# groupes créés}}, {nb_groups_updated, plural, one {# groupe synchronisé} other {# groupes synchronisés}'
+Message.Connector.resultImportGroup: '{nb_groups_created, plural, one {# groupe créé}  other {# groupes créés}}, {nb_groups_updated, plural, one {# groupe synchronisé} other {# groupes synchronisés}}'
 Message.Connector.resultImportUser: '{nb_users_created, plural, one {# utilisateur créé} other {# utilisateurs créés}}, {nb_users_updated, plural, one {# utilisateur synchronisé} other {# utilisateurs synchronisés}}, {nb_aliases_created, plural, one {# alias créé} other {# alias créés}}'
 Message.Date: Date
 Message.Dialogs.confirmAuthorizedDomainMsgContent: "Êtes-vous sur d'autoriser l'expéditeur pour tous les utilisateurs ?"
