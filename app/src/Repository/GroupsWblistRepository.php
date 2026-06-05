@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Groups;
 use App\Entity\GroupsWblist;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -30,5 +31,24 @@ class GroupsWblistRepository extends BaseRepository
                 ->setParameter('group', $group);
         $query = $dql->getQuery();
         return $query->getResult();
+    }
+
+
+    /**
+     * @return Query<GroupsWblist>
+     */
+    public function getSearchQuery(Groups $group, string $searchKey = ''): Query
+    {
+        $queryBuilder = $this->createQueryBuilder('gwl')
+                ->join('gwl.mailaddr', 'madr')
+                ->where('gwl.groups = :group')
+                ->setParameter('group', $group);
+
+        if ($searchKey !== '') {
+            $queryBuilder->andWhere('madr.email LIKE :searchKey')
+                ->setParameter('searchKey', '%' . $searchKey . '%');
+        }
+
+        return $queryBuilder->getQuery();
     }
 }

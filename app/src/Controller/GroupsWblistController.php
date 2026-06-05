@@ -6,9 +6,11 @@ use App\Entity\Groups;
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
 use App\Form\GroupsWblistType;
+use App\Repository\GroupsWblistRepository;
 use App\Service\GroupService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,16 +43,41 @@ class GroupsWblistController extends AbstractController
     }
 
     #[Route(path: '/{groupId}', name: 'groups_wblist_index', methods: 'GET')]
-    public function index(int $groupId): Response
-    {
-        $groupswblists = $this->em->getRepository(GroupsWblist::class)->findBy((['groups' => $groupId]));
+    public function index(
+        int $groupId,
+        GroupsWblistRepository $groupsWblistRepository,
+        Request $request,
+        PaginatorInterface $paginator
+    ): Response {
 
-        $groups = $this->em->getRepository(Groups::class)->find($groupId);
-        $this->checkAccess($groups);
+        $group = $this->em->getRepository(Groups::class)->find($groupId);
+        $this->checkAccess($group);
+
+        $searchKey = $request->query->getString('search', '');
+        $groupsWblistSearchQuery = $groupsWblistRepository->getSearchQuery(
+            group: $group,
+            searchKey: $searchKey
+        );
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+        $groupswblists = $paginator->paginate(
+            $groupsWblistSearchQuery,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'madr.email',
+                'defaultSortDirection' => 'asc',
+                'wrap-queries' => true,
+                'fetchJoinCollection' => false,
+                'distinct' => false,
+            ]
+        );
 
         return $this->render('groups_wblist/index.html.twig', [
             'groups_wblists' => $groupswblists,
-            'groups' => $groups,
+            'group' => $group,
         ]);
     }
 
@@ -178,21 +205,31 @@ class GroupsWblistController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{groupId}/{sid}/delete', name: 'groups_wblist_delete', methods: 'GET')]
-    public function delete(int $groupId, int $sid, GroupService $groupService): RedirectResponse
+    #[Route(path: '/{groupId}/{sid}/delete', name: 'groups_wblist_delete', methods: 'POST')]
+    public function delete(int $groupId, int $sid, Request $request, GroupService $groupService): RedirectResponse
     {
         $group = $this->em->getRepository(Groups::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
+
+        $csrfToken = $request->request->getString('_token', '');
+
+        if (!$this->isCsrfTokenValid('delete' . $groupId . '_' . $sid, $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
+        }
+
         $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
             'mailaddr' => $sid,
             'groups' => $groupId,
         ]));
+
         if ($groupsWblist) {
-            $em = $this->em;
-            $em->remove($groupsWblist);
-            $em->flush();
+            $this->em->remove($groupsWblist);
+            $this->em->flush();
         }
+
         $groupService->updateWblist();
+
 
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
     }
