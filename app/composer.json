@@ -14,7 +14,7 @@
         "doctrine/dbal": "^4",
         "knplabs/knp-paginator-bundle": "^6.6",
         "knpuniversity/oauth2-client-bundle": "^2.10",
-        "microsoft/microsoft-graph": "^1.70",
+        "microsoft/microsoft-graph": "^2",
         "phpdocumentor/reflection-docblock": "^5.2",
         "sentry/sentry-symfony": "^5.1",
         "stof/doctrine-extensions-bundle": "^1.6",
