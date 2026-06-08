@@ -325,15 +325,18 @@ Generics.fields.object: Objet
 Generics.fields.priority: Priorité
 Generics.fields.recipient: Destinataire
 Generics.fields.sender: Expéditeur
-Generics.flash.ExistingUser: "Ligne [ROW] : Utilisateur [EMAIL] existe déjà dans la base de données et n'est pas un alias."
-Generics.flash.ImportError: "Une erreur s'est produite lors de l'importation : [ERROR_MESSAGE]"
-Generics.flash.ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> [LIST_ROWS_ERROR]"
-Generics.flash.ImportExisting: 'Les utilisateurs suivants existaient déjà dans la base de données et ont été mis à jours : <br> [LIST_DUPES]'
+Generics.flash.BadCsvFormat: 'Fichier CSV invalide'
+Generics.flash.BadImportFormat: "Format du fichier d'import invalide"
+Generics.flash.ExistingUser: "Ligne {ROW} : Utilisateur {EMAIL} existe déjà dans la base de données et n'est pas un alias."
+Generics.flash.ImportError: "Une erreur s'est produite lors de l'importation : {ERROR_MESSAGE}"
+Generics.flash.ImportErrorsList: "Des erreurs se sont produites lors de l'importation : <br> {LIST_ROWS_ERROR}"
+Generics.flash.ImportExisting: 'Les utilisateurs suivants existaient déjà dans la base de données et ont été mis à jours : <br> {LIST_DUPES}'
 Generics.flash.ImportSuccess: 'Il y a [NB_USER] comptes emails qui ont été importés avec succès !'
-Generics.flash.IncorrectColumns: 'Ligne [ROW] : Nombre de colonnes incorrect.'
-Generics.flash.InvalidEmail: 'Ligne [ROW] : Adresse e-mail invalide.'
-Generics.flash.NonexistantDomain: "Ligne [ROW] : Domaine [DOMAIN] n'existe pas dans la base de données."
-Generics.flash.NonexistantUser: "Ligne [ROW] : Utilisateur [EMAIL] n'existe pas dans la base de données."
+Generics.flash.IncorrectColumns: 'Ligne {ROW} : Nombre de colonnes incorrect.'
+Generics.flash.InvalidEmail: 'Ligne {ROW} : Adresse e-mail invalide.'
+Generics.flash.NoImport: "Rien n'a été importé"
+Generics.flash.NonexistantDomain: "Ligne {ROW} : Domaine {DOMAIN} n'existe pas dans la base de données."
+Generics.flash.NonexistantUser: "Ligne {ROW} : Utilisateur {EMAIL} n'existe pas dans la base de données."
 Generics.flash.accountUpdated: 'Compte mis à jour'
 Generics.flash.addSuccess: 'Ajout effectué avec succès !'
 Generics.flash.aliasAlreadyExist: "Cet alias est déjà utilisé. Vous ne pouvez pas l'utiliser"
@@ -410,7 +413,6 @@ Message.Dialogs.confirmBannedMsgContent: "Êtes-vous sur de vouloir bannir l'exp
 Message.Dialogs.confirmBannedMsgtitle: "Bannir l'expéditeur"
 Message.Dialogs.confirmDeleteDomainContent: 'Êtes-vous sur de vouloir supprimer ce domaine ?'
 Message.Dialogs.confirmDeleteGroupContent: 'Êtes-vous sûr de vouloir supprimer ce groupe ?'
-Message.Dialogs.confirmDeleteGroupTitle: 'Supprimer ce groupe ?'
 Message.Dialogs.confirmDeleteMsgContent: 'Êtes-vous sur de vouloir supprimer le message ?'
 Message.Dialogs.confirmDeleteMsgtitle: 'Supprimer le message'
 Message.Dialogs.confirmDeleteSenderContentB: 'Êtes-vous sur de vouloir annuler le blocage pour cet expéditeur ?'
@@ -421,7 +423,6 @@ Message.Dialogs.confirmDeleteUserContent: 'Êtes-vous sur de vouloir supprimer c
 Message.Dialogs.confirmRemoveConnectorContent: 'Êtes-vous sûr de vouloir supprimer ce connecteur ?'
 Message.Dialogs.confirmRemoveConnectorTitle: 'Supprimer le connecteur.'
 Message.Dialogs.confirmRemoveRuleContent: 'Êtes-vous sûr de vouloir supprimer cette règle ?'
-Message.Dialogs.confirmRemoveRuleTitle: 'Supprimer la règle ?'
 Message.Dialogs.confirmRemoveUserFromGroupContent: 'Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?'
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Supprimer du groupe ?'
 Message.Dialogs.confirmRestoreMsgContent: 'Êtes-vous sur de vouloir récupérer le message ?'
@@ -441,7 +442,6 @@ Message.Flash.messageDeleted: 'Message supprimé avec succès'
 Message.Flash.messageMarkedAsHam: 'Message marqué comme acceptable avec succès'
 Message.Flash.messageMarkedAsSpam: 'Message marqué comme spam avec succès'
 Message.Flash.messagePendingRelease: 'Le message va être délivré dans quelques instants.'
-Message.Flash.missingRuleForDomain: "Une première règle doit d'abord être créée pour ce domaine"
 Message.Flash.newRuleCreated: 'Nouvelle règle créée !'
 Message.Flash.ruleExistForDomain: 'Une règle similaire existe déjà pour ce domaine'
 Message.Flash.ruleExists: 'Cette règle existe déjà !'
@@ -483,6 +483,7 @@ Navigation.information: Informations
 Navigation.login: Connexion
 Navigation.logout: 'Se déconnecter'
 Navigation.mailBlocked: 'Mails bloqués'
+Navigation.mailboxes.other: 'Autres boîtes mails'
 Navigation.mainSubTitle: 'Solution antispam AgentJ'
 Navigation.policy: Stratégies
 Navigation.poweredBy: 'Propulsé par Agentj'

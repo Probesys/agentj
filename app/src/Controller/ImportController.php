@@ -15,6 +15,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function dd;
@@ -56,10 +57,10 @@ class ImportController extends AbstractController
                     $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
                     $this->addFlash('success', $message);
                 } else {
-                    $this->addFlash('warning', 'Generics.flash.NoImport');
+                    $this->addFlash('warning', new TranslatableMessage('Generics.flash.NoImport'));
                 }
             } else {
-                $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
+                $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadCsvFormat'));
             }
 
             return $this->redirect($this->referrer->get());
@@ -247,10 +248,10 @@ class ImportController extends AbstractController
                     $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
                     $this->addFlash('success', $message);
                 } else {
-                    $this->addFlash('warning', 'Generics.flash.NoImport');
+                    $this->addFlash('warning', new TranslatableMessage('Generics.flash.NoImport'));
                 }
             } else {
-                $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
+                $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadCsvFormat'));
             }
 
             return $this->redirect($this->referrer->get());

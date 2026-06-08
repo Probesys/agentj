@@ -64,7 +64,7 @@
                     {% endif %}
 
                     {% if sharedBoxes|length > 0%}
-                        <div class="dropdown-header">Autres boîtes mails</div>
+                        <div class="dropdown-header">{{ 'Navigation.mailboxes.other' | trans }}</div>
 
                         {% for sharedBox in sharedBoxes %}
                             <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedBox.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedBox.username}}">

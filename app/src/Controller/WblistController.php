@@ -209,7 +209,7 @@ class WblistController extends AbstractController
                 $file = $fileUpload->move('/tmp/', $filename);
                 $this->importWbList($file->getPathname(), $form->get('domain')->getData(), $rule);
             } else {
-                $this->addFlash('danger', 'Generics.flash.BadFormatcsv');
+                $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadImportFormat'));
             }
 
             return new RedirectResponse($this->referrer->get());
