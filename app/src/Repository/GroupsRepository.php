@@ -83,4 +83,5 @@ class GroupsRepository extends BaseRepository
         $result = $query->getOneOrNullResult();
         return $result && $result['max'] ? $result['max'] : 0;
     }
+
 }

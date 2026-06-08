@@ -200,17 +200,34 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
-    public function listUsers(Request $request, Groups $group): Response
-    {
+    public function listUsers(
+        Groups $group,
+        Request $request,
+        UserRepository $userRepository,
+        PaginatorInterface $paginator
+    ): Response {
+
         $this->checkAccess($group);
-        $users = $group->getUsers();
+
+        $searchKey = $request->query->getString('search', '');
+        $usersQuery = $userRepository->getSearchByGroupQuery($group, $searchKey);
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+        $users = $paginator->paginate(
+            $usersQuery,
+            $request->query->getInt('page', 1),
+            $perPage
+        );
+
         return $this->render('groups/group_users.html.twig', [
                     'group' => $group,
                     'users' => $users
         ]);
     }
 
-    #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'GET')]
+    #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'POST')]
     public function removeUser(
         Request $request,
         Groups $group,
@@ -220,19 +237,24 @@ class GroupsController extends AbstractController
         UserRepository $userRepository,
     ): Response {
 
-        if ($this->isCsrfTokenValid('removeUser' . $user->getId(), $request->query->get('_token'))) {
-            $group->removeUser($user);
+        $csrfToken = $request->request->get('_token', '');
 
-            $userAliases = $userRepository->findBy(['originalUser' => $user->getId()]);
-            foreach ($userAliases as $alias) {
-                $group->removeUser($alias);
-            }
-            $this->em->flush();
-            $userService->updateUserAndAliasPolicy($user);
-            $groupService->updateWblist();
-
-            $this->em->flush();
+        if (!$this->isCsrfTokenValid('removeUser' . $user->getId(), $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
         }
+
+        $group->removeUser($user);
+
+        $userAliases = $userRepository->findBy(['originalUser' => $user->getId()]);
+        foreach ($userAliases as $alias) {
+            $group->removeUser($alias);
+        }
+        $this->em->flush();
+        $userService->updateUserAndAliasPolicy($user);
+        $groupService->updateWblist();
+
+        $this->em->flush();
 
         return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
     }
