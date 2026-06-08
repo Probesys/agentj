@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-06-05 - 2.6.4
+
+### Bug fixes
+
+- Don't assign groups to LDAP users who are no longer returned by the connector ([d2497a57](https://github.com/Probesys/agentj/commit/d2497a57))
+
 ## 2026-05-22 - 2.6.3
 
 This release also includes changes from 2.5.5.
