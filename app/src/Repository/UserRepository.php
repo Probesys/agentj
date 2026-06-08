@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
+use App\Entity\Groups;
 use App\Entity\Maddr;
 use App\Entity\User;
 use Doctrine\DBAL;
@@ -44,6 +45,24 @@ class UserRepository extends BaseRepository
                         ->setParameter('ldapDN', $dn)
                         ->getQuery()
                         ->getOneOrNullResult();
+    }
+
+    /**
+     * @return Query<User>
+     */
+    public function getSearchByGroupQuery(Groups $group, string $searchKey = ''): Query
+    {
+        $queryBuilder = $this->createQueryBuilder('u')
+                ->innerJoin('u.groups', 'g')
+                ->where('g = :group')
+                ->setParameter('group', $group);
+
+        if ($searchKey !== '') {
+            $queryBuilder->andWhere('u.fullname LIKE :search OR u.username LIKE :search OR u.email LIKE :search')
+                ->setParameter('search', '%' . $searchKey . '%');
+        }
+
+        return $queryBuilder->getQuery();
     }
 
     public function findOneByEmail(string $email): ?User
