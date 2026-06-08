@@ -12,6 +12,7 @@ use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\DomainRepository;
 use App\Repository\SettingsRepository;
+use App\Repository\WblistRepository;
 use App\Service\MailaddrService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -291,32 +292,71 @@ class DomainController extends AbstractController
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
-    #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'GET|POST')]
-    public function deleteWblist(int $rid, int $sid, Request $request): Response
-    {
-        $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
+    #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'POST')]
+    public function deleteWblist(
+        int $rid,
+        int $sid,
+        Request $request,
+        WblistRepository $wblistRepository
+    ): Response {
+
+        $wbList = $wblistRepository->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
         $this->checkAccess($domain);
-        if ($wbList) {
-            $em = $this->em;
-            $em->remove($wbList);
-            $em->flush();
+
+        $csrfToken = $request->request->getString('_token', '');
+
+        if (!$this->isCsrfTokenValid('delete', $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
         }
 
-        return $this->redirectToRoute('domain_index');
+        $this->em->remove($wbList);
+        $this->em->flush();
+
+        return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
     }
 
     #[Route(path: '/{id}/wblist', name: 'domain_wblist', methods: 'GET')]
-    public function domainwblist(Domain $domain): Response
-    {
+    public function domainwblist(
+        Domain $domain,
+        Request $request,
+        PaginatorInterface $paginator,
+        WblistRepository $wblistRepository
+    ): Response {
         $this->checkAccess($domain);
-        $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
-        $wblist = $this->em->getRepository(Wblist::class)->findBy(['rid' => $user]);
-        if (!$wblist) {
-            $this->addFlash('danger', $this->translator->trans('Message.Flash.missingRuleForDomain'));
-            return $this->redirectToRoute('domain_wblist_new', ['id' => $domain->getId(), 'type' => 'domain']);
-        }
-        return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
+
+        $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
+
+        $searchKey = $request->query->getString('search', '');
+
+        $wblistQuery = $wblistRepository->getDomainSearchQuery(
+            userDomain: $userDomain,
+            searchKey: $searchKey
+        );
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+
+        $wblist = $paginator->paginate(
+            $wblistQuery,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'sender.email',
+                'defaultSortDirection' => 'asc',
+                'wrap-queries' => true,
+                'fetchJoinCollection' => false,
+                'distinct' => false,
+            ]
+        );
+
+
+        return $this->render('domain/wblist.html.twig', [
+            'domain' => $domain,
+            'wblist' => $wblist,
+        ]);
     }
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine

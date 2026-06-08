@@ -8,6 +8,7 @@ use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Util\Email;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL;
 
@@ -286,5 +287,23 @@ class WblistRepository extends BaseRepository
         $query = $dql->getQuery();
         $result = $query->getOneOrNullResult();
         return !is_null($result);
+    }
+
+    /**
+     * @return Query<Wblist>
+     */
+    public function getDomainSearchQuery(User $userDomain, string $searchKey = ''): Query
+    {
+        $queryBuilder = $this->createQueryBuilder('wb')
+            ->join('wb.sid', 'sender')
+            ->where('wb.rid =:rid')
+            ->setParameter('rid', $userDomain);
+
+        if ($searchKey !== '') {
+            $queryBuilder->andWhere('sender.email LIKE :searchKey')
+                ->setParameter('searchKey', '%' . $searchKey . '%');
+        }
+
+        return $queryBuilder->getQuery();
     }
 }
