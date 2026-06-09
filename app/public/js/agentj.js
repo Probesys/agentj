@@ -247,41 +247,6 @@ document.addEventListener("turbo:load", function () {
     $("#dialog-confirm").dialog("open");
   });
 
-  // mise suppression d'un element via ajax
-  $('.delete-ajax-button').click(function (event) {
-    event.preventDefault();
-    var parent = $(this).closest("tr");
-    if ($(this).data("confirm")) {
-      message = $(this).data("confirm");
-    } else {
-      message = Translator.trans('Generics.actions.confirmDelete');
-    }
-    if (confirm(message)) {
-      $.ajax({
-        type: 'POST',
-        url: $(this).data('target'),
-        success: function () {
-          message = Translator.trans('Generics.flash.deleteSuccess');
-          parent.hide('slow', function () {
-            parent.remove();
-          });
-          // decrement nb span nbResults
-          if ($('span.nbResults').length) {
-            nbresult = $('span.nbResults').html();
-            nbresult--;
-            $('span.nbResults').html(nbresult);
-          }
-          showAlertMessage('success', message);
-        },
-        failure: function () {
-          message = Translator.trans('Generics.flash.deleteFailure');
-          showAlertMessage('error', message);
-        }
-
-      });
-    }
-  });
-
 
 
 

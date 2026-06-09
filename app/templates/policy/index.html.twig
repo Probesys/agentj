@@ -1,64 +1,112 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{'Entities.Policy.index'|trans()}}{% endblock %}
+{% block title %}
+	{{'Entities.Policy.index'|trans()}}
+{% endblock %}
 
 {% block body %}
 
 
-  {% set _title = 'Entities.Policy.index'|trans  %}
-  {% embed 'common/blockTitleAndButtons.html.twig' %}
+	{% set _title = 'Entities.Policy.index'|trans  %}
+	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
-    {% block content_button_actions %} 
-      <a href="{{ path('policy_new') }}" class="btn btn-success  float-right col-sm-12 col-md-4"><i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Policy.actions.add_new'|trans() }}</a>               
+		{% block content_button_actions %}
+			<a href="{{ path('policy_new') }}" class="btn btn-success  float-right col-sm-12 col-md-4">
+				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Policy.actions.add_new'|trans() }}</a>
 
-    {% endblock %}          
+		{% endblock %}
 
-  {% endembed %} 
- 
- <div class="table-responsive">
-    <section id="no-more-tables">
-        <table id ="table_msgs"  class="table datatable hidden">
-            <thead>
-                <tr>
-                    <th scope="col">{{ 'Generics.fields.name'|trans() }}</th>
-                    <th scope="col">{{ 'Entities.Policy.fields.virusLover'|trans() }}</th>
-                    <th scope="col">{{ 'Entities.Policy.fields.spamLover'|trans() }}</th>
-                    <th scope="col">{{ 'Entities.Policy.fields.bannedFilesLover'|trans() }}</th>
-                    <th scope="col">{{ 'Entities.Policy.fields.badHeaderLover'|trans() }}</th>
-                    <th scope="col">{{ 'Generics.labels.actions'|trans() }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for policy in policies %}
-                    <tr>
-                        <td data-title="{{'Generics.fields.name'|trans }}">{{ policy.policyName }}</td>
-                        <td data-title="{{'Entities.Policy.fields.virusLover'|trans }}">{% if policy.virusLover == 'Y' %}{{'Generics.labels.yes'|trans()}}{% else %}{{'Generics.labels.no'|trans()}}{%  endif %}</td>
-                        <td data-title="{{'Entities.Policy.fields.spamLover'|trans }}">{% if policy.spamLover == 'Y' %}{{'Generics.labels.yes'|trans()}}{% else %}{{'Generics.labels.no'|trans()}}{%  endif %}</td>
-                        <td data-title="{{'Entities.Policy.fields.bannedFilesLover'|trans }}">{% if policy.bannedFilesLover == 'Y' %}{{'Generics.labels.yes'|trans()}}{% else %}{{'Generics.labels.no'|trans()}}{%  endif %}</td>
-                        <td data-title="{{'Entities.Policy.fields.badHeaderLover'|trans }}">{% if policy.badHeaderLover == 'Y' %}{{'Generics.labels.yes'|trans()}}{% else %}{{'Generics.labels.no'|trans()}}{%  endif %}</td>
-                        <td>
-                            <ul class="list-inline list-unstyled">
-                                <li class="list-inline-item">
-                                    <a href="{{ path('policy_edit', {'id': policy.id}) }}"  class='btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
-                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
-                                    </a>      
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="javascript;void(0);" class='btn btn-sm btn-danger delete-ajax-button' data-confirm="{{ 'Generics.actions.confirmDelete'|trans() }}" data-target='{{ path('policy_delete', {id:policy.id}) }}'>
-                                        <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-                                        <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </td>
-                    </tr>
+	{% endembed %}
 
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
- </div>
-    {% include 'alertsPopup.html.twig' %}
+
+	<div class="col mb-3 bg-white pb-3">
+		<div class="row">
+			<div class="col-md-12">
+				{% include 'common/_rapidSearchForm.html.twig'%}
+			</div>
+		</div>
+	</div>
+
+	<div class="table-responsive">
+		<section id="no-more-tables">
+			<table id="table_msgs" class="table">
+				<thead>
+					<tr>
+						<th>{{ knp_pagination_sortable(policies, 'Generics.fields.name'|trans(), 'p.policyName') }}</th>
+						<th>{{ 'Entities.Policy.fields.virusLover'|trans() }}</th>
+						<th>{{ 'Entities.Policy.fields.spamLover'|trans() }}</th>
+						<th>{{ 'Entities.Policy.fields.bannedFilesLover'|trans() }}</th>
+						<th>{{ 'Entities.Policy.fields.badHeaderLover'|trans() }}</th>
+						<th>{{ 'Generics.labels.actions'|trans() }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for policy in policies %}
+						<tr>
+							<td data-title="{{'Generics.fields.name'|trans }}">{{ policy.policyName }}</td>
+							<td data-title="{{'Entities.Policy.fields.virusLover'|trans }}">
+								{% if policy.virusLover == 'Y' %}
+									{{'Generics.labels.yes'|trans()}}
+								{% else %}
+									{{'Generics.labels.no'|trans()}}
+								{%  endif %}
+							</td>
+							<td data-title="{{'Entities.Policy.fields.spamLover'|trans }}">
+								{% if policy.spamLover == 'Y' %}
+									{{'Generics.labels.yes'|trans()}}
+								{% else %}
+									{{'Generics.labels.no'|trans()}}
+								{%  endif %}
+							</td>
+							<td data-title="{{'Entities.Policy.fields.bannedFilesLover'|trans }}">
+								{% if policy.bannedFilesLover == 'Y' %}
+									{{'Generics.labels.yes'|trans()}}
+								{% else %}
+									{{'Generics.labels.no'|trans()}}
+								{%  endif %}
+							</td>
+							<td data-title="{{'Entities.Policy.fields.badHeaderLover'|trans }}">
+								{% if policy.badHeaderLover == 'Y' %}
+									{{'Generics.labels.yes'|trans()}}
+								{% else %}
+									{{'Generics.labels.no'|trans()}}
+								{%  endif %}
+							</td>
+							<td>
+								<ul class="list-inline list-unstyled">
+									<li class="list-inline-item">
+										<a href="{{ path('policy_edit', {'id': policy.id}) }}" class='btn btn-sm btn-success' title="{{ 'Generics.actions.edit'|trans() }}">
+											<i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+											<span class="d-md-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
+										</a>
+									</li>
+									<li class="list-inline-item">
+                                        <form
+                                            action="{{ path('policy_delete', {id:policy.id}) }}"
+                                            data-turbo-confirm="{{ 'Generics.actions.confirmDelete'|trans() }}"
+                                            method="post"
+                                        >
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
+                                            <button
+                                                type="submit"
+                                                class='btn btn-sm btn-danger'
+                                                >
+                                                <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                                <span class="d-md-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
+                                            </button>
+                                        </form>
+    								</li>
+								</ul>
+							</td>
+						</tr>
+
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+	</div>
+
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': policies } %}
+	{% include 'alertsPopup.html.twig' %}
 
 {% endblock %}

@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Policy;
 use App\Form\PolicyType;
+use App\Repository\PolicyRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,15 +19,29 @@ class PolicyController extends AbstractController
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
+        private PolicyRepository $policyRepository,
     ) {
     }
 
     #[Route(path: '/', name: 'policy_index', methods: 'GET')]
-    public function index(): Response
+    public function index(Request $request, PaginatorInterface $paginator): Response
     {
-        $policies = $this->em
-            ->getRepository(Policy::class)
-            ->findAll();
+        $searchKey = $request->query->getString('search', '');
+        $policiesQuery = $this->policyRepository->getSearchQuery($searchKey);
+
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
+
+        $policies = $paginator->paginate(
+            $policiesQuery,
+            $request->query->getInt('page', 1),
+            $perPage,
+            [
+                'defaultSortFieldName' => 'p.policyName',
+                'defaultSortDirection' => 'asc',
+            ]
+        );
 
         return $this->render('policy/index.html.twig', ['policies' => $policies]);
     }
@@ -38,9 +54,8 @@ class PolicyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->em;
-            $em->persist($policy);
-            $em->flush();
+            $this->em->persist($policy);
+            $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Generics.flash.addSuccess'));
             return $this->redirectToRoute('policy_index');
         }
@@ -70,13 +85,19 @@ class PolicyController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'policy_delete', methods: 'POST')]
-    public function delete(Policy $policy): Response
+    public function delete(Request $request, Policy $policy): Response
     {
+        $csrfToken = $request->request->getString('_token', '');
 
-        $em = $this->em;
-        $em->remove($policy);
-        $em->flush();
 
-        return new Response('success', 200);
+        if (!$this->isCsrfTokenValid('delete', $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirectToRoute('policy_index');
+        }
+
+        $this->em->remove($policy);
+        $this->em->flush();
+
+        return $this->redirectToRoute('policy_index');
     }
 }
