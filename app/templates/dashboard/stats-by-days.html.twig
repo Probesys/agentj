@@ -163,6 +163,11 @@
         });
       });
 
+      var existingChart = Chart.getChart(chart);
+      if (existingChart) {
+        existingChart.destroy();
+      }
+
       const myLineChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -176,9 +181,9 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            yAxes: [{
+            y: {
+              beginAtZero: true,
               ticks: {
-                beginAtZero: true,
                 stepSize: 1,
                 callback: function(value) {
                   if (Number.isInteger(value)) {
@@ -186,16 +191,18 @@
                   }
                 }
               }
-            }]
+            }
           },
-          legend: {
-            display: true,
-            labels: {
-              filter: function(legendItem, chartData) {
-                var dataset = chartData.datasets[legendItem.datasetIndex];
-                return dataset.data.some(function(value) {
-                  return value > 0;
-                });
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                filter: function(legendItem, chartData) {
+                  var dataset = chartData.datasets[legendItem.datasetIndex];
+                  return dataset.data.some(function(value) {
+                    return value > 0;
+                  });
+                }
               }
             }
           }

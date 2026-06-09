@@ -84,6 +84,11 @@
             noDataMessage.style.marginTop = '20px';
             document.getElementById('messagesChart').parentNode.appendChild(noDataMessage);
         } else {
+            var existingMessagesChart = Chart.getChart(document.getElementById('messagesChart'));
+            if (existingMessagesChart) {
+                existingMessagesChart.destroy();
+            }
+
             var messagesChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: filteredData,

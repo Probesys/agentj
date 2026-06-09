@@ -639,9 +639,6 @@
             "config/routes/ux_autocomplete.yaml"
         ]
     },
-    "symfony/ux-chartjs": {
-        "version": "v2.1.1"
-    },
     "symfony/ux-turbo": {
         "version": "2.31",
         "recipe": {

@@ -46,8 +46,20 @@
     {% endif %}
 
 <script>
-document.addEventListener("turbo:frame-load", function () {
-    var ctxMsgs = document.getElementById('msgsChart').getContext('2d');
+document.addEventListener("turbo:frame-load", function (event) {
+    if (event.target.id !== 'dashboard-stats-by-in-out') {
+        return;
+    }
+
+    var msgsCanvas = event.target.querySelector('#msgsChart');
+    var outMsgsCanvas = event.target.querySelector('#outMsgsChart');
+    var domainSelect = event.target.querySelector('#domainSelect');
+
+    if (!msgsCanvas || !outMsgsCanvas || !domainSelect) {
+        return;
+    }
+
+    var ctxMsgs = msgsCanvas.getContext('2d');
     var msgsData = {
         labels: [
             '{{ 'Generics.labels.unblockedMessages'|trans }}', '{{ 'Generics.labels.blockedMessages'|trans }}'
@@ -65,6 +77,11 @@ document.addEventListener("turbo:frame-load", function () {
         ]
     };
 
+    var existingMsgsChart = Chart.getChart(msgsCanvas);
+    if (existingMsgsChart) {
+        existingMsgsChart.destroy();
+    }
+
     var msgsChart = new Chart(ctxMsgs, {
         type: 'doughnut',
         data: msgsData,
@@ -81,7 +98,7 @@ document.addEventListener("turbo:frame-load", function () {
         }
     });
 
-    var ctxOutMsgs = document.getElementById('outMsgsChart').getContext('2d');
+    var ctxOutMsgs = outMsgsCanvas.getContext('2d');
     var outMsgsData = {
         labels: [
             '{{ 'Generics.labels.unblockedMessages'|trans }}', '{{ 'Generics.labels.blockedMessages'|trans }}'
@@ -98,6 +115,11 @@ document.addEventListener("turbo:frame-load", function () {
             }
         ]
     };
+
+    var existingOutMsgsChart = Chart.getChart(outMsgsCanvas);
+    if (existingOutMsgsChart) {
+        existingOutMsgsChart.destroy();
+    }
 
     var outMsgsChart = new Chart(ctxOutMsgs, {
         type: 'doughnut',
@@ -116,7 +138,7 @@ document.addEventListener("turbo:frame-load", function () {
     });
 
     var data = {{ data|json_encode|raw }};
-    document.getElementById('domainSelect').addEventListener('change', function () {
+    domainSelect.addEventListener('change', function () {
         var selectedDomain = this.value;
         var domainData = data[selectedDomain];
 
