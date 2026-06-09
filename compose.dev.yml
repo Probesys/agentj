@@ -44,7 +44,7 @@ services:
       - ./app/public/files:/var/www/agentj/public/files
 
   watcher:
-   image: node:18-alpine
+   image: node:20-alpine
    user: ${UID}:${GID}
    working_dir: /app
    volumes:
