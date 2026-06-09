@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 SHELL [ "/bin/sh", "-e", "-c" ]
 
@@ -7,11 +7,11 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
     apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
-    postfix \ 
-    postfix-mysql \ 
+    postfix \
+    postfix-mysql \
     postfix-lmdb \
-    tzdata  \ 
-    iproute2   
+    tzdata  \
+    iproute2
 
 COPY in /etc/postfix-in
 COPY out /etc/postfix-out
