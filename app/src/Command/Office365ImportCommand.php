@@ -78,10 +78,15 @@ class Office365ImportCommand extends Command
             $this->importGroups();
         }
 
+        $output->writeln([
+            'nb_users_created' => 0,
+            'nb_users_updated' => 0,
+            'nb_aliases_created' => 0,
+        ]);
         return Command::SUCCESS;
     }
 
-    private function importUsers(): void
+    private function importUsers(): array
     {
         $domain = $this->connector->getDomain();
         $users = [];
@@ -156,6 +161,12 @@ class Office365ImportCommand extends Command
             'nb_users_updated' => $nbUserUpdated,
             'nb_aliases_created' => $nbAliasCreated,
         ]));
+
+        return [
+            'nb_users_created' => $nbUserCreated,
+            'nb_users_updated' => $nbUserUpdated,
+            'nb_aliases_created' => $nbAliasCreated,
+        ];
     }
 
     /**

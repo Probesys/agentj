@@ -75,12 +75,27 @@ final class SynchronizeConnectorsHandler
                     'connector_id' => $connector->getId(),
                     'connector_type' => $connector->getType(),
                 ]);
+
+                if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
+                    $connector->setLastSuccessResult([
+                        'nb_users_created' => 0, // TODO: retrieve nb from cmd
+                        'nb_users_updated' => 0, // TODO: retrieve nb from cmd
+                        'nb_aliases_created' => 0, // TODO: retrieve nb from cmd
+                    ]);
+                }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to synchronize connector', [
                     'connector_id' => $connector->getId(),
                     'connector_type' => $connector->getType(),
                     'exception' => $e,
                 ]);
+
+                if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
+                    $connector->setLastErrorAt(new \DateTimeImmutable());
+                    // TODO: retrieve error from command
+                    $errorMessage = '';
+                    $connector->setLastErrorResult($errorMessage);
+                }
             }
         }
         $this->entityManager->flush();

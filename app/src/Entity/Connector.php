@@ -286,7 +286,7 @@ class Connector
         return $this->lastErrorResult;
     }
 
-    public function setLastErrorResult(?array $result): static
+    public function setLastErrorResult(?string $result): static
     {
         $this->lastErrorResult = $result;
 
