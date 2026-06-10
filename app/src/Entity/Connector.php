@@ -64,6 +64,19 @@ class Connector
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $importStartedAt = null;
 
+    #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: false, options: ['default' => '{}'])]
+    private ?string $lastSuccessResult = '{}';
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastSuccessAt = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: false, options: ['default' => ''])]
+    private ?string $lastErrorResult = '{}';
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastErrorAt = null;
+
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -240,6 +253,54 @@ class Connector
     public function setImportStartedAt(?\DateTimeImmutable $importStartedAt): static
     {
         $this->importStartedAt = $importStartedAt;
+
+        return $this;
+    }
+
+    public function getLastSuccessResult(): string
+    {
+        return $this->lastSuccessResult;
+    }
+
+    public function setLastSuccessResult(?array $result): static
+    {
+        $this->lastSuccessResult = $result;
+
+        return $this;
+    }
+
+    public function getLastSuccessAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSuccessAt;
+    }
+
+    public function setLastSuccessAt(?\DateTimeImmutable $lastSuccessAt): static
+    {
+        $this->lastSuccessAt = $lastSuccessAt;
+
+        return $this;
+    }
+
+    public function getLastErrorResult(): string
+    {
+        return $this->lastErrorResult;
+    }
+
+    public function setLastErrorResult(?array $result): static
+    {
+        $this->lastErrorResult = $result;
+
+        return $this;
+    }
+
+    public function getLastErrorAt(): ?\DateTimeImmutable
+    {
+        return $this->lastErrorAt;
+    }
+
+    public function setLastErrorAt(?\DateTimeImmutable $lastErrorAt): static
+    {
+        $this->lastErrorAt = $lastErrorAt;
 
         return $this;
     }
