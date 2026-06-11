@@ -304,16 +304,4 @@ class Connector
 
         return $this;
     }
-
-    public function getTest(): array
-    {
-        return $this->test;
-    }
-
-    public function setTest(array $test): static
-    {
-        $this->test = $test;
-
-        return $this;
-    }
 }

@@ -59,6 +59,7 @@ class Office365ImportCommand extends Command
             $this->handleError('Connector not found');
             return Command::FAILURE;
         }
+        $this->connector = $connector;
 
         $clientId = $this->connector->getClientId();
         $clientSecret = $this->connector->getClientSecret();
@@ -93,7 +94,13 @@ class Office365ImportCommand extends Command
             'users' => $usersResult,
             'groups' => $groupsResult,
         ]);
+        if ($this->connector->getLastErrorAt() !== null) {
         $this->connector->setImportStartedAt(null);
+            $this->connector->setLastErrorAt(null);
+        }
+        if ($this->connector->getLastErrorResult() !== '') {
+            $this->connector->setLastErrorResult('');
+        }
         $this->em->persist($this->connector);
         $this->em->flush();
 
