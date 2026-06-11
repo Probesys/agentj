@@ -304,4 +304,21 @@ class Connector
 
         return $this;
     }
+
+    public function getLastExecution(): array
+    {
+        $lastResult = $this->getLastSuccessAt();
+        $lastError = $this->getLastErrorAt();
+
+        if ($lastResult === null && $lastError === null) {
+            return [];
+        }
+
+        $isError = ($lastResult > $lastError);
+
+        return [
+            'type' => $isError ? 'Error' : 'Success',
+            'detail' => $isError ? $lastError : $lastResult,
+        ];
+    }
 }

@@ -66,8 +66,11 @@
                     {{ 'Entities.Domain.labels.dns' | trans() }}
                 </div>
                 <div class="card-body">
-                    <pre style="white-space: pre-wrap; word-break: break-word;"><code class="language-css"
-                                                                                      style="width: 1rem">{{ dkim.selector ~ '._domainkey.' ~ domain.domain }} {{ dnsInfo }}</code></pre>
+                    <pre style="white-space: pre-wrap; word-break: break-word;">
+                        <code class="language-css" style="width: 1rem">
+                            {{ dkim.selector ~ '._domainkey.' ~ domain.domain }} {{ dnsInfo }}
+                        </code>
+                    </pre>
                 </div>
 
                 <script>
@@ -165,13 +168,30 @@
                                 <td>{{ connector.name }}</td>
                                 <td>{{ connector.type }}</td>
                                 <td>
-                                    {% if connector.type != 'IMAP' and connector.importStartedAt === null %}
-                                        <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
-                                          class='btn btn-sm btn-success'
-                                          title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
-                                            <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
-                                            <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
-                                        </a>
+                                    {% if connector.type != 'IMAP' %}
+                                        {% if connector.importStartedAt === null %}
+                                            <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
+                                              class='btn btn-sm btn-success'
+                                              title="{{ 'Entities.Domain.actions.importUserAndAliases'|trans() }}">
+                                                <i class="fas fa-sync d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
+                                                <span class="d-none d-lg-block">{{ 'Generics.actions.import'|trans() }}</span>
+                                            </a>
+                                        {# {% else %} #}
+                                            {% if connector.lastExecution != null %}
+                                                {% set labelResult = 'Form.' ~ connector.lastExecution.type %}
+                                                <a href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
+                                                  class='btn btn-sm btn-success'
+                                                  title="{{ labelResult | trans }}"
+                                                  data-url-modal-content="{{ path('import_user_email') }}"
+                                                  >
+                                                    {% if connector.lastExecution.type == 'Error' %}
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-info-circle"></i>
+                                                    {% endif %}
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td>
