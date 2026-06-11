@@ -9,6 +9,7 @@ use App\Repository\ConnectorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -63,10 +64,14 @@ final class SynchronizeConnectorsHandler
                 $this->entityManager->persist($connector);
                 $this->entityManager->flush();
 
-                $command->run($input, $output);
+                $cmdExitCode = $command->run($input, $output);
 
+                if ($cmdExitCode != Command::SUCCESS) {
+
+                }
                 $connector->setImportStartedAt(null);
                 $connector->setLastSynchronizedAt(new \DateTimeImmutable());
+                $result = $output->fetch();
                 $connector->setLastResultSynchronization($output->fetch());
                 $this->entityManager->persist($connector);
                 $this->entityManager->flush();
@@ -78,9 +83,9 @@ final class SynchronizeConnectorsHandler
 
                 if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
                     $connector->setLastSuccessResult([
-                        'nb_users_created' => 0, // TODO: retrieve nb from cmd
-                        'nb_users_updated' => 0, // TODO: retrieve nb from cmd
-                        'nb_aliases_created' => 0, // TODO: retrieve nb from cmd
+                        'nb_users_created' => $result['users']['nb_users_created'],
+                        'nb_users_updated' => $result['users']['nb_users_updated'],
+                        'nb_aliases_created' => $result['users']['nb_aliases_created'],
                     ]);
                 }
             } catch (\Exception $e) {
@@ -92,8 +97,7 @@ final class SynchronizeConnectorsHandler
 
                 if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
                     $connector->setLastErrorAt(new \DateTimeImmutable());
-                    // TODO: retrieve error from command
-                    $errorMessage = '';
+                    $errorMessage = $e->getCode(). ': ' . $e->getMessage();
                     $connector->setLastErrorResult($errorMessage);
                 }
             }

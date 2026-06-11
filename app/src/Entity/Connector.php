@@ -64,14 +64,14 @@ class Connector
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $importStartedAt = null;
 
-    #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: false, options: ['default' => '{}'])]
-    private ?string $lastSuccessResult = '{}';
+    #[ORM\Column(options: ['default' => []])]
+    private array $lastSuccessResult = [];
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastSuccessAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: false, options: ['default' => ''])]
-    private ?string $lastErrorResult = '{}';
+    private ?string $lastErrorResult = '';
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastErrorAt = null;
@@ -262,7 +262,7 @@ class Connector
         return $this->lastSuccessResult;
     }
 
-    public function setLastSuccessResult(?array $result): static
+    public function setLastSuccessResult(string $result): static
     {
         $this->lastSuccessResult = $result;
 
@@ -301,6 +301,18 @@ class Connector
     public function setLastErrorAt(?\DateTimeImmutable $lastErrorAt): static
     {
         $this->lastErrorAt = $lastErrorAt;
+
+        return $this;
+    }
+
+    public function getTest(): array
+    {
+        return $this->test;
+    }
+
+    public function setTest(array $test): static
+    {
+        $this->test = $test;
 
         return $this;
     }

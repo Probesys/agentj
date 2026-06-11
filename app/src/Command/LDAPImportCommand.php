@@ -80,23 +80,27 @@ class LDAPImportCommand extends Command
             return Command::FAILURE;
         }
 
-        $this->importUsers();
+        $resultUsers = $this->importUsers();
+        $resultGroups = [];
         if ($this->connector->isSynchronizeGroup()) {
-            $this->importGroups();
+            $resultGroups = $this->importGroups();
         }
 
         $this->groupService->updateWblist();
-
-        sleep(5);
 
         $this->connector->setImportStartedAt(null);
         $this->em->persist($this->connector);
         $this->em->flush();
 
+        $output->writeln([
+            'users' => $resultUsers,
+            'group' => $resultGroups,
+        ]);
+
         return Command::SUCCESS;
     }
 
-    private function importUsers(): void
+    private function importUsers(): array
     {
         $mailAttribute = $this->connector->getLdapEmailField();
         $aliasAttribute = $this->connector->getLdapAliasField();
@@ -162,13 +166,17 @@ class LDAPImportCommand extends Command
             }
         }
 
-        $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
+        $result = [
             'nb_users_created' => $this->nbUserCreated,
             'nb_users_updated' => $this->nbUserUpdated,
             'nb_aliases_created' => $this->nbAliasCreated,
-        ]));
+        ];
+
+        $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', $result));
 
         $this->em->flush();
+
+        return $result;
     }
 
     private function updateUserFromLdap(
@@ -288,7 +296,7 @@ class LDAPImportCommand extends Command
         $this->userService->updateAliasGroupsAndPolicyFromUser($user);
     }
 
-    private function importGroups(): void
+    private function importGroups(): array
     {
         $realNameAttribute = $this->connector->getLdapGroupNameField();
         $groupMemberAttribute = $this->connector->getLdapGroupMemberField();
@@ -330,12 +338,16 @@ class LDAPImportCommand extends Command
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
-            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+            $result = [
                 'nb_groups_created' => $nbGroupCreated,
                 'nb_groups_updated' => $nbGroupUpdated,
-            ]));
+            ];
+
+            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', $result));
 
             $this->em->flush();
+
+            return $result;
         }
     }
 
