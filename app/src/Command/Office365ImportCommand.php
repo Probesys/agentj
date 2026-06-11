@@ -59,7 +59,6 @@ class Office365ImportCommand extends Command
             $this->handleError('Connector not found');
             return Command::FAILURE;
         }
-        $this->connector = $connector;
 
         $clientId = $this->connector->getClientId();
         $clientSecret = $this->connector->getClientSecret();

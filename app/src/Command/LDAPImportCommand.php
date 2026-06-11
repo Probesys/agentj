@@ -12,6 +12,7 @@ use App\Service\MailaddrService;
 use App\Service\UserService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -56,6 +57,10 @@ class LDAPImportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->connector->setImportStartedAt(new \DateTimeImmutable());
+        $this->em->persist($this->connector);
+        $this->em->flush();
+
         $this->nbUserUpdated = 0;
         $this->nbUserCreated = 0;
         $this->nbAliasCreated = 0;
@@ -65,29 +70,40 @@ class LDAPImportCommand extends Command
 
         $this->connector = $this->em->getRepository(LdapConnector::class)->find($connectorId);
         if (!$this->connector) {
-            $this->io->error('Connector not found');
+            $this->handleError('Connector not found');
             return Command::FAILURE;
         }
-
-        $this->connector->setImportStartedAt(new \DateTimeImmutable());
-        $this->em->persist($this->connector);
-        $this->em->flush();
 
         try {
             $this->ldap = $this->ldapService->bind($this->connector);
         } catch (ConnectionException $exception) {
-            $this->io->error($exception->getMessage());
+            $this->handleError($exception->getMessage());
             return Command::FAILURE;
         }
 
-        $resultUsers = $this->importUsers();
+        $usersResult = [];
+        try {
+            $resultUsers = $this->importUsers();
+        } catch (Exception $e) {
+            $this->handleError($e->getMessage());
+        }
+
         $resultGroups = [];
         if ($this->connector->isSynchronizeGroup()) {
-            $resultGroups = $this->importGroups();
+            try {
+                $groupsResult = $this->importGroups();
+            } catch (Exception $e) {
+                $this->handleError($e->getMessage());
+            }
         }
 
         $this->groupService->updateWblist();
 
+        $this->connector->setLastSuccessAt(new DateTimeImmutable());
+        $this->connector->setLastSuccessResult([
+            'users' => $usersResult,
+            'groups' => $groupsResult,
+        ]);
         $this->connector->setImportStartedAt(null);
         $this->em->persist($this->connector);
         $this->em->flush();
@@ -100,6 +116,10 @@ class LDAPImportCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @throws NotBoundException
+     * @throws LdapException
+     */
     private function importUsers(): array
     {
         $mailAttribute = $this->connector->getLdapEmailField();
@@ -338,16 +358,14 @@ class LDAPImportCommand extends Command
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
-            $result = [
-                'nb_groups_created' => $nbGroupCreated,
-                'nb_groups_updated' => $nbGroupUpdated,
-            ];
-
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', $result));
 
-            $this->em->flush();
+            [
+                'nb_groups_created' => $nbGroupCreated,
+                'nb_groups_updated' => $nbGroupUpdated,
+            ]));
 
-            return $result;
+            $this->em->flush();
         }
     }
 
@@ -362,5 +380,15 @@ class LDAPImportCommand extends Command
                 $group->addUser($user);
             }
         }
+    }
+
+    private function handleError(string $message)
+    {
+        $this->io->error($message);
+        $this->connector->setImportStartedAt(null);
+        $this->connector->setLastErrorAt(new DateTimeImmutable());
+        $this->connector->setLastErrorResult('Connector not found');
+        $this->em->persist($this->connector);
+        $this->em->flush();
     }
 }
