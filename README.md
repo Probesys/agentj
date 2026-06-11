@@ -21,7 +21,7 @@ Features include:
 It runs on a Docker stack and uses well-known projects and technologies:
 
 - mail system: Postfix, Amavis, SpamAssassin, ClamAV, OpenDKIM
-- web interface: Symfony 7 with PHP 8.2 and MariaDB
+- web interface: Symfony 7 with PHP 8.4 and MariaDB
 
 AgentJ is a [Probesys](https://www.probesys.coop) project, made available under the [GNU Affero General Public License v3.0](/LICENSE).
 
