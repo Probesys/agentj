@@ -25,8 +25,8 @@ final class Version20260610145308 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->addSql(<<<SQL
-            ALTER TABLE domain CHANGE authorized_senders_spam_level authorized_senders_spam_level DOUBLE PRECISION DEFAULT \'5\' NOT NULL,
-            CHANGE report_spam_level report_spam_level DOUBLE PRECISION DEFAULT \'0\' NOT NULL;
+            ALTER TABLE domain CHANGE authorized_senders_spam_level authorized_senders_spam_level DOUBLE PRECISION DEFAULT '5' NOT NULL,
+            CHANGE report_spam_level report_spam_level DOUBLE PRECISION DEFAULT '0' NOT NULL;
         SQL);
     }
 }

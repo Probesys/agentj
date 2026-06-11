@@ -8,6 +8,7 @@ use App\Entity\Groups;
 use App\Entity\User;
 use App\Service\MailaddrService;
 use App\Util\Email;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Microsoft\Graph\Generated\Groups\GroupsRequestBuilderGetRequestConfiguration;
@@ -55,7 +56,7 @@ class Office365ImportCommand extends Command
 
         $connector = $this->em->getRepository(Office365Connector::class)->find($connectorId);
         if (!$connector) {
-            $this->io->error('Connector not found');
+            $this->handleError('Connector not found');
             return Command::FAILURE;
         }
         $this->connector = $connector;
@@ -72,45 +73,58 @@ class Office365ImportCommand extends Command
 
         $this->graphServiceClient = new GraphServiceClient($this->tokenRequestContext);
 
-        $this->importUsers();
-
-        if ($this->connector->isSynchronizeGroup()) {
-            $this->importGroups();
+        $usersResult = [];
+        try {
+            $usersResult = $this->importUsers();
+        } catch (Exception $e) {
+            $this->handleError($e->getMessage());
         }
 
-        $output->writeln([
-            'nb_users_created' => 0,
-            'nb_users_updated' => 0,
-            'nb_aliases_created' => 0,
+        $groupsResult = [];
+        if ($this->connector->isSynchronizeGroup()) {
+            try {
+                $groupsResult = $this->importGroups();
+            } catch (Exception $e) {
+                $this->handleError($e->getMessage());
+            }
+        }
+
+        $this->connector->setLastSuccessAt(new DateTimeImmutable());
+        $this->connector->setLastSuccessResult([
+            'users' => $usersResult,
+            'groups' => $groupsResult,
         ]);
+        $this->connector->setImportStartedAt(null);
+        $this->em->persist($this->connector);
+        $this->em->flush();
+
         return Command::SUCCESS;
     }
 
+    /**
+     * @throws Exception
+     */
     private function importUsers(): array
     {
         $domain = $this->connector->getDomain();
         $users = [];
 
-        try {
-            $requestConfiguration = new UsersRequestBuilderGetRequestConfiguration();
-            $headers = [
-                'ConsistencyLevel' => 'eventual',
-            ];
-            $requestConfiguration->headers = $headers;
+        $requestConfiguration = new UsersRequestBuilderGetRequestConfiguration();
+        $headers = [
+            'ConsistencyLevel' => 'eventual',
+        ];
+        $requestConfiguration->headers = $headers;
 
-            $queryParameters = UsersRequestBuilderGetRequestConfiguration::createQueryParameters(
-                count: true,
-                filter: "endsWith(userPrincipalName,'@" . $domain->getDomain() . "')",
-                top: 999,
-                select: ['userPrincipalName', 'displayName', 'mail', 'id', 'proxyAddresses'],
-            );
-            $requestConfiguration->queryParameters = $queryParameters;
+        $queryParameters = UsersRequestBuilderGetRequestConfiguration::createQueryParameters(
+            count: true,
+            filter: "endsWith(userPrincipalName,'@" . $domain->getDomain() . "')",
+            top: 999,
+            select: ['userPrincipalName', 'displayName', 'mail', 'id', 'proxyAddresses'],
+        );
+        $requestConfiguration->queryParameters = $queryParameters;
 
-            $result = $this->graphServiceClient->users()->get($requestConfiguration)->wait();
-            $users = $result->getValue();
-        } catch (Exception $exc) {
-            $this->io->writeln($exc->getMessage());
-        }
+        $result = $this->graphServiceClient->users()->get($requestConfiguration)->wait();
+        $users = $result->getValue();
 
         $nbUserCreated = 0;
         $nbUserUpdated = 0;
@@ -155,12 +169,6 @@ class Office365ImportCommand extends Command
             $this->em->persist($user);
             $this->em->flush();
         }
-
-        $this->io->writeln($this->translator->trans('Message.Connector.resultImportUser', [
-            'nb_users_created' => $nbUserCreated,
-            'nb_users_updated' => $nbUserUpdated,
-            'nb_aliases_created' => $nbAliasCreated,
-        ]));
 
         return [
             'nb_users_created' => $nbUserCreated,
@@ -224,9 +232,11 @@ class Office365ImportCommand extends Command
         return $aliases;
     }
 
-    private function importGroups(): void
+    /**
+     * @throws Exception
+     */
+    private function importGroups(): array
     {
-        $groups = [];
         $domain = $this->connector->getDomain();
 
         $requestConfiguration = new GroupsRequestBuilderGetRequestConfiguration();
@@ -245,12 +255,8 @@ class Office365ImportCommand extends Command
         $nbGroupCreated = 0;
         $nbGroupUpdated = 0;
 
-        try {
-            $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
-            $groups = $result->getValue();
-        } catch (Exception $exc) {
-            $this->io->writeln($exc->getMessage());
-        }
+        $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
+        $groups = $result->getValue();
 
         $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($domain);
 
@@ -297,10 +303,10 @@ class Office365ImportCommand extends Command
             $this->addMembersToGroup($localGroup);
         }
 
-        $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroup', [
+        return [
             'nb_groups_created' => $nbGroupCreated,
             'nb_groups_updated' => $nbGroupUpdated,
-        ]));
+        ];
     }
 
     /**
@@ -345,6 +351,16 @@ class Office365ImportCommand extends Command
                 $this->em->persist($user);
             }
         }
+        $this->em->flush();
+    }
+
+    private function handleError(string $message)
+    {
+        $this->io->error($message);
+        $this->connector->setImportStartedAt(null);
+        $this->connector->setLastErrorAt(new DateTimeImmutable());
+        $this->connector->setLastErrorResult('Connector not found');
+        $this->em->persist($this->connector);
         $this->em->flush();
     }
 }

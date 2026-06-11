@@ -64,30 +64,12 @@ final class SynchronizeConnectorsHandler
                 $this->entityManager->persist($connector);
                 $this->entityManager->flush();
 
-                $cmdExitCode = $command->run($input, $output);
-
-                if ($cmdExitCode != Command::SUCCESS) {
-
-                }
-                $connector->setImportStartedAt(null);
-                $connector->setLastSynchronizedAt(new \DateTimeImmutable());
-                $result = $output->fetch();
-                $connector->setLastResultSynchronization($output->fetch());
-                $this->entityManager->persist($connector);
-                $this->entityManager->flush();
+                $command->run($input, $output);
 
                 $this->logger->error('Connector synchronized', [
                     'connector_id' => $connector->getId(),
                     'connector_type' => $connector->getType(),
                 ]);
-
-                if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
-                    $connector->setLastSuccessResult([
-                        'nb_users_created' => $result['users']['nb_users_created'],
-                        'nb_users_updated' => $result['users']['nb_users_updated'],
-                        'nb_aliases_created' => $result['users']['nb_aliases_created'],
-                    ]);
-                }
             } catch (\Exception $e) {
                 $this->logger->error('Failed to synchronize connector', [
                     'connector_id' => $connector->getId(),
@@ -95,14 +77,13 @@ final class SynchronizeConnectorsHandler
                     'exception' => $e,
                 ]);
 
-                if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
-                    $connector->setLastErrorAt(new \DateTimeImmutable());
-                    $errorMessage = $e->getCode(). ': ' . $e->getMessage();
-                    $connector->setLastErrorResult($errorMessage);
-                }
+                // if ($connector instanceof LdapConnector || $connector instanceof Office365Connector) {
+                //     $connector->setLastErrorAt(new \DateTimeImmutable());
+                //     $errorMessage = $e->getCode(). ': ' . $e->getMessage();
+                //     $connector->setLastErrorResult($errorMessage);
+                // }
             }
         }
-        $this->entityManager->flush();
 
         $lock->release();
     }

@@ -64,7 +64,7 @@ class Connector
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $importStartedAt = null;
 
-    #[ORM\Column(options: ['default' => []])]
+    #[ORM\Column(options: ['default' => '[]'])]
     private array $lastSuccessResult = [];
 
     #[ORM\Column(nullable: true)]
@@ -257,12 +257,12 @@ class Connector
         return $this;
     }
 
-    public function getLastSuccessResult(): string
+    public function getLastSuccessResult(): array
     {
         return $this->lastSuccessResult;
     }
 
-    public function setLastSuccessResult(string $result): static
+    public function setLastSuccessResult(array $result): static
     {
         $this->lastSuccessResult = $result;
 

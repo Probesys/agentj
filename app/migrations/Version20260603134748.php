@@ -39,26 +39,26 @@ final class Version20260603134748 extends AbstractMigration
     {
         $this->addSql(<<<SQL
             ALTER TABLE connector CHANGE last_synchronized_at last_synchronized_at
-            DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'
+            DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)';
         SQL);
         $this->addSql(<<<SQL
             ALTER TABLE domain CHANGE authorized_senders_spam_level authorized_senders_spam_level
-            DOUBLE PRECISION DEFAULT \'5\' NOT NULL,
-            CHANGE report_spam_level report_spam_level DOUBLE PRECISION
-            DEFAULT \'0\' NOT NULL, CHANGE quota quota JSON DEFAULT NULL COMMENT \'(DC2Type:json)\';
+            DOUBLE PRECISION DEFAULT '5' NOT NULL,
+            CHANGE report_spam_level report_spam_level DOUBLE PRECISION DEFAULT '0' NOT NULL,
+            CHANGE quota quota JSON DEFAULT NULL COMMENT '(DC2Type:json)';
         SQL);
         $this->addSql('ALTER TABLE groups CHANGE quota quota JSON DEFAULT NULL COMMENT \'(DC2Type:json)\'');
         $this->addSql(<<<SQL
-            ALTER TABLE messenger_messages CHANGE created_at created_at DATETIME
-            NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            CHANGE available_at available_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-            CHANGE delivered_at delivered_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\';
+            ALTER TABLE messenger_messages
+            CHANGE created_at created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)',
+            CHANGE available_at available_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)',
+            CHANGE delivered_at delivered_at DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)';
         SQL);
         $this->addSql(<<<SQL
             ALTER TABLE msgrcpt CHANGE amavis_release_started_at amavis_release_started_at DATETIME
-            DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\',
+            DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)',
             CHANGE amavis_release_ended_at amavis_release_ended_at DATETIME
-            DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\';
+            DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)';
         SQL);
         $this->addSql('ALTER TABLE users CHANGE quota quota JSON DEFAULT NULL COMMENT \'(DC2Type:json)\'');
     }
