@@ -3,10 +3,11 @@ set -e
 
 sh /setup-env.sh
 
-if [ "$PROXY_PORT" -eq 80 ] || [ "$PROXY_PORT" -eq 443 ]; then
+FRONT_PORT="${FRONT_PORT:-$PROXY_PORT}"
+if [ "$FRONT_PORT" -eq 80 ] || [ "$FRONT_PORT" -eq 443 ]; then
     sed -i "s|\$HTTP_HOST_PORT||g" /etc/nginx/sites-enabled/default
 else
-    sed -i "s|\$HTTP_HOST_PORT|:${PROXY_PORT}|g" /etc/nginx/sites-enabled/default
+    sed -i "s|\$HTTP_HOST_PORT|:${FRONT_PORT}|g" /etc/nginx/sites-enabled/default
 fi
 
 sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
