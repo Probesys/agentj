@@ -1,64 +1,70 @@
 {# templates/alert/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Alertes{% endblock %}
+{% block title %}{{ 'Generics.labels.alerts'|trans }} {% endblock %}
+
+{% set _title = 'Generics.labels.alerts'|trans ~ ' : ' ~ alerts.getTotalItemCount %}
 
 {% block body %}
-    <h1>Alertes</h1>
+	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
-    <table id="alertsTable" class="table hidden">
-        <thead>
-            <tr>
-                <th class="bg-transparent">{{ 'Message.Date'|trans }}</th>
-                <th class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
-                <th class="bg-transparent">{{ 'Message.Object'|trans }}</th>
-                <th class="bg-transparent"></th>
-                <th class="bg-transparent"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for alert in alerts %}
-                <tr class="{{ alert.isRead ? '' : 'font-weight-bold' }}">
-                    <td data-title="{{ 'Message.Date'|trans }}">
-                        <time datetime="{{ alert.date|date('Y-m-d\\TH:i:s') }}">
-                            {{ alert.date|format_datetime('short', 'short') }}
-                        </time>
-                    </td>
-                    <td data-title="{{ 'Entities.User.fields.email'|trans }}">
-                        {{ alert.refUser }}
-                    </td>
-                    <td data-title="{{ 'Message.Object'|trans }}">
-                        {{ alert.subject }}
-                    </td>
-                    <td>
-                        <a href="{{ path('alert_read', { 'id': alert.id }) }}" class="btn btn-primary float-right" title="{{ 'Entities.Alert.actions.read'|trans }}">
-                            <i class="fas fa-check"></i>
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ path('alert_delete', { 'id': alert.id }) }}" class="btn btn-danger float-right" title="{{ 'Entities.Alert.actions.delete'|trans }}">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3">{{ 'Generics.messages.no_records_found'|trans }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <script>
-        $(document).ready(function() {
-            $('#alertsTable').DataTable({
-                "order": [[0, "desc"]], // Order by the first column (date) in descending order
-                "language": {
-                url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
-                },
-                "pageLength": window.location.pathname === "/" ? 10 : 100,
-                "stateSave": true
-            });
-        });
-    </script>
+
+	{% endembed %}
+
+	<div class="col mb-3 bg-white pb-3">
+		<div class="row">
+			<div class="col-md-12">
+				{% include 'common/_rapidSearchForm.html.twig'%}
+			</div>
+		</div>
+	</div>
+	<div class="table-responsive">
+		<table id="alertsTable" class="table hidden">
+			<thead>
+				<tr>
+					<th class="bg-transparent">{{ knp_pagination_sortable(alerts, 'Message.Date'|trans, 'a.date') }}</th>
+					<th class="bg-transparent">{{ knp_pagination_sortable(alerts, 'Entities.User.fields.email'|trans, 'a.refUser') }}</th>
+					<th class="bg-transparent">{{ knp_pagination_sortable(alerts, 'Message.Object'|trans, 'a.subject') }}</th>
+					<th class="bg-transparent"></th>
+					<th class="bg-transparent"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for alert in alerts %}
+					<tr class="{{ alert.isRead ? '' : 'font-weight-bold' }}">
+						<td data-title="{{ 'Message.Date'|trans }}">
+							<time datetime="{{ alert.date|date('Y-m-d\\TH:i:s') }}">
+								{{ alert.date|format_datetime('short', 'short') }}
+							</time>
+						</td>
+						<td data-title="{{ 'Entities.User.fields.email'|trans }}">
+							{{ alert.refUser }}
+						</td>
+						<td data-title="{{ 'Message.Object'|trans }}">
+							{{ alert.subject }}
+						</td>
+						<td>
+							<a href="{{ path('alert_read', { 'id': alert.id }) }}" class="btn btn-primary float-right" title="{{ 'Entities.Alert.actions.read'|trans }}">
+								<i class="fas fa-check"></i>
+							</a>
+						</td>
+						<td>
+                            <form method="post" action="{{ path('alert_delete', { 'id': alert.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
+                                <button type="submit" class="btn btn-danger float-right" title="{{ 'Entities.Alert.actions.delete'|trans }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+						</td>
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="3">{{ 'Generics.messages.no_records_found'|trans }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': alerts } %}
 {% endblock %}
