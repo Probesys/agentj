@@ -14,7 +14,6 @@
         "knplabs/knp-paginator-bundle": "^6.6",
         "knpuniversity/oauth2-client-bundle": "^2.10",
         "microsoft/microsoft-graph": "^3",
-        "phpdocumentor/reflection-docblock": "^5.2",
         "sentry/sentry-symfony": "^5.1",
         "stof/doctrine-extensions-bundle": "^1.6",
         "symfony/asset": "7.4.*",

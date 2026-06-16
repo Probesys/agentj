@@ -152,15 +152,6 @@
             "config/packages/http_discovery.yaml"
         ]
     },
-    "phpdocumentor/reflection-common": {
-        "version": "2.2.0"
-    },
-    "phpdocumentor/reflection-docblock": {
-        "version": "5.2.2"
-    },
-    "phpdocumentor/type-resolver": {
-        "version": "1.4.0"
-    },
     "phpstan/phpstan": {
         "version": "1.11",
         "recipe": {
@@ -703,9 +694,6 @@
     },
     "twig/twig": {
         "version": "v3.3.0"
-    },
-    "webmozart/assert": {
-        "version": "1.10.0"
     },
     "willdurand/js-translation-bundle": {
         "version": "2.0",
