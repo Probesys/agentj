@@ -1,5 +1,15 @@
 # Changelog of AgentJ
 
+## 2026-06-17 - 2.6.5
+
+### Bug fixes
+
+- Fix accessing groups for super admin ([313b749a](https://github.com/Probesys/agentj/commit/313b749a))
+
+### Maintenance
+
+- Allow Nginx app to be set behind a reverse proxy ([1b90cd82](https://github.com/Probesys/agentj/commit/1b90cd82))
+
 ## 2026-06-05 - 2.6.4
 
 ### Bug fixes
