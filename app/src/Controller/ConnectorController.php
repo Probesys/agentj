@@ -29,6 +29,7 @@ class ConnectorController extends AbstractController
 
         return $this->redirectToRoute('domain_edit', [
             'id' => $connector->getDomain()->getId(),
-        ], Response::HTTP_SEE_OTHER);
+            '_fragment' => 'auth',
+        ]);
     }
 }

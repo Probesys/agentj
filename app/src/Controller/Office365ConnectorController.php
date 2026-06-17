@@ -45,13 +45,16 @@ class Office365ConnectorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $connectorRepository->save($connector);
 
-            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $domain->getId(),
+                '_fragment' => 'auth',
+            ]);
         }
 
         $form->get("type")->setData(ConnectorTypes::OFFICE365);
         return $this->render('connector/new.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 
@@ -66,16 +69,15 @@ class Office365ConnectorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $connectorRepository->save($connector);
 
-            return $this->redirectToRoute(
-                'domain_edit',
-                ['id' => $connector->getDomain()->getId()],
-                Response::HTTP_SEE_OTHER
-            );
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $connector->getDomain()->getId(),
+                '_fragment' => 'auth',
+            ]);
         }
 
         return $this->render('connector/edit.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 
@@ -92,7 +94,9 @@ class Office365ConnectorController extends AbstractController
             $this->addFlash('success', nl2br($output->fetch()));
         }
 
-
-        return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
+        return $this->redirectToRoute('domain_edit', [
+            'id' => $connector->getDomain()->getId(),
+            '_fragment' => 'auth',
+        ]);
     }
 }

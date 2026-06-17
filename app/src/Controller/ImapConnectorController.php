@@ -38,14 +38,17 @@ class ImapConnectorController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $connectorRepository->save($connector);
-            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $domain->getId(),
+                '_fragment' => 'auth',
+            ]);
         }
 
         $form->get("type")->setData(ConnectorTypes::IMAP);
         $form->remove("synchronizeGroup");
         return $this->render('connector/new_imap.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 
@@ -61,17 +64,16 @@ class ImapConnectorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $connector = $form->getData();
             $connectorRepository->save($connector);
-            return $this->redirectToRoute(
-                'domain_edit',
-                ['id' => $connector->getDomain()->getId()],
-                Response::HTTP_SEE_OTHER,
-            );
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $connector->getDomain()->getId(),
+                '_fragment' => 'auth',
+            ]);
         }
 
         $form->remove("synchronizeGroup");
         return $this->render('connector/edit_imap.html.twig', [
-                    'connector' => $connector,
-                    'form' => $form,
+            'connector' => $connector,
+            'form' => $form,
         ]);
     }
 }

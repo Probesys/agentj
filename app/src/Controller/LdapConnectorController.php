@@ -64,7 +64,10 @@ class LdapConnectorController extends AbstractController
 
             $connectorRepository->save($connector);
 
-            return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('domain_edit', [
+                'id' => $domain->getId(),
+                '_fragment' => 'auth',
+            ]);
         }
 
         $form->get("type")->setData(ConnectorTypes::LDAP);
@@ -98,7 +101,8 @@ class LdapConnectorController extends AbstractController
 
             return $this->redirectToRoute('domain_edit', [
                 'id' => $connector->getDomain()->getId(),
-            ], Response::HTTP_SEE_OTHER);
+                '_fragment' => 'auth',
+            ]);
         }
 
         return $this->render('connector/edit_ldap.html.twig', [
@@ -120,7 +124,10 @@ class LdapConnectorController extends AbstractController
             $this->addFlash('success', nl2br($output->fetch()));
         }
 
-        return $this->redirectToRoute('domain_edit', ['id' => $connector->getDomain()->getId()]);
+        return $this->redirectToRoute('domain_edit', [
+            'id' => $connector->getDomain()->getId(),
+            '_fragment' => 'auth',
+        ]);
     }
 
     #[Route('/checkbind/{domain}', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
