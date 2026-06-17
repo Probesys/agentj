@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 SHELL [ "/bin/sh", "-e", "-c" ]
 
@@ -18,22 +18,21 @@ RUN apt-get update -q --fix-missing && \
     composer \
     git \
     nodejs \
-    php8.2 \
-    php8.2-bz2 \
-    php8.2-cli \
-    php8.2-common \
-    php8.2-curl \
-    php8.2-fpm \
-    php8.2-gd \
-    php8.2-imap \
-    php8.2-ldap \
-    php8.2-intl \
-    php8.2-mbstring \
-    php8.2-mysql \
-    php8.2-opcache \
-    php8.2-xml \
-    php8.2-zip \
-    php8.2-xdebug \
+    php8.4 \
+    php8.4-bz2 \
+    php8.4-cli \
+    php8.4-common \
+    php8.4-curl \
+    php8.4-fpm \
+    php8.4-gd \
+    php8.4-ldap \
+    php8.4-intl \
+    php8.4-mbstring \
+    php8.4-mysql \
+    php8.4-opcache \
+    php8.4-xml \
+    php8.4-zip \
+    php8.4-xdebug \
     tzdata \
     yarnpkg \
     zip \
@@ -47,13 +46,13 @@ RUN apt-get update -q --fix-missing && \
     supervisor \
     tzdata
 
-RUN mkdir -p /var/run/php/ && touch /var/run/php/php82-fpm.pid
+RUN mkdir -p /var/run/php/ && touch /var/run/php/php84-fpm.pid
 
 
-COPY docker/files/docker-php-ext-xdebug.ini /etc/php/8.2/fpm/conf.d/docker-php-ext-xdebug.ini
+COPY docker/files/docker-php-ext-xdebug.ini /etc/php/8.4/fpm/conf.d/docker-php-ext-xdebug.ini
 COPY docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
-COPY docker/conf/php-fpm/www.conf /etc/php/8.2/fpm/pool.d/www.conf
+COPY docker/conf/php-fpm/www.conf /etc/php/8.4/fpm/pool.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf
 COPY docker/setup-env.sh /setup-env.sh
 COPY docker/entrypoint.sh /entrypoint.sh

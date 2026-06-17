@@ -44,13 +44,24 @@ services:
       - ./app/public/files:/var/www/agentj/public/files
 
   watcher:
-   image: node:18-alpine
-   user: ${UID}:${GID}
-   working_dir: /app
-   volumes:
-        - ./app:/app
-   restart: unless-stopped
-   command: /bin/sh -c "yarn install && yarn watch"
+    image: probesys38/agentj_app:$VERSION
+    build:
+      context: app/
+      dockerfile: Dockerfile.dev
+      args:
+        - UID
+        - GID
+    working_dir: /var/www/agentj
+    command: /bin/sh -c "sudo -u www-data yarnpkg watch"
+    entrypoint: ""
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./app/:/var/www/agentj
 
   senderverifmilter:
     build:

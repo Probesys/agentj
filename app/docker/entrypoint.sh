@@ -9,7 +9,7 @@ else
     sed -i "s|\$HTTP_HOST_PORT|:${PROXY_PORT}|g" /etc/nginx/sites-enabled/default
 fi
 
-sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.2/cli/php.ini
+sed -i 's|memory_limit = 128M|memory_limit = 512M|g' /etc/php/8.4/cli/php.ini
 
 cd /var/www/agentj || exit 4
 rm -rf /var/www/agentj/var/cache
