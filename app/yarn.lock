@@ -23,7 +23,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.23.2":
+"@babel/core@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/core@npm:7.29.7"
   dependencies:
@@ -986,7 +986,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-env@npm:^7.23.2":
+"@babel/preset-env@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/preset-env@npm:7.29.7"
   dependencies:
@@ -1139,14 +1139,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hotwired/stimulus@npm:^3.0.0, @hotwired/stimulus@npm:^3.2.2":
+"@hotwired/stimulus@npm:^3.2.2":
   version: 3.2.2
   resolution: "@hotwired/stimulus@npm:3.2.2"
   checksum: 10c0/3793919e353d28424f57d07e6b634bf6e8821c227acfa2a608aaa8bdfe7e80479acef12705168ca866f3c231399f4a939fb0cd089aaae04c406b3d885a3b35ea
   languageName: node
   linkType: hard
 
-"@hotwired/turbo@npm:^8.0.0":
+"@hotwired/turbo@npm:^8.0.23":
   version: 8.0.23
   resolution: "@hotwired/turbo@npm:8.0.23"
   checksum: 10c0/600ba4ba7632e27c3ed9e80a2114715df94302d3d3b72b0a70efcd7c31477b377228a7fad629eeb2e4b2d778bf65571b176fc76a6bc5603dfc814810c0a815d6
@@ -1438,7 +1438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/stimulus-bridge@npm:^4.0.0":
+"@symfony/stimulus-bridge@npm:^4.0.1":
   version: 4.0.1
   resolution: "@symfony/stimulus-bridge@npm:4.0.1"
   dependencies:
@@ -1452,7 +1452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets::locator=root-workspace-0b6124%40workspace%3A.":
+"@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A.":
   version: 2.35.0
   resolution: "@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A."
   peerDependencies:
@@ -1462,7 +1462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets::locator=root-workspace-0b6124%40workspace%3A.":
+"@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A.":
   version: 2.35.0
   resolution: "@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A."
   peerDependencies:
@@ -1472,7 +1472,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/webpack-encore@npm:^5.0.0":
+"@symfony/webpack-encore@npm:^5.3.1":
   version: 5.3.1
   resolution: "@symfony/webpack-encore@npm:5.3.1"
   dependencies:
@@ -2244,7 +2244,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.38.0":
+"core-js@npm:^3.49.0":
   version: 3.49.0
   resolution: "core-js@npm:3.49.0"
   checksum: 10c0/2e42edb47eda38fd5368380131623c8aa5d4a6b42164125b17744bdc08fa5ebbbdd06b4b4aa6ca3663470a560b0f2fba48e18f142dfe264b0039df85bc625694
@@ -2997,7 +2997,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery@npm:^3.6.0":
+"jquery@npm:^3.7.1":
   version: 3.7.1
   resolution: "jquery@npm:3.7.1"
   checksum: 10c0/808cfbfb758438560224bf26e17fcd5afc7419170230c810dd11f5c1792e2263e2970cca8d659eb84fcd9acc301edb6d310096e450277d54be4f57071b0c82d9
@@ -3805,7 +3805,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.13.9":
+"regenerator-runtime@npm:^0.13.11":
   version: 0.13.11
   resolution: "regenerator-runtime@npm:0.13.11"
   checksum: 10c0/12b069dc774001fbb0014f6a28f11c09ebfe3c0d984d88c9bced77fdb6fedbacbca434d24da9ae9371bfbf23f754869307fb51a4c98a8b8b18e5ef748677ca24
@@ -3932,25 +3932,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@babel/core": "npm:^7.23.2"
-    "@babel/preset-env": "npm:^7.23.2"
-    "@hotwired/stimulus": "npm:^3.0.0"
-    "@hotwired/turbo": "npm:^8.0.0"
-    "@symfony/stimulus-bridge": "npm:^4.0.0"
-    "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets"
-    "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets"
-    "@symfony/webpack-encore": "npm:^5.0.0"
+    "@babel/core": "npm:^7.29.7"
+    "@babel/preset-env": "npm:^7.29.7"
+    "@hotwired/stimulus": "npm:^3.2.2"
+    "@hotwired/turbo": "npm:^8.0.23"
+    "@symfony/stimulus-bridge": "npm:^4.0.1"
+    "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A."
+    "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A."
+    "@symfony/webpack-encore": "npm:^5.3.1"
     chart.js: "npm:^4.5.1"
-    core-js: "npm:^3.38.0"
-    jquery: "npm:^3.6.0"
-    regenerator-runtime: "npm:^0.13.9"
-    sass: "npm:^1.51.0"
-    sass-loader: "npm:^16.0.0"
-    stimulus: "npm:^3.0.0"
-    tom-select: "npm:^2.2.2"
-    webpack: "npm:^5.94.0"
-    webpack-cli: "npm:^6.0.0"
-    webpack-notifier: "npm:^1.6.0"
+    core-js: "npm:^3.49.0"
+    jquery: "npm:^3.7.1"
+    regenerator-runtime: "npm:^0.13.11"
+    sass: "npm:^1.101.0"
+    sass-loader: "npm:^16.0.8"
+    stimulus: "npm:^3.2.2"
+    tom-select: "npm:^2.6.1"
+    webpack: "npm:^5.107.2"
+    webpack-cli: "npm:^6.0.1"
+    webpack-notifier: "npm:^1.15.0"
   languageName: unknown
   linkType: soft
 
@@ -3961,7 +3961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^16.0.0":
+"sass-loader@npm:^16.0.8":
   version: 16.0.8
   resolution: "sass-loader@npm:16.0.8"
   dependencies:
@@ -3987,9 +3987,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.51.0":
-  version: 1.100.0
-  resolution: "sass@npm:1.100.0"
+"sass@npm:^1.101.0":
+  version: 1.101.0
+  resolution: "sass@npm:1.101.0"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^5.0.0"
@@ -4000,7 +4000,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10c0/e2aab47c87b69d2d4f8e48fa665138548069f56a7fd0fc4e15c9bde888b715798e49d33436e873918a8849ca3cc6c141a68618f58e2f3b2e6ec179cc309ca622
+  checksum: 10c0/1fbbcef2f767dec4d97773a2a084f4e1ef2e4abecf574e08743e52237069f1129a6b43b07b5c23aa3bcbf395509e40db758d9748a07940da227aa1626329a74d
   languageName: node
   linkType: hard
 
@@ -4120,7 +4120,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stimulus@npm:^3.0.0":
+"stimulus@npm:^3.2.2":
   version: 3.2.2
   resolution: "stimulus@npm:3.2.2"
   dependencies:
@@ -4312,7 +4312,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tom-select@npm:^2.2.2":
+"tom-select@npm:^2.6.1":
   version: 2.6.1
   resolution: "tom-select@npm:2.6.1"
   dependencies:
@@ -4414,7 +4414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^6.0.0":
+"webpack-cli@npm:^6.0.1":
   version: 6.0.1
   resolution: "webpack-cli@npm:6.0.1"
   dependencies:
@@ -4467,7 +4467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-notifier@npm:^1.6.0":
+"webpack-notifier@npm:^1.15.0":
   version: 1.15.0
   resolution: "webpack-notifier@npm:1.15.0"
   dependencies:
@@ -4499,7 +4499,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.94.0":
+"webpack@npm:^5.107.2":
   version: 5.107.2
   resolution: "webpack@npm:5.107.2"
   dependencies:

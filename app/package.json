@@ -1,22 +1,22 @@
 {
     "devDependencies": {
-        "@babel/core": "^7.23.2",
-        "@babel/preset-env": "^7.23.2",
-        "@hotwired/stimulus": "^3.0.0",
-        "@hotwired/turbo": "^8.0.0",
-        "@symfony/stimulus-bridge": "^4.0.0",
-        "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets",
-        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
-        "@symfony/webpack-encore": "^5.0.0",
-        "core-js": "^3.38.0",
-        "regenerator-runtime": "^0.13.9",
-        "sass": "^1.51.0",
-        "sass-loader": "^16.0.0",
-        "stimulus": "^3.0.0",
-        "tom-select": "^2.2.2",
-        "webpack": "^5.94.0",
-        "webpack-cli": "^6.0.0",
-        "webpack-notifier": "^1.6.0"
+        "@babel/core": "^7.29.7",
+        "@babel/preset-env": "^7.29.7",
+        "@hotwired/stimulus": "^3.2.2",
+        "@hotwired/turbo": "^8.0.23",
+        "@symfony/stimulus-bridge": "^4.0.1",
+        "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A.",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A.",
+        "@symfony/webpack-encore": "^5.3.1",
+        "core-js": "^3.49.0",
+        "regenerator-runtime": "^0.13.11",
+        "sass": "^1.101.0",
+        "sass-loader": "^16.0.8",
+        "stimulus": "^3.2.2",
+        "tom-select": "^2.6.1",
+        "webpack": "^5.107.2",
+        "webpack-cli": "^6.0.1",
+        "webpack-notifier": "^1.15.0"
     },
     "license": "UNLICENSED",
     "private": true,
@@ -27,11 +27,11 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "@babel/core": "^7.23.2",
-        "@babel/preset-env": "^7.23.2",
-        "@symfony/webpack-encore": "^5.0.0",
+        "@babel/core": "^7.29.7",
+        "@babel/preset-env": "^7.29.7",
+        "@symfony/webpack-encore": "^5.3.1",
         "chart.js": "^4.5.1",
-        "jquery": "^3.6.0",
-        "webpack": "^5.94.0"
+        "jquery": "^3.7.1",
+        "webpack": "^5.107.2"
     }
 }
