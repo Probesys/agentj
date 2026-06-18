@@ -99,12 +99,6 @@ class Domain
     #[ORM\OneToMany(targetEntity: Connector::class, mappedBy: 'domain')]
     private Collection $connectors;
 
-    /**
-     * @var Collection<int, DailyStat>
-     */
-    #[ORM\OneToMany(mappedBy: 'domain', targetEntity: DailyStat::class)]
-    private Collection $dailyStats;
-
     #[ORM\OneToOne(
         targetEntity: 'App\Entity\DomainKey',
         inversedBy: 'domain',
@@ -137,7 +131,6 @@ class Domain
         $this->datemod = new \DateTime();
         $this->groups = new ArrayCollection();
         $this->connectors = new ArrayCollection();
-        $this->dailyStats = new ArrayCollection();
         $this->domainKeys = new DomainKey();
         $this->domainRelays = new ArrayCollection(); # ip addresses
     }
@@ -465,36 +458,6 @@ class Domain
             // set the owning side to null (unless already changed)
             if ($connector->getDomain() === $this) {
                 $connector->setDomain(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, DailyStat>
-     */
-    public function getDailyStats(): Collection
-    {
-        return $this->dailyStats;
-    }
-
-    public function addDailyStat(DailyStat $dailyStat): self
-    {
-        if (!$this->dailyStats->contains($dailyStat)) {
-            $this->dailyStats->add($dailyStat);
-            $dailyStat->setDomain($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDailyStat(DailyStat $dailyStat): self
-    {
-        if ($this->dailyStats->removeElement($dailyStat)) {
-            // set the owning side to null (unless already changed)
-            if ($dailyStat->getDomain() === $this) {
-                $dailyStat->setDomain(null);
             }
         }
 

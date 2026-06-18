@@ -107,23 +107,11 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
      * @return array<int, array<string, mixed>>
      */
     public function countByTypeAndDays(
-        ?Domain $domain = null,
-        ?int $fromDate = null,
         ?int $messageStatus = MessageStatus::UNTREATED,
         ?User $user = null
     ): array {
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
         $queryBuilder->select('COUNT(mr.mailId) as nb_result, m.timeIso, DATE(FROM_UNIXTIME(m.timeNum)) as date_group');
-
-        if (!is_null($fromDate)) {
-            $queryBuilder->andWhere('m.timeNum >= :date');
-            $queryBuilder->setParameter('date', $fromDate);
-        }
-
-        if ($domain) {
-            $queryBuilder->andWhere('u.domain = :domain');
-            $queryBuilder->setParameter('domain', $domain);
-        }
 
         $queryBuilder->groupBy('date_group');
 
