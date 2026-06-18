@@ -39,16 +39,16 @@ Entities.Domain.fields.humanAuthenticationFooter: 'Footer of the human authentic
 Entities.Domain.fields.humanAuthenticationStylesheet: 'Custom stylesheet on the human authentication page'
 Entities.Domain.fields.level: 'Spam threshold'
 Entities.Domain.fields.logo: Restored
-Entities.Domain.fields.mailAuthenticationSender: 'Email address that sends authentication request'
+Entities.Domain.fields.mailAuthenticationSender: 'Email address that sends authentication requests'
 Entities.Domain.fields.mailmessage: 'Text of the email validating the email address with the human authentication link'
 Entities.Domain.fields.message: 'Presentation text on the human authentication page'
 Entities.Domain.fields.messageAlert: 'Message of the report'
-Entities.Domain.fields.policy: 'Policy for the field'
+Entities.Domain.fields.policy: 'Policy for the domain'
 Entities.Domain.fields.quota: 'Rate Limit'
 Entities.Domain.fields.quota_emails: 'Number of email during the period'
 Entities.Domain.fields.quota_seconds: 'Period duration'
 Entities.Domain.fields.reportSpamLevel: 'Include spam in the report whose level is lower than:'
-Entities.Domain.fields.sendUserAlerts: 'Send alerts to users dashboard in AgentJ'
+Entities.Domain.fields.sendUserAlerts: 'Send alerts to users on the dashboard in AgentJ'
 Entities.Domain.fields.sendUserMailAlerts: 'Send alerts to users by email'
 Entities.Domain.fields.smtp_port: 'SMTP port'
 Entities.Domain.fields.srvSmtp: 'SMTP server'
@@ -58,7 +58,7 @@ Entities.Domain.labels.auth: 'AUTH, USERS & ALIAS'
 Entities.Domain.labels.connectors: Connectors
 Entities.Domain.labels.dns: DNS
 Entities.Domain.labels.domain: DOMAIN
-Entities.Domain.labels.domainrules: 'Rules of the field'
+Entities.Domain.labels.domainrules: 'Rules of the domain'
 Entities.Domain.labels.dynamicsVariables.EMAIL_DEST: 'Email of recipient'
 Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE: 'End of message loop'
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE: 'Start of message loop'
@@ -77,10 +77,10 @@ Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL to recover th
 Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Link to pending emails'
 Entities.Domain.labels.dynamicsVariables.USERNAME: "User's name"
 Entities.Domain.labels.filters: 'FILTERS & RATES'
-Entities.Domain.labels.ipAddresses: 'IP Address'
+Entities.Domain.labels.ipAddresses: 'IP address of the sending server'
 Entities.Domain.labels.rules: Rules
 Entities.Domain.labels.saveBeforeConnectors: 'Please register the domain first before adding connectors.'
-Entities.DomainRelay.fields.ipAddress: 'IP Address'
+Entities.DomainRelay.fields.ipAddress: 'IP address'
 Entities.Group.Actions.Delete: Delete
 Entities.Group.Actions.New: 'Create a group'
 Entities.Group.Actions.Updated: Edit
@@ -432,7 +432,7 @@ Message.Flash.connectionKo: 'Unable to connect'
 Message.Flash.connectionOk: 'Connection success'
 Message.Flash.deleteSuccesFull: 'Successful deletion'
 Message.Flash.domainCreatd: 'The domain has been successfully created'
-Message.Flash.domainUpdated: 'The field has been successfully updated'
+Message.Flash.domainUpdated: 'The domain has been successfully updated'
 Message.Flash.failedToGeneratePrivateKey: 'Failed to generate private key'
 Message.Flash.failedToGeneratePublicKey: 'Failed to generate public key'
 Message.Flash.invalidLdapQuery: 'Invalid LDAP query'
