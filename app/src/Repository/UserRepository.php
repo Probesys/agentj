@@ -242,11 +242,13 @@ class UserRepository extends BaseRepository
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function getUsersWithMessageCountsByDomain(Domain $domain): array
-    {
-        $cacheKey = "stats_users_messages_{$domain->getId()}";
+    public function getUsersWithMessageCountsByDomain(
+        Domain $domain,
+        string $searchKey = ''
+    ): array {
+        $cacheKey = "stats_users_messages_{$domain->getId()}_{$searchKey}";
 
-        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($domain) {
+        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($domain, $searchKey) {
             $item->expiresAfter(3600);
 
             $conn = $this->getEntityManager()->getConnection();
@@ -304,8 +306,15 @@ class UserRepository extends BaseRepository
                 ) AS sqlLimitReportCounts ON sqlLimitReportCounts.email = u.email
                 WHERE u.roles LIKE '%"ROLE_USER"%'
                 AND u.domain_id = :domain
-                GROUP BY u.id
             SQL;
+
+            if ($searchKey !== '') {
+                $sql .= ' AND (u.email LIKE :searchKey OR u.fullname LIKE :searchKey)';
+                $parameters['searchKey'] = '%' . $searchKey . '%';
+                $types['searchKey'] = DBAL\ParameterType::STRING;
+            }
+
+            $sql .= ' GROUP BY u.id ORDER BY u.email asc';
 
             $parameters['deliveryStatus'] = DeliveryStatus::PASS;
             $types['deliveryStatus'] = DBAL\ParameterType::STRING;

@@ -38,7 +38,11 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        {% include '/dashboard/_stats-in-out_table.html.twig' %}
+                        <h2 class="mx-2  d-flex justify-content-between">
+                            {{ 'Generics.labels.previewUsers'|trans }}
+                            <a href="{{ path('dashboard_stats_by_in_out') }}" class="btn btn-secondary">{{ 'Generics.actions.showMore'|trans }}</a>
+                        </h2>
+                        {% include '/dashboard/_stats-in-out_table.html.twig' with { showPagination: false } %}
                     </div>
                 </div>
             </div>

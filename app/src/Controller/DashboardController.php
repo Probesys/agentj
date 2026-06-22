@@ -13,7 +13,9 @@ use App\Repository\MsgrcptRepository;
 use App\Repository\MsgrcptSearchRepository;
 use App\Repository\OutMsgrcptRepository;
 use App\Repository\UserRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -125,7 +127,9 @@ final class DashboardController extends AbstractController
     #[Route('/dashboard/stats-by-in-out', name: 'dashboard_stats_by_in_out')]
     public function statsByInOut(
         DomainRepository $domainRepository,
+        Request $request,
         UserRepository $userRepository,
+        PaginatorInterface $paginator,
     ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -147,8 +151,10 @@ final class DashboardController extends AbstractController
             'totalOutMsgBlockedCount' => 0,
         ];
 
+        $searchKey = $request->query->getString('search', '');
+
         foreach ($domains as $domain) {
-            $domainUsers = $userRepository->getUsersWithMessageCountsByDomain($domain);
+            $domainUsers = $userRepository->getUsersWithMessageCountsByDomain($domain, $searchKey);
             $users = array_merge($users, $domainUsers);
 
             $totalMsgCount = array_reduce($domainUsers, function ($carry, $user) {
@@ -179,9 +185,30 @@ final class DashboardController extends AbstractController
 
         $data['All'] = $dataAll;
 
-        return $this->render('dashboard/stats-by-in-out.html.twig', [
+        $isPreview = $request->query->getBoolean('preview');
+
+        if ($isPreview) {
+            $perPage = 5;
+        } else {
+            $perPage = (int) $this->getParameter('app.per_page_global');
+            $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+        }
+
+        $paginatedUsers = $paginator->paginate(
+            $users,
+            $request->query->getInt('page', 1),
+            $perPage,
+        );
+
+        if ($isPreview) {
+            $template = 'dashboard/stats-by-in-out.html.twig';
+        } else {
+            $template = 'dashboard/stats-by-in-out-list.html.twig';
+        }
+
+        return $this->render($template, [
             'domains' => $domains,
-            'users' => $users,
+            'users' => $paginatedUsers,
             'data' => $data,
         ]);
     }

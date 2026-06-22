@@ -1,6 +1,6 @@
-<h2 class="mx-2">{{ 'Generics.labels.previewUsers'|trans }}</h2>
+
 <div class="table-responsive">
-	<table id="table_users" class="table table-hover">
+	<table id="table_users" class="table table-hover table-sm">
 		<thead>
 			<tr>
 				<th rowspan="2" class="bg-transparent">{{ 'Entities.User.fields.email'|trans }}</th>
@@ -43,14 +43,6 @@
 		</tbody>
 	</table>
 </div>
-<script>
-	$('#table_users').DataTable(
-    {
-		"initComplete": function (settings, json) {
-			$('#table_users').removeAttr('style');
-		},
-		"language": {
-			url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
-		}
-    });
-</script>
+{% if showPagination|default(false) %}
+	{% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': users } %}
+{% endif %}
