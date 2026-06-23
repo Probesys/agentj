@@ -39,40 +39,6 @@ document.addEventListener("turbo:load", function () {
     e.preventDefault();
   });
 
-  /* DataTable*/
-  $.extend($.fn.dataTable.defaults, {
-    dom:
-      "<'col mb-3 bg-white pb-3'<'row'<'col-sm-10 col-md-6'l><'col-sm-12 col-md-6'f>>>" +
-      "<'row'<'col-sm-12'tr>>" +
-      "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-    renderer: 'bootstrap'
-  });
-
-  var table = $('.datatable').DataTable(
-    {
-      "initComplete": function (settings, json) {
-        var domDropDownActions = "";
-        if ($(this).prop("id") == 'table_users') {
-          domDropDownActions = '<div class="ml-2 bg-white float-left">' +
-            '<label>Actions' +
-            '<select id="massive-actions-select" class="custom-select custom-select-sm form-control form-control-sm">' +
-            '<option value="">Actions</option>' +
-            '<option data-dialog-title="' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '" value="">' + Translator.trans('Entities.User.actions.deleteEmailAccount') + '</option>';
-          domDropDownActions += '</select></label></div>';
-          $(domDropDownActions).insertAfter("#" + $(this).prop("id") + "_length ");
-        }
-
-      },
-      "language": {
-        url: $('body').data('base-path') + '/js/translations/datatable.' + $('html').attr('lang') + '.json',
-      },
-      "pageLength": window.location.pathname === "/" ? 10 : 100,
-      "stateSave": true
-    });
-
-  table.on('init', function () {
-    $('.datatable').removeClass('hidden');
-  });
 
   //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
