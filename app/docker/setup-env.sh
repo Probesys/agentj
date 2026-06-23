@@ -36,6 +36,8 @@ sed -i "s|\$SCHEDULER_AUTORELEASE_FREQUENCY|${SCHEDULER_AUTORELEASE_FREQUENCY:-1
 sed -i "s|\$FEATURE_FLAG_DISABLE_DASHBOARD|${FEATURE_FLAG_DISABLE_DASHBOARD:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT|${FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_HINT_INDEX|${FEATURE_FLAG_HINT_INDEX:-false}|g" $env_file
+sed -i "s|\$ALTCHA_KEY_SECRET|$ALTCHA_KEY_SECRET|g" $env_file
+sed -i "s|\$ALTCHA_KEY_SIGNATURE|$ALTCHA_KEY_SIGNATURE|g" $env_file
 
 if [ "$SF_APP_ENV" != 'prod' ]; then
     env_file_test=/var/www/agentj/.env.test

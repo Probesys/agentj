@@ -7,8 +7,10 @@ use App\Entity\SenderRule;
 use App\Form\HumanAuthenticationType;
 use App\Repository\MessageRepository;
 use App\Repository\SenderRuleRepository;
+use App\Service\AltchaService;
 use App\Service\HumanAuthenticationService;
 use App\Service\MessageService;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +24,7 @@ class HumanAuthenticationController extends AbstractController
     public function show(
         string $token,
         Request $request,
+        AltchaService $altchaService,
         SenderRuleRepository $senderRuleRepository,
         MessageRepository $messageRepository,
         MessageService $messageService,
@@ -48,15 +51,28 @@ class HumanAuthenticationController extends AbstractController
         $verified = false;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Test if the sender is the same than the posted email field and if the mail has not been yet treated
+            // Test if the sender is the same as the posted email field and if the mail has not been yet treated
             if (
                 !$message->getStatus() &&
                 $form->has('email') &&
-                $form->get('email')->getData() == $senderEmail &&
-                // Test honeypot
-                $form->has('emailEmpty') &&
-                empty($form->get('emailEmpty')->getData())
+                $form->get('email')->getData() == $senderEmail
             ) {
+                // Validate Atlcha challenge resolution
+                $isAltchaChallengeValid = false;
+                $challenge = $request->request->get('altcha');
+
+                try {
+                    $isAltchaChallengeValid = $altchaService->verifySolution((string)$challenge);
+                } catch (Exception $exception) {
+                    $error = new FormError($translator->trans('Message.Flash.checkMailUnsuccessful'));
+                    $form->addError($error);
+                }
+
+                if (!$isAltchaChallengeValid) {
+                    $error = new FormError($translator->trans('Message.Flash.checkMailUnsuccessful'));
+                    $form->addError($error);
+                }
+
                 // Keep only recipients that are NOT already in a sender rule. This avoids,
                 // for instance, a blocked sender to authorise himself.
                 $messageRecipients = array_filter(

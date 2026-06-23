@@ -16,14 +16,6 @@ class HumanAuthenticationType extends AbstractType
             'label' => new TranslatableMessage('Message.HumanAuthentication.toVerify.email'),
         ]);
 
-        $builder->add('emailEmpty', EmailType::class, [
-            'label' => false,
-            'required' => false,
-            'attr' => [
-                'style' => 'display:none',
-            ],
-        ]);
-
         $builder->add('submit', SubmitType::class, [
             'label' => new TranslatableMessage('Message.HumanAuthentication.toVerify.submit'),
             'attr' => [
