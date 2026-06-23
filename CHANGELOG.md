@@ -1,5 +1,16 @@
 # Changelog of AgentJ
 
+## UNRELASED
+
+### Migration notes
+
+Altcha (https://altcha.org/) is now used during human authentication. There are 3 new environment variables:
+- `ALTCHA_KEY_SECRET` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
+- `ALTCHA_KEY_SIGNATURE` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
+- `ALTCHA_COST` an (optional) value that we recommend to be between 5000 and 10000. A higher cost takes more time to validate.
+
+You must set at least `ALTCHA_KEY_SECRET` to enable Altcha. Otherwise, the human authentication form will not show the widget.
+
 ## 2026-09-18 - 2.7.5
 
 ### Bug Fixes

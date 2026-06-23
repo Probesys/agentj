@@ -10,6 +10,7 @@ use App\Repository\DomainRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Service\CryptEncryptService;
+use App\Service\HumanAuthenticationService;
 use App\Service\LocaleService;
 use App\Service\LogService;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -35,7 +36,7 @@ class SendAuthMailRequestCommand
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
         private TranslatorInterface $translator,
-        private CryptEncryptService $cryptEncryptService,
+        private HumanAuthenticationService $humanAuthenticationService,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
         private LogService $logService,
@@ -186,12 +187,7 @@ class SendAuthMailRequestCommand
         array $recipientUsers,
         string $locale,
     ): array {
-        $token = $this->cryptEncryptService->encrypt(
-            $message->getMailId()
-            . '%%%' . $message->getSecretId()
-            . '%%%' . $message->getPartitionTag()
-            . '%%%' . $domain->getId()
-        );
+        $token = $this->humanAuthenticationService->encryptToken($message, $domain);
         $url = $this->urlGenerator->generate('human_authentication', [
             'token' => $token
         ], UrlGeneratorInterface::ABSOLUTE_URL);

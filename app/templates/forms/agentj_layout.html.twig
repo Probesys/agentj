@@ -80,3 +80,12 @@
     {%- endif -%}
     {{- parent() -}}
 {%- endblock form_widget_compound -%}
+
+{% block altcha_widget %}
+    <altcha-widget
+        id="{{ id }}"
+        name={{ field_name(form) }}
+        challenge="{{ challenge_url }}"
+        display="standard"
+    ></altcha-widget>
+{% endblock %}

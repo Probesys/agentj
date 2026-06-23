@@ -112,6 +112,8 @@ endif
 	sed -i "s/.*UID.*/UID=$(shell id -u)/" .env
 	sed -i "s/.*GID.*/GID=$(shell id -g)/" .env
 	sed -i "s/.*MAILPIT_WEB_PORT.*/MAILPIT_WEB_PORT=8025/" .env
+	sed -i "/^ALTCHA_KEY_SECRET/s/$$/$(shell openssl rand -hex 32)/" .env
+	sed -i "/^ALTCHA_KEY_SIGNATURE/s/$$/$(shell openssl rand -hex 32)/" .env
 
 .PHONY: help
 help:

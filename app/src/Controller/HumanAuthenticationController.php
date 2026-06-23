@@ -48,14 +48,11 @@ class HumanAuthenticationController extends AbstractController
         $verified = false;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Test if the sender is the same than the posted email field and if the mail has not been yet treated
+            // Test if the sender is the same as the posted email field and if the mail has not been yet treated
             if (
                 !$message->getStatus() &&
                 $form->has('email') &&
-                $form->get('email')->getData() == $senderEmail &&
-                // Test honeypot
-                $form->has('emailEmpty') &&
-                empty($form->get('emailEmpty')->getData())
+                $form->get('email')->getData() == $senderEmail
             ) {
                 // Keep only recipients that are NOT already in a sender rule. This avoids,
                 // for instance, a blocked sender to authorise himself.

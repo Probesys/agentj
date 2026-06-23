@@ -64,7 +64,7 @@ class Domain
     private Collection $users;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $confirmCaptchaMessage;
+    private ?string $confirmCaptchaMessage = null;
 
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
     private string $humanAuthenticationStylesheet = '';

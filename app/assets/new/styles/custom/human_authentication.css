@@ -26,3 +26,12 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+altcha-widget {
+    display: block;
+}
+
+altcha-widget .altcha {
+    --altcha-max-width: 100%;
+    --altcha-border-color: var(--color-primary9)
+}

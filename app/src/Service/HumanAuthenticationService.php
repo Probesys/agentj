@@ -61,4 +61,14 @@ class HumanAuthenticationService
 
         return [$message, $domain, $messageRecipients];
     }
+
+    public function encryptToken(Message $message, Domain $domain): string
+    {
+        return $this->cryptEncryptService->encrypt(
+            $message->getMailId()
+            . '%%%' . $message->getSecretId()
+            . '%%%' . $message->getPartitionTag()
+            . '%%%' . $domain->getId()
+        );
+    }
 }

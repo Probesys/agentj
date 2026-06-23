@@ -32,9 +32,6 @@ security:
         check:
             pattern: ^/check
             security:  false
-        captcha:
-            pattern: ^/captcha-handler
-            security:  false
         main:
             lazy: true
 #            provider: users_in_memory
@@ -67,6 +64,7 @@ security:
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
          - { path: ^/rules/admin, roles: ROLE_ADMIN }
+         - { path: ^/altcha, roles: PUBLIC_ACCESS }
          - { path: ^/, roles: ROLE_USER }
 
 when@test:

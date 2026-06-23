@@ -7,6 +7,7 @@
         "php": "^8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "altcha-org/altcha": "^2.0",
         "doctrine/dbal": "^4",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
