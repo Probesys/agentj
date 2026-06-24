@@ -48,6 +48,10 @@ class GroupsRepository extends BaseRepository
         if ($domains) {
             $queryBuilder->where('g.domain in (:domains)');
             $queryBuilder->setParameter('domains', $domains);
+        } else {
+            // The admin is associated to no domains, so we make sure to return
+            // an empty list of groups.
+            $queryBuilder->where('true = false');
         }
 
         if ($searchKey !== '') {

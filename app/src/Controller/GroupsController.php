@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\GroupsType;
 use App\Service\GroupService;
 use App\Service\UserService;
+use App\Repository\DomainRepository;
 use App\Repository\GroupsRepository;
 use App\Repository\GroupsWblistRepository;
 use App\Repository\UserRepository;
@@ -29,8 +30,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/groups')]
 class GroupsController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $em, private TranslatorInterface $translator)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator,
+        private DomainRepository $domainsRepository,
+    ) {
     }
 
     private function checkAccess(Groups $group): void
@@ -51,8 +55,14 @@ class GroupsController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $domains = $this->domainsRepository->findAll();
+        } else {
+            $domains = $user->getDomains()->toArray();
+        }
+
         $groupsQuery = $groupsRepository->getSearchQuery(
-            domains: $user->getDomains()->toArray(),
+            domains: $domains,
             searchKey: $request->query->getString('search', '')
         );
 
