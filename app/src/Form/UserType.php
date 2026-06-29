@@ -143,7 +143,8 @@ class UserType extends AbstractType
             'allowedDomains' => [],
             'include_quota' => true,
             'adminForm' => false,
-            'domainHasIMAPConnector' => false
+            'domainHasIMAPConnector' => false,
+            'csrf_token_id' => 'user',
         ]);
     }
 }

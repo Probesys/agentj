@@ -5,6 +5,7 @@
     <file>public/index.php</file>
     <file>src</file>
     <file>migrations</file>
+    <file>tests</file>
 
     <exclude-pattern>config/reference\.php$</exclude-pattern>
 

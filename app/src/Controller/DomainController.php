@@ -114,11 +114,7 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
-            if ($domain->getSmtpPort()) {
-                $strTransport .= ":" . $domain->getSmtpPort();
-            }
-            $domain->setTransport($strTransport);
+            $domain->setCalculatedTransport();
             //Default messages
             //captcha page
             $messageConfig = $settingsRepository->findBy(['context' => 'default_domain_messages']);
@@ -218,11 +214,7 @@ class DomainController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
-            $strTransport = "smtp:[" . $domain->getSrvSmtp() . "]";
-            if ($domain->getSmtpPort()) {
-                $strTransport .= ":" . $domain->getSmtpPort();
-            }
-            $domain->setTransport($strTransport);
+            $domain->setCalculatedTransport();
 
             $policy = $form->get('policy')->getData();
             $userDomain = $this->em->getRepository(User::class)->findOneBy((['email' => '@' . $domain->getDomain()]));

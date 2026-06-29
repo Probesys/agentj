@@ -206,6 +206,18 @@ class Domain
         return $this;
     }
 
+    public function setCalculatedTransport(): self
+    {
+        $strTransport = "smtp:[" . $this->getSrvSmtp() . "]";
+        if ($this->getSmtpPort()) {
+            $strTransport .= ":" . $this->getSmtpPort();
+        }
+
+        $this->setTransport($strTransport);
+
+        return $this;
+    }
+
     public function getMessage(): ?string
     {
         return $this->message;
