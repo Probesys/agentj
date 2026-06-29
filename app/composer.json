@@ -57,6 +57,7 @@
         "willdurand/js-translation-bundle": "*"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.6",
         "doctrine/doctrine-fixtures-bundle": "^4",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",
@@ -81,11 +82,11 @@
         },
         "sort-packages": true,
         "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "rector/extension-installer": true,
             "rector/rector-installer": true,
             "symfony/flex": true,
-            "rector/extension-installer": true,
-            "symfony/runtime": true,
-            "phpstan/extension-installer": true
+            "symfony/runtime": true
         }
     },
     "autoload": {

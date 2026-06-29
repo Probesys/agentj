@@ -36,3 +36,12 @@ sed -i "s|\$SCHEDULER_AUTORELEASE_FREQUENCY|${SCHEDULER_AUTORELEASE_FREQUENCY:-1
 sed -i "s|\$FEATURE_FLAG_DISABLE_DASHBOARD|${FEATURE_FLAG_DISABLE_DASHBOARD:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT|${FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_HINT_INDEX|${FEATURE_FLAG_HINT_INDEX:-false}|g" $env_file
+
+if [ "$SF_APP_ENV" != 'prod' ]; then
+    env_file_test=/var/www/agentj/.env.test
+    cp /var/www/agentj/.env.test.example $env_file_test
+    sed -i "s|\$DB_NAME|${DB_NAME}_tests|g" $env_file_test
+    sed -i "s|\$DB_USER|$DB_USER|g" $env_file_test
+    sed -i "s|\$DB_PASSWORD|$DB_PASSWORD|g" $env_file_test
+    sed -i "s|\$DB_HOST|$DB_HOST|g" $env_file_test
+fi

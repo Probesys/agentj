@@ -6,6 +6,7 @@ __pycache__/
 .local/
 mailpit/
 .vscode/
+.idea/
 sa_learn/hams/*
 !sa_learn/hams/.keep
 sa_learn/spams/*
