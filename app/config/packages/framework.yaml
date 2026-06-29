@@ -27,6 +27,7 @@ when@test:
     framework:
         test: true
         session:
+            storage_factory_id: session.storage.factory.mock_file
             storage_id: session.storage.mock_file
 
 when@prod:
