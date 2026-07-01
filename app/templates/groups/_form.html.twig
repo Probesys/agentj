@@ -7,9 +7,8 @@
 		{{ form_row(form.policy) }}
 		{{ form_row(form.wbRule) }}
 		<div class="form-group">
-			{{ form_label(form.priority) }}
-			{{ form_widget(form.priority) }}
-			<small class="d-none form-text text-danger"></small>
+			{{ form_row(form.priority) }}
+			<small data-form-group-target="priorityAlert" class="col-sm-12 d-none form-text text-danger"></small>
 		</div>
 
 		{{ form_row(form.domain) }}
