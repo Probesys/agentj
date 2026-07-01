@@ -49,7 +49,9 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        // WBList rules are case-insensitive
+        $normalizedEmail = strtolower($senderEmail);
+        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($normalizedEmail);
 
         $recipient = $messageRecipient->getRid();
         $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
@@ -65,7 +67,7 @@ class MessageService
 
             $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
                 $user,
-                $message->getFromAddr()
+                strtolower($message->getFromAddr()), // Case-insensitive
             );
 
             $domain = $user->getDomain();

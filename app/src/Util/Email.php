@@ -62,15 +62,15 @@ class Email
      */
     public static function getAddressLookups(string $email): array
     {
-        if (!self::validate($email)) {
+        $normalizedEmail = strtolower($email);
+        if (!self::validate($normalizedEmail)) {
             return [];
         }
 
-        list($localUser, $domain) = explode('@', $email, limit: 2);
+        [$localUser, $domain] = explode('@', $normalizedEmail, limit: 2);
 
         $lookup = [];
-        $lookup[] = $email;
-
+        $lookup[] = $normalizedEmail;
         $lookup[] = '@' . $domain;
 
         $domainParts = explode('.', $domain);
