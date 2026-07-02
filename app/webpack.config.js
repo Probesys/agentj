@@ -72,7 +72,6 @@ Encore
         // uncomment if you use API Platform Admin (composer req api-admin)
         //.enableReactPreset()
         //.addEntry('admin', './assets/js/admin.js')
-        .addEntry('agentj', './public/js/agentj.js')
         ;
 
 module.exports = Encore.getWebpackConfig();

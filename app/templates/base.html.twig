@@ -16,7 +16,6 @@
 
       {{ encore_entry_link_tags('app') }}
       {{ encore_entry_script_tags('app') }}
-      {{ encore_entry_script_tags('agentj') }}
 
     {% block head_js %}
       <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.js') }}"></script>
@@ -29,7 +28,7 @@
       <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
       <script src="{{ path('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
       <script src="{{ asset('js/translations/config.js') }}"></script>
-      <script type="text/javascript" src="{{ asset('js/nav.js') }}"></script>
+
       <script type="text/javascript" src="{{ asset('lib/select2/select2.full.min.js') }}"></script>
       <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>

@@ -9,6 +9,8 @@
 
 import './styles/css/app.css';
 import Chart from 'chart.js/auto';
+import './agentj';
+import './nav';
 
 const $ = require('jquery');
 window.Chart = Chart;
