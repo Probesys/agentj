@@ -1,5 +1,8 @@
 FROM debian:trixie-slim
 
+RUN groupadd -g 997 amavis && \
+    useradd -u 997 -g amavis -d /var/lib/amavis -s /bin/sh -c "AMaViS system user" amavis
+
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
