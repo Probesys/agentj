@@ -1130,6 +1130,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fortawesome/fontawesome-free@npm:^5.15.4":
+  version: 5.15.4
+  resolution: "@fortawesome/fontawesome-free@npm:5.15.4"
+  checksum: 10c0/0a12f11b17b3073475df965d423ac485715e281d11ecde17250fab5dc0a177fb29ced59242f6c024bef59429c502ba8fe831ed9500e14713cc30138e70df8fbc
+  languageName: node
+  linkType: hard
+
 "@hotwired/stimulus-webpack-helpers@npm:^1.0.0, @hotwired/stimulus-webpack-helpers@npm:^1.0.1":
   version: 1.0.1
   resolution: "@hotwired/stimulus-webpack-helpers@npm:1.0.1"
@@ -3934,6 +3941,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.29.7"
     "@babel/preset-env": "npm:^7.29.7"
+    "@fortawesome/fontawesome-free": "npm:^5.15.4"
     "@hotwired/stimulus": "npm:^3.2.2"
     "@hotwired/turbo": "npm:^8.0.23"
     "@symfony/stimulus-bridge": "npm:^4.0.1"
