@@ -34,11 +34,6 @@
       <script type="text/javascript" src="{{ asset('lib/dropzone.js') }}"></script>
       <script type="text/javascript" src="{{ asset('js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
 
-      {# <script type="text/javascript" src="{{ asset('bundles/tetranzselect2entity/js/select2entity.js') }}"></script> #}
-      {#      <script type="text/javascript" src="{{ asset('js/node_modules/push.js/bin/push.min.js') }}"></script>#}
-
-{#      <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>#}
-{#      <script type="text/javascript" src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>#}
     {% endblock %}
 
 <script type="text/javascript" src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
@@ -70,8 +65,6 @@
 
           {% endblock %}
         </div>
-        {#          </main>#}
-
       </main>
       {% block footer %}
         {% include '_footer.html.twig' %}
@@ -80,10 +73,6 @@
           </a>
       {% endblock %}
     </div>
-
-    {#  </div>
-    </div>#}
-
 
     {% block bottom_js %}
 

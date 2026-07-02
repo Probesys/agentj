@@ -1,20 +1,12 @@
 <!doctype html>
 <html  lang="{{ app.request.locale }}">
   <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="turbo-prefetch" content="false">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     {% block head_css %}
-      <!-- Bootstrap Core CSS -->
-{#      <link href="{{ asset('css/bootstrap/bootstrap.css')}}" rel="stylesheet">      #}
-
-{#      <link rel="stylesheet" href="{{ asset('css/jquery-ui.css') }}">#}
       <link href="{{ asset('lib/select2/select2.min.css')}}" rel="stylesheet" type="text/css">
-{#      <link href="{{ asset('css/jquery.mCustomScrollbar.min.css')}}" rel="stylesheet" type="text/css">#}
-      {#      <link rel="stylesheet" href="{{ asset('css/sb-admin.css') }}">#}
-{#      <link rel="stylesheet" href="{{ asset('css/styles.css') }}">#}
       <link rel="stylesheet" href="{{ asset('css/nav.css') }}">
       <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
     {% endblock %}
@@ -48,9 +40,6 @@
 
 
     {% block bottom_js %}
-
-{#      {{ encore_entry_script_tags('agentj') }}#}
-
     {% endblock %}
 
     </div>
