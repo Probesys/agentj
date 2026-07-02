@@ -2,6 +2,9 @@ FROM debian:trixie-slim
 
 SHELL [ "/bin/sh", "-e", "-c" ]
 
+RUN groupadd -g 102 postfix && \
+    useradd -u 100 -g postfix -d /var/spool/postfix -s /usr/sbin/nologin -c "Postfix MTA" postfix
+
 RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,id=debconf,target=/var/cache/debconf,sharing=locked \
