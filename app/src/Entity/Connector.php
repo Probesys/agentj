@@ -48,18 +48,20 @@ class Connector
     private Collection $users;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
-    #[ORM\OneToMany(targetEntity: Groups::class, mappedBy: 'originConnector')]
+    #[ORM\OneToMany(targetEntity: Group::class, mappedBy: 'originConnector')]
+    #[ORM\JoinTable(name: 'connector_groups')]
+    #[ORM\InverseJoinColumn(name: 'groups_id', nullable: true)]
     private Collection $groups;
 
     #[ORM\Column(nullable: true)]
     private ?bool $synchronizeGroup = null;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
-    #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'connectors')]
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'connectors')]
     private Collection $targetGroups;
 
     #[ORM\Column(nullable: true)]
@@ -160,14 +162,14 @@ class Connector
     }
 
     /**
-     * @return Collection<int, Groups>
+     * @return Collection<int, Group>
      */
     public function getGroups(): Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
+    public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
@@ -177,7 +179,7 @@ class Connector
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
+    public function removeGroup(Group $group): self
     {
         if ($this->groups->removeElement($group)) {
             // set the owning side to null (unless already changed)
@@ -202,14 +204,14 @@ class Connector
     }
 
     /**
-     * @return Collection<int, Groups>
+     * @return Collection<int, Group>
      */
     public function getTargetGroups(): Collection
     {
         return $this->targetGroups;
     }
 
-    public function addTargetGroup(Groups $targetGroup): static
+    public function addTargetGroup(Group $targetGroup): static
     {
         if (!$this->targetGroups->contains($targetGroup)) {
             $this->targetGroups->add($targetGroup);
@@ -218,7 +220,7 @@ class Connector
         return $this;
     }
 
-    public function removeTargetGroup(Groups $targetGroup): static
+    public function removeTargetGroup(Group $targetGroup): static
     {
         $this->targetGroups->removeElement($targetGroup);
 

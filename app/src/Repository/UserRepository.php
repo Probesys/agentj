@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\Maddr;
 use App\Entity\User;
 use Doctrine\DBAL;
@@ -50,7 +50,7 @@ class UserRepository extends BaseRepository
     /**
      * @return Query<User>
      */
-    public function getSearchByGroupQuery(Groups $group, string $searchKey = ''): Query
+    public function getSearchByGroupQuery(Group $group, string $searchKey = ''): Query
     {
         $queryBuilder = $this->createQueryBuilder('u')
                 ->innerJoin('u.groups', 'g')

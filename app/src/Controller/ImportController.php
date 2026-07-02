@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Controller\Traits\ControllerCommonTrait;
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\User;
 use App\Form\ImportType;
 use App\Service\GroupService;
@@ -124,12 +124,12 @@ class ImportController extends AbstractController
                             if (isset($data[3]) && $data[3] != '') {
                                 $slugGroup = $this->slugify($data[3]);
                                 if (!isset($groups[$domainEmail][$slugGroup])) {
-                                    $group = $em->getRepository(Groups::class)->findOneBy([
+                                    $group = $em->getRepository(Group::class)->findOneBy([
                                         'domain' => $domains[$domainEmail]['entity'],
                                         'name' => trim($data[3]),
                                     ]);
                                     if (!$group) {
-                                        $group = new Groups();
+                                        $group = new Group();
                                         $group->setName($data[3]);
                                         $group->setDomain($domains[$domainEmail]['entity']);
                                         $group->setWbRule('none');

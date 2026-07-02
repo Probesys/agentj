@@ -2,20 +2,19 @@
 
 namespace App\Form;
 
-use App\Entity\Groups;
-use App\Entity\User;
 use App\Entity\Domain;
-use App\Form\UserAutocompleteField;
-use App\Repository\GroupsRepository;
+use App\Entity\Group;
+use App\Entity\User;
+use App\Repository\GroupRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Translation\TranslatableMessage;
 
 class UserType extends AbstractType
@@ -66,14 +65,14 @@ class UserType extends AbstractType
             ])
             ->add('groups', EntityType::class, [
                 'label' => new TranslatableMessage('Entities.User.fields.groups'),
-                'class' => Groups::class,
+                'class' => Group::class,
                 'multiple' => true,           // This allows multiple checkboxes to be checked
                 'expanded' => true,           // This makes it render as checkboxes
                 'required' => false,
                 'choice_label' => function ($group, $key, $index) {
                     return $group->getName() . ' (' . $group->getDomain() . ')';
                 },
-                'query_builder' => function (GroupsRepository $rep) use ($allowedDomains) {
+                'query_builder' => function (GroupRepository $rep) use ($allowedDomains) {
                     $retRepo = $rep->createQueryBuilder('g')
                         ->leftJoin('g.domain', 'd');
                     if ($allowedDomains) {

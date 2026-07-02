@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\Domain;
 use App\Entity\Office365Connector;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\User;
 use App\Repository\ConnectorRepository;
 use App\Service\MailaddrService;
@@ -268,13 +268,13 @@ class Office365ImportCommand extends Command
         $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
         $groups = $result->getValue();
 
-        $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($domain);
+        $priorityMax = $this->em->getRepository(Group::class)->getMaxPriorityforDomain($domain);
 
         foreach ($groups as $m365group) {
-            $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
+            $localGroup = $this->em->getRepository(Group::class)->findOneByUid($m365group->getId());
 
             if (!$localGroup) {
-                $localGroup = new Groups();
+                $localGroup = new Group();
                 $localGroup->setPriority($priorityMax + 1);
                 $localGroup->setName($m365group->getDisplayName());
                 $localGroup->setActive(false);
@@ -349,7 +349,7 @@ class Office365ImportCommand extends Command
         }
     }
 
-    private function addMembersToGroup(Groups $group): void
+    private function addMembersToGroup(Group $group): void
     {
         $result = $this->graphServiceClient->groups()->byGroupId($group->getUid())->members()->get()->wait();
         $members = $result->getValue();

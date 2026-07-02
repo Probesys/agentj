@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Wblist;
 use App\Form\UserPreferencesType;
-use App\Repository\GroupsRepository;
+use App\Repository\GroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +20,7 @@ class AccountController extends AbstractController
     }
 
     #[Route(path: '/account', name: 'account')]
-    public function index(Request $request, GroupsRepository $groupsRepository): Response
+    public function index(Request $request, GroupRepository $groupRepository): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -39,7 +39,7 @@ class AccountController extends AbstractController
 
         $domainWblist = $this->em->getRepository(Wblist::class)->getDefaultDomainWBList($user->getDomain());
 
-        $defaultGroup = $groupsRepository->getMainUserGroup($user);
+        $defaultGroup = $groupRepository->getMainUserGroup($user);
 
         return $this->render('account/index.html.twig', [
             'form' => $form,

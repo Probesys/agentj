@@ -22,10 +22,10 @@ class Rights
     private string $systemName;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
     #[ORM\JoinTable(name: 'rights_groups')]
-    #[ORM\ManyToMany(targetEntity: 'App\Entity\Groups', inversedBy: 'rights')]
+    #[ORM\ManyToMany(targetEntity: 'App\Entity\Group', inversedBy: 'rights')]
     private Collection $groups;
 
     public function __construct()
@@ -69,14 +69,14 @@ class Rights
     }
 
     /**
-     * @return Collection<int, Groups>
+     * @return Collection<int, Group>
      */
     public function getGroups(): Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
+    public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
@@ -85,7 +85,7 @@ class Rights
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
+    public function removeGroup(Group $group): self
     {
         if ($this->groups->contains($group)) {
             $this->groups->removeElement($group);

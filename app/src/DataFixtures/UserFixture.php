@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\Domain;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -50,7 +50,7 @@ class UserFixture extends Fixture
         $user->setRoles('["ROLE_USER"]');
         $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
         $user->setDomain($domain);
-        $group = $this->em->getRepository(Groups::class)->findOneBy(['name' => 'group1']);
+        $group = $this->em->getRepository(Group::class)->findOneBy(['name' => 'group1']);
         $user->addGroup($group);
         $user->setPolicy($user->getDomain()->getPolicy());
 
@@ -64,7 +64,7 @@ class UserFixture extends Fixture
         $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
         $user->setDomain($domain);
 
-        $group = $this->em->getRepository(Groups::class)->findOneBy(['name' => 'group1']);
+        $group = $this->em->getRepository(Group::class)->findOneBy(['name' => 'group1']);
         $user->addGroup($group);
         $user->setPolicy($user->getDomain()->getPolicy());
         $user->setQuota([["quota_emails" => 1, "quota_seconds" => 5]]);
@@ -78,7 +78,7 @@ class UserFixture extends Fixture
         $user->setRoles('["ROLE_USER"]');
         $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
         $user->setDomain($domain);
-        $group = $this->em->getRepository(Groups::class)->findOneBy(['name' => 'group1']);
+        $group = $this->em->getRepository(Group::class)->findOneBy(['name' => 'group1']);
         $user->addGroup($group);
         $user->setPolicy($user->getDomain()->getPolicy());
         $user->setQuota([["quota_emails" => 10, "quota_seconds" => 5]]);

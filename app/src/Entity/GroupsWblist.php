@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\GroupsWblistRepository;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * GroupsWblist
@@ -14,10 +14,10 @@ class GroupsWblist
 {
     use WbRuleTrait;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups', inversedBy: 'groupsWbLists')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Group', inversedBy: 'groupsWbLists')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
-    private Groups $groups;
+    private Group $group;
 
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr', fetch: 'EAGER')]
@@ -44,14 +44,14 @@ class GroupsWblist
         return $this;
     }
 
-    public function getGroups(): ?Groups
+    public function getGroup(): ?Group
     {
-        return $this->groups;
+        return $this->group;
     }
 
-    public function setGroups(?Groups $groups): self
+    public function setGroup(?Group $group): self
     {
-        $this->groups = $groups;
+        $this->group = $group;
 
         return $this;
     }

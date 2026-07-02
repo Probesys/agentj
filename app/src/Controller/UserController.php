@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Form\UserType;
@@ -661,7 +661,7 @@ class UserController extends AbstractController
     private function computeUserPolicy(User $user): Policy
     {
         $policy = null;
-        $groupsRepository = $this->em->getRepository(Groups::class);
+        $groupsRepository = $this->em->getRepository(Group::class);
         if ($user->getGroups() && count($user->getGroups()) > 0) {
             $defaultGroup = array_reduce($user->getGroups()->toArray(), function ($a, $b) {
                 return $a && $a->getPriority() > $b->getPriority() ? $a : $b;

@@ -49,10 +49,10 @@ parameters:
 			path: src/Form/DomainType.php
 
 		-
-			message: '#^Class App\\Form\\GroupsType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			message: '#^Class App\\Form\\GroupType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/Form/GroupsType.php
+			path: src/Form/GroupType.php
 
 		-
 			message: '#^Class App\\Form\\GroupsWblistType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'

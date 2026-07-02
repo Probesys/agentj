@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\GroupsWblist;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,7 +22,7 @@ class GroupsWblistRepository extends BaseRepository
      *
      * @return array<int, int>
      */
-    public function getwbListforGroup(Groups $group): array
+    public function getwbListforGroup(Group $group): array
     {
         $dql = $this->createQueryBuilder('gwl')
                 ->select('madr.id, gwl.wb')
@@ -37,7 +37,7 @@ class GroupsWblistRepository extends BaseRepository
     /**
      * @return Query<GroupsWblist>
      */
-    public function getSearchQuery(Groups $group, string $searchKey = ''): Query
+    public function getSearchQuery(Group $group, string $searchKey = ''): Query
     {
         $queryBuilder = $this->createQueryBuilder('gwl')
                 ->join('gwl.mailaddr', 'madr')

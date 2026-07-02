@@ -2,9 +2,9 @@
 
 namespace App\Form;
 
+use App\Entity\Group;
 use App\Entity\LdapConnector;
-use App\Entity\Groups;
-use App\Repository\GroupsRepository;
+use App\Repository\GroupRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -64,11 +64,11 @@ class LdapConnectorType extends ConnectorType
             ->add('targetGroups', EntityType::class, [
                 'attr' => ['class' => 'select2'],
                 'required' => false,
-                'class' => Groups::class,
+                'class' => Group::class,
                 'multiple' => true,
                 'expanded' => false,
-                'query_builder' => function (GroupsRepository $groupsRepository) use ($domain) {
-                    return $groupsRepository->createQueryBuilder('g')
+                'query_builder' => function (GroupRepository $groupRepository) use ($domain) {
+                    return $groupRepository->createQueryBuilder('g')
                         ->where('g.domain = :domain')
                         ->setParameter('domain', $domain);
                 },

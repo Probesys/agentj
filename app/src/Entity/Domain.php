@@ -76,9 +76,9 @@ class Domain
     private float $reportSpamLevel = 0;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
-    #[ORM\OneToMany(targetEntity: 'App\Entity\Groups', mappedBy: 'domain', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: 'App\Entity\Group', mappedBy: 'domain', orphanRemoval: true)]
     private Collection $groups;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -332,14 +332,14 @@ class Domain
     }
 
     /**
-     * @return Collection<int, Groups>
+     * @return Collection<int, Group>
      */
     public function getGroups(): Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
+    public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
@@ -349,7 +349,7 @@ class Domain
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
+    public function removeGroup(Group $group): self
     {
         if ($this->groups->contains($group)) {
             $this->groups->removeElement($group);
