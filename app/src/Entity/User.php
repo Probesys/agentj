@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Policy;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -74,9 +73,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Domain $domain;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
-    #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_groups')]
+    #[ORM\InverseJoinColumn(name: 'groups_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     #[OrderBy(['priority' => 'DESC'])]
     private Collection $groups;
@@ -543,14 +544,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return ?Collection<int, Groups>
+     * @return ?Collection<int, Group>
      */
     public function getGroups(): ?Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
+    public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
@@ -559,7 +560,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
+    public function removeGroup(Group $group): self
     {
         $this->groups->removeElement($group);
 

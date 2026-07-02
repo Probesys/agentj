@@ -52,7 +52,7 @@ class WblistRepository extends BaseRepository
                 )
                 ->innerJoin('wb.rid', 'u')
                 ->innerJoin('wb.sid', 's')
-                ->leftJoin('wb.groups', 'g');
+                ->leftJoin('wb.group', 'g');
 
         if (in_array('ROLE_USER', $user->getRoles())) {
             $dql->andWhere('wb.rid = :user');

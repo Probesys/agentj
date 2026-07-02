@@ -2,18 +2,15 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Groups
- */
 #[ORM\Table(name: 'groups')]
-#[ORM\Entity(repositoryClass: 'App\Repository\GroupsRepository')]
-class Groups
+#[ORM\Entity(repositoryClass: 'App\Repository\GroupRepository')]
+class Group
 {
     use WbRuleTrait;
 
@@ -57,7 +54,7 @@ class Groups
     /**
      * @var Collection<int, GroupsWblist>
      */
-    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
+    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'group')]
     private Collection $groupsWbLists;
 
     #[Gedmo\Slug(fields: ['name'])]
@@ -280,7 +277,7 @@ class Groups
     {
         if (!$this->groupsWbLists->contains($groupsWbList)) {
             $this->groupsWbLists[] = $groupsWbList;
-            $groupsWbList->setGroups($this);
+            $groupsWbList->setGroup($this);
         }
 
         return $this;
@@ -290,8 +287,8 @@ class Groups
     {
         if ($this->groupsWbLists->removeElement($groupsWbList)) {
             // set the owning side to null (unless already changed)
-            if ($groupsWbList->getGroups() === $this) {
-                $groupsWbList->setGroups(null);
+            if ($groupsWbList->getGroup() === $this) {
+                $groupsWbList->setGroup(null);
             }
         }
 

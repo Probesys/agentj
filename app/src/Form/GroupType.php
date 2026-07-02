@@ -3,19 +3,19 @@
 namespace App\Form;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Repository\DomainRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Translation\TranslatableMessage;
 
-class GroupsType extends AbstractType
+class GroupType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -87,15 +87,13 @@ class GroupsType extends AbstractType
                 'by_reference' => false,
                 'label' => false,
             ])
-
-
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Groups::class,
+            'data_class' => Group::class,
             'user' => null,
         ]);
     }

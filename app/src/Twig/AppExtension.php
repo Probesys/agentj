@@ -3,7 +3,7 @@
 namespace App\Twig;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
@@ -79,7 +79,7 @@ class AppExtension extends AbstractExtension
             return [];
         }
 
-        $groupsLabel = array_map(function (Groups $group) {
+        $groupsLabel = array_map(function (Group $group) {
             return $group->getName();
         }, $groups);
 

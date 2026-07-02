@@ -6,7 +6,7 @@ use Symfony\Component\Translation\TranslatableMessage;
 
 /**
  * The WbRuleTrait helps to manipulate the wblist.wb field (and other similar
- * fields like Groups.wb and GroupsWblist.wb).
+ * fields like Group.wb and GroupsWblist.wb).
  *
  * It abstracts the "wb" value meaning behind the "rule" concept. A rule tells
  * what must be done and can be converted to a wb value. In the other way, a wb

@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\GroupsWblist;
 use App\Entity\Mailaddr;
-use App\Repository\GroupsRepository;
+use App\Repository\GroupRepository;
 use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class UpdateGroupsWblistCommand extends Command
 {
     public function __construct(
-        private GroupsRepository $groupsRepository,
+        private GroupRepository $groupRepository,
         private EntityManagerInterface $em,
         private GroupService $groupService
     ) {
@@ -36,7 +36,7 @@ class UpdateGroupsWblistCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $this->setGroupPriority();
 
-        $activeGroups = $this->groupsRepository->findBy([
+        $activeGroups = $this->groupRepository->findBy([
             'active' => true
         ]);
 
@@ -44,13 +44,13 @@ class UpdateGroupsWblistCommand extends Command
         foreach ($activeGroups as $group) {
             $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
                 'mailaddr' => $rootMailaddr,
-                'groups' => $group,
+                'group' => $group,
             ]));
             if (!$groupsWblist) {
                 $groupsWblist = new GroupsWblist();
                 $groupsWblist->setMailaddr($rootMailaddr);
             }
-            $groupsWblist->setGroups($group);
+            $groupsWblist->setGroup($group);
             $groupsWblist->setWb($group->getWb());
             $this->em->persist($groupsWblist);
         }
@@ -66,9 +66,9 @@ class UpdateGroupsWblistCommand extends Command
      */
     private function setGroupPriority(): void
     {
-        $listGroupWithNoPriority = $this->groupsRepository->findBy(['priority' => null]);
+        $listGroupWithNoPriority = $this->groupRepository->findBy(['priority' => null]);
         foreach ($listGroupWithNoPriority as $group) {
-            $maxPriority = $this->groupsRepository->getMaxPriorityforDomain($group->getDomain());
+            $maxPriority = $this->groupRepository->getMaxPriorityforDomain($group->getDomain());
             $group->setPriority($maxPriority + 1);
             $this->em->persist($group);
             $this->em->flush();

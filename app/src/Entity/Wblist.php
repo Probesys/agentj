@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\User;
-use App\Entity\Mailaddr;
 use App\Repository\WblistRepository;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\ORM\Mapping as ORM;
@@ -48,9 +46,9 @@ class Wblist
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
     private ?int $type;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Groups')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Group')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
-    private ?Groups $groups;
+    private ?Group $group;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[ORM\Id]
@@ -118,14 +116,14 @@ class Wblist
         return $this;
     }
 
-    public function getGroups(): ?Groups
+    public function getGroup(): ?Group
     {
-        return $this->groups;
+        return $this->group;
     }
 
-    public function setGroups(?Groups $groups): self
+    public function setGroup(?Group $group): self
     {
-        $this->groups = $groups;
+        $this->group = $group;
 
         return $this;
     }

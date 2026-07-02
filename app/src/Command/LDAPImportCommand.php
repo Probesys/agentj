@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Service\GroupService;
@@ -11,7 +11,6 @@ use App\Service\LdapService;
 use App\Service\MailaddrService;
 use App\Service\UserService;
 use App\Util\Email;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -335,7 +334,7 @@ class LDAPImportCommand extends Command
             $ldapQuery = $this->connector->getLdapGroupFilter();
             $query = $this->ldap->query($this->connector->getLdapBaseDN(), $ldapQuery);
 
-            $priorityMax = $this->em->getRepository(Groups::class)
+            $priorityMax = $this->em->getRepository(Group::class)
                                     ->getMaxPriorityforDomain($this->connector->getDomain());
 
             $results = $query->execute();
@@ -346,9 +345,9 @@ class LDAPImportCommand extends Command
             foreach ($results as $ldapGroup) {
                 /* @var $ldapGroup Entry */
                 $isNew = false;
-                $group = $this->em->getRepository(Groups::class)->findOneByLdapDN($ldapGroup->getDN());
+                $group = $this->em->getRepository(Group::class)->findOneByLdapDN($ldapGroup->getDN());
                 if (!$group) {
-                    $group = new Groups();
+                    $group = new Group();
                     $group->setLdapDN($ldapGroup->getDn());
                     $group->setPolicy($this->connector->getDomain()->getPolicy());
                     $group->setActive(false);
@@ -383,7 +382,7 @@ class LDAPImportCommand extends Command
         return null;
     }
 
-    private function addMembersToLdapGroup(Entry $ldapGroup, Groups $group): void
+    private function addMembersToLdapGroup(Entry $ldapGroup, Group $group): void
     {
         $members = [];
         $groupMemberfield = $this->connector->getLdapGroupMemberField();

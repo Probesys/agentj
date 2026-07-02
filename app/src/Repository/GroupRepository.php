@@ -3,22 +3,22 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\User;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends BaseRepository<Groups>
+ * @extends BaseRepository<Group>
  */
-class GroupsRepository extends BaseRepository
+class GroupRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Groups::class);
+        parent::__construct($registry, Group::class);
     }
 
-    public function findOneByUid(string $uid): ?Groups
+    public function findOneByUid(string $uid): ?Group
     {
         return $this->createQueryBuilder('g')
                         ->where('g.uid = :uid')
@@ -27,7 +27,7 @@ class GroupsRepository extends BaseRepository
                         ->getOneOrNullResult();
     }
 
-    public function findOneByLdapDN(string $dn): ?Groups
+    public function findOneByLdapDN(string $dn): ?Group
     {
         return $this->createQueryBuilder('g')
                         ->where('g.ldapDN = :ldapDN')
@@ -38,7 +38,7 @@ class GroupsRepository extends BaseRepository
 
     /**
      * @param Domain[] $domains
-     * @return Query<Groups>
+     * @return Query<Group>
      */
     public function getSearchQuery(array $domains, string $searchKey = ''): Query
     {
@@ -65,7 +65,7 @@ class GroupsRepository extends BaseRepository
     /**
      * Return the main (hightest priority) group of the user $user
      */
-    public function getMainUserGroup(User $user): ?Groups
+    public function getMainUserGroup(User $user): ?Group
     {
         $dql = $this->createQueryBuilder('g')
                 ->innerJoin('g.users', 'u')

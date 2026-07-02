@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Domain;
 use App\Entity\User;
-use App\Repository\GroupsRepository;
+use App\Repository\GroupRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -13,7 +13,7 @@ class UserService
     public function __construct(
         private EntityManagerInterface $em,
         private UserRepository $userRepository,
-        private GroupsRepository $groupsRepository,
+        private GroupRepository $groupRepository,
     ) {
     }
 
@@ -24,7 +24,7 @@ class UserService
      */
     public function updateUserAndAliasPolicy(User $user): void
     {
-        $defaultGroup = $this->groupsRepository->getMainUserGroup($user);
+        $defaultGroup = $this->groupRepository->getMainUserGroup($user);
 
         $policy = $defaultGroup ? $defaultGroup->getPolicy() : $user->getDomain()->getPolicy();
         $user->setPolicy($policy);
@@ -48,7 +48,7 @@ class UserService
         ]);
         foreach ($users as $user) {
             /* @var $user User */
-            $group = $this->groupsRepository->getMainUserGroup($user);
+            $group = $this->groupRepository->getMainUserGroup($user);
             if (!$group) {
                 $user->setPolicy($domain->getPolicy());
                 $this->em->persist($user);

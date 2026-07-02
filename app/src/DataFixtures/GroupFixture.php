@@ -3,14 +3,13 @@
 namespace App\DataFixtures;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
-use App\Entity\User;
+use App\Entity\Group;
 use App\Entity\Policy;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class GroupsFixture extends Fixture
+class GroupFixture extends Fixture
 {
     private EntityManagerInterface $em;
 
@@ -21,7 +20,7 @@ class GroupsFixture extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $group = new Groups();
+        $group = new Group();
         $group->setName('group1');
         $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
         $group->setDomain($domain);

@@ -11,8 +11,8 @@
 	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
 		{% block content_button_actions %}
-			<a href="#" data-url-modal-content="{{ path('groups_edit',{'id':group.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
-			<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('groups_wblist_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
+			<a href="#" data-url-modal-content="{{ path('group_edit',{'id':group.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
+			<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('group_wblist_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
 				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.addRule'|trans() }}
 			</a>
 
@@ -54,7 +54,7 @@
 											<a
                                                 href="#"
                                                 data-modal-method-type="GET"
-                                                data-url-modal-content="{{ path('groups_wblist_edit',{'sid':groups_wblist.mailaddr.id,'groupId':groups_wblist.groups.id,}) }}"
+                                                data-url-modal-content="{{ path('group_wblist_edit',{'sid':groups_wblist.mailaddr.id,'groupId':groups_wblist.group.id,}) }}"
                                                 class='btn-open-modal btn btn-sm btn-success '
                                                 title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
                                             >
@@ -65,13 +65,13 @@
 										<li class="list-inline-item">
 											<form
                                                 method="post"
-                                                action="{{ path('groups_wblist_delete',{'groupId':groups_wblist.groups.id,'sid':groups_wblist.mailaddr.id}) }}"
+                                                action="{{ path('group_wblist_delete',{'groupId':groups_wblist.group.id,'sid':groups_wblist.mailaddr.id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                                 <input
                                                     type="hidden"
                                                     name="_token"
-                                                    value="{{ csrf_token('delete' ~ groups_wblist.groups.id ~ '_' ~ groups_wblist.mailaddr.id) }}"
+                                                    value="{{ csrf_token('delete' ~ groups_wblist.group.id ~ '_' ~ groups_wblist.mailaddr.id) }}"
                                                 >
 												<button
                                                     type="submit"
@@ -97,7 +97,7 @@
 	{% include 'alertsPopup.html.twig' %}
 
 	<div class="d-flex justify-content-center pb-3">
-		<a class="btn btn-outline-secondary" href="{{ path('groups_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
+		<a class="btn btn-outline-secondary" href="{{ path('group_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
 
 	</div>
 

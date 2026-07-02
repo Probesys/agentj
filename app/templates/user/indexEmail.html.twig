@@ -54,7 +54,7 @@
                             {{ knp_pagination_sortable(users, 'Entities.User.fields.policy'|trans, 'p.policyName') }}
                         </th>
                         <th>
-                            {{ 'Entities.User.fields.groups'|trans }}
+                            {{ 'Entities.User.fields.group'|trans }}
                         </th>
                         <th>
                             {{ 'Generics.labels.actions' | trans }}
@@ -85,7 +85,7 @@
                             <td data-title="{{ 'Entities.User.fields.policy'|trans }}">
                                 {{ user.policy.policyName }}
                             </td>
-                            <td data-title="{{ 'Entities.User.fields.groups'|trans }}">
+                            <td data-title="{{ 'Entities.User.fields.group'|trans }}">
                                 {% for group in groups %}
                                     <span class="badge badge-secondary">
                                         {{ group }}
