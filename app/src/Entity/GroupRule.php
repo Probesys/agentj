@@ -2,19 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\GroupsWblistRepository;
+use App\Repository\GroupRuleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * GroupsWblist
+ * GroupRule
  */
 #[ORM\Table(name: 'groups_wblist')]
-#[ORM\Entity(repositoryClass: GroupsWblistRepository::class)]
-class GroupsWblist
+#[ORM\Entity(repositoryClass: GroupRuleRepository::class)]
+class GroupRule
 {
     use WbRuleTrait;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Group', inversedBy: 'groupsWbLists')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Group', inversedBy: 'groupRules')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
     private Group $group;

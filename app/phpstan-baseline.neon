@@ -55,10 +55,10 @@ parameters:
 			path: src/Form/GroupType.php
 
 		-
-			message: '#^Class App\\Form\\GroupsWblistType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
+			message: '#^Class App\\Form\\GroupRuleType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/Form/GroupsWblistType.php
+			path: src/Form/GroupRuleType.php
 
 		-
 			message: '#^Class App\\Form\\HumanAuthenticationType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'

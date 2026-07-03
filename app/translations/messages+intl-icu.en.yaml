@@ -98,7 +98,7 @@ Entities.Group.fields.domain: 'Associated domain'
 Entities.Group.fields.name: 'Group name'
 Entities.Group.fields.overrideUser: 'Override user choices'
 Entities.Group.fields.policy: Policy
-Entities.Group.labels.grouprules: 'Group rules'
+Entities.Group.labels.groupRules: 'Group rules'
 Entities.Group.labels.rules: Rules
 Entities.Group.labels.usersGroup: 'Users of the group'
 Entities.ImapConnector.actions.add: 'Add IMAP connector'

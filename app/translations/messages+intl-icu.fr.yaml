@@ -98,7 +98,7 @@ Entities.Group.fields.domain: 'Domaine associé'
 Entities.Group.fields.name: 'Nom du groupe'
 Entities.Group.fields.overrideUser: 'Supplante les choix utilisateurs'
 Entities.Group.fields.policy: Stratégie
-Entities.Group.labels.grouprules: 'Règles du groupe'
+Entities.Group.labels.groupRules: 'Règles du groupe'
 Entities.Group.labels.rules: Règles
 Entities.Group.labels.usersGroup: 'Utilisateurs du groupe'
 Entities.ImapConnector.actions.add: 'Ajouter un connecteur IMAP'

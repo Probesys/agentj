@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\GroupsWblist;
+use App\Entity\GroupRule;
 use App\Entity\Mailaddr;
 use App\Repository\GroupRepository;
 use App\Service\GroupService;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'agentj:update-groups-wblist',
     description: 'setPriority to groups that does not have and generate rules. Use when upgrade from  1.6.1 and before',
 )]
-class UpdateGroupsWblistCommand extends Command
+class UpdateGroupRuleCommand extends Command
 {
     public function __construct(
         private GroupRepository $groupRepository,
@@ -42,17 +42,17 @@ class UpdateGroupsWblistCommand extends Command
 
         $rootMailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
         foreach ($activeGroups as $group) {
-            $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+            $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy(([
                 'mailaddr' => $rootMailaddr,
                 'group' => $group,
             ]));
-            if (!$groupsWblist) {
-                $groupsWblist = new GroupsWblist();
-                $groupsWblist->setMailaddr($rootMailaddr);
+            if (!$groupRule) {
+                $groupRule = new GroupRule();
+                $groupRule->setMailaddr($rootMailaddr);
             }
-            $groupsWblist->setGroup($group);
-            $groupsWblist->setWb($group->getWb());
-            $this->em->persist($groupsWblist);
+            $groupRule->setGroup($group);
+            $groupRule->setWb($group->getWb());
+            $this->em->persist($groupRule);
         }
         $this->em->flush();
         $this->groupService->updateWblist();

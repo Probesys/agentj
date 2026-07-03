@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Group;
-use App\Entity\GroupsWblist;
+use App\Entity\GroupRule;
 use App\Entity\Mailaddr;
-use App\Form\GroupsWblistType;
-use App\Repository\GroupsWblistRepository;
+use App\Form\GroupRuleType;
+use App\Repository\GroupRuleRepository;
 use App\Service\GroupService;
 use App\Service\MailaddrService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,7 +22,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route(path: '/group')]
-class GroupsWblistController extends AbstractController
+class GroupRuleController extends AbstractController
 {
     private EntityManagerInterface $em;
     private TranslatorInterface $translator;
@@ -42,10 +42,10 @@ class GroupsWblistController extends AbstractController
         }
     }
 
-    #[Route(path: '/{groupId}/wblist', name: 'group_wblist_index', methods: 'GET')]
+    #[Route(path: '/{groupId}/rule', name: 'group_rule_index', methods: 'GET')]
     public function index(
         int $groupId,
-        GroupsWblistRepository $groupsWblistRepository,
+        GroupRuleRepository $groupRuleRepository,
         Request $request,
         PaginatorInterface $paginator
     ): Response {
@@ -54,7 +54,7 @@ class GroupsWblistController extends AbstractController
         $this->checkAccess($group);
 
         $searchKey = $request->query->getString('search', '');
-        $groupsWblistSearchQuery = $groupsWblistRepository->getSearchQuery(
+        $groupRulesSearchQuery = $groupRuleRepository->getSearchQuery(
             group: $group,
             searchKey: $searchKey
         );
@@ -62,8 +62,8 @@ class GroupsWblistController extends AbstractController
         $perPage = (int)$this->getParameter('app.per_page_global');
         $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
 
-        $groupsWblists = $paginator->paginate(
-            $groupsWblistSearchQuery,
+        $groupRules = $paginator->paginate(
+            $groupRulesSearchQuery,
             $request->query->getInt('page', 1),
             $perPage,
             [
@@ -72,16 +72,16 @@ class GroupsWblistController extends AbstractController
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
                 'distinct' => false,
-            ]
+            ],
         );
 
-        return $this->render('groups_wblist/index.html.twig', [
-            'groups_wblists' => $groupsWblists,
+        return $this->render('group_rule/index.html.twig', [
+            'group_rules' => $groupRules,
             'group' => $group,
         ]);
     }
 
-    #[Route(path: '/{groupId}/wblist/new', name: 'group_wblist_new', methods: 'GET|POST')]
+    #[Route(path: '/{groupId}/rule/new', name: 'group_rule_new', methods: 'GET|POST')]
     public function new(
         int $groupId,
         Request $request,
@@ -93,10 +93,10 @@ class GroupsWblistController extends AbstractController
             throw $this->createNotFoundException('The group does not exist');
         }
 
-        $groupsWblist = new GroupsWblist();
+        $groupRule = new GroupRule();
 
-        $form = $this->createForm(GroupsWblistType::class, null, [
-            'action' => $this->generateUrl('group_wblist_new', ['groupId' => $group->getId()]),
+        $form = $this->createForm(GroupRuleType::class, null, [
+            'action' => $this->generateUrl('group_rule_new', ['groupId' => $group->getId()]),
         ]);
 
         $form->handleRequest($request);
@@ -112,38 +112,38 @@ class GroupsWblistController extends AbstractController
                 $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
                 $em->persist($mailaddr);
             } else {
-                $groupsWblistexist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+                $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
                     'mailaddr' => $mailaddr,
                     'group' => $group,
                 ]));
-                if ($groupsWblistexist) {
+                if ($groupRuleExists) {
                     $this->addFlash('warning', $this->translator->trans('Message.Flash.ruleExists'));
-                    return $this->redirectToRoute('group_wblist_index', ['groupId' => $groupId]);
+                    return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
                 }
             }
 
-            $groupsWblist->setMailaddr($mailaddr);
+            $groupRule->setMailaddr($mailaddr);
 
-            $groupsWblist->setGroup($group);
-            $groupsWblist->setWbRule($data['wbRule']);
+            $groupRule->setGroup($group);
+            $groupRule->setWbRule($data['wbRule']);
 
-            $em->persist($groupsWblist);
+            $em->persist($groupRule);
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
             $groupService->updateWblist();
 
-            return $this->redirectToRoute('group_wblist_index', ['groupId' => $groupId]);
+            return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
         }
 
-        return $this->render('groups_wblist/new.html.twig', [
-            'groups_wblist' => $groupsWblist,
+        return $this->render('group_rule/new.html.twig', [
+            'group_rule' => $groupRule,
             'group' => $group,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route(path: '/{groupId}/wblist/{sid}/edit', name: 'group_wblist_edit', methods: 'GET|POST')]
+    #[Route(path: '/{groupId}/rule/{sid}/edit', name: 'group_rule_edit', methods: 'GET|POST')]
     public function edit(
         int $groupId,
         int $sid,
@@ -151,14 +151,14 @@ class GroupsWblistController extends AbstractController
         MailaddrService $mailaddrService,
         GroupService $groupService,
     ): Response {
-        $groupWbList = $this->em->getRepository(GroupsWblist::class)->findOneBy([
+        $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy([
             'mailaddr' => $sid,
             'group' => $groupId,
         ]);
         $group = $this->em->getRepository(Group::class)->findOneBy(['id' => $groupId]);
         $this->checkAccess($group);
-        $form = $this->createForm(GroupsWblistType::class, null, [
-            'action' => $this->generateUrl('group_wblist_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
+        $form = $this->createForm(GroupRuleType::class, null, [
+            'action' => $this->generateUrl('group_rule_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -173,40 +173,40 @@ class GroupsWblistController extends AbstractController
                 $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
                 $em->persist($mailaddr);
             } else {
-                $groupsWblistexist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+                $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
                     'mailaddr' => $mailaddr,
                     'group' => $group,
                 ]));
-                if ($groupsWblistexist && $mailaddr != $groupWbList->getMailaddr()) {
+                if ($groupRuleExists && $mailaddr != $groupRule->getMailaddr()) {
                     $this->addFlash('warning', $this->translator->trans('Message.Flash.ruleExists'));
-                    return $this->redirectToRoute('group_wblist_new', ['groupId' => $groupId]);
+                    return $this->redirectToRoute('group_rule_new', ['groupId' => $groupId]);
                 }
             }
 
-            $groupWbList->setMailaddr($mailaddr);
-            $groupWbList->setGroup($group);
-            $groupWbList->setWbRule($data['wbRule']);
+            $groupRule->setMailaddr($mailaddr);
+            $groupRule->setGroup($group);
+            $groupRule->setWbRule($data['wbRule']);
 
-            $em->persist($groupWbList);
+            $em->persist($groupRule);
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
             $groupService->updateWblist();
 
-            return $this->redirectToRoute('group_wblist_index', ['groupId' => $groupId]);
+            return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
         } else {
-            $form->get('email')->setData($groupWbList->getMailaddr()->getEmail());
-            $form->get('wbRule')->setData($groupWbList->getWbRule());
+            $form->get('email')->setData($groupRule->getMailaddr()->getEmail());
+            $form->get('wbRule')->setData($groupRule->getWbRule());
         }
 
-        return $this->render('groups_wblist/edit.html.twig', [
-            'groups_wblist' => $groupWbList,
+        return $this->render('group_rule/edit.html.twig', [
+            'group_rule' => $groupRule,
             'group' => $group,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route(path: '/{groupId}/wblist/{sid}/delete', name: 'group_wblist_delete', methods: 'POST')]
+    #[Route(path: '/{groupId}/rule/{sid}/delete', name: 'group_rule_delete', methods: 'POST')]
     public function delete(int $groupId, int $sid, Request $request, GroupService $groupService): RedirectResponse
     {
         $group = $this->em->getRepository(Group::class)->findOneBy(['id' => $groupId]);
@@ -216,21 +216,21 @@ class GroupsWblistController extends AbstractController
 
         if (!$this->isCsrfTokenValid('delete' . $groupId . '_' . $sid, $csrfToken)) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
-            return $this->redirectToRoute('group_wblist_index', ['groupId' => $groupId]);
+            return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
         }
 
-        $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
+        $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy(([
             'mailaddr' => $sid,
             'group' => $groupId,
         ]));
 
-        if ($groupsWblist) {
-            $this->em->remove($groupsWblist);
+        if ($groupRule) {
+            $this->em->remove($groupRule);
             $this->em->flush();
         }
 
         $groupService->updateWblist();
 
-        return $this->redirectToRoute('group_wblist_index', ['groupId' => $groupId]);
+        return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
     }
 }
