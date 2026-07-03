@@ -52,10 +52,10 @@ class Group
     private Collection $users;
 
     /**
-     * @var Collection<int, GroupsWblist>
+     * @var Collection<int, GroupRule>
      */
-    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'group')]
-    private Collection $groupsWbLists;
+    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupRule', mappedBy: 'group')]
+    private Collection $groupRules;
 
     #[Gedmo\Slug(fields: ['name'])]
     #[ORM\Column(type: 'string', length: 128, unique: true)]
@@ -102,7 +102,7 @@ class Group
         $this->datemod = new \DateTime();
         $this->rights = new ArrayCollection();
         $this->users = new ArrayCollection();
-        $this->groupsWbLists = new ArrayCollection();
+        $this->groupRules = new ArrayCollection();
         $this->connectors = new ArrayCollection();
     }
 
@@ -266,29 +266,29 @@ class Group
     }
 
     /**
-     * @return Collection<int, GroupsWblist>
+     * @return Collection<int, GroupRule>
      */
-    public function getGroupsWbLists(): Collection
+    public function getGroupRules(): Collection
     {
-        return $this->groupsWbLists;
+        return $this->groupRules;
     }
 
-    public function addGroupsWbList(GroupsWblist $groupsWbList): self
+    public function addGroupRule(GroupRule $groupRule): self
     {
-        if (!$this->groupsWbLists->contains($groupsWbList)) {
-            $this->groupsWbLists[] = $groupsWbList;
-            $groupsWbList->setGroup($this);
+        if (!$this->groupRules->contains($groupRule)) {
+            $this->groupRules[] = $groupRule;
+            $groupRule->setGroup($this);
         }
 
         return $this;
     }
 
-    public function removeGroupsWbList(GroupsWblist $groupsWbList): self
+    public function removeGroupRule(GroupRule $groupRule): self
     {
-        if ($this->groupsWbLists->removeElement($groupsWbList)) {
+        if ($this->groupRules->removeElement($groupRule)) {
             // set the owning side to null (unless already changed)
-            if ($groupsWbList->getGroup() === $this) {
-                $groupsWbList->setGroup(null);
+            if ($groupRule->getGroup() === $this) {
+                $groupRule->setGroup(null);
             }
         }
 

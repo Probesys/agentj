@@ -8,9 +8,9 @@ use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Util\Email;
+use Doctrine\DBAL;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\DBAL;
 
 /**
  * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
@@ -135,7 +135,7 @@ class WblistRepository extends BaseRepository
     public function insertFromGroup(): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sqlSelectGroupwbList = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority)
+        $sqlSelectGroupRule = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority)
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
                                     CASE g.override_user
                                           WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE . " + g.priority" .
@@ -146,9 +146,7 @@ class WblistRepository extends BaseRepository
                                     inner join groups_wblist gw on gw.group_id =g.id
                                     where g.active = true and gw.wb != BINARY '' and g.priority is not null";
 
-
-        $stmt = $conn->prepare($sqlSelectGroupwbList);
-        return $stmt->executeQuery();
+        return $conn->prepare($sqlSelectGroupRule)->executeQuery();
     }
 
     /**

@@ -4,13 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Domain;
 use App\Entity\Group;
-use App\Entity\GroupsWblist;
+use App\Entity\GroupRule;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Form\GroupType;
 use App\Repository\DomainRepository;
 use App\Repository\GroupRepository;
-use App\Repository\GroupsWblistRepository;
+use App\Repository\GroupRuleRepository;
 use App\Repository\MailaddrRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
@@ -116,11 +116,11 @@ class GroupController extends AbstractController
                 $mailaddr->setEmail('@.');
                 $this->em->persist($mailaddr);
             }
-            $groupsWblist = new GroupsWblist();
-            $groupsWblist->setMailaddr($mailaddr);
-            $groupsWblist->setGroup($group);
-            $groupsWblist->setWb($group->getWb());
-            $this->em->persist($groupsWblist);
+            $groupRule = new GroupRule();
+            $groupRule->setMailaddr($mailaddr);
+            $groupRule->setGroup($group);
+            $groupRule->setWb($group->getWb());
+            $this->em->persist($groupRule);
 
             $this->em->flush();
             return new JsonResponse([
@@ -141,7 +141,7 @@ class GroupController extends AbstractController
         Group $group,
         GroupService $groupService,
         UserService $userService,
-        GroupsWblistRepository $groupsWblistRepository,
+        GroupRuleRepository $groupRuleRepository,
         MailaddrRepository $mailaddrRepository,
     ): Response {
         $this->checkAccess($group);
@@ -177,14 +177,14 @@ class GroupController extends AbstractController
 
             $mailaddr = $mailaddrRepository->findOneBy((['email' => '@.']));
 
-            $groupsWblist = $groupsWblistRepository->findOneBy((['mailaddr' => $mailaddr, 'group' => $group]));
-            if (!$groupsWblist) {
-                $groupsWblist = new GroupsWblist();
-                $groupsWblist->setMailaddr($mailaddr);
+            $groupRule = $groupRuleRepository->findOneBy((['mailaddr' => $mailaddr, 'group' => $group]));
+            if (!$groupRule) {
+                $groupRule = new GroupRule();
+                $groupRule->setMailaddr($mailaddr);
             }
-            $groupsWblist->setGroup($group);
-            $groupsWblist->setWb($group->getWb());
-            $this->em->persist($groupsWblist);
+            $groupRule->setGroup($group);
+            $groupRule->setWb($group->getWb());
+            $this->em->persist($groupRule);
 
 
             $this->em->flush();

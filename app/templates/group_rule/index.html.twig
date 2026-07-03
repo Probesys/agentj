@@ -1,25 +1,23 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-	{{ 'Entities.Group.labels.grouprules'|trans() }}
+	{{ 'Entities.Group.labels.groupRules'|trans() }}
 	{{group.name}}
 {% endblock %}
 
 {% block body %}
 
-	{% set _title = 'Entities.Group.labels.grouprules'|trans ~ ' : ' ~ group.name %}
+	{% set _title = 'Entities.Group.labels.groupRules'|trans ~ ' : ' ~ group.name %}
 	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
 		{% block content_button_actions %}
 			<a href="#" data-url-modal-content="{{ path('group_edit',{'id':group.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
-			<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('group_wblist_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
+			<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('groups_rules_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
 				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.addRule'|trans() }}
 			</a>
-
 		{% endblock %}
 
 	{% endembed %}
-
 
 	<div class="col mb-3 bg-white pb-3">
 		<div class="row">
@@ -34,19 +32,19 @@
 			<table class="table">
 				<thead>
 					<tr>
-						<th>{{ knp_pagination_sortable(groups_wblists, 'Generics.fields.sender'|trans(), 'madr.email') }}</th>
+						<th>{{ knp_pagination_sortable(group_rules, 'Generics.fields.sender'|trans(), 'madr.email') }}</th>
 						<th>{{ 'Entities.Group.labels.rules'|trans() }}</th>
 						<th>{{ 'Generics.labels.actions'|trans() }}</th>
 					</tr>
 				</thead>
 				<tbody>
-					{% for groups_wblist in groups_wblists %}
-						{% set email = groups_wblist.getMailaddr().email %}
+					{% for group_rule in group_rules %}
+						{% set email = group_rule.getMailaddr().email %}
 						{% if  email != "@." %}
 							<tr>
 								<td data-title="{{'Generics.fields.sender'|trans }}">{{email}}</td>
 								<td data-title="{{'Entities.Group.labels.rules'|trans }}">
-									{{ groups_wblist.wbRuleName | trans }}
+									{{ group_rule.wbRuleName | trans }}
 								</td>
 								<td>
 									<ul class="list-inline list-unstyled">
@@ -54,7 +52,7 @@
 											<a
                                                 href="#"
                                                 data-modal-method-type="GET"
-                                                data-url-modal-content="{{ path('group_wblist_edit',{'sid':groups_wblist.mailaddr.id,'groupId':groups_wblist.group.id,}) }}"
+                                                data-url-modal-content="{{ path('groups_rules_edit',{'sid':group_rule.mailaddr.id,'groupId':group_rule.group.id,}) }}"
                                                 class='btn-open-modal btn btn-sm btn-success '
                                                 title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
                                             >
@@ -65,13 +63,13 @@
 										<li class="list-inline-item">
 											<form
                                                 method="post"
-                                                action="{{ path('group_wblist_delete',{'groupId':groups_wblist.group.id,'sid':groups_wblist.mailaddr.id}) }}"
+                                                action="{{ path('groups_rules_delete',{'groupId':group_rule.group.id,'sid':group_rule.mailaddr.id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                                 <input
                                                     type="hidden"
                                                     name="_token"
-                                                    value="{{ csrf_token('delete' ~ groups_wblist.group.id ~ '_' ~ groups_wblist.mailaddr.id) }}"
+                                                    value="{{ csrf_token('delete' ~ group_rule.group.id ~ '_' ~ group_rule.mailaddr.id) }}"
                                                 >
 												<button
                                                     type="submit"
@@ -93,7 +91,7 @@
 		</section>
 	</div>
 
-	{% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': groups_wblists } %}
+	{% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': group_rules } %}
 	{% include 'alertsPopup.html.twig' %}
 
 	<div class="d-flex justify-content-center pb-3">
