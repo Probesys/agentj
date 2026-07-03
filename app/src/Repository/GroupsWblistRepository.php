@@ -27,7 +27,7 @@ class GroupsWblistRepository extends BaseRepository
         $dql = $this->createQueryBuilder('gwl')
                 ->select('madr.id, gwl.wb')
                 ->join('gwl.mailaddr', 'madr')
-                ->where('gwl.groups = :group')
+                ->where('gwl.group = :group')
                 ->setParameter('group', $group);
         $query = $dql->getQuery();
         return $query->getResult();
@@ -41,7 +41,7 @@ class GroupsWblistRepository extends BaseRepository
     {
         $queryBuilder = $this->createQueryBuilder('gwl')
                 ->join('gwl.mailaddr', 'madr')
-                ->where('gwl.groups = :group')
+                ->where('gwl.group = :group')
                 ->setParameter('group', $group);
 
         if ($searchKey !== '') {

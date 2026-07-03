@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
-#[Route(path: '/groups')]
+#[Route(path: '/group')]
 class GroupController extends AbstractController
 {
     public function __construct(
@@ -46,7 +46,7 @@ class GroupController extends AbstractController
         }
     }
 
-    #[Route(path: '/', name: 'groups_index', methods: 'GET')]
+    #[Route(path: '/', name: 'group_index', methods: 'GET')]
     public function index(
         Request $request,
         GroupRepository $groupRepository,
@@ -79,22 +79,22 @@ class GroupController extends AbstractController
             ]
         );
 
-        return $this->render('groups/index.html.twig', ['groups' => $groups]);
+        return $this->render('group/index.html.twig', ['groups' => $groups]);
     }
 
-    #[Route(path: '/new', name: 'groups_new', methods: 'GET|POST')]
+    #[Route(path: '/new', name: 'group_new', methods: 'GET|POST')]
     public function new(Request $request): Response
     {
         $group = new Group();
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupType::class, $group, [
-                'action' => $this->generateUrl('groups_new'),
+                'action' => $this->generateUrl('group_new'),
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
             $form = $this->createForm(GroupType::class, $group, [
                 'user' => $this->getUser(),
-                'action' => $this->generateUrl('groups_new'),
+                'action' => $this->generateUrl('group_new'),
             ]);
         }
         $form->handleRequest($request);
@@ -129,13 +129,13 @@ class GroupController extends AbstractController
             ], 200);
         }
 
-        return $this->render('groups/new.html.twig', [
+        return $this->render('group/new.html.twig', [
             'group' => $group,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route(path: '/{id}/edit', name: 'groups_edit', methods: 'GET|POST')]
+    #[Route(path: '/{id}/edit', name: 'group_edit', methods: 'GET|POST')]
     public function edit(
         Request $request,
         Group $group,
@@ -147,13 +147,13 @@ class GroupController extends AbstractController
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             $form = $this->createForm(GroupType::class, $group, [
-                'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'action' => $this->generateUrl('group_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         } else {
             $form = $this->createForm(GroupType::class, $group, [
                 'user' => $this->getUser(),
-                'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
+                'action' => $this->generateUrl('group_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']
             ]);
         }
@@ -163,7 +163,7 @@ class GroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($oldName != $group->getName() || $oldDomain != $group->getDomain()) {
+            if ($oldName !== $group->getName() || $oldDomain !== $group->getDomain()) {
                 $labelExists = $this->checkNameforDomain($group->getName(), $form->get('domain')->getData());
                 if ($labelExists) {
                     return new JsonResponse([
@@ -203,13 +203,13 @@ class GroupController extends AbstractController
             ], 200);
         }
 
-        return $this->render('groups/edit.html.twig', [
+        return $this->render('group/edit.html.twig', [
             'group' => $group,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
+    #[Route(path: '/{id}/users', name: 'group_list_users', methods: 'GET|POST')]
     public function listUsers(
         Group $group,
         Request $request,
@@ -231,7 +231,7 @@ class GroupController extends AbstractController
             $perPage
         );
 
-        return $this->render('groups/group_users.html.twig', [
+        return $this->render('group/group_users.html.twig', [
             'group' => $group,
             'users' => $users
         ]);
@@ -251,7 +251,7 @@ class GroupController extends AbstractController
 
         if (!$this->isCsrfTokenValid('removeUser' . $user->getId(), $csrfToken)) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
-            return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
+            return $this->redirectToRoute('group_list_users', ['id' => $group->getId()]);
         }
 
         $group->removeUser($user);
@@ -266,7 +266,7 @@ class GroupController extends AbstractController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('groups_list_users', ['id' => $group->getId()]);
+        return $this->redirectToRoute('group_list_users', ['id' => $group->getId()]);
     }
 
     /**
@@ -287,7 +287,7 @@ class GroupController extends AbstractController
         return false;
     }
 
-    #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'POST')]
+    #[Route(path: '/{id}/delete', name: 'group_delete', methods: 'POST')]
     public function delete(
         Request $request,
         Group $group,
@@ -299,7 +299,7 @@ class GroupController extends AbstractController
 
         if (!$this->isCsrfTokenValid('delete' . $group->getId(), $csrfToken)) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
-            return $this->redirectToRoute('groups_index');
+            return $this->redirectToRoute('group_index');
         }
 
         $groupUsers = $group->getUsers()->toArray();
@@ -315,10 +315,10 @@ class GroupController extends AbstractController
 
         $this->em->flush();
 
-        return $this->redirectToRoute('groups_index');
+        return $this->redirectToRoute('group_index');
     }
 
-    #[Route(path: '/check-priority', name: 'groups_check_priority', methods: 'GET|POST')]
+    #[Route(path: '/check-priority', name: 'group_check_priority', methods: 'GET|POST')]
     public function checkPriorityExist(Request $request): JsonResponse
     {
         $domainId = $request->request->get('domainId');

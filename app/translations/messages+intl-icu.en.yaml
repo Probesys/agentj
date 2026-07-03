@@ -245,7 +245,7 @@ Entities.User.fields.domain: Domain
 Entities.User.fields.email: Email
 Entities.User.fields.emailRecovery: 'Recovery email'
 Entities.User.fields.fullName: Name
-Entities.User.fields.groups: Group
+Entities.User.fields.group: Group
 Entities.User.fields.inMsgBlockedCount: 'Incoming message blocked count'
 Entities.User.fields.inMsgCount: 'Incoming message count'
 Entities.User.fields.incoming: Incoming

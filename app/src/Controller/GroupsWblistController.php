@@ -137,9 +137,9 @@ class GroupsWblistController extends AbstractController
         }
 
         return $this->render('groups_wblist/new.html.twig', [
-                    'groups_wblist' => $groupsWblist,
-                    'group' => $group,
-                    'form' => $form->createView(),
+            'groups_wblist' => $groupsWblist,
+            'group' => $group,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -200,9 +200,9 @@ class GroupsWblistController extends AbstractController
         }
 
         return $this->render('groups_wblist/edit.html.twig', [
-                    'groups_wblist' => $groupWbList,
-                    'group' => $group,
-                    'form' => $form->createView(),
+            'groups_wblist' => $groupWbList,
+            'group' => $group,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -230,7 +230,6 @@ class GroupsWblistController extends AbstractController
         }
 
         $groupService->updateWblist();
-
 
         return $this->redirectToRoute('groups_wblist_index', ['groupId' => $groupId]);
     }

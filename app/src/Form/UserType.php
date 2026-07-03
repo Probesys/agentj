@@ -64,7 +64,7 @@ class UserType extends AbstractType
                 'mapped' => false,
             ])
             ->add('groups', EntityType::class, [
-                'label' => new TranslatableMessage('Entities.User.fields.groups'),
+                'label' => new TranslatableMessage('Entities.User.fields.group'),
                 'class' => Group::class,
                 'multiple' => true,           // This allows multiple checkboxes to be checked
                 'expanded' => true,           // This makes it render as checkboxes

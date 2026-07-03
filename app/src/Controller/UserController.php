@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Domain;
-use App\Entity\Group;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Form\UserType;
@@ -13,14 +12,14 @@ use App\Service\GroupService;
 use App\Service\Referrer;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Knp\Component\Pager\PaginatorInterface;
 
 #[Route(path: 'admin/users')]
 class UserController extends AbstractController
@@ -38,7 +37,6 @@ class UserController extends AbstractController
         PaginatorInterface $paginator,
         UserRepository $userRepository
     ): Response {
-
         $perPage = (int) $this->getParameter('app.per_page_global');
         $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
 
@@ -72,7 +70,6 @@ class UserController extends AbstractController
         PaginatorInterface $paginator,
         UserRepository $userRepository
     ): Response {
-
         $perPage = (int) $this->getParameter('app.per_page_global');
         $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
 
@@ -92,6 +89,7 @@ class UserController extends AbstractController
                 'defaultSortDirection' => 'asc',
             ]
         );
+
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
@@ -146,22 +144,22 @@ class UserController extends AbstractController
         if ($form->isSubmitted()) {
             $return = [];
             $data = $form->getData();
-            $userNameExist = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
-            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $userNameExists = $this->em->getRepository(User::class)->findOneBy(['username' => $data->getUserName()]);
+            $emailExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $firstPassword = $form->get('password')->get('first')->getData();
             $secondPassword = $form->get('password')->get('second')->getData();
 
-            if ($userNameExist) {
+            if ($userNameExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAlreadyExist'),
                 ];
-            } elseif ($emailExist) {
+            } elseif ($emailExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
-            } elseif ($firstPassword != $secondPassword) {
+            } elseif ($firstPassword !== $secondPassword) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.passwordNotMatching'),
@@ -171,7 +169,7 @@ class UserController extends AbstractController
                 $encoded = $passwordHasher->hashPassword($user, $firstPassword);
                 $policy = $this->em->getRepository(Policy::class)->find(5);
                 $username = $form->get('username')->getData();
-                $username = $username ? $username : $form->get('fullname')->getData();
+                $username = $username ?: $form->get('fullname')->getData();
                 $user->setUsername($username);
                 $user->setPassword($encoded);
                 $user->setPolicy($policy);
@@ -185,20 +183,18 @@ class UserController extends AbstractController
                 ];
             }
 
-
             return new JsonResponse($return, 200);
         }
 
         return $this->render('user/new.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
 
     #[Route(path: '/local/{id}/edit', name: 'user_local_edit', methods: 'GET|POST')]
     public function edit(Request $request, User $user): Response
     {
-
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_local_edit', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form'],
@@ -206,7 +202,7 @@ class UserController extends AbstractController
             'include_quota' => false,
         ]);
         $email = $user->getEmail();
-        $form->get('email')->setData($email !== null ? $email : '');
+        $form->get('email')->setData($email ?? '');
 
         $form->remove('originalUser');
         $form->remove('emailRecovery');
@@ -219,11 +215,11 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userNameExist = $this->em->getRepository(User::class)->findOneBy([
+            $userNameExists = $this->em->getRepository(User::class)->findOneBy([
                 'username' => $form->get('username')->getData(),
             ]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if ($oldUser['username'] != $form->get('username')->getData() && $userNameExist) {
+            if (($oldUser['username'] !== $form->get('username')->getData()) && $userNameExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.userNameAlreadyExist'),
@@ -243,11 +239,10 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/edit.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
-
 
     #[Route(path: '/local/{id}/changePassword', name: 'user_local_change_password', methods: 'GET|POST')]
     public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
@@ -279,13 +274,12 @@ class UserController extends AbstractController
                 $this->em->flush();
             }
 
-
             return $this->redirectToRoute('users_local_index', ['id' => $user->getId()]);
         }
 
         return $this->render('user/edit.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -303,7 +297,6 @@ class UserController extends AbstractController
     #[Route(path: '/email/batchDelete', name: 'user_email_batch_delete', methods: 'POST')]
     public function batchDeleteEmail(Request $request): Response
     {
-
         $csrfToken = $request->request->getString('_csrf_token', 'delete');
 
         if (!$this->isCsrfTokenValid('delete user', $csrfToken)) {
@@ -334,17 +327,16 @@ class UserController extends AbstractController
 
         $allowedDomains = $this->getAlloweDomains();
 
-
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
 
         $form = $this->createForm(
             UserType::class,
             $user,
             [
-                    'action' => $this->generateUrl('user_email_new'),
-                    'allowedDomains' => $allowedDomains,
-                    'attr' => ['class' => 'modal-ajax-form']
-                ]
+                'action' => $this->generateUrl('user_email_new'),
+                'allowedDomains' => $allowedDomains,
+                'attr' => ['class' => 'modal-ajax-form']
+            ],
         );
         $form->remove('password');
         $form->remove('originalUser');
@@ -358,12 +350,12 @@ class UserController extends AbstractController
         if ($form->isSubmitted()) {
             $data = $form->getData();
 
-            $emailExist = $userRepository->findOneBy(['email' => $data->getEmail()]);
+            $emailExists = $userRepository->findOneBy(['email' => $data->getEmail()]);
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
             if (!$data->getImapLogin()) {
-                $imapLoginExist = false;
+                $imapLoginExists = false;
             } else {
-                $imapLoginExist = $userRepository->findOneBy([
+                $imapLoginExists = $userRepository->findOneBy([
                     'imapLogin' => $data->getImapLogin(),
                     'domain' => $newDomain,
                 ]);
@@ -374,12 +366,12 @@ class UserController extends AbstractController
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
-            } elseif ($emailExist) {
+            } elseif ($emailExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
-            } elseif ($imapLoginExist) {
+            } elseif ($imapLoginExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
@@ -415,16 +407,15 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/new.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
-                    'imapDomains' => $imapDomains
+            'user' => $user,
+            'form' => $form->createView(),
+            'imapDomains' => $imapDomains
         ]);
     }
 
     #[Route(path: '/newAlias', name: 'new_user_email_alias', methods: 'GET|POST')]
     public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response
     {
-        $groups = null;
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
             'alias' => true,
@@ -445,14 +436,14 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted()) {
             $data = $form->getData();
-            $aliaslExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $aliasExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
-            } elseif ($aliaslExist) {
+            } elseif ($aliasExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.aliasAlreadyExist'),
@@ -484,8 +475,8 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/newAlias.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -499,9 +490,6 @@ class UserController extends AbstractController
         UserRepository $userRepository,
         DomainRepository $domainRepository,
     ): Response {
-
-        $oldGroups = $user->getGroups()->toArray();
-
         $allowedDomains = $this->getAlloweDomains();
 
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
@@ -529,15 +517,15 @@ class UserController extends AbstractController
         if ($form->isSubmitted()) {
             $return = [];
             $data = $form->getData();
-            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $emailExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUserData = $this->em->getUnitOfWork()->getOriginalEntityData($user);
 
             $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
 
             if (!$data->getImapLogin()) {
-                $imapLoginExist = false;
+                $imapLoginExists = false;
             } else {
-                $imapLoginExist = $userRepository->findOneBy([
+                $imapLoginExists = $userRepository->findOneBy([
                     'imapLogin' => $data->getImapLogin(),
                     'domain' => $newDomain,
                 ]);
@@ -548,14 +536,12 @@ class UserController extends AbstractController
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.domainNotExist'),
                 ];
-            } elseif (
-                $oldUserData['email'] != $form->get('email')->getData() && $emailExist
-            ) {
+            } elseif (($oldUserData['email'] !== $form->get('email')->getData()) && $emailExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
                 ];
-            } elseif ($oldUserData['imapLogin'] != $form->get('imapLogin')->getData() && $imapLoginExist) {
+            } elseif (($oldUserData['imapLogin'] !== $form->get('imapLogin')->getData()) && $imapLoginExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.imapLoginAlreadyExist'),
@@ -584,13 +570,12 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/edit.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
-                    'imapDomains' => $imapDomains,
-                    'domainHasIMAPConnector' => $domainHasIMAPConnector,
+            'user' => $user,
+            'form' => $form->createView(),
+            'imapDomains' => $imapDomains,
+            'domainHasIMAPConnector' => $domainHasIMAPConnector,
         ]);
     }
-
 
     #[Route(path: '/alias/{id}/edit', name: 'user_email_alias_edit', methods: 'GET|POST')]
     public function editUserEmailAlias(
@@ -599,12 +584,6 @@ class UserController extends AbstractController
         UserService $userService,
         GroupService $groupService,
     ): Response {
-        $userId = null;
-        if ($user->getOriginalUser()) {
-            $userId = $user->getOriginalUser()->getId();
-        }
-
-        $oldAliasGroups = $user->getGroups()->toArray();
         $form = $this->createForm(UserType::class, $user, [
             'action' => $this->generateUrl('user_email_alias_edit', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form'],
@@ -624,9 +603,9 @@ class UserController extends AbstractController
         if ($form->isSubmitted()) {
             $return = [];
             $data = $form->getData();
-            $emailExist = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
+            $emailExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
             $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if ($oldUser['email'] != $form->get('email')->getData() && $emailExist) {
+            if (($oldUser['email'] !== $form->get('email')->getData()) && $emailExists) {
                 $return = [
                     'status' => 'danger',
                     'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
@@ -648,20 +627,19 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/edit.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
+            'user' => $user,
+            'form' => $form->createView(),
         ]);
     }
 
     /**
-     * Return the plociy of user if exist. Else return the domain policy
+     * Return the policy of user if exists. Else return the domain policy
      * @param User $user
      * @return Policy
      */
     private function computeUserPolicy(User $user): Policy
     {
         $policy = null;
-        $groupsRepository = $this->em->getRepository(Group::class);
         if ($user->getGroups() && count($user->getGroups()) > 0) {
             $defaultGroup = array_reduce($user->getGroups()->toArray(), function ($a, $b) {
                 return $a && $a->getPriority() > $b->getPriority() ? $a : $b;
@@ -684,29 +662,29 @@ class UserController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $allowedomains = $user->getDomains()->toArray();
+            $allowedDomains = $user->getDomains()->toArray();
         } else {
-            $allowedomains = $this->em
-                    ->getRepository(Domain::class)
-                    ->findAll();
+            $allowedDomains = $this->em
+                ->getRepository(Domain::class)
+                ->findAll();
         }
-        return $allowedomains;
+        return $allowedDomains;
     }
 
     private function checkDomainAccess(string $domainName = ""): ?Domain
     {
-        $allowedomains = $this->getAlloweDomains();
-        $allowedomainNamesArray = array_map(function (Domain $entity) {
+        $allowedDomains = $this->getAlloweDomains();
+        $allowedDomainNamesArray = array_map(function (Domain $entity) {
             return $entity->getDomain();
-        }, $allowedomains);
+        }, $allowedDomains);
 
-        if (!in_array($domainName, $allowedomainNamesArray)) {
+        if (!in_array($domainName, $allowedDomainNamesArray)) {
             return null;
-        } else {
-            return $this->em
-                            ->getRepository(Domain::class)
-                            ->findOneBy(['domain' => $domainName]);
         }
+
+        return $this->em
+            ->getRepository(Domain::class)
+            ->findOneBy(['domain' => $domainName]);
     }
 
     /**
@@ -715,24 +693,23 @@ class UserController extends AbstractController
     #[Route(path: '/user/autocomplete', name: 'autocomplete_user', options: ['expose' => true])]
     public function autocompleteUserAction(UserRepository $userRepository, Request $request): JsonResponse
     {
-
         $q = $request->query->get('query');
         $pageLimit = $request->query->has('page_limit') ? (int) $request->query->get('page_limit') : 30;
         $return = [];
         $items = [];
-        $allowedomains = [];
+        $allowedDomains = [];
 
         /** @var User $user */
         $user = $this->getUser();
         if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $allowedomains = $user->getDomains()->toArray();
+            $allowedDomains = $user->getDomains()->toArray();
         }
 
         $entities = $userRepository->autocomplete(
             $q,
             $pageLimit,
             $request->query->getInt('page', 1),
-            $allowedomains
+            $allowedDomains
         );
 
         foreach ($entities as $entity) {

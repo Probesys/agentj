@@ -51,8 +51,6 @@ class Connector
      * @var Collection<int, Group>
      */
     #[ORM\OneToMany(targetEntity: Group::class, mappedBy: 'originConnector')]
-    #[ORM\JoinTable(name: 'connector_groups')]
-    #[ORM\InverseJoinColumn(name: 'groups_id', nullable: true)]
     private Collection $groups;
 
     #[ORM\Column(nullable: true)]
@@ -62,6 +60,7 @@ class Connector
      * @var Collection<int, Group>
      */
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'connectors')]
+    #[ORM\JoinTable(name: 'connector_groups')]
     private Collection $targetGroups;
 
     #[ORM\Column(nullable: true)]

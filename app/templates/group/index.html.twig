@@ -9,7 +9,7 @@
 	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
 		{% block content_button_actions %}
-			<a href="#" data-url-modal-content="{{ path('groups_new') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
+			<a href="#" data-url-modal-content="{{ path('group_new') }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
 				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.New'|trans() }}</a>
 		{% endblock %}
 
@@ -50,7 +50,7 @@
 									<li class="list-inline-item">
 										<a
 											href="#"
-											data-url-modal-content="{{ path('groups_edit',{'id':group.id}) }}"
+											data-url-modal-content="{{ path('group_edit',{'id':group.id}) }}"
 											class='btn-open-modal btn btn-sm btn-success'
 											data-target='authorized'
 											title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
@@ -72,7 +72,7 @@
 									</li>
 									<li class="list-inline-item">
 										<a
-											href="{{ path('groups_list_users',{'id':group.id}) }}"
+											href="{{ path('group_list_users',{'id':group.id}) }}"
 											class='btn btn-sm btn-secondary'
 											data-target='authorized'
 											title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
@@ -85,7 +85,7 @@
 										<form
 											method="post"
 											class="d-inline"
-											action="{{ path('groups_delete', {'id': group.id}) }}"
+											action="{{ path('group_delete', {'id': group.id}) }}"
 											data-turbo-confirm="{{ 'Message.Dialogs.confirmDeleteGroupContent'|trans }}"
                                         >
 											<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ group.id) }}">
