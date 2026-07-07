@@ -41,11 +41,11 @@ class MsgsRepository extends BaseMessageRepository
 
         if ($messageType === 'incoming') {
             $table = 'msgs';
-            $msgrcptTable = 'msgrcpt';
+            $messageRecipientTable = 'msgrcpt';
             $userJoinCondition = 'u.email = maddr.email';
         } elseif ($messageType === 'outgoing') {
             $table = 'out_msgs';
-            $msgrcptTable = 'out_msgrcpt';
+            $messageRecipientTable = 'out_msgrcpt';
             $userJoinCondition = 'u.email = m.from_addr';
         } else {
             throw new \DomainException("messageType must be one of 'incoming' or 'outgoing' (got {$messageType})");
@@ -73,7 +73,7 @@ class MsgsRepository extends BaseMessageRepository
                     ELSE 'non'
                 END as replyTo
             FROM {$table} m
-            LEFT JOIN {$msgrcptTable} mr ON m.mail_id = mr.mail_id
+            LEFT JOIN {$messageRecipientTable} mr ON m.mail_id = mr.mail_id
             LEFT JOIN maddr ON maddr.id = mr.rid
             LEFT JOIN users u ON {$userJoinCondition}
             LEFT JOIN domain d ON u.domain_id = d.id
@@ -138,7 +138,7 @@ class MsgsRepository extends BaseMessageRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m.sendCaptcha
             FROM App\Entity\Msgs m
-            JOIN m.msgRcpts mr
+            JOIN m.messageRecipients mr
             JOIN mr.rid recipient
             JOIN m.sid sender
             WHERE recipient.email = :to

@@ -81,7 +81,7 @@ class SendAuthMailRequestCommand
             $requiresProcessing = false;
             $recipientUsersByDomains = [];
 
-            foreach ($message->getMsgrcpts() as $messageRecipient) {
+            foreach ($message->getMessageRecipients() as $messageRecipient) {
                 // If the status of a message recipient still requires to be
                 // processed (null or unreleased), it means that AgentJ didn't
                 // have time to consolidate its status. To put it another way:

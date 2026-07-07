@@ -3,12 +3,12 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
-use App\Entity\Msgrcpt;
+use App\Entity\MessageRecipient;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Message\AmavisRelease;
-use App\Repository\MsgrcptRepository;
+use App\Repository\MessageRecipientRepository;
 use App\Repository\MsgsRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\UserRepository;
@@ -20,7 +20,7 @@ class MessageService
     public function __construct(
         private MessageBusInterface $bus,
         private RuleAddressRepository $ruleAddressRepository,
-        private MsgrcptRepository $messageRecipientRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
         private MsgsRepository $messageRepository,
         private UserRepository $userRepository,
         private WblistRepository $wblistRepository,
@@ -33,7 +33,7 @@ class MessageService
      * Authorize the message's sender for the given recipient and release the
      * messages that he sent to him.
      */
-    public function authorizeSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function authorizeSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
         $message = $messageRecipient->getMsgs();
 
@@ -88,7 +88,7 @@ class MessageService
      * Authorize the message's sender for the given recipient's domain and
      * release the messages that he sent to it.
      */
-    public function authorizeSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function authorizeSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
         $message = $messageRecipient->getMsgs();
 
@@ -140,7 +140,7 @@ class MessageService
      * Ban the message's sender for the given recipient and reject the messages
      * that he sent to him.
      */
-    public function banSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function banSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
         $message = $messageRecipient->getMsgs();
 
@@ -194,7 +194,7 @@ class MessageService
      * Ban the message's sender for the given recipient's domain and reject the
      * messages that he sent to it.
      */
-    public function banSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function banSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
         $message = $messageRecipient->getMsgs();
 
@@ -247,8 +247,10 @@ class MessageService
     /**
      * Restore (release) the message for the provided recipient.
      */
-    public function dispatchRelease(Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
-    {
+    public function dispatchRelease(
+        MessageRecipient $messageRecipient,
+        int $finalStatus = MessageStatus::RESTORED,
+    ): void {
         if (
             $messageRecipient->isAlreadyReleased() ||
             $messageRecipient->isAmavisReleaseOngoing() ||
@@ -268,7 +270,7 @@ class MessageService
         ));
     }
 
-    public function restore(Msgrcpt $messageRecipient): void
+    public function restore(MessageRecipient $messageRecipient): void
     {
         $this->dispatchRelease($messageRecipient, MessageStatus::RESTORED);
     }
@@ -276,7 +278,7 @@ class MessageService
     /**
      * Mark a message and its recipient as deleted.
      */
-    public function delete(Msgs $message, Msgrcpt $messageRecipient): bool
+    public function delete(Msgs $message, MessageRecipient $messageRecipient): bool
     {
         $this->messageRecipientRepository->changeStatus(
             $message->getPartitionTag(),
@@ -302,7 +304,7 @@ class MessageService
     {
         $result = $this->spamassassinService->marksAsSpam($message);
 
-        foreach ($message->getMsgRcpts() as $messageRecipient) {
+        foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isUntreated()) {
                 continue;
             }
@@ -330,7 +332,7 @@ class MessageService
     {
         $result = $this->spamassassinService->marksAsHam($message);
 
-        foreach ($message->getMsgRcpts() as $messageRecipient) {
+        foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isSpam()) {
                 continue;
             }

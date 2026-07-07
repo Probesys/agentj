@@ -3,11 +3,11 @@
 namespace App\Service;
 
 use App\Entity\Domain;
+use App\Entity\MessageRecipient;
 use App\Entity\Msgs;
-use App\Entity\Msgrcpt;
 use App\Repository\DomainRepository;
+use App\Repository\MessageRecipientRepository;
 use App\Repository\MsgsRepository;
-use App\Repository\MsgrcptRepository;
 
 class HumanAuthenticationService
 {
@@ -15,12 +15,12 @@ class HumanAuthenticationService
         private CryptEncryptService $cryptEncryptService,
         private DomainRepository $domainRepository,
         private MsgsRepository $messageRepository,
-        private MsgrcptRepository $messageRecipientRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
     ) {
     }
 
     /**
-     * @return ?array{?Msgs, ?Domain, Msgrcpt[]}
+     * @return ?array{?Msgs, ?Domain, MessageRecipient[]}
      */
     public function decryptToken(string $token): ?array
     {
@@ -51,9 +51,12 @@ class HumanAuthenticationService
         if ($message) {
             $messageRecipients = $this->messageRecipientRepository->findByMessage($message);
 
-            $messageRecipients = array_filter($messageRecipients, function (Msgrcpt $msgrcpt) use ($domain) {
-                return $msgrcpt->getRid()->getReverseDomain() == $domain->getDomain();
-            });
+            $messageRecipients = array_filter(
+                $messageRecipients,
+                function (MessageRecipient $messageRecipient) use ($domain) {
+                    return $messageRecipient->getRid()->getReverseDomain() == $domain->getDomain();
+                },
+            );
         }
 
         return [$message, $domain, $messageRecipients];

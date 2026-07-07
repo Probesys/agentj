@@ -23,13 +23,13 @@
             {{ 'Generics.fields.recipient' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msgRcpt.rid.getEmail }}
+            {{ messageRecipient.rid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msgRcpt.bspamLevel }}
+            {{ messageRecipient.bspamLevel }}
         </div>
 
         {% if msg.sendCaptcha > 0 %}
@@ -56,14 +56,14 @@
             {{ 'Message.Status.title' | trans }}
         </div>
         <div class="col-md-8">
-            {% if msgRcpt.isAlreadyReleased %}
+            {% if messageRecipient.isAlreadyReleased %}
                 {% set deliveryStatusClass = 'text-success' %}
-                {% set msgsStatus = msgRcpt.statusLabel | trans %}
-                {% set response = msgRcpt.amavisOutput %}
+                {% set msgsStatus = messageRecipient.statusLabel | trans %}
+                {% set response = messageRecipient.amavisOutput %}
             {% else %}
                 {% set deliveryStatusClass = 'text-danger' %}
-                {% set msgsStatus = msgDeliveryStatus[msgRcpt.ds] %}
-                {% set response = msgRcpt.smtpResp %}
+                {% set msgsStatus = msgDeliveryStatus[messageRecipient.ds] %}
+                {% set response = messageRecipient.smtpResp %}
             {% endif %}
 
             <span class="{{ deliveryStatusClass }}">

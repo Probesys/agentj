@@ -3,16 +3,16 @@
 namespace App\MessageHandler;
 
 use App\Message\ConsolidateAmavisData;
-use App\Repository\MsgrcptRepository;
+use App\Repository\MessageRecipientRepository;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 final class ConsolidateAmavisDataHandler
 {
     public function __construct(
-        private MsgrcptRepository $messageRecipientRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
         private LoggerInterface $logger,
         private LockFactory $lockFactory,
     ) {

@@ -16,7 +16,7 @@ class MessagesController extends AbstractController
     public function __construct(
         private Service\LogService $logService,
         private Service\MessageService $messageService,
-        private Repository\MsgrcptRepository $msgrcptRepository,
+        private Repository\MessageRecipientRepository $messageRecipientRepository,
         private Repository\MsgsRepository $msgsRepository,
     ) {
     }
@@ -45,7 +45,7 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $messageRecipient = $this->msgrcptRepository->findOneBy([
+        $messageRecipient = $this->messageRecipientRepository->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $recipientId,
@@ -98,7 +98,7 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->msgrcptRepository->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->messageRecipientRepository->findOneByMessageAndRid($message, $recipientId);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -112,7 +112,7 @@ class MessagesController extends AbstractController
         return $this->render('portal/messages/restore.html.twig');
     }
 
-    private function checkMailAccess(Entity\User $user, Entity\Msgrcpt $messageRecipient): void
+    private function checkMailAccess(Entity\User $user, Entity\MessageRecipient $messageRecipient): void
     {
         $listAliases = $user->getAliases();
         $accessibleRecipientEmails = array_map(function ($item) {

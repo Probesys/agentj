@@ -2,15 +2,14 @@
 
 namespace App\Controller;
 
-use App\Amavis\ContentType;
 use App\Amavis\MessageStatus;
+use App\Entity\MessageRecipient;
 use App\Entity\User;
-use App\Entity\Msgrcpt;
 use App\Repository\AlertRepository;
 use App\Repository\DomainRepository;
 use App\Repository\LimitReportRepository;
-use App\Repository\MsgrcptRepository;
-use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MessageRecipientRepository;
+use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\OutMsgrcptRepository;
 use App\Repository\UserRepository;
 use Knp\Component\Pager\PaginatorInterface;
@@ -23,7 +22,7 @@ use Symfony\Component\Translation\TranslatableMessage;
 final class DashboardController extends AbstractController
 {
     public function __construct(
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
     ) {
     }
 
@@ -54,19 +53,19 @@ final class DashboardController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $latestMessageRecipients = $this->msgrcptSearchRepository
+        $latestMessageRecipients = $this->messageRecipientSearchRepository
             ->getSearchQuery($user)
             ->setMaxResults(5)
             ->getResult();
 
-        $msgs['untreated'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
-        $msgs['authorized'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
-        $msgs['banned'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
-        $msgs['delete'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
-        $msgs['restored'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
-        $msgs['error'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::ERROR);
-        $msgs['spammed'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
-        $msgs['virus'] = $this->msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS);
+        $msgs['untreated'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::UNTREATED);
+        $msgs['authorized'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+        $msgs['banned'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::BANNED);
+        $msgs['delete'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::DELETED);
+        $msgs['restored'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::RESTORED);
+        $msgs['error'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::ERROR);
+        $msgs['spammed'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::SPAMMED);
+        $msgs['virus'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::VIRUS);
 
         return $this->render('dashboard/stats-by-status.html.twig', [
             'msgs' => $msgs,
@@ -79,35 +78,35 @@ final class DashboardController extends AbstractController
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $nbUntreadtedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbUntreadtedMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::UNTREATED
         );
-        $nbAutorizeMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbAutorizeMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::AUTHORIZED
         );
-        $nbBannedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbBannedMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::BANNED
         );
-        $nbDeletedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbDeletedMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::DELETED
         );
-        $nbRestoredMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbRestoredMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::RESTORED
         );
-        $nbErrorMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbErrorMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::ERROR
         );
-        $nbSpammedMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbSpammedMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::SPAMMED
         );
-        $nbVirusMsgByDay = $this->msgrcptSearchRepository->countByTypeAndDays(
+        $nbVirusMsgByDay = $this->messageRecipientSearchRepository->countByTypeAndDays(
             user: $user,
             messageStatus: MessageStatus::VIRUS
         );
@@ -216,7 +215,7 @@ final class DashboardController extends AbstractController
     #[Route(path: '{email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
     public function showMessagesStats(
         User $user,
-        MsgrcptRepository $messageRecipientRepository,
+        MessageRecipientRepository $messageRecipientRepository,
         OutMsgrcptRepository $outMessageRecipientRepository,
         LimitReportRepository $limitReportRepository,
     ): Response {
@@ -241,7 +240,7 @@ final class DashboardController extends AbstractController
                 ];
             }
 
-            if ($message instanceof Msgrcpt) {
+            if ($message instanceof MessageRecipient) {
                 $statusCounts[$status]['quantity']++;
             } else {
                 $statusCounts[$status]['quantityOut']++;
