@@ -125,6 +125,9 @@ class Domain
     #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $sendUserMailAlerts = false;
 
+    #[ORM\Column(name: 'api_key_hash', type: 'string', length: 64, nullable: true, unique: true)]
+    private ?string $apiKeyHash = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -555,6 +558,23 @@ class Domain
     {
         $this->sendUserMailAlerts = $sendUserMailAlerts;
         return $this;
+    }
+
+    public function getApiKeyHash(): ?string
+    {
+        return $this->apiKeyHash;
+    }
+
+    public function setApiKeyHash(?string $apiKeyHash): self
+    {
+        $this->apiKeyHash = $apiKeyHash;
+
+        return $this;
+    }
+
+    public function hasApiKey(): bool
+    {
+        return $this->apiKeyHash !== null;
     }
 
     public function hasIMAPConnector(): bool

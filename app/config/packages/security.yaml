@@ -35,6 +35,11 @@ security:
         captcha:
             pattern: ^/captcha-handler
             security:  false
+        api:
+            pattern: ^/api
+            stateless: true
+            custom_authenticator:
+             - App\Security\ApiKeyAuthenticator
         main:
             lazy: true
 #            provider: users_in_memory
@@ -63,6 +68,7 @@ security:
          - { path: ^/login, roles: PUBLIC_ACCESS }
          - { path: ^/connect, roles: PUBLIC_ACCESS }
          - { path: ^/portal, roles: PUBLIC_ACCESS }
+         - { path: ^/api, roles: ROLE_API }
          - { path: ^/admin, roles: [ROLE_ADMIN] }
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
