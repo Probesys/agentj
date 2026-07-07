@@ -2,9 +2,9 @@
 
 namespace App\Repository;
 
-use App\Entity\Domain;
 use App\Entity\Address;
-use App\Entity\Mailaddr;
+use App\Entity\Domain;
+use App\Entity\RuleAddress;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Util\Email;
@@ -231,7 +231,7 @@ class WblistRepository extends BaseRepository
      */
     public function getDefaultDomainWBList(Domain $domain): ?Wblist
     {
-        $sid = $this->getEntityManager()->getRepository(Mailaddr::class)->findOneBy(['email' => '@.']);
+        $sid = $this->getEntityManager()->getRepository(RuleAddress::class)->findOneBy(['email' => '@.']);
         $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy([
             'email' => '@' . $domain->getDomain(),
         ]);
@@ -243,7 +243,7 @@ class WblistRepository extends BaseRepository
      */
     public function updateOrCreateRule(
         User $recipientUser,
-        Mailaddr $senderMailaddr,
+        RuleAddress $senderRuleAddress,
         string $wbRule,
         int $type,
         int $priority,
@@ -251,11 +251,11 @@ class WblistRepository extends BaseRepository
     ): void {
         $wblist = $this->findOneBy([
             'rid' => $recipientUser,
-            'sid' => $senderMailaddr,
+            'sid' => $senderRuleAddress,
         ]);
 
         if (!$wblist) {
-            $wblist = new Wblist($recipientUser, $senderMailaddr);
+            $wblist = new Wblist($recipientUser, $senderRuleAddress);
         }
 
         $wblist->setWbRule($wbRule);

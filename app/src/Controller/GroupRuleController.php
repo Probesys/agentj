@@ -4,11 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Group;
 use App\Entity\GroupRule;
-use App\Entity\Mailaddr;
+use App\Entity\RuleAddress;
 use App\Form\GroupRuleType;
 use App\Repository\GroupRuleRepository;
 use App\Service\GroupService;
-use App\Service\MailaddrService;
+use App\Service\RuleAddressService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -67,7 +67,7 @@ class GroupRuleController extends AbstractController
             $request->query->getInt('page', 1),
             $perPage,
             [
-                'defaultSortFieldName' => 'madr.email',
+                'defaultSortFieldName' => 'ra.email',
                 'defaultSortDirection' => 'asc',
                 'wrap-queries' => true,
                 'fetchJoinCollection' => false,
@@ -85,7 +85,7 @@ class GroupRuleController extends AbstractController
     public function new(
         int $groupId,
         Request $request,
-        MailaddrService $mailaddrService,
+        RuleAddressService $ruleAddressService,
         GroupService $groupService,
     ): Response {
         $group = $this->em->getRepository(Group::class)->findOneBy((['id' => $groupId]));
@@ -105,15 +105,15 @@ class GroupRuleController extends AbstractController
 
             $data = $form->getData();
 
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
-            if (!$mailaddr) {
-                $mailaddr = new Mailaddr();
-                $mailaddr->setEmail($data['email']);
-                $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
-                $em->persist($mailaddr);
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
+            if (!$ruleAddress) {
+                $ruleAddress = new RuleAddress();
+                $ruleAddress->setEmail($data['email']);
+                $ruleAddress->setPriority($ruleAddressService->computePriority($data['email']));
+                $em->persist($ruleAddress);
             } else {
                 $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
-                    'mailaddr' => $mailaddr,
+                    'ruleAddress' => $ruleAddress,
                     'group' => $group,
                 ]));
                 if ($groupRuleExists) {
@@ -122,7 +122,7 @@ class GroupRuleController extends AbstractController
                 }
             }
 
-            $groupRule->setMailaddr($mailaddr);
+            $groupRule->setRuleAddress($ruleAddress);
 
             $groupRule->setGroup($group);
             $groupRule->setWbRule($data['wbRule']);
@@ -148,11 +148,11 @@ class GroupRuleController extends AbstractController
         int $groupId,
         int $sid,
         Request $request,
-        MailaddrService $mailaddrService,
+        RuleAddressService $ruleAddressService,
         GroupService $groupService,
     ): Response {
         $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy([
-            'mailaddr' => $sid,
+            'ruleAddress' => $sid,
             'group' => $groupId,
         ]);
         $group = $this->em->getRepository(Group::class)->findOneBy(['id' => $groupId]);
@@ -166,24 +166,24 @@ class GroupRuleController extends AbstractController
 
             $data = $form->getData();
 
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
-            if (!$mailaddr) {
-                $mailaddr = new Mailaddr();
-                $mailaddr->setEmail($data['email']);
-                $mailaddr->setPriority($mailaddrService->computePriority($data['email']));
-                $em->persist($mailaddr);
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
+            if (!$ruleAddress) {
+                $ruleAddress = new RuleAddress();
+                $ruleAddress->setEmail($data['email']);
+                $ruleAddress->setPriority($ruleAddressService->computePriority($data['email']));
+                $em->persist($ruleAddress);
             } else {
                 $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
-                    'mailaddr' => $mailaddr,
+                    'ruleAddress' => $ruleAddress,
                     'group' => $group,
                 ]));
-                if ($groupRuleExists && $mailaddr != $groupRule->getMailaddr()) {
+                if ($groupRuleExists && $ruleAddress != $groupRule->getRuleAddress()) {
                     $this->addFlash('warning', $this->translator->trans('Message.Flash.ruleExists'));
                     return $this->redirectToRoute('group_rule_new', ['groupId' => $groupId]);
                 }
             }
 
-            $groupRule->setMailaddr($mailaddr);
+            $groupRule->setRuleAddress($ruleAddress);
             $groupRule->setGroup($group);
             $groupRule->setWbRule($data['wbRule']);
 
@@ -195,7 +195,7 @@ class GroupRuleController extends AbstractController
 
             return $this->redirectToRoute('group_rule_index', ['groupId' => $groupId]);
         } else {
-            $form->get('email')->setData($groupRule->getMailaddr()->getEmail());
+            $form->get('email')->setData($groupRule->getRuleAddress()->getEmail());
             $form->get('wbRule')->setData($groupRule->getWbRule());
         }
 
@@ -220,7 +220,7 @@ class GroupRuleController extends AbstractController
         }
 
         $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy(([
-            'mailaddr' => $sid,
+            'ruleAddress' => $sid,
             'group' => $groupId,
         ]));
 

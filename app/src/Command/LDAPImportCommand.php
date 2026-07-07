@@ -8,7 +8,7 @@ use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Service\GroupService;
 use App\Service\LdapService;
-use App\Service\MailaddrService;
+use App\Service\RuleAddressService;
 use App\Service\UserService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
@@ -255,7 +255,7 @@ class LDAPImportCommand extends Command
         $user->setOriginConnector($this->connector);
         $user->setEmail($emailAddress);
         $user->setDomain($domain);
-        $user->setPriority(MailaddrService::computePriority($emailAddress));
+        $user->setPriority(RuleAddressService::computePriority($emailAddress));
         $user->setRoles('["ROLE_USER"]');
         $user->setBypassHumanAuth($this->connector->isLdapBypassHumanAuth());
         $user->setReport($this->connector->isLdapReport());

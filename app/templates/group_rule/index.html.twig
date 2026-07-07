@@ -32,14 +32,14 @@
 			<table class="table">
 				<thead>
 					<tr>
-						<th>{{ knp_pagination_sortable(group_rules, 'Generics.fields.sender'|trans(), 'madr.email') }}</th>
+						<th>{{ knp_pagination_sortable(group_rules, 'Generics.fields.sender'|trans(), 'ra.email') }}</th>
 						<th>{{ 'Entities.Group.labels.rules'|trans() }}</th>
 						<th>{{ 'Generics.labels.actions'|trans() }}</th>
 					</tr>
 				</thead>
 				<tbody>
 					{% for group_rule in group_rules %}
-						{% set email = group_rule.getMailaddr().email %}
+						{% set email = group_rule.getRuleAddress().email %}
 						{% if  email != "@." %}
 							<tr>
 								<td data-title="{{'Generics.fields.sender'|trans }}">{{email}}</td>
@@ -52,7 +52,7 @@
 											<a
                                                 href="#"
                                                 data-modal-method-type="GET"
-                                                data-url-modal-content="{{ path('group_rule_edit',{'sid':group_rule.mailaddr.id,'groupId':group_rule.group.id,}) }}"
+                                                data-url-modal-content="{{ path('group_rule_edit',{'sid':group_rule.ruleAddress.id,'groupId':group_rule.group.id,}) }}"
                                                 class='btn-open-modal btn btn-sm btn-success '
                                                 title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
                                             >
@@ -63,13 +63,13 @@
 										<li class="list-inline-item">
 											<form
                                                 method="post"
-                                                action="{{ path('group_rule_delete',{'groupId':group_rule.group.id,'sid':group_rule.mailaddr.id}) }}"
+                                                action="{{ path('group_rule_delete',{'groupId':group_rule.group.id,'sid':group_rule.ruleAddress.id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                                 <input
                                                     type="hidden"
                                                     name="_token"
-                                                    value="{{ csrf_token('delete' ~ group_rule.group.id ~ '_' ~ group_rule.mailaddr.id) }}"
+                                                    value="{{ csrf_token('delete' ~ group_rule.group.id ~ '_' ~ group_rule.ruleAddress.id) }}"
                                                 >
 												<button
                                                     type="submit"
