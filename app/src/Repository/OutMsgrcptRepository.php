@@ -29,7 +29,7 @@ class OutMsgrcptRepository extends BaseMessageRecipientRepository
                 Join::WITH,
                 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag'
             )
-            ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->leftJoin('App\Entity\Address', 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         return $queryBuilder;
     }

@@ -2,19 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\MaddrRepository;
+use App\Repository\AddressRepository;
 use App\Util\Url;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * Maddr
- */
 #[ORM\Table(name: 'maddr')]
 #[ORM\Index(name: 'idx_maddr_email', columns: ['email'])]
 #[ORM\UniqueConstraint(name: 'part_email', columns: ['partition_tag', 'email'])]
-#[ORM\Entity(repositoryClass: MaddrRepository::class)]
-class Maddr
+#[ORM\Entity(repositoryClass: AddressRepository::class)]
+class Address
 {
     #[ORM\Column(name: 'id', type: 'bigint', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]
