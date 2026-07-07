@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Amavis\ContentType;
 use App\Entity\Domain;
-use App\Entity\Maddr;
+use App\Entity\Address;
 use App\Entity\Msgrcpt;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
@@ -127,7 +127,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->innerJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
-            ->innerJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->innerJoin('App\Entity\Address', 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
 
         return $queryBuilder;
@@ -163,7 +163,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
             // messages, so we don't need to join this table.
             // It can be used for the "searchKey" filter too, but the "hasFilters"
             // condition above takes care of this case.
-            $countQueryBuilder->join(Maddr::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            $countQueryBuilder->join(Address::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
         }
 
         $this->addUserSpecificJoins($countQueryBuilder, $user);
@@ -249,7 +249,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
         // And add the recipient/sender search condition.
         if (count($allUserEmails) > 0) {
-            $queryBuilder->innerJoin('App\Entity\Maddr', 'maddrSender', Join::WITH, 'maddrSender.id = m.sid');
+            $queryBuilder->innerJoin('App\Entity\Address', 'maddrSender', Join::WITH, 'maddrSender.id = m.sid');
 
             $queryBuilder->andWhere('(maddr.email IN (:users) OR maddrSender.email IN (:users))');
             $queryBuilder->setParameter('users', $allUserEmails);

@@ -57,7 +57,7 @@ class AmavisAutoReleaseCommand extends Command
             $recipient = $messageRecipient->getRid();
             $senderEmail = $messageRecipient->getMsgs()->getSenderEmail();
 
-            $recipientUser = $this->userRepository->findOneByMailAddress($recipient);
+            $recipientUser = $this->userRepository->findOneByAddress($recipient);
 
             $recipientOriginalUser = $recipientUser->getOriginalUser();
             if ($recipientOriginalUser) {

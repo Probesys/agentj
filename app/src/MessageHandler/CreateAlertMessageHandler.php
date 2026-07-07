@@ -8,7 +8,7 @@ use App\Entity\SqlLimitReport;
 use App\Entity\Alert;
 use App\Entity\User;
 use App\Entity\Domain;
-use App\Entity\Maddr;
+use App\Entity\Address;
 use App\Service\LocaleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -97,8 +97,8 @@ class CreateAlertMessageHandler
                         // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
                         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
                             $sid = $outMsg->getSid();
-                            $maddr = $this->entityManager->getRepository(Maddr::class)->find($sid);
-                            $domain = $maddr ? $maddr->getDomain() : null;
+                            $address = $this->entityManager->getRepository(Address::class)->find($sid);
+                            $domain = $address ? $address->getDomain() : null;
                             $userDomains = $user->getDomains()->toArray();
                             if ($domain === null || !in_array($domain, $userDomains)) {
                                 continue;

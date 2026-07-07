@@ -54,7 +54,7 @@ class MessageService
         $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($normalizedEmail);
 
         $recipient = $messageRecipient->getRid();
-        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+        $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
             $this->wblistRepository->updateOrCreateRule(
@@ -159,7 +159,7 @@ class MessageService
         $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
-        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+        $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
             $this->wblistRepository->updateOrCreateRule(

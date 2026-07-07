@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
-use App\Entity\Maddr;
+use App\Entity\Address;
 use App\Entity\Mailaddr;
 use App\Entity\User;
 use App\Entity\Wblist;
@@ -157,7 +157,7 @@ class WblistRepository extends BaseRepository
      *
      * @return Wblist[]
      */
-    public function findBySenderEmailAndRecipient(string $senderEmail, Maddr $recipient): array
+    public function findBySenderEmailAndRecipient(string $senderEmail, Address $recipient): array
     {
         $recipientAddresses = Email::getAddressLookups($recipient->getEmail());
         $senderAddresses = Email::getAddressLookups($senderEmail);
@@ -204,7 +204,7 @@ class WblistRepository extends BaseRepository
         return $wblists;
     }
 
-    public function isSenderAuthorizedByRecipient(string $senderEmail, Maddr $recipient): bool
+    public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
     {
         $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 
@@ -215,7 +215,7 @@ class WblistRepository extends BaseRepository
         return $wblists[0]->isWbRuleAuthorized();
     }
 
-    public function isSenderInRecipientList(string $senderEmail, Maddr $recipient): bool
+    public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool
     {
         $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 

@@ -2,29 +2,27 @@
 
 namespace App\Command;
 
-use App\Entity\Domain;
 use App\Amavis\MessageStatus;
-use App\Entity\Msgrcpt;
+use App\Entity\Domain;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Repository\DomainRepository;
 use App\Repository\MsgsRepository;
 use App\Repository\UserRepository;
 use App\Service\CryptEncryptService;
-use App\Service\LogService;
 use App\Service\LocaleService;
+use App\Service\LogService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use App\Amavis\DeliveryStatus;
-use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsCommand(
     name: 'agentj:send-auth-mail-token',
@@ -106,7 +104,7 @@ class SendAuthMailRequestCommand
                     continue;
                 }
 
-                $recipientUser = $this->userRepository->findOneByMailAddress($recipient);
+                $recipientUser = $this->userRepository->findOneByAddress($recipient);
                 if (!$recipientUser) {
                     continue;
                 }
