@@ -38,7 +38,7 @@ class OutMsgrcpt extends BaseMessageRecipient
      * As status is not consolidated for outgoing messages (thus, not set),
      * this method return a coherent status based on Amavis fields.
      *
-     * @see \App\Repository\MsgrcptRepository::consolidateStatus
+     * @see \App\Repository\MessageRecipientRepository::consolidateStatus
      */
     public function getStatus(): int
     {

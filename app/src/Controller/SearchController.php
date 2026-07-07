@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Form\SearchFilterType;
-use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\OutMsgrcptRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -21,7 +21,7 @@ class SearchController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private OutMsgrcptRepository $outMsgrcptRepository
     ) {
     }
@@ -42,7 +42,7 @@ class SearchController extends AbstractController
 
         $messageType = $activeFilters['messageType'] ?? 'incoming';
         if ($messageType == 'incoming') {
-            $allMessages = $this->msgrcptSearchRepository
+            $allMessages = $this->messageRecipientSearchRepository
                 ->getAdvancedSearchQuery($activeFilters);
         } else {
             $allMessages = $this->outMsgrcptRepository

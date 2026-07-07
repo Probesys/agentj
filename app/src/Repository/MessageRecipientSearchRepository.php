@@ -2,31 +2,25 @@
 
 namespace App\Repository;
 
-use App\Amavis\ContentType;
-use App\Entity\Domain;
-use App\Entity\Address;
-use App\Entity\Msgrcpt;
-use App\Entity\User;
 use App\Amavis\MessageStatus;
-use App\Amavis\DeliveryStatus;
 use App\Doctrine\SqlIndexWalker;
-use App\Repository\BaseMessageRecipientRepository;
-use App\Repository\UserRepository;
+use App\Entity\Address;
+use App\Entity\MessageRecipient;
+use App\Entity\User;
 use App\Util\Email;
 use App\Util\Search;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * @extends BaseMessageRecipientRepository<Msgrcpt>
+ * @extends BaseMessageRecipientRepository<MessageRecipient>
  *
  * @phpstan-import-type SortParams from Search
  */
-class MsgrcptSearchRepository extends BaseMessageRecipientRepository
+class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
 {
     public function __construct(
         ManagerRegistry $registry,
@@ -36,7 +30,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         #[Autowire(env: 'bool:FEATURE_FLAG_HINT_INDEX')]
         private bool $featureFlagHintIndex,
     ) {
-        parent::__construct($registry, Msgrcpt::class);
+        parent::__construct($registry, MessageRecipient::class);
     }
 
     /**
@@ -154,7 +148,7 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
         $countQueryBuilder->resetDQLPart('from');
         $countQueryBuilder->resetDQLPart('orderBy');
 
-        $countQueryBuilder->from(Msgrcpt::class, 'mr');
+        $countQueryBuilder->from(MessageRecipient::class, 'mr');
 
         if ($user && !$user->isSuperAdmin()) {
             // When counting, maddr is used only to filter messages by email

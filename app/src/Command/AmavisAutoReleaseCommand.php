@@ -3,8 +3,8 @@
 namespace App\Command;
 
 use App\Amavis\MessageStatus;
-use App\Repository\MsgrcptRepository;
-use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MessageRecipientRepository;
+use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\UserRepository;
 use App\Repository\WblistRepository;
 use App\Service\MessageService;
@@ -12,7 +12,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Lock\LockFactory;
 
 #[AsCommand(
@@ -24,8 +23,8 @@ class AmavisAutoReleaseCommand extends Command
     private int $batchSize = 500;
 
     public function __construct(
-        private MsgrcptRepository $messageRecipientRepository,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private UserRepository $userRepository,
         private WblistRepository $wblistRepository,
         private MessageService $messageService,
@@ -45,7 +44,7 @@ class AmavisAutoReleaseCommand extends Command
             return Command::FAILURE;
         }
 
-        $unreleasedSearchQuery = $this->msgrcptSearchRepository->getSearchQuery(
+        $unreleasedSearchQuery = $this->messageRecipientSearchRepository->getSearchQuery(
             null,
             messageStatus: MessageStatus::UNRELEASED,
         );

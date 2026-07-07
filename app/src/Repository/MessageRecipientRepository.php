@@ -2,29 +2,28 @@
 
 namespace App\Repository;
 
-use App\Amavis\DeliveryStatus;
 use App\Amavis\ContentType;
+use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
-use App\Entity\Msgrcpt;
+use App\Entity\MessageRecipient;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Util\Url;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\ORM\Query;
 
 /**
- * @extends BaseRepository<Msgrcpt>
+ * @extends BaseRepository<MessageRecipient>
  */
-class MsgrcptRepository extends BaseRepository
+class MessageRecipientRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Msgrcpt::class);
+        parent::__construct($registry, MessageRecipient::class);
     }
 
-    public function findOneByMessageAndRid(Msgs $message, int $rid): ?Msgrcpt
+    public function findOneByMessageAndRid(Msgs $message, int $rid): ?MessageRecipient
     {
         return $this->findOneBy([
             'partitionTag' => $message->getPartitionTag(),
@@ -34,7 +33,7 @@ class MsgrcptRepository extends BaseRepository
     }
 
     /**
-     * @return Msgrcpt[]
+     * @return MessageRecipient[]
      */
     public function findByMessage(Msgs $message): array
     {
@@ -59,18 +58,18 @@ class MsgrcptRepository extends BaseRepository
      * returned by this method in order to be sure to release or ban the
      * correct messages.
      *
-     * @return Msgrcpt[]
+     * @return MessageRecipient[]
      */
     public function findSentToUserByEmail(User $recipientUser, string $senderFrom): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
-            SELECT mrcpt
-            FROM App\Entity\Msgrcpt mrcpt
-            JOIN mrcpt.msgs m
-            JOIN mrcpt.rid r
+            SELECT mr
+            FROM App\Entity\MessageRecipient as mr
+            JOIN mr.msgs m
+            JOIN mr.rid r
             WHERE r.email = :recipientEmail
             AND m.fromAddr = :senderFrom
-            AND mrcpt.status IS NOT NULL
+            AND mr.status IS NOT NULL
         SQL);
 
         $query->setParameter('recipientEmail', $recipientUser->getEmail());
@@ -89,18 +88,18 @@ class MsgrcptRepository extends BaseRepository
      * returned by this method in order to be sure to release or ban the
      * correct messages.
      *
-     * @return Msgrcpt[]
+     * @return MessageRecipient[]
      */
     public function findSentToDomainByEmail(Domain $recipientDomain, string $senderFrom): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
-            SELECT mrcpt
-            FROM App\Entity\Msgrcpt mrcpt
-            JOIN mrcpt.msgs m
-            JOIN mrcpt.rid r
+            SELECT mr
+            FROM App\Entity\MessageRecipient as mr
+            JOIN mr.msgs m
+            JOIN mr.rid r
             WHERE r.domain = :recipientReverseDomainName
             AND m.fromAddr = :senderFrom
-            AND mrcpt.status IS NOT NULL
+            AND mr.status IS NOT NULL
         SQL);
 
         $domainName = $recipientDomain->getDomain();
@@ -140,13 +139,13 @@ class MsgrcptRepository extends BaseRepository
     }
 
     /**
-     * @return Msgrcpt[]
+     * @return MessageRecipient[]
      */
     public function findByEmailRecipient(User $user): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
-            FROM App\Entity\Msgrcpt mr
+            FROM App\Entity\MessageRecipient as mr
             JOIN mr.rid AS r
             WHERE r.email = :email
         SQL);

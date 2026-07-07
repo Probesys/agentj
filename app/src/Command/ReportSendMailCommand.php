@@ -2,10 +2,10 @@
 
 namespace App\Command;
 
-use App\Entity\User;
-use App\Entity\Msgrcpt;
 use App\Amavis\MessageStatus;
-use App\Repository\MsgrcptSearchRepository;
+use App\Entity\MessageRecipient;
+use App\Entity\User;
+use App\Repository\MessageRecipientSearchRepository;
 use App\Service\LocaleService;
 use App\Service\MessageService;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,11 +16,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 #[AsCommand(
@@ -36,7 +35,7 @@ class ReportSendMailCommand extends Command
         private MailerInterface $mailer,
         #[Autowire(param: 'app.domain_mail_authentification_sender')]
         private string $defaultMailFrom,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private MessageService $messageService,
         private UrlGeneratorInterface $urlGenerator,
         private LocaleService $localeService,
@@ -131,16 +130,16 @@ class ReportSendMailCommand extends Command
     }
 
     /**
-     * @param Msgrcpt[] $messageRecipients
+     * @param MessageRecipient[] $messageRecipients
      */
     private function createEmailContent(User $user, array $messageRecipients): string
     {
-        $nbUntreated = $this->msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED);
-        $nbAuthorized = $this->msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
-        $nbBanned = $this->msgrcptSearchRepository->countByType($user, MessageStatus::BANNED);
-        $nbDeleted = $this->msgrcptSearchRepository->countByType($user, MessageStatus::DELETED);
-        $nbRestored = $this->msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED);
-        $nbSpammed = $this->msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED);
+        $nbUntreated = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::UNTREATED);
+        $nbAuthorized = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
+        $nbBanned = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::BANNED);
+        $nbDeleted = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::DELETED);
+        $nbRestored = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::RESTORED);
+        $nbSpammed = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::SPAMMED);
 
         $domain = $user->getDomain();
         $locale = $this->localeService->getUserLocale($user);
@@ -175,7 +174,7 @@ class ReportSendMailCommand extends Command
     }
 
     /**
-     * @param Msgrcpt[] $messageRecipients
+     * @param MessageRecipient[] $messageRecipients
      */
     private function replaceForeachMessages(
         string $body,
@@ -238,11 +237,11 @@ class ReportSendMailCommand extends Command
     }
 
     /**
-     * @return Msgrcpt[]
+     * @return MessageRecipient[]
      */
     private function getMessageRecipients(User $user): array
     {
-        $messageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+        $messageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
             $user,
             messageStatus: MessageStatus::UNTREATED,
             fromDate: $user->getDateLastReport(),
@@ -252,7 +251,7 @@ class ReportSendMailCommand extends Command
         $reportSpamLevel = $domain->getReportSpamLevel();
 
         if ($reportSpamLevel > 0) {
-            $spamMessageRecipients = $this->msgrcptSearchRepository->getSearchQuery(
+            $spamMessageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
                 $user,
                 messageStatus: MessageStatus::SPAMMED,
                 maxSpamLevel: $reportSpamLevel,

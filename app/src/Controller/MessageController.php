@@ -3,27 +3,26 @@
 namespace App\Controller;
 
 use App\Amavis\MessageStatus;
-use App\Entity\Msgrcpt;
+use App\Entity\MessageRecipient;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
-use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MsgsRepository;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Webklex\PHPIMAP\Message;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: '/message')]
 class MessageController extends AbstractController
@@ -40,7 +39,7 @@ class MessageController extends AbstractController
     public function index(
         Request $request,
         PaginatorInterface $paginator,
-        MsgrcptSearchRepository $msgrcptSearchRepository,
+        MessageRecipientSearchRepository $messageRecipientSearchRepository,
         MsgsRepository $msgsRepository,
         ?string $type = null
     ): Response {
@@ -174,7 +173,7 @@ class MessageController extends AbstractController
         }
 
         $searchKey = trim($request->query->getString('search'));
-        $messagesRecipientsQuery = $msgrcptSearchRepository->getSearchQuery(
+        $messagesRecipientsQuery = $messageRecipientSearchRepository->getSearchQuery(
             $user,
             $messageStatus,
             $searchKey,
@@ -209,19 +208,19 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/stats/counts', name: 'message_counts', methods: ['GET'])]
-    public function countAll(MsgrcptSearchRepository $msgrcptSearchRepository): JsonResponse
+    public function countAll(MessageRecipientSearchRepository $messageRecipientSearchRepository): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
 
         return new JsonResponse([
-            'untreated' => $msgrcptSearchRepository->countByType($user, MessageStatus::UNTREATED),
-            'spammed' => $msgrcptSearchRepository->countByType($user, MessageStatus::SPAMMED),
-            'virus' => $msgrcptSearchRepository->countByType($user, MessageStatus::VIRUS),
-            'authorized' => $msgrcptSearchRepository->countByType($user, MessageStatus::AUTHORIZED),
-            'banned' => $msgrcptSearchRepository->countByType($user, MessageStatus::BANNED),
-            'deleted' => $msgrcptSearchRepository->countByType($user, MessageStatus::DELETED),
-            'restored' => $msgrcptSearchRepository->countByType($user, MessageStatus::RESTORED),
+            'untreated' => $messageRecipientSearchRepository->countByType($user, MessageStatus::UNTREATED),
+            'spammed' => $messageRecipientSearchRepository->countByType($user, MessageStatus::SPAMMED),
+            'virus' => $messageRecipientSearchRepository->countByType($user, MessageStatus::VIRUS),
+            'authorized' => $messageRecipientSearchRepository->countByType($user, MessageStatus::AUTHORIZED),
+            'banned' => $messageRecipientSearchRepository->countByType($user, MessageStatus::BANNED),
+            'deleted' => $messageRecipientSearchRepository->countByType($user, MessageStatus::DELETED),
+            'restored' => $messageRecipientSearchRepository->countByType($user, MessageStatus::RESTORED),
         ]);
     }
 
@@ -230,15 +229,15 @@ class MessageController extends AbstractController
     public function showAction(int $partitionTag, string $mailId, int $rid): Response
     {
 
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid
         ]);
-        if (!$msgRcpt) {
+        if (!$messageRecipient) {
             throw $this->createNotFoundException('The message does not exist.');
         }
-        $this->checkMailAccess($msgRcpt);
+        $this->checkMailAccess($messageRecipient);
 
         $msg = $this->em->getRepository(Msgs::class)->findOneBy([
             'partitionTag' => $partitionTag,
@@ -247,12 +246,12 @@ class MessageController extends AbstractController
 
         $wblists = $this->em->getRepository(Wblist::class)->findBySenderEmailAndRecipient(
             $msg->getSenderEmail(),
-            $msgRcpt->getRid(),
+            $messageRecipient->getRid(),
         );
 
         return $this->render('message/show.html.twig', [
             'msg' => $msg,
-            'msgRcpt' => $msgRcpt,
+            'messageRecipient' => $messageRecipient,
             'wblists' => $wblists
         ]);
     }
@@ -274,7 +273,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -345,7 +344,7 @@ class MessageController extends AbstractController
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
     public function authorized(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): Response {
@@ -366,7 +365,7 @@ class MessageController extends AbstractController
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
     public function banned(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): Response {
@@ -402,7 +401,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -420,7 +419,7 @@ class MessageController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
@@ -442,7 +441,7 @@ class MessageController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/bannedDomain', name: 'message_banned_domain')]
     public function bannedDomain(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
@@ -464,7 +463,7 @@ class MessageController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsSpam', name: 'message_mark_as_spam')]
     public function markAsSpam(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
@@ -484,7 +483,7 @@ class MessageController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsHam', name: 'message_mark_as_ham')]
     public function markAsHam(
-        Msgrcpt $messageRecipient,
+        MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
@@ -504,42 +503,42 @@ class MessageController extends AbstractController
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
     public function showDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ]);
 
-        if (!$msgRcpt) {
+        if (!$messageRecipient) {
             throw $this->createNotFoundException('The message does not exist.');
         }
 
-        $this->checkMailAccess($msgRcpt);
+        $this->checkMailAccess($messageRecipient);
 
         return $this->render('message/content.html.twig', [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
-            'msgRcpt' => $msgRcpt
+            'messageRecipient' => $messageRecipient
         ]);
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
     public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
     {
-        $msgRcpt = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ]);
 
-        if (!$msgRcpt) {
+        if (!$messageRecipient) {
             throw $this->createNotFoundException('The message does not exist.');
         }
 
-        $this->checkMailAccess($msgRcpt);
+        $this->checkMailAccess($messageRecipient);
 
-        $message = $msgRcpt->getMsgs();
+        $message = $messageRecipient->getMsgs();
 
         if (!$message->isInQuarantine()) {
             throw $this->createNotFoundException('The message is not in quarantine.');
@@ -588,11 +587,11 @@ class MessageController extends AbstractController
             'from' => $from,
             'subject' => $subject,
             'attachments' => $attachments,
-            'msgRcpt' => $msgRcpt
+            'messageRecipient' => $messageRecipient
         ]);
     }
 
-    private function checkMailAccess(Msgrcpt $msgRcpt): void
+    private function checkMailAccess(MessageRecipient $messageRecipient): void
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -606,14 +605,14 @@ class MessageController extends AbstractController
 
         if (
             !$this->isGranted("ROLE_ADMIN") &&
-            !in_array($msgRcpt->getRid()->getEmail(), $accessibleRecipientEmails)
+            !in_array($messageRecipient->getRid()->getEmail(), $accessibleRecipientEmails)
         ) {
             throw new AccessDeniedException();
         }
     }
 
     /**
-     * @return array{Msgs, Msgrcpt}
+     * @return array{Msgs, MessageRecipient}
      */
     private function fetchMessageFromBatchId(string $id): array
     {
@@ -631,7 +630,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -648,7 +647,7 @@ class MessageController extends AbstractController
     )]
     public function checkReleaseStatus(int $partitionTag, string $mailId, int $rseqnum): JsonResponse
     {
-        $messageRecipient = $this->em->getRepository(Msgrcpt::class)->findOneBy([
+        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rseqnum' => $rseqnum,

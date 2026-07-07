@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
-use App\Entity\Msgrcpt;
 use App\Repository\MsgsRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Webklex\PHPIMAP\Message as Email;
 
 /**
@@ -24,11 +23,11 @@ use Webklex\PHPIMAP\Message as Email;
 #[ORM\Entity(repositoryClass: MsgsRepository::class)]
 class Msgs extends BaseMessage
 {
-    /** @var Collection<int, MsgRcpt> $msgRcpts */
-    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MsgRcpt::class)]
+    /** @var Collection<int, MessageRecipient> $messageRecipients */
+    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MessageRecipient::class)]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
-    private Collection $msgRcpts;
+    private Collection $messageRecipients;
 
     /** @var Collection<int, Quarantine> $quarantineChunks */
     #[ORM\OneToMany(mappedBy: 'message', targetEntity: Quarantine::class)]
@@ -38,16 +37,16 @@ class Msgs extends BaseMessage
 
     public function __construct()
     {
-        $this->msgRcpts = new ArrayCollection();
+        $this->messageRecipients = new ArrayCollection();
         $this->quarantineChunks = new ArrayCollection();
     }
 
     /**
-     * @return Collection<int, Msgrcpt>
+     * @return Collection<int, MessageRecipient>
      */
-    public function getMsgRcpts(): Collection
+    public function getMessageRecipients(): Collection
     {
-        return $this->msgRcpts;
+        return $this->messageRecipients;
     }
 
     /**
