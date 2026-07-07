@@ -5,7 +5,7 @@ on: [pull_request]
 jobs:
   linters:
     env:
-        NO_DOCKER: true
+      NO_DOCKER: "true"
 
     runs-on: ubuntu-24.04
 
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
-            php-version: 8.4
+          php-version: 8.4
 
       - name: Setup env
         run: |
@@ -48,31 +48,19 @@ jobs:
       - name: Run the linters
         run: make lint
 
-  testmail:
+  test_mail:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup env
         run: |
           sudo apt-get update ; sudo apt-get install -y swaks
-          cp .env.example .env
-          sed -i "s|#COMPOSE_FILE=.*|COMPOSE_FILE=docker-compose.yml:compose.dev.yml|g" .env
-          sed -i "s|APP_ENV=.*|APP_ENV=dev|g" .env
-          sed -i "s|SF_APP_SECRET=.*|SF_APP_SECRET=`openssl rand -hex 16`|" .env
-          sed -i "s|SF_TOKEN_ENCRYPTION_IV=.*|SF_TOKEN_ENCRYPTION_IV=`openssl rand -hex 8`|" .env
-          sed -i "s|SF_TOKEN_ENCRYPTION_SALT=.*|SF_TOKEN_ENCRYPTION_SALT=`openssl rand -base64 32`|" .env
-          sed -i "s|example.com|agentj.local|g" .env
-          sed -i "s|#UID=.*|UID=`id -u`|g" .env
-          sed -i "s|#GID=.*|GID=`id -g`|g" .env
-          sed -i "s|#MAILPIT_WEB_PORT=.*|MAILPIT_WEB_PORT=8025|g" .env
+          make .env
           echo 'SCHEDULER_CONSOLIDATE_FREQUENCY="1 second"' >> .env
           echo 'SCHEDULER_AUTORELEASE_FREQUENCY="1 second"' >> .env
 
       - name: Run docker-compose
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        env:
-          APP_ENV: dev
-          DOMAIN: agentj.local
+        uses: hoverkraft-tech/compose-action@v3
         with:
           compose-file: |
             docker-compose.yml
@@ -84,3 +72,50 @@ jobs:
         run: |
           ./tests/tests.sh
           exit $(cat `find tests/results -name '*.result'` | grep -c failed)
+
+  test_app:
+    env:
+      COVERAGE: "--coverage-html ./coverage --coverage-text"
+      TEST_RESULTS: "--log-junit test-results/junit.xml"
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup env
+        run: make .env
+
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v3
+        with:
+          compose-file: |
+            docker-compose.yml
+            compose.dev.yml
+          up-flags: --build
+          down-flags: --volumes
+
+      - name: Run tests
+        run: |
+          make test
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
+        with:
+            job_summary: false
+            check_run: false
+            files: |
+                ./app/test-results/**/*.xml
+                ./app/test-results/**/*.trx
+                ./app/test-results/**/*.json
+
+      - name: Upload test artifacts
+        if: (!cancelled())
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-artifacts
+          path: |
+            ./app/coverage/
+            ./app/test-results/

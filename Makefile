@@ -30,10 +30,11 @@ ifdef FILTER
 test: override FILTER := --filter=$(FILTER)
 endif
 test: COVERAGE ?= --coverage-html ./coverage
-test: ## Run the test suite (can take FILE, FILTER and COVERAGE arguments)
+test: ## Run the test suite (can take FILE, FILTER, TEST_RESULTS and COVERAGE arguments)
 	$(PHP) vendor/bin/phpunit \
 		-c phpunit.xml.dist \
 		--testdox \
+		$(TEST_RESULTS) \
 		$(COVERAGE) \
 		$(FILTER) \
 		$(FILE)
