@@ -50,4 +50,36 @@ class UserImportController extends AbstractController
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
+
+    /**
+     * Delete users for the calling domain.
+     *
+     * Auth: header "X-Api-Key: <key>" (see agentj:api-key:generate).
+     *
+     * Body: JSON array of email addresses, e.g. ["jane@example.com", "marc@example.com"]
+     */
+    #[Route(path: '/users/delete', name: 'api_users_delete', methods: 'POST')]
+    public function delete(Request $request): JsonResponse
+    {
+        $apiUser = $this->getUser();
+        if (!$apiUser instanceof ApiKeyUser) {
+            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $payload = json_decode($request->getContent(), true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($payload)) {
+            return new JsonResponse(
+                ['error' => 'Invalid JSON body, expected an array of email addresses'],
+                Response::HTTP_BAD_REQUEST,
+            );
+        }
+
+        if (count($payload) === 0) {
+            return new JsonResponse(['error' => 'Empty payload'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $result = $this->userApiImportService->deleteUsers($apiUser->getDomain(), $payload);
+
+        return new JsonResponse($result, Response::HTTP_OK);
+    }
 }

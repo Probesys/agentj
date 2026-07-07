@@ -118,4 +118,49 @@ class UserApiImportService
 
         return ['imported' => $imported, 'updated' => $updated, 'errors' => $errors];
     }
+
+    /**
+     * @param array<int, mixed> $emails
+     * @return array{deleted: int, errors: string[]}
+     */
+    public function deleteUsers(Domain $domain, array $emails): array
+    {
+        $em = $this->em;
+        $deleted = 0;
+        $errors = [];
+        $seen = [];
+        $domainSuffix = '@' . strtolower($domain->getDomain());
+
+        foreach (array_slice($emails, 0, self::MAX_ROWS) as $index => $email) {
+            if (!is_string($email) || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Row $index: invalid email";
+                continue;
+            }
+
+            $email = strtolower($email);
+            if (!str_ends_with($email, $domainSuffix)) {
+                $errors[] = "Row $index: email '$email' does not belong to domain '" . $domain->getDomain() . "'";
+                continue;
+            }
+
+            if (isset($seen[$email])) {
+                continue;
+            }
+            $seen[$email] = true;
+
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $email, 'domain' => $domain]);
+            if (!$user) {
+                $errors[] = "Row $index: email '$email' not found";
+                continue;
+            }
+
+            $em->remove($user);
+            $deleted++;
+        }
+
+        $em->flush();
+        $this->groupService->updateWblist();
+
+        return ['deleted' => $deleted, 'errors' => $errors];
+    }
 }
