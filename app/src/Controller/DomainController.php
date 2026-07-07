@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Domain;
 use App\Entity\DomainKey;
-use App\Entity\Mailaddr;
 use App\Entity\Policy;
+use App\Entity\RuleAddress;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\DomainType;
@@ -13,7 +13,7 @@ use App\Model\ConnectorTypes;
 use App\Repository\DomainRepository;
 use App\Repository\SettingsRepository;
 use App\Repository\WblistRepository;
-use App\Service\MailaddrService;
+use App\Service\RuleAddressService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -153,14 +153,14 @@ class DomainController extends AbstractController
             $wbRule = $form->get("wbRule")->getData();
 
             //for all domain @.
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
-            if (!$mailaddr) {
-                $mailaddr = new Mailaddr();
-                $mailaddr->setPriority(0); // priority for domain is 0
-                $mailaddr->setEmail('@.');
-                $this->em->persist($mailaddr);
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => '@.']));
+            if (!$ruleAddress) {
+                $ruleAddress = new RuleAddress();
+                $ruleAddress->setPriority(0); // priority for domain is 0
+                $ruleAddress->setEmail('@.');
+                $this->em->persist($ruleAddress);
             }
-            $wblist = new Wblist($user, $mailaddr);
+            $wblist = new Wblist($user, $ruleAddress);
             $wblist->setWbRule($wbRule);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
             $this->em->persist($wblist);
@@ -354,7 +354,7 @@ class DomainController extends AbstractController
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
     #[Route(path: '/{id}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
-    public function newwblist(Domain $domain, Request $request, MailaddrService $mailaddrService): Response
+    public function newwblist(Domain $domain, Request $request, RuleAddressService $ruleAddressService): Response
     {
         $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
@@ -376,27 +376,27 @@ class DomainController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => $data['email']]));
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
 
-            if (!$mailaddr) {
-                $mailaddr = new Mailaddr();
-                $mailaddr->setEmail($data['email']);
+            if (!$ruleAddress) {
+                $ruleAddress = new RuleAddress();
+                $ruleAddress->setEmail($data['email']);
 
-                $priority = $mailaddrService->computePriority($data['email']);
-                $mailaddr->setPriority($priority);
+                $priority = $ruleAddressService->computePriority($data['email']);
+                $ruleAddress->setPriority($priority);
 
-                $this->em->persist($mailaddr);
+                $this->em->persist($ruleAddress);
             } else {
-                $domainWblistexist = $this->em->getRepository(Wblist::class)->findOneBy(([
+                $domainWblistExists = $this->em->getRepository(Wblist::class)->findOneBy(([
                     'rid' => $user,
-                    'sid' => $mailaddr,
+                    'sid' => $ruleAddress,
                 ]));
-                if ($domainWblistexist) {
+                if ($domainWblistExists) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
                     return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
                 }
             }
-            $wblist = new Wblist($user, $mailaddr);
+            $wblist = new Wblist($user, $ruleAddress);
             $wblist->setWbRule($data['wbRule']);
             $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
 

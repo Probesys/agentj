@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Mailaddr;
+use App\Entity\Domain;
+use App\Entity\RuleAddress;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
-use App\Entity\Domain;
 use App\Repository\WblistRepository;
 use App\Service\LogService;
 use App\Service\Referrer;
@@ -236,37 +236,37 @@ class WblistController extends AbstractController
                     continue;
                 }
 
-                $mailaddrSender = $this->em->getRepository(Mailaddr::class)->findOneBy(['email' => $data]);
-                //if email doesn't exist then we create email in Mailaddr
-                if (!$mailaddrSender) {
-                    $mailaddrSender = new Mailaddr();
-                    $mailaddrSender->setEmail($data);
-                    $mailaddrSender->setPriority(6);
-                    $this->em->persist($mailaddrSender);
+                $ruleAddressSender = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
+                // if email doesn't exist then we create email in RuleAddress
+                if (!$ruleAddressSender) {
+                    $ruleAddressSender = new RuleAddress();
+                    $ruleAddressSender->setEmail($data);
+                    $ruleAddressSender->setPriority(6);
+                    $this->em->persist($ruleAddressSender);
                     $this->em->flush();
                 }
 
                 if (
                     isset($tabWblist[$domain->getId()]) &&
-                    in_array($mailaddrSender->getId(), $tabWblist[$domain->getId()])
+                    in_array($ruleAddressSender->getId(), $tabWblist[$domain->getId()])
                 ) {
                     continue;
                 }
 
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
                 $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
-                    'sid' => $mailaddrSender,
+                    'sid' => $ruleAddressSender,
                     'rid' => $user,
                 ]);
                 if (!$wblist) {
-                    $wblist = new Wblist($user, $mailaddrSender);
+                    $wblist = new Wblist($user, $ruleAddressSender);
                 }
 
                 $wblist->setWbRule($rule);
                 $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
                 $wblist->setType(Wblist::WBLIST_TYPE_IMPORT);
                 $this->em->persist($wblist);
-                $tabWblist[$domain->getId()][] = $mailaddrSender->getId();
+                $tabWblist[$domain->getId()][] = $ruleAddressSender->getId();
             }
             $this->em->flush();
         }

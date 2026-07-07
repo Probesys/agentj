@@ -16,10 +16,10 @@ class GroupRule
     #[ORM\Id]
     private Group $group;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr', fetch: 'EAGER')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\RuleAddress', fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
-    private Mailaddr $mailaddr;
+    private RuleAddress $ruleAddress;
 
     /**
      * @var string
@@ -51,14 +51,14 @@ class GroupRule
         return $this;
     }
 
-    public function getMailaddr(): ?Mailaddr
+    public function getRuleAddress(): ?RuleAddress
     {
-        return $this->mailaddr;
+        return $this->ruleAddress;
     }
 
-    public function setMailaddr(?Mailaddr $mailaddr): self
+    public function setRuleAddress(?RuleAddress $ruleAddress): self
     {
-        $this->mailaddr = $mailaddr;
+        $this->ruleAddress = $ruleAddress;
 
         return $this;
     }

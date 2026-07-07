@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Entity\GroupRule;
-use App\Entity\Mailaddr;
+use App\Entity\RuleAddress;
 use App\Repository\GroupRepository;
 use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,15 +40,15 @@ class UpdateGroupRuleCommand extends Command
             'active' => true
         ]);
 
-        $rootMailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
+        $rootRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => '@.']));
         foreach ($activeGroups as $group) {
             $groupRule = $this->em->getRepository(GroupRule::class)->findOneBy(([
-                'mailaddr' => $rootMailaddr,
+                'ruleAddress' => $rootRuleAddress,
                 'group' => $group,
             ]));
             if (!$groupRule) {
                 $groupRule = new GroupRule();
-                $groupRule->setMailaddr($rootMailaddr);
+                $groupRule->setRuleAddress($rootRuleAddress);
             }
             $groupRule->setGroup($group);
             $groupRule->setWb($group->getWb());

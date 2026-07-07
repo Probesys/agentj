@@ -25,8 +25,8 @@ class GroupRuleRepository extends BaseRepository
     public function getGroupRulesForGroup(Group $group): array
     {
         $dql = $this->createQueryBuilder('gr')
-            ->select('madr.id, gr.wb')
-            ->join('gr.mailaddr', 'madr')
+            ->select('ra.id, gr.wb')
+            ->join('gr.ruleAddress', 'ra')
             ->where('gr.group = :group')
             ->setParameter('group', $group);
         return $dql->getQuery()->getResult();
@@ -39,12 +39,12 @@ class GroupRuleRepository extends BaseRepository
     public function getSearchQuery(Group $group, string $searchKey = ''): Query
     {
         $queryBuilder = $this->createQueryBuilder('gr')
-            ->join('gr.mailaddr', 'madr')
+            ->join('gr.ruleAddress', 'ra')
             ->where('gr.group = :group')
             ->setParameter('group', $group);
 
         if ($searchKey !== '') {
-            $queryBuilder->andWhere('madr.email LIKE :searchKey')
+            $queryBuilder->andWhere('ra.email LIKE :searchKey')
                 ->setParameter('searchKey', '%' . $searchKey . '%');
         }
 

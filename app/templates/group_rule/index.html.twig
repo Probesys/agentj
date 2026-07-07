@@ -1,102 +1,100 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-	{{ 'Entities.Group.labels.groupRules'|trans() }}
-	{{group.name}}
+    {{ 'Entities.Group.labels.groupRules'|trans() }}
+    {{group.name}}
 {% endblock %}
 
 {% block body %}
 
-	{% set _title = 'Entities.Group.labels.groupRules'|trans ~ ' : ' ~ group.name %}
-	{% embed 'common/blockTitleAndButtons.html.twig' %}
+    {% set _title = 'Entities.Group.labels.groupRules'|trans ~ ' : ' ~ group.name %}
+    {% embed 'common/blockTitleAndButtons.html.twig' %}
 
-		{% block content_button_actions %}
-			<a href="#" data-url-modal-content="{{ path('group_edit',{'id':group.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
-			<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('groups_rules_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
-				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.addRule'|trans() }}
-			</a>
-		{% endblock %}
+    {% block content_button_actions %}
+        <a href="#" data-url-modal-content="{{ path('group_edit',{'id':group.id}) }}" class=' btn-open-modal btn-success btn float-right ml-1 col-sm-12 col-md-4 mb-1' data-target='authorized'>{{ 'Entities.Group.Actions.updateGroup'|trans() }}</a>
+        <a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('groups_rules_new',{'groupId':group.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
+            <i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Group.Actions.addRule'|trans() }}
+        </a>
+    {% endblock %}
 
-	{% endembed %}
+    {% endembed %}
 
-	<div class="col mb-3 bg-white pb-3">
-		<div class="row">
-			<div class="col-md-12">
-				{% include 'common/_rapidSearchForm.html.twig'%}
-			</div>
-		</div>
-	</div>
+    <div class="col mb-3 bg-white pb-3">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/_rapidSearchForm.html.twig'%}
+            </div>
+        </div>
+    </div>
 
-	<div class="table-responsive">
-		<section id="no-more-tables">
-			<table class="table">
-				<thead>
-					<tr>
-						<th>{{ knp_pagination_sortable(group_rules, 'Generics.fields.sender'|trans(), 'madr.email') }}</th>
-						<th>{{ 'Entities.Group.labels.rules'|trans() }}</th>
-						<th>{{ 'Generics.labels.actions'|trans() }}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for group_rule in group_rules %}
-						{% set email = group_rule.getMailaddr().email %}
-						{% if  email != "@." %}
-							<tr>
-								<td data-title="{{'Generics.fields.sender'|trans }}">{{email}}</td>
-								<td data-title="{{'Entities.Group.labels.rules'|trans }}">
-									{{ group_rule.wbRuleName | trans }}
-								</td>
-								<td>
-									<ul class="list-inline list-unstyled">
-										<li class="list-inline-item">
-											<a
+    <div class="table-responsive">
+        <section id="no-more-tables">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ knp_pagination_sortable(group_rules, 'Generics.fields.sender'|trans(), 'ra.email') }}</th>
+                        <th>{{ 'Entities.Group.labels.rules'|trans() }}</th>
+                        <th>{{ 'Generics.labels.actions'|trans() }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group_rule in group_rules %}
+                        {% set email = group_rule.getRuleAddress().email %}
+                        {% if  email != "@." %}
+                            <tr>
+                                <td data-title="{{'Generics.fields.sender'|trans }}">{{email}}</td>
+                                <td data-title="{{'Entities.Group.labels.rules'|trans }}">
+                                    {{ group_rule.wbRuleName | trans }}
+                                </td>
+                                <td>
+                                    <ul class="list-inline list-unstyled">
+                                        <li class="list-inline-item">
+                                            <a
                                                 href="#"
                                                 data-modal-method-type="GET"
-                                                data-url-modal-content="{{ path('groups_rules_edit',{'sid':group_rule.mailaddr.id,'groupId':group_rule.group.id,}) }}"
+                                                data-url-modal-content="{{ path('groups_rules_edit',{'sid':group_rule.ruleAddress.id,'groupId':group_rule.group.id,}) }}"
                                                 class='btn-open-modal btn btn-sm btn-success '
                                                 title="{{ 'Entities.Group.Actions.updateGroup'|trans() }}"
                                             >
-												<i class="fas fa-edit  d-none d-md-block d-lg-none"></i>
-												<span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Updated'|trans() }}</span>
-											</a>
-										</li>
-										<li class="list-inline-item">
-											<form
+                                                <i class="fas fa-edit  d-none d-md-block d-lg-none"></i>
+                                                <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.Updated'|trans() }}</span>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <form
                                                 method="post"
-                                                action="{{ path('groups_rules_delete',{'groupId':group_rule.group.id,'sid':group_rule.mailaddr.id}) }}"
+                                                action="{{ path('groups_rules_delete',{'groupId':group_rule.group.id,'sid':group_rule.ruleAddress.id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                                 <input
                                                     type="hidden"
                                                     name="_token"
-                                                    value="{{ csrf_token('delete' ~ group_rule.group.id ~ '_' ~ group_rule.mailaddr.id) }}"
+                                                    value="{{ csrf_token('delete' ~ group_rule.group.id ~ '_' ~ group_rule.ruleAddress.id) }}"
                                                 >
-												<button
+                                                <button
                                                     type="submit"
                                                     class='btn btn-sm btn-danger confirmModal'
                                                     title="{{ 'Entities.Group.Actions.deleteRule'|trans() }}"
                                                 >
-													<i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-													<span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.deleteRule'|trans() }}</span>
-												</button>
-											</form>
-										</li>
-									</ul>
-								</td>
-							</tr>
-						{% endif %}
-					{% endfor %}
-				</tbody>
-			</table>
-		</section>
-	</div>
+                                                    <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+                                                    <span class="d-md-none d-lg-block">{{ 'Entities.Group.Actions.deleteRule'|trans() }}</span>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
 
-	{% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': group_rules } %}
-	{% include 'alertsPopup.html.twig' %}
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': group_rules } %}
+    {% include 'alertsPopup.html.twig' %}
 
-	<div class="d-flex justify-content-center pb-3">
-		<a class="btn btn-outline-secondary" href="{{ path('group_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
-
-	</div>
-
+    <div class="d-flex justify-content-center pb-3">
+        <a class="btn btn-outline-secondary" href="{{ path('group_index') }}">{{ 'Entities.Group.Actions.backToGroupList'|trans() }}</a>
+    </div>
 {% endblock %}

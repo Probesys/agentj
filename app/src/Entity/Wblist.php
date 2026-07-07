@@ -32,10 +32,10 @@ class Wblist
     #[ORM\Id]
     private User $rid;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr')]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\RuleAddress')]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
-    private Mailaddr $sid;
+    private RuleAddress $sid;
 
     #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
     private string $wb;
@@ -54,10 +54,10 @@ class Wblist
     #[ORM\Id]
     private ?int $priority;
 
-    public function __construct(User $user, Mailaddr $mailaddr)
+    public function __construct(User $user, RuleAddress $ruleAddress)
     {
         $this->rid = $user;
-        $this->sid = $mailaddr;
+        $this->sid = $ruleAddress;
         $this->datemod = new \DateTime();
     }
 
@@ -109,7 +109,7 @@ class Wblist
         return $this;
     }
 
-    public function setSid(Mailaddr $sid): self
+    public function setSid(RuleAddress $sid): self
     {
         $this->sid = $sid;
 
@@ -128,7 +128,7 @@ class Wblist
         return $this;
     }
 
-    public function getSid(): Mailaddr
+    public function getSid(): RuleAddress
     {
         return $this->sid;
     }

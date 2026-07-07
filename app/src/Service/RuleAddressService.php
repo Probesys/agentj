@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class MailaddrService
+class RuleAddressService
 {
     public static function computePriority(string $email = ""): int
     {

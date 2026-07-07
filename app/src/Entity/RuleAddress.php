@@ -2,17 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\MailaddrRepository;
+use App\Repository\RuleAddressRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * Mailaddr
- */
 #[ORM\Table(name: 'mailaddr')]
 #[ORM\UniqueConstraint(name: 'email', columns: ['email'])]
-#[ORM\Entity(repositoryClass: MailaddrRepository::class)]
-class Mailaddr
+#[ORM\Entity(repositoryClass: RuleAddressRepository::class)]
+class RuleAddress
 {
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]

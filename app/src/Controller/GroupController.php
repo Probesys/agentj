@@ -5,13 +5,13 @@ namespace App\Controller;
 use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\GroupRule;
-use App\Entity\Mailaddr;
+use App\Entity\RuleAddress;
 use App\Entity\User;
 use App\Form\GroupType;
 use App\Repository\DomainRepository;
 use App\Repository\GroupRepository;
 use App\Repository\GroupRuleRepository;
-use App\Repository\MailaddrRepository;
+use App\Repository\RuleAddressRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
 use App\Service\UserService;
@@ -110,14 +110,14 @@ class GroupController extends AbstractController
 
             $this->em->persist($group);
 
-            $mailaddr = $this->em->getRepository(Mailaddr::class)->findOneBy((['email' => '@.']));
-            if (!$mailaddr) {
-                $mailaddr = new Mailaddr();
-                $mailaddr->setEmail('@.');
-                $this->em->persist($mailaddr);
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => '@.']));
+            if (!$ruleAddress) {
+                $ruleAddress = new RuleAddress();
+                $ruleAddress->setEmail('@.');
+                $this->em->persist($ruleAddress);
             }
             $groupRule = new GroupRule();
-            $groupRule->setMailaddr($mailaddr);
+            $groupRule->setRuleAddress($ruleAddress);
             $groupRule->setGroup($group);
             $groupRule->setWb($group->getWb());
             $this->em->persist($groupRule);
@@ -142,7 +142,7 @@ class GroupController extends AbstractController
         GroupService $groupService,
         UserService $userService,
         GroupRuleRepository $groupRuleRepository,
-        MailaddrRepository $mailaddrRepository,
+        RuleAddressRepository $ruleAddressRepository,
     ): Response {
         $this->checkAccess($group);
         if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
@@ -175,12 +175,12 @@ class GroupController extends AbstractController
 
             $this->em->persist($group);
 
-            $mailaddr = $mailaddrRepository->findOneBy((['email' => '@.']));
+            $ruleAddress = $ruleAddressRepository->findOneBy((['email' => '@.']));
 
-            $groupRule = $groupRuleRepository->findOneBy((['mailaddr' => $mailaddr, 'group' => $group]));
+            $groupRule = $groupRuleRepository->findOneBy((['ruleAddress' => $ruleAddress, 'group' => $group]));
             if (!$groupRule) {
                 $groupRule = new GroupRule();
-                $groupRule->setMailaddr($mailaddr);
+                $groupRule->setRuleAddress($ruleAddress);
             }
             $groupRule->setGroup($group);
             $groupRule->setWb($group->getWb());

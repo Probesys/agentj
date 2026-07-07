@@ -3,29 +3,23 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
-use App\Message\AmavisRelease;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
-use App\Repository\MailaddrRepository;
+use App\Message\AmavisRelease;
 use App\Repository\MsgrcptRepository;
 use App\Repository\MsgsRepository;
+use App\Repository\RuleAddressRepository;
 use App\Repository\UserRepository;
 use App\Repository\WblistRepository;
-use App\Service\CryptEncryptService;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class MessageService
 {
     public function __construct(
         private MessageBusInterface $bus,
-        private MailaddrRepository $mailaddrRepository,
+        private RuleAddressRepository $ruleAddressRepository,
         private MsgrcptRepository $messageRecipientRepository,
         private MsgsRepository $messageRepository,
         private UserRepository $userRepository,
@@ -51,7 +45,7 @@ class MessageService
 
         // WBList rules are case-insensitive
         $normalizedEmail = strtolower($senderEmail);
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($normalizedEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($normalizedEmail);
 
         $recipient = $messageRecipient->getRid();
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
@@ -59,7 +53,7 @@ class MessageService
         foreach ($userAndAliases as $user) {
             $this->wblistRepository->updateOrCreateRule(
                 $user,
-                $senderMailaddr,
+                $senderRuleAddress,
                 wbRule: 'accept',
                 type: $validationSource,
                 priority: Wblist::WBLIST_PRIORITY_USER,
@@ -104,7 +98,7 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
         $recipientDomainName = $recipient->getReverseDomain();
@@ -115,7 +109,7 @@ class MessageService
 
         $this->wblistRepository->updateOrCreateRule(
             $domainUser,
-            $senderMailaddr,
+            $senderRuleAddress,
             wbRule: 'accept',
             type: $validationSource,
             priority: Wblist::WBLIST_PRIORITY_USER,
@@ -156,7 +150,7 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
@@ -164,7 +158,7 @@ class MessageService
         foreach ($userAndAliases as $user) {
             $this->wblistRepository->updateOrCreateRule(
                 $user,
-                $senderMailaddr,
+                $senderRuleAddress,
                 wbRule: 'block',
                 type: $validationSource,
                 priority: Wblist::WBLIST_PRIORITY_USER,
@@ -210,7 +204,7 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
         $recipientDomainName = $recipient->getReverseDomain();
@@ -219,7 +213,7 @@ class MessageService
 
         $this->wblistRepository->updateOrCreateRule(
             $domainUser,
-            $senderMailaddr,
+            $senderRuleAddress,
             wbRule: 'block',
             type: $validationSource,
             priority: Wblist::WBLIST_PRIORITY_USER,
