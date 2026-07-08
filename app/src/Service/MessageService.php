@@ -3,13 +3,13 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Entity\MessageRecipient;
-use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Message\AmavisRelease;
 use App\Repository\MessageRecipientRepository;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\UserRepository;
 use App\Repository\WblistRepository;
@@ -21,7 +21,7 @@ class MessageService
         private MessageBusInterface $bus,
         private RuleAddressRepository $ruleAddressRepository,
         private MessageRecipientRepository $messageRecipientRepository,
-        private MsgsRepository $messageRepository,
+        private MessageRepository $messageRepository,
         private UserRepository $userRepository,
         private WblistRepository $wblistRepository,
         private CryptEncryptService $cryptEncryptService,
@@ -278,7 +278,7 @@ class MessageService
     /**
      * Mark a message and its recipient as deleted.
      */
-    public function delete(Msgs $message, MessageRecipient $messageRecipient): bool
+    public function delete(Message $message, MessageRecipient $messageRecipient): bool
     {
         $this->messageRecipientRepository->changeStatus(
             $message->getPartitionTag(),
@@ -300,7 +300,7 @@ class MessageService
      *
      * It returns false if the message couldn't be put in the spams folder.
      */
-    public function markMessageAsSpam(Msgs $message): bool
+    public function markMessageAsSpam(Message $message): bool
     {
         $result = $this->spamassassinService->marksAsSpam($message);
 
@@ -328,7 +328,7 @@ class MessageService
      *
      * It returns false if the message couldn't be put in the hams folder.
      */
-    public function markMessageAsHam(Msgs $message): bool
+    public function markMessageAsHam(Message $message): bool
     {
         $result = $this->spamassassinService->marksAsHam($message);
 
@@ -347,7 +347,7 @@ class MessageService
      * Return a secure token containing the id of the user and of the message.
      * The token is valid for 7 days.
      */
-    public function getReleaseToken(Msgs $message, User $user): string
+    public function getReleaseToken(Message $message, User $user): string
     {
         $data = $user->getId() . '%%%' . $message->getMailId();
         return $this->cryptEncryptService->encrypt($data, lifetime: 7 * 24 * 3600);

@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Util\Search;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends BaseMessageRepository<Msgs>
+ * @extends BaseMessageRepository<Message>
  *
  * @phpstan-import-type SortParams from Search
  */
-class MsgsRepository extends BaseMessageRepository
+class MessageRepository extends BaseMessageRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Msgs::class);
+        parent::__construct($registry, Message::class);
     }
 
-    public function findOneByMailId(int $partitionTag, string $mailId): ?Msgs
+    public function findOneByMailId(int $partitionTag, string $mailId): ?Message
     {
         return $this->findOneBy([
             'partitionTag' => $partitionTag,
@@ -114,13 +114,13 @@ class MsgsRepository extends BaseMessageRepository
     /**
      * get all message which need human authentication
      *
-     * @return Msgs[]
+     * @return Message[]
      */
     public function searchMsgsToSendAuthRequest(\DateTimeImmutable $since): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m
-            FROM App\Entity\Msgs m
+            FROM App\Entity\Message m
             WHERE m.sendCaptcha = 0
             AND m.timeNum >= :sinceTimestamp
         SQL);
@@ -137,7 +137,7 @@ class MsgsRepository extends BaseMessageRepository
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT m.sendCaptcha
-            FROM App\Entity\Msgs m
+            FROM App\Entity\Message m
             JOIN m.messageRecipients mr
             JOIN mr.rid recipient
             JOIN m.sid sender
@@ -173,7 +173,7 @@ class MsgsRepository extends BaseMessageRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = ' DELETE q FROM quarantine q '
-            . ' LEFT JOIN  msgs m ON m.mail_id = q.mail_id '
+            . ' LEFT JOIN msgs m ON m.mail_id = q.mail_id '
             . ' WHERE m.time_num < :date';
 
         $stmt = $conn->prepare($sql);

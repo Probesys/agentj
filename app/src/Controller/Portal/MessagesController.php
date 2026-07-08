@@ -17,7 +17,7 @@ class MessagesController extends AbstractController
         private Service\LogService $logService,
         private Service\MessageService $messageService,
         private Repository\MessageRecipientRepository $messageRecipientRepository,
-        private Repository\MsgsRepository $msgsRepository,
+        private Repository\MessageRepository $messageRepository,
     ) {
     }
 
@@ -92,7 +92,7 @@ class MessagesController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $message = $this->msgsRepository->findOneByMailId($partitionTag, $mailId);
+        $message = $this->messageRepository->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');

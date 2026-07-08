@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Webklex\PHPIMAP\Message as Email;
 
 /**
- * Msgs
+ * Message
  */
 #[ORM\Table(name: 'msgs')]
 #[ORM\Index(name: 'msgs_idx_sid', columns: ['sid'])]
@@ -20,8 +20,8 @@ use Webklex\PHPIMAP\Message as Email;
 #[ORM\Index(name: 'msgs_idx_from_addr', columns: ['from_addr'])]
 #[ORM\Index(name: 'idx_msgs_quar_type', columns: ['quar_type'])]
 #[ORM\Index(name: 'msgs_idx_send_captcha_time_num', columns: ['send_captcha', 'time_num'])]
-#[ORM\Entity(repositoryClass: MsgsRepository::class)]
-class Msgs extends BaseMessage
+#[ORM\Entity(repositoryClass: MessageRepository::class)]
+class Message extends BaseMessage
 {
     /** @var Collection<int, MessageRecipient> $messageRecipients */
     #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MessageRecipient::class)]

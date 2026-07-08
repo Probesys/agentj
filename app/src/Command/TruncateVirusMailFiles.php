@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Log;
-use App\Entity\Msgs;
+use App\Entity\Message;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

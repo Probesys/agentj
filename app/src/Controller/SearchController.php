@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Form\SearchFilterType;
 use App\Repository\MessageRecipientSearchRepository;
@@ -111,9 +111,9 @@ class SearchController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, 'outgoing');
+        $allMessages = $this->em->getRepository(Message::class)->advancedSearch($user, 'outgoing');
 
-        $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
+        $message = array_filter($allMessages, function ($msg) use ($outMsg) {
             return $outMsg !== false && $msg['mail_id'] === $outMsg['mail_id'];
         });
 
@@ -121,7 +121,7 @@ class SearchController extends AbstractController
             'controller_name' => 'MessageController',
             'outMsg' => $outMsg,
             'outMsgRcpt' => $outMsgRcpt,
-            'message' => $ms,
+            'message' => $message,
         ]);
     }
 

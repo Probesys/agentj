@@ -34,7 +34,7 @@ class Quarantine
     #[ORM\ManyToOne(inversedBy: 'quarantineChunks')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private ?Msgs $message;
+    private ?Message $message;
 
     public function getPartitionTag(): int
     {
@@ -56,12 +56,12 @@ class Quarantine
         return ResourceHelper::toString($this->mailText);
     }
 
-    public function getMessage(): Msgs
+    public function getMessage(): Message
     {
         return $this->message;
     }
 
-    public function setMessage(Msgs $message): self
+    public function setMessage(Message $message): self
     {
         $this->message = $message;
 

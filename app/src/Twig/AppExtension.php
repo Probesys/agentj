@@ -4,7 +4,7 @@ namespace App\Twig;
 
 use App\Entity\Domain;
 use App\Entity\Group;
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Service\LocaleService;
@@ -96,7 +96,7 @@ class AppExtension extends AbstractExtension
         return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
     }
 
-    public function messageReleaseToken(Msgs $message, User $user): string
+    public function messageReleaseToken(Message $message, User $user): string
     {
         return $this->messageService->getReleaseToken($message, $user);
     }

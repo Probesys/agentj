@@ -4,10 +4,10 @@ namespace App\Command;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Repository\DomainRepository;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LocaleService;
@@ -32,7 +32,7 @@ class SendAuthMailRequestCommand
 {
     public function __construct(
         private DomainRepository $domainRepository,
-        private MsgsRepository $messageRepository,
+        private MessageRepository $messageRepository,
         private UserRepository $userRepository,
         private TranslatorInterface $translator,
         private CryptEncryptService $cryptEncryptService,
@@ -182,12 +182,16 @@ class SendAuthMailRequestCommand
      * @param User[] $recipientUsers
      * @return string[]
      */
-    private function createAuthEmailContent(Domain $domain, Msgs $msg, array $recipientUsers, string $locale): array
-    {
+    private function createAuthEmailContent(
+        Domain $domain,
+        Message $message,
+        array $recipientUsers,
+        string $locale,
+    ): array {
         $token = $this->cryptEncryptService->encrypt(
-            $msg->getMailId()
-            . '%%%' . $msg->getSecretId()
-            . '%%%' . $msg->getPartitionTag()
+            $message->getMailId()
+            . '%%%' . $message->getSecretId()
+            . '%%%' . $message->getPartitionTag()
             . '%%%' . $domain->getId()
         );
         $url = $this->urlGenerator->generate('human_authentication', [
@@ -229,10 +233,10 @@ class SendAuthMailRequestCommand
     /**
      * Set the subject of the mail send captcha from original subject
      */
-    private function getSubject(Msgs $msg, string $locale): string
+    private function getSubject(Message $message, string $locale): string
     {
-        if ($msg->getSubject()) {
-            $subject = 'Re : ' . $msg->getSubject();
+        if ($message->getSubject()) {
+            $subject = 'Re : ' . $message->getSubject();
         } else {
             $subject = $this->translator->trans('Message.Captcha.defaultMailSubject', locale: $locale);
         }
@@ -244,7 +248,7 @@ class SendAuthMailRequestCommand
      * @param string[] $body
      */
     private function createAuthEmail(
-        Msgs $message,
+        Message $message,
         string $mailFrom,
         ?string $fromName,
         array $body,
@@ -266,7 +270,7 @@ class SendAuthMailRequestCommand
             $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
             $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
         } catch (\Exception $e) {
-            //catch error and save this in msgs + change status to error
+            //catch error and save this in message + change status to error
             $messageError = $e->getMessage();
             $message->setMessageError($messageError);
             $message->setStatus(MessageStatus::ERROR);
@@ -279,7 +283,7 @@ class SendAuthMailRequestCommand
     /**
      * Send an authentification request email
      */
-    private function sendAuthEmail(Msgs $message, Email $email): bool
+    private function sendAuthEmail(Message $message, Email $email): bool
     {
         try {
             $this->mailer->send($email);

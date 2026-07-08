@@ -120,8 +120,18 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
     {
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
-            ->innerJoin('App\Entity\Msgs', 'm', Join::WITH, 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag')
-            ->innerJoin('App\Entity\Address', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->innerJoin(
+                'App\Entity\Message',
+                'm',
+                Join::WITH,
+                'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag',
+            )
+            ->innerJoin(
+                'App\Entity\Address',
+                'maddr',
+                Join::WITH,
+                'maddr.id = mr.rid',
+            );
 
 
         return $queryBuilder;

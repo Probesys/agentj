@@ -3,24 +3,24 @@
 namespace App\Service;
 
 use App\Entity\Domain;
+use App\Entity\Message;
 use App\Entity\MessageRecipient;
-use App\Entity\Msgs;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientRepository;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 
 class HumanAuthenticationService
 {
     public function __construct(
         private CryptEncryptService $cryptEncryptService,
         private DomainRepository $domainRepository,
-        private MsgsRepository $messageRepository,
+        private MessageRepository $messageRepository,
         private MessageRecipientRepository $messageRecipientRepository,
     ) {
     }
 
     /**
-     * @return ?array{?Msgs, ?Domain, MessageRecipient[]}
+     * @return ?array{?Message, ?Domain, MessageRecipient[]}
      */
     public function decryptToken(string $token): ?array
     {
