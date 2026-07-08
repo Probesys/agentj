@@ -3,7 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Message\CreateAlertMessage;
-use App\Entity\OutMsg;
+use App\Entity\OutMessage;
 use App\Entity\SqlLimitReport;
 use App\Entity\Alert;
 use App\Entity\User;
@@ -48,7 +48,7 @@ class CreateAlertMessageHandler
         $type = $message->getType();
 
         if ($type === 'out_msg') {
-            $this->handleOutMsg($message);
+            $this->handleOutMessage($message);
         } elseif ($type === 'sql_limit_report') {
             $this->handleSqlLimitReport($message);
         } else {
@@ -56,26 +56,26 @@ class CreateAlertMessageHandler
         }
     }
 
-    private function handleOutMsg(CreateAlertMessage $message): void
+    private function handleOutMessage(CreateAlertMessage $message): void
     {
         $mailId = $message->getId();
-        $this->output->writeln('Handler invoked for OutMsg ID: ' . $mailId);
+        $this->output->writeln('Handler invoked for OutMessage ID: ' . $mailId);
 
         // Ensure the field name matches the database column
-        $outMsg = $this->entityManager->getRepository(OutMsg::class)->findOneBy(['mailId' => $mailId]);
-        $this->output->writeln('OutMsg fetched: ' . ($outMsg ? 'Yes' : 'No'));
+        $outMessage = $this->entityManager->getRepository(OutMessage::class)->findOneBy(['mailId' => $mailId]);
+        $this->output->writeln('OutMessage fetched: ' . ($outMessage ? 'Yes' : 'No'));
 
-        if ($outMsg) {
+        if ($outMessage) {
             // Refresh the entity to ensure it has the latest data
-            $this->entityManager->refresh($outMsg);
+            $this->entityManager->refresh($outMessage);
 
-            $this->output->writeln('OutMsg content: ' . $outMsg->getContent());
+            $this->output->writeln('OutMessage content: ' . $outMessage->getContent());
 
-            if ($outMsg->getContent() === 'V') {
+            if ($outMessage->getContent() === 'V') {
                 $target = $message->getTarget();
 
                 // Fetch the user who sent the email
-                $fromAddr = $outMsg->getSid()->getEmail();
+                $fromAddr = $outMessage->getSid()->getEmail();
                 $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
 
                 $timezone = new \DateTimeZone('Europe/Paris');
@@ -96,7 +96,7 @@ class CreateAlertMessageHandler
 
                         // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
                         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-                            $sid = $outMsg->getSid();
+                            $sid = $outMessage->getSid();
                             $address = $this->entityManager->getRepository(Address::class)->find($sid);
                             $domain = $address ? $address->getDomain() : null;
                             $userDomains = $user->getDomains()->toArray();
@@ -218,10 +218,10 @@ class CreateAlertMessageHandler
                     }
                 }
             } else {
-                $this->output->writeln('OutMsg content is not "V"');
+                $this->output->writeln('OutMessage content is not "V"');
             }
         } else {
-            $this->output->writeln('OutMsg not found for mail_id: ' . $mailId);
+            $this->output->writeln('OutMessage not found for mail_id: ' . $mailId);
         }
     }
 

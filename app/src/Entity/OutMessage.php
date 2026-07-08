@@ -2,19 +2,18 @@
 
 namespace App\Entity;
 
-use App\Entity\BaseMessage;
-use App\Repository\OutMsgRepository;
+use App\Repository\OutMessageRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OutMsgRepository::class)]
+#[ORM\Entity(repositoryClass: OutMessageRepository::class)]
 #[ORM\Table(name: 'out_msgs')]
 #[ORM\Index(name: 'out_msgs_idx_mail_id', columns: ['mail_id'])]
 #[ORM\Index(name: 'out_msgs_idx_time_iso', columns: ['time_iso'])]
 #[ORM\Index(name: 'out_msgs_idx_time_num', columns: ['time_num'])]
 #[ORM\Index(name: 'out_msgs_idx_status_id', columns: ['status_id'])]
 #[ORM\Index(name: 'out_msgs_idx_message_id', columns: ['message_id'])]
-class OutMsg extends BaseMessage
+class OutMessage extends BaseMessage
 {
     /** @var Collection<int, OutMsgrcpt> $msgRcpts */
     #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: OutMsgrcpt::class)]

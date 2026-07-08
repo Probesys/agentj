@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Entity\OutMsg;
+use App\Entity\OutMessage;
 use App\Entity\SqlLimitReport;
 use App\Message\CreateAlertMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,7 +32,7 @@ class CreateAlertForAdminCommand extends Command
     {
         $output->writeln('Starting create-alert-for-admin command...');
 
-        $outMsgs = $this->entityManager->getRepository(OutMsg::class)->createQueryBuilder('o')
+        $outMessages = $this->entityManager->getRepository(OutMessage::class)->createQueryBuilder('o')
             ->where('o.content = :content')
             ->andWhere('o.processedAdmin = :processedAdmin')
             ->setParameter('content', 'V')
@@ -40,16 +40,16 @@ class CreateAlertForAdminCommand extends Command
             ->getQuery()
             ->getResult();
 
-        $output->writeln('Number of messages found: ' . count($outMsgs));
+        $output->writeln('Number of messages found: ' . count($outMessages));
 
-        foreach ($outMsgs as $outMsg) {
-            $mailId = $outMsg->getMailId();
+        foreach ($outMessages as $outMessage) {
+            $mailId = $outMessage->getMailId();
 
             $output->writeln('Creating alert for mail ID: ' . $mailId);
             $this->messageBus->dispatch(new CreateAlertMessage('out_msg', $mailId, 'admin'));
 
-            $outMsg->setProcessedAdmin(true);
-            $this->entityManager->persist($outMsg);
+            $outMessage->setProcessedAdmin(true);
+            $this->entityManager->persist($outMessage);
         }
 
         $this->entityManager->flush();

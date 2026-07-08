@@ -2,18 +2,18 @@
 
 namespace App\Repository;
 
-use App\Entity\OutMsg;
+use App\Entity\OutMessage;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends BaseMessageRepository<OutMsg>
+ * @extends BaseMessageRepository<OutMessage>
  */
-class OutMsgRepository extends BaseMessageRepository
+class OutMessageRepository extends BaseMessageRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OutMsg::class);
+        parent::__construct($registry, OutMessage::class);
     }
 
     /**

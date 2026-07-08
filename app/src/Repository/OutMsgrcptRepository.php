@@ -24,7 +24,7 @@ class OutMsgrcptRepository extends BaseMessageRecipientRepository
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->leftJoin(
-                'App\Entity\OutMsg',
+                'App\Entity\OutMessage',
                 'm',
                 Join::WITH,
                 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag'

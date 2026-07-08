@@ -11,7 +11,7 @@
       {{ 'Generics.fields.date' | trans }}
     </div>
     <div class="col-md-8">
-      {{ outMsg.time_iso | format_datetime('short', 'short') }}
+      {{ outMessage.time_iso | format_datetime('short', 'short') }}
     </div>
     <div class="col-md-4">
        {{ 'Generics.fields.sender' | trans }}
@@ -45,7 +45,7 @@
       {{ 'Entities.Message.isMailingList' | trans }}
     </div>
     <div class="col-md-8">
-       {%  if outMsg.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
+       {%  if outMessage.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
     </div>
     <div class="col-md-4">
       {{ 'Message.Status.title' | trans }}
