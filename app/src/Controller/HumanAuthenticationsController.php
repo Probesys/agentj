@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Domain;
 use App\Entity\Wblist;
 use App\Form\HumanAuthenticationType;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use App\Repository\WblistRepository;
 use App\Service\HumanAuthenticationService;
 use App\Service\MessageService;
@@ -23,7 +23,7 @@ class HumanAuthenticationsController extends AbstractController
         string $token,
         Request $request,
         WblistRepository $wblistRepository,
-        MsgsRepository $messageRepository,
+        MessageRepository $messageRepository,
         MessageService $messageService,
         HumanAuthenticationService $humanAuthenticationService,
         TranslatorInterface $translator,

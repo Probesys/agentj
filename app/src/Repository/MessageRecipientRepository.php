@@ -7,7 +7,7 @@ use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\MessageRecipient;
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Util\Url;
 use Doctrine\DBAL;
@@ -23,7 +23,7 @@ class MessageRecipientRepository extends BaseRepository
         parent::__construct($registry, MessageRecipient::class);
     }
 
-    public function findOneByMessageAndRid(Msgs $message, int $rid): ?MessageRecipient
+    public function findOneByMessageAndRid(Message $message, int $rid): ?MessageRecipient
     {
         return $this->findOneBy([
             'partitionTag' => $message->getPartitionTag(),
@@ -35,7 +35,7 @@ class MessageRecipientRepository extends BaseRepository
     /**
      * @return MessageRecipient[]
      */
-    public function findByMessage(Msgs $message): array
+    public function findByMessage(Message $message): array
     {
         return $this->findBy([
             'partitionTag' => $message->getPartitionTag(),

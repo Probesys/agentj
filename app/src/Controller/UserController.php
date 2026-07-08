@@ -325,7 +325,7 @@ class UserController extends AbstractController
     ): Response {
         $user = new User();
 
-        $allowedDomains = $this->getAlloweDomains();
+        $allowedDomains = $this->getAllowedDomains();
 
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
 
@@ -490,7 +490,7 @@ class UserController extends AbstractController
         UserRepository $userRepository,
         DomainRepository $domainRepository,
     ): Response {
-        $allowedDomains = $this->getAlloweDomains();
+        $allowedDomains = $this->getAllowedDomains();
 
         $imapDomains = $domainRepository->findDomainsWithIMAPConnectors();
 
@@ -657,7 +657,7 @@ class UserController extends AbstractController
     /**
      * @return Domain[]
      */
-    private function getAlloweDomains(): array
+    private function getAllowedDomains(): array
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -673,7 +673,7 @@ class UserController extends AbstractController
 
     private function checkDomainAccess(string $domainName = ""): ?Domain
     {
-        $allowedDomains = $this->getAlloweDomains();
+        $allowedDomains = $this->getAllowedDomains();
         $allowedDomainNamesArray = array_map(function (Domain $entity) {
             return $entity->getDomain();
         }, $allowedDomains);

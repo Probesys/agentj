@@ -11,13 +11,13 @@
             {{ 'Generics.fields.date' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msg.timeiso | format_datetime('short', 'short') }}
+            {{ message.timeiso | format_datetime('short', 'short') }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.sender' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msg.sid.getEmail }}
+            {{ message.sid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
@@ -32,13 +32,13 @@
             {{ messageRecipient.bspamLevel }}
         </div>
 
-        {% if msg.sendCaptcha > 0 %}
+        {% if message.sendCaptcha > 0 %}
             <div class="col-md-4">
                 {{ 'Entities.Message.dateAuthRequestAt' | trans }}
                 :
             </div>
             <div class="col-md-8">
-                {{ msg.sendCaptcha | format_datetime('short', 'short') }}
+                {{ message.sendCaptcha | format_datetime('short', 'short') }}
             </div>
         {% endif %}
 
@@ -46,7 +46,7 @@
             {{ 'Entities.Message.isMailingList' | trans }}
         </div>
         <div class="col-md-8">
-            {%  if msg.isMlist %}
+            {%  if message.isMlist %}
                 {{ 'Generics.labels.yes' | trans() }}
             {% else %}
                 {{ 'Generics.labels.no' | trans() }}

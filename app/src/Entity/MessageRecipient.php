@@ -15,7 +15,7 @@ class MessageRecipient extends BaseMessageRecipient
     #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private ?Msgs $msgs;
+    private ?Message $msgs;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseStartedAt = null;
@@ -23,12 +23,12 @@ class MessageRecipient extends BaseMessageRecipient
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseEndedAt = null;
 
-    public function getMsgs(): Msgs
+    public function getMsgs(): Message
     {
         return $this->msgs;
     }
 
-    public function setMsgs(Msgs $msgs): self
+    public function setMsgs(Message $msgs): self
     {
         $this->msgs = $msgs;
 

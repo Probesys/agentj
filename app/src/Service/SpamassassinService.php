@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\Msgs;
+use App\Entity\Message;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class SpamassassinService
@@ -16,7 +16,7 @@ class SpamassassinService
     /**
      * Put the message content in Spamassassin "spams" folder and return true on success.
      */
-    public function marksAsSpam(Msgs $message): bool
+    public function marksAsSpam(Message $message): bool
     {
         return $this->putMessage($message, 'spams');
     }
@@ -24,7 +24,7 @@ class SpamassassinService
     /**
      * Put the message content in Spamassassin "hams" folder and return true on success.
      */
-    public function marksAsHam(Msgs $message): bool
+    public function marksAsHam(Message $message): bool
     {
         return $this->putMessage($message, 'hams');
     }
@@ -32,7 +32,7 @@ class SpamassassinService
     /**
      * @param 'spams'|'hams' $folder
      */
-    private function putMessage(Msgs $message, string $folder): bool
+    private function putMessage(Message $message, string $folder): bool
     {
         $outputDirPath = "{$this->spamassassinLearnDir}/{$folder}";
         if (!is_dir($outputDirPath)) {

@@ -3,13 +3,13 @@
 namespace App\Controller;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Entity\MessageRecipient;
-use App\Entity\Msgs;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
 use App\Repository\MessageRecipientSearchRepository;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -40,7 +40,7 @@ class MessageController extends AbstractController
         Request $request,
         PaginatorInterface $paginator,
         MessageRecipientSearchRepository $messageRecipientSearchRepository,
-        MsgsRepository $msgsRepository,
+        MessageRepository $messageRepository,
         ?string $type = null
     ): Response {
         $subTitle = '';
@@ -239,25 +239,25 @@ class MessageController extends AbstractController
         }
         $this->checkMailAccess($messageRecipient);
 
-        $msg = $this->em->getRepository(Msgs::class)->findOneBy([
+        $message = $this->em->getRepository(Message::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
         ]);
 
         $wblists = $this->em->getRepository(Wblist::class)->findBySenderEmailAndRecipient(
-            $msg->getSenderEmail(),
+            $message->getSenderEmail(),
             $messageRecipient->getRid(),
         );
 
         return $this->render('message/show.html.twig', [
-            'msg' => $msg,
+            'message' => $message,
             'messageRecipient' => $messageRecipient,
             'wblists' => $wblists
         ]);
     }
 
     /**
-     * Delete a message entity.
+     * Delete a Message entity.
      */
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/delete/', name: 'message_delete', methods: 'GET')]
     public function deleteAction(
@@ -267,7 +267,7 @@ class MessageController extends AbstractController
         Request $request,
         Service\LogService $logService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
+        $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');
@@ -395,7 +395,7 @@ class MessageController extends AbstractController
         Request $request,
         Service\LogService $logService,
     ): Response {
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
+        $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');
@@ -501,7 +501,7 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
-    public function showDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
+    public function showMessageDetail(int $partitionTag, string $mailId, int $rid): Response
     {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
@@ -612,7 +612,7 @@ class MessageController extends AbstractController
     }
 
     /**
-     * @return array{Msgs, MessageRecipient}
+     * @return array{Message, MessageRecipient}
      */
     private function fetchMessageFromBatchId(string $id): array
     {
@@ -624,7 +624,7 @@ class MessageController extends AbstractController
 
         list($partitionTag, $mailId, $rid) = $decodedId;
 
-        $message = $this->em->getRepository(Msgs::class)->findOneByMailId($partitionTag, $mailId);
+        $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
             throw $this->createNotFoundException('Message does not exist');

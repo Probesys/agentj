@@ -115,7 +115,7 @@ class ReportSendMailCommand extends Command
                 $output->writeln(date('Y-m-d H:i:s') . "\tReport sent to " . $mailTo);
                 $i++;
             } catch (\Exception $e) {
-                //catch error and save this in msgs + change status to error
+                //catch error and save this in message + change status to error
                 $messageError = $e->getMessage();
                 $io->note(sprintf('Error  %s : [%s]', $user->getEmail(), $messageError));
             }

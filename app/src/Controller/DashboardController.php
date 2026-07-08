@@ -58,17 +58,41 @@ final class DashboardController extends AbstractController
             ->setMaxResults(5)
             ->getResult();
 
-        $msgs['untreated'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::UNTREATED);
-        $msgs['authorized'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
-        $msgs['banned'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::BANNED);
-        $msgs['delete'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::DELETED);
-        $msgs['restored'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::RESTORED);
-        $msgs['error'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::ERROR);
-        $msgs['spammed'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::SPAMMED);
-        $msgs['virus'] = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::VIRUS);
+        $stats['untreated'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::UNTREATED,
+        );
+        $stats['authorized'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::AUTHORIZED,
+        );
+        $stats['banned'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::BANNED,
+        );
+        $stats['delete'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::DELETED,
+        );
+        $stats['restored'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::RESTORED,
+        );
+        $stats['error'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::ERROR,
+        );
+        $stats['spammed'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::SPAMMED,
+        );
+        $stats['virus'] = $this->messageRecipientSearchRepository->countByType(
+            $user,
+            MessageStatus::VIRUS,
+        );
 
         return $this->render('dashboard/stats-by-status.html.twig', [
-            'msgs' => $msgs,
+            'stats' => $stats,
             'latestMessageRecipients' => $latestMessageRecipients,
         ]);
     }

@@ -5,7 +5,7 @@
   {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
 {% block modalContent %}
-    {% for m in message %}
+    {% for message in messages %}
         <div class="row">
     <div class="col-md-4">
       {{ 'Generics.fields.date' | trans }}
@@ -17,13 +17,13 @@
        {{ 'Generics.fields.sender' | trans }}
     </div>
     <div class="col-md-8">
-      {{ m.from_addr }}
+      {{ message.from_addr }}
     </div>
     <div class="col-md-4">
       {{ 'Generics.fields.recipient' | trans }}
     </div>
     <div class="col-md-8">
-      {{ m.email }}
+      {{ message.email }}
     </div>
     <div class="col-md-4">
      {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
@@ -78,8 +78,8 @@
             {% set classTr = "bg-success text-white" %}
             {% endif %}
           <tr class="{{ classTr }} ">
-            <td>{{ m.email }}</td>
-            <td>{{ m.from_addr }}</td>
+            <td>{{ message.email }}</td>
+            <td>{{ message.from_addr }}</td>
           </tr>
         {% endfor %}
       </table>
