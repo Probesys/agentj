@@ -95,31 +95,31 @@ class SearchController extends AbstractController
         ]);
         $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
 
-        // Fetching the OutMsgs data using raw SQL
-        $sqlOutMsgs = <<<SQL
+        // Fetching the OutMessage data using raw SQL
+        $sqlOutMessages = <<<SQL
             SELECT * FROM out_msgs
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
         SQL;
 
         // Execute the query and fetch data as an associative array
-        $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
+        $stmtOutMessage = $conn->executeQuery($sqlOutMessages, [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
         ]);
-        $outMsg = $stmtOutMsgs->fetchAssociative();
+        $outMessage = $stmtOutMessage->fetchAssociative();
 
         /** @var User $user */
         $user = $this->getUser();
         $allMessages = $this->em->getRepository(Message::class)->advancedSearch($user, 'outgoing');
 
-        $messages = array_filter($allMessages, function ($msg) use ($outMsg) {
-            return $outMsg !== false && $msg['mail_id'] === $outMsg['mail_id'];
+        $messages = array_filter($allMessages, function ($message) use ($outMessage) {
+            return $outMessage !== false && $message['mail_id'] === $outMessage['mail_id'];
         });
 
         return $this->render('message/out_show.html.twig', [
             'controller_name' => 'MessageController',
-            'outMsg' => $outMsg,
+            'outMessage' => $outMessage,
             'outMsgRcpt' => $outMsgRcpt,
             'messages' => $messages,
         ]);
