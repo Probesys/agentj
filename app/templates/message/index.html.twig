@@ -115,15 +115,15 @@
                             <td data-title="{{'Message.Object'|trans }}">
                                 <span
                                     data-msg-id="{{ keyPairMessage|json_encode() }}"
-                                    title="{{msgRecipient.msgs.subject|replace({'_':' '})}}"
+                                    title="{{msgRecipient.message.subject|replace({'_':' '})}}"
                                 >
-                                    {{msgRecipient.msgs.subject|slice(0,30)|replace({'_':' '})}}
+                                    {{msgRecipient.message.subject|slice(0,30)|replace({'_':' '})}}
                                 </span>
                             </td>
                             <td data-title="{{'Message.Sender'|trans }}">
-                                {% if msgRecipient.msgs.fromAddr | length > 35 %}
-                                    <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msgRecipient.msgs.fromAddr }}">
-                                        {% for senderSplit in  msgRecipient.msgs.fromAddr |split('<') %}
+                                {% if msgRecipient.message.fromAddr | length > 35 %}
+                                    <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msgRecipient.message.fromAddr }}">
+                                        {% for senderSplit in  msgRecipient.message.fromAddr |split('<') %}
                                             {% if (senderSplit | length > 35) and ('@' in senderSplit ) %}
                                                 {% set email = senderSplit |split('@') %}
                                                 {{ email.0 }}
@@ -136,8 +136,8 @@
                                         {% endfor %}
                                     </span>
                                 {% else %}
-                                    <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msgRecipient.msgs.fromAddr }}">
-                                        {{  msgRecipient.msgs.fromAddr }}
+                                    <span title="{{ 'Message.Sender'|trans ~ ' : ' ~ msgRecipient.message.fromAddr }}">
+                                        {{  msgRecipient.message.fromAddr }}
                                     </span>
                                 {% endif %}
                                 {% if error_badge %}
@@ -148,9 +148,9 @@
                             </td>
                             <td data-title="{{'Message.Date'|trans }}">
                                 <span
-                                    title="{{'Message.Date'|trans ~ ' : ' ~ msgRecipient.msgs.timeNum | format_datetime('short', 'short') }}"
+                                    title="{{'Message.Date'|trans ~ ' : ' ~ msgRecipient.message.timeNum | format_datetime('short', 'short') }}"
                                 >
-                                    {{msgRecipient.msgs.timeNum | format_datetime('short', 'short')}}
+                                    {{msgRecipient.message.timeNum | format_datetime('short', 'short')}}
                                 </span>
                             </td>
                             {% if not msgRecipient.isVirus %}
@@ -176,7 +176,7 @@
                                             <i class="fas fa-info"></i>
                                         </a>
                                     </li>
-                                    {% if msgRecipient.msgs.isInQuarantine %}
+                                    {% if msgRecipient.message.isInQuarantine %}
                                         <li class="list-inline-item">
                                             <a href="#"
                                                 title="{{ 'Entities.Message.labels.preview' | trans }}"

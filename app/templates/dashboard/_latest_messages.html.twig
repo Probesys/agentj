@@ -37,12 +37,12 @@
 						</td>
 					{% endif %}
 					<td data-title="{{'Message.Object'|trans }}">
-						<span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{messageRecipient.msgs.subject|replace({'_':' '})}}">{{messageRecipient.msgs.subject|slice(0,30)|replace({'_':' '})}}</span>
+						<span data-msg-id="{{ keyPairMessage|json_encode() }}" title="{{messageRecipient.message.subject|replace({'_':' '})}}">{{messageRecipient.message.subject|slice(0,30)|replace({'_':' '})}}</span>
 					</td>
 					<td data-title="{{'Message.Sender'|trans }}">
-						{% if messageRecipient.msgs.fromAddr | length > 35 %}
-							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.msgs.fromAddr }}">
-								{% for senderSplit in messageRecipient.msgs.fromAddr |split('<') %}
+						{% if messageRecipient.message.fromAddr | length > 35 %}
+							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.message.fromAddr }}">
+								{% for senderSplit in messageRecipient.message.fromAddr |split('<') %}
 									{% if (senderSplit | length > 35) and ('@' in senderSplit ) %}
 										{% set email = senderSplit |split('@') %}
 										{{ email.0 }}<br/>@{{ email.1 |replace({'>':''})}}
@@ -52,14 +52,14 @@
 								{% endfor %}
 							</span>
 						{% else %}
-							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.msgs.fromAddr }}">{{  messageRecipient.msgs.fromAddr }}</span>
+							<span title="{{ 'Message.Sender'|trans ~ ' : ' ~ messageRecipient.message.fromAddr }}">{{  messageRecipient.message.fromAddr }}</span>
 						{% endif %}
 						{% if error_badge %}
 							<span class="badge badge-pill badge-warning" title="{{ error_badge_detail | trans }}">{{ error_badge | trans }}</span>
 						{% endif %}
 					</td>
 					<td data-title="{{'Message.Date'|trans }}">
-						<span title="{{'Message.Date'|trans ~ ' : ' ~ messageRecipient.msgs.timeNum | format_datetime('short', 'short') }}">{{messageRecipient.msgs.timeNum | format_datetime('short', 'short')}}</span>
+						<span title="{{'Message.Date'|trans ~ ' : ' ~ messageRecipient.message.timeNum | format_datetime('short', 'short') }}">{{messageRecipient.message.timeNum | format_datetime('short', 'short')}}</span>
 					</td>
 					<td>{{ messageRecipient.bspamLevel }}</td>
 					<td>
