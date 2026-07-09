@@ -10,7 +10,7 @@ use App\Repository\DomainRepository;
 use App\Repository\LimitReportRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRecipientSearchRepository;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\OutMessageRecipientRepository;
 use App\Repository\UserRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -240,7 +240,7 @@ final class DashboardController extends AbstractController
     public function showMessagesStats(
         User $user,
         MessageRecipientRepository $messageRecipientRepository,
-        OutMsgrcptRepository $outMessageRecipientRepository,
+        OutMessageRecipientRepository $outMessageRecipientRepository,
         LimitReportRepository $limitReportRepository,
     ): Response {
         $messages = array_merge(

@@ -2,21 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\OutMsgrcpt;
+use App\Entity\Address;
+use App\Entity\OutMessage;
+use App\Entity\OutMessageRecipient;
 use App\Entity\User;
-use App\Repository\BaseMessageRecipientRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends BaseMessageRecipientRepository<OutMsgrcpt>
+ * @extends BaseMessageRecipientRepository<OutMessageRecipient>
  */
-class OutMsgrcptRepository extends BaseMessageRecipientRepository
+class OutMessageRecipientRepository extends BaseMessageRecipientRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OutMsgrcpt::class);
+        parent::__construct($registry, OutMessageRecipient::class);
     }
 
     protected function getBaseQueryBuilder(): QueryBuilder
@@ -24,25 +25,25 @@ class OutMsgrcptRepository extends BaseMessageRecipientRepository
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->leftJoin(
-                'App\Entity\OutMessage',
+                OutMessage::class,
                 'm',
                 Join::WITH,
                 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag'
             )
-            ->leftJoin('App\Entity\Address', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->leftJoin(Address::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         return $queryBuilder;
     }
 
     /**
-     * @return OutMsgrcpt[]
+     * @return OutMessageRecipient[]
      */
     public function findByEmailSender(User $user): array
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT omr
-            FROM App\Entity\OutMsgrcpt omr
-            JOIN omr.msgs AS om
+            FROM App\Entity\OutMessageRecipient omr
+            JOIN omr.message AS om
             JOIN om.sid AS s
             WHERE s.email = :email
         SQL);

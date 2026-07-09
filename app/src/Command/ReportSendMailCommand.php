@@ -207,7 +207,7 @@ class ReportSendMailCommand extends Command
 
         $bodyMessages = '';
         foreach ($messageRecipients as $messageRecipient) {
-            $message = $messageRecipient->getMsgs();
+            $message = $messageRecipient->getMessage();
             $token = $this->messageService->getReleaseToken($message, $user);
 
             $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [

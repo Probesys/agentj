@@ -2,13 +2,13 @@
   <table style="width:100%;background-color: #fff;">
     <tbody>
       {% for messageRecipient in messageRecipients %}
-        {% set token = message_release_token(messageRecipient.msgs, user) %}
+        {% set token = message_release_token(messageRecipient.message, user) %}
         <tr>
 
           <td>
             <div>
-              <strong>{{ messageRecipient.msgs.fromAddr }}</strong><br>
-              <p style="font-size: 10px">{{ messageRecipient.msgs.subject }}</p>
+              <strong>{{ messageRecipient.message.fromAddr }}</strong><br>
+              <p style="font-size: 10px">{{ messageRecipient.message.subject }}</p>
             </div>
           </td>
 

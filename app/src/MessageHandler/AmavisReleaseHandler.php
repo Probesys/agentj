@@ -40,7 +40,7 @@ final class AmavisReleaseHandler
             return;
         }
 
-        if ($messageRecipient->getMsgs()->getQuarLoc() === null) {
+        if ($messageRecipient->getMessage()->getQuarLoc() === null) {
             $this->logger->error('Mail cannot be released  : invalid quartloc', [
                 'mailId' => $amavisRelease->getMailId(),
                 'partitionTag' => $amavisRelease->getPartitionTag(),
@@ -49,7 +49,7 @@ final class AmavisReleaseHandler
             return;
         }
 
-        if ($messageRecipient->getMsgs()->getSecretId() === null) {
+        if ($messageRecipient->getMessage()->getSecretId() === null) {
             $this->logger->error('Mail cannot be released  : invalid secretid', [
                 'mailId' => $amavisRelease->getMailId(),
                 'partitionTag' => $amavisRelease->getPartitionTag(),
@@ -84,8 +84,8 @@ final class AmavisReleaseHandler
 
         $process = new Process([
             $this->amavisdReleaseCommand,
-            $messageRecipient->getMsgs()->getQuarLoc(),
-            $messageRecipient->getMsgs()->getSecretId(),
+            $messageRecipient->getMessage()->getQuarLoc(),
+            $messageRecipient->getMessage()->getSecretId(),
             $messageRecipient->getRid()->getEmail(),
         ]);
 

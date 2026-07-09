@@ -31,7 +31,7 @@ class BaseMessageRecipient
     #[ORM\GeneratedValue(strategy: 'NONE')]
     private int $rseqnum = 0;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Address')]
+    #[ORM\ManyToOne(targetEntity: Address::class)]
     #[ORM\JoinColumn(name: 'rid', nullable: true)]
     private ?Address $rid = null;
 

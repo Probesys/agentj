@@ -1,29 +1,29 @@
 {% for messageRecipient in messagesRecipients %}
     <tr>
         <td data-title="{{ 'Search.MailId'|trans }}">{{ messageRecipient.mailId }}</td>
-        <td data-title="{{ 'Search.Sender'|trans }}">{{ messageRecipient.msgs.fromAddr }}</td>
+        <td data-title="{{ 'Search.Sender'|trans }}">{{ messageRecipient.message.fromAddr }}</td>
         <td data-title="{{ 'Search.Recipient'|trans }}">{{ messageRecipient.rid.getEmail }}</td>
-        <td data-title="{{ 'Search.Subject'|trans }}">{{ messageRecipient.msgs.subject }}</td>
-        <td data-title="{{ 'Search.Date'|trans }}">{{ messageRecipient.msgs.timeIso|format_datetime('short', 'short') }}</td>
+        <td data-title="{{ 'Search.Subject'|trans }}">{{ messageRecipient.message.subject }}</td>
+        <td data-title="{{ 'Search.Date'|trans }}">{{ messageRecipient.message.timeIso|format_datetime('short', 'short') }}</td>
 
         <td>{{ messageRecipient.bspamLevel }}</td>
 
         {% if (activeFilters['sizeMin'] is defined and activeFilters['sizeMin'] is not null)
             or (activeFilters['sizeMax'] is defined and activeFilters['sizeMax'] is not null)
         %}
-            <td class="size-column">{{ messageRecipient.msgs.size }}</td>
+            <td class="size-column">{{ messageRecipient.message.size }}</td>
         {% else %}
             <td class="size-column" style="display: none;"></td>
         {% endif %}
 
         {% if activeFilters['host'] is defined and activeFilters['host'] is not null %}
-            <td class="host-column">{{ messageRecipient.msgs.host }}</td>
+            <td class="host-column">{{ messageRecipient.message.host }}</td>
         {% else %}
             <td class="host-column" style="display: none;"></td>
         {% endif %}
 
         {% if activeFilters['replyTo'] is defined and activeFilters['replyTo'] is not null %}
-            {% if messageRecipient.msgs.subject matches '/Re:/i' %}
+            {% if messageRecipient.message.subject matches '/Re:/i' %}
                 <td class="reply-to-column">{{ 'Generics.labels.yes' | trans }}</td>
             {% else %}
                 <td class="reply-to-column">{{ 'Generics.labels.no' | trans }}</td>

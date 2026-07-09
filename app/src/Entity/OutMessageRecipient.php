@@ -5,29 +5,29 @@ namespace App\Entity;
 use App\Amavis\ContentType;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\OutMessageRecipientRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'out_msgrcpt')]
 #[ORM\Index(name: 'out_msgrcpt_idx_mail_id', columns: ['mail_id'])]
 #[ORM\Index(name: 'out_msgrcpt_idx_rid', columns: ['rid'])]
 #[ORM\Index(name: 'out_msgrcpt_idx_status_id', columns: ['status_id'])]
-#[ORM\Entity(repositoryClass: OutMsgrcptRepository::class)]
-class OutMsgrcpt extends BaseMessageRecipient
+#[ORM\Entity(repositoryClass: OutMessageRecipientRepository::class)]
+class OutMessageRecipient extends BaseMessageRecipient
 {
-    #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
+    #[ORM\ManyToOne(inversedBy: 'messageRecipients')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private ?OutMessage $msgs;
+    private ?OutMessage $message;
 
-    public function getMsgs(): ?OutMessage
+    public function getMessage(): ?OutMessage
     {
-        return $this->msgs;
+        return $this->message;
     }
 
-    public function setMsgs(?OutMessage $msgs): self
+    public function setMessage(?OutMessage $message): self
     {
-        $this->msgs = $msgs;
+        $this->message = $message;
 
         return $this;
     }

@@ -6,7 +6,7 @@ use App\Entity\Message;
 use App\Entity\User;
 use App\Form\SearchFilterType;
 use App\Repository\MessageRecipientSearchRepository;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\OutMessageRecipientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +22,7 @@ class SearchController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private MessageRecipientSearchRepository $messageRecipientSearchRepository,
-        private OutMsgrcptRepository $outMsgrcptRepository
+        private OutMessageRecipientRepository $outMessageRecipientRepository
     ) {
     }
 
@@ -45,7 +45,7 @@ class SearchController extends AbstractController
             $allMessages = $this->messageRecipientSearchRepository
                 ->getAdvancedSearchQuery($activeFilters);
         } else {
-            $allMessages = $this->outMsgrcptRepository
+            $allMessages = $this->outMessageRecipientRepository
                 ->getAdvancedSearchQuery($activeFilters);
         }
 
@@ -79,8 +79,8 @@ class SearchController extends AbstractController
     {
         $conn = $this->em->getConnection();
 
-        // Fetching the OutMsgrcpt data using raw SQL
-        $sqlOutMsgrcpt = <<<SQL
+        // Fetching the OutMessageRecipient data using raw SQL
+        $sqlOutMessageRecipient = <<<SQL
             SELECT * FROM out_msgrcpt
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
@@ -88,12 +88,12 @@ class SearchController extends AbstractController
         SQL;
 
         // Execute the query and fetch data as an associative array
-        $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
+        $stmtOutMessageRecipient = $conn->executeQuery($sqlOutMessageRecipient, [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ]);
-        $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
+        $outMessageRecipient = $stmtOutMessageRecipient->fetchAssociative();
 
         // Fetching the OutMessage data using raw SQL
         $sqlOutMessages = <<<SQL
@@ -120,7 +120,7 @@ class SearchController extends AbstractController
         return $this->render('message/out_show.html.twig', [
             'controller_name' => 'MessageController',
             'outMessage' => $outMessage,
-            'outMsgRcpt' => $outMsgRcpt,
+            'outMessageRecipient' => $outMessageRecipient,
             'messages' => $messages,
         ]);
     }

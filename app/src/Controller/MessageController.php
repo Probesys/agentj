@@ -326,12 +326,12 @@ class MessageController extends AbstractController
                         $logService->addLog('restore batch', $mailId);
                         break;
                     case 'mark as spam':
-                        $message = $messageRecipient->getMsgs();
+                        $message = $messageRecipient->getMessage();
                         $this->messageService->markMessageAsSpam($message);
                         $logService->addLog('marked as spam batch', $mailId);
                         break;
                     case 'mark as ham':
-                        $message = $messageRecipient->getMsgs();
+                        $message = $messageRecipient->getMessage();
                         $this->messageService->markMessageAsHam($message);
                         $logService->addLog('marked as ham batch', $mailId);
                         break;
@@ -469,7 +469,7 @@ class MessageController extends AbstractController
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
 
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
         $result = $this->messageService->markMessageAsSpam($message);
 
         if ($result) {
@@ -489,7 +489,7 @@ class MessageController extends AbstractController
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
 
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
         $result = $this->messageService->markMessageAsHam($message);
 
         if ($result) {
@@ -538,7 +538,7 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         if (!$message->isInQuarantine()) {
             throw $this->createNotFoundException('The message is not in quarantine.');

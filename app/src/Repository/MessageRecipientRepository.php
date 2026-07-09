@@ -65,7 +65,7 @@ class MessageRecipientRepository extends BaseRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
             FROM App\Entity\MessageRecipient as mr
-            JOIN mr.msgs m
+            JOIN mr.message m
             JOIN mr.rid r
             WHERE r.email = :recipientEmail
             AND m.fromAddr = :senderFrom
@@ -95,7 +95,7 @@ class MessageRecipientRepository extends BaseRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
             FROM App\Entity\MessageRecipient as mr
-            JOIN mr.msgs m
+            JOIN mr.message m
             JOIN mr.rid r
             WHERE r.domain = :recipientReverseDomainName
             AND m.fromAddr = :senderFrom
@@ -114,7 +114,7 @@ class MessageRecipientRepository extends BaseRepository
     /**
      * Update the status of a message for one recipient
      */
-    public function changeStatus(int $partitiontag, string $mailId, int $status, int|string $rid): void
+    public function changeStatus(int $partitionTag, string $mailId, int $status, int|string $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -127,7 +127,7 @@ class MessageRecipientRepository extends BaseRepository
 
         $conn->executeStatement($sql, [
             'status' => $status,
-            'partitionTag' => $partitiontag,
+            'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ], [
@@ -185,8 +185,6 @@ class MessageRecipientRepository extends BaseRepository
         $statement->bindValue('status_banned', MessageStatus::BANNED);
         $statement->bindValue('status_unreleased', MessageStatus::UNRELEASED);
 
-        $result = $statement->executeQuery();
-
-        return $result->rowCount();
+        return $statement->executeQuery()->rowCount();
     }
 }

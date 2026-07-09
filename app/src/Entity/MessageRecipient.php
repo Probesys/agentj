@@ -12,10 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MessageRecipientRepository::class)]
 class MessageRecipient extends BaseMessageRecipient
 {
-    #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
+    #[ORM\ManyToOne(inversedBy: 'messageRecipients')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
-    private ?Message $msgs;
+    private ?Message $message;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseStartedAt = null;
@@ -23,14 +23,14 @@ class MessageRecipient extends BaseMessageRecipient
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $amavisReleaseEndedAt = null;
 
-    public function getMsgs(): Message
+    public function getMessage(): Message
     {
-        return $this->msgs;
+        return $this->message;
     }
 
-    public function setMsgs(Message $msgs): self
+    public function setMessage(Message $message): self
     {
-        $this->msgs = $msgs;
+        $this->message = $message;
 
         return $this;
     }
