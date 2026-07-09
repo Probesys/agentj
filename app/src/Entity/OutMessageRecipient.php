@@ -5,15 +5,15 @@ namespace App\Entity;
 use App\Amavis\ContentType;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\OutMessageRecipientRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'out_msgrcpt')]
 #[ORM\Index(name: 'out_msgrcpt_idx_mail_id', columns: ['mail_id'])]
 #[ORM\Index(name: 'out_msgrcpt_idx_rid', columns: ['rid'])]
 #[ORM\Index(name: 'out_msgrcpt_idx_status_id', columns: ['status_id'])]
-#[ORM\Entity(repositoryClass: OutMsgrcptRepository::class)]
-class OutMsgrcpt extends BaseMessageRecipient
+#[ORM\Entity(repositoryClass: OutMessageRecipientRepository::class)]
+class OutMessageRecipient extends BaseMessageRecipient
 {
     #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]

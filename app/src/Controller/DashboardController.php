@@ -10,7 +10,7 @@ use App\Repository\DomainRepository;
 use App\Repository\LimitReportRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRecipientSearchRepository;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\OutMessageRecipientRepository;
 use App\Repository\UserRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -238,10 +238,10 @@ final class DashboardController extends AbstractController
 
     #[Route(path: '{email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
     public function showMessagesStats(
-        User $user,
-        MessageRecipientRepository $messageRecipientRepository,
-        OutMsgrcptRepository $outMessageRecipientRepository,
-        LimitReportRepository $limitReportRepository,
+        User                          $user,
+        MessageRecipientRepository    $messageRecipientRepository,
+        OutMessageRecipientRepository $outMessageRecipientRepository,
+        LimitReportRepository         $limitReportRepository,
     ): Response {
         $messages = array_merge(
             $messageRecipientRepository->findByEmailRecipient($user),

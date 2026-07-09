@@ -15,8 +15,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'out_msgs_idx_message_id', columns: ['message_id'])]
 class OutMessage extends BaseMessage
 {
-    /** @var Collection<int, OutMsgrcpt> $msgRcpts */
-    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: OutMsgrcpt::class)]
+    /** @var Collection<int, OutMessageRecipient> $msgRcpts */
+    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: OutMessageRecipient::class)]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $msgRcpts;
@@ -28,14 +28,14 @@ class OutMessage extends BaseMessage
     private bool $processedAdmin = false;
 
     /**
-     * @return Collection<int, OutMsgrcpt>
+     * @return Collection<int, OutMessageRecipient>
      */
     public function getMsgRcpts(): Collection
     {
         return $this->msgRcpts;
     }
 
-    public function addMsgRcpt(OutMsgrcpt $msgRcpt): self
+    public function addMsgRcpt(OutMessageRecipient $msgRcpt): self
     {
         if (!$this->msgRcpts->contains($msgRcpt)) {
             $this->msgRcpts[] = $msgRcpt;
@@ -45,7 +45,7 @@ class OutMessage extends BaseMessage
         return $this;
     }
 
-    public function removeMsgRcpt(OutMsgrcpt $msgRcpt): self
+    public function removeMsgRcpt(OutMessageRecipient $msgRcpt): self
     {
         if ($this->msgRcpts->removeElement($msgRcpt)) {
             // set the owning side to null (unless already changed)

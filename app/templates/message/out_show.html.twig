@@ -29,15 +29,15 @@
      {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
     </div>
     <div class="col-md-8">
-      {{ outMsgRcpt.bspam_level }}
+      {{ outMessageRecipient.bspam_level }}
     </div>
 
-    {% if outMsgRcpt.send_captcha > 0 %}
+    {% if outMessageRecipient.send_captcha > 0 %}
     <div class="col-md-4">
       {{ 'Entities.Message.dateAuthRequestAt' | trans }} :
     </div>
     <div class="col-md-8">
-       {{ outMsgRcpt.send_captcha | format_datetime('short', 'short') }}
+       {{ outMessageRecipient.send_captcha | format_datetime('short', 'short') }}
     </div>
     {% endif %}
 
@@ -51,9 +51,9 @@
       {{ 'Message.Status.title' | trans }}
     </div>
     <div class="col-md-8">
-        {% set msgsStatus = msgDeliveryStatus[outMsgRcpt.ds] %}
-        {% set response = outMsgRcpt.smtp_resp %}
-        {% if outMsgRcpt.ds == 'P' %}
+        {% set msgsStatus = msgDeliveryStatus[outMessageRecipient.ds] %}
+        {% set response = outMessageRecipient.smtp_resp %}
+        {% if outMessageRecipient.ds == 'P' %}
           {% set deliverySatusClass = 'text-success' %}
         {% else %}
           {% set deliverySatusClass = 'text-danger' %}
