@@ -35,7 +35,7 @@ class MessageService
      */
     public function authorizeSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -68,7 +68,7 @@ class MessageService
             $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
             foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-                $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+                $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
                 $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
                 if (!$isSameSender || $isSpam) {
                     continue;
@@ -90,7 +90,7 @@ class MessageService
      */
     public function authorizeSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -121,7 +121,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-            $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+            $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
             $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
             if (!$isSameSender || $isSpam) {
                 continue;
@@ -142,7 +142,7 @@ class MessageService
      */
     public function banSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -170,7 +170,7 @@ class MessageService
             );
 
             foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-                $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+                $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
                 if (
                     !$isSameSender ||
                     $messageRecipientToBan->isVirus() ||
@@ -196,7 +196,7 @@ class MessageService
      */
     public function banSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -225,7 +225,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+            $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
             if (
                 !$isSameSender ||
                 $messageRecipientToBan->isVirus() ||

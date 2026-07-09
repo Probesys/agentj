@@ -65,7 +65,7 @@ class MessageRecipientRepository extends BaseRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr.mrcpt
             FROM msgrcpt as mr
-            JOIN mr.msgs m
+            JOIN mr.message m
             JOIN mr.rid r
             WHERE r.email = :recipientEmail
             AND m.fromAddr = :senderFrom
@@ -95,7 +95,7 @@ class MessageRecipientRepository extends BaseRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr.mrcpt
             FROM msgrcpt mr
-            JOIN mr.msgs m
+            JOIN mr.message m
             JOIN mr.rid r
             WHERE r.domain = :recipientReverseDomainName
             AND m.fromAddr = :senderFrom

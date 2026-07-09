@@ -42,7 +42,7 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT omr
             FROM App\Entity\OutMessageRecipient omr
-            JOIN omr.msgs AS om
+            JOIN omr.message AS om
             JOIN om.sid AS s
             WHERE s.email = :email
         SQL);

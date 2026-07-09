@@ -238,10 +238,10 @@ final class DashboardController extends AbstractController
 
     #[Route(path: '{email}/messages_stats/', name: 'messages_stats', methods: 'GET')]
     public function showMessagesStats(
-        User                          $user,
-        MessageRecipientRepository    $messageRecipientRepository,
+        User $user,
+        MessageRecipientRepository $messageRecipientRepository,
         OutMessageRecipientRepository $outMessageRecipientRepository,
-        LimitReportRepository         $limitReportRepository,
+        LimitReportRepository $limitReportRepository,
     ): Response {
         $messages = array_merge(
             $messageRecipientRepository->findByEmailRecipient($user),
