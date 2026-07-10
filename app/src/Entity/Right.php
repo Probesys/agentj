@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\RightRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'rights')]
-#[ORM\Entity(repositoryClass: 'App\Repository\RightsRepository')]
-class Rights
+#[ORM\Entity(repositoryClass: RightRepository::class)]
+class Right
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,7 +26,7 @@ class Rights
      * @var Collection<int, Group>
      */
     #[ORM\JoinTable(name: 'rights_groups')]
-    #[ORM\ManyToMany(targetEntity: 'App\Entity\Group', inversedBy: 'rights')]
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'rights')]
     private Collection $groups;
 
     public function __construct()

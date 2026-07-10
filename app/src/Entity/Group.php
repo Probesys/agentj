@@ -36,12 +36,12 @@ class Group
     private ?Policy $policy = null;
 
     /**
-     * @var Collection<int, Rights>
+     * @var Collection<int, Right>
      */
-    #[ORM\ManyToMany(targetEntity: 'App\Entity\Rights', mappedBy: 'groups')]
+    #[ORM\ManyToMany(targetEntity: Right::class, mappedBy: 'groups')]
     private Collection $rights;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Domain', inversedBy: 'groups')]
+    #[ORM\ManyToOne(targetEntity: Domain::class, inversedBy: 'groups')]
     #[ORM\JoinColumn(nullable: false)]
     private Domain $domain;
 
@@ -51,13 +51,13 @@ class Group
     /**
      * @var Collection<int, User>
      */
-    #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'groups', cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'groups', cascade: ['persist'])]
     private Collection $users;
 
     /**
      * @var Collection<int, GroupRule>
      */
-    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupRule', mappedBy: 'group')]
+    #[ORM\OneToMany(targetEntity: GroupRule::class, mappedBy: 'group')]
     private Collection $groupRules;
 
     #[Gedmo\Slug(fields: ['name'])]
@@ -145,7 +145,7 @@ class Group
 
 
     /**
-     * @return Collection<int, Rights>
+     * @return Collection<int, Right>
      */
     public function getRights(): Collection
     {
@@ -153,7 +153,7 @@ class Group
     }
 
 
-    public function addRight(Rights $right): self
+    public function addRight(Right $right): self
     {
         if (!$this->rights->contains($right)) {
             $this->rights[] = $right;
@@ -163,7 +163,7 @@ class Group
         return $this;
     }
 
-    public function removeRight(Rights $right): self
+    public function removeRight(Right $right): self
     {
         if ($this->rights->contains($right)) {
             $this->rights->removeElement($right);
@@ -362,7 +362,7 @@ class Group
     }
 
     /**
-     * @return array<int, array<string, int>>
+     * @return array<int, array<string, int>>|null
      */
     public function getQuota(): ?array
     {
