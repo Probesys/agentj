@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 class OutMessage extends BaseMessage
 {
     /** @var Collection<int, OutMessageRecipient> $messageRecipients */
-    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: OutMessageRecipient::class)]
+    #[ORM\OneToMany(mappedBy: 'message', targetEntity: OutMessageRecipient::class)]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $messageRecipients;

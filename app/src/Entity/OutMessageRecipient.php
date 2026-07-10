@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: OutMessageRecipientRepository::class)]
 class OutMessageRecipient extends BaseMessageRecipient
 {
-    #[ORM\ManyToOne(inversedBy: 'msgRcpts')]
+    #[ORM\ManyToOne(inversedBy: 'messageRecipients')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
     private ?OutMessage $message;

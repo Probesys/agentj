@@ -4,10 +4,11 @@ namespace App\Repository;
 
 use App\Entity\OutMessageRecipient;
 use App\Entity\User;
-use App\Repository\BaseMessageRecipientRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\OutMessage;
+use App\Entity\Address;
 
 /**
  * @extends BaseMessageRecipientRepository<OutMessageRecipient>
@@ -24,12 +25,12 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
             ->leftJoin(
-                'App\Entity\OutMessage',
+                OutMessage::class,
                 'm',
                 Join::WITH,
                 'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag'
             )
-            ->leftJoin('App\Entity\Address', 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->leftJoin(Address::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         return $queryBuilder;
     }
@@ -41,7 +42,7 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT omr
-            FROM App\Entity\OutMessageRecipient omr
+            FROM OutMessageRecipient omr
             JOIN omr.message AS om
             JOIN om.sid AS s
             WHERE s.email = :email

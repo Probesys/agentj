@@ -24,7 +24,7 @@ use Webklex\PHPIMAP\Message as Email;
 class Message extends BaseMessage
 {
     /** @var Collection<int, MessageRecipient> $messageRecipients */
-    #[ORM\OneToMany(mappedBy: 'msgs', targetEntity: MessageRecipient::class)]
+    #[ORM\OneToMany(mappedBy: 'message', targetEntity: MessageRecipient::class)]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $messageRecipients;

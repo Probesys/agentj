@@ -64,7 +64,7 @@ class MessageRecipientRepository extends BaseRepository
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr.mrcpt
-            FROM msgrcpt as mr
+            FROM MessageRecipient as mr
             JOIN mr.message m
             JOIN mr.rid r
             WHERE r.email = :recipientEmail
@@ -94,7 +94,7 @@ class MessageRecipientRepository extends BaseRepository
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr.mrcpt
-            FROM msgrcpt mr
+            FROM MessageRecipient mr
             JOIN mr.message m
             JOIN mr.rid r
             WHERE r.domain = :recipientReverseDomainName
@@ -114,7 +114,7 @@ class MessageRecipientRepository extends BaseRepository
     /**
      * Update the status of a message for one recipient
      */
-    public function changeStatus(int $partitiontag, string $mailId, int $status, int|string $rid): void
+    public function changeStatus(int $partitionTag, string $mailId, int $status, int|string $rid): void
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -127,7 +127,7 @@ class MessageRecipientRepository extends BaseRepository
 
         $conn->executeStatement($sql, [
             'status' => $status,
-            'partitionTag' => $partitiontag,
+            'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ], [
@@ -145,7 +145,7 @@ class MessageRecipientRepository extends BaseRepository
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
-            FROM msgrcpt mr
+            FROM MessageRecipient mr
             JOIN mr.rid AS r
             WHERE r.email = :email
         SQL);
@@ -185,8 +185,6 @@ class MessageRecipientRepository extends BaseRepository
         $statement->bindValue('status_banned', MessageStatus::BANNED);
         $statement->bindValue('status_unreleased', MessageStatus::UNRELEASED);
 
-        $result = $statement->executeQuery();
-
-        return $result->rowCount();
+        return $statement->executeQuery()->rowCount();
     }
 }
