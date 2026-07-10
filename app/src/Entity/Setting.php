@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\SettingsRepository;
+use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SettingsRepository::class)]
-class Settings
+#[ORM\Entity(repositoryClass: SettingRepository::class)]
+class Setting
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
