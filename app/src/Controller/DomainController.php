@@ -11,7 +11,7 @@ use App\Entity\Wblist;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\DomainRepository;
-use App\Repository\SettingsRepository;
+use App\Repository\SettingRepository;
 use App\Repository\WblistRepository;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
@@ -92,7 +92,7 @@ class DomainController extends AbstractController
     public function new(
         Request $request,
         ParameterBagInterface $params,
-        SettingsRepository $settingsRepository,
+        SettingRepository $settingRepository,
     ): Response {
         if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException();
@@ -117,21 +117,21 @@ class DomainController extends AbstractController
             $domain->setCalculatedTransport();
             //Default messages
             //captcha page
-            $messageConfig = $settingsRepository->findBy(['context' => 'default_domain_messages']);
+            $messageConfig = $settingRepository->findBy(['context' => 'default_domain_messages']);
             if ($messageConfig) {
-                $domain->setMessage($settingsRepository->findOneBy([
+                $domain->setMessage($settingRepository->findOneBy([
                     'context' => 'default_domain_messages',
                     'name' => 'page_content_authentification_request',
                 ])->getValue());
-                $domain->setConfirmCaptchaMessage($settingsRepository->findOneBy([
+                $domain->setConfirmCaptchaMessage($settingRepository->findOneBy([
                     'context' => 'default_domain_messages',
                     'name' => 'page_content_authentification_valid',
                 ])->getValue());
-                $domain->setMailmessage($settingsRepository->findOneBy([
+                $domain->setMailmessage($settingRepository->findOneBy([
                     'context' => 'default_domain_messages',
                     'name' => 'mail_content_authentification_request',
                 ])->getValue());
-                $domain->setMessageAlert($settingsRepository->findOneBy([
+                $domain->setMessageAlert($settingRepository->findOneBy([
                     'context' => 'default_domain_messages',
                     'name' => 'mail_content_report',
                 ])->getValue());
