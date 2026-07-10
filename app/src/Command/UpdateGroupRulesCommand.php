@@ -11,13 +11,12 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'agentj:update-groups-wblist',
+    name: 'agentj:update-group-rules',
     description: 'setPriority to groups that does not have and generate rules. Use when upgrade from  1.6.1 and before',
 )]
-class UpdateGroupRuleCommand extends Command
+class UpdateGroupRulesCommand extends Command
 {
     public function __construct(
         private GroupRepository $groupRepository,
@@ -33,7 +32,6 @@ class UpdateGroupRuleCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
         $this->setGroupPriority();
 
         $activeGroups = $this->groupRepository->findBy([
@@ -55,7 +53,7 @@ class UpdateGroupRuleCommand extends Command
             $this->em->persist($groupRule);
         }
         $this->em->flush();
-        $this->groupService->updateWblist();
+        $this->groupService->updateSenderRules();
 
         return Command::SUCCESS;
     }

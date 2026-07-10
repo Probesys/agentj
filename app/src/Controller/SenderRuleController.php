@@ -4,11 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Domain;
 use App\Entity\RuleAddress;
+use App\Entity\SenderRule;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
-use App\Repository\WblistRepository;
+use App\Repository\SenderRuleRepository;
 use App\Service\LogService;
 use App\Service\Referrer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class WblistController extends AbstractController
+class SenderRuleController extends AbstractController
 {
     public function __construct(
         private TranslatorInterface $translator,
@@ -30,7 +30,7 @@ class WblistController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/wblist/{type}', name: 'wblist')]
+    #[Route(path: '/rules/{type}', name: 'sender_rules_index')]
     public function index(string $type, Request $request, PaginatorInterface $paginator): Response
     {
         if ($type !== 'W' && $type !== 'B') {
@@ -42,7 +42,7 @@ class WblistController extends AbstractController
             new TranslatableMessage('Message.Actions.Delete');
         $filterForm = $this->createForm(ActionsFilterType::class, null, [
             'avalaibleActions' => [$actionLabel->getMessage() => 'delete'],
-            'action' => $this->generateUrl('wblist_batch'),
+            'action' => $this->generateUrl('sender_rules_batch'),
         ]);
 
         $sortField = $request->query->getString('sortField');
@@ -59,7 +59,7 @@ class WblistController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $title = '';
-        $wblist = $this->em->getRepository(Wblist::class)->search($type, $user, $query, [
+        $senderRule = $this->em->getRepository(SenderRule::class)->search($type, $user, $query, [
             'field' => $sortField,
             'direction' => $sortDirection,
         ]);
@@ -72,7 +72,7 @@ class WblistController extends AbstractController
                 $title = $this->translator->trans('Navigation.blacklist');
                 break;
         }
-        $totalItemFound = count($wblist);
+        $totalItemFound = count($senderRule);
 
         // Retrieve perPage from the request or use the default value
         $perPage = $request->query->getInt('per_page', (int) $this->getParameter('app.per_page_global'));
@@ -80,32 +80,32 @@ class WblistController extends AbstractController
         // Set the initial value of perPage in the form
         $filterForm->get('per_page')->setData($perPage);
 
-        $wblist2Show = $paginator->paginate(
-            $wblist,
-            $request->query->getInt('page', 1)/* page number */,
+        $senderRules = $paginator->paginate(
+            $senderRule,
+            $request->query->getInt('page', 1) /* page number */,
             $perPage
         );
-        return $this->render('wb_list/index.html.twig', [
-                    'controller_name' => 'WBListController',
-                    'wblist' => $wblist2Show,
-                    'wbTypeList' => $type,
-                    'title' => $title,
-                    'totalItemFound' => $totalItemFound,
-                    'filter_form' => $filterForm->createView()
+        return $this->render('sender_rule/index.html.twig', [
+            'controller_name' => 'SenderRuleController',
+            'senderRules' => $senderRules,
+            'senderRuleType' => $type,
+            'title' => $title,
+            'totalItemFound' => $totalItemFound,
+            'filter_form' => $filterForm->createView()
         ]);
     }
 
 
-    #[Route(path: '/WBlist/{rid}/{sid}/{priority}/delete', name: 'wblist_delete', methods: 'GET')]
+    #[Route(path: '/rules/{rid}/{sid}/{priority}/delete', name: 'sender_rules_delete', methods: 'GET')]
     public function deleteAction(
         int $rid,
         int $sid,
         int $priority,
-        WblistRepository $wblistRepository,
+        SenderRuleRepository $senderRuleRepository,
         Request $request
     ): RedirectResponse {
-        if ($this->isCsrfTokenValid('delete_wblist' . $rid . $sid, $request->query->get('_token'))) {
-            $this->deleteWbList($rid, $sid, $priority, $wblistRepository);
+        if ($this->isCsrfTokenValid('delete_sender_rule' . $rid . $sid, $request->query->get('_token'))) {
+            $this->deleteSenderRule($rid, $sid, $priority, $senderRuleRepository);
             $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
         } else {
             $this->addFlash('error', 'Invalid csrf token');
@@ -114,17 +114,17 @@ class WblistController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    private function deleteWbList(
+    private function deleteSenderRule(
         int $rid,
         int $sid,
         int $priority,
-        WblistRepository $wblistRepository,
+        SenderRuleRepository $senderRuleRepository,
     ): void {
 
         $mainUser = $this->em->getRepository(User::class)->find($rid);
         $userAndAliases = [];
 
-        // if adress in an alias we get the target mail
+        // if address in an alias we get the target mail
         if ($mainUser && $mainUser->getOriginalUser()) {
             $mainUser = $mainUser->getOriginalUser();
         }
@@ -136,35 +136,17 @@ class WblistController extends AbstractController
         }
 
         foreach ($userAndAliases as $user) {
-            $wblistRepository->delete($user->getId(), $sid, $priority);
+            $senderRuleRepository->delete($user->getId(), $sid, $priority);
         }
     }
 
     #[Route(
-        path: '/WBlist/batch/delete/',
-        name: 'wblist_batch_delete',
+        path: '/rules/batch/{action}',
+        name: 'sender_rules_batch',
         methods: 'POST',
         options: ['expose' => true],
     )]
-    public function batchDeleteAction(Request $request): RedirectResponse
-    {
-
-        foreach ($request->request->all('id') as $obj) {
-            $mailInfo = json_decode($obj);
-            $this->em->getRepository(Wblist::class)->delete($mailInfo[0], $mailInfo[1], $mailInfo[2]);
-        }
-
-        return new RedirectResponse($this->referrer->get());
-    }
-
-
-    #[Route(
-        path: '/batch/{action}',
-        name: 'wblist_batch',
-        methods: 'POST',
-        options: ['expose' => true],
-    )]
-    public function batchWbListAction(Request $request, ?string $action = null): RedirectResponse
+    public function batchSenderRuleAction(Request $request, ?string $action = null): RedirectResponse
     {
         $em = $this->em;
         if ($action) {
@@ -173,13 +155,13 @@ class WblistController extends AbstractController
                 $mailInfo = json_decode($obj);
                 switch ($action) {
                     case 'delete':
-                        $this->deleteWbList(
+                        $this->deleteSenderRule(
                             $mailInfo[0],
                             $mailInfo[1],
                             $mailInfo[2],
-                            $em->getRepository(Wblist::class)
+                            $em->getRepository(SenderRule::class)
                         );
-                        $logService->addLog('delete batch wblist', $mailInfo[1]);
+                        $logService->addLog('delete batch sender rule', $mailInfo[1]);
                         break;
                 }
             }
@@ -188,8 +170,8 @@ class WblistController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/wblist/admin/import/{type}', name: 'import_wblist', options: ['expose' => true])]
-    public function importWbListAction(Request $request, string $type): Response
+    #[Route(path: '/rules/admin/import/{type}', name: 'sender_rules_import', options: ['expose' => true])]
+    public function importSenderRuleAction(Request $request, string $type): Response
     {
         if ($type !== 'W' && $type !== 'B') {
             return new Response("Type has to be either `W` or `B`", 422);
@@ -197,7 +179,7 @@ class WblistController extends AbstractController
         $rule = $type === 'W' ? 'accept' : 'block';
 
         $form = $this->createForm(ImportType::class, null, [
-            'action' => $this->generateUrl('import_wblist', ['type' => $type]),
+            'action' => $this->generateUrl('sender_rules_import', ['type' => $type]),
             'user' => $this->getUser()
         ]);
         $form->handleRequest($request);
@@ -205,9 +187,9 @@ class WblistController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
             if ($fileUpload->getClientMimeType() == "text/plain") {
-                $filename = 'import-wblist-agentj-' . time() . ".txt";
+                $filename = 'import-sender-rules-agentj-' . time() . ".txt";
                 $file = $fileUpload->move('/tmp/', $filename);
-                $this->importWbList($file->getPathname(), $form->get('domain')->getData(), $rule);
+                $this->importSenderRule($file->getPathname(), $form->get('domain')->getData(), $rule);
             } else {
                 $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadImportFormat'));
             }
@@ -215,20 +197,20 @@ class WblistController extends AbstractController
             return new RedirectResponse($this->referrer->get());
         }
 
-        return $this->render('import/index_wblist.html.twig', [
+        return $this->render('import/index_sender_rule.html.twig', [
             'controller_name' => 'ImportController',
             'form' => $form,
-            'wbTypeList' => $type,
+            'senderRuleType' => $type,
         ]);
     }
 
     /**
      * @param 'accept'|'block' $rule
      */
-    private function importWbList(string $pathfile, Domain $domain, string $rule): void
+    private function importSenderRule(string $pathFile, Domain $domain, string $rule): void
     {
-        $tabWblist = [];
-        if (($handle = fopen($pathfile, "r"))) {
+        $senderRules = [];
+        if (($handle = fopen($pathFile, "r"))) {
             while (($data = fgets($handle, 4096)) !== false) {
                 $data = $this->sanitizeImportedData($data);
 
@@ -247,26 +229,26 @@ class WblistController extends AbstractController
                 }
 
                 if (
-                    isset($tabWblist[$domain->getId()]) &&
-                    in_array($ruleAddressSender->getId(), $tabWblist[$domain->getId()])
+                    isset($senderRules[$domain->getId()]) &&
+                    in_array($ruleAddressSender->getId(), $senderRules[$domain->getId()])
                 ) {
                     continue;
                 }
 
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                $wblist = $this->em->getRepository(Wblist::class)->findOneBy([
+                $senderRule = $this->em->getRepository(SenderRule::class)->findOneBy([
                     'sid' => $ruleAddressSender,
                     'rid' => $user,
                 ]);
-                if (!$wblist) {
-                    $wblist = new Wblist($user, $ruleAddressSender);
+                if (!$senderRule) {
+                    $senderRule = new SenderRule($user, $ruleAddressSender);
                 }
 
-                $wblist->setWbRule($rule);
-                $wblist->setPriority(Wblist::WBLIST_PRIORITY_USER);
-                $wblist->setType(Wblist::WBLIST_TYPE_IMPORT);
-                $this->em->persist($wblist);
-                $tabWblist[$domain->getId()][] = $ruleAddressSender->getId();
+                $senderRule->setWbRule($rule);
+                $senderRule->setPriority(SenderRule::PRIORITY_USER);
+                $senderRule->setType(SenderRule::TYPE_IMPORT);
+                $this->em->persist($senderRule);
+                $senderRules[$domain->getId()][] = $ruleAddressSender->getId();
             }
             $this->em->flush();
         }

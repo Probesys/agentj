@@ -5,7 +5,7 @@ namespace App\Entity;
 use Symfony\Component\Translation\TranslatableMessage;
 
 /**
- * The WbRuleTrait helps to manipulate the wblist.wb field (and other similar
+ * The WbRuleTrait helps to manipulate the SenderRule.wb field (and other similar
  * fields like Group.wb and GroupRule.wb).
  *
  * It abstracts the "wb" value meaning behind the "rule" concept. A rule tells
@@ -20,7 +20,7 @@ use Symfony\Component\Translation\TranslatableMessage;
  * - allow (wb = W): the sender is allowed by Amavis without executing the antispam.
  * - enabled (wb = 0): used at the domain level only to represent that the
  *   antispam is enabled for the domain.
- * - none (wb = ''): used at the group level only so no wblist is created by
+ * - none (wb = ''): used at the group level only so no sender rule is created by
  *   default for the users of the group.
  *
  * This trait expects that the `getWb()` and `setWb()` methods exist in the
@@ -47,7 +47,7 @@ trait WbRuleTrait
     public function getWbRuleName(): TranslatableMessage
     {
         $wbRule = $this->getWbRule();
-        return new TranslatableMessage("Entities.WBList.rules.{$wbRule}");
+        return new TranslatableMessage("Entities.SenderRule.rules.{$wbRule}");
     }
 
     /**

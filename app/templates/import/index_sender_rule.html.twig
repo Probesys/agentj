@@ -1,10 +1,10 @@
 {% extends 'modalTemplate.html.twig' %}
 
 {% block modalTitle %}
-    {% if wbTypeList == 'W' %}
-        {{ 'Entities.Import.Wblist.titleAuthorized' | trans }}
+    {% if senderRuleType == 'W' %}
+        {{ 'Entities.Import.SenderRule.titleAuthorized' | trans }}
     {% else %}
-        {{ 'Entities.Import.Wblist.titleBan' | trans }}
+        {{ 'Entities.Import.SenderRule.titleBan' | trans }}
     {% endif %}
 {% endblock %}
 
@@ -13,7 +13,7 @@
     {{ form_start(form) }}
     <h5>{{ 'Form.ImportFile'|trans() }}  </h5>
     <span class="text-info">
-        {{ 'Entities.Import.Wblist.description' | trans }}
+        {{ 'Entities.Import.SenderRule.description' | trans }}
     </span>
     {{ form_widget(form) }}
     <div class="d-flex justify-content-center">

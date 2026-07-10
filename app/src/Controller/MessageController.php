@@ -6,7 +6,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
-use App\Entity\Wblist;
+use App\Entity\SenderRule;
 use App\Form\ActionsFilterType;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MessageRepository;
@@ -244,7 +244,7 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $wblists = $this->em->getRepository(Wblist::class)->findBySenderEmailAndRecipient(
+        $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(
             $message->getSenderEmail(),
             $messageRecipient->getRid(),
         );
@@ -252,7 +252,7 @@ class MessageController extends AbstractController
         return $this->render('message/show.html.twig', [
             'message' => $message,
             'messageRecipient' => $messageRecipient,
-            'wblists' => $wblists
+            'senderRules' => $senderRules
         ]);
     }
 
@@ -306,14 +306,14 @@ class MessageController extends AbstractController
                     case 'authorized':
                         $this->messageService->authorizeSenderForRecipient(
                             $messageRecipient,
-                            Wblist::WBLIST_TYPE_USER,
+                            SenderRule::TYPE_USER,
                         );
                         $logService->addLog('authorized batch', $mailId);
                         break;
                     case 'banned':
                         $this->messageService->banSenderForRecipient(
                             $messageRecipient,
-                            Wblist::WBLIST_TYPE_USER,
+                            SenderRule::TYPE_USER,
                         );
                         $logService->addLog('banned batch', $mailId);
                         break;
@@ -352,7 +352,7 @@ class MessageController extends AbstractController
 
         $result = $this->messageService->authorizeSenderForRecipient(
             $messageRecipient,
-            Wblist::WBLIST_TYPE_USER,
+            SenderRule::TYPE_USER,
         );
 
         if ($result) {
@@ -373,7 +373,7 @@ class MessageController extends AbstractController
 
         $result = $this->messageService->banSenderForRecipient(
             $messageRecipient,
-            Wblist::WBLIST_TYPE_USER,
+            SenderRule::TYPE_USER,
         );
 
         if ($result) {
@@ -385,7 +385,7 @@ class MessageController extends AbstractController
     }
 
     /**
-     * Only release the message for all recipients. Does not add entries in wblist
+     * Only release the message for all recipients. Does not add entries in sender rule.
      */
     #[Route(path: '/{partitionTag}/{mailId}/{rid}/restore', name: 'message_restore')]
     public function restore(
@@ -427,7 +427,7 @@ class MessageController extends AbstractController
 
         $result = $this->messageService->authorizeSenderForDomain(
             $messageRecipient,
-            Wblist::WBLIST_TYPE_USER,
+            SenderRule::TYPE_USER,
         );
 
         if ($result) {
@@ -449,7 +449,7 @@ class MessageController extends AbstractController
 
         $result = $this->messageService->banSenderForDomain(
             $messageRecipient,
-            Wblist::WBLIST_TYPE_USER,
+            SenderRule::TYPE_USER,
         );
 
         if ($result) {

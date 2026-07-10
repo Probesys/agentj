@@ -7,7 +7,7 @@ use App\Entity\DomainRelay;
 use App\Entity\User;
 use App\Entity\Policy;
 use App\Entity\RuleAddress;
-use App\Entity\Wblist;
+use App\Entity\SenderRule;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -110,10 +110,10 @@ class DomainFixture extends Fixture
         $user->setPolicy($domain->getPolicy());
         $this->manager->persist($user);
 
-        $wblist = new Wblist($user, $ruleAddress);
-        $wblist->setWbRule($wbRule);
-        $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-        $this->manager->persist($wblist);
+        $senderRule = new SenderRule($user, $ruleAddress);
+        $senderRule->setWbRule($wbRule);
+        $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
+        $this->manager->persist($senderRule);
         $dkim = $domain->getDomainKeys();
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');

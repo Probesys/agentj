@@ -2,17 +2,17 @@
 
 namespace App\Service;
 
-use App\Repository\WblistRepository;
+use App\Repository\SenderRuleRepository;
 
 class GroupService
 {
-    public function __construct(private WblistRepository $wblistRepository)
+    public function __construct(private SenderRuleRepository $senderRuleRepository)
     {
     }
 
-    public function updateWblist(): void
+    public function updateSenderRules(): void
     {
-        $this->wblistRepository->deleteFromGroup();
-        $this->wblistRepository->insertFromGroup();
+        $this->senderRuleRepository->deleteFromGroup();
+        $this->senderRuleRepository->insertFromGroup();
     }
 }

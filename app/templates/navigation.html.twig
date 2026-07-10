@@ -105,14 +105,14 @@
                         </ul>
                     </div>
                 </li>
-                <li class="{% if route == 'wblist' and route_params['type'] == 'W' %}active{% endif %}">
-                    <a href="{{ path('wblist', {'type': 'W'}) }}">
+                <li class="{% if route == 'sender_rules_index' and route_params['type'] == 'W' %}active{% endif %}">
+                    <a href="{{ path('sender_rules_index', {'type': 'W'}) }}">
                         <i class="fa fa-paper-plane"></i>
                         <span class="menu-text">{{ 'Navigation.whitelist'|trans }}</span>
                     </a>
                 </li>
-                <li class="{% if route == 'wblist' and route_params['type'] == 'B' %}active{% endif %}">
-                    <a href="{{ path('wblist', {'type': 'B'}) }}">
+                <li class="{% if route == 'sender_rules_index' and route_params['type'] == 'B' %}active{% endif %}">
+                    <a href="{{ path('sender_rules_index', {'type': 'B'}) }}">
                         <i class="fa fa-user-slash"></i>
                         <span class="menu-text">{{ 'Navigation.blacklist'|trans }}</span>
                     </a>

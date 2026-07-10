@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Domain;
-use App\Entity\Wblist;
+use App\Entity\SenderRule;
 use App\Form\HumanAuthenticationType;
 use App\Repository\MessageRepository;
-use App\Repository\WblistRepository;
+use App\Repository\SenderRuleRepository;
 use App\Service\HumanAuthenticationService;
 use App\Service\MessageService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +22,7 @@ class HumanAuthenticationsController extends AbstractController
     public function show(
         string $token,
         Request $request,
-        WblistRepository $wblistRepository,
+        SenderRuleRepository $senderRuleRepository,
         MessageRepository $messageRepository,
         MessageService $messageService,
         HumanAuthenticationService $humanAuthenticationService,
@@ -57,20 +57,20 @@ class HumanAuthenticationsController extends AbstractController
                 $form->has('emailEmpty') &&
                 empty($form->get('emailEmpty')->getData())
             ) {
-                // Keep only recipients that are NOT already in a wblist. This avoids,
+                // Keep only recipients that are NOT already in a sender rule. This avoids,
                 // for instance, a blocked sender to authorise himself.
                 $messageRecipients = array_filter(
                     $messageRecipients,
-                    function ($messageRecipient) use ($wblistRepository, $senderEmail) {
+                    function ($messageRecipient) use ($senderRuleRepository, $senderEmail) {
                         $recipient = $messageRecipient->getRid();
-                        return !$wblistRepository->isSenderInRecipientList($senderEmail, $recipient);
+                        return !$senderRuleRepository->isSenderInRecipientList($senderEmail, $recipient);
                     }
                 );
 
                 foreach ($messageRecipients as $messageRecipient) {
                     $messageService->authorizeSenderForRecipient(
                         $messageRecipient,
-                        Wblist::WBLIST_TYPE_AUTHENTICATION,
+                        SenderRule::TYPE_AUTHENTICATION,
                     );
                 }
 

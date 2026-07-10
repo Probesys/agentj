@@ -14,7 +14,7 @@
       {%  if is_granted('ROLE_ADMIN')%}
         <a
           href="#"
-          data-url-modal-content="{{ path('import_wblist', {'type': wbTypeList})}}"
+          data-url-modal-content="{{ path('sender_rules_import', {'type': senderRuleType})}}"
           class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6"
           >
             <i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}
@@ -37,45 +37,45 @@
           {% if is_granted('ROLE_ADMIN') %}
             <th>{{ sortLinkMacro.sortLink('Message.Recipient'|trans,'emailuser') }}</th>
             {% endif %}
-          <th>{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}</th>
+          <th>{{ senderRuleType == 'B' ? 'Entities.SenderRule.fields.typeB'|trans() : 'Entities.SenderRule.fields.typeW'|trans() }}</th>
           <th>{{ sortLinkMacro.sortLink('Message.Sender'|trans,'email') }}</th>
           <th>{{ sortLinkMacro.sortLink('Message.Date'|trans,'wb.datemod') }}</th>
           <th>{{ 'Message.Actions.list'|trans() }}</th>
         </tr>
       </thead>
       <tbody>
-        {% for wb in wblist %}
+        {% for senderRule in senderRules %}
 
-          {% set classLine = wb | wblist_is_overridden ? 'opacity-50' : '' %}
-          {% set keyPairMessage =  [wb.rid, wb.sid, wb.priority] %}
+          {% set classLine = senderRule | sender_rule_is_overridden ? 'opacity-50' : '' %}
+          {% set keyPairMessage =  [senderRule.rid, senderRule.sid, senderRule.priority] %}
           <tr class="{{ classLine }}">
             <td>
-              {% if wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
+              {% if senderRule.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
               <input type="checkbox" id="{{ keyPairMessage|json_encode() }}" name="id[]" value="{{ keyPairMessage|json_encode() }}" class="cb selected-msg">
               <label class="for-cb" ></label>
               {% endif %}
             </td>
             {% if is_granted('ROLE_ADMIN') %}
-              <td data-title="{{ 'Entities.WBList.fields.user'|trans() }}">{{wb.fullname}}<br />{{wb.emailuser}} </td>
+              <td data-title="{{ 'Entities.SenderRule.fields.user'|trans() }}">{{senderRule.fullname}}<br />{{senderRule.emailuser}} </td>
               {% endif %}
-              {% if  wb.type is empty %}
-                {% set wb = wb|merge({'type': '3'}) %}
+              {% if  senderRule.type is empty %}
+                {% set senderRule = senderRule|merge({'type': '3'}) %}
               {% endif %}
-              {% set typeLabel = 'Entities.WBList.fields.typeLabel' ~ wbTypeList ~ '.' ~ wb.type | trans%}
+              {% set typeLabel = 'Entities.SenderRule.fields.typeLabel' ~ senderRuleType ~ '.' ~ senderRule.type | trans%}
             {% set typeLabel = typeLabel | trans %}
-              {% if  wb.type == 2 %}
-                {% set typeLabel = typeLabel ~ ' ' ~ wb.group %}
+              {% if  senderRule.type == 2 %}
+                {% set typeLabel = typeLabel ~ ' ' ~ senderRule.group %}
               {% endif %}
 
-            <td data-title="{{ wbTypeList == 'B' ? 'Entities.WBList.fields.typeB'|trans() : 'Entities.WBList.fields.typeW'|trans() }}">{{  typeLabel}} </td>
-            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.email}}</td>
-            <td data-title="{{ 'Message.Sender'|trans() }}">{{wb.datemod | format_datetime('short', 'short')}}</td>
+            <td data-title="{{ senderRuleType == 'B' ? 'Entities.SenderRule.fields.typeB'|trans() : 'Entities.SenderRule.fields.typeW'|trans() }}">{{  typeLabel}} </td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{senderRule.email}}</td>
+            <td data-title="{{ 'Message.Sender'|trans() }}">{{senderRule.datemod | format_datetime('short', 'short')}}</td>
             <td>
-              {% if wb.email != '@.' and (wb.type != 2 or is_granted('ROLE_SUPER_ADMIN')) %}
-                  {% set deleteLabel = 'Entities.WBList.actions.deleteSender' ~ wbTypeList | trans() %}
-                  {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ wbTypeList | trans() %}
-                  {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ wbTypeList | trans() %}
-                  <a href="{{path('wblist_delete',{'rid':wb.rid,'sid':wb.sid,'priority' : wb.priority})}}?_token={{ csrf_token('delete_wblist' ~ wb.rid ~ wb.sid)}}" class='btn btn-sm btn-danger confirmModal'
+              {% if senderRule.email != '@.' and (senderRule.type != 2 or is_granted('ROLE_SUPER_ADMIN')) %}
+                  {% set deleteLabel = 'Entities.SenderRule.actions.deleteSender' ~ senderRuleType | trans() %}
+                  {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ senderRuleType | trans() %}
+                  {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ senderRuleType | trans() %}
+                  <a href="{{path('sender_rules_delete',{'rid':senderRule.rid,'sid':senderRule.sid,'priority' : senderRule.priority})}}?_token={{ csrf_token('delete_sender_rule' ~ senderRule.rid ~ senderRule.sid)}}" class='btn btn-sm btn-danger confirmModal'
                      data-dialog-title='{{ deleteConfirmTitle|trans }}'
                      data-dialog-content='{{ deleteConfirmContent|trans }}'
                      title="{{ deleteLabel|trans() }}">
@@ -93,7 +93,7 @@
 </div>
   {{ form_end(filter_form) }}
   <div class="navigation text-center">
-    {{ knp_pagination_render(wblist) }}
+    {{ knp_pagination_render(senderRules) }}
   </div>
   {% include 'alertsPopup.html.twig' %}
 

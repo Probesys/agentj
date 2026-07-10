@@ -7,7 +7,6 @@
 
 {% block body %}
 
-
 	{% if domain.active %}
 		{% set _title = 'Entities.Domain.labels.domainrules'|trans ~ ' : ' ~ domain.domain ~ " <span class='badge badge-success'>" ~ 'Generics.fields.active'| trans ~ "</span>" %}
 	{% else %}
@@ -16,7 +15,7 @@
 	{% embed 'common/blockTitleAndButtons.html.twig' %}
 
 		{% block content_button_actions %}
-			<a href="#" data-url-modal-content="{{ path('domain_wblist_new',{'id':domain.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
+			<a href="#" data-url-modal-content="{{ path('domain_sender_rules_new',{'id':domain.id}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4">
 				<i class="fas fa-plus"></i>&nbsp;{{ 'Entities.Domain.actions.add_new_rule'|trans() }}</a>
 		{% endblock %}
 
@@ -35,27 +34,27 @@
 			<table class="table">
 				<thead>
 					<tr>
-						<th>{{ knp_pagination_sortable(wblist, 'Generics.fields.sender'|trans(), 'sender.email') }}</th>
+						<th>{{ knp_pagination_sortable(senderRules, 'Generics.fields.sender'|trans(), 'sender.email') }}</th>
 						<th>{{ 'Entities.Domain.labels.rules'|trans() }}</th>
 						<th>{{ 'Generics.labels.actions'|trans() }}</th>
 					</tr>
 				</thead>
 				<tbody>
 
-					{% for wb in wblist %}
-						{% set mail = wb.getSid().email %}
+					{% for senderRule in senderRules %}
+						{% set mail = senderRule.getSid().email %}
 						{% if mail != "@." %}
 							<tr>
 								<td data-title="{{'Generics.fields.sender'|trans }}">{{mail}}</td>
 								<td data-title="{{'Entities.Domain.labels.rules'|trans }}">
-									{{ wb.wbRuleName | trans }}
+									{{ senderRule.wbRuleName | trans }}
 								</td>
 								<td>
 									<ul class="list-inline list-unstyled">
 										<li class="list-inline-item">
                                             <form
                                                 method="post"
-                                                action="{{ path('domain_wblist_delete',{'rid' : wb.getRid().id, 'sid' : wb.getSid().id}) }}"
+                                                action="{{ path('domain_sender_rules_delete',{'rid' : senderRule.getRid().id, 'sid' : senderRule.getSid().id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
@@ -80,7 +79,7 @@
 		</section>
 	</div>
 
-    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': wblist } %}
+    {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': senderRules } %}
 
 
 	<div class="d-flex justify-content-center">

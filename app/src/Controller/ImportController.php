@@ -198,7 +198,7 @@ class ImportController extends AbstractController
 
                 //Need to flush if user new is inferior $batchSize
                 $em->flush();
-                $this->groupService->updateWblist();
+                $this->groupService->updateSenderRules();
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);
@@ -370,7 +370,7 @@ class ImportController extends AbstractController
 
                 //Need to flush if user new is inferior $batchSize
                 $em->flush();
-                $this->groupService->updateWblist();
+                $this->groupService->updateSenderRules();
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans(

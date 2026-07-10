@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\Wblist;
+use App\Entity\SenderRule;
+use App\Entity\User;
 use App\Form\UserPreferencesType;
 use App\Repository\GroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Translation\TranslatableMessage;
 
@@ -22,7 +23,7 @@ class AccountController extends AbstractController
     #[Route(path: '/account', name: 'account')]
     public function index(Request $request, GroupRepository $groupRepository): Response
     {
-        /** @var \App\Entity\User $user */
+        /** @var User $user */
         $user = $this->getUser();
         $form = $this->createForm(UserPreferencesType::class, $user, [
             'action' => $this->generateUrl('account'),
@@ -37,13 +38,13 @@ class AccountController extends AbstractController
             return $this->redirect('account');
         }
 
-        $domainWblist = $this->em->getRepository(Wblist::class)->getDefaultDomainWBList($user->getDomain());
+        $domainSenderRule = $this->em->getRepository(SenderRule::class)->getDefaultDomainSenderRule($user->getDomain());
 
         $defaultGroup = $groupRepository->getMainUserGroup($user);
 
         return $this->render('account/index.html.twig', [
             'form' => $form,
-            'domainWblist' => $domainWblist,
+            'domainSenderRule' => $domainSenderRule,
             'defaultGroup' => $defaultGroup,
         ]);
     }
