@@ -5,8 +5,8 @@ namespace App\Repository;
 use App\Entity\Address;
 use App\Entity\Domain;
 use App\Entity\RuleAddress;
+use App\Entity\SenderRule;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Util\Email;
 use Doctrine\DBAL;
 use Doctrine\ORM\Query;
@@ -15,13 +15,13 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
  *
- * @extends BaseRepository<Wblist>
+ * @extends BaseRepository<SenderRule>
  */
-class WblistRepository extends BaseRepository
+class SenderRuleRepository extends BaseRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Wblist::class);
+        parent::__construct($registry, SenderRule::class);
     }
 
     /**
@@ -64,7 +64,7 @@ class WblistRepository extends BaseRepository
             $dql->setParameter('domains', $user->getDomains());
         }
 
-        // The wblist.wb attribute can either be "W or Y / B or N / space / score".
+        // The SenderRule.wb attribute can either be "W or Y / B or N / space / score".
         // Score can be positive (i.e. lean towards blacklisting) or negative
         // (i.e. lean towards whitelisting). Space is neutral.
         // In AgentJ, we use the space to represent an "accepted" sender, in
@@ -96,7 +96,7 @@ class WblistRepository extends BaseRepository
         return $dql->getQuery()->getScalarResult();
     }
 
-    public function findOneByRecipientDomain(Domain $domain): ?Wblist
+    public function findOneByRecipientDomain(Domain $domain): ?SenderRule
     {
         $queryBuilder = $this->createQueryBuilder('wb');
         $queryBuilder->innerJoin('wb.rid', 'r');
@@ -137,9 +137,10 @@ class WblistRepository extends BaseRepository
         $conn = $this->getEntityManager()->getConnection();
         $sqlSelectGroupRule = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority)
                                     select u.id ,gw.sid, ug.groups_id, gw.wb, NOW(),'2',
-                                    CASE g.override_user
-                                          WHEN 1 THEN " . Wblist::WBLIST_PRIORITY_GROUP_OVERRIDE . " + g.priority" .
-                " WHEN 0 THEN " . Wblist::WBLIST_PRIORITY_GROUP . " + g.priority
+                                    CASE g.override_user WHEN 1 THEN "
+                                        . SenderRule::SENDER_RULE_PRIORITY_GROUP_OVERRIDE . " + g.priority" .
+                                        " WHEN 0 THEN "
+                                        . SenderRule::SENDER_RULE_PRIORITY_GROUP . " + g.priority
                                     END as 'priority'  from users u
                                     inner join user_groups ug on ug.user_id =u.id
                                     inner join groups g on g.id =ug.groups_id
@@ -150,12 +151,12 @@ class WblistRepository extends BaseRepository
     }
 
     /**
-     * Get the list of Wblists that apply to the two given addresses.
+     * Get the list of sender rules that apply to the two given addresses.
      *
      * The list is ordered by priority, meaning that its first element is the
      * one which applies to the addresses.
      *
-     * @return Wblist[]
+     * @return SenderRule[]
      */
     public function findBySenderEmailAndRecipient(string $senderEmail, Address $recipient): array
     {
@@ -178,58 +179,58 @@ class WblistRepository extends BaseRepository
             'recipientAddresses' => DBAL\ArrayParameterType::STRING,
         ])->fetchFirstColumn();
 
-        $wblists = [];
+        $senderRules = [];
 
         foreach ($recipientUserIds as $recipientUserId) {
             $query = $entityManager->createQuery(<<<SQL
-                SELECT wb
-                FROM App\Entity\Wblist wb
-                JOIN wb.sid as s
-                WHERE wb.rid = :recipientId
+                SELECT sr
+                FROM App\Entity\SenderRule sr
+                JOIN sr.sid as s
+                WHERE sr.rid = :recipientId
                 AND s.email IN (:senderAddresses)
-                ORDER BY wb.priority DESC, s.priority DESC
+                ORDER BY sr.priority DESC, s.priority DESC
             SQL);
 
             $query->setParameter('recipientId', $recipientUserId);
             $query->setParameter('senderAddresses', $senderAddresses);
             $query->setMaxResults(1);
 
-            $wblist = $query->getOneOrNullResult();
+            $senderRule = $query->getOneOrNullResult();
 
-            if ($wblist) {
-                $wblists[] = $wblist;
+            if ($senderRule) {
+                $senderRules[] = $senderRule;
             }
         }
 
-        return $wblists;
+        return $senderRules;
     }
 
     public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
     {
-        $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
+        $senderRules = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 
-        if (count($wblists) === 0) {
+        if (count($senderRules) === 0) {
             return false;
         }
 
-        return $wblists[0]->isWbRuleAuthorized();
+        return $senderRules[0]->isWbRuleAuthorized();
     }
 
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool
     {
-        $wblists = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
+        $senderRules = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
 
-        if (count($wblists) === 0) {
+        if (count($senderRules) === 0) {
             return false;
         }
 
-        return $wblists[0]->isWbRuleAuthorized() || $wblists[0]->isWbRuleBlocked();
+        return $senderRules[0]->isWbRuleAuthorized() || $senderRules[0]->isWbRuleBlocked();
     }
 
     /**
      * Return the default Wb for a domain
      */
-    public function getDefaultDomainWBList(Domain $domain): ?Wblist
+    public function getDefaultDomainSenderRule(Domain $domain): ?SenderRule
     {
         $sid = $this->getEntityManager()->getRepository(RuleAddress::class)->findOneBy(['email' => '@.']);
         $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy([
@@ -239,7 +240,7 @@ class WblistRepository extends BaseRepository
     }
 
     /**
-     * @param WbRule $wbRule
+     * @phpstan-param WbRule $wbRule
      */
     public function updateOrCreateRule(
         User $recipientUser,
@@ -249,28 +250,28 @@ class WblistRepository extends BaseRepository
         int $priority,
         bool $flush = true,
     ): void {
-        $wblist = $this->findOneBy([
+        $senderRule = $this->findOneBy([
             'rid' => $recipientUser,
             'sid' => $senderRuleAddress,
         ]);
 
-        if (!$wblist) {
-            $wblist = new Wblist($recipientUser, $senderRuleAddress);
+        if (!$senderRule) {
+            $senderRule = new SenderRule($recipientUser, $senderRuleAddress);
         }
 
-        $wblist->setWbRule($wbRule);
-        $wblist->setType($type);
-        $wblist->setPriority($priority);
+        $senderRule->setWbRule($wbRule);
+        $senderRule->setType($type);
+        $senderRule->setPriority($priority);
 
-        $this->save($wblist, $flush);
+        $this->save($senderRule, $flush);
     }
 
     /**
-     * Check if wblist is overriden by anotherOne with highter priority
+     * Check if sender rule is overridden by anotherOne with higher priority
      *
      * @param array<string, mixed> $wbInfo
      */
-    public function wbListIsOverriden(array $wbInfo): bool
+    public function senderRuleIsOverridden(array $wbInfo): bool
     {
         $dql = $this->createQueryBuilder('wb')
                 ->select('wb')
@@ -288,7 +289,7 @@ class WblistRepository extends BaseRepository
     }
 
     /**
-     * @return Query<Wblist>
+     * @return Query<SenderRule>
      */
     public function getDomainSearchQuery(User $userDomain, string $searchKey = ''): Query
     {

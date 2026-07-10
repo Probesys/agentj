@@ -19,7 +19,7 @@ class ImportType extends AbstractType
             ->add('attachment', FileType::class, ['label' => false])
             ->add('domain', EntityType::class, [
                 'class' => Domain::class,
-                'label' => new TranslatableMessage('Entities.WBList.fields.domain'),
+                'label' => new TranslatableMessage('Entities.SenderRule.fields.domain'),
                 'multiple' => false,
                 'attr' => ['class' => 'select2'],
                 'query_builder' => function (DomainRepository $rep) {

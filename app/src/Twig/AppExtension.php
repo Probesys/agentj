@@ -6,7 +6,7 @@ use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\User;
-use App\Entity\Wblist;
+use App\Entity\SenderRule;
 use App\Service\LocaleService;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,7 +37,7 @@ class AppExtension extends AbstractExtension
         return [
             new TwigFilter('lcfirst', [$this, 'lcfirst']),
             new TwigFilter('user_groups', [$this, 'getUserGroups']),
-            new TwigFilter('wblist_is_overridden', [$this, 'wbListIsOverriden']),
+            new TwigFilter('sender_rule_is_overridden', [$this, 'senderRuleIsOverridden']),
         ];
     }
 
@@ -87,13 +87,13 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * Check if wblist is overriden by anotherOne with highter prioriry
+     * Check if sender rule is overridden by anotherOne with higher priority
      *
      * @param array<string, mixed> $wbInfo
      */
-    public function wbListIsOverriden(array $wbInfo): bool
+    public function senderRuleIsOverridden(array $wbInfo): bool
     {
-        return $this->em->getRepository(Wblist::class)->wbListIsOverriden($wbInfo);
+        return $this->em->getRepository(SenderRule::class)->senderRuleIsOverridden($wbInfo);
     }
 
     public function messageReleaseToken(Message $message, User $user): string

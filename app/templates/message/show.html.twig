@@ -88,7 +88,7 @@
                             {{ 'Generics.fields.sender' | trans }}
                         </th>
                         <th>
-                            {{ 'Entities.WBList.fields.wbRule' | trans }}
+                            {{ 'Entities.SenderRule.fields.wbRule' | trans }}
                         </th>
                         <th>
                             {{ 'Generics.fields.priority' | trans }}
@@ -98,26 +98,26 @@
                         </th>
                     </tr>
                 </thead>
-                {% for wblist in wblists %}
+                {% for senderRule in senderRules %}
                     {% set classTr = "" %}
                     {% if loop.index == 1 %}
                         {% set classTr = "bg-success text-white" %}
                     {% endif %}
                     <tr class="{{ classTr }} ">
                         <td>
-                            {{ wblist.rid.email }}
+                            {{ senderRule.rid.email }}
                         </td>
                         <td>
-                            {{ wblist.sid.email }}
+                            {{ senderRule.sid.email }}
                         </td>
                         <td>
-                            {{ wblist.wbRuleName | trans }}
+                            {{ senderRule.wbRuleName | trans }}
                         </td>
                         <td>
-                            {{ wblist.priority }}
+                            {{ senderRule.priority }}
                         </td>
                         <td>
-                            {{ wblist.group?.name }}
+                            {{ senderRule.group?.name }}
                         </td>
                     </tr>
                 {% endfor %}

@@ -6,13 +6,13 @@ use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Policy;
 use App\Entity\RuleAddress;
+use App\Entity\SenderRule;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\DomainRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\SettingRepository;
-use App\Repository\WblistRepository;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -160,10 +160,10 @@ class DomainController extends AbstractController
                 $ruleAddress->setEmail('@.');
                 $this->em->persist($ruleAddress);
             }
-            $wblist = new Wblist($user, $ruleAddress);
-            $wblist->setWbRule($wbRule);
-            $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-            $this->em->persist($wblist);
+            $senderRule = new SenderRule($user, $ruleAddress);
+            $senderRule->setWbRule($wbRule);
+            $senderRule->setPriority(SenderRule::SENDER_RULE_PRIORITY_DOMAIN);
+            $this->em->persist($senderRule);
 
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.domainCreatd'));
@@ -202,13 +202,13 @@ class DomainController extends AbstractController
             'maxSpamLevel' => $this->getParameter('app.domain_max_spam_level'),
         ]);
 
-        $wblist = $this->em->getRepository(Wblist::class)->findOneByRecipientDomain($domain);
+        $senderRule = $this->em->getRepository(SenderRule::class)->findOneByRecipientDomain($domain);
 
-        if ($wblist === null) {
-            throw $this->createNotFoundException('No wblist found for domain ' . $domain->getDomain());
+        if ($senderRule === null) {
+            throw $this->createNotFoundException('No sender rule found for domain ' . $domain->getDomain());
         }
 
-        $form->get('wbRule')->setData($wblist->getWbRule());
+        $form->get('wbRule')->setData($senderRule->getWbRule());
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -228,14 +228,14 @@ class DomainController extends AbstractController
             $userDomain->setPolicy($policy);
 
             $wbRule = $form->get("wbRule")->getData();
-            $wblist->setWbRule($wbRule);
-            $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
+            $senderRule->setWbRule($wbRule);
+            $senderRule->setPriority(SenderRule::SENDER_RULE_PRIORITY_DOMAIN);
 
             if ($domain->getDomainKeys() === null) {
                 $this->generateOpenDkim($domain);
             }
 
-            $em->persist($wblist);
+            $em->persist($senderRule);
             $em->persist($userDomain);
             $em->flush();
 
@@ -284,37 +284,37 @@ class DomainController extends AbstractController
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
-    #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'POST')]
-    public function deleteWblist(
+    #[Route(path: '/{rid}/sender-rule/delete/{sid}', name: 'domain_sender_rule_delete', methods: 'POST')]
+    public function deleteSenderRule(
         int $rid,
         int $sid,
         Request $request,
-        WblistRepository $wblistRepository
+        SenderRuleRepository $senderRuleRepository
     ): Response {
 
-        $wbList = $wblistRepository->findOneBy(['rid' => $rid, 'sid' => $sid]);
-        $domain = $wbList->getRid()->getDomain();
+        $senderRule = $senderRuleRepository->findOneBy(['rid' => $rid, 'sid' => $sid]);
+        $domain = $senderRule->getRid()->getDomain();
         $this->checkAccess($domain);
 
         $csrfToken = $request->request->getString('_token', '');
 
         if (!$this->isCsrfTokenValid('delete', $csrfToken)) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
-            return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
+            return $this->redirectToRoute('domaine_sender_rule', ['id' => $domain->getId()]);
         }
 
-        $this->em->remove($wbList);
+        $this->em->remove($senderRule);
         $this->em->flush();
 
-        return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
+        return $this->redirectToRoute('domaine_sender_rule', ['id' => $domain->getId()]);
     }
 
-    #[Route(path: '/{id}/wblist', name: 'domain_wblist', methods: 'GET')]
-    public function domainwblist(
+    #[Route(path: '/{id}/sender-rule', name: 'domaine_sender_rule', methods: 'GET')]
+    public function domainSenderRule(
         Domain $domain,
         Request $request,
         PaginatorInterface $paginator,
-        WblistRepository $wblistRepository
+        SenderRuleRepository $senderRuleRepository
     ): Response {
         $this->checkAccess($domain);
 
@@ -322,7 +322,7 @@ class DomainController extends AbstractController
 
         $searchKey = $request->query->getString('search', '');
 
-        $wblistQuery = $wblistRepository->getDomainSearchQuery(
+        $senderRulesQuery = $senderRuleRepository->getDomainSearchQuery(
             userDomain: $userDomain,
             searchKey: $searchKey
         );
@@ -330,9 +330,8 @@ class DomainController extends AbstractController
         $perPage = (int) $this->getParameter('app.per_page_global');
         $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
 
-
-        $wblist = $paginator->paginate(
-            $wblistQuery,
+        $senderRules = $paginator->paginate(
+            $senderRulesQuery,
             $request->query->getInt('page', 1),
             $perPage,
             [
@@ -345,30 +344,30 @@ class DomainController extends AbstractController
         );
 
 
-        return $this->render('domain/wblist.html.twig', [
+        return $this->render('domain/senderRule.html.twig', [
             'domain' => $domain,
-            'wblist' => $wblist,
+            'senderRules' => $senderRules,
         ]);
     }
 
     /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
      */
-    #[Route(path: '/{id}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
-    public function newwblist(Domain $domain, Request $request, RuleAddressService $ruleAddressService): Response
+    #[Route(path: '/{id}/sender-rule/new', name: 'domain_sender_rule_new', methods: 'GET|POST')]
+    public function newSenderRule(Domain $domain, Request $request, RuleAddressService $ruleAddressService): Response
     {
         $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
-            'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),
+            'action' => $this->generateUrl('domain_sender_rule_new', ['id' => $domain->getId()]),
         ]);
         $formBuilder->add('email', TextType::class);
 
         $formBuilder->add('wbRule', ChoiceType::class, [
             'choices' => ['accept', 'block', 'allow'],
             'choice_label' => function (string $choice): TranslatableMessage {
-                return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                return new TranslatableMessage("Entities.SenderRule.rules.{$choice}");
             },
-            'label' => new TranslatableMessage('Entities.WBList.fields.wbRule'),
+            'label' => new TranslatableMessage('Entities.SenderRule.fields.wbRule'),
         ]);
 
         $form = $formBuilder->getForm();
@@ -387,26 +386,26 @@ class DomainController extends AbstractController
 
                 $this->em->persist($ruleAddress);
             } else {
-                $domainWblistExists = $this->em->getRepository(Wblist::class)->findOneBy(([
+                $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
                     'rid' => $user,
                     'sid' => $ruleAddress,
                 ]));
-                if ($domainWblistExists) {
+                if ($domainSenderRuleExists) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
-                    return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
+                    return $this->redirectToRoute('domaine_sender_rule', ['id' => $domain->getId()]);
                 }
             }
-            $wblist = new Wblist($user, $ruleAddress);
-            $wblist->setWbRule($data['wbRule']);
-            $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
+            $senderRule = new SenderRule($user, $ruleAddress);
+            $senderRule->setWbRule($data['wbRule']);
+            $senderRule->setPriority(SenderRule::SENDER_RULE_PRIORITY_DOMAIN);
 
-            $this->em->persist($wblist);
+            $this->em->persist($senderRule);
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
-            return $this->redirectToRoute('domain_wblist', ['id' => $domain->getId()]);
+            return $this->redirectToRoute('domaine_sender_rule', ['id' => $domain->getId()]);
         }
 
-        return $this->render('domain/newwblist.html.twig', [
+        return $this->render('domain/newSenderRule.html.twig', [
             'domain' => $domain,
             'form' => $form->createView(),
         ]);

@@ -108,7 +108,7 @@ class LDAPImportCommand extends Command
             }
         }
 
-        $this->groupService->updateWblist();
+        $this->groupService->updateSenderRule();
 
         $this->connector->finishImportWithSuccess([
             'users' => $usersResult,

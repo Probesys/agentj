@@ -5,8 +5,8 @@ namespace App\Command;
 use App\Amavis\MessageStatus;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRecipientSearchRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
-use App\Repository\WblistRepository;
 use App\Service\MessageService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +26,7 @@ class AmavisAutoReleaseCommand extends Command
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private UserRepository $userRepository,
-        private WblistRepository $wblistRepository,
+        private SenderRuleRepository $senderRuleRepository,
         private MessageService $messageService,
         private LockFactory $lockFactory,
     ) {
@@ -65,7 +65,7 @@ class AmavisAutoReleaseCommand extends Command
 
             $recipientDomain = $recipientUser->getDomain();
 
-            $senderIsAuthorized = $this->wblistRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
+            $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
             $humanAuthIsDisabled = $recipientUser->getBypassHumanAuth();
 
             $spamLevel = $recipientDomain->getLevel();

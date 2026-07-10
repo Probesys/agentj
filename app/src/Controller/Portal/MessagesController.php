@@ -59,7 +59,7 @@ class MessagesController extends AbstractController
 
         $result = $this->messageService->authorizeSenderForRecipient(
             $messageRecipient,
-            Entity\Wblist::WBLIST_TYPE_USER,
+            Entity\SenderRule::SENDER_RULE_TYPE_USER,
         );
 
         if ($result) {

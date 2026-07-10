@@ -5,14 +5,14 @@ namespace App\Service;
 use App\Amavis\MessageStatus;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
+use App\Entity\SenderRule;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Message\AmavisRelease;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
-use App\Repository\WblistRepository;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class MessageService
@@ -23,7 +23,7 @@ class MessageService
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
-        private WblistRepository $wblistRepository,
+        private SenderRuleRepository $senderRuleRepository,
         private CryptEncryptService $cryptEncryptService,
         private SpamassassinService $spamassassinService,
     ) {
@@ -43,7 +43,7 @@ class MessageService
             return false;
         }
 
-        // WBList rules are case-insensitive
+        // Sender rules are case-insensitive
         $normalizedEmail = strtolower($senderEmail);
         $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($normalizedEmail);
 
@@ -51,12 +51,12 @@ class MessageService
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
-            $this->wblistRepository->updateOrCreateRule(
+            $this->senderRuleRepository->updateOrCreateRule(
                 $user,
                 $senderRuleAddress,
                 wbRule: 'accept',
                 type: $validationSource,
-                priority: Wblist::WBLIST_PRIORITY_USER,
+                priority: SenderRule::SENDER_RULE_PRIORITY_USER,
             );
 
             $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
@@ -107,12 +107,12 @@ class MessageService
         $domain = $domainUser->getDomain();
         $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
-        $this->wblistRepository->updateOrCreateRule(
+        $this->senderRuleRepository->updateOrCreateRule(
             $domainUser,
             $senderRuleAddress,
             wbRule: 'accept',
             type: $validationSource,
-            priority: Wblist::WBLIST_PRIORITY_USER,
+            priority: SenderRule::SENDER_RULE_PRIORITY_USER,
         );
 
         $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
@@ -156,12 +156,12 @@ class MessageService
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
-            $this->wblistRepository->updateOrCreateRule(
+            $this->senderRuleRepository->updateOrCreateRule(
                 $user,
                 $senderRuleAddress,
                 wbRule: 'block',
                 type: $validationSource,
-                priority: Wblist::WBLIST_PRIORITY_USER,
+                priority: SenderRule::SENDER_RULE_PRIORITY_USER,
             );
 
             $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
@@ -211,12 +211,12 @@ class MessageService
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
 
-        $this->wblistRepository->updateOrCreateRule(
+        $this->senderRuleRepository->updateOrCreateRule(
             $domainUser,
             $senderRuleAddress,
             wbRule: 'block',
             type: $validationSource,
-            priority: Wblist::WBLIST_PRIORITY_USER,
+            priority: SenderRule::SENDER_RULE_PRIORITY_USER,
         );
 
         $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(

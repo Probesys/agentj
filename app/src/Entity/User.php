@@ -120,10 +120,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $uid;
 
     /**
-     * @var Collection<int, Wblist>
+     * @var Collection<int, SenderRule>
      */
-    #[ORM\OneToMany(targetEntity: Wblist::class, mappedBy: 'rid')]
-    private Collection $wbLists;
+    #[ORM\OneToMany(targetEntity: SenderRule::class, mappedBy: 'rid')]
+    private Collection $senderRules;
 
     #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'users')]
     private ?Connector $originConnector;
@@ -151,7 +151,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->sharedWith = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->ownedSharedBoxes = new ArrayCollection();
-        $this->wbLists = new ArrayCollection();
+        $this->senderRules = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -568,29 +568,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return ?Collection<int, Wblist>
+     * @return ?Collection<int, SenderRule>
      */
-    public function getWbLists(): ?Collection
+    public function getSenderRules(): ?Collection
     {
-        return $this->wbLists;
+        return $this->senderRules;
     }
 
-    public function addWbList(Wblist $wbList): self
+    public function addSenderRule(SenderRule $senderRule): self
     {
-        if (!$this->wbLists->contains($wbList)) {
-            $this->wbLists[] = $wbList;
-            $wbList->setRid($this);
+        if (!$this->senderRules->contains($senderRule)) {
+            $this->senderRules[] = $senderRule;
+            $senderRule->setRid($this);
         }
 
         return $this;
     }
 
-    public function removeWbList(Wblist $wbList): self
+    public function removeSenderRule(SenderRule $senderRule): self
     {
-        if ($this->wbLists->removeElement($wbList)) {
+        if ($this->senderRules->removeElement($senderRule)) {
             // set the owning side to null (unless already changed)
-            if ($wbList->getRid() === $this) {
-                $wbList->setRid(null);
+            if ($senderRule->getRid() === $this) {
+                $senderRule->setRid(null);
             }
         }
 

@@ -40,9 +40,9 @@ class GroupType extends AbstractType
             ->add('wbRule', ChoiceType::class, [
                 'choices' => ['none', 'block', 'allow'],
                 'choice_label' => function (string $choice): TranslatableMessage {
-                    return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                    return new TranslatableMessage("Entities.SenderRule.rules.{$choice}");
                 },
-                'label' => new TranslatableMessage('Entities.WBList.fields.wbRule'),
+                'label' => new TranslatableMessage('Entities.SenderRule.fields.wbRule'),
                 'required' => true,
             ])
             ->add('priority', NumberType::class, [

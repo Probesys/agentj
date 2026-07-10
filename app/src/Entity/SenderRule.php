@@ -2,37 +2,37 @@
 
 namespace App\Entity;
 
-use App\Repository\WblistRepository;
+use App\Repository\SenderRuleRepository;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Wblist
+ * SenderRule
  */
 #[ORM\Table(name: 'wblist')]
-#[ORM\Entity(repositoryClass: WblistRepository::class)]
-class Wblist
+#[ORM\Entity(repositoryClass: SenderRuleRepository::class)]
+class SenderRule
 {
     use WbRuleTrait;
 
-    public const WBLIST_PRIORITY_DOMAIN = 0;
-    public const WBLIST_PRIORITY_GROUP = 50;
-    public const WBLIST_PRIORITY_USER = 100;
-    public const WBLIST_PRIORITY_GROUP_OVERRIDE = 200;
+    public const SENDER_RULE_PRIORITY_DOMAIN = 0;
+    public const SENDER_RULE_PRIORITY_GROUP = 50;
+    public const SENDER_RULE_PRIORITY_USER = 100;
+    public const SENDER_RULE_PRIORITY_GROUP_OVERRIDE = 200;
 
-    public const WBLIST_TYPE_USER = 0; // List origin is a user
-    public const WBLIST_TYPE_AUTHENTICATION = 1 ; // List origin is human authentication
-    public const WBLIST_TYPE_GROUP = 2; // List origin is a group
-    public const WBLIST_TYPE_ADMIN = 3; // List origin is an administrator
-    public const WBLIST_TYPE_OUTMAIL = 4; // List origin is a sent email
-    public const WBLIST_TYPE_IMPORT = 5; // List origin is an import file
+    public const SENDER_RULE_TYPE_USER = 0; // List origin is a user
+    public const SENDER_RULE_TYPE_AUTHENTICATION = 1 ; // List origin is human authentication
+    public const SENDER_RULE_TYPE_GROUP = 2; // List origin is a group
+    public const SENDER_RULE_TYPE_ADMIN = 3; // List origin is an administrator
+    public const SENDER_RULE_TYPE_OUTMAIL = 4; // List origin is a sent email
+    public const SENDER_RULE_TYPE_IMPORT = 5; // List origin is an import file
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\User', inversedBy: 'wbLists')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'senderRules')]
     #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
     private User $rid;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\RuleAddress')]
+    #[ORM\ManyToOne(targetEntity: RuleAddress::class)]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
     private RuleAddress $sid;
@@ -46,7 +46,7 @@ class Wblist
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
     private ?int $type;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Group')]
+    #[ORM\ManyToOne(targetEntity: Group::class)]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
     private ?Group $group;
 

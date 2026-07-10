@@ -42,10 +42,10 @@ class DomainType extends AbstractType
             ->add('wbRule', ChoiceType::class, [
                 'choices' => ['enabled', 'allow'],
                 'choice_label' => function (string $choice): TranslatableMessage {
-                    return new TranslatableMessage("Entities.WBList.rules.{$choice}");
+                    return new TranslatableMessage("Entities.SenderRule.rules.{$choice}");
                 },
                 'mapped' => false,
-                'label' => new TranslatableMessage('Entities.WBList.fields.wbRule'),
+                'label' => new TranslatableMessage('Entities.SenderRule.fields.wbRule'),
                 'required' => true,
             ])
             ->add('policy', null, [

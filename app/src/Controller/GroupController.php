@@ -189,7 +189,7 @@ class GroupController extends AbstractController
 
             $this->em->flush();
 
-            $groupService->updateWblist();
+            $groupService->updateSenderRule();
             foreach ($group->getUsers() as $user) {
                 $userService->updateUserAndAliasPolicy($user);
             }
@@ -262,7 +262,7 @@ class GroupController extends AbstractController
         }
         $this->em->flush();
         $userService->updateUserAndAliasPolicy($user);
-        $groupService->updateWblist();
+        $groupService->updateSenderRule();
 
         $this->em->flush();
 
@@ -307,7 +307,7 @@ class GroupController extends AbstractController
         $this->em->remove($group);
         $this->em->flush();
 
-        $groupService->updateWblist();
+        $groupService->updateSenderRule();
 
         foreach ($groupUsers as $user) {
             $userService->updateUserAndAliasPolicy($user);
