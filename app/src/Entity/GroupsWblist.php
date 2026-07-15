@@ -19,7 +19,6 @@ class GroupsWblist
     #[ORM\Id]
     private Group $group;
 
-
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Mailaddr', fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
@@ -30,7 +29,6 @@ class GroupsWblist
      */
     #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
     private string $wb;
-
 
     public function getWb(): string
     {

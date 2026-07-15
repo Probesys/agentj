@@ -57,7 +57,7 @@ class Group
     /**
      * @var Collection<int, GroupsWblist>
      */
-    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'groups')]
+    #[ORM\OneToMany(targetEntity: 'App\Entity\GroupsWblist', mappedBy: 'group')]
     private Collection $groupsWbLists;
 
     #[Gedmo\Slug(fields: ['name'])]

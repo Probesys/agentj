@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\User;
-use App\Entity\Mailaddr;
 use App\Repository\WblistRepository;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\ORM\Mapping as ORM;
