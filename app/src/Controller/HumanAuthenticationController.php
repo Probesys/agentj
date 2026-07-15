@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class HumanAuthenticationsController extends AbstractController
+class HumanAuthenticationController extends AbstractController
 {
     #[Route(path: '/check/{token}', name: 'human_authentication', methods: ['GET', 'POST'])]
     public function show(
