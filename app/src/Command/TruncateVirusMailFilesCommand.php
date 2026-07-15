@@ -2,23 +2,20 @@
 
 namespace App\Command;
 
-use App\Entity\Log;
-use App\Entity\Message;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'agentj:truncate-virus-queue',
     description: 'Truncate amavis quarantine files older than X days (see .ENV file) ',
 )]
-class TruncateVirusMailFiles extends Command
+class TruncateVirusMailFilesCommand extends Command
 {
     private int $nbDays = 30;
 
@@ -74,6 +71,7 @@ class TruncateVirusMailFiles extends Command
                 }
             }
         }
+
         return Command::SUCCESS;
     }
 }
