@@ -30,7 +30,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
     name: 'agentj:import-ldap',
     description: 'import users from LDAP',
 )]
-class LDAPImportCommand extends Command
+class LdapImportCommand extends Command
 {
     private LdapConnector $connector;
     private Ldap $ldap;
