@@ -5,7 +5,7 @@ namespace App\Entity;
 use Symfony\Component\Translation\TranslatableMessage;
 
 /**
- * The WbRuleTrait helps to manipulate the SenderRule.wb field (and other similar
+ * The RuleTrait helps to manipulate the SenderRule.wb field (and other similar
  * fields like Group.wb and GroupRule.wb).
  *
  * It abstracts the "wb" value meaning behind the "rule" concept. A rule tells
@@ -28,7 +28,7 @@ use Symfony\Component\Translation\TranslatableMessage;
  *
  * @phpstan-type WbRule 'accept'|'block'|'allow'|'enabled'|'none'
  */
-trait WbRuleTrait
+trait RuleTrait
 {
     /**
      * @return WbRule

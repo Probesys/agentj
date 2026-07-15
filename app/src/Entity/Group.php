@@ -15,7 +15,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: 'App\Repository\GroupRepository')]
 class Group
 {
-    use WbRuleTrait;
+    use RuleTrait;
 
     /**
      * @var int

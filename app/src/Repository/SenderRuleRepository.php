@@ -13,7 +13,7 @@ use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
+ * @phpstan-import-type WbRule from \App\Entity\RuleTrait
  *
  * @extends BaseRepository<SenderRule>
  */
@@ -70,7 +70,7 @@ class SenderRuleRepository extends BaseRepository
         // In AgentJ, we use the space to represent an "accepted" sender, in
         // contrast to B for "blocked" senders, and W for "allowed" senders.
         // We don't use score (except "0" at the domain level, but we don't
-        // care here). See WbRuleTrait for more details.
+        // care here). See RuleTrait for more details.
         if ($type === 'W') {
             $dql->andWhere("wb.wb = 'W' OR wb.wb = 'Y' OR wb.wb = ' '");
         } elseif ($type === 'B') {
