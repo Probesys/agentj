@@ -23,10 +23,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 #[AsCommand(
-    name: 'agentj:report-send-mail',
+    name: 'agentj:send-report-mail',
     description: 'Send report email',
 )]
-class ReportSendMailCommand extends Command
+class SendReportMailCommand extends Command
 {
     public function __construct(
         private Environment $twig,
@@ -182,28 +182,28 @@ class ReportSendMailCommand extends Command
         array $messageRecipients
     ): string {
         // Get the part of the body before [FOREACH_MESSAGE].
-        $splittedBody = explode('[FOREACH_MESSAGE]', $body, 2);
+        $splitBody = explode('[FOREACH_MESSAGE]', $body, 2);
 
-        if (count($splittedBody) !== 2) {
+        if (count($splitBody) !== 2) {
             return $body;
         }
 
-        $bodyStart = $splittedBody[0];
+        $bodyStart = $splitBody[0];
 
         // Get the part of the body after [ENDFOREACH_MESSAGE].
-        $bodyRest = $splittedBody[1];
+        $bodyRest = $splitBody[1];
 
-        $splittedBody = explode('[ENDFOREACH_MESSAGE]', $bodyRest, 2);
+        $splitBody = explode('[ENDFOREACH_MESSAGE]', $bodyRest, 2);
 
-        if (count($splittedBody) !== 2) {
+        if (count($splitBody) !== 2) {
             return $body;
         }
 
-        $bodyEnd = $splittedBody[1];
+        $bodyEnd = $splitBody[1];
 
         // The remaining section is the one between the two previous tags, i.e.
         // the message template.
-        $messageTemplate = $splittedBody[0];
+        $messageTemplate = $splitBody[0];
 
         $bodyMessages = '';
         foreach ($messageRecipients as $messageRecipient) {
