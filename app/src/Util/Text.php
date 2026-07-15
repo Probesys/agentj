@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Controller\Traits;
+namespace App\Util;
 
-use Symfony\Contracts\Translation\TranslatorInterface;
-
-trait ControllerCommonTrait
+class Text
 {
-    public function slugify(string $text): string
+    public static function slugify(string $text): string
     {
         $text = preg_replace('#[^\\pL\d]+#u', '-', $text);
         $text = trim($text, '-');
