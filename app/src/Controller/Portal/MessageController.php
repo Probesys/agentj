@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class MessagesController extends AbstractController
+class MessageController extends AbstractController
 {
     public function __construct(
         private Service\LogService $logService,
