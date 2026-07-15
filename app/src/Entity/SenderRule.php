@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: SenderRuleRepository::class)]
 class SenderRule
 {
-    use WbRuleTrait;
+    use RuleTrait;
 
     public const PRIORITY_DOMAIN = 0;
     public const PRIORITY_GROUP = 50;

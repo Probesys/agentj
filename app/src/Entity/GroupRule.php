@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: GroupRuleRepository::class)]
 class GroupRule
 {
-    use WbRuleTrait;
+    use RuleTrait;
 
     #[ORM\ManyToOne(targetEntity: 'App\Entity\Group', inversedBy: 'groupRules')]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]

@@ -13,7 +13,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 /**
- * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
+ * @phpstan-import-type WbRule from \App\Entity\RuleTrait
  */
 class DomainFixture extends Fixture
 {
