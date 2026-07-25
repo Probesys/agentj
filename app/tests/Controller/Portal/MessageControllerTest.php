@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Controller;
+namespace App\Tests\Controller\Portal;
 
 use App\Amavis\MessageStatus;
 use App\Service\MessageService;
@@ -334,6 +334,156 @@ class PortalMessageControllerTest extends WebTestCase
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->client->request(Request::METHOD_GET, $urlRestore);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserCanBanItsMessageFromReport(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'new' => 1,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->client->request(Request::METHOD_GET, $urlBan);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserCanBanItsMessageFromReportOldVersion(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->client->request(Request::METHOD_GET, $urlBan);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserCannotBanMessageFromOtherUser(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient1);
+        $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'new' => 1,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->client->request(Request::METHOD_GET, $urlBan);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserCannotBanMessageFromOtherUserOldVersion(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient1);
+        $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $this->client->request(Request::METHOD_GET, $urlBan);
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
