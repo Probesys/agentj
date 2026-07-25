@@ -506,6 +506,8 @@ Navigation.virus: Virus
 Navigation.whitelist: 'Authorized senders'
 Portal.Messages.authorized.backToMessages: 'See my authorized mails'
 Portal.Messages.authorized.senderAuthorized: 'The address is now authorized.'
+Portal.Messages.banned.backToMessages: 'See my banned mails'
+Portal.Messages.banned.senderBanned: 'The address is now banned.'
 Portal.Messages.restore.backToMessages: 'See my recovered mails'
 Portal.Messages.restore.messageRestored: 'Message successfully recovered.'
 Search.AdvancedFilter: 'Advanced filter'

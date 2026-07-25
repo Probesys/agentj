@@ -506,6 +506,8 @@ Navigation.virus: 'Virus détectés'
 Navigation.whitelist: 'Expéditeurs autorisés'
 Portal.Messages.authorized.backToMessages: 'Voir mes mails autorisés'
 Portal.Messages.authorized.senderAuthorized: 'L’adresse est désormais autorisée.'
+Portal.Messages.banned.backToMessages: 'Voir mes mails bannis'
+Portal.Messages.banned.senderBanned: "L'adresse est désormais bannie."
 Portal.Messages.restore.backToMessages: 'Voir mes mails récupérés'
 Portal.Messages.restore.messageRestored: 'Message récupéré avec succès.'
 Search.AdvancedFilter: 'Filtres avancés'
