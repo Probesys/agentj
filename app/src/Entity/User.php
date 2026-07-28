@@ -579,7 +579,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->senderRules->contains($senderRule)) {
             $this->senderRules[] = $senderRule;
-            $senderRule->setRid($this);
+            $senderRule->setUser($this);
         }
 
         return $this;
@@ -589,8 +589,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->senderRules->removeElement($senderRule)) {
             // set the owning side to null (unless already changed)
-            if ($senderRule->getRid() === $this) {
-                $senderRule->setRid(null);
+            if ($senderRule->getUser() === $this) {
+                $senderRule->setUser(null);
             }
         }
 

@@ -232,7 +232,7 @@ class MessageController extends AbstractController
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $rid
+            'address' => $rid
         ]);
         if (!$messageRecipient) {
             throw $this->createNotFoundException('The message does not exist.');
@@ -246,7 +246,7 @@ class MessageController extends AbstractController
 
         $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(
             $message->getSenderEmail(),
-            $messageRecipient->getRid(),
+            $messageRecipient->getAddress(),
         );
 
         return $this->render('message/show.html.twig', [
@@ -273,7 +273,9 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em
+            ->getRepository(MessageRecipient::class)
+            ->findOneByMessageAndRecipientAddressId($message, $rid);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -401,7 +403,9 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em
+            ->getRepository(MessageRecipient::class)
+            ->findOneByMessageAndRecipientAddressId($message, $rid);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -506,7 +510,7 @@ class MessageController extends AbstractController
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $rid,
+            'address' => $rid,
         ]);
 
         if (!$messageRecipient) {
@@ -516,10 +520,7 @@ class MessageController extends AbstractController
         $this->checkMailAccess($messageRecipient);
 
         return $this->render('message/content.html.twig', [
-            'partitionTag' => $partitionTag,
-            'mailId' => $mailId,
-            'rid' => $rid,
-            'messageRecipient' => $messageRecipient
+            'messageRecipient' => $messageRecipient,
         ]);
     }
 
@@ -529,7 +530,7 @@ class MessageController extends AbstractController
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $rid,
+            'address' => $rid,
         ]);
 
         if (!$messageRecipient) {
@@ -605,7 +606,7 @@ class MessageController extends AbstractController
 
         if (
             !$this->isGranted("ROLE_ADMIN") &&
-            !in_array($messageRecipient->getRid()->getEmail(), $accessibleRecipientEmails)
+            !in_array($messageRecipient->getAddress()->getEmail(), $accessibleRecipientEmails)
         ) {
             throw new AccessDeniedException();
         }
@@ -622,7 +623,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Invalid batch id');
         }
 
-        list($partitionTag, $mailId, $rid) = $decodedId;
+        list($partitionTag, $mailId, $addressId) = $decodedId;
 
         $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
@@ -630,7 +631,9 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneByMessageAndRid($message, $rid);
+        $messageRecipient = $this->em
+            ->getRepository(MessageRecipient::class)
+            ->findOneByMessageAndRecipientAddressId($message, $addressId);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');

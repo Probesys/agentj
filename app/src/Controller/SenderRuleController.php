@@ -115,13 +115,12 @@ class SenderRuleController extends AbstractController
     }
 
     private function deleteSenderRule(
-        int $rid,
-        int $sid,
+        int $userId,
+        int $senderRuleAddressId,
         int $priority,
         SenderRuleRepository $senderRuleRepository,
     ): void {
-
-        $mainUser = $this->em->getRepository(User::class)->find($rid);
+        $mainUser = $this->em->getRepository(User::class)->find($userId);
         $userAndAliases = [];
 
         // if address in an alias we get the target mail
@@ -135,8 +134,8 @@ class SenderRuleController extends AbstractController
             array_unshift($userAndAliases, $mainUser);
         }
 
-        foreach ($userAndAliases as $user) {
-            $senderRuleRepository->delete($user->getId(), $sid, $priority);
+        foreach ($userAndAliases as $userOrAlias) {
+            $senderRuleRepository->delete($userOrAlias->getId(), $senderRuleAddressId, $priority);
         }
     }
 
@@ -218,37 +217,37 @@ class SenderRuleController extends AbstractController
                     continue;
                 }
 
-                $ruleAddressSender = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
+                $senderRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
                 // if email doesn't exist then we create email in RuleAddress
-                if (!$ruleAddressSender) {
-                    $ruleAddressSender = new RuleAddress();
-                    $ruleAddressSender->setEmail($data);
-                    $ruleAddressSender->setPriority(6);
-                    $this->em->persist($ruleAddressSender);
+                if (!$senderRuleAddress) {
+                    $senderRuleAddress = new RuleAddress();
+                    $senderRuleAddress->setEmail($data);
+                    $senderRuleAddress->setPriority(6);
+                    $this->em->persist($senderRuleAddress);
                     $this->em->flush();
                 }
 
                 if (
                     isset($senderRules[$domain->getId()]) &&
-                    in_array($ruleAddressSender->getId(), $senderRules[$domain->getId()])
+                    in_array($senderRuleAddress->getId(), $senderRules[$domain->getId()])
                 ) {
                     continue;
                 }
 
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
                 $senderRule = $this->em->getRepository(SenderRule::class)->findOneBy([
-                    'sid' => $ruleAddressSender,
-                    'rid' => $user,
+                    'senderRuleAddress' => $senderRuleAddress,
+                    'user' => $user,
                 ]);
                 if (!$senderRule) {
-                    $senderRule = new SenderRule($user, $ruleAddressSender);
+                    $senderRule = new SenderRule($user, $senderRuleAddress);
                 }
 
                 $senderRule->setWbRule($rule);
                 $senderRule->setPriority(SenderRule::PRIORITY_USER);
                 $senderRule->setType(SenderRule::TYPE_IMPORT);
                 $this->em->persist($senderRule);
-                $senderRules[$domain->getId()][] = $ruleAddressSender->getId();
+                $senderRules[$domain->getId()][] = $senderRuleAddress->getId();
             }
             $this->em->flush();
         }

@@ -33,7 +33,7 @@ class BaseMessageRecipient
 
     #[ORM\ManyToOne(targetEntity: Address::class)]
     #[ORM\JoinColumn(name: 'rid', nullable: true)]
-    private ?Address $rid = null;
+    private ?Address $address = null;
 
     #[ORM\Column(name: 'is_local', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private string $isLocal = '';
@@ -185,14 +185,14 @@ class BaseMessageRecipient
         return $this;
     }
 
-    public function getRid(): ?Address
+    public function getAddress(): ?Address
     {
-        return $this->rid;
+        return $this->address;
     }
 
-    public function setRid(?Address $rid): self
+    public function setAddress(?Address $address): self
     {
-        $this->rid = $rid;
+        $this->address = $address;
 
         return $this;
     }

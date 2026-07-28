@@ -48,7 +48,7 @@ class MessageController extends AbstractController
         $messageRecipient = $this->messageRecipientRepository->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $recipientId,
+            'address' => $recipientId,
         ]);
 
         if (!$messageRecipient) {
@@ -98,7 +98,8 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->messageRecipientRepository->findOneByMessageAndRid($message, $recipientId);
+        $messageRecipient = $this->messageRecipientRepository
+            ->findOneByMessageAndRecipientAddressId($message, $recipientId);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -120,7 +121,7 @@ class MessageController extends AbstractController
         }, $listAliases->toArray());
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
-        if (!in_array($messageRecipient->getRid()->getEmail(), $accessibleRecipientEmails)) {
+        if (!in_array($messageRecipient->getAddress()->getEmail(), $accessibleRecipientEmails)) {
             throw new AccessDeniedException();
         }
     }

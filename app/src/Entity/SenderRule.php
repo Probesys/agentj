@@ -27,12 +27,12 @@ class SenderRule
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'senderRules')]
     #[ORM\JoinColumn(name: 'rid', nullable: true, onDelete: 'CASCADE')]
     #[ORM\Id]
-    private User $rid;
+    private User $user;
 
     #[ORM\ManyToOne(targetEntity: RuleAddress::class)]
     #[ORM\JoinColumn(name: 'sid', nullable: true)]
     #[ORM\Id]
-    private RuleAddress $sid;
+    private RuleAddress $senderRuleAddress;
 
     #[ORM\Column(name: 'wb', type: 'string', length: 10, nullable: false)]
     private string $wb;
@@ -53,8 +53,8 @@ class SenderRule
 
     public function __construct(User $user, RuleAddress $ruleAddress)
     {
-        $this->rid = $user;
-        $this->sid = $ruleAddress;
+        $this->user = $user;
+        $this->senderRuleAddress = $ruleAddress;
         $this->datemod = new \DateTime();
     }
 
@@ -94,21 +94,21 @@ class SenderRule
         return $this;
     }
 
-    public function getRid(): ?User
+    public function getUser(): ?User
     {
-        return $this->rid;
+        return $this->user;
     }
 
-    public function setRid(?User $rid): self
+    public function setUser(?User $user): self
     {
-        $this->rid = $rid;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function setSid(RuleAddress $sid): self
+    public function setSenderRuleAddress(RuleAddress $senderRuleAddress): self
     {
-        $this->sid = $sid;
+        $this->senderRuleAddress = $senderRuleAddress;
 
         return $this;
     }
@@ -125,9 +125,9 @@ class SenderRule
         return $this;
     }
 
-    public function getSid(): RuleAddress
+    public function getSenderRuleAddress(): RuleAddress
     {
-        return $this->sid;
+        return $this->senderRuleAddress;
     }
 
     public function getPriority(): int

@@ -24,13 +24,8 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
     {
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
-            ->leftJoin(
-                OutMessage::class,
-                'm',
-                Join::WITH,
-                'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag'
-            )
-            ->leftJoin(Address::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            ->leftJoin('mr.message', 'm')
+            ->leftJoin('mr.address', 'maddr');
 
         return $queryBuilder;
     }
@@ -44,8 +39,8 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
             SELECT omr
             FROM App\Entity\OutMessageRecipient omr
             JOIN omr.message AS om
-            JOIN om.sid AS s
-            WHERE s.email = :email
+            JOIN om.senderAddress AS sa
+            WHERE sa.email = :email
         SQL);
 
         $query->setParameter('email', $user->getEmail());

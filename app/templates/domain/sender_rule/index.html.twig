@@ -42,7 +42,7 @@
 				<tbody>
 
 					{% for senderRule in senderRules %}
-						{% set mail = senderRule.getSid().email %}
+						{% set mail = senderRule.senderRuleAddress.email %}
 						{% if mail != "@." %}
 							<tr>
 								<td data-title="{{'Generics.fields.sender'|trans }}">{{mail}}</td>
@@ -54,7 +54,7 @@
 										<li class="list-inline-item">
                                             <form
                                                 method="post"
-                                                action="{{ path('domain_sender_rules_delete',{'rid' : senderRule.getRid().id, 'sid' : senderRule.getSid().id}) }}"
+                                                action="{{ path('domain_sender_rules_delete',{'rid' : senderRule.user.id, 'sid' : senderRule.senderRuleAddress.id}) }}"
                                                 data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">

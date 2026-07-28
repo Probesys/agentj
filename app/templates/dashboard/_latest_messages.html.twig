@@ -24,7 +24,7 @@
 					{% set error_badge = 'Message.ErrorSendCaptcha' %}
 					{% set error_badge_detail = messageRecipient.messageError %}
 				{% endif %}
-				{% set keyPairMessage =  [messageRecipient.partitionTag, messageRecipient.mailId,messageRecipient.rid] %}
+				{% set keyPairMessage =  [messageRecipient.partitionTag, messageRecipient.mailId,messageRecipient.address.id] %}
 				<tr>
 					{% if is_granted('ROLE_ADMIN') %}
 						<td>
@@ -33,7 +33,7 @@
 					{% endif %}
 					{% if is_granted('ROLE_ADMIN') %}
 						<td data-title="{{'Message.Recipient'|trans }}">
-							<span title="{{messageRecipient.rid.getEmail()}}">{{messageRecipient.rid.getEmail()}}</span>
+							<span title="{{messageRecipient.address.email}}">{{messageRecipient.address.email}}</span>
 						</td>
 					{% endif %}
 					<td data-title="{{'Message.Object'|trans }}">

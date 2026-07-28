@@ -62,7 +62,7 @@ class HumanAuthenticationController extends AbstractController
                 $messageRecipients = array_filter(
                     $messageRecipients,
                     function ($messageRecipient) use ($senderRuleRepository, $senderEmail) {
-                        $recipient = $messageRecipient->getRid();
+                        $recipient = $messageRecipient->getAddress();
                         return !$senderRuleRepository->isSenderInRecipientList($senderEmail, $recipient);
                     }
                 );

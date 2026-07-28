@@ -47,7 +47,7 @@
         {% for senderRule in senderRules %}
 
           {% set classLine = senderRule | sender_rule_is_overridden ? 'opacity-50' : '' %}
-          {% set keyPairMessage =  [senderRule.rid, senderRule.sid, senderRule.priority] %}
+          {% set keyPairMessage =  [senderRule.userId, senderRule.senderRuleAddressId, senderRule.priority] %}
           <tr class="{{ classLine }}">
             <td>
               {% if senderRule.type != 2 or is_granted('ROLE_SUPER_ADMIN')%}
@@ -75,7 +75,7 @@
                   {% set deleteLabel = 'Entities.SenderRule.actions.deleteSender' ~ senderRuleType | trans() %}
                   {% set deleteConfirmTitle = 'Message.Dialogs.confirmDeleteSenderTitle' ~ senderRuleType | trans() %}
                   {% set deleteConfirmContent = 'Message.Dialogs.confirmDeleteSenderContent' ~ senderRuleType | trans() %}
-                  <a href="{{path('sender_rules_delete',{'rid':senderRule.rid,'sid':senderRule.sid,'priority' : senderRule.priority})}}?_token={{ csrf_token('delete_sender_rule' ~ senderRule.rid ~ senderRule.sid)}}" class='btn btn-sm btn-danger confirmModal'
+                  <a href="{{path('sender_rules_delete',{'rid':senderRule.userId,'sid':senderRule.senderRuleAddressId,'priority' : senderRule.priority})}}?_token={{ csrf_token('delete_sender_rule' ~ senderRule.userId ~ senderRule.senderRuleAddressId)}}" class='btn btn-sm btn-danger confirmModal'
                      data-dialog-title='{{ deleteConfirmTitle|trans }}'
                      data-dialog-content='{{ deleteConfirmContent|trans }}'
                      title="{{ deleteLabel|trans() }}">

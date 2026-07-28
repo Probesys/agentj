@@ -75,7 +75,7 @@ class CreateAlertMessageHandler
                 $target = $message->getTarget();
 
                 // Fetch the user who sent the email
-                $fromAddr = $outMessage->getSid()->getEmail();
+                $fromAddr = $outMessage->getSenderAddress()->getEmail();
                 $senderUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $fromAddr]);
 
                 $timezone = new \DateTimeZone('Europe/Paris');
@@ -96,8 +96,7 @@ class CreateAlertMessageHandler
 
                         // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
                         if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
-                            $sid = $outMessage->getSid();
-                            $address = $this->entityManager->getRepository(Address::class)->find($sid);
+                            $address = $outMessage->getSenderAddress();
                             $domain = $address ? $address->getDomain() : null;
                             $userDomains = $user->getDomains()->toArray();
                             if ($domain === null || !in_array($domain, $userDomains)) {

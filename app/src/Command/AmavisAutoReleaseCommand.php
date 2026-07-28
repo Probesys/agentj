@@ -53,7 +53,7 @@ class AmavisAutoReleaseCommand extends Command
         $messageRecipients = $unreleasedSearchQuery->getResult();
 
         foreach ($messageRecipients as $messageRecipient) {
-            $recipient = $messageRecipient->getRid();
+            $recipient = $messageRecipient->getAddress();
             $senderEmail = $messageRecipient->getMessage()->getSenderEmail();
 
             $recipientUser = $this->userRepository->findOneByAddress($recipient);

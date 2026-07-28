@@ -139,10 +139,10 @@ class MessageRepository extends BaseMessageRepository
             SELECT m.sendCaptcha
             FROM App\Entity\Message m
             JOIN m.messageRecipients mr
-            JOIN mr.rid recipient
-            JOIN m.sid sender
-            WHERE recipient.email = :to
-            AND sender.email = :from
+            JOIN mr.address ra
+            JOIN m.senderAddress sa
+            WHERE ra.email = :to
+            AND sa.email = :from
             AND m.sendCaptcha != 0
             ORDER BY m.sendCaptcha DESC
         SQL);

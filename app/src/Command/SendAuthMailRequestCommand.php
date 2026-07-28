@@ -99,7 +99,7 @@ class SendAuthMailRequestCommand
                     continue;
                 }
 
-                $recipient = $messageRecipient->getRid();
+                $recipient = $messageRecipient->getAddress();
                 if (!$recipient) {
                     continue;
                 }
@@ -163,7 +163,7 @@ class SendAuthMailRequestCommand
                         date('Y-m-d H:i:s')
                         . "\t{$fromName} <{$mailFrom}>"
                         . "\t{$message->getMailId()}"
-                        . "\t{$message->getSid()->getEmail()}"
+                        . "\t{$message->getSenderAddress()->getEmail()}"
                         . "\t{$subject}"
                     );
                 }
@@ -254,7 +254,7 @@ class SendAuthMailRequestCommand
         array $body,
         string $locale,
     ): ?Email {
-        $mailTo = $message->getSid()->getEmail();
+        $mailTo = $message->getSenderAddress()->getEmail();
         try {
             $subject = $this->getSubject($message, $locale);
             $email = new Email();

@@ -80,7 +80,7 @@
                             {% set error_badge = 'Message.Status.Error' %}
                         {% endif %}
 
-                        {% set keyPairMessage =  [msgRecipient.partitionTag, msgRecipient.mailId,msgRecipient.rid.id] %}
+                        {% set keyPairMessage =  [msgRecipient.partitionTag, msgRecipient.mailId,msgRecipient.address.id] %}
                         <tr
                             class="{{bold}} ">
                             {# it not virus #}
@@ -107,8 +107,8 @@
                             {% endif %}
                             {% if is_granted('ROLE_ADMIN') %}
                                 <td data-title="{{'Message.Recipient'|trans }}">
-                                    <span title="{{msgRecipient.rid.getEmail()}}">
-                                        {{msgRecipient.rid.getEmail()}}
+                                    <span title="{{msgRecipient.address.email}}">
+                                        {{msgRecipient.address.email}}
                                     </span>
                                 </td>
                             {% endif %}
@@ -168,7 +168,7 @@
                                                 {
                                                     'partitionTag' : msgRecipient.partitionTag,
                                                     'mailId' : msgRecipient.mailId,
-                                                    'rid' : msgRecipient.rid.id
+                                                    'rid' : msgRecipient.address.id
                                                 }
                                             ) }}"
                                             class="btn-open-modal btn btn-info float-right"
@@ -186,7 +186,7 @@
                                                     {
                                                         'partitionTag' : msgRecipient.partitionTag,
                                                         'mailId' : msgRecipient.mailId,
-                                                        'rid' : msgRecipient.rid.id
+                                                        'rid' : msgRecipient.address.id
                                                     }
                                                 ) }}"
                                                 class="btn-open-modal btn btn-info float-right"
@@ -229,7 +229,7 @@
                                                         {
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item confirmModal text-primary'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}'
@@ -248,7 +248,7 @@
                                                         {
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item confirmModal text-success'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}'
@@ -266,7 +266,7 @@
                                                         href="{{path('message_banned',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item confirmModal'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}'
@@ -284,7 +284,7 @@
                                                         href="{{path('message_delete',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item  confirmModal text-danger'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}'
@@ -304,7 +304,7 @@
                                                         href="{{path('message_authorized_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item  confirmModal  text-success'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}'
@@ -318,7 +318,7 @@
                                                         href="{{path('message_banned_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.rid.id
+                                                            'rid':msgRecipient.address.id
                                                         })}}"
                                                         class='dropdown-item confirmModal'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}'
@@ -336,7 +336,7 @@
                                                             href="{{path('message_mark_as_spam',{
                                                                 'partitionTag': msgRecipient.partitionTag,
                                                                 'mailId': msgRecipient.mailId,
-                                                                'rid': msgRecipient.rid.id
+                                                                'rid': msgRecipient.address.id
                                                                 })}}"
                                                                 class="dropdown-item"
                                                             >
@@ -350,7 +350,7 @@
                                                             href="{{path('message_mark_as_ham',{
                                                                 'partitionTag': msgRecipient.partitionTag,
                                                                     'mailId': msgRecipient.mailId,
-                                                                    'rid': msgRecipient.rid.id
+                                                                    'rid': msgRecipient.address.id
                                                                 })}}"
                                                                 class="dropdown-item"
                                                             >

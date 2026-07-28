@@ -47,7 +47,7 @@ class MessageService
         $normalizedEmail = strtolower($senderEmail);
         $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($normalizedEmail);
 
-        $recipient = $messageRecipient->getRid();
+        $recipient = $messageRecipient->getAddress();
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
@@ -100,7 +100,7 @@ class MessageService
 
         $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
-        $recipient = $messageRecipient->getRid();
+        $recipient = $messageRecipient->getAddress();
         $recipientDomainName = $recipient->getReverseDomain();
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
@@ -152,7 +152,7 @@ class MessageService
 
         $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
-        $recipient = $messageRecipient->getRid();
+        $recipient = $messageRecipient->getAddress();
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
@@ -206,7 +206,7 @@ class MessageService
 
         $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
-        $recipient = $messageRecipient->getRid();
+        $recipient = $messageRecipient->getAddress();
         $recipientDomainName = $recipient->getReverseDomain();
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
@@ -284,7 +284,7 @@ class MessageService
             $message->getPartitionTag(),
             $message->getMailId(),
             MessageStatus::DELETED,
-            $messageRecipient->getRid()->getId(),
+            $messageRecipient->getAddress()->getId(),
         );
 
         return true;
@@ -309,7 +309,7 @@ class MessageService
                 continue;
             }
 
-            $recipient = $messageRecipient->getRid();
+            $recipient = $messageRecipient->getAddress();
             $recipientEmail = $recipient->getEmail();
 
             $messageRecipient->setStatus(MessageStatus::SPAMMED);

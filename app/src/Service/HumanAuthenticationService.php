@@ -54,7 +54,7 @@ class HumanAuthenticationService
             $messageRecipients = array_filter(
                 $messageRecipients,
                 function (MessageRecipient $messageRecipient) use ($domain) {
-                    return $messageRecipient->getRid()->getReverseDomain() == $domain->getDomain();
+                    return $messageRecipient->getAddress()->getReverseDomain() == $domain->getDomain();
                 },
             );
         }

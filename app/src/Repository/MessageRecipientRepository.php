@@ -23,12 +23,12 @@ class MessageRecipientRepository extends BaseRepository
         parent::__construct($registry, MessageRecipient::class);
     }
 
-    public function findOneByMessageAndRid(Message $message, int $rid): ?MessageRecipient
+    public function findOneByMessageAndRecipientAddressId(Message $message, int $addressId): ?MessageRecipient
     {
         return $this->findOneBy([
             'partitionTag' => $message->getPartitionTag(),
             'mailId' => $message->getMailId(),
-            'rid' => $rid,
+            'address' => $addressId,
         ]);
     }
 
@@ -66,8 +66,8 @@ class MessageRecipientRepository extends BaseRepository
             SELECT mr
             FROM App\Entity\MessageRecipient as mr
             JOIN mr.message m
-            JOIN mr.rid r
-            WHERE r.email = :recipientEmail
+            JOIN mr.address ra
+            WHERE ra.email = :recipientEmail
             AND m.fromAddr = :senderFrom
             AND mr.status IS NOT NULL
         SQL);
@@ -96,8 +96,8 @@ class MessageRecipientRepository extends BaseRepository
             SELECT mr
             FROM App\Entity\MessageRecipient as mr
             JOIN mr.message m
-            JOIN mr.rid r
-            WHERE r.domain = :recipientReverseDomainName
+            JOIN mr.address ra
+            WHERE ra.domain = :recipientReverseDomainName
             AND m.fromAddr = :senderFrom
             AND mr.status IS NOT NULL
         SQL);
@@ -114,7 +114,7 @@ class MessageRecipientRepository extends BaseRepository
     /**
      * Update the status of a message for one recipient
      */
-    public function changeStatus(int $partitionTag, string $mailId, int $status, int|string $rid): void
+    public function changeStatus(int $partitionTag, string $mailId, int $status, int|string $addressId): void
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -122,19 +122,20 @@ class MessageRecipientRepository extends BaseRepository
             UPDATE msgrcpt SET status_id = :status
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
-            AND rid = :rid
+            AND rid = :addressId
+
         SQL;
 
         $conn->executeStatement($sql, [
             'status' => $status,
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $rid,
+            'addressId' => $addressId,
         ], [
             'status' => DBAL\ParameterType::INTEGER,
             'partitionTag' => DBAL\ParameterType::STRING,
             'mailId' => DBAL\ParameterType::STRING,
-            'rid' => DBAL\ParameterType::STRING,
+            'addressId' => DBAL\ParameterType::STRING,
         ]);
     }
 
@@ -146,8 +147,8 @@ class MessageRecipientRepository extends BaseRepository
         $query = $this->getEntityManager()->createQuery(<<<SQL
             SELECT mr
             FROM App\Entity\MessageRecipient as mr
-            JOIN mr.rid AS r
-            WHERE r.email = :email
+            JOIN mr.address AS ra
+            WHERE ra.email = :email
         SQL);
 
         $query->setParameter('email', $user->getEmail());

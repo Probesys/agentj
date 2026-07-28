@@ -40,8 +40,8 @@ class SenderRuleRepository extends BaseRepository
     ): array {
         $dql = $this->createQueryBuilder('wb')
                 ->select(
-                    'u.id as rid, ' .
-                    's.id as sid, ' .
+                    'u.id as userId, ' .
+                    's.id as senderRuleAddressId, ' .
                     'wb.type as type, ' .
                     'wb.priority as priority, ' .
                     'wb.datemod, ' .
@@ -50,12 +50,12 @@ class SenderRuleRepository extends BaseRepository
                     'u.email as emailuser, ' .
                     'g.name as group'
                 )
-                ->innerJoin('wb.rid', 'u')
-                ->innerJoin('wb.sid', 's')
+                ->innerJoin('wb.user', 'u')
+                ->innerJoin('wb.senderRuleAddress', 's')
                 ->leftJoin('wb.group', 'g');
 
         if (in_array('ROLE_USER', $user->getRoles())) {
-            $dql->andWhere('wb.rid = :user');
+            $dql->andWhere('wb.user = :user');
             $dql->setParameter('user', $user);
         }
 
@@ -99,8 +99,8 @@ class SenderRuleRepository extends BaseRepository
     public function findOneByRecipientDomain(Domain $domain): ?SenderRule
     {
         $queryBuilder = $this->createQueryBuilder('wb');
-        $queryBuilder->innerJoin('wb.rid', 'r');
-        $queryBuilder->innerJoin('wb.sid', 's');
+        $queryBuilder->innerJoin('wb.user', 'r');
+        $queryBuilder->innerJoin('wb.senderRuleAddress', 's');
         $queryBuilder->where("s.email = '@.'");
         $queryBuilder->andWhere('r.email = :domain');
         $queryBuilder->setParameter('domain', "@{$domain->getDomain()}");
@@ -118,15 +118,15 @@ class SenderRuleRepository extends BaseRepository
         return $stmt->executeQuery();
     }
 
-    public function delete(int $rid, int $sid, int $priority): mixed
+    public function delete(int $userId, int $senderRuleAddressId, int $priority): mixed
     {
         $qdl = $this->createQueryBuilder('wb')
                 ->delete()
-                ->where('wb.rid =:rid')
-                ->andWhere('wb.sid =:sid')
+                ->where('wb.user =:userId')
+                ->andWhere('wb.senderRuleAddress =:senderRuleAddressId')
                 ->andWhere('wb.priority =:priority')
-                ->setParameter('rid', $rid)
-                ->setParameter('sid', $sid)
+                ->setParameter('userId', $userId)
+                ->setParameter('senderRuleAddressId', $senderRuleAddressId)
                 ->setParameter('priority', $priority);
 
         return $qdl->getQuery()->execute();
@@ -185,8 +185,8 @@ class SenderRuleRepository extends BaseRepository
             $query = $entityManager->createQuery(<<<SQL
                 SELECT sr
                 FROM App\Entity\SenderRule sr
-                JOIN sr.sid as s
-                WHERE sr.rid = :recipientId
+                JOIN sr.senderRuleAddress as s
+                WHERE sr.user = :recipientId
                 AND s.email IN (:senderAddresses)
                 ORDER BY sr.priority DESC, s.priority DESC
             SQL);
@@ -232,11 +232,11 @@ class SenderRuleRepository extends BaseRepository
      */
     public function getDefaultDomainSenderRule(Domain $domain): ?SenderRule
     {
-        $sid = $this->getEntityManager()->getRepository(RuleAddress::class)->findOneBy(['email' => '@.']);
-        $rid = $this->getEntityManager()->getRepository(User::class)->findOneBy([
+        $senderRuleAddress = $this->getEntityManager()->getRepository(RuleAddress::class)->findOneBy(['email' => '@.']);
+        $user = $this->getEntityManager()->getRepository(User::class)->findOneBy([
             'email' => '@' . $domain->getDomain(),
         ]);
-        return $this->findOneBy(['rid' => $rid, 'sid' => $sid]);
+        return $this->findOneBy(['user' => $user, 'senderRuleAddress' => $senderRuleAddress]);
     }
 
     /**
@@ -251,8 +251,8 @@ class SenderRuleRepository extends BaseRepository
         bool $flush = true,
     ): void {
         $senderRule = $this->findOneBy([
-            'rid' => $recipientUser,
-            'sid' => $senderRuleAddress,
+            'user' => $recipientUser,
+            'senderRuleAddress' => $senderRuleAddress,
         ]);
 
         if (!$senderRule) {
@@ -275,11 +275,11 @@ class SenderRuleRepository extends BaseRepository
     {
         $dql = $this->createQueryBuilder('wb')
                 ->select('wb')
-                ->where('wb.rid =:rid')
-                ->andWhere('wb.sid =:sid')
+                ->where('wb.user =:user')
+                ->andWhere('wb.senderRuleAddress =:senderRuleAddress')
                 ->andWhere('wb.priority > :priority')
-                ->setParameter('rid', $wbInfo['rid'])
-                ->setParameter('sid', $wbInfo['sid'])
+                ->setParameter('user', $wbInfo['userId'])
+                ->setParameter('senderRuleAddress', $wbInfo['senderRuleAddressId'])
                 ->setParameter('priority', $wbInfo['priority'])
                 ->setMaxResults(1);
 
@@ -291,12 +291,12 @@ class SenderRuleRepository extends BaseRepository
     /**
      * @return Query<SenderRule>
      */
-    public function getDomainSearchQuery(User $userDomain, string $searchKey = ''): Query
+    public function getDomainSearchQuery(User $domainUser, string $searchKey = ''): Query
     {
         $queryBuilder = $this->createQueryBuilder('wb')
-            ->join('wb.sid', 'sender')
-            ->where('wb.rid =:rid')
-            ->setParameter('rid', $userDomain);
+            ->join('wb.senderRuleAddress', 'sender')
+            ->where('wb.user =:user')
+            ->setParameter('user', $domainUser);
 
         if ($searchKey !== '') {
             $queryBuilder->andWhere('sender.email LIKE :searchKey')

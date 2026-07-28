@@ -17,13 +17,13 @@
             {{ 'Generics.fields.sender' | trans }}
         </div>
         <div class="col-md-8">
-            {{ message.sid.getEmail }}
+            {{ message.senderAddress.email }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
         </div>
         <div class="col-md-8">
-            {{ messageRecipient.rid.getEmail }}
+            {{ messageRecipient.address.email }}
         </div>
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
@@ -105,10 +105,10 @@
                     {% endif %}
                     <tr class="{{ classTr }} ">
                         <td>
-                            {{ senderRule.rid.email }}
+                            {{ senderRule.user.email }}
                         </td>
                         <td>
-                            {{ senderRule.sid.email }}
+                            {{ senderRule.senderRuleAddress.email }}
                         </td>
                         <td>
                             {{ senderRule.wbRuleName | trans }}

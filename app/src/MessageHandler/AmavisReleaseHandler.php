@@ -86,7 +86,7 @@ final class AmavisReleaseHandler
             $this->amavisdReleaseCommand,
             $messageRecipient->getMessage()->getQuarLoc(),
             $messageRecipient->getMessage()->getSecretId(),
-            $messageRecipient->getRid()->getEmail(),
+            $messageRecipient->getAddress()->getEmail(),
         ]);
 
         $process->run(

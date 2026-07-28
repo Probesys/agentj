@@ -296,7 +296,7 @@ class DomainController extends AbstractController
         $searchKey = $request->query->getString('search', '');
 
         $senderRulesQuery = $senderRuleRepository->getDomainSearchQuery(
-            userDomain: $userDomain,
+            domainUser: $userDomain,
             searchKey: $searchKey
         );
 
@@ -358,8 +358,8 @@ class DomainController extends AbstractController
                 $this->em->persist($ruleAddress);
             } else {
                 $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
-                    'rid' => $user,
-                    'sid' => $ruleAddress,
+                    'user' => $user,
+                    'senderRuleAddress' => $ruleAddress,
                 ]));
                 if ($domainSenderRuleExists) {
                     $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
@@ -389,9 +389,8 @@ class DomainController extends AbstractController
         Request $request,
         SenderRuleRepository $senderRuleRepository
     ): Response {
-
-        $senderRule = $senderRuleRepository->findOneBy(['rid' => $rid, 'sid' => $sid]);
-        $domain = $senderRule->getRid()->getDomain();
+        $senderRule = $senderRuleRepository->findOneBy(['user' => $rid, 'senderRuleAddress' => $sid]);
+        $domain = $senderRule->getUser()->getDomain();
         $this->checkAccess($domain);
 
         $csrfToken = $request->request->getString('_token', '');

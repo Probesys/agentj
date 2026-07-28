@@ -120,19 +120,8 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
     {
         $queryBuilder = $this->createQueryBuilder('mr');
         $queryBuilder->select('mr')
-            ->innerJoin(
-                'App\Entity\Message',
-                'm',
-                Join::WITH,
-                'm.mailId = mr.mailId AND m.partitionTag = mr.partitionTag',
-            )
-            ->innerJoin(
-                'App\Entity\Address',
-                'maddr',
-                Join::WITH,
-                'maddr.id = mr.rid',
-            );
-
+            ->innerJoin('mr.message', 'm')
+            ->innerJoin('mr.address', 'maddr');
 
         return $queryBuilder;
     }
@@ -161,13 +150,13 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         $countQueryBuilder->from(MessageRecipient::class, 'mr');
 
         if ($user && !$user->isSuperAdmin()) {
-            // When counting, maddr is used only to filter messages by email
-            // (for an end-user), or by the domains (for a simple admin).
-            // Super-admins have access to all the domains and all the
-            // messages, so we don't need to join this table.
+            // When counting, the recipient address is used only to filter
+            // messages by email (for an end-user), or by the domains (for a
+            // simple admin). Super-admins have access to all the domains and
+            // all the messages, so we don't need to join this table.
             // It can be used for the "searchKey" filter too, but the "hasFilters"
             // condition above takes care of this case.
-            $countQueryBuilder->join(Address::class, 'maddr', Join::WITH, 'maddr.id = mr.rid');
+            $countQueryBuilder->join('mr.address', 'maddr');
         }
 
         $this->addUserSpecificJoins($countQueryBuilder, $user);
@@ -253,9 +242,9 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
 
         // And add the recipient/sender search condition.
         if (count($allUserEmails) > 0) {
-            $queryBuilder->innerJoin('App\Entity\Address', 'maddrSender', Join::WITH, 'maddrSender.id = m.sid');
+            $queryBuilder->innerJoin('m.senderAddress', 'sa');
 
-            $queryBuilder->andWhere('(maddr.email IN (:users) OR maddrSender.email IN (:users))');
+            $queryBuilder->andWhere('(maddr.email IN (:users) OR sa.email IN (:users))');
             $queryBuilder->setParameter('users', $allUserEmails);
         }
     }

@@ -88,7 +88,7 @@ class BaseMessage
 
     #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
     #[ORM\ManyToOne(targetEntity: Address::class)]
-    private ?Address $sid;
+    private ?Address $senderAddress;
 
     #[ORM\Column(name: 'send_captcha', type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
     private int $sendCaptcha = 0;
@@ -318,14 +318,14 @@ class BaseMessage
         return $this;
     }
 
-    public function getSid(): ?Address
+    public function getSenderAddress(): ?Address
     {
-        return $this->sid;
+        return $this->senderAddress;
     }
 
-    public function setSid(?Address $sid): self
+    public function setSenderAddress(?Address $senderAddress): self
     {
-        $this->sid = $sid;
+        $this->senderAddress = $senderAddress;
 
         return $this;
     }
@@ -344,7 +344,7 @@ class BaseMessage
      */
     public function getSenderEmail(): ?string
     {
-        $sender = $this->getSid();
+        $sender = $this->getSenderAddress();
         $senderEmail = $sender->getEmail();
 
         $fromEmail = $this->getFromMimeAddress()?->getAddress();
