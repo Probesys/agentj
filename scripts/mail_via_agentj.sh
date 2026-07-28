@@ -87,7 +87,7 @@ if [ "$spam" = true ] ; then
     body="@tests/gtube"
 fi
 
-command="swaks --from '${from}' --to '${joined:-$to}' --server '$ip_smtptest':26 \
+command="swaks --from '${from}' --to '${joined:-$to}' --server '$ip_smtptest':27 \
 	--h-Subject '$subject' --body $body"
 
 for h in "${headers[@]}"; do
