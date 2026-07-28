@@ -27,3 +27,12 @@ domain_wblist:
         permanent: true
         keepQueryParams: true
         ignoreAttributes: false
+
+group_wblist:
+    path: /groups/wblist/{groupId}
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+    defaults:
+        route: 'groups_rules_index'
+        permanent: true
+        keepQueryParams: true
+        ignoreAttributes: false
