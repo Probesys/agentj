@@ -72,6 +72,7 @@ Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES: 'Nombre de message
 Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES: 'Nombre de messages non traités'
 Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION: "Lien vers la page d'authentification humaine"
 Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_AUTHORIZE_SENDER: "URL autorisant l'expéditeur du message"
+Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_BAN: "URL bannissant l'expéditeur du message"
 Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL récupérant le message'
 Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Lien vers les mails en attente'
 Entities.Domain.labels.dynamicsVariables.USERNAME: "Nom de l'utilisateur"

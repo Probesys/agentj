@@ -224,11 +224,19 @@ class SendReportMailCommand extends Command
                 'recipientId' => $messageRecipient->getAddress()->getId(),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
+            $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+                'token' => $token,
+                'partitionTag' => $messageRecipient->getPartitionTag(),
+                'mailId' => $messageRecipient->getMailId(),
+                'recipientId' => $messageRecipient->getAddress()->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+
             $bodyMessage = $messageTemplate;
             $bodyMessage = str_replace('[MESSAGE_SENDER]', $this->escape($message->getFromAddr()), $bodyMessage);
             $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $this->escape($message->getSubject()), $bodyMessage);
             $bodyMessage = str_replace('[URL_MESSAGE_AUTHORIZE_SENDER]', $urlAuthorize, $bodyMessage);
             $bodyMessage = str_replace('[URL_MESSAGE_RESTORE]', $urlRestore, $bodyMessage);
+            $bodyMessage = str_replace('[URL_MESSAGE_BAN]', $urlBan, $bodyMessage);
 
             $bodyMessages .= $bodyMessage;
         }
