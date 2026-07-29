@@ -26,6 +26,7 @@ class Right
      * @var Collection<int, Group>
      */
     #[ORM\JoinTable(name: 'rights_groups')]
+    #[ORM\JoinColumn(name: 'rights_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'groups_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'rights')]
     private Collection $groups;

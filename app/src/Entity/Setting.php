@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Table(name: 'settings')]
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
 class Setting
 {
