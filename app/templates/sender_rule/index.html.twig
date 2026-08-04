@@ -17,6 +17,10 @@
 				<a href="#" data-url-modal-content="{{ path('sender_rules_import', {'type': senderRuleType})}}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6">
 					<i class="fas fa-plus"></i>&nbsp;{{ 'Generics.actions.importFile' | trans }}
 				</a>
+			{% else %}
+				<a href="#" data-modal-method-type="GET" data-url-modal-content="{{ path('sender_rules_new', {'type': senderRuleType}) }}" class="btn-open-modal btn btn-success float-right col-sm-12 col-md-4 col-lg-6">
+					<i class="fas fa-plus"></i>&nbsp;{{ (senderRuleType == 'W' ? 'Entities.SenderRule.actions.authorizeSender' : 'Entities.SenderRule.actions.blockSender') | trans }}
+				</a>
 			{% endif %}
 		{% endblock %}
 
@@ -61,7 +65,11 @@
 								{% endif %}
 							</td>
 							{% if is_granted('ROLE_ADMIN') %}
-								<td data-title="{{ 'Entities.SenderRule.fields.user'|trans() }}">{{senderRule.user.fullname}}<br/>{{senderRule.user.email}}
+								<td data-title="{{ 'Entities.SenderRule.fields.user'|trans() }}">
+									{% if senderRule.user.fullname %}
+										<span class="d-block">{{ senderRule.user.fullname }}</span>
+									{% endif %}
+									{{ senderRule.user.email }}
 								</td>
 							{% endif %}
 							{% set senderRuleTypeValue = senderRule.type is empty ? '3' : senderRule.type %}

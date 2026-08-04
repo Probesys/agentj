@@ -27,12 +27,13 @@ final class SenderRuleFactory extends PersistentObjectFactory
             'user' => UserFactory::new(),
             'senderRuleAddress' => RuleAddressFactory::new(),
             'wb' => self::faker()->randomElement([
-                ' ',
-                'B',
-                'W',
-                '0',
-                '',
+                'accept',
+                'block',
+                'allow',
+                'enabled',
+                'none',
             ]),
+            'type' => null,
             'priority' => SenderRule::PRIORITY_USER,
         ];
     }
@@ -47,6 +48,9 @@ final class SenderRuleFactory extends PersistentObjectFactory
             );
 
             $rule->setWbRule($attributes['wb']);
+            if ($attributes['type'] !== null) {
+                $rule->setType($attributes['type']);
+            }
             $rule->setPriority($attributes['priority']);
 
             return $rule;

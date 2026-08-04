@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Domain;
 use App\Entity\User;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -36,21 +37,39 @@ class DomainRepository extends BaseRepository
         User $currentUser,
         ?string $searchKey = null,
     ): Query {
-        $queryBuilder = $this->createQueryBuilder('d');
+        $queryBuilder = $this->createAccessibleQueryBuilder($currentUser);
 
         if ($searchKey) {
-            $queryBuilder->where('d.domain LIKE :search')
+            $queryBuilder->andWhere('d.domain LIKE :search')
                 ->setParameter('search', '%' . $searchKey . '%');
         }
+
+        return $queryBuilder->getQuery();
+    }
+
+    /**
+     * @return Domain[]
+     */
+    public function findActiveForUser(User $currentUser): array
+    {
+        return $this->createAccessibleQueryBuilder($currentUser)
+            ->andWhere('d.active = :active')
+            ->setParameter('active', true)
+            ->orderBy('d.domain', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    private function createAccessibleQueryBuilder(User $currentUser): QueryBuilder
+    {
+        $queryBuilder = $this->createQueryBuilder('d');
 
         if (!$currentUser->isSuperAdmin()) {
             $queryBuilder->andWhere(':user MEMBER OF d.users')
                 ->setParameter('user', $currentUser);
         }
 
-        $query = $queryBuilder->getQuery();
-
-        return $query;
+        return $queryBuilder;
     }
 
     /**

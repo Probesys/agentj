@@ -1,0 +1,25 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+    {% if senderRuleType == 'W' %}
+        {{ 'Entities.SenderRule.actions.authorizeSender' | trans }}
+    {% else %}
+        {{ 'Entities.SenderRule.actions.blockSender' | trans }}
+    {% endif %}
+{% endblock %}
+
+{% block modalContent %}
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary mr-2">
+                {{ 'Generics.actions.save' | trans }}
+            </button>
+
+            <button type="button" class="btn btn-outline-secondary btn-close-modal">
+                {{ 'Generics.actions.cancel' | trans }}
+            </button>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

@@ -87,7 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'aliases')]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
-    private ?User $originalUser;
+    private ?User $originalUser = null;
 
     /**
      * @var Collection<int, User>
@@ -400,6 +400,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
         return $this->originalUser;
     }
 
+    public function getMainUser(): self
+    {
+        $mainUser = $this;
+
+        while ($mainUser->getOriginalUser()) {
+            $mainUser = $mainUser->getOriginalUser();
+        }
+
+        return $mainUser;
+    }
+
     public function setOriginalUser(?self $originalUser): self
     {
         $this->originalUser = $originalUser;
@@ -681,6 +692,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     public function getAliases(): ?Collection
     {
         return $this->aliases;
+    }
+
+    /**
+     * @return User[]
+     */
+    public function getUserAndAliases(): array
+    {
+        $mainUser = $this->getMainUser();
+
+        return array_merge([$mainUser], $mainUser->getAliases()->toArray());
     }
 
     public function addAlias(User $alias): self

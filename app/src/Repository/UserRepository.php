@@ -98,20 +98,13 @@ class UserRepository extends BaseRepository
      */
     public function findUserAndAliasesByAddress(Address $address): array
     {
-        $mainUser = $this->findOneByAddress($address);
+        $user = $this->findOneByAddress($address);
 
-        if (!$mainUser) {
+        if (!$user) {
             return [];
         }
 
-        // Make sure to get the main user
-        while ($mainUser->getOriginalUser()) {
-            $mainUser = $mainUser->getOriginalUser();
-        }
-
-        $aliases = $mainUser->getAliases()->toArray();
-
-        return array_merge([$mainUser], $aliases);
+        return $user->getUserAndAliases();
     }
 
     public function findDomainUser(string $domainName): ?User
