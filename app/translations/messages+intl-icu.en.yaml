@@ -160,9 +160,7 @@ Entities.Message.deleted: Deleted
 Entities.Message.index: 'List of messages'
 Entities.Message.informationMessage: 'The messages will be automatically deleted after 30 days.'
 Entities.Message.isMailingList: 'Mailing list? '
-Entities.Message.labels.imgDisabled: 'Image disabled'
 Entities.Message.labels.infos: 'Information about the blockage'
-Entities.Message.labels.linkDisabled: 'Link disabled'
 Entities.Message.labels.preview: 'Preview of the message'
 Entities.Message.labels.reason: 'Reason for blockage'
 Entities.Message.noBlockedMessages: 'No blocked messages'
@@ -236,6 +234,8 @@ Entities.Report.title: 'Activity report'
 Entities.Report.titleDay: 'On the last 24 hours'
 Entities.Report.titleMonth: 'Last month'
 Entities.Report.typeMessage: Type
+Entities.SenderRule.actions.authorizeSender: 'Authorize a sender'
+Entities.SenderRule.actions.blockSender: 'Block a sender'
 Entities.SenderRule.actions.deleteSenderB: 'Unlock the sender'
 Entities.SenderRule.actions.deleteSenderW: 'Delete sender'
 Entities.SenderRule.fields.domain: Domain
