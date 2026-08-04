@@ -15,14 +15,14 @@ class RuleAddressRepository extends BaseRepository
         parent::__construct($registry, RuleAddress::class);
     }
 
-    public function findOneOrCreateByEmail(string $email, bool $flush = true): RuleAddress
+    public function findOneOrCreateByEmail(string $email, bool $flush = true, ?int $priority = null): RuleAddress
     {
         $ruleAddress = $this->findOneBy(['email' => $email]);
 
         if (!$ruleAddress) {
             $ruleAddress = new RuleAddress();
             $ruleAddress->setEmail($email);
-            $ruleAddress->setPriority(6);
+            $ruleAddress->setPriority($priority ?? 6);
             $this->save($ruleAddress, $flush);
         }
 
