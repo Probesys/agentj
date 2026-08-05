@@ -4,11 +4,12 @@ namespace App\Controller;
 
 use App\Controller\Traits\ControllerCommonTrait;
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\User;
 use App\Form\ImportType;
 use App\Service\GroupService;
 use App\Service\Referrer;
+use App\Util\Text;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -18,13 +19,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use function dd;
-
 #[Route(path: '/admin/import')]
 class ImportController extends AbstractController
 {
-    use ControllerCommonTrait;
-
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -67,8 +64,8 @@ class ImportController extends AbstractController
         }
 
         return $this->render('import/index.html.twig', [
-                    'controller_name' => 'ImportController',
-                    'form' => $form->createView(),
+            'controller_name' => 'ImportController',
+            'form' => $form->createView(),
         ]);
     }
 
@@ -122,14 +119,14 @@ class ImportController extends AbstractController
                             //group
                             $group = false;
                             if (isset($data[3]) && $data[3] != '') {
-                                $slugGroup = $this->slugify($data[3]);
+                                $slugGroup = Text::slugify($data[3]);
                                 if (!isset($groups[$domainEmail][$slugGroup])) {
-                                    $group = $em->getRepository(Groups::class)->findOneBy([
+                                    $group = $em->getRepository(Group::class)->findOneBy([
                                         'domain' => $domains[$domainEmail]['entity'],
                                         'name' => trim($data[3]),
                                     ]);
                                     if (!$group) {
-                                        $group = new Groups();
+                                        $group = new Group();
                                         $group->setName($data[3]);
                                         $group->setDomain($domains[$domainEmail]['entity']);
                                         $group->setWbRule('none');
@@ -198,7 +195,7 @@ class ImportController extends AbstractController
 
                 //Need to flush if user new is inferior $batchSize
                 $em->flush();
-                $this->groupService->updateWblist();
+                $this->groupService->updateSenderRules();
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);
@@ -370,7 +367,7 @@ class ImportController extends AbstractController
 
                 //Need to flush if user new is inferior $batchSize
                 $em->flush();
-                $this->groupService->updateWblist();
+                $this->groupService->updateSenderRules();
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans(

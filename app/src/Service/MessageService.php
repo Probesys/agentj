@@ -3,33 +3,27 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
-use App\Message\AmavisRelease;
-use App\Entity\Msgrcpt;
-use App\Entity\Msgs;
+use App\Entity\Message;
+use App\Entity\MessageRecipient;
+use App\Entity\SenderRule;
 use App\Entity\User;
-use App\Entity\Wblist;
-use App\Repository\MailaddrRepository;
-use App\Repository\MsgrcptRepository;
-use App\Repository\MsgsRepository;
+use App\Message\AmavisRelease;
+use App\Repository\MessageRecipientRepository;
+use App\Repository\MessageRepository;
+use App\Repository\RuleAddressRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
-use App\Repository\WblistRepository;
-use App\Service\CryptEncryptService;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class MessageService
 {
     public function __construct(
         private MessageBusInterface $bus,
-        private MailaddrRepository $mailaddrRepository,
-        private MsgrcptRepository $messageRecipientRepository,
-        private MsgsRepository $messageRepository,
+        private RuleAddressRepository $ruleAddressRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
+        private MessageRepository $messageRepository,
         private UserRepository $userRepository,
-        private WblistRepository $wblistRepository,
+        private SenderRuleRepository $senderRuleRepository,
         private CryptEncryptService $cryptEncryptService,
         private SpamassassinService $spamassassinService,
     ) {
@@ -39,9 +33,9 @@ class MessageService
      * Authorize the message's sender for the given recipient and release the
      * messages that he sent to him.
      */
-    public function authorizeSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function authorizeSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -49,20 +43,20 @@ class MessageService
             return false;
         }
 
-        // WBList rules are case-insensitive
+        // Sender rules are case-insensitive
         $normalizedEmail = strtolower($senderEmail);
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($normalizedEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($normalizedEmail);
 
         $recipient = $messageRecipient->getRid();
-        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+        $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
-            $this->wblistRepository->updateOrCreateRule(
+            $this->senderRuleRepository->updateOrCreateRule(
                 $user,
-                $senderMailaddr,
+                $senderRuleAddress,
                 wbRule: 'accept',
                 type: $validationSource,
-                priority: Wblist::WBLIST_PRIORITY_USER,
+                priority: SenderRule::PRIORITY_USER,
             );
 
             $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
@@ -74,7 +68,7 @@ class MessageService
             $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
             foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-                $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+                $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
                 $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
                 if (!$isSameSender || $isSpam) {
                     continue;
@@ -94,9 +88,9 @@ class MessageService
      * Authorize the message's sender for the given recipient's domain and
      * release the messages that he sent to it.
      */
-    public function authorizeSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function authorizeSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -104,7 +98,7 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
         $recipientDomainName = $recipient->getReverseDomain();
@@ -113,12 +107,12 @@ class MessageService
         $domain = $domainUser->getDomain();
         $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
-        $this->wblistRepository->updateOrCreateRule(
+        $this->senderRuleRepository->updateOrCreateRule(
             $domainUser,
-            $senderMailaddr,
+            $senderRuleAddress,
             wbRule: 'accept',
             type: $validationSource,
-            priority: Wblist::WBLIST_PRIORITY_USER,
+            priority: SenderRule::PRIORITY_USER,
         );
 
         $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
@@ -127,7 +121,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-            $isSameSender = $messageRecipientToRelease->getMsgs()->getSenderEmail() === $senderEmail;
+            $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
             $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
             if (!$isSameSender || $isSpam) {
                 continue;
@@ -146,9 +140,9 @@ class MessageService
      * Ban the message's sender for the given recipient and reject the messages
      * that he sent to him.
      */
-    public function banSenderForRecipient(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function banSenderForRecipient(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -156,18 +150,18 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
-        $userAndAliases = $this->userRepository->findUserAndAliasesByMaddr($recipient);
+        $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
 
         foreach ($userAndAliases as $user) {
-            $this->wblistRepository->updateOrCreateRule(
+            $this->senderRuleRepository->updateOrCreateRule(
                 $user,
-                $senderMailaddr,
+                $senderRuleAddress,
                 wbRule: 'block',
                 type: $validationSource,
-                priority: Wblist::WBLIST_PRIORITY_USER,
+                priority: SenderRule::PRIORITY_USER,
             );
 
             $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
@@ -176,7 +170,7 @@ class MessageService
             );
 
             foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-                $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+                $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
                 if (
                     !$isSameSender ||
                     $messageRecipientToBan->isVirus() ||
@@ -200,9 +194,9 @@ class MessageService
      * Ban the message's sender for the given recipient's domain and reject the
      * messages that he sent to it.
      */
-    public function banSenderForDomain(Msgrcpt $messageRecipient, int $validationSource): bool
+    public function banSenderForDomain(MessageRecipient $messageRecipient, int $validationSource): bool
     {
-        $message = $messageRecipient->getMsgs();
+        $message = $messageRecipient->getMessage();
 
         $senderEmail = $message->getSenderEmail();
 
@@ -210,19 +204,19 @@ class MessageService
             return false;
         }
 
-        $senderMailaddr = $this->mailaddrRepository->findOneOrCreateByEmail($senderEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getRid();
         $recipientDomainName = $recipient->getReverseDomain();
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
 
-        $this->wblistRepository->updateOrCreateRule(
+        $this->senderRuleRepository->updateOrCreateRule(
             $domainUser,
-            $senderMailaddr,
+            $senderRuleAddress,
             wbRule: 'block',
             type: $validationSource,
-            priority: Wblist::WBLIST_PRIORITY_USER,
+            priority: SenderRule::PRIORITY_USER,
         );
 
         $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
@@ -231,7 +225,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            $isSameSender = $messageRecipientToBan->getMsgs()->getSenderEmail() === $senderEmail;
+            $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
             if (
                 !$isSameSender ||
                 $messageRecipientToBan->isVirus() ||
@@ -253,8 +247,10 @@ class MessageService
     /**
      * Restore (release) the message for the provided recipient.
      */
-    public function dispatchRelease(Msgrcpt $messageRecipient, int $finalStatus = MessageStatus::RESTORED): void
-    {
+    public function dispatchRelease(
+        MessageRecipient $messageRecipient,
+        int $finalStatus = MessageStatus::RESTORED,
+    ): void {
         if (
             $messageRecipient->isAlreadyReleased() ||
             $messageRecipient->isAmavisReleaseOngoing() ||
@@ -274,7 +270,7 @@ class MessageService
         ));
     }
 
-    public function restore(Msgrcpt $messageRecipient): void
+    public function restore(MessageRecipient $messageRecipient): void
     {
         $this->dispatchRelease($messageRecipient, MessageStatus::RESTORED);
     }
@@ -282,7 +278,7 @@ class MessageService
     /**
      * Mark a message and its recipient as deleted.
      */
-    public function delete(Msgs $message, Msgrcpt $messageRecipient): bool
+    public function delete(Message $message, MessageRecipient $messageRecipient): bool
     {
         $this->messageRecipientRepository->changeStatus(
             $message->getPartitionTag(),
@@ -304,11 +300,11 @@ class MessageService
      *
      * It returns false if the message couldn't be put in the spams folder.
      */
-    public function markMessageAsSpam(Msgs $message): bool
+    public function markMessageAsSpam(Message $message): bool
     {
         $result = $this->spamassassinService->marksAsSpam($message);
 
-        foreach ($message->getMsgRcpts() as $messageRecipient) {
+        foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isUntreated()) {
                 continue;
             }
@@ -332,11 +328,11 @@ class MessageService
      *
      * It returns false if the message couldn't be put in the hams folder.
      */
-    public function markMessageAsHam(Msgs $message): bool
+    public function markMessageAsHam(Message $message): bool
     {
         $result = $this->spamassassinService->marksAsHam($message);
 
-        foreach ($message->getMsgRcpts() as $messageRecipient) {
+        foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isSpam()) {
                 continue;
             }
@@ -351,7 +347,7 @@ class MessageService
      * Return a secure token containing the id of the user and of the message.
      * The token is valid for 7 days.
      */
-    public function getReleaseToken(Msgs $message, User $user): string
+    public function getReleaseToken(Message $message, User $user): string
     {
         $data = $user->getId() . '%%%' . $message->getMailId();
         return $this->cryptEncryptService->encrypt($data, lifetime: 7 * 24 * 3600);

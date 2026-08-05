@@ -31,9 +31,9 @@ class BaseMessageRecipient
     #[ORM\GeneratedValue(strategy: 'NONE')]
     private int $rseqnum = 0;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Maddr')]
+    #[ORM\ManyToOne(targetEntity: Address::class)]
     #[ORM\JoinColumn(name: 'rid', nullable: true)]
-    private ?Maddr $rid = null;
+    private ?Address $rid = null;
 
     #[ORM\Column(name: 'is_local', type: 'string', length: 1, nullable: false, options: ['fixed' => true])]
     private string $isLocal = '';
@@ -185,12 +185,12 @@ class BaseMessageRecipient
         return $this;
     }
 
-    public function getRid(): ?Maddr
+    public function getRid(): ?Address
     {
         return $this->rid;
     }
 
-    public function setRid(?Maddr $rid): self
+    public function setRid(?Address $rid): self
     {
         $this->rid = $rid;
 

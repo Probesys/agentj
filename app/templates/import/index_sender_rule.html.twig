@@ -1,0 +1,24 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+    {% if senderRuleType == 'W' %}
+        {{ 'Entities.Import.SenderRule.titleAuthorized' | trans }}
+    {% else %}
+        {{ 'Entities.Import.SenderRule.titleBan' | trans }}
+    {% endif %}
+{% endblock %}
+
+
+{% block modalContent %}
+    {{ form_start(form) }}
+    <h5>{{ 'Form.ImportFile'|trans() }}  </h5>
+    <span class="text-info">
+        {{ 'Entities.Import.SenderRule.description' | trans }}
+    </span>
+    {{ form_widget(form) }}
+    <div class="d-flex justify-content-center">
+        <button class="btn btn-primary mr-2">{{'Entities.Import.actions.import'|trans}}</button>
+        <button class="btn btn-outline-secondary btn-close-modal">{{'Generics.actions.cancel'|trans}}</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

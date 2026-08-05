@@ -12,14 +12,13 @@ Entities.Connector.fields.name: 'Connector name'
 Entities.Connector.fields.targetGroups: 'Assign user(s) to group(s)'
 Entities.Connector.fields.type: 'Connector type'
 Entities.Domain.Name: Domain
-Entities.Domain.actions.WBList: List
+Entities.Domain.actions.SenderRule: List
 Entities.Domain.actions.add_connector: 'Add connector'
 Entities.Domain.actions.add_new: 'Add a new domain'
 Entities.Domain.actions.add_new_rule: 'New rule'
 Entities.Domain.actions.backToDomainList: 'Return to the list of domains'
 Entities.Domain.actions.customisation: Customisation
 Entities.Domain.actions.deleteRule: 'Delete rule'
-Entities.Domain.actions.editDomainRule: 'Amend a rule'
 Entities.Domain.actions.importUserAndAliases: 'Import users and aliases'
 Entities.Domain.customisation.general.tab: General
 Entities.Domain.customisation.general.title: 'General customisation of domain {domain}'
@@ -98,7 +97,7 @@ Entities.Group.fields.domain: 'Associated domain'
 Entities.Group.fields.name: 'Group name'
 Entities.Group.fields.overrideUser: 'Override user choices'
 Entities.Group.fields.policy: Policy
-Entities.Group.labels.grouprules: 'Group rules'
+Entities.Group.labels.groupRules: 'Group rules'
 Entities.Group.labels.rules: Rules
 Entities.Group.labels.usersGroup: 'Users of the group'
 Entities.ImapConnector.actions.add: 'Add IMAP connector'
@@ -110,12 +109,12 @@ Entities.ImapConnector.fields.imapProtocol: Encryption
 Entities.Import.Alias.description: "The file must be encoded in utf8 in csv format separated by semicolon.<br/>The structure is as follows: FirstName; LastName; email; alias's email<br/>"
 Entities.Import.Alias.title: 'Import alias'
 Entities.Import.Alias.warning: 'Warning: The already existing users will be updated with the new information'
+Entities.Import.SenderRule.description: 'The file must be a text file (.txt) encoded in UTF8. Each line must have a valid email address or domain.'
+Entities.Import.SenderRule.titleAuthorized: 'Import a list of authorized users'
+Entities.Import.SenderRule.titleBan: 'Import a list of banned users'
 Entities.Import.Users.description: 'The file must be encoded in utf8 in csv format separated by semicolon.<br/>The structure is as follows: email; LastName; FirstName; Group<br/>'
 Entities.Import.Users.title: 'Import users'
 Entities.Import.Users.warning: 'Warning: The already existing users will be updated with the new information.'
-Entities.Import.Wblist.description: 'The file must be a text file (.txt) encoded in UTF8. Each line must have a valid email address or domain.'
-Entities.Import.Wblist.titleAuthorized: 'Import a list of authorized users'
-Entities.Import.Wblist.titleBan: 'Import a list of banned users'
 Entities.Import.actions.import: Import
 Entities.LdapConnector.actions.add: 'Add LDAP connector'
 Entities.LdapConnector.actions.edit: 'Edit LDAP connector'
@@ -236,6 +235,29 @@ Entities.Report.title: 'Activity report'
 Entities.Report.titleDay: 'On the last 24 hours'
 Entities.Report.titleMonth: 'Last month'
 Entities.Report.typeMessage: Type
+Entities.SenderRule.actions.deleteSenderB: 'Unlock the sender'
+Entities.SenderRule.actions.deleteSenderW: 'Delete sender'
+Entities.SenderRule.fields.domain: Domain
+Entities.SenderRule.fields.typeB: 'Type of blockage'
+Entities.SenderRule.fields.typeLabelB.0: 'Blocked by you'
+Entities.SenderRule.fields.typeLabelB.1: 'Blocked by human authentication'
+Entities.SenderRule.fields.typeLabelB.2: 'Blocked by the group'
+Entities.SenderRule.fields.typeLabelB.3: 'Blocked by the administrator'
+Entities.SenderRule.fields.typeLabelB.5: 'Validated by file importation'
+Entities.SenderRule.fields.typeLabelW.0: 'Validated by you'
+Entities.SenderRule.fields.typeLabelW.1: 'Validated by human authentication'
+Entities.SenderRule.fields.typeLabelW.2: 'Validated by the group'
+Entities.SenderRule.fields.typeLabelW.3: 'Validated by the administrator'
+Entities.SenderRule.fields.typeLabelW.4: 'Validated by outgoing email'
+Entities.SenderRule.fields.typeLabelW.5: 'Validated by file importation'
+Entities.SenderRule.fields.typeW: 'Type of validation'
+Entities.SenderRule.fields.user: User
+Entities.SenderRule.fields.wbRule: 'Filtering rule'
+Entities.SenderRule.rules.accept: 'Accept with spam filter'
+Entities.SenderRule.rules.allow: 'Allow all emails'
+Entities.SenderRule.rules.block: 'Block all emails'
+Entities.SenderRule.rules.enabled: 'Antispam enabled'
+Entities.SenderRule.rules.none: 'No rule'
 Entities.User.actions.add_new: 'New user'
 Entities.User.actions.add_new_alias: 'Add a new alias'
 Entities.User.actions.edit: 'Edition of a user'
@@ -245,7 +267,7 @@ Entities.User.fields.domain: Domain
 Entities.User.fields.email: Email
 Entities.User.fields.emailRecovery: 'Recovery email'
 Entities.User.fields.fullName: Name
-Entities.User.fields.groups: Group
+Entities.User.fields.group: Group
 Entities.User.fields.inMsgBlockedCount: 'Incoming message blocked count'
 Entities.User.fields.inMsgCount: 'Incoming message count'
 Entities.User.fields.incoming: Incoming
@@ -266,29 +288,6 @@ Entities.User.indexEmail: 'List of email accounts'
 Entities.User.indexLocal: 'List of administrators'
 Entities.User.labels.defaultGroupSetting: 'Default group setting'
 Entities.User.labels.domainSetting: 'Domain setting'
-Entities.WBList.actions.deleteSenderB: 'Unlock the sender'
-Entities.WBList.actions.deleteSenderW: 'Delete sender'
-Entities.WBList.fields.domain: Domain
-Entities.WBList.fields.typeB: 'Type of blockage'
-Entities.WBList.fields.typeLabelB.0: 'Blocked by you'
-Entities.WBList.fields.typeLabelB.1: 'Blocked by human authentication'
-Entities.WBList.fields.typeLabelB.2: 'Blocked by the group'
-Entities.WBList.fields.typeLabelB.3: 'Blocked by the administrator'
-Entities.WBList.fields.typeLabelB.5: 'Validated by file importation'
-Entities.WBList.fields.typeLabelW.0: 'Validated by you'
-Entities.WBList.fields.typeLabelW.1: 'Validated by human authentication'
-Entities.WBList.fields.typeLabelW.2: 'Validated by the group'
-Entities.WBList.fields.typeLabelW.3: 'Validated by the administrator'
-Entities.WBList.fields.typeLabelW.4: 'Validated by outgoing email'
-Entities.WBList.fields.typeLabelW.5: 'Validated by file importation'
-Entities.WBList.fields.typeW: 'Type of validation'
-Entities.WBList.fields.user: User
-Entities.WBList.fields.wbRule: 'Filtering rule'
-Entities.WBList.rules.accept: 'Accept with spam filter'
-Entities.WBList.rules.allow: 'Allow all emails'
-Entities.WBList.rules.block: 'Block all emails'
-Entities.WBList.rules.enabled: 'Antispam enabled'
-Entities.WBList.rules.none: 'No rule'
 Form.Error: Error
 Form.ImportFile: 'Select a file to import'
 Generics.actions.addIpAddress: 'IP Address'

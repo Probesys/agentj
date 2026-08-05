@@ -2,12 +2,12 @@
 
 namespace App\Repository;
 
-use App\Entity\Msgs;
-use App\Entity\OutMsg;
+use App\Entity\Message;
+use App\Entity\OutMessage;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @template T of Msgs|OutMsg
+ * @template T of Message|OutMessage
  * @extends BaseRepository<T>
  */
 abstract class BaseMessageRepository extends BaseRepository

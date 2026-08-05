@@ -3,8 +3,8 @@
 namespace App\Command;
 
 use App\Entity\Log;
-use App\Entity\Msgs;
-use App\Entity\OutMsg;
+use App\Entity\Message;
+use App\Entity\OutMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -42,7 +42,7 @@ class TruncateMessageCommand extends Command
         }
 
         // Truncate incoming messages
-        $deletedIncomingStats = $this->em->getRepository(Msgs::class)->truncateMessageOlder($start);
+        $deletedIncomingStats = $this->em->getRepository(Message::class)->truncateMessageOlder($start);
 
         $message = date('Y-m-d H:i:s');
         $message .= "\tdelete incoming mail entries older than " . date('Y-m-d', $start);
@@ -51,7 +51,7 @@ class TruncateMessageCommand extends Command
         $output->writeln($message);
 
         // Truncate outgoing messages
-        $deletedOutgoingStats = $this->em->getRepository(OutMsg::class)->truncateMessageOlder($start);
+        $deletedOutgoingStats = $this->em->getRepository(OutMessage::class)->truncateMessageOlder($start);
 
         $message = date('Y-m-d H:i:s');
         $message .= "\tdelete outgoing mail entries older than " . date('Y-m-d', $start);

@@ -84,7 +84,7 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/run/php/ && touch /var/run/php/php84-fpm.pid
 RUN rm -rf node_modules
 
-COPY docker/conf/cron/agentj /etc/cron.d/agentj
+COPY --chmod=644 docker/conf/cron/agentj /etc/cron.d/agentj
 COPY docker/conf/nginx/nginx.conf /etc/nginx/sites-enabled/default
 COPY docker/conf/php-fpm/www.conf /etc/php/8.4/fpm/pool.d/www.conf
 COPY docker/conf/supervisor/supervisord.conf /etc/supervisord.conf

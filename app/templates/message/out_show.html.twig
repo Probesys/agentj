@@ -5,39 +5,39 @@
   {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
 {% block modalContent %}
-    {% for m in message %}
+    {% for message in messages %}
         <div class="row">
     <div class="col-md-4">
       {{ 'Generics.fields.date' | trans }}
     </div>
     <div class="col-md-8">
-      {{ outMsg.time_iso | format_datetime('short', 'short') }}
+      {{ outMessage.time_iso | format_datetime('short', 'short') }}
     </div>
     <div class="col-md-4">
        {{ 'Generics.fields.sender' | trans }}
     </div>
     <div class="col-md-8">
-      {{ m.from_addr }}
+      {{ message.from_addr }}
     </div>
     <div class="col-md-4">
       {{ 'Generics.fields.recipient' | trans }}
     </div>
     <div class="col-md-8">
-      {{ m.email }}
+      {{ message.email }}
     </div>
     <div class="col-md-4">
      {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
     </div>
     <div class="col-md-8">
-      {{ outMsgRcpt.bspam_level }}
+      {{ outMessageRecipient.bspam_level }}
     </div>
 
-    {% if outMsgRcpt.send_captcha > 0 %}
+    {% if outMessageRecipient.send_captcha > 0 %}
     <div class="col-md-4">
       {{ 'Entities.Message.dateAuthRequestAt' | trans }} :
     </div>
     <div class="col-md-8">
-       {{ outMsgRcpt.send_captcha | format_datetime('short', 'short') }}
+       {{ outMessageRecipient.send_captcha | format_datetime('short', 'short') }}
     </div>
     {% endif %}
 
@@ -45,15 +45,15 @@
       {{ 'Entities.Message.isMailingList' | trans }}
     </div>
     <div class="col-md-8">
-       {%  if outMsg.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
+       {%  if outMessage.is_mlist %}{{ 'Generics.labels.yes' | trans() }} {% else %} {{ 'Generics.labels.no' | trans() }} {% endif %}
     </div>
     <div class="col-md-4">
       {{ 'Message.Status.title' | trans }}
     </div>
     <div class="col-md-8">
-        {% set msgsStatus = msgDeliveryStatus[outMsgRcpt.ds] %}
-        {% set response = outMsgRcpt.smtp_resp %}
-        {% if outMsgRcpt.ds == 'P' %}
+        {% set msgsStatus = msgDeliveryStatus[outMessageRecipient.ds] %}
+        {% set response = outMessageRecipient.smtp_resp %}
+        {% if outMessageRecipient.ds == 'P' %}
           {% set deliverySatusClass = 'text-success' %}
         {% else %}
           {% set deliverySatusClass = 'text-danger' %}
@@ -78,8 +78,8 @@
             {% set classTr = "bg-success text-white" %}
             {% endif %}
           <tr class="{{ classTr }} ">
-            <td>{{ m.email }}</td>
-            <td>{{ m.from_addr }}</td>
+            <td>{{ message.email }}</td>
+            <td>{{ message.from_addr }}</td>
           </tr>
         {% endfor %}
       </table>

@@ -31,8 +31,8 @@ sudo -u www-data php bin/console doctrine:migration:migrate
 echo "Create or update super admin user"
 sudo -u www-data php bin/console agentj:create-super-admin "$SUPER_ADMIN_USERNAME" "$SUPER_ADMIN_PASSWORD"
 
-echo "update groups wblist"
-sudo -u www-data php bin/console agentj:update-groups-wblist
+echo "Update group rules"
+sudo -u www-data php bin/console agentj:update-group-rules
 
 # Allow web server user to write Symphony logs
 chown -R www-data:www-data /var/www/agentj/var

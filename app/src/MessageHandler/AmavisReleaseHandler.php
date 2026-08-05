@@ -4,11 +4,11 @@ namespace App\MessageHandler;
 
 use App\Amavis\MessageStatus;
 use App\Message;
-use App\Repository\MsgrcptRepository;
+use App\Repository\MessageRecipientRepository;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
 
 #[AsMessageHandler]
@@ -17,7 +17,7 @@ final class AmavisReleaseHandler
     public function __construct(
         #[Autowire(param: 'app.amavisd-release')]
         private string $amavisdReleaseCommand,
-        private MsgrcptRepository $messageRecipientRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
         private LoggerInterface $logger,
         private LockFactory $lockFactory,
     ) {
@@ -40,7 +40,7 @@ final class AmavisReleaseHandler
             return;
         }
 
-        if ($messageRecipient->getMsgs()->getQuarLoc() === null) {
+        if ($messageRecipient->getMessage()->getQuarLoc() === null) {
             $this->logger->error('Mail cannot be released  : invalid quartloc', [
                 'mailId' => $amavisRelease->getMailId(),
                 'partitionTag' => $amavisRelease->getPartitionTag(),
@@ -49,7 +49,7 @@ final class AmavisReleaseHandler
             return;
         }
 
-        if ($messageRecipient->getMsgs()->getSecretId() === null) {
+        if ($messageRecipient->getMessage()->getSecretId() === null) {
             $this->logger->error('Mail cannot be released  : invalid secretid', [
                 'mailId' => $amavisRelease->getMailId(),
                 'partitionTag' => $amavisRelease->getPartitionTag(),
@@ -84,8 +84,8 @@ final class AmavisReleaseHandler
 
         $process = new Process([
             $this->amavisdReleaseCommand,
-            $messageRecipient->getMsgs()->getQuarLoc(),
-            $messageRecipient->getMsgs()->getSecretId(),
+            $messageRecipient->getMessage()->getQuarLoc(),
+            $messageRecipient->getMessage()->getSecretId(),
             $messageRecipient->getRid()->getEmail(),
         ]);
 

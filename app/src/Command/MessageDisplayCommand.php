@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\Option;
@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MessageDisplayCommand
 {
     public function __construct(
-        private MsgsRepository $messageRepository,
+        private MessageRepository $messageRepository,
     ) {
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Policy;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -74,9 +73,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Domain $domain;
 
     /**
-     * @var Collection<int, Groups>
+     * @var Collection<int, Group>
      */
-    #[ORM\ManyToMany(targetEntity: Groups::class, inversedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_groups')]
+    #[ORM\InverseJoinColumn(name: 'groups_id', nullable: true, onDelete: 'CASCADE')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     #[OrderBy(['priority' => 'DESC'])]
     private Collection $groups;
@@ -119,10 +120,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $uid;
 
     /**
-     * @var Collection<int, Wblist>
+     * @var Collection<int, SenderRule>
      */
-    #[ORM\OneToMany(targetEntity: Wblist::class, mappedBy: 'rid')]
-    private Collection $wbLists;
+    #[ORM\OneToMany(targetEntity: SenderRule::class, mappedBy: 'rid')]
+    private Collection $senderRules;
 
     #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'users')]
     private ?Connector $originConnector;
@@ -150,7 +151,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->sharedWith = new ArrayCollection();
         $this->groups = new ArrayCollection();
         $this->ownedSharedBoxes = new ArrayCollection();
-        $this->wbLists = new ArrayCollection();
+        $this->senderRules = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -543,14 +544,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return ?Collection<int, Groups>
+     * @return ?Collection<int, Group>
      */
     public function getGroups(): ?Collection
     {
         return $this->groups;
     }
 
-    public function addGroup(Groups $group): self
+    public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
@@ -559,7 +560,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeGroup(Groups $group): self
+    public function removeGroup(Group $group): self
     {
         $this->groups->removeElement($group);
 
@@ -567,29 +568,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return ?Collection<int, Wblist>
+     * @return ?Collection<int, SenderRule>
      */
-    public function getWbLists(): ?Collection
+    public function getSenderRules(): ?Collection
     {
-        return $this->wbLists;
+        return $this->senderRules;
     }
 
-    public function addWbList(Wblist $wbList): self
+    public function addSenderRule(SenderRule $senderRule): self
     {
-        if (!$this->wbLists->contains($wbList)) {
-            $this->wbLists[] = $wbList;
-            $wbList->setRid($this);
+        if (!$this->senderRules->contains($senderRule)) {
+            $this->senderRules[] = $senderRule;
+            $senderRule->setRid($this);
         }
 
         return $this;
     }
 
-    public function removeWbList(Wblist $wbList): self
+    public function removeSenderRule(SenderRule $senderRule): self
     {
-        if ($this->wbLists->removeElement($wbList)) {
+        if ($this->senderRules->removeElement($senderRule)) {
             // set the owning side to null (unless already changed)
-            if ($wbList->getRid() === $this) {
-                $wbList->setRid(null);
+            if ($senderRule->getRid() === $this) {
+                $senderRule->setRid(null);
             }
         }
 

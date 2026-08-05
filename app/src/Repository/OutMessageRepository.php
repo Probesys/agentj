@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\OutMessage;
+use Doctrine\DBAL;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends BaseMessageRepository<OutMessage>
+ */
+class OutMessageRepository extends BaseMessageRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, OutMessage::class);
+    }
+
+    /**
+     * Delete outgoing messages older than $date
+     *
+     * @return array{
+     *     nbDeletedMsgs: int|string,
+     *     nbDeletedQuarantine: int|string,
+     * }
+     */
+    public function truncateMessageOlder(int $date): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = ' DELETE q FROM out_quarantine q '
+            . ' LEFT JOIN  out_msgs m ON m.mail_id = q.mail_id '
+            . ' WHERE m.time_num < :date';
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue('date', $date, DBAL\ParameterType::INTEGER);
+        $result = $stmt->executeQuery();
+        $nbDeletedQuarantine = $result->rowCount();
+
+        $sql = ' DELETE FROM out_msgs WHERE time_num < :date';
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue('date', $date, DBAL\ParameterType::INTEGER);
+        $result = $stmt->executeQuery();
+        $nbDeletedMsgs = $result->rowCount();
+
+        return [
+            'nbDeletedMsgs' => $nbDeletedMsgs,
+            'nbDeletedQuarantine' => $nbDeletedQuarantine,
+        ];
+    }
+}

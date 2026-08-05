@@ -150,7 +150,7 @@ then
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
-	$dx php bin/console ag:report >/dev/null
+	$dx php bin/console agentj:send-report-mail >/dev/null
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
 		expected_sender="will@blocnormal.fr" \
 		to_addr="user@blocnormal.fr" \

@@ -3,20 +3,18 @@
 namespace App\Command;
 
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\Office365Connector;
-use App\Entity\Groups;
 use App\Entity\User;
-use App\Repository\ConnectorRepository;
-use App\Service\MailaddrService;
+use App\Service\RuleAddressService;
 use App\Util\Email;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Microsoft\Graph\Generated\Groups\GroupsRequestBuilderGetRequestConfiguration;
-use Microsoft\Kiota\Authentication\Oauth\ClientCredentialContext;
-use Microsoft\Graph\GraphServiceClient;
 use Microsoft\Graph\Generated\Models\User as GraphUser;
 use Microsoft\Graph\Generated\Users\UsersRequestBuilderGetRequestConfiguration;
+use Microsoft\Graph\GraphServiceClient;
+use Microsoft\Kiota\Authentication\Oauth\ClientCredentialContext;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -168,7 +166,7 @@ class Office365ImportCommand extends Command
             $user->setUid($graphUser->getId());
             $user->setPolicy($domain->getPolicy());
             $user->setOriginConnector($this->connector);
-            $user->setPriority(MailaddrService::computePriority($graphUser->getMail()));
+            $user->setPriority(RuleAddressService::computePriority($graphUser->getMail()));
             if (count($graphUser->getProxyAddresses()) > 1) {
                 $aliases = $this->addAliases($user, $graphUser->getProxyAddresses());
                 $nbAliasCreated += count($aliases);
@@ -268,13 +266,13 @@ class Office365ImportCommand extends Command
         $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
         $groups = $result->getValue();
 
-        $priorityMax = $this->em->getRepository(Groups::class)->getMaxPriorityforDomain($domain);
+        $priorityMax = $this->em->getRepository(Group::class)->getMaxPriorityforDomain($domain);
 
         foreach ($groups as $m365group) {
-            $localGroup = $this->em->getRepository(Groups::class)->findOneByUid($m365group->getId());
+            $localGroup = $this->em->getRepository(Group::class)->findOneByUid($m365group->getId());
 
             if (!$localGroup) {
-                $localGroup = new Groups();
+                $localGroup = new Group();
                 $localGroup->setPriority($priorityMax + 1);
                 $localGroup->setName($m365group->getDisplayName());
                 $localGroup->setActive(false);
@@ -305,7 +303,7 @@ class Office365ImportCommand extends Command
             $userGroup->setDomain($domain);
             $userGroup->setUid($m365group->getId());
             $userGroup->setPolicy($domain->getPolicy());
-            $userGroup->setPriority(MailaddrService::computePriority($m365group->getMail()));
+            $userGroup->setPriority(RuleAddressService::computePriority($m365group->getMail()));
             $this->em->persist($userGroup);
             $this->em->flush();
 
@@ -349,7 +347,7 @@ class Office365ImportCommand extends Command
         }
     }
 
-    private function addMembersToGroup(Groups $group): void
+    private function addMembersToGroup(Group $group): void
     {
         $result = $this->graphServiceClient->groups()->byGroupId($group->getUid())->members()->get()->wait();
         $members = $result->getValue();

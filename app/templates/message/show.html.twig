@@ -11,34 +11,34 @@
             {{ 'Generics.fields.date' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msg.timeiso | format_datetime('short', 'short') }}
+            {{ message.timeiso | format_datetime('short', 'short') }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.sender' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msg.sid.getEmail }}
+            {{ message.sid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msgRcpt.rid.getEmail }}
+            {{ messageRecipient.rid.getEmail }}
         </div>
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
         </div>
         <div class="col-md-8">
-            {{ msgRcpt.bspamLevel }}
+            {{ messageRecipient.bspamLevel }}
         </div>
 
-        {% if msg.sendCaptcha > 0 %}
+        {% if message.sendCaptcha > 0 %}
             <div class="col-md-4">
                 {{ 'Entities.Message.dateAuthRequestAt' | trans }}
                 :
             </div>
             <div class="col-md-8">
-                {{ msg.sendCaptcha | format_datetime('short', 'short') }}
+                {{ message.sendCaptcha | format_datetime('short', 'short') }}
             </div>
         {% endif %}
 
@@ -46,7 +46,7 @@
             {{ 'Entities.Message.isMailingList' | trans }}
         </div>
         <div class="col-md-8">
-            {%  if msg.isMlist %}
+            {%  if message.isMlist %}
                 {{ 'Generics.labels.yes' | trans() }}
             {% else %}
                 {{ 'Generics.labels.no' | trans() }}
@@ -56,14 +56,14 @@
             {{ 'Message.Status.title' | trans }}
         </div>
         <div class="col-md-8">
-            {% if msgRcpt.isAlreadyReleased %}
+            {% if messageRecipient.isAlreadyReleased %}
                 {% set deliveryStatusClass = 'text-success' %}
-                {% set msgsStatus = msgRcpt.statusLabel | trans %}
-                {% set response = msgRcpt.amavisOutput %}
+                {% set msgsStatus = messageRecipient.statusLabel | trans %}
+                {% set response = messageRecipient.amavisOutput %}
             {% else %}
                 {% set deliveryStatusClass = 'text-danger' %}
-                {% set msgsStatus = msgDeliveryStatus[msgRcpt.ds] %}
-                {% set response = msgRcpt.smtpResp %}
+                {% set msgsStatus = msgDeliveryStatus[messageRecipient.ds] %}
+                {% set response = messageRecipient.smtpResp %}
             {% endif %}
 
             <span class="{{ deliveryStatusClass }}">
@@ -88,36 +88,36 @@
                             {{ 'Generics.fields.sender' | trans }}
                         </th>
                         <th>
-                            {{ 'Entities.WBList.fields.wbRule' | trans }}
+                            {{ 'Entities.SenderRule.fields.wbRule' | trans }}
                         </th>
                         <th>
                             {{ 'Generics.fields.priority' | trans }}
                         </th>
                         <th>
-                            {{ 'Entities.User.fields.groups' | trans }}
+                            {{ 'Entities.User.fields.group' | trans }}
                         </th>
                     </tr>
                 </thead>
-                {% for wblist in wblists %}
+                {% for senderRule in senderRules %}
                     {% set classTr = "" %}
                     {% if loop.index == 1 %}
                         {% set classTr = "bg-success text-white" %}
                     {% endif %}
                     <tr class="{{ classTr }} ">
                         <td>
-                            {{ wblist.rid.email }}
+                            {{ senderRule.rid.email }}
                         </td>
                         <td>
-                            {{ wblist.sid.email }}
+                            {{ senderRule.sid.email }}
                         </td>
                         <td>
-                            {{ wblist.wbRuleName | trans }}
+                            {{ senderRule.wbRuleName | trans }}
                         </td>
                         <td>
-                            {{ wblist.priority }}
+                            {{ senderRule.priority }}
                         </td>
                         <td>
-                            {{ wblist.groups?.name }}
+                            {{ senderRule.group?.name }}
                         </td>
                     </tr>
                 {% endfor %}

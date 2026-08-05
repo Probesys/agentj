@@ -3,16 +3,15 @@
 namespace App\Command;
 
 use App\Amavis\MessageStatus;
-use App\Repository\MsgrcptRepository;
-use App\Repository\MsgrcptSearchRepository;
+use App\Repository\MessageRecipientRepository;
+use App\Repository\MessageRecipientSearchRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
-use App\Repository\WblistRepository;
 use App\Service\MessageService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Lock\LockFactory;
 
 #[AsCommand(
@@ -24,10 +23,10 @@ class AmavisAutoReleaseCommand extends Command
     private int $batchSize = 500;
 
     public function __construct(
-        private MsgrcptRepository $messageRecipientRepository,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
+        private MessageRecipientRepository $messageRecipientRepository,
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private UserRepository $userRepository,
-        private WblistRepository $wblistRepository,
+        private SenderRuleRepository $senderRuleRepository,
         private MessageService $messageService,
         private LockFactory $lockFactory,
     ) {
@@ -45,7 +44,7 @@ class AmavisAutoReleaseCommand extends Command
             return Command::FAILURE;
         }
 
-        $unreleasedSearchQuery = $this->msgrcptSearchRepository->getSearchQuery(
+        $unreleasedSearchQuery = $this->messageRecipientSearchRepository->getSearchQuery(
             null,
             messageStatus: MessageStatus::UNRELEASED,
         );
@@ -55,9 +54,9 @@ class AmavisAutoReleaseCommand extends Command
 
         foreach ($messageRecipients as $messageRecipient) {
             $recipient = $messageRecipient->getRid();
-            $senderEmail = $messageRecipient->getMsgs()->getSenderEmail();
+            $senderEmail = $messageRecipient->getMessage()->getSenderEmail();
 
-            $recipientUser = $this->userRepository->findOneByMailAddress($recipient);
+            $recipientUser = $this->userRepository->findOneByAddress($recipient);
 
             $recipientOriginalUser = $recipientUser->getOriginalUser();
             if ($recipientOriginalUser) {
@@ -66,7 +65,7 @@ class AmavisAutoReleaseCommand extends Command
 
             $recipientDomain = $recipientUser->getDomain();
 
-            $senderIsAuthorized = $this->wblistRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
+            $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
             $humanAuthIsDisabled = $recipientUser->getBypassHumanAuth();
 
             $spamLevel = $recipientDomain->getLevel();

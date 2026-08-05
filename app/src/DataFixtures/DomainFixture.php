@@ -6,14 +6,14 @@ use App\Entity\Domain;
 use App\Entity\DomainRelay;
 use App\Entity\User;
 use App\Entity\Policy;
-use App\Entity\Mailaddr;
-use App\Entity\Wblist;
+use App\Entity\RuleAddress;
+use App\Entity\SenderRule;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 /**
- * @phpstan-import-type WbRule from \App\Entity\WbRuleTrait
+ * @phpstan-import-type WbRule from \App\Entity\RuleTrait
  */
 class DomainFixture extends Fixture
 {
@@ -29,10 +29,10 @@ class DomainFixture extends Fixture
     {
         $this->manager = $manager;
 
-        $mailaddr = new Mailaddr();
-        $mailaddr->setPriority(0);
-        $mailaddr->setEmail('@.');
-        $manager->persist($mailaddr);
+        $ruleAddress = new RuleAddress();
+        $ruleAddress->setPriority(0);
+        $ruleAddress->setEmail('@.');
+        $manager->persist($ruleAddress);
 
         $normalPolicy = $this->em->getRepository(Policy::class)->findOneBy(['policyName' => 'Normale']);
 
@@ -60,7 +60,7 @@ class DomainFixture extends Fixture
             TXT);
         // phpcs:enable Generic.Files.LineLength
 
-        $this->fillDomainCommon($blocnormal, $mailaddr, wbRule: 'enabled');
+        $this->fillDomainCommon($blocnormal, $ruleAddress, wbRule: 'enabled');
 
         $laissepasser = new Domain();
         $laissepasser->setDomain('laissepasser.fr');
@@ -84,7 +84,7 @@ class DomainFixture extends Fixture
             TXT);
         // phpcs:enable Generic.Files.LineLength
 
-        $this->fillDomainCommon($laissepasser, $mailaddr, wbRule: 'allow');
+        $this->fillDomainCommon($laissepasser, $ruleAddress, wbRule: 'allow');
 
         $manager->persist($blocnormal);
         $manager->persist($laissepasser);
@@ -94,7 +94,7 @@ class DomainFixture extends Fixture
     /**
      * @param WbRule $wbRule
      */
-    public function fillDomainCommon(Domain $domain, Mailaddr $mailaddr, string $wbRule): void
+    public function fillDomainCommon(Domain $domain, RuleAddress $ruleAddress, string $wbRule): void
     {
         $domain->setLevel(0.5);
         $domain->setSrvSmtp('smtp.test');
@@ -110,10 +110,10 @@ class DomainFixture extends Fixture
         $user->setPolicy($domain->getPolicy());
         $this->manager->persist($user);
 
-        $wblist = new Wblist($user, $mailaddr);
-        $wblist->setWbRule($wbRule);
-        $wblist->setPriority(Wblist::WBLIST_PRIORITY_DOMAIN);
-        $this->manager->persist($wblist);
+        $senderRule = new SenderRule($user, $ruleAddress);
+        $senderRule->setWbRule($wbRule);
+        $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
+        $this->manager->persist($senderRule);
         $dkim = $domain->getDomainKeys();
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');

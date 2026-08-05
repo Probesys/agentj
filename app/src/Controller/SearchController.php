@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Msgs;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Form\SearchFilterType;
-use App\Repository\MsgrcptSearchRepository;
-use App\Repository\OutMsgrcptRepository;
+use App\Repository\MessageRecipientSearchRepository;
+use App\Repository\OutMessageRecipientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,8 +21,8 @@ class SearchController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private MsgrcptSearchRepository $msgrcptSearchRepository,
-        private OutMsgrcptRepository $outMsgrcptRepository
+        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
+        private OutMessageRecipientRepository $outMessageRecipientRepository
     ) {
     }
 
@@ -42,10 +42,10 @@ class SearchController extends AbstractController
 
         $messageType = $activeFilters['messageType'] ?? 'incoming';
         if ($messageType == 'incoming') {
-            $allMessages = $this->msgrcptSearchRepository
+            $allMessages = $this->messageRecipientSearchRepository
                 ->getAdvancedSearchQuery($activeFilters);
         } else {
-            $allMessages = $this->outMsgrcptRepository
+            $allMessages = $this->outMessageRecipientRepository
                 ->getAdvancedSearchQuery($activeFilters);
         }
 
@@ -79,8 +79,8 @@ class SearchController extends AbstractController
     {
         $conn = $this->em->getConnection();
 
-        // Fetching the OutMsgrcpt data using raw SQL
-        $sqlOutMsgrcpt = <<<SQL
+        // Fetching the OutMessageRecipient data using raw SQL
+        $sqlOutMessageRecipient = <<<SQL
             SELECT * FROM out_msgrcpt
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
@@ -88,40 +88,40 @@ class SearchController extends AbstractController
         SQL;
 
         // Execute the query and fetch data as an associative array
-        $stmtOutMsgrcpt = $conn->executeQuery($sqlOutMsgrcpt, [
+        $stmtOutMessageRecipient = $conn->executeQuery($sqlOutMessageRecipient, [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
             'rid' => $rid,
         ]);
-        $outMsgRcpt = $stmtOutMsgrcpt->fetchAssociative();
+        $outMessageRecipient = $stmtOutMessageRecipient->fetchAssociative();
 
-        // Fetching the OutMsgs data using raw SQL
-        $sqlOutMsgs = <<<SQL
+        // Fetching the OutMessage data using raw SQL
+        $sqlOutMessages = <<<SQL
             SELECT * FROM out_msgs
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
         SQL;
 
         // Execute the query and fetch data as an associative array
-        $stmtOutMsgs = $conn->executeQuery($sqlOutMsgs, [
+        $stmtOutMessage = $conn->executeQuery($sqlOutMessages, [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
         ]);
-        $outMsg = $stmtOutMsgs->fetchAssociative();
+        $outMessage = $stmtOutMessage->fetchAssociative();
 
         /** @var User $user */
         $user = $this->getUser();
-        $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, 'outgoing');
+        $allMessages = $this->em->getRepository(Message::class)->advancedSearch($user, 'outgoing');
 
-        $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
-            return $outMsg !== false && $msg['mail_id'] === $outMsg['mail_id'];
+        $messages = array_filter($allMessages, function ($message) use ($outMessage) {
+            return $outMessage !== false && $message['mail_id'] === $outMessage['mail_id'];
         });
 
         return $this->render('message/out_show.html.twig', [
             'controller_name' => 'MessageController',
-            'outMsg' => $outMsg,
-            'outMsgRcpt' => $outMsgRcpt,
-            'message' => $ms,
+            'outMessage' => $outMessage,
+            'outMessageRecipient' => $outMessageRecipient,
+            'messages' => $messages,
         ]);
     }
 

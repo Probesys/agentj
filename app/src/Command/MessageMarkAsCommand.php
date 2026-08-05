@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\Amavis\MessageStatus;
-use App\Repository\MsgsRepository;
+use App\Repository\MessageRepository;
 use App\Service\MessageService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Argument;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class MessageMarkAsCommand
 {
     public function __construct(
-        private MsgsRepository $messageRepository,
+        private MessageRepository $messageRepository,
         private MessageService $messageService,
     ) {
     }

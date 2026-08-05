@@ -4,14 +4,14 @@ namespace App\Repository;
 
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
+use App\Entity\Address;
 use App\Entity\Domain;
-use App\Entity\Groups;
-use App\Entity\Maddr;
+use App\Entity\Group;
 use App\Entity\User;
 use Doctrine\DBAL;
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\Expr;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -50,7 +50,7 @@ class UserRepository extends BaseRepository
     /**
      * @return Query<User>
      */
-    public function getSearchByGroupQuery(Groups $group, string $searchKey = ''): Query
+    public function getSearchByGroupQuery(Group $group, string $searchKey = ''): Query
     {
         $queryBuilder = $this->createQueryBuilder('u')
                 ->innerJoin('u.groups', 'g')
@@ -87,18 +87,18 @@ class UserRepository extends BaseRepository
                         ->getOneOrNullResult();
     }
 
-    public function findOneByMailAddress(Maddr $maddr): ?User
+    public function findOneByAddress(Address $address): ?User
     {
-        $email = $maddr->getEmail();
+        $email = $address->getEmail();
         return $this->findOneBy(['email' => $email]);
     }
 
     /**
      * @return User[]
      */
-    public function findUserAndAliasesByMaddr(Maddr $maddr): array
+    public function findUserAndAliasesByAddress(Address $address): array
     {
-        $mainUser = $this->findOneByMailAddress($maddr);
+        $mainUser = $this->findOneByAddress($address);
 
         if (!$mainUser) {
             return [];

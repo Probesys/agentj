@@ -2,14 +2,14 @@
 
 namespace App\Repository;
 
-use App\Entity\Msgrcpt;
-use App\Entity\OutMsgrcpt;
+use App\Entity\MessageRecipient;
+use App\Entity\OutMessageRecipient;
 use App\Util\Search;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 
 /**
- * @template T of Msgrcpt|OutMsgrcpt
+ * @template T of MessageRecipient|OutMessageRecipient
  * @extends BaseRepository<T>
  */
 abstract class BaseMessageRecipientRepository extends BaseRepository

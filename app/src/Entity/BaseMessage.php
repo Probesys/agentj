@@ -2,10 +2,9 @@
 
 namespace App\Entity;
 
-use App\Entity\Maddr;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Address as MimeAddress;
 
 #[ORM\MappedSuperclass]
 #[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
@@ -88,8 +87,8 @@ class BaseMessage
     private ?int $status;
 
     #[ORM\JoinColumn(name: 'sid', referencedColumnName: 'id')]
-    #[ORM\ManyToOne(targetEntity: Maddr::class)]
-    private ?Maddr $sid;
+    #[ORM\ManyToOne(targetEntity: Address::class)]
+    private ?Address $sid;
 
     #[ORM\Column(name: 'send_captcha', type: 'integer', nullable: false, options: ['unsigned' => true, 'default' => 0])]
     private int $sendCaptcha = 0;
@@ -279,10 +278,10 @@ class BaseMessage
         return $this->fromAddr;
     }
 
-    public function getFromMimeAddress(): ?Address
+    public function getFromMimeAddress(): ?MimeAddress
     {
         try {
-            return Address::create($this->fromAddr ?? '');
+            return MimeAddress::create($this->fromAddr ?? '');
         } catch (\InvalidArgumentException $e) {
             return null;
         }
@@ -319,12 +318,12 @@ class BaseMessage
         return $this;
     }
 
-    public function getSid(): ?Maddr
+    public function getSid(): ?Address
     {
         return $this->sid;
     }
 
-    public function setSid(?Maddr $sid): self
+    public function setSid(?Address $sid): self
     {
         $this->sid = $sid;
 
@@ -352,9 +351,9 @@ class BaseMessage
 
         if ($fromEmail) {
             return $fromEmail;
-        } else {
-            return $senderEmail;
         }
+
+        return $senderEmail;
     }
 
     public function getStatus(): ?int
