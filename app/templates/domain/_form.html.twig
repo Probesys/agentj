@@ -346,7 +346,9 @@
             <div class="form-group">
                 <label for="domain_mailAuthenticationSender" class="col-form-label col-sm-12">
                     {{ 'Entities.Domain.fields.mailAuthenticationSender'|trans }}
-                    ({{ 'Generics.labels.byDefault'|trans }} : {{ domain_mail_authentification_sender }})
+                    {% if domain.id %}
+                        ({{ 'Generics.labels.byDefault'|trans }} : {{ domain.defaultMailAuthenticationSender }})
+                    {% endif %}
                 </label>
                 {{ form_widget(form.mailAuthenticationSender) }}
             </div>

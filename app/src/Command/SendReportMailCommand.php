@@ -14,7 +14,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -33,8 +32,6 @@ class SendReportMailCommand extends Command
         private ManagerRegistry $doctrine,
         private TranslatorInterface $translator,
         private MailerInterface $mailer,
-        #[Autowire(param: 'app.domain_mail_authentification_sender')]
-        private string $defaultMailFrom,
         private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private MessageService $messageService,
         private UrlGeneratorInterface $urlGenerator,
@@ -75,9 +72,6 @@ class SendReportMailCommand extends Command
 
             $domain = $user->getDomain();
             $from = $domain->getMailAuthenticationSender();
-            if (!$from) {
-                $from = $this->defaultMailFrom;
-            }
 
             $locale = $this->localeService->getUserLocale($user);
             $fromName = $this->translator->trans('Entities.Report.mailFromName', locale: $locale);

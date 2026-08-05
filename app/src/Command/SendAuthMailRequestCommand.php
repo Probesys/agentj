@@ -43,8 +43,6 @@ class SendAuthMailRequestCommand
         private LockFactory $lockFactory,
         #[Autowire(param: 'app.amavisd-release')]
         public readonly string $amavisdRelease,
-        #[Autowire(param: 'app.domain_mail_authentification_sender')]
-        public readonly string $defaultSenderAdress,
     ) {
     }
 
@@ -141,7 +139,7 @@ class SendAuthMailRequestCommand
                 // "From" header and to use his locale when building the email.
                 $recipientUser = $recipientUsers[0];
 
-                $mailFrom = $this->getMailFrom($domain);
+                $mailFrom = $domain->getMailAuthenticationSender();
                 $fromName = $recipientUser->getFullName();
                 $locale = $this->localeService->getUserLocale($recipientUser);
 
@@ -296,20 +294,5 @@ class SendAuthMailRequestCommand
             $this->messageRepository->save($message);
             return false;
         }
-    }
-
-    private function getMailFrom(Domain $domain): string
-    {
-        if ($domain->getMailAuthenticationSender()) {
-            try {
-                $mailFrom = Address::create($domain->getMailAuthenticationSender())->getAddress();
-            } catch (\InvalidArgumentException $e) {
-                $mailFrom = $this->defaultSenderAdress;
-            }
-        } else {
-            $mailFrom = $this->defaultSenderAdress;
-        }
-
-        return $mailFrom;
     }
 }

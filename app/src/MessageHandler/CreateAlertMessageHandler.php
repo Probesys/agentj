@@ -14,7 +14,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -23,21 +22,18 @@ class CreateAlertMessageHandler
 {
     private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
-    private string $defaultMailFrom;
     private TranslatorInterface $translator;
     private MailerInterface $mailer;
     private LocaleService $localeService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $params,
         TranslatorInterface $translator,
         MailerInterface $mailer,
         LocaleService $localeService,
     ) {
         $this->entityManager = $entityManager;
         $this->output = new ConsoleOutput();
-        $this->defaultMailFrom = $params->get('app.domain_mail_authentification_sender');
         $this->translator = $translator;
         $this->mailer = $mailer;
         $this->localeService = $localeService;
@@ -123,9 +119,6 @@ class CreateAlertMessageHandler
                         $emailAddress = $user->getEmail();
                         if ($emailAddress !== null && $user->getDomain() !== null) {
                             $mailFrom = $user->getDomain()->getMailAuthenticationSender();
-                            if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
-                                $mailFrom = $this->defaultMailFrom;
-                            }
 
                             $subject = $this->translator->trans(
                                 'Entities.Alert.messages.admin.virus.title',
@@ -185,9 +178,6 @@ class CreateAlertMessageHandler
                             $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
                         } else {
                             $mailFrom = $senderUser->getDomain()->getMailAuthenticationSender();
-                            if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
-                                $mailFrom = $this->defaultMailFrom;
-                            }
 
                             $subject = $this->translator->trans(
                                 'Entities.Alert.messages.user.virus.title',
@@ -301,9 +291,6 @@ class CreateAlertMessageHandler
                     $emailAddress = $user->getEmail();
                     if ($emailAddress !== null && $user->getDomain() !== null) {
                         $mailFrom = $user->getDomain()->getMailAuthenticationSender();
-                        if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
-                            $mailFrom = $this->defaultMailFrom;
-                        }
 
                         $subject = $this->translator->trans(
                             'Entities.Alert.messages.admin.quota.title',
@@ -368,9 +355,7 @@ class CreateAlertMessageHandler
                                 $this->output->writeln('Mail alerts disabled for user: ' . $senderUser->getId());
                             } else {
                                 $mailFrom = $senderUser->getDomain()->getMailAuthenticationSender();
-                                if (!$mailFrom || !filter_var($mailFrom, FILTER_VALIDATE_EMAIL)) {
-                                    $mailFrom = $this->defaultMailFrom;
-                                }
+
                                 $subject = $this->translator->trans(
                                     'Entities.Alert.messages.user.quota.title',
                                     locale: $locale,

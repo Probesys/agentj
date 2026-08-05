@@ -410,9 +410,19 @@ class Domain
         return $this;
     }
 
-    public function getMailAuthenticationSender(): ?string
+    public function getMailAuthenticationSender(): string
     {
-        return $this->mailAuthenticationSender;
+        return $this->mailAuthenticationSender ?: $this->getDefaultMailAuthenticationSender();
+    }
+
+    /**
+     * Default "no-reply" address used when no custom sender is set on the
+     * domain, based on the domain itself rather than some unrelated default,
+     * whose DKIM key wouldn't match this domain.
+     */
+    public function getDefaultMailAuthenticationSender(): string
+    {
+        return 'no-reply@' . $this->domain;
     }
 
     public function setMailAuthenticationSender(?string $mailAuthenticationSender): self

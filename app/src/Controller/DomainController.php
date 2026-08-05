@@ -115,6 +115,7 @@ class DomainController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $domain->setCalculatedTransport();
+
             //Default messages
             //captcha page
             $messageConfig = $settingRepository->findBy(['context' => 'default_domain_messages']);
