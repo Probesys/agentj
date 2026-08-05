@@ -118,7 +118,11 @@ class AppExtension extends AbstractExtension
             $originalUser = $originalToken->getUser();
 
             if ($originalUser instanceof User) {
-                return $originalUser;
+                // The user carried by the original token comes from the
+                // serialized session, not from Doctrine, so it isn't
+                // hydrated (its collections, e.g. ownedSharedBoxes, would
+                // appear empty). Reload it from the database.
+                return $this->em->getRepository(User::class)->find($originalUser->getId());
             }
         }
 

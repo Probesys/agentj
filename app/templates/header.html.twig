@@ -61,13 +61,19 @@
                         <div class="dropdown-divider"></div>
                     {% endif %}
 
-                    {% if sharedBoxes|length > 0%}
+                    {% if originalUser %}
+                        {% set sharedUsers = originalUser.ownedSharedBoxes | filter(sharedUser => sharedUser.id != app.user.id) %}
+                    {% else %}
+                        {% set sharedUsers = app.user.ownedSharedBoxes %}
+                    {% endif %}
+
+                    {% if sharedUsers | length > 0 %}
                         <div class="dropdown-header">{{ 'Navigation.mailboxes.other' | trans }}</div>
 
-                        {% for sharedBox in sharedBoxes %}
-                            <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedBox.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedBox.username}}">
+                        {% for sharedUser in sharedUsers %}
+                            <a class="dropdown-item" href="{{ path('homepage', {'_switch_user': sharedUser.username}) }}" title="{{ 'Generics.actions.connectAs'|trans() ~ sharedUser.username}}">
                                 <i class="fas fa-envelope"></i>
-                                {{ sharedBox.username }}
+                                {{ sharedUser.username }}
                             </a>
                         {% endfor %}
 

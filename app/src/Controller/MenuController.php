@@ -15,10 +15,8 @@ class MenuController extends AbstractController
 
         $domain = $user->getDomain();
 
-        $sharedBoxes = $user->getOwnedSharedBoxes();
         return $this->render('header.html.twig', [
             'domain' => $domain,
-            'sharedBoxes' => $sharedBoxes,
         ]);
     }
 }
