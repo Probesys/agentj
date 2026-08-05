@@ -76,7 +76,7 @@ Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL récupérant 
 Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Lien vers les mails en attente'
 Entities.Domain.labels.dynamicsVariables.USERNAME: "Nom de l'utilisateur"
 Entities.Domain.labels.filters: 'FILTRES & QUOTAS'
-Entities.Domain.labels.ipAddresses: "IP du serveur d'envoi"
+Entities.Domain.labels.ipAddresses: 'Serveurs sortants autorisés'
 Entities.Domain.labels.rules: Règles
 Entities.Domain.labels.saveBeforeConnectors: "Veuillez d'abord enregistrer le domaine, pour ajouter des connecteurs."
 Entities.DomainRelay.fields.ipAddress: 'Adresse IP'
@@ -290,7 +290,7 @@ Entities.User.labels.defaultGroupSetting: 'Paramètre du groupe par défaut'
 Entities.User.labels.domainSetting: 'Paramètre du domaine'
 Form.Error: Erreur
 Form.ImportFile: 'Sélectionnez un fichier à importer'
-Generics.actions.addIpAddress: 'Ajouter une adresse IP'
+Generics.actions.addIpAddress: 'Ajouter un serveur'
 Generics.actions.backToPreviousPage: 'Retour à la page précédente'
 Generics.actions.backToTheList: 'Retour à la liste'
 Generics.actions.cancel: Annuler
@@ -310,6 +310,7 @@ Generics.actions.impersonate: 'Se connecter'
 Generics.actions.import: Importer
 Generics.actions.importFile: 'Importer depuis un fichier'
 Generics.actions.rememberme: 'Se souvenir de moi'
+Generics.actions.remove: Retirer
 Generics.actions.save: Enregistrer
 Generics.actions.search: Rechercher
 Generics.actions.showMore: 'Voir plus'

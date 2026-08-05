@@ -15,13 +15,14 @@ export default class extends Controller {
         this.index++;
 
         let div = document.createElement('div');
+        div.classList.add('domain-relay-row');
         div.innerHTML = newForm;
 
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.classList.add('btn', 'btn-danger', 'col-sm-2');
 
-        deleteButton.innerText = Translator.trans('Message.Actions.Delete');
+        deleteButton.innerText = Translator.trans('Generics.actions.remove');
 
         deleteButton.setAttribute('data-action', 'click->add-ip-address#remove');
         div.appendChild(deleteButton);
@@ -48,7 +49,7 @@ export default class extends Controller {
 
             $("#dialog-confirm").dialog("open");
             input.value = '';
-        } 
+        }
 
         const allInputs = this.containerTarget.querySelectorAll('input');
 

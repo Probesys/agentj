@@ -79,19 +79,18 @@
             <div class="card-body" data-controller="add-ip-address">
                 <div data-add-ip-address-target="container" id="domain-relays-container">
                     {% for domainRelay in form.domainRelays %}
-                        <div>
-                            {{ form_row(domainRelay.ipAddress, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%"  } }) }}
+                        <div class="domain-relay-row">
+                            {{ form_row(domainRelay.ipAddress, { attr: { class:'form-control col-sm-8', 'data-action': 'blur->add-ip-address#validateIp' } }) }}
                             <button type="button" class="btn btn-danger col-sm-2"
-                                    data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                                    data-action="click->add-ip-address#remove">{{ 'Generics.actions.remove' | trans() }}</button>
                         </div>
                     {% endfor %}
                 </div>
 
                 {% set domainRelayPrototype %}
-                    <br>
-                    {{ form_row(form.domainRelays.vars.prototype.ipAddress, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp', style: "width: 50%" } })|e }}
+                    {{ form_row(form.domainRelays.vars.prototype.ipAddress, { attr: { class: 'domain-relay-item form-control col-sm-8' , 'data-action': 'blur->add-ip-address#validateIp' } })|e }}
                     <button type="button" class="btn btn-danger col-sm-2"
-                            data-action="click->add-ip-address#remove">{{ 'Generics.actions.delete' | trans() }}</button>
+                            data-action="click->add-ip-address#remove">{{ 'Generics.actions.remove' | trans() }}</button>
                 {% endset %}
 
                 <div style="display: none;" data-add-ip-address-target="prototype" id="domain-relays-prototype"

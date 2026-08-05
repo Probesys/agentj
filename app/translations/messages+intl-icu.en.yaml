@@ -76,7 +76,7 @@ Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL to recover th
 Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Link to pending emails'
 Entities.Domain.labels.dynamicsVariables.USERNAME: "User's name"
 Entities.Domain.labels.filters: 'FILTERS & RATES'
-Entities.Domain.labels.ipAddresses: 'IP address of the sending server'
+Entities.Domain.labels.ipAddresses: 'Authorized outgoing servers'
 Entities.Domain.labels.rules: Rules
 Entities.Domain.labels.saveBeforeConnectors: 'Please register the domain first before adding connectors.'
 Entities.DomainRelay.fields.ipAddress: 'IP address'
@@ -290,7 +290,7 @@ Entities.User.labels.defaultGroupSetting: 'Default group setting'
 Entities.User.labels.domainSetting: 'Domain setting'
 Form.Error: Error
 Form.ImportFile: 'Select a file to import'
-Generics.actions.addIpAddress: 'IP Address'
+Generics.actions.addIpAddress: 'Add a server'
 Generics.actions.backToPreviousPage: 'Back to the previous page'
 Generics.actions.backToTheList: 'Back to list'
 Generics.actions.cancel: Cancel
@@ -310,6 +310,7 @@ Generics.actions.impersonate: 'Sign in'
 Generics.actions.import: Import
 Generics.actions.importFile: 'Import from file'
 Generics.actions.rememberme: 'Remember me'
+Generics.actions.remove: Remove
 Generics.actions.save: Save
 Generics.actions.search: Search
 Generics.actions.showMore: 'Show more'

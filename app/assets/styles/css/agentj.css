@@ -419,3 +419,21 @@ table thead tr th {
     pointer-events: none;
     opacity: 0.7;
 }
+
+/* Authorized outgoing servers rows (domain form): a dedicated class instead
+   of a pile of Bootstrap utilities, so the layout only needs to be edited
+   here instead of staying in sync between the Twig template and
+   add_ip_address_controller.js. */
+.domain-relay-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.domain-relay-row .form-group {
+    margin-bottom: 0;
+}
