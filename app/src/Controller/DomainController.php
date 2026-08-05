@@ -437,7 +437,6 @@ class DomainController extends AbstractController
             $dkim->setPublicKey($pubkeyPem);
             // $public_key = openssl_pkey_get_public($public_key_pem);
 
-            $this->addFlash('info', $domain->getSrvSmtp() . ' DKIM public key: ' . $dkim->getDnsEntry());
             return true;
         } catch (ProcessFailedException $exception) {
             $this->addFlash('error', $exception->getMessage());
