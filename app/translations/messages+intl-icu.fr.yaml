@@ -122,7 +122,7 @@ Entities.LdapConnector.fields.LdapBaseDN: 'Base DN'
 Entities.LdapConnector.fields.LdapPassword: 'Mot de passe'
 Entities.LdapConnector.fields.advancedOptions: 'Options avancées'
 Entities.LdapConnector.fields.allowAnonymousBind: 'Connexion anonyme'
-Entities.LdapConnector.fields.bypassHumanAuth: "Désactiver l'authentification humaine pour les utilisateurs créés"
+Entities.LdapConnector.fields.activateHumanAuthentication: "Activer l'authentification humaine pour les utilisateurs créés"
 Entities.LdapConnector.fields.connectionInformation: 'Informations de connexion'
 Entities.LdapConnector.fields.ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
 Entities.LdapConnector.fields.ldapAllowConnection: "Autoriser l'authentification par LDAP"
@@ -262,7 +262,7 @@ Entities.User.actions.add_new: 'Nouvel utilisateur'
 Entities.User.actions.add_new_alias: 'Ajouter un nouvel alias'
 Entities.User.actions.edit: "Edition d'un utilisateur"
 Entities.User.fields.alias: Alias
-Entities.User.fields.bypassHumanAuth: "Désactiver l'authentification humaine"
+Entities.User.fields.activateHumanAuthentication: "Activer l'authentification humaine"
 Entities.User.fields.domain: Domaine
 Entities.User.fields.email: Email
 Entities.User.fields.emailRecovery: 'Email de récupération'

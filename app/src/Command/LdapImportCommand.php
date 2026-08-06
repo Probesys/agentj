@@ -47,14 +47,14 @@ class LdapImportCommand extends Command
         private TranslatorInterface $translator,
         private LdapService $ldapService,
         private UserService $userService,
-        private GroupService $groupService
+        private GroupService $groupService,
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this->addArgument('connectorId', InputArgument::REQUIRED, 'Connector from wich import users');
+        $this->addArgument('connectorId', InputArgument::REQUIRED, 'Connector from which import users');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -257,7 +257,7 @@ class LdapImportCommand extends Command
         $user->setDomain($domain);
         $user->setPriority(RuleAddressService::computePriority($emailAddress));
         $user->setRoles('["ROLE_USER"]');
-        $user->setBypassHumanAuth($this->connector->isLdapBypassHumanAuth());
+        $user->setHumanAuthenticationEnabled($this->connector->isLdapHumanAuthenticationEnabled());
         $user->setReport($this->connector->isLdapReport());
         $this->em->persist($user);
         $this->em->flush();

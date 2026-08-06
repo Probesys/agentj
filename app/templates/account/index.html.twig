@@ -39,6 +39,7 @@
                     </a>
                 </li>
             </ul>
+
             <div class="tab-content p-3" id="accountTabContent">
                 <div class="tab-pane fade show active" id="account-infos" role="tabpanel" aria-labelledby="account-infos-tab">
                     {{ form_start(form) }}
@@ -49,29 +50,28 @@
                         <div class="col-md-10">
                             {{ app.user.fullName }}
                         </div>
+
                         <div class="col-md-2">
                             {{ 'Entities.User.fields.email'|trans() }}
                         </div>
                         <div class="col-md-10">
                             {{ app.user.email }}
                         </div>
+
                         <div class="col-md-2">
                             {{ 'Entities.User.fields.group'|trans() }}
                         </div>
                         <div class="col-md-10"></div>
-                        <div class="col-md-2">
-                            {{ 'Entities.User.fields.report'|trans() }}
+
+                        <div class="col-md-12">
+                            {{ form_row(form.report) }}
                         </div>
-                        <div class="col-md-10">
-                            {{ form_widget(form.report) }}
-                        </div>
-                        <div class="col-md-2">
-                            {{ 'Entities.User.fields.bypassHumanAuth'|trans() }}
-                        </div>
-                        <div class="col-md-10">
-                            {{ form_widget(form.bypassHumanAuth) }}
+
+                        <div class="col-md-12">
+                            {{ form_row(form.humanAuthenticationEnabled) }}
                         </div>
                     </div>
+
                     <div class="d-flex justify-content-center">
                         <input
                             type="submit"

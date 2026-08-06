@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -110,8 +112,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $dateLastReport;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
-    private bool $bypassHumanAuth = false;
+    #[ORM\Column(type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    private ?DateTimeInterface $humanAuthenticationEnabledAt = null;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private ?string $preferedLang;
@@ -152,6 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->groups = new ArrayCollection();
         $this->ownedSharedBoxes = new ArrayCollection();
         $this->senderRules = new ArrayCollection();
+        $this->setHumanAuthenticationEnabled(true);
     }
 
     public function __toString(): string
@@ -497,14 +500,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getBypassHumanAuth(): ?bool
+    public function getHumanAuthenticationEnabledAt(): ?DateTimeInterface
     {
-        return $this->bypassHumanAuth;
+        return $this->humanAuthenticationEnabledAt;
     }
 
-    public function setBypassHumanAuth(?bool $bypassHumanAuth): self
+    public function setHumanAuthenticationEnabledAt(?DateTimeInterface $date): self
     {
-        $this->bypassHumanAuth = $bypassHumanAuth;
+        $this->humanAuthenticationEnabledAt = $date;
 
         return $this;
     }
@@ -538,9 +541,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->report;
     }
 
-    public function isBypassHumanAuth(): ?bool
+    public function isHumanAuthenticationEnabled(): bool
     {
-        return $this->bypassHumanAuth;
+        return $this->humanAuthenticationEnabledAt !== null;
+    }
+
+    public function setHumanAuthenticationEnabled(bool $isEnabled): self
+    {
+        $date = $isEnabled ? new DateTime() : null;
+        $this->setHumanAuthenticationEnabledAt($date);
+
+        return $this;
     }
 
     /**

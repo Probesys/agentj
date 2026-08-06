@@ -61,8 +61,8 @@ class LdapConnector extends Connector
     #[ORM\Column(nullable: false, options: ['default' => true])]
     private bool $ldapAllowConnection = true;
 
-    #[ORM\Column(nullable: false, options: ['default' => false])]
-    private bool $ldapBypassHumanAuth = false;
+    #[ORM\Column(nullable: false, options: ['default' => true])]
+    private bool $ldapHumanAuthenticationEnabled = true;
 
     #[ORM\Column(nullable: false, options: ['default' => true])]
     private bool $ldapReport = true;
@@ -273,14 +273,14 @@ class LdapConnector extends Connector
         return $this;
     }
 
-    public function isLdapBypassHumanAuth(): bool
+    public function isLdapHumanAuthenticationEnabled(): bool
     {
-        return $this->ldapBypassHumanAuth;
+        return $this->ldapHumanAuthenticationEnabled;
     }
 
-    public function setLdapBypassHumanAuth(bool $ldapBypassHumanAuth): static
+    public function setLdapHumanAuthenticationEnabled(bool $isEnabled): static
     {
-        $this->ldapBypassHumanAuth = $ldapBypassHumanAuth;
+        $this->ldapHumanAuthenticationEnabled = $isEnabled;
 
         return $this;
     }

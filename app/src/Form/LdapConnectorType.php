@@ -115,8 +115,8 @@ class LdapConnectorType extends ConnectorType
             ->add('ldapReport', null, [
                 'label' => new TranslatableMessage('Entities.LdapConnector.fields.report'),
             ])
-            ->add('ldapBypassHumanAuth', null, [
-                'label' => new TranslatableMessage('Entities.LdapConnector.fields.bypassHumanAuth'),
+            ->add('ldapHumanAuthenticationEnabled', null, [
+                'label' => new TranslatableMessage('Entities.LdapConnector.fields.activateHumanAuthentication'),
             ])
         ;
     }
