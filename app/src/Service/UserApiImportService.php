@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
+use App\Entity\Group;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -62,12 +62,12 @@ class UserApiImportService
             $groupName = isset($row['group']) && is_string($row['group']) ? trim($row['group']) : '';
             if ($groupName !== '') {
                 if (!isset($groups[$groupName])) {
-                    $groupEntity = $em->getRepository(Groups::class)->findOneBy([
+                    $groupEntity = $em->getRepository(Group::class)->findOneBy([
                         'domain' => $domain,
                         'name' => $groupName,
                     ]);
                     if (!$groupEntity) {
-                        $groupEntity = new Groups();
+                        $groupEntity = new Group();
                         $groupEntity->setName($groupName);
                         $groupEntity->setDomain($domain);
                         $groupEntity->setWbRule('none');
