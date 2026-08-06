@@ -114,7 +114,7 @@ class UserApiImportService
         }
 
         $em->flush();
-        $this->groupService->updateWblist();
+        $this->groupService->updateSenderRules();
 
         return ['imported' => $imported, 'updated' => $updated, 'errors' => $errors];
     }
@@ -159,7 +159,7 @@ class UserApiImportService
         }
 
         $em->flush();
-        $this->groupService->updateWblist();
+        $this->groupService->updateSenderRules();
 
         return ['deleted' => $deleted, 'errors' => $errors];
     }
