@@ -30,8 +30,17 @@ class ApiKeyUser implements UserInterface
     {
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function getUserIdentifier(): string
     {
-        return $this->domain->getDomain();
+        $identifier = $this->domain->getDomain();
+
+        if (!$identifier) {
+            throw new \LogicException('Domain name (used as API identifier) cannot be empty');
+        }
+
+        return $identifier;
     }
 }
