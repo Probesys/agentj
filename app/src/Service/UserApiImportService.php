@@ -40,7 +40,8 @@ class UserApiImportService
         $batchSize = 20;
 
         foreach (array_slice($rows, 0, self::MAX_ROWS) as $index => $row) {
-            if (!is_array($row) || empty($row['email']) || !is_string($row['email'])
+            if (
+                !is_array($row) || empty($row['email']) || !is_string($row['email'])
                 || !filter_var($row['email'], FILTER_VALIDATE_EMAIL)
             ) {
                 $errors[] = "Row $index: missing or invalid 'email'";
