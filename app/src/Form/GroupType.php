@@ -95,6 +95,7 @@ class GroupType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Group::class,
             'user' => null,
+            'csrf_token_id' => 'groups',
         ]);
     }
 }

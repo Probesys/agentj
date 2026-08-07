@@ -145,6 +145,36 @@ parameters:
 			path: src/Security/SwitchToUserVoter.php
 
 		-
+			message: '#^Call to an undefined method App\\Tests\\Factory\\GroupFactory\:\:getDomain\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Controller/GroupControllerTest.php
+
+		-
+			message: '#^Call to an undefined method App\\Tests\\Factory\\GroupFactory\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Controller/GroupControllerTest.php
+
+		-
+			message: '#^Call to an undefined method App\\Tests\\Factory\\GroupFactory\:\:getPriority\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Controller/GroupControllerTest.php
+
+		-
+			message: '#^Call to an undefined method App\\Tests\\Factory\\GroupFactory\:\:getWbRule\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Controller/GroupControllerTest.php
+
+		-
+			message: '#^Parameter \#1 \$group of method App\\Entity\\User\:\:addGroup\(\) expects App\\Entity\\Group, App\\Tests\\Factory\\GroupFactory given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Controller/GroupControllerTest.php
+
+		-
 			message: '#^Call to an undefined method Zenstruck\\Foundry\\Persistence\\RepositoryDecorator\<App\\Entity\\SenderRule, Doctrine\\Persistence\\ObjectRepository\<App\\Entity\\SenderRule\>\>\:\:save\(\)\.$#'
 			identifier: method.notFound
 			count: 1
