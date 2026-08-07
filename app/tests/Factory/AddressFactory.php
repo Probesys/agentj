@@ -2,13 +2,14 @@
 
 namespace App\Tests\Factory;
 
-use App\Entity\Policy;
+use App\Entity\Address;
+use App\Util\Url;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<Policy>
+ * @extends PersistentObjectFactory<Address>
  */
-final class PolicyFactory extends PersistentObjectFactory
+final class AddressFactory extends PersistentObjectFactory
 {
     public function __construct()
     {
@@ -17,14 +18,15 @@ final class PolicyFactory extends PersistentObjectFactory
     #[\Override]
     public static function class(): string
     {
-        return Policy::class;
+        return Address::class;
     }
 
     #[\Override]
     protected function defaults(): array|callable
     {
         return [
-            'policy_name' => self::faker()->word(),
+            'domain' => Url::reverseDomainName(self::faker()->domainName()),
+            'email' => null,
         ];
     }
 
@@ -32,7 +34,7 @@ final class PolicyFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(Policy $policy): void {})
+            // ->afterInstantiate(function(Address $address): void {})
         ;
     }
 }
