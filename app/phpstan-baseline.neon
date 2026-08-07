@@ -143,3 +143,15 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: src/Security/SwitchToUserVoter.php
+
+		-
+			message: '#^Call to an undefined method Zenstruck\\Foundry\\Persistence\\RepositoryDecorator\<App\\Entity\\SenderRule, Doctrine\\Persistence\\ObjectRepository\<App\\Entity\\SenderRule\>\>\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/DomainFactory.php
+
+		-
+			message: '#^Method App\\Tests\\Factory\\GroupFactory\:\:class\(\) should return class\-string\<App\\Tests\\Factory\\GroupFactory\> but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Factory/GroupFactory.php

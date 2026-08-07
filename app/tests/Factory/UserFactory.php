@@ -30,6 +30,7 @@ final class UserFactory extends PersistentObjectFactory
             'password' => self::faker()->text(),
             'policy' => PolicyFactory::new(),
             'domain' => null,
+            'originalUser' => null,
         ];
     }
 
@@ -49,28 +50,59 @@ final class UserFactory extends PersistentObjectFactory
         return User::class;
     }
 
-    public function user(?Domain $domain = null): self
+    public function alias(User $user): self
     {
         return $this->with([
-            'domain' => $domain,
-            'roles' => '["ROLE_USER"]'
-        ])->afterInstantiate(function (User $user): void {
+            'originalUser' => $user,
+        ]);
+    }
+
+    public function user(?Domain $domain = null): self
+    {
+        return $this->with(function () use ($domain) {
+            $email = $domain
+                ? self::faker()->userName() . '@' . $domain->getDomain()
+                : self::faker()->unique()->email();
+
+            return [
+                'email' => $email,
+                'domain' => $domain,
+                'roles' => '["ROLE_USER"]',
+            ];
+        })->afterInstantiate(function (User $user) use ($domain): void {
             if ($user->getDomain() === null) {
-                $domain = DomainFactory::new()->create(
-                    ['domain' => Email::extractDomain($user->getEmail())]
-                );
+                $domainName = Email::extractDomain($user->getEmail());
+
+                $domain = DomainFactory::new()
+                    ->withDomain($domainName)
+                    ->create();
+
                 $user->setDomain($domain);
             }
         });
     }
 
-    public function admin(): self
+    /**
+     * @param array<Domain>|null $domains
+     */
+    public function admin(?array $domains = []): self
     {
-        return $this->with(['roles' => '["ROLE_ADMIN"]']);
+        return $this->with(function () {
+            return [
+                'email' => self::faker()->unique()->email(),
+                'roles' => '["ROLE_ADMIN"]',
+            ];
+        })->afterInstantiate(function (User $user) use ($domains): void {
+            foreach ($domains as $domain) {
+                $user->addDomain($domain);
+            }
+        });
     }
 
-    public function superAdmin(): self
+    public function superAdmin(?Domain $domain = null): self
     {
-        return $this->with(['roles' => '["ROLE_SUPER_ADMIN"]']);
+        return $this
+            ->user($domain)
+            ->with(['roles' => '["ROLE_SUPER_ADMIN"]']);
     }
 }

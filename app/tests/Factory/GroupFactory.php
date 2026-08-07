@@ -2,13 +2,13 @@
 
 namespace App\Tests\Factory;
 
-use App\Entity\Policy;
+use App\Entity\Group;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<Policy>
+ * @extends PersistentObjectFactory<GroupFactory>
  */
-final class PolicyFactory extends PersistentObjectFactory
+final class GroupFactory extends PersistentObjectFactory
 {
     public function __construct()
     {
@@ -17,14 +17,17 @@ final class PolicyFactory extends PersistentObjectFactory
     #[\Override]
     public static function class(): string
     {
-        return Policy::class;
+        return Group::class;
     }
 
     #[\Override]
     protected function defaults(): array|callable
     {
         return [
-            'policy_name' => self::faker()->word(),
+            'domain' => DomainFactory::new(),
+            'name' => self::faker()->text(255),
+            'slug' => self::faker()->text(128),
+            'wb' => self::faker()->text(10),
         ];
     }
 
@@ -32,7 +35,7 @@ final class PolicyFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(Policy $policy): void {})
+            // ->afterInstantiate(function(Group $groups): void {})
         ;
     }
 }
