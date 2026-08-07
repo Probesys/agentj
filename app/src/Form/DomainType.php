@@ -111,6 +111,7 @@ class DomainType extends AbstractType
             'minSpamLevel' => null,
             'maxSpamLevel' => null,
             'is_edit' => false,
+            'csrf_token_id' => 'domain',
         ]);
 
         $resolver->setDefined('is_edit');

@@ -3,7 +3,6 @@
 namespace App\Tests\Controller;
 
 use App\Tests\Factory\DomainFactory;
-use App\Tests\Factory\PolicyFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\SessionHelper;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -33,10 +32,10 @@ class UserControllerTest extends WebTestCase
     public function testAdminCannotListUsersIfNoDomain(): void
     {
         $client = static::createClient();
-        $user = UserFactory::new()->admin()->create([
+        $admin = UserFactory::new()->admin()->create([
             'domains' => [],
         ]);
-        $client->loginUser($user);
+        $client->loginUser($admin);
 
         $client->request('GET', '/admin/users/email');
 
@@ -46,10 +45,10 @@ class UserControllerTest extends WebTestCase
     public function testSuperAdminCanListUsersIfNoDomain(): void
     {
         $client = static::createClient();
-        $user = UserFactory::new()->superAdmin()->create([
+        $superAdmin = UserFactory::new()->superAdmin()->create([
             'domains' => [],
         ]);
-        $client->loginUser($user);
+        $client->loginUser($superAdmin);
 
         $client->request('GET', '/admin/users/email');
 
@@ -60,10 +59,10 @@ class UserControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $user = UserFactory::new()->admin()->create([
+        $admin = UserFactory::new()->admin()->create([
             'domains' => [$domain],
         ]);
-        $client->loginUser($user);
+        $client->loginUser($admin);
         $domainUsers = UserFactory::new()
             ->many(2)
             ->applyStateMethod('user')
@@ -92,8 +91,8 @@ class UserControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $user = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($user);
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
         $domainUsers = UserFactory::new()->many(2)
             ->applyStateMethod('user')
             ->create([
@@ -143,10 +142,10 @@ class UserControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $user = UserFactory::new()->admin()->create([
+        $admin = UserFactory::new()->admin()->create([
             'domains' => [$domain],
         ]);
-        $client->loginUser($user);
+        $client->loginUser($admin);
 
         $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
@@ -159,7 +158,9 @@ class UserControllerTest extends WebTestCase
         ]);
 
         assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertSame(2, UserFactory::count());
+        // When creating a domain, a user is created for `@domain.tld` address.
+        // So here, we have this user, plus the admin, plus the freshly created one.
+        self::assertSame(3, UserFactory::count());
         $createdUser = UserFactory::findBy(['email' => 'test@' . $domain->getDomain()])[0];
         self::assertSame('Test User', $createdUser->getFullname());
         self::assertNull($createdUser->getImapLogin());
@@ -170,10 +171,10 @@ class UserControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $user = UserFactory::new()->admin()->create([
+        $admin = UserFactory::new()->admin()->create([
             'domains' => [$domain],
         ]);
-        $client->loginUser($user);
+        $client->loginUser($admin);
 
         $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
@@ -186,6 +187,13 @@ class UserControllerTest extends WebTestCase
         ]);
 
         assertSame(200, $client->getResponse()->getStatusCode()); // API always returns 200
-        self::assertSame(1, UserFactory::count()); // But no user created
+        $response = $client->getResponse()->getContent();
+        self::assertNotFalse($response);
+        self::assertJsonStringEqualsJsonString(
+            '{"status":"danger","message":"An error occurred when processing the form"}',
+            $response,
+        );
+        // But no user created (1 because of `@domain.tld`, and one for the admin)
+        self::assertSame(2, UserFactory::count());
     }
 }
