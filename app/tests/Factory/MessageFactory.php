@@ -3,7 +3,6 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Message;
-use App\Entity\Msgs;
 use Zenstruck\Foundry\Object\Instantiator;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
@@ -36,6 +35,7 @@ final class MessageFactory extends PersistentObjectFactory
                 ->format('Ymd\THis\Z'),
             'timeNum' => self::faker()->unixTime('now'),
             'validateCaptcha' => self::faker()->randomNumber(),
+            'isMlist' => null,
         ];
     }
 
@@ -43,7 +43,7 @@ final class MessageFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this->instantiateWith(
-            Instantiator::withoutConstructor()->alwaysForce(),
+            Instantiator::withConstructor()->alwaysForce(),
         );
     }
 }
