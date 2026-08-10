@@ -66,7 +66,9 @@ class AmavisAutoReleaseCommand extends Command
             $recipientDomain = $recipientUser->getDomain();
 
             $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
+            dump('----- senderIsAuthorized: ' . $senderIsAuthorized);
             $humanAuthIsDisabled = $recipientUser->getBypassHumanAuth();
+            dump('----- bypassHumanAuth: ' . $humanAuthIsDisabled);
 
             $spamLevel = $recipientDomain->getLevel();
             $authorizedSendersSpamLevel = $recipientDomain->getAuthorizedSendersSpamLevel();
