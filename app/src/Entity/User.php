@@ -122,7 +122,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, SenderRule>
      */
-    #[ORM\OneToMany(targetEntity: SenderRule::class, mappedBy: 'rid')]
+    #[ORM\OneToMany(targetEntity: SenderRule::class, mappedBy: 'user')]
     private Collection $senderRules;
 
     #[ORM\ManyToOne(targetEntity: Connector::class, inversedBy: 'users')]
