@@ -469,7 +469,7 @@ Message.HumanAuthentication.verified.content: 'Votre adresse email a été véri
 Message.HumanAuthentication.verified.title: "Merci, et bonne journée\_!"
 Message.Object: Objet
 Message.Recipient: Destinataire
-Message.Report.defaultAlertMailContent: "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attentes de validation.<br /><br /> Et [NB_BLOCKED_MESSAGES] messages qui ont été bloqués grâce à AgentJ. <br /><br /> Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br /> Merci et bonne journée. "
+Message.Report.defaultAlertMailContent: "Bonjour,<br /> Vous avez [NB_UNTREATED_MESSAGES] mails qui sont en attente de validation.<br /><br /> Et [NB_BLOCKED_MESSAGES] mail(s) qui a/ont été bloqué(s) grâce à AgentJ.<br /><br /> Vous pouvez les traiter sur <a href='[URL_MSGS]'>[URL_MSGS]</a>.<br /><br /> Merci et bonne journée. "
 Message.Report.defaultMailSubject: 'Messages en attente sur AgentJ pour '
 Message.Sender: Expéditeur
 Message.Status.title: Statut

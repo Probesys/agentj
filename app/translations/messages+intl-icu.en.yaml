@@ -469,7 +469,7 @@ Message.HumanAuthentication.verified.content: 'Your email address has been succe
 Message.HumanAuthentication.verified.title: 'Thank you, have a nice day!'
 Message.Object: Subject
 Message.Recipient: Recipient
-Message.Report.defaultAlertMailContent: 'Hello.<br/> You have [NB_UNTREATED_MESSAGES] emails that are untreated.<br/><br/> And [NB_BLOCKED_MESSAGES] messages that were blocked by AgentJ. <br/><br/> You can treat them on <a href="[URL_MSGS]">[URL_MSGS]</a>.<br/><br/> Thank you and have a nice day. '
+Message.Report.defaultAlertMailContent: 'Hello.<br/> You have [NB_UNTREATED_MESSAGES] emails that are untreated.<br/><br/> And [NB_BLOCKED_MESSAGES] email(s) that was/were blocked by AgentJ.<br/><br/> You can treat them on <a href="[URL_MSGS]">[URL_MSGS]</a>.<br/><br/> Thank you and have a nice day. '
 Message.Report.defaultMailSubject: 'Messages pending on AgentJ for '
 Message.Sender: Sender
 Message.Status.title: Status
