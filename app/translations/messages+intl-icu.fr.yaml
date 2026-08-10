@@ -435,6 +435,7 @@ Message.Dialogs.confirmRemoveUserFromGroupContent: 'Êtes-vous sûr de vouloir e
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Supprimer du groupe ?'
 Message.Dialogs.confirmRestoreMsgContent: 'Êtes-vous sur de vouloir récupérer le message ?'
 Message.Dialogs.confirmRestoreMsgtitle: 'Récupérer le message'
+Message.Flash.checkAltchaUnsuccessful: 'Impossible de vérifier le Altcha. Merci de cocher la case.'
 Message.Flash.checkMailUnsuccessful: 'Cette adresse email semble être invalide, ou a déjà été validée.'
 Message.Flash.connectionKo: 'Connexion échouée'
 Message.Flash.connectionOk: 'Connexion établie'

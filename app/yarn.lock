@@ -1459,7 +1459,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A.":
+"@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets::locator=root-workspace-0b6124%40workspace%3A.":
   version: 2.35.0
   resolution: "@symfony/ux-autocomplete@file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A."
   peerDependencies:
@@ -1469,7 +1469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A.":
+"@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets::locator=root-workspace-0b6124%40workspace%3A.":
   version: 2.35.0
   resolution: "@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A."
   peerDependencies:
@@ -1944,6 +1944,15 @@ __metadata:
     json-schema-traverse: "npm:^1.0.0"
     require-from-string: "npm:^2.0.2"
   checksum: 10c0/5df9a1c8f83863cde1bd3a9ddb426f599718f88e3dc9153616c79fb28e0be455335830d7f21d745576519f057b371352daa31047b6a33d7036fe08777d60cf2a
+  languageName: node
+  linkType: hard
+
+"altcha@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "altcha@npm:3.1.0"
+  dependencies:
+    hash-wasm: "npm:^4.12.0"
+  checksum: 10c0/c110a68263c7b97fa12c968f97e5bfa1c2e93b078acbd362afcebaf338a8d4c34b3003221b3db67d5531c848b7d05b5f8ca3e090c774e020eb10c4ddc6b41faf
   languageName: node
   linkType: hard
 
@@ -2820,6 +2829,13 @@ __metadata:
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
   checksum: 10c0/2e789c61b7888d66993e14e8331449e525ef42aac53c627cc53d1c3334e768bcb6abdc4f5f0de1478a25beec6f0bd62c7549058b7ac53e924040d4f301f02fd1
+  languageName: node
+  linkType: hard
+
+"hash-wasm@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "hash-wasm@npm:4.12.0"
+  checksum: 10c0/6cb95055319810b6f673de755289960683a9831807690795f0e8918b2fd7e6ae5b82a9dc47cbace171cf2814b412ef68c315a0ead0b4d96bd3e56a05e4bde136
   languageName: node
   linkType: hard
 
@@ -3945,9 +3961,10 @@ __metadata:
     "@hotwired/stimulus": "npm:^3.2.2"
     "@hotwired/turbo": "npm:^8.0.23"
     "@symfony/stimulus-bridge": "npm:^4.0.1"
-    "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets#vendor/symfony/ux-autocomplete/assets::hash=1b9753&locator=root-workspace-0b6124%40workspace%3A."
-    "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets#vendor/symfony/ux-turbo/assets::hash=14b3d2&locator=root-workspace-0b6124%40workspace%3A."
+    "@symfony/ux-autocomplete": "file:vendor/symfony/ux-autocomplete/assets"
+    "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets"
     "@symfony/webpack-encore": "npm:^5.3.1"
+    altcha: "npm:^3.1.0"
     chart.js: "npm:^4.5.1"
     core-js: "npm:^3.49.0"
     jquery: "npm:^3.7.1"

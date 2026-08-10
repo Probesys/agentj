@@ -26,3 +26,13 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+.human-authentication__altcha {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+altcha-widget {
+    --altcha-max-width: 100%;
+    --altcha-border-color: var(--color-primary9)
+}

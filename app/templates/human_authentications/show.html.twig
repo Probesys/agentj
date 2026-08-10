@@ -33,7 +33,15 @@
                         </div>
                     {% endif %}
 
-                    {{ form(form) }}
+                    {{ form_start(form) }}
+                        {{ form_errors(form) }}
+                        {{ form_row(form.email)}}
+                        <div class="human-authentication__altcha">
+                            <altcha-widget challenge="{{ path('altcha_challenge') }}"></altcha-widget>
+                        </div>
+                        {{ form_row(form.submit)}}
+                    {{ form_end(form) }}
+
                 {% else %}
                     {% if domain.confirmCaptchaMessage %}
                         {{ domain.confirmCaptchaMessage | raw }}
