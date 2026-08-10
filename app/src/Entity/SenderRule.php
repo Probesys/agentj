@@ -45,7 +45,7 @@ class SenderRule
 
     #[ORM\ManyToOne(targetEntity: Group::class)]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
-    private ?Group $group;
+    private ?Group $group = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     #[ORM\Id]

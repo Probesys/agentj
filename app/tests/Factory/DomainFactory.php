@@ -33,12 +33,7 @@ final class DomainFactory extends PersistentObjectFactory
     #[\Override]
     protected function defaults(): array
     {
-        $domain = sprintf(
-            '%s-%s.%s',
-            self::faker()->domainWord(),
-            bin2hex(random_bytes(4)),
-            self::faker()->tld(),
-        );
+        $domain = self::randomDomain();
 
         return [
             'active' => true,
@@ -73,5 +68,18 @@ final class DomainFactory extends PersistentObjectFactory
                 $this->senderRuleRepository->save($senderRule);
             })
         ;
+    }
+
+    /**
+     * Generates a randomized domain name to avoid collisions
+     */
+    public static function randomDomain(): string
+    {
+        return sprintf(
+            '%s-%s.%s',
+            self::faker()->domainWord(),
+            bin2hex(random_bytes(4)),
+            self::faker()->tld(),
+        );
     }
 }
