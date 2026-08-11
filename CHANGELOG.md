@@ -1,5 +1,11 @@
 # Changelog of AgentJ
 
+## 2026-08-11 - 2.6.6
+
+### Security
+
+- Fix restriction on wblist imports to admins ([4b4ebf5c](https://github.com/Probesys/agentj/commit/4b4ebf5c))
+
 ## 2026-06-17 - 2.6.5
 
 ### Bug fixes
