@@ -29,7 +29,7 @@ class SecurityControllerTest extends WebTestCase
     public function testGetLoginRedirectsIfAlreadyConnected(): void
     {
         $client = static::createClient();
-        $user = UserFactory::createOne();
+        $user = UserFactory::new()->user()->create();
         $client->loginUser($user);
 
         $client->request(Request::METHOD_GET, '/login');
