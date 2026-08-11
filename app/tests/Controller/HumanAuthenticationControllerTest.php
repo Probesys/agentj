@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use AltchaOrg\Altcha\Solution;
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\EventSubscriber\SecurityHeadersSubscriber;
 use App\Service\AltchaService;
 use App\Service\CryptEncryptService;
@@ -52,6 +53,7 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);
@@ -126,6 +128,7 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);
@@ -161,6 +164,7 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);

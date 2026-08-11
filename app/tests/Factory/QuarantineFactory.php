@@ -3,6 +3,7 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Quarantine;
+use App\Tests\MessageHelper;
 use DateTime;
 use Zenstruck\Foundry\Object\Instantiator;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
@@ -12,6 +13,8 @@ use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
  */
 final class QuarantineFactory extends PersistentObjectFactory
 {
+    use MessageHelper;
+
     public function __construct()
     {
     }
