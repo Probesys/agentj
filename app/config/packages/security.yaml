@@ -9,7 +9,7 @@ security:
             # Use native password hasher, which auto-selects the best
             # possible hashing algorithm (starting from Symfony 5.3 this is "bcrypt")
             algorithm: bcrypt
-  
+
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     # providers:
     #     #in_memory: { memory: ~ }
@@ -66,6 +66,7 @@ security:
          - { path: ^/admin, roles: [ROLE_ADMIN] }
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }
+         - { path: ^/rules/admin, roles: ROLE_ADMIN }
          - { path: ^/, roles: ROLE_USER }
 
 when@test:
