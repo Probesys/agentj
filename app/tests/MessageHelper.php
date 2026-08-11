@@ -5,16 +5,21 @@ namespace App\Tests;
 use App\Entity\Address;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
+use App\Entity\OutMessage;
+use App\Entity\OutMessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
+use App\Tests\Factory\OutMessageFactory;
+use App\Tests\Factory\OutMessageRecipientFactory;
+use App\Tests\Factory\OutQuarantineFactory;
 use App\Tests\Factory\QuarantineFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Util\Url;
-use Webklex\PHPIMAP\Structure;
+use DateTime;
 
 trait MessageHelper
 {
@@ -47,14 +52,16 @@ trait MessageHelper
     private function setupMail(
         Address $sender,
         array $recipients,
+        bool $isInMessage = true,
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
         ?array $messageAttributes = [],
-    ): Message {
+    ): Message|OutMessage {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::new()->create(array_merge([
+        $messageFactory = $isInMessage ? MessageFactory::class : OutMessageFactory::class;
+        $message = $messageFactory::new()->create(array_merge([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
@@ -74,8 +81,8 @@ trait MessageHelper
             'to' => $recipientsEmails,
             'body' => $body ?? null,
         ]);
-
-        QuarantineFactory::new()->create([
+        $quarantineFactory = $isInMessage ? QuarantineFactory::class : OutQuarantineFactory::class;
+        $quarantineFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'message' => $message,
@@ -87,12 +94,16 @@ trait MessageHelper
     }
 
     private function setupMailRecipient(
-        Message $message,
+        Message|OutMessage $message,
         Address $recipient,
         int $rseqnum,
         ?int $status = null,
-    ): MessageRecipient {
-        return MessageRecipientFactory::new()->create([
+    ): MessageRecipient|OutMessageRecipient {
+        $messageRecipientFactory = $message instanceof Message ?
+            MessageRecipientFactory::class :
+            OutMessageRecipientFactory::class;
+
+        return $messageRecipientFactory::new()->create([
             'message' => $message,
             'partitionTag' => $message->getPartitionTag(),
             'mailId' => $message->getMailId(),
@@ -127,5 +138,37 @@ trait MessageHelper
             'wb' => $rule,
             'priority' => $priority,
         ]);
+    }
+
+    /**
+     * @param array<mixed> $attributes
+     */
+    public static function generateMailText(string $mailId, array $attributes = []): string
+    {
+        $date = $attributes['date'] ?? new DateTime();
+        $body = $attributes['body'] ?? '';
+
+        $headers = <<<TEXT
+                Message-ID: {$mailId}\r
+                Subject: {$attributes['subject']}\r
+                From: <{$attributes['from']}>\r
+                To: support@example.com\r
+                Date: {$date->format(DATE_RFC1123)}\r
+                Content-Type: text/html\r
+                TEXT;
+
+        if (isset($attributes['to'])) {
+            $toString = implode(', ', $attributes['to']);
+            $headers .= "\nTo: {$toString}\r";
+        } else {
+            $headers .= "\nTo: support@example.com\r";
+        }
+
+        $attributesHeaders = $attributes['headers'] ?? [];
+        foreach ($attributesHeaders as $name => $value) {
+            $headers .= "\n{$name}: {$value}\r";
+        }
+
+        return "{$headers}\n\r\n\r{$body}";
     }
 }

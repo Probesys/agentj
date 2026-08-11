@@ -2,8 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Address;
-use App\Entity\OutMessage;
 use App\Entity\OutMessageRecipient;
 use App\Entity\User;
 use Doctrine\ORM\Query\Expr\Join;
