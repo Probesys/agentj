@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\OutMessageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -21,11 +22,23 @@ class OutMessage extends BaseMessage
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
     private Collection $messageRecipients;
 
+    /** @var Collection<int, OutQuarantine> $quarantineChunks */
+    #[ORM\OneToMany(mappedBy: 'message', targetEntity: OutQuarantine::class)]
+    #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id')]
+    #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag')]
+    private Collection $quarantineChunks;
+
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $processedUser = false;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $processedAdmin = false;
+
+    public function __construct()
+    {
+        $this->messageRecipients = new ArrayCollection();
+        $this->quarantineChunks = new ArrayCollection();
+    }
 
     /**
      * @return Collection<int, OutMessageRecipient>
@@ -76,5 +89,18 @@ class OutMessage extends BaseMessage
     {
         $this->processedAdmin = $processedAdmin;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, OutQuarantine>
+     */
+    public function getQuarantineChunks(): Collection
+    {
+        return $this->quarantineChunks;
+    }
+
+    public function isInQuarantine(): bool
+    {
+        return !$this->quarantineChunks->isEmpty();
     }
 }

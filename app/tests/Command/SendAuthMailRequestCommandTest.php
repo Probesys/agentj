@@ -4,6 +4,7 @@ namespace App\Tests\Command;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Message;
+use App\Entity\OutMessage;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\MessageFactory;
@@ -189,7 +190,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         $message = $this->setupMail($addrS, $addrR);
         $this->setMessageDate($message, '-6 hours');
         // Create another message sent 6 hours ago and for which authentication mail has already been sent
-        $otherMessage = $this->setupMail($addrS, $addrR, 'otherTest');
+        $otherMessage = $this->setupMail($addrS, $addrR);
         $sixHoursAgo = new DateTimeImmutable("-6 hours")->getTimestamp();
         $this->setMessageDate($otherMessage, '-6 hours', ['sendCaptcha' => $sixHoursAgo]);
         self::bootKernel();
@@ -210,8 +211,11 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
     /**
      * @param array<string, mixed>|null $attributes
      */
-    private function setMessageDate(Message $message, ?string $delta = '-6 hours', ?array $attributes = []): void
-    {
+    private function setMessageDate(
+        Message|OutMessage $message,
+        ?string $delta = '-6 hours',
+        ?array $attributes = [],
+    ): void {
         $message->setSendCaptcha($attributes['sendCaptcha'] ?? 0);
         $message->setTimeNum(new DateTimeImmutable($delta)->getTimestamp());
         $messageRecipient = $message->getMessageRecipients()->first();
