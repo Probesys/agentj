@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Entity\SenderRule;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
@@ -1150,6 +1151,7 @@ class MessageControllerTest extends WebTestCase
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED);
+        self::assertTrue($message instanceof Message);
         $mailRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($mailRecipient);
         $now = new DateTimeImmutable();
@@ -1185,6 +1187,7 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
