@@ -1,5 +1,51 @@
 # Changelog of AgentJ
 
+## 2026-08-11 - 2.7.0
+
+### New
+
+- Import addresses/domains in blacklist ([da27d5ae](https://github.com/Probesys/agentj/commit/da27d5ae))
+- Import LDAP and O365 connectors asynchronously ([7f4f887f](https://github.com/Probesys/agentj/commit/7f4f887f))
+- Add notification on user settings updated ([7ac1f6dd](https://github.com/Probesys/agentj/commit/7ac1f6dd))
+
+### Bugfixes
+
+- Fix stats about incoming/outgoing messages ([55995d4a](https://github.com/Probesys/agentj/commit/55995d4a))
+- Fix redirection after editing a connector ([d953cef2](https://github.com/Probesys/agentj/commit/d953cef2))
+- Make authorization banning rules are case-insensitive ([fbcd1ca7](https://github.com/Probesys/agentj/commit/fbcd1ca7))
+- Bring user menu back on mobile ([4b7f0e68](https://github.com/Probesys/agentj/commit/4b7f0e68))
+- Fix typo and incoherent strings in english translations ([58494887](https://github.com/Probesys/agentj/commit/58494887))
+- Add missing translations ([a05a2b03](https://github.com/Probesys/agentj/commit/a05a2b03))
+- Change icon in web app manifest ([6a30389e](https://github.com/Probesys/agentj/commit/6a30389e))
+- Modify favicon to use AgentJ logo ([fb92e299](https://github.com/Probesys/agentj/commit/fb92e299))
+
+### Maintenance
+
+- Upgrade Docker images to use Debian 13 ([923fc2b6](https://github.com/Probesys/agentj/commit/923fc2b6), [af60ccb9](https://github.com/Probesys/agentj/commit/af60ccb9), [16465510](https://github.com/Probesys/agentj/commit/16465510), [e84eb4e8](https://github.com/Probesys/agentj/commit/e84eb4e8))
+- Upgrade to Symfony 7.4 ([40f7c60c](https://github.com/Probesys/agentj/commit/40f7c60c), [f016311e](https://github.com/Probesys/agentj/commit/f016311e))
+- Recycle the messenger worker hourly ([e33b7f66](https://github.com/Probesys/agentj/commit/e33b7f66))
+- Add missing indexes on `messenger_messages` table ([1edfa128](https://github.com/Probesys/agentj/commit/1edfa128))
+- Enforce safe permissions on the app cron.d file ([2e46935c](https://github.com/Probesys/agentj/commit/2e46935c))
+- Execute PHP scripts as www-data user ([4046e39b](https://github.com/Probesys/agentj/commit/4046e39b))
+- Update dependencies ([c640e8a5](https://github.com/Probesys/agentj/commit/c640e8a5), [58bc846a](https://github.com/Probesys/agentj/commit/58bc846a), [efec8f51](https://github.com/Probesys/agentj/commit/efec8f51), [a710957](https://github.com/Probesys/agentj/commit/a710957), [8459b030](https://github.com/Probesys/agentj/commit/8459b030), [24e0d601](https://github.com/Probesys/agentj/commit/24e0d601), [cb750b95](https://github.com/Probesys/agentj/commit/cb750b95), [aa909bbb](https://github.com/Probesys/agentj/commit/aa909bbb), [e36abcbc](https://github.com/Probesys/agentj/commit/e36abcbc), [6d1b243d](https://github.com/Probesys/agentj/commit/6d1b243d), [99082e76](https://github.com/Probesys/agentj/commit/99082e76), [789b6955](https://github.com/Probesys/agentj/commit/789b6955), [88309f84](https://github.com/Probesys/agentj/commit/88309f84), [dcc1b29d](https://github.com/Probesys/agentj/commit/dcc1b29))
+
+### Documentation
+
+- Add web interface admin doc ([f58bc285](https://github.com/Probesys/agentj/commit/f58bc285))
+
+### Developer
+
+- Rename entities to clarify usage ([99fd4419](https://github.com/Probesys/agentj/commit/99fd4419), [f35f9e26](https://github.com/Probesys/agentj/commit/f35f9e26), [72662bee](https://github.com/Probesys/agentj/commit/72662bee), [f667ecde](https://github.com/Probesys/agentj/commit/f667ecde), [9fec2de7](https://github.com/Probesys/agentj/commit/9fec2de7), [e855101e](https://github.com/Probesys/agentj/commit/e855101e), [ae5402fd](https://github.com/Probesys/agentj/commit/ae5402fd), [69ebc58a](https://github.com/Probesys/agentj/commit/69ebc58a), [f59ea282](https://github.com/Probesys/agentj/commit/f59ea282), [4db0460c](https://github.com/Probesys/agentj/commit/4db0460c), [2b7b95ed](https://github.com/Probesys/agentj/commit/2b7b95ed), [8301699e](https://github.com/Probesys/agentj/commit/8301699e), [3913ffa6](https://github.com/Probesys/agentj/commit/3913ffa6), [48efce7e](https://github.com/Probesys/agentj/commit/48efce7e), [eddfdf51](https://github.com/Probesys/agentj/commit/eddfdf51), [b8f0f051](https://github.com/Probesys/agentj/commit/b8f0f051), [97978089](https://github.com/Probesys/agentj/commit/97978089), [d05b4810](https://github.com/Probesys/agentj/commit/d05b4810), [451ef4f1](https://github.com/Probesys/agentj/commit/451ef4f1), [132ac135](https://github.com/Probesys/agentj/commit/132ac135), [2fe11031](https://github.com/Probesys/agentj/commit/2fe11031))
+- Add application tests ([42e83d96](https://github.com/Probesys/agentj/commit/42e83d96), [f3b4cdce](https://github.com/Probesys/agentj/commit/f3b4cdce), [742a13cf](https://github.com/Probesys/agentj/commit/742a13cf), [733521d2](https://github.com/Probesys/agentj/commit/733521d2), [6c08d64c](https://github.com/Probesys/agentj/commit/6c08d64c), [b290151b](https://github.com/Probesys/agentj/commit/b290151b), [288e2ec6](https://github.com/Probesys/agentj/commit/288e2ec6), [ccbdc338](https://github.com/Probesys/agentj/commit/ccbdc338), [2897019c](https://github.com/Probesys/agentj/commit/2897019c))
+- Clean up frontend setup ([a828f30f](https://github.com/Probesys/agentj/commit/a828f30f), [72efd7f6](https://github.com/Probesys/agentj/commit/72efd7f6), [75873e8c](https://github.com/Probesys/agentj/commit/75873e8c), [a72cc98c](https://github.com/Probesys/agentj/commit/a72cc98c), [9e16c443](https://github.com/Probesys/agentj/commit/9e16c443), [f847da0c](https://github.com/Probesys/agentj/commit/f847da0c), [3a4cb2e9](https://github.com/Probesys/agentj/commit/3a4cb2e9), [c3b741fa](https://github.com/Probesys/agentj/commit/c3b741fa), [ffb2e047](https://github.com/Probesys/agentj/commit/ffb2e047), [54f9be4e](https://github.com/Probesys/agentj/commit/54f9be4e), [f8540c3b](https://github.com/Probesys/agentj/commit/f8540c3b), [5e96afb1](https://github.com/Probesys/agentj/commit/5e96afb1))
+- Add a command to extract translation keys  ([da8651fb](https://github.com/Probesys/agentj/commit/da8651fb))
+- Parameterize script to send mails ([a274e8ad](https://github.com/Probesys/agentj/commit/a274e8ad))
+- Fix code style issues ([0c39e4ba](https://github.com/Probesys/agentj/commit/0c39e4ba), [d8893d31](https://github.com/Probesys/agentj/commit/d8893d31))
+- Refactor the locales system ([b6272ba6](https://github.com/Probesys/agentj/commit/b6272ba6))
+- Allow OutMessageRecipient to have a status ([6770a2d6](https://github.com/Probesys/agentj/commit/6770a2d6))
+- Use ResourceHelper to read binary columns ([c4778817](https://github.com/Probesys/agentj/commit/c4778817))
+- Remove daily stats system ([3ffc3d5b](https://github.com/Probesys/agentj/commit/3ffc3d5b))
+
 ## 2026-08-11 - 2.6.6
 
 ### Security
