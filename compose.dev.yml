@@ -30,6 +30,8 @@ services:
       default:
         ipv4_address: 172.28.2.1
     working_dir: /var/www/agentj
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   worker:
     build:
