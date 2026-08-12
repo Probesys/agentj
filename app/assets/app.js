@@ -12,6 +12,10 @@ import Chart from 'chart.js/auto';
 import './agentj';
 import './nav';
 
+
+import { Modal } from 'bootstrap';
+window.Modal = Modal;
+
 const $ = require('jquery');
 window.Chart = Chart;
 

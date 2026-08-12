@@ -98,14 +98,20 @@ document.addEventListener("turbo:load", function () {
             dropdownParent: $('.modal-content')
           }
         );
-        $('#empModal').modal('show');
+        const modalNode = document.getElementById('empModal');
+        const modal = new Modal(modalNode)
+        modalNode.bsModal = modal;
+        modal.show();
+
       }
     });
   });
 
   $(document).on('click', '.btn-close-modal', function (e) {
     e.stopImmediatePropagation();
-    $('#empModal').modal('toggle');
+    const modalNode = document.getElementById('empModal');
+    const modal = modalNode.bsModal;
+    modal.hide();
   });
 
   // Manage ajax form

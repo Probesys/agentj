@@ -1,4 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
+import { Tab } from 'bootstrap';
+
 export default class extends Controller {
     static targets = ['domain', 'auth', 'filter', 'alert'];
 
@@ -13,7 +15,8 @@ export default class extends Controller {
     }
 
     setActiveTab(tabName) {
-        const elem = $(this[tabName + 'Target']);
-        elem.tab('show');
+        const elem = this[tabName + 'Target'];
+        const tab = new Tab(elem);
+        tab.show();
     }
 }
