@@ -8376,9 +8376,7 @@ div[id^="dropzone-"] {
 /*.dropdown-menu .dropdown-menu-right .show{
 
 }*/
-.select2-container {
-  width: 100% !important;
-  padding: 0; }
+
 
 @media (min-width: 768px) {
   .sidebar.toggled {
@@ -8431,7 +8429,7 @@ div[id^="dropzone-"] {
     position: relative;
     /*padding-left: 50%;*/
     white-space: normal;
-    text-align: left; 
+    text-align: left;
     word-wrap: break-word;
   }
 

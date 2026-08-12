@@ -62,7 +62,6 @@ class LdapConnectorType extends ConnectorType
                 'attr' => ['data-ldap-bind' => 'true']
             ])
             ->add('targetGroups', EntityType::class, [
-                'attr' => ['class' => 'select2'],
                 'required' => false,
                 'class' => Group::class,
                 'multiple' => true,
@@ -73,6 +72,7 @@ class LdapConnectorType extends ConnectorType
                         ->setParameter('domain', $domain);
                 },
                 'label' => new TranslatableMessage('Entities.Connector.fields.targetGroups'),
+                'autocomplete' => true,
             ])
             ->add('ldapRealNameField', null, [
                 'required' => true,

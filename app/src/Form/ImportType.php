@@ -21,7 +21,6 @@ class ImportType extends AbstractType
                 'class' => Domain::class,
                 'label' => new TranslatableMessage('Entities.SenderRule.fields.domain'),
                 'multiple' => false,
-                'attr' => ['class' => 'select2'],
                 'query_builder' => function (DomainRepository $rep) {
                     return $rep->createQueryBuilder('d')
                                ->leftJoin('d.users', 'u')

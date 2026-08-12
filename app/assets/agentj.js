@@ -20,9 +20,6 @@ document.addEventListener("turbo:load", function () {
     $(".sidebar").toggleClass("toggled");
   }
 
-  $('.select2').select2();
-
-
   $(document).scroll(function () {
     if ($(this).scrollTop() > 100) {
       $(".scroll-to-top").fadeIn();
@@ -92,12 +89,6 @@ document.addEventListener("turbo:load", function () {
       success: function (response) {
         $('#empModal').html(response);
 
-        $('.select2').select2(
-          {
-            width: 'resolve',
-            dropdownParent: $('.modal-content')
-          }
-        );
         const modalNode = document.getElementById('empModal');
         const modal = new Modal(modalNode)
         modalNode.bsModal = modal;

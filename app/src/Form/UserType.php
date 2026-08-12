@@ -50,7 +50,6 @@ class UserType extends AbstractType
             ])
             ->add('roles', ChoiceType::class, [
                 'label' => new TranslatableMessage('Entities.User.fields.roles'),
-                'attr' => ['class' => 'select2'],
                 'choices' => ['Local Admin' => '["ROLE_ADMIN"]', 'Super Admin' => '["ROLE_SUPER_ADMIN"]'],
                 'mapped' => false
             ])
@@ -86,7 +85,6 @@ class UserType extends AbstractType
             ->add('domain', null, [
                 'label' => new TranslatableMessage('Entities.User.fields.domain'),
                 'attr' => [
-                    'class' => 'select2',
                     'onChange' => 'toggleImapLogin(this)'  // JavaScript function for handling changes
                 ]
             ])
