@@ -13,25 +13,7 @@ Xdebug is a PHP extension that enables advanced debugging capabilities. It allow
 
 ## Debug in VS Code
 
-1. Install the **PHP Debug** extension in VS Code by pressing <kbd>CTRL + P</kbd> and enter the following command: `ext install xdebug.php-debug`;
-2. Go to **Run and Debug**, add a new configuration for PHP debugging, then replace the file `.vscode/launch.json` by the following:
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Listen for Xdebug",
-            "type": "php",
-            "request": "launch",
-            "port": 9003,
-            "pathMappings": {
-                "/var/www/agentj/": "${workspaceFolder}/app"
-            }
-        }
-    ]
-}
-```
-3. Start the debug session in VS Code
+See [VSCode documentation](./vscode.md) for configuration.
 
 ## Debug in PHPStorm
 
