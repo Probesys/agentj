@@ -25,7 +25,7 @@ class BaseMessageRecipient
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, length: 255, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private mixed $mailId = null; /** @phpstan-ignore property.onlyRead */
+    private mixed $mailId = null;
 
     #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
     #[ORM\Id]
