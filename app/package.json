@@ -10,8 +10,6 @@
         "@symfony/webpack-encore": "^5.3.1",
         "core-js": "^3.50.0",
         "regenerator-runtime": "^0.13.11",
-        "sass": "^1.102.0",
-        "sass-loader": "^16.0.8",
         "stimulus": "^3.2.2",
         "tom-select": "^2.6.2",
         "webpack": "^5.109.2",
