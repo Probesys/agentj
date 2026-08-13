@@ -1,8 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+
     insert (event) {
-        if (!CKEDITOR.currentInstance) {
+        const editor = window.editor;
+        if (!editor) {
             return;
         }
 
@@ -12,12 +14,12 @@ export default class extends Controller {
             return;
         }
 
-        if (variable.startsWith('[URL_')) {
-            CKEDITOR.currentInstance.insertHtml(
-                `<a href="${variable}">${variable}</a>`
-            );
-        } else {
-            CKEDITOR.currentInstance.insertHtml(variable);
-        }
+        const html = variable.startsWith('[URL_')
+            ? `<a href="${variable}">${variable}</a>`
+            : variable;
+
+        const viewFragment = editor.data.processor.toView(html);
+        const modelFragment = editor.data.toModel(viewFragment);
+        editor.model.insertContent(modelFragment);
     }
 }

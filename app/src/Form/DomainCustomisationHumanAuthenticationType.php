@@ -15,6 +15,7 @@ class DomainCustomisationHumanAuthenticationType extends AbstractType
     {
         $builder->add('mailmessage', TextareaType::class, [
             'label' => new TranslatableMessage('Entities.Domain.fields.mailmessage'),
+            'required' => false,
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
@@ -22,6 +23,7 @@ class DomainCustomisationHumanAuthenticationType extends AbstractType
 
         $builder->add('message', TextareaType::class, [
             'label' => new TranslatableMessage('Entities.Domain.fields.message'),
+            'required' => false,
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
@@ -29,6 +31,7 @@ class DomainCustomisationHumanAuthenticationType extends AbstractType
 
         $builder->add('confirmCaptchaMessage', TextareaType::class, [
             'label' => new TranslatableMessage('Entities.Domain.fields.confirmCaptchaMessage'),
+            'required' => false,
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
