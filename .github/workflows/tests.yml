@@ -96,6 +96,14 @@ jobs:
           up-flags: --build
           down-flags: --volumes
 
+      # This is supposely done by the watcher when running docker compose up.
+      # However, as it can take a bit longer than starting the tests, the first
+      # test(s) can fail because it can't find the assets. This makes sure the
+      # assets are there before running the tests.
+      - name: Build assets
+        run: |
+          docker compose exec -u www-data watcher yarnpkg dev
+
       - name: Run tests
         run: |
           make test
