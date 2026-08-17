@@ -334,6 +334,8 @@ Generics.flash.ImportExisting: 'Les utilisateurs suivants existaient déjà dans
 Generics.flash.ImportSuccess: 'Il y a [NB_USER] comptes emails qui ont été importés avec succès !'
 Generics.flash.IncorrectColumns: 'Ligne {ROW} : Nombre de colonnes incorrect.'
 Generics.flash.InvalidEmail: 'Ligne {ROW} : Adresse e-mail invalide.'
+Generics.flash.ipAddressDuplicated: 'Cette adresse IP est déjà utilisée.'
+Generics.flash.ipAddressInvalid: 'Adresse IP invalide.'
 Generics.flash.NoImport: "Rien n'a été importé"
 Generics.flash.NonexistantDomain: "Ligne {ROW} : Domaine {DOMAIN} n'existe pas dans la base de données."
 Generics.flash.NonexistantUser: "Ligne {ROW} : Utilisateur {EMAIL} n'existe pas dans la base de données."

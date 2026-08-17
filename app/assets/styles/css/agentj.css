@@ -224,12 +224,6 @@ div[id^="dropzone-"] {
   float: right;
 }
 
-/* Jquery UI dialog */
-.ui-dialog-titlebar {
-  background-color: #343a40;
-  color: #fff
-}
-
 .navbar-expand .navbar-nav .dropdown-menu {
 
   max-height: 80vh;

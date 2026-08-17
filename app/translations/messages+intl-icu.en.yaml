@@ -334,6 +334,8 @@ Generics.flash.ImportExisting: 'The following users already existed and were upd
 Generics.flash.ImportSuccess: 'There are [NB_USER] email accounts that have been successfully imported!'
 Generics.flash.IncorrectColumns: 'Row {ROW}: Incorrect number of columns.'
 Generics.flash.InvalidEmail: 'Row {ROW}: email address is invalid.'
+Generics.flash.ipAddressDuplicated: 'This IP address is already in use.'
+Generics.flash.ipAddressInvalid: 'Invalid IP address.'
 Generics.flash.NoImport: 'Nothing has been imported'
 Generics.flash.NonexistantDomain: 'Row {ROW}: Domain {DOMAIN} does not exist in the database.'
 Generics.flash.NonexistantUser: 'Row [ROW]: User [EMAIL] does not exist in the database.'

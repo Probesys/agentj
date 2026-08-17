@@ -1,5 +1,5 @@
 @import '~@fortawesome/fontawesome-free/css/all.min.css';
 @import './agentj.css';
 @import './styles.css';
-@import './jquery-ui.css';
+@import '~jquery-ui-dist/jquery-ui.css';
 @import './bootstrap-spinner.css';

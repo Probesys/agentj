@@ -9,14 +9,19 @@
 
 import './styles/css/app.css';
 import Chart from 'chart.js/auto';
-import './agentj';
-import './nav';
+window.Chart = Chart;
+
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
 
 
 import { Modal } from 'bootstrap';
 window.Modal = Modal;
 
-const $ = require('jquery');
-window.Chart = Chart;
+import  'jquery-ui-dist/jquery-ui';
+
+import './agentj';
+import './nav';
 
 import './bootstrap';
