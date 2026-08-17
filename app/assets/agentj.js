@@ -178,7 +178,6 @@ document.addEventListener("turbo:load", function () {
     buttons: [
       {
         text: Translator.trans('Generics.labels.yes'),
-        class: 'ui-dialog-save-btn',
         click: function () {
 
 

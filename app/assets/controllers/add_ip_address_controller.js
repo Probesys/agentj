@@ -8,6 +8,16 @@ export default class extends Controller {
         this.index = this.containerTarget.children.length;
     }
 
+
+    onSubmit(event) {
+        const allInputs = this.containerTarget.querySelectorAll('input');
+        const allValid = Array.from(allInputs).every((input) => this.validateIp({ target: input }));
+
+        if (!allValid) {
+            event.preventDefault();
+        }
+    }
+
     add(event) {
         event.preventDefault();
         let prototype = this.prototypeTarget.dataset.prototype;
@@ -42,13 +52,14 @@ export default class extends Controller {
 
         if (!ipPattern.test(ip) && ip != "") {
 
-            $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
-            $('#dialog-confirm').data("type-action-confirm", "form");
-            $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-            $("#dialog-content").html(Translator.trans('Message.Actions.ipAddressInvalid'));
-
+            $('#dialog-confirm').dialog('option', 'title', Translator.trans('Generics.labels.error'));
+            $("#dialog-content").html(Translator.trans('Generics.flash.ipAddressInvalid'));
+            $('#dialog-confirm').dialog('option', 'buttons', []);
+            $('#dialog-confirm').dialog('option', 'close', function () {
+                input.focus();
+            });
             $("#dialog-confirm").dialog("open");
-            input.value = '';
+            return false;
         }
 
         const allInputs = this.containerTarget.querySelectorAll('input');
@@ -62,16 +73,20 @@ export default class extends Controller {
         });
 
         if (duplicateFound) {
-            $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
-            $('#dialog-confirm').data("type-action-confirm", "form");
-            $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-            $("#dialog-content").html(Translator.trans('Message.Actions.ipAddressDuplicated'));
+            $('#dialog-confirm').dialog('option', 'title', Translator.trans('Generics.labels.error'));
+            $("#dialog-content").html(Translator.trans('Generics.flash.ipAddressDuplicated'));
 
+            $('#dialog-confirm').dialog('option', 'buttons', []);
+            $('#dialog-confirm').dialog('option', 'close', function () {
+                input.focus();
+            });
             $("#dialog-confirm").dialog("open");
-            input.value = '';
+            return false;
+
         } else {
             input.setCustomValidity('');
         }
 
+        return true;
     }
 }
