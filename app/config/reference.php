@@ -1505,13 +1505,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ...<string, mixed>
  *     },
  * }
- * @psalm-type BazingaJsTranslationConfig = array{
- *     locale_fallback?: scalar|Param|null, // Default: "en"
- *     default_domain?: scalar|Param|null, // Default: "messages"
- *     http_cache_time?: scalar|Param|null, // Default: "86400"
- *     active_locales?: list<scalar|Param|null>,
- *     active_domains?: list<scalar|Param|null>,
- * }
  * @psalm-type StofDoctrineExtensionsConfig = array{
  *     orm?: array<string, array{ // Default: []
  *         translatable?: scalar|Param|null, // Default: false
@@ -1768,7 +1761,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     doctrine_migrations?: DoctrineMigrationsConfig,
  *     security?: SecurityConfig,
  *     twig_extra?: TwigExtraConfig,
- *     bazinga_js_translation?: BazingaJsTranslationConfig,
  *     stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     knp_paginator?: KnpPaginatorConfig,
  *     turbo?: TurboConfig,
@@ -1788,7 +1780,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
  *         twig_extra?: TwigExtraConfig,
- *         bazinga_js_translation?: BazingaJsTranslationConfig,
  *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         turbo?: TurboConfig,
@@ -1809,7 +1800,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
  *         twig_extra?: TwigExtraConfig,
- *         bazinga_js_translation?: BazingaJsTranslationConfig,
  *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         turbo?: TurboConfig,
@@ -1830,7 +1820,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
  *         twig_extra?: TwigExtraConfig,
- *         bazinga_js_translation?: BazingaJsTranslationConfig,
  *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         turbo?: TurboConfig,

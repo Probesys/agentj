@@ -53,8 +53,7 @@
         "twig/extra-bundle": "^3.3",
         "twig/intl-extra": "^3.3",
         "twig/twig": "^3.9",
-        "webklex/php-imap": "^6.0",
-        "willdurand/js-translation-bundle": "*"
+        "webklex/php-imap": "^6.0"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^8.6",

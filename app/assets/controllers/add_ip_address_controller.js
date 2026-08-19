@@ -3,6 +3,12 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ["container", "prototype"];
+    static values = {
+        errorLabel: String,
+        errorDuplicatedLabel: String,
+        errorBadFormatLabel: String,
+        removeLabel: String
+    }
 
     connect() {
         this.index = this.containerTarget.children.length;
@@ -32,7 +38,7 @@ export default class extends Controller {
         deleteButton.type = 'button';
         deleteButton.classList.add('btn', 'btn-danger', 'col-sm-2');
 
-        deleteButton.innerText = Translator.trans('Generics.actions.remove');
+        deleteButton.innerText = this.removeLabelValue;
 
         deleteButton.setAttribute('data-action', 'click->add-ip-address#remove');
         div.appendChild(deleteButton);
@@ -52,8 +58,8 @@ export default class extends Controller {
 
         if (!ipPattern.test(ip) && ip != "") {
 
-            $('#dialog-confirm').dialog('option', 'title', Translator.trans('Generics.labels.error'));
-            $("#dialog-content").html(Translator.trans('Generics.flash.ipAddressInvalid'));
+            $('#dialog-confirm').dialog('option', 'title', this.errorLabelValue);
+            $("#dialog-content").html(this.errorBadFormatLabelValue);
             $('#dialog-confirm').dialog('option', 'buttons', []);
             $('#dialog-confirm').dialog('option', 'close', function () {
                 input.focus();
@@ -73,8 +79,8 @@ export default class extends Controller {
         });
 
         if (duplicateFound) {
-            $('#dialog-confirm').dialog('option', 'title', Translator.trans('Generics.labels.error'));
-            $("#dialog-content").html(Translator.trans('Generics.flash.ipAddressDuplicated'));
+            $('#dialog-confirm').dialog('option', 'title', this.errorLabelValue);
+            $("#dialog-content").html(this.errorDuplicatedLabelValue);
 
             $('#dialog-confirm').dialog('option', 'buttons', []);
             $('#dialog-confirm').dialog('option', 'close', function () {

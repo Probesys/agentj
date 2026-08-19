@@ -13,6 +13,15 @@ function $_GET(param) {
   return vars;
 }
 
+function trans (key) {
+    const translation = window.jsTranslations[key];
+    console.log(translation);
+    if (translation) {
+        return translation;
+    } else {
+        return key;
+    }
+};
 
 document.addEventListener("turbo:load", function () {
 
@@ -54,7 +63,7 @@ document.addEventListener("turbo:load", function () {
     $('#dialog-confirm').dialog('option', 'title', $(this).find(':selected').data('dialog-title'));
     $('#dialog-confirm').data("type-action-confirm", "form");
     $('#dialog-confirm').data("form-to-confirm", "massive-actions-form");
-    $("#dialog-content").html(Translator.trans('Message.Actions.massiveActionContent'));
+    $("#dialog-content").html(trans('Message.Actions.massiveActionContent'));
 
     $("#dialog-confirm").dialog("open");
     //Reset the form action
@@ -126,7 +135,7 @@ document.addEventListener("turbo:load", function () {
         if (typeof data.message !== "undefined") {
           message = data.message;
         } else {
-          message = Translator.trans('Generics.flash.editSuccess');
+          message = trans('Generics.flash.editSuccess');
         }
         $("#flash-message-modal-container").removeClass("d-none alert-danger alert-success alert-secondary alert-info alert-warning");
         $('#flashmessagecontent').html(message);
@@ -177,7 +186,7 @@ document.addEventListener("turbo:load", function () {
     modal: true,
     buttons: [
       {
-        text: Translator.trans('Generics.labels.yes'),
+        text: trans('Generics.labels.yes'),
         click: function () {
 
 
@@ -191,7 +200,7 @@ document.addEventListener("turbo:load", function () {
         }
       },
       {
-        text: Translator.trans('Generics.labels.cancel'),
+        text: trans('Generics.labels.cancel'),
         click: function () {
           $(this).dialog("close");
         }

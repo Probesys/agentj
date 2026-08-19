@@ -14,13 +14,7 @@
       {{ encore_entry_link_tags('app') }}
       {{ encore_entry_script_tags('app') }}
 
-    {% block head_js %}
-      <script type="text/javascript" src="{{ asset('js/intl-messageformat-9.0.2.min.js') }}"></script>
-      <script type="text/javascript" src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
-      <script src="{{ path('bazinga_jstranslation_js',{"locales":app.request.locale~",fr"})}}"></script>
-      <script src="{{ asset('js/translations/config.js') }}"></script>
-
-    {% endblock %}
+    {% block head_js %}{% endblock %}
 
     <title>{% block title %}{% endblock %} | {{ 'Navigation.mainSubTitle'|trans }}</title>
   </head>
@@ -73,5 +67,13 @@
     <div id="empModal" class="modal" tabindex="-1" role="dialog">
 
     </div>
+    <script>
+        window.jsTranslations = {{ {
+            'Message.Actions.massiveActionContent': 'Message.Actions.massiveActionContent' | trans,
+            'Generics.flash.editSuccess': 'Generics.flash.editSuccess' | trans,
+            'Generics.labels.yes': 'Generics.labels.yes' | trans,
+            'Generics.labels.cancel': 'Generics.labels.cancel' | trans,
+        } | json_encode | raw }};
+    </script>
   </body>
 </html>
