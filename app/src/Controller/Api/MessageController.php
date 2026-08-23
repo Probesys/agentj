@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Security\ApiKeyUser;
 use App\Service\PendingMessageApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,8 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/api')]
 class MessageController extends AbstractController
 {
-    public function __construct(private PendingMessageApiService $pendingMessageApiService)
-    {
+    public function __construct(
+        private PendingMessageApiService $pendingMessageApiService,
+        private UserRepository $userRepository,
+    ) {
     }
 
     /**
@@ -39,11 +42,20 @@ class MessageController extends AbstractController
 
         $domain = $apiUser->getDomain();
 
+        // Domain::$users is a ManyToMany (mappedBy: 'domains') that is never
+        // populated in practice — the real, always-populated relation is
+        // User::$domain (ManyToOne), same one used by SendReportMailCommand.
+        $domainUsers = $this->userRepository->findBy(['domain' => $domain]);
+
         $email = $request->query->get('email');
         if ($email !== null) {
-            $user = $domain->getUsers()->findFirst(
-                fn (int $key, User $user) => $user->getEmail() === $email && $user->getOriginalUser() === null,
-            );
+            $user = null;
+            foreach ($domainUsers as $candidate) {
+                if ($candidate->getEmail() === $email && $candidate->getOriginalUser() === null) {
+                    $user = $candidate;
+                    break;
+                }
+            }
 
             if ($user === null) {
                 return new JsonResponse(['error' => "Unknown user '$email' for this domain"], Response::HTTP_NOT_FOUND);
@@ -51,9 +63,10 @@ class MessageController extends AbstractController
 
             $users = [$user];
         } else {
-            $users = $domain->getUsers()->filter(
+            $users = array_values(array_filter(
+                $domainUsers,
                 fn (User $user) => in_array('ROLE_USER', $user->getRoles(), true) && $user->getOriginalUser() === null,
-            )->getValues();
+            ));
         }
 
         $sinceDate = $request->query->get('since');
