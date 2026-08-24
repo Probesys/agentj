@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: 'admin/users')]
@@ -31,6 +32,7 @@ class UserController extends AbstractController
     ) {
     }
 
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     #[Route(path: '/local', name: 'users_local_index', methods: 'GET')]
     public function indexUserLocal(
         Request $request,
@@ -121,6 +123,7 @@ class UserController extends AbstractController
         return $this->render('user/indexAlias.html.twig', ['users' => $users]);
     }
 
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     #[Route(path: '/local/new', name: 'user_local_new', methods: 'GET|POST')]
     public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -192,6 +195,7 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     #[Route(path: '/local/{id}/edit', name: 'user_local_edit', methods: 'GET|POST')]
     public function edit(Request $request, User $user): Response
     {
@@ -244,6 +248,7 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     #[Route(path: '/local/{id}/changePassword', name: 'user_local_change_password', methods: 'GET|POST')]
     public function changePassword(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
     {
