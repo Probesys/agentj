@@ -778,9 +778,6 @@ class UserControllerTest extends WebTestCase
         self::assertSame(403, $client->getResponse()->getStatusCode());
     }
 
-    // Route will be reserved to super admins.
-    // See https://github.com/Probesys/agentj-security/pull/5
-    // TODO: when merged, modify this test to assert an admin cannot create admins.
     public function testAdminCanCreateAdmins(): void
     {
         $client = static::createClient();
@@ -791,26 +788,9 @@ class UserControllerTest extends WebTestCase
 
         $payload = $this->createPayload($client, $domain);
         $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
-
-        self::assertResponseIsSuccessful();
-        $content = $client->getResponse()->getContent();
-        self::assertSame($initialCount + 1, UserFactory::count());
-        $content = $client->getResponse()->getContent();
-        self::assertNotFalse($content);
-        self::assertJsonStringEqualsJsonString(
-            '{"status":"success","message":"Added successfully!"}',
-            $content,
-        );
-        $createdAdmin = UserFactory::last();
-        self::assertSame($payload['user']['fullname'], $createdAdmin->getFullname());
-        self::assertSame($payload['user']['username'], $createdAdmin->getUsername());
-        self::assertSame($payload['user']['email'], $createdAdmin->getEmail());
-        $domains = $createdAdmin
-            ->getDomains()
-            ->map(fn(Domain $domain) => $domain->getId())
-            ->toArray()
-        ;
-        self::assertSame([$domain->getId()], $domains);
+        
+        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame($initialCount, UserFactory::count());
     }
 
     public function testSuperAdminCanCreateAdmins(): void
