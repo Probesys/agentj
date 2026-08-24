@@ -58,6 +58,10 @@ class LdapService
 
     public function bindUser(User $user, string $password): bool
     {
+        if ($password === '') {
+            return false;
+        }
+
         if (!$user->getLdapDN()) {
             return false;
         }
