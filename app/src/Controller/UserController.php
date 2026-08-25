@@ -362,7 +362,7 @@ class UserController extends AbstractController
                 $this->em->persist($user);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user);
+                $userService->syncUserAndAliases($user);
                 $groupService->updateSenderRules();
 
                 $return = [
@@ -404,13 +404,15 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
+                // /** @var User $alias */
                 $alias = $form->getData();
+                // $alias->setOriginalUser($user);
                 $user->addAlias($alias);
 
                 $this->em->persist($alias);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user);
+                $userService->syncUserAndAliases($alias);
                 $groupService->updateSenderRules();
 
                 $return = [
@@ -509,7 +511,7 @@ class UserController extends AbstractController
                 $this->em->flush();
 
                 $userService->updateUserAndAliasPolicy($user);
-                $userService->updateAliasGroupsAndPolicyFromUser($user);
+                $userService->syncUserAndAliases($user);
 
                 $groupService->updateSenderRules();
 

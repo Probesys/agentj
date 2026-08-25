@@ -58,7 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: Policy::class)]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
-    private ?Policy $policy;
+    private ?Policy $policy = null;
 
     #[ORM\ManyToOne(targetEntity: Policy::class)]
     #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
@@ -87,7 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'aliases')]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
-    private ?User $originalUser;
+    private ?User $originalUser = null;
 
     /**
      * @var Collection<int, User>

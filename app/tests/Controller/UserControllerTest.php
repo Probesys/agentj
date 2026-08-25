@@ -4,10 +4,14 @@ namespace App\Tests\Controller;
 
 use App\Entity\Domain;
 use App\Entity\User;
+use App\Entity\SenderRule;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\GroupFactory;
+use App\Tests\Factory\RuleAddressFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
+use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -19,54 +23,59 @@ class UserControllerTest extends WebTestCase
 {
     use Factories;
     use FactoryHelper;
+    use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
 
+    private KernelBrowser $client;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->client = static::createClient();
+    }
+
     public function testUserCannotListUsers(): void
     {
-        $client = static::createClient();
         $user = UserFactory::new()->user()->create();
-        $client->loginUser($user);
+        $this->client->loginUser($user);
 
-        $client->request('GET', '/admin/users/email');
+        $this->client->request('GET', '/admin/users/email');
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 
     public function testAdminCannotListUsersIfNoDomain(): void
     {
-        $client = static::createClient();
         $admin = UserFactory::new()->admin()->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
 
-        $client->request('GET', '/admin/users/email');
+        $this->client->request('GET', '/admin/users/email');
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 
     public function testSuperAdminCanListUsersIfNoDomain(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
 
-        $client->request('GET', '/admin/users/email');
+        $this->client->request('GET', '/admin/users/email');
 
         self::assertResponseIsSuccessful();
     }
 
     public function testAdminCanListUsersOfItsDomain(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         $user1 = UserFactory::new()->user($domain)->create();
         $user2 = UserFactory::new()->user($domain)->create();
         $otherDomain = DomainFactory::createOne();
         $otherDomainUser = UserFactory::new()->user($otherDomain)->create();
 
-        $crawler = $client->request('GET', '/admin/users/email');
+        $crawler = $this->client->request('GET', '/admin/users/email');
 
         self::assertResponseIsSuccessful();
         $seenUsers = $crawler
@@ -81,16 +90,15 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanListAllUsers(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $domainUser1 = UserFactory::new()->user($domain)->create();
         $domainUser2 = UserFactory::new()->user($domain)->create();
         $otherDomain = DomainFactory::createOne();
         $otherDomainUser = UserFactory::new()->user($otherDomain)->create();
 
-        $crawler = $client->request('GET', '/admin/users/email');
+        $crawler = $this->client->request('GET', '/admin/users/email');
 
         self::assertResponseIsSuccessful();
         $seenUsers = $crawler
@@ -104,14 +112,13 @@ class UserControllerTest extends WebTestCase
 
     public function testUserCannotCreateUsers(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $user = UserFactory::new()->user($domain)->create();
-        $client->loginUser($user);
+        $this->client->loginUser($user);
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'test@test.fr',
                 'imapLogin' => 'testUser',
@@ -119,19 +126,18 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 
     public function testAdminCanCreateUsersInItsDomains(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'test@' . $domain->getDomain(),
                 'imapLogin' => '',
@@ -139,7 +145,7 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         // When creating a domain, a user is created for `@domain.tld` address.
         // So here, we have this user, plus the admin, plus the freshly created one.
         self::assertSame(3, UserFactory::count());
@@ -151,13 +157,12 @@ class UserControllerTest extends WebTestCase
 
     public function testAdminCannotCreateUsersWithIncorrectCsrfToken(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         self::assertEquals(2, UserFactory::count()); // 1 admin user, and 1 user for domain rule
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
                 '_token' => 'invalidCsrfToken',
                 'fullname' => 'Test User',
@@ -167,8 +172,8 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode()); // API always returns 200
-        $response = $client->getResponse()->getContent();
+        self::assertSame(200, $this->client->getResponse()->getStatusCode()); // API always returns 200
+        $response = $this->client->getResponse()->getContent();
         self::assertNotFalse($response);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"An error occurred when processing the form"}',
@@ -180,16 +185,15 @@ class UserControllerTest extends WebTestCase
 
     public function testAdminCannotCreateUsersOutsideItsDomain(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'test@' . $otherDomain->getDomain(),
                 'imapLogin' => '',
@@ -197,21 +201,20 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode()); // API always returns 200
+        self::assertSame(200, $this->client->getResponse()->getStatusCode()); // API always returns 200
         self::assertSame($initialCount, UserFactory::count()); // But no user created
     }
 
     public function testSuperAdminCanCreateUsersInAllDomains(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'test@' . $domain->getDomain(),
                 'imapLogin' => '',
@@ -219,7 +222,7 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount + 1, UserFactory::count());
         $createdUser = UserFactory::findBy(['email' => 'test@' . $domain->getDomain()])[0];
         self::assertSame('Test User', $createdUser->getFullname());
@@ -229,36 +232,34 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateUsersWithEmptyForm(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", []);
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", []);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
     }
 
     public function testSuperAdminCannotCreateUserForANonExistingDomain(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'test@nonExistingDomain.tld',
                 'report' => true,
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"The domain does not exist"}',
@@ -268,27 +269,26 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateUserWithAnAlreadyUsedEmail(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $domain = DomainFactory::createOne();
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => $user->getEmail(),
                 'report' => true,
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This email is already used. You can\'t use it"}',
@@ -298,9 +298,8 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateUserThatIsPresentInImap(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $domain = DomainFactory::createOne();
         UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
@@ -308,9 +307,9 @@ class UserControllerTest extends WebTestCase
         ]);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+        $this->client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => 'Test User',
                 'email' => 'other@' . $domain->getDomain(),
                 'imapLogin' => 'test',
@@ -318,9 +317,9 @@ class UserControllerTest extends WebTestCase
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message": "This IMAP login already exists. You can\'t use it"}',
@@ -330,13 +329,12 @@ class UserControllerTest extends WebTestCase
 
     public function testAdminCanEditUsersInItsDomain(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $group = GroupFactory::new()->create([
             'domain' => $domain,
         ]);
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -345,9 +343,9 @@ class UserControllerTest extends WebTestCase
         $newFullname = 'Other name';
         $newEmail = 'other@' . $domain->getDomain();
         self::assertCount(0, $user->getGroups());
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => $newFullname,
                 'email' => $newEmail,
                 'groups' => [
@@ -358,7 +356,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"success","message":"The update has been successfully completed"}',
@@ -372,10 +370,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanEditUsers(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -383,9 +380,9 @@ class UserControllerTest extends WebTestCase
 
         $newFullname = 'Other name';
         $newEmail = 'other@' . $domain->getDomain();
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => $newFullname,
                 'email' => $newEmail,
             ],
@@ -393,7 +390,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"success","message":"The update has been successfully completed"}',
@@ -406,10 +403,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotEditUsersWithANotExistingDomain(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -417,9 +413,9 @@ class UserControllerTest extends WebTestCase
 
         $newFullname = 'Other name';
         $newEmail = 'other@not-existing.tld';
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => $newFullname,
                 'email' => $newEmail,
             ],
@@ -427,7 +423,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"The domain does not exist"}',
@@ -440,10 +436,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotEditUsersWithAnAlreadyUsedMail(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -454,9 +449,9 @@ class UserControllerTest extends WebTestCase
 
         $newFullname = 'Other name';
         $newEmail = $otherUser->getEmail();
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => $newFullname,
                 'email' => $newEmail,
             ],
@@ -464,7 +459,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This email is already used. You can\'t use it"}',
@@ -477,11 +472,10 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotEditUserThatIsAlreadyPresentInDestinationDomainImap(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -493,18 +487,18 @@ class UserControllerTest extends WebTestCase
 
         $newFullname = 'Other name';
         $newEmail = 'other@' . $otherDomain->getDomain();
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
             'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
                 'fullname' => $newFullname,
                 'email' => $newEmail,
                 'imapLogin' => 'test',
             ],
         ]);
 
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(200, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This IMAP login already exists. You can\'t use it"}',
@@ -517,17 +511,16 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanListAliasesOfEmailAccounts(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
         $alias = UserFactory::new()->alias($user)->create();
         $otherUser = UserFactory::new()->user($domain)->create();
 
-        $crawler = $client->request('GET', '/admin/users/email');
+        $crawler = $this->client->request('GET', '/admin/users/email');
 
         self::assertResponseIsSuccessful();
         $seenUsers = $crawler
@@ -545,10 +538,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanSearchAnEmailAccountByItsAlias(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -559,7 +551,7 @@ class UserControllerTest extends WebTestCase
             'email' => 'other@' . $domain->getDomain(),
         ]);
 
-        $crawler = $client->request('GET', '/admin/users/email?search=alias@');
+        $crawler = $this->client->request('GET', '/admin/users/email?search=alias@');
 
         self::assertResponseIsSuccessful();
         $seenUsers = $crawler
@@ -576,24 +568,23 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanCreateAnAlias(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
         $aliasEmail = 'other@' . $domain->getDomain();
-        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+        $this->client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
             'user_alias' => [
-                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                '_token' => $this->generateCsrfToken($this->client, 'user_alias'),
                 'email' => $aliasEmail,
             ],
         ]);
 
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertResponseIsSuccessful();
         self::assertJsonStringEqualsJsonString(
@@ -613,44 +604,101 @@ class UserControllerTest extends WebTestCase
 
     public function testAdminCannotCreateAnAliasForAUserOutOfItsDomains(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         $otherDomain = DomainFactory::createOne();
         $user = UserFactory::new()->user($otherDomain)->create();
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+        $this->client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
             'user_alias' => [
-                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                '_token' => $this->generateCsrfToken($this->client, 'user_alias'),
                 'email' => 'other@' . $otherDomain->getDomain(),
             ],
         ]);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
+    }
+
+    public function testCreateAnAliasForAUserWithSenderRulesShouldApplyThoseRules(): void
+    {
+        $domain = DomainFactory::createOne();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $this->client->loginUser($superAdmin);
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        [$senderAddress, $userAddress] = $this->setupAddresses($sender, $recipient);
+        $senderRuleAddress = RuleAddressFactory::new()->create([
+            'email' => $senderAddress->getEmail(),
+            'priority' => 7,
+        ]);
+        $senderRule = SenderRuleFactory::new()->create([
+            'user' => $recipient,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => 'accept',
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+        ]);
+        self::assertCount(1, $recipient->getSenderRules());
+        $initialCount = UserFactory::count();
+
+        $alias = 'other@' . $domain->getDomain();
+        $this->client->request(Request::METHOD_POST, $this->newAliasUrl($recipient), [
+            'user_alias' => [
+                '_token' => $this->generateCsrfToken($this->client, 'user_alias'),
+                'email' => $alias,
+            ],
+        ]);
+
+        $content = $this->client->getResponse()->getContent();
+        self::assertNotFalse($content);
+        self::assertResponseIsSuccessful();
+        self::assertJsonStringEqualsJsonString(
+            '{"status":"success","message":"Added successfully!"}',
+            $content,
+        );
+        // Alias has been created
+        self::assertSame($initialCount + 1, UserFactory::count());
+        $newAlias = UserFactory::last();
+        self::assertSame($alias, $newAlias->getFullname());
+        self::assertSame($alias, $newAlias->getUsername());
+        self::assertSame($alias, $newAlias->getEmail());
+        // The rule has been associated to the new alias
+        self::assertSame(1, $newAlias->getSenderRules()->count());
+        $aliasSenderRule = $newAlias->getSenderRules()->first();
+        self::assertNotFalse($aliasSenderRule);
+        self::assertSame($newAlias->getId(), $aliasSenderRule->getUser()->getId());
+        self::assertSame($senderRule->getSenderRuleAddress(), $aliasSenderRule->getSenderRuleAddress());
+        self::assertSame($senderRule->getPriority(), $aliasSenderRule->getPriority());
+        // The rule is still associated to the original user
+        $em = self::getContainer()->get('doctrine')->getManager();
+        $em->refresh($sender);
+        self::assertSame(1, $recipient->getSenderRules()->count());
+        $userSenderRule = $recipient->getSenderRules()->first();
+        self::assertSame($senderRule, $userSenderRule);
     }
 
     public function testSuperAdminCannotCreateAnAliasForNotExistingDomain(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
+        $email = 'test@' . $domain->getDomain();
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+        $this->client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
             'user_alias' => [
-                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                '_token' => $this->generateCsrfToken($this->client, 'user_alias'),
                 'email' => 'other@other-domain.tld',
             ],
         ]);
 
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"The domain does not exist"}',
@@ -661,10 +709,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateAlreadyExistingAlias(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -673,14 +720,14 @@ class UserControllerTest extends WebTestCase
         ]);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+        $this->client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
             'user_alias' => [
-                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                '_token' => $this->generateCsrfToken($this->client, 'user_alias'),
                 'email' => $alias->getEmail(),
             ],
         ]);
 
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This alias is already used. You can\'t use it"}',
@@ -691,10 +738,9 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanDeleteAnAlias(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
@@ -704,8 +750,8 @@ class UserControllerTest extends WebTestCase
         $initialCount = UserFactory::count();
 
         $aliasId = $alias->getId();
-        $client->request(Request::METHOD_POST, '/admin/users/email/' . $aliasId . '/delete', [
-            '_token' => $this->generateCsrfToken($client, 'delete' . $aliasId),
+        $this->client->request(Request::METHOD_POST, '/admin/users/email/' . $aliasId . '/delete', [
+            '_token' => $this->generateCsrfToken($this->client, 'delete' . $aliasId),
         ]);
 
         self::assertResponseRedirects();
@@ -716,18 +762,16 @@ class UserControllerTest extends WebTestCase
 
     public function testUserCannotListAdmins(): void
     {
-        $client = static::createClient();
         $user = UserFactory::new()->user()->create();
-        $client->loginUser($user);
+        $this->client->loginUser($user);
 
-        $client->request(Request::METHOD_GET, '/admin/users/local');
+        $this->client->request(Request::METHOD_GET, '/admin/users/local');
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 
     public function testSuperAdminCanListAllAdmins(): void
     {
-        $client = static::createClient();
         $domain1 = DomainFactory::createOne();
         $admin1 = UserFactory::new()->admin([$domain1])->create();
         $domain2 = DomainFactory::createOne();
@@ -735,9 +779,9 @@ class UserControllerTest extends WebTestCase
         $domain3 = DomainFactory::createOne();
         $admin3 = UserFactory::new()->admin([$domain3])->create();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
 
-        $crawler = $client->request(Request::METHOD_GET, '/admin/users/local');
+        $crawler = $this->client->request(Request::METHOD_GET, '/admin/users/local');
 
         self::assertResponseIsSuccessful();
         $seenAdmins = $crawler
@@ -751,44 +795,41 @@ class UserControllerTest extends WebTestCase
 
     public function testUserCannotCreateAdmins(): void
     {
-        $client = static::createClient();
         $user = UserFactory::new()->user()->create();
-        $client->loginUser($user);
+        $this->client->loginUser($user);
 
-        $client->request(Request::METHOD_POST, '/admin/users/local/new');
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new');
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
     }
 
     public function testAdminCanCreateAdmins(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $admin = UserFactory::new()->admin([$domain])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
         $initialCount = UserFactory::count();
 
-        $payload = $this->createPayload($client, $domain);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $payload = $this->createPayload($this->client, $domain);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(403, $this->client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
     }
 
     public function testSuperAdminCanCreateAdmins(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $payload = $this->createPayload($client, $domain);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $payload = $this->createPayload($this->client, $domain);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount + 1, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"success","message":"Added successfully!"}',
@@ -808,22 +849,21 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanCreateSuperAdmins(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $domains = array_map(fn($domain) => $domain->getId(), DomainFactory::all());
-        $payload = $this->createPayload($client, $domain, [
+        $payload = $this->createPayload($this->client, $domain, [
             'domains' => $domains,
             'roles' => '["ROLE_SUPER_ADMIN"]',
         ]);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount + 1, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"success","message":"Added successfully!"}',
@@ -844,19 +884,18 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateAdminWithAlreadyUsedUsername(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         UserFactory::new()->user()->create(['username' => 'test']);
         $initialCount = UserFactory::count();
 
-        $payload = $this->createPayload($client, $domain);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $payload = $this->createPayload($this->client, $domain);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This login already exists. You can\'t use it"}',
@@ -866,22 +905,21 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateAdminWithAlreadyUsedEmail(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $email = 'test@test.fr';
         UserFactory::new()->user()->create(['email' => $email]);
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $payload = $this->createPayload($client, $domain, [
+        $payload = $this->createPayload($this->client, $domain, [
             'email' => $email,
         ]);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This email is already used. You can\'t use it"}',
@@ -891,22 +929,21 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotCreateAdminWithNotIdenticalPasswords(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
-        $payload = $this->createPayload($client, $domain, [
+        $payload = $this->createPayload($this->client, $domain, [
             'password' => [
                 'second' => 'other',
             ],
         ]);
-        $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
+        $this->client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"Password confirmation is not valid"}',
@@ -916,25 +953,24 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanEditAdminsToSuperAdmins(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $newFullname = 'other';
         $newUsername = 'other';
         $newEmail = 'other@' . $domain->getDomain();
         $url = '/admin/users/local/' . $admin->getId() . '/edit';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             'user' => [
                 'email' => $newEmail,
                 'fullname' => $newFullname,
                 'username' => $newUsername,
                 'roles' => '["ROLE_SUPER_ADMIN"]',
                 'domains' => [],
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
             ]
         ]);
 
@@ -949,32 +985,31 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotEditAdminsIfUsernameAlreadyUsed(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
         UserFactory::new()->user()->create(['username' => 'other']);
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $newFullname = 'other';
         $newUsername = 'other';
         $newEmail = 'other@' . $domain->getDomain();
         $url = '/admin/users/local/' . $admin->getId() . '/edit';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             'user' => [
                 'email' => $newEmail,
                 'fullname' => $newFullname,
                 'username' => $newUsername,
                 'roles' => '["ROLE_SUPER_ADMIN"]',
                 'domains' => [],
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
             ]
         ]);
 
         self::assertResponseIsSuccessful();
         self::assertSame($initialCount, UserFactory::count());
-        $content = $client->getResponse()->getContent();
+        $content = $this->client->getResponse()->getContent();
         self::assertNotFalse($content);
         self::assertJsonStringEqualsJsonString(
             '{"status":"danger","message":"This login already exists. You can\'t use it"}',
@@ -988,21 +1023,20 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanChangeAdminPassword(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
         $initialPassword = $admin->getPassword();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/local/' . $admin->getId() . '/changePassword';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             'user' => [
                 'password' => [
                     'first' => 'secret',
                     'second' => 'secret',
                 ],
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
             ],
         ]);
 
@@ -1014,21 +1048,20 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotChangeAdminPasswordIfPasswordsDoNotMatch(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
         $initialPassword = $admin->getPassword();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/local/' . $admin->getId() . '/changePassword';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             'user' => [
                 'password' => [
                     'first' => 'secret',
                     'second' => 'other',
                 ],
-                '_token' => $this->generateCsrfToken($client, 'user'),
+                '_token' => $this->generateCsrfToken($this->client, 'user'),
             ],
         ]);
 
@@ -1040,16 +1073,15 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanDeleteAdmin(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
         $adminId = $admin->getId();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/email/' . $admin->getId() . '/delete';
-        $client->request(Request::METHOD_POST, $url, [
-            '_token' => $this->generateCsrfToken($client, 'delete' . $admin->getId()),
+        $this->client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($this->client, 'delete' . $admin->getId()),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1059,15 +1091,14 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotDeleteAdminWithoutValidCsrfToken(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin = UserFactory::new()->admin()->create();
         $adminId = $admin->getId();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/email/' . $admin->getId() . '/delete';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             '_token' => 'test',
         ]);
 
@@ -1080,18 +1111,17 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCanBatchDeleteAdmins(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin1 = UserFactory::new()->admin()->create();
         $admin1Id = $admin1->getId();
         $admin2 = UserFactory::new()->admin()->create();
         $admin2Id = $admin2->getId();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/email/batchDelete';
-        $client->request(Request::METHOD_POST, $url, [
-            '_csrf_token' => $this->generateCsrfToken($client, 'delete user'),
+        $this->client->request(Request::METHOD_POST, $url, [
+            '_csrf_token' => $this->generateCsrfToken($this->client, 'delete user'),
             'id' => [
                 $admin1Id,
                 $admin2Id,
@@ -1106,17 +1136,16 @@ class UserControllerTest extends WebTestCase
 
     public function testSuperAdminCannotBatchDeleteAdminsWithoutValidCsrfToken(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $admin1 = UserFactory::new()->admin()->create();
         $admin1Id = $admin1->getId();
         $admin2 = UserFactory::new()->admin()->create();
         $admin2Id = $admin2->getId();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $initialCount = UserFactory::count();
 
         $url = '/admin/users/email/batchDelete';
-        $client->request(Request::METHOD_POST, $url, [
+        $this->client->request(Request::METHOD_POST, $url, [
             '_csrf_token' => 'test',
             'id' => [
                 $admin1Id,
