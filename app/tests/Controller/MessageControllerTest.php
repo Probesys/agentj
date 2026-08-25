@@ -28,6 +28,39 @@ class MessageControllerTest extends WebTestCase
     use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
+    
+    public function testHtmlBodyIsSanitized(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$senderAddress, $recipientAddress] = $this->setupAddresses($sender, $recipient);
+        $body = <<<'HTML'
+            <strong>Security test</strong>
+            <p>If this message is printed correcly, your email client is well configured.</p>
+            <img src="x" onerror="alert('Demo XSS')">
+            <a hrel="https://threat.security.com/exploit">More information here.</a>
+            The security team
+        HTML;
+        $message = $this->setupMail($senderAddress, $recipientAddress, body: $body, status: MessageStatus::AUTHORIZED);
+        $url = sprintf(
+            "/message/%s/%s/%s/iframe-content",
+            $message->getPartitionTag(),
+            $message->getMailId(),
+            $recipientAddress->getId(),
+        );
+        $client->request(Request::METHOD_GET, $url);
+
+        $content = $client->getResponse()->getContent();
+        self::assertNotFalse($content);
+        self::assertStringContainsString('<strong>Security test</strong>', $content);
+        self::assertStringNotContainsString('<img', $content);
+        self::assertStringContainsString('[IMAGE]', $content);
+        self::assertStringNotContainsString('onerror=', $content);
+        self::assertStringContainsString('[URL] More information here.', $content);
+    }
 
     public function testListUntreatedMessages(): void
     {
@@ -591,13 +624,9 @@ class MessageControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $recipient = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $sender = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $admin = UserFactory::new()->admin()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
@@ -654,13 +683,9 @@ class MessageControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $recipient = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $sender = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $admin = UserFactory::new()->admin()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, $addrR, status: MessageStatus::RESTORED);
@@ -686,13 +711,9 @@ class MessageControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $recipient = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $sender = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $admin = UserFactory::new()->admin()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, $addrR, status: MessageStatus::SPAMMED);

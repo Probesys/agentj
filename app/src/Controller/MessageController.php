@@ -12,6 +12,7 @@ use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MessageRepository;
 use App\Service;
+use App\Service\HtmlSanitizerService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -35,6 +36,7 @@ class MessageController extends AbstractController
         private Service\MessageService $messageService,
         private Service\Referrer $referrer,
         private DomainRepository $domainRepository,
+        private HtmlSanitizerService $sanitizer,
     ) {
     }
 
@@ -559,31 +561,7 @@ class MessageController extends AbstractController
         $from = $email->getFrom();
         $textBody = $email->getTextBody();
         $htmlBody = $email->getHtmlBody();
-
-        //Remove all script tags
-        $htmlBody = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $htmlBody);
-        //remove onclick=""
-        $htmlBody = preg_replace('/\son\w+="[^"]*"/i', '', $htmlBody); // attributs entre guillemets doubles
-        //remove onclick=''
-        $htmlBody = preg_replace('/\son\w+=\'[^\']*\'/i', '', $htmlBody); // attributs entre guillemets simples
-
-        //Remove original images
-        $htmlBody = preg_replace_callback(
-            '/<img\s+[^>]*src=["\']([^"\']+)["\'][^>]*>/is',
-            function ($matches) {
-                return '[' . $this->translator->trans('Entities.Message.labels.imgDisabled') . ']';
-            },
-            $htmlBody
-        );
-
-        //Remove all links
-        $htmlBody = preg_replace_callback(
-            '/<a\b[^>]*\bhref=["\'][^"\']+["\'][^>]*>.*?<\/a>/is',  // Utilisation de "s" pour les retours à la ligne
-            function ($matches) {
-                return '[' . $this->translator->trans('Entities.Message.labels.linkDisabled') . ']';
-            },
-            $htmlBody
-        );
+        $htmlBody = $this->sanitizer->sanitize($htmlBody);
 
         return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,

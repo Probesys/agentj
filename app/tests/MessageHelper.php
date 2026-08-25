@@ -39,6 +39,7 @@ trait MessageHelper
         Address $sender,
         Address $recipient,
         ?string $subject = 'test',
+        ?string $body = null,
         ?int $status = null,
     ): Message {
         $mailId = bin2hex(random_bytes(8));
@@ -76,6 +77,7 @@ trait MessageHelper
             'subject' => $subject,
             'from' => $sender->getEmail(),
             'to' => [$recipient->getEmail()],
+            'body' => $body ?? null,
         ]);
 
         QuarantineFactory::new()->create([

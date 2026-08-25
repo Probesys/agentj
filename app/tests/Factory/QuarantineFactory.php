@@ -50,7 +50,7 @@ final class QuarantineFactory extends PersistentObjectFactory
                 From: <{$attributes['from']}>\r
                 To: support@example.com\r
                 Date: {$date->format(DATE_RFC1123)}\r
-                Content-Type: text/html\r
+                Content-Type: text/html; charset=UTF-8\r
                 TEXT;
 
         if (isset($attributes['to'])) {
