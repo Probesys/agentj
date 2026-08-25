@@ -458,8 +458,9 @@ class UserController extends AbstractController
                 $this->em->persist($user);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $userService->updateAliasGroupsAndPolicyFromUser($user);
                 $groupService->updateSenderRules();
+
                 $return = [
                     'status' => 'success',
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
