@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerCommonTrait;
 use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Form\ImportType;
 use App\Service\GroupService;
 use App\Service\Referrer;
+use App\Service\UserService;
 use App\Util\Text;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +25,7 @@ class ImportController extends AbstractController
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
+        private UserService $userService,
         private GroupService $groupService,
         private Referrer $referrer,
     ) {
@@ -289,6 +290,8 @@ class ImportController extends AbstractController
         $domains = [];
         try {
             if (($handle = fopen($pathfile, "r")) !== false) {
+                $originalUserByIds = [];
+
                 while (($data = fgetcsv($handle, 1024, $split)) !== false) {
                     //check line number of columns, if empty
                     if ((count($data) != 4)) {
@@ -313,6 +316,8 @@ class ImportController extends AbstractController
                                 //check if original email's user exist
                                 $originalUser = $em->getRepository(User::class)->findOneBy(['email' => $data[2]]);
                                 if ($originalUser) {
+                                    $originalUserByIds[$originalUser->getId()] = $originalUser;
+
                                     $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
                                     //check if user already exist and is not an alias
                                     if ($user and $user->getOriginalUser() == null) {
@@ -341,6 +346,7 @@ class ImportController extends AbstractController
                                         $user->setOriginalUser($originalUser);
                                         $user->setPolicy($originalUser->getPolicy());
                                         $em->persist($user);
+
                                         $emails[$user->getEmail()] = $user->getEmail();
                                     }
                                 } else {
@@ -369,8 +375,13 @@ class ImportController extends AbstractController
                     $row++;
                 }
 
-                //Need to flush if user new is inferior $batchSize
+                // Need to flush if user new is inferior $batchSize
                 $em->flush();
+
+                foreach ($originalUserByIds as $user) {
+                    $this->userService->syncUserAndAliases($user);
+                }
+
                 $this->groupService->updateSenderRules();
             }
         } catch (\Exception $e) {

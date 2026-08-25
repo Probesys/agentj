@@ -189,6 +189,8 @@ class LdapImportCommand extends Command
                 }
 
                 $this->assignTargetGroupsToUser($user);
+
+                $this->userService->syncUserAndAliases($user);
             }
         }
 
@@ -299,11 +301,15 @@ class LdapImportCommand extends Command
             $this->nbAliasCreated++;
         }
 
+
         $alias->setEmail($aliasEmail);
         $alias->setUsername($aliasEmail);
         $alias->setOriginalUser($user);
         $alias->setDomain($domain);
         $this->em->persist($alias);
+
+        $user->addAlias($alias);
+
         $this->em->flush();
     }
 
@@ -319,7 +325,8 @@ class LdapImportCommand extends Command
             $user->addGroup($group);
         }
 
-        $this->userService->updateAliasGroupsAndPolicyFromUser($user);
+        $this->em->persist($user);
+        $this->em->flush();
     }
 
     /**
