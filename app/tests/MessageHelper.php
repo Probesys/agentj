@@ -42,7 +42,7 @@ trait MessageHelper
     ): string {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::createOne([
+        $message = MessageFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
@@ -51,7 +51,7 @@ trait MessageHelper
             'status' => $status,
         ]);
 
-        MessageRecipientFactory::createOne([
+        MessageRecipientFactory::new()->create([
             'message' => $message,
             'partitionTag' => 0,
             'mailId' => $mailId,
