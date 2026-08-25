@@ -393,7 +393,7 @@ class UserController extends AbstractController
                 $this->em->persist($user);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user);
+                $userService->syncUserAndAliases($user);
                 $groupService->updateSenderRules();
 
                 $return = [
@@ -464,8 +464,9 @@ class UserController extends AbstractController
                 $this->em->persist($user);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $userService->syncUserAndAliases($user);
                 $groupService->updateSenderRules();
+
                 $return = [
                     'status' => 'success',
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -563,7 +564,7 @@ class UserController extends AbstractController
                 $this->em->flush();
 
                 $userService->updateUserAndAliasPolicy($user);
-                $userService->updateAliasGroupsAndPolicyFromUser($user);
+                $userService->syncUserAndAliases($user);
 
                 $groupService->updateSenderRules();
 
@@ -622,7 +623,7 @@ class UserController extends AbstractController
                 $user->setUsername($user->getEmail());
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $userService->syncUserAndAliases($user->getOriginalUser());
                 $groupService->updateSenderRules();
 
                 $return = [
