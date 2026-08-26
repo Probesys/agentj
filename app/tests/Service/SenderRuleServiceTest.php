@@ -8,6 +8,8 @@ use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Service\SenderRuleService;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\RuleAddressFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -21,11 +23,8 @@ class SenderRuleServiceTest extends KernelTestCase
     public function testImportFileUsesSharedRuleCreation(): void
     {
         self::bootKernel();
-        $domain = DomainFactory::createOne();
-        $domainUser = UserFactory::createOne([
-            'domain' => $domain,
-            'email' => '@' . $domain->getDomain(),
-        ]);
+        $domain = DomainFactory::new()->create();
+        $domainUser = UserFactory::findBy(['email' => '@' . $domain]);
         $path = tempnam(sys_get_temp_dir(), 'sender-rules-test-');
         self::assertIsString($path);
         file_put_contents($path, "sender@example.org\nexample.net\ninvalid value\nsender@example.org\n");
@@ -46,16 +45,18 @@ class SenderRuleServiceTest extends KernelTestCase
             self::assertSame($priority, $ruleAddress->getPriority());
 
             $senderRule = $senderRuleRepository->findOneBy([
-                'rid' => $domainUser,
-                'sid' => $ruleAddress,
+                'user' => $domainUser,
+                'senderRuleAddress' => $ruleAddress,
             ]);
             self::assertNotNull($senderRule);
             self::assertSame('accept', $senderRule->getWbRule());
             self::assertSame(SenderRule::TYPE_IMPORT, $senderRule->getType());
         }
 
-        self::assertSame(2, $ruleAddressRepository->count([]));
-        self::assertSame(2, $senderRuleRepository->count([]));
+        // At domain creation, it needs to have a root '@.' RuleAddress (shared accross all domains).
+        // Creating a domain also creates a SenderRule using this RuleAddress.
+        self::assertSame(3, RuleAddressFactory::count());
+        self::assertSame(3, SenderRuleFactory::count());
     }
 
     public function testUserRuleDoesNotReplaceGroupRule(): void
@@ -84,8 +85,8 @@ class SenderRuleServiceTest extends KernelTestCase
 
         $senderRuleRepository = static::getContainer()->get(SenderRuleRepository::class);
         $userRule = $senderRuleRepository->findOneBy([
-            'rid' => $user,
-            'sid' => $ruleAddress,
+            'user' => $user,
+            'senderRuleAddress' => $ruleAddress,
             'priority' => SenderRule::PRIORITY_USER,
         ]);
         self::assertNotNull($userRule);
@@ -119,8 +120,8 @@ class SenderRuleServiceTest extends KernelTestCase
 
         foreach ([$mainUser, $alias] as $recipient) {
             self::assertNotNull($senderRuleRepository->findOneBy([
-                'rid' => $recipient,
-                'sid' => $ruleAddress,
+                'user' => $recipient,
+                'senderRuleAddress' => $ruleAddress,
                 'priority' => SenderRule::PRIORITY_USER,
             ]));
         }

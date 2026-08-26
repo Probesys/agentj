@@ -2,12 +2,14 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\RuleAddress;
 use App\Entity\SenderRule;
+use App\Entity\User;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Service\SenderRuleService;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\RuleAddressFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -50,10 +52,7 @@ class SenderRuleControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $domainUser = UserFactory::createOne([
-            'domain' => $domain,
-            'email' => '@' . $domain->getDomain(),
-        ]);
+        $domainUser = UserFactory::findBy(['email' => '@' . $domain->getDomain()])[0];
         $admin = UserFactory::new()->admin()->create(['domains' => [$domain]]);
         $client->loginUser($admin);
         $csrfToken = $this->getCsrfToken($client, '/rules/new/W');
@@ -70,16 +69,17 @@ class SenderRuleControllerTest extends WebTestCase
         $senderRule = $this->getSenderRule($domainUser, '@trusted.example.org');
         self::assertSame('accept', $senderRule->getWbRule());
         self::assertSame(SenderRule::TYPE_ADMIN, $senderRule->getType());
-        self::assertSame(5, $senderRule->getSid()->getPriority());
+        self::assertSame(5, $senderRule->getSenderRuleAddress()->getPriority());
     }
 
     public function testInvalidSenderAddressIsRejected(): void
     {
         $client = static::createClient();
         $user = UserFactory::new()->user()->create();
+        $initialRuleAddressCount = RuleAddressFactory::count();
         $client->loginUser($user);
-        $csrfToken = $this->getCsrfToken($client, '/rules/new/W');
 
+        $csrfToken = $this->getCsrfToken($client, '/rules/new/W');
         $client->request(Request::METHOD_POST, '/rules/new/W', [
             'sender_rule' => [
                 '_token' => $csrfToken,
@@ -89,21 +89,18 @@ class SenderRuleControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('"status":"danger"', (string) $client->getResponse()->getContent());
-        self::assertSame(0, $this->getRuleAddressRepository()->count([]));
+        self::assertSame($initialRuleAddressCount, RuleAddressFactory::count());
     }
 
     public function testAdminCannotCreateRuleForUnmanagedDomain(): void
     {
         $client = static::createClient();
-        $managedDomain = DomainFactory::createOne();
-        $unmanagedDomain = DomainFactory::createOne();
-        UserFactory::createOne([
-            'domain' => $unmanagedDomain,
-            'email' => '@' . $unmanagedDomain->getDomain(),
-        ]);
+        $managedDomain = DomainFactory::new()->create();
+        $unmanagedDomain = DomainFactory::new()->create();
         $admin = UserFactory::new()->admin()->create(['domains' => [$managedDomain]]);
         $client->loginUser($admin);
         $csrfToken = $this->getCsrfToken($client, '/rules/new/W');
+        $initialUserCount = UserFactory::count();
 
         $client->request(Request::METHOD_POST, '/rules/new/W', [
             'sender_rule' => [
@@ -115,7 +112,7 @@ class SenderRuleControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('"status":"danger"', (string) $client->getResponse()->getContent());
-        self::assertSame(0, $this->getRuleAddressRepository()->count([]));
+        self::assertSame($initialUserCount, UserFactory::count());
     }
 
     public function testImportOnlyListsDomainsManagedByAdmin(): void
@@ -150,7 +147,7 @@ class SenderRuleControllerTest extends WebTestCase
         self::assertNotNull($ruleAddress);
         $senderRuleRepository = static::getContainer()->get(SenderRuleRepository::class);
         self::assertSame(2, $senderRuleRepository->count([
-            'sid' => $ruleAddress,
+            'senderRuleAddress' => $ruleAddress,
             'priority' => SenderRule::PRIORITY_USER,
         ]));
 
@@ -160,22 +157,19 @@ class SenderRuleControllerTest extends WebTestCase
 
         self::assertResponseRedirects();
         self::assertSame(0, $senderRuleRepository->count([
-            'sid' => $ruleAddress,
+            'senderRuleAddress' => $ruleAddress,
             'priority' => SenderRule::PRIORITY_USER,
         ]));
     }
 
-    private function getSenderRule(object $recipient, string $address): SenderRule
+    private function getSenderRule(User $recipient, string $address): SenderRule
     {
-        $ruleAddress = $this->getRuleAddressRepository()->findOneBy(['email' => $address]);
-        self::assertInstanceOf(RuleAddress::class, $ruleAddress);
+        $ruleAddress = RuleAddressFactory::findBy(['email' => $address])[0];
 
-        $senderRuleRepository = static::getContainer()->get(SenderRuleRepository::class);
-        $senderRule = $senderRuleRepository->findOneBy([
-            'rid' => $recipient,
-            'sid' => $ruleAddress,
-        ]);
-        self::assertInstanceOf(SenderRule::class, $senderRule);
+        $senderRule = SenderRuleFactory::findBy([
+            'user' => $recipient,
+            'senderRuleAddress' => $ruleAddress,
+        ])[0];
 
         return $senderRule;
     }
