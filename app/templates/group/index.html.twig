@@ -15,19 +15,17 @@
 
 	{% endembed %}
 
-	<div class="col mb-3 bg-white pb-3">
-		<div class="row">
-			<div class="col-md-12">
-				{% include 'common/_rapidSearchForm.html.twig'%}
-			</div>
-		</div>
-	</div>
+    {% include 'group/_batchActionsAndSearch.html.twig' %}
 
 	<div class="table-responsive">
 		<section id="no-more-tables">
 			<table id="table_groups" class="table">
 				<thead>
 					<tr>
+                        <th>
+                            <input type="checkbox" class="cb" id="checkAll" data-target-checkall-class="selected-msg">
+                            <label class="for-cb check-all" for="checkAll"></label>
+                        </th>
 						<th>{{ knp_pagination_sortable(groups, 'Entities.Group.Name'|trans(), 'g.name') }}</th>
 						<th>{{ knp_pagination_sortable(groups, 'Entities.Domain.Name'|trans(), 'd.domain') }}</th>
 						<th>{{ knp_pagination_sortable(groups, 'Generics.fields.priority'|trans(), 'g.priority') }}</th>
@@ -39,7 +37,17 @@
 				<tbody>
 					{% for group in groups %}
 						<tr>
-							{#          <td><input type="checkbox"></td>#}
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    name="id[]"
+                                    value="{{ group.id }}"
+                                    id="group_{{ group.id }}"
+                                    class="cb selected-msg"
+                                    data-mass-action-group="groups"
+                                />
+                                <label class="for-cb"></label>
+                            </td>
 							<td data-title="{{'Entities.Group.Name'|trans }}">{{group.name}}</td>
 							<td data-title="{{'Entities.Domain.Name'|trans }}">{{group.domain.domain}}</td>
 							<td data-title="{{'Generics.fields.priority'|trans }}">{{ group.priority }}</td>
