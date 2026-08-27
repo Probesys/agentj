@@ -110,6 +110,7 @@ Entities.Import.Alias.description: "Le fichier doit être encodé en utf8 au for
 Entities.Import.Alias.title: 'Importer des alias'
 Entities.Import.Alias.warning: 'Attention : les utilisateurs importés existant déjà dans la base de données seront mis à jour.'
 Entities.Import.SenderRule.description: 'Le fichier doit être un fichier texte (.txt) encodé en UTF8. Chaque ligne doit comporter une adresse mail ou un domaine valide.'
+Entities.Import.SenderRule.success: 'Import des règles terminé.'
 Entities.Import.SenderRule.titleAuthorized: "Importer une liste d'utilisateurs autorisés"
 Entities.Import.SenderRule.titleBan: "Importer une liste d'utilisateurs bannis"
 Entities.Import.Users.description: 'Le fichier doit être encodé en utf8 au format csv séparé par des points virgules.<br /> La structure est la suivante : email ; Nom; Prénom; Groupe<br />'
@@ -120,9 +121,9 @@ Entities.LdapConnector.actions.add: 'Ajouter un connecteur LDAP'
 Entities.LdapConnector.actions.edit: 'Modifier le connecteur LDAP'
 Entities.LdapConnector.fields.LdapBaseDN: 'Base DN'
 Entities.LdapConnector.fields.LdapPassword: 'Mot de passe'
+Entities.LdapConnector.fields.activateHumanAuthentication: "Activer l'authentification humaine pour les utilisateurs créés"
 Entities.LdapConnector.fields.advancedOptions: 'Options avancées'
 Entities.LdapConnector.fields.allowAnonymousBind: 'Connexion anonyme'
-Entities.LdapConnector.fields.activateHumanAuthentication: "Activer l'authentification humaine pour les utilisateurs créés"
 Entities.LdapConnector.fields.connectionInformation: 'Informations de connexion'
 Entities.LdapConnector.fields.ldapAliasField: "Champ LDAP pour l'alias (si différent de l'email)"
 Entities.LdapConnector.fields.ldapAllowConnection: "Autoriser l'authentification par LDAP"
@@ -261,8 +262,8 @@ Entities.SenderRule.rules.none: 'Aucune règle'
 Entities.User.actions.add_new: 'Nouvel utilisateur'
 Entities.User.actions.add_new_alias: 'Ajouter un nouvel alias'
 Entities.User.actions.edit: "Edition d'un utilisateur"
-Entities.User.fields.alias: Alias
 Entities.User.fields.activateHumanAuthentication: "Activer l'authentification humaine"
+Entities.User.fields.alias: Alias
 Entities.User.fields.domain: Domaine
 Entities.User.fields.email: Email
 Entities.User.fields.emailRecovery: 'Email de récupération'
@@ -334,8 +335,6 @@ Generics.flash.ImportExisting: 'Les utilisateurs suivants existaient déjà dans
 Generics.flash.ImportSuccess: 'Il y a [NB_USER] comptes emails qui ont été importés avec succès !'
 Generics.flash.IncorrectColumns: 'Ligne {ROW} : Nombre de colonnes incorrect.'
 Generics.flash.InvalidEmail: 'Ligne {ROW} : Adresse e-mail invalide.'
-Generics.flash.ipAddressDuplicated: 'Cette adresse IP est déjà utilisée.'
-Generics.flash.ipAddressInvalid: 'Adresse IP invalide.'
 Generics.flash.NoImport: "Rien n'a été importé"
 Generics.flash.NonexistantDomain: "Ligne {ROW} : Domaine {DOMAIN} n'existe pas dans la base de données."
 Generics.flash.NonexistantUser: "Ligne {ROW} : Utilisateur {EMAIL} n'existe pas dans la base de données."
@@ -349,6 +348,8 @@ Generics.flash.genericFormError: "Une erreur s'est produite lors du traitement d
 Generics.flash.groupNameAlreadyExist: 'Ce groupe existe déjà pour domaine. Vous ne pouvez pas utiliser ce nom'
 Generics.flash.imapLoginAlreadyExist: "Ce login IMAP est déjà utilisé. Vous ne pouvez pas l'utiliser"
 Generics.flash.invalidCsrfToken: 'Token CSRF invalide'
+Generics.flash.ipAddressDuplicated: 'Cette adresse IP est déjà utilisée.'
+Generics.flash.ipAddressInvalid: 'Adresse IP invalide.'
 Generics.flash.passwordNotMatching: "La confirmation du mot de passe n'est pas valide"
 Generics.flash.userNameAlreadyExist: "Ce login existe déjà. Vous ne pouvez pas l'utiliser"
 Generics.footer.sourceCode: 'Code source'

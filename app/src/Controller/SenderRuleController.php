@@ -189,6 +189,7 @@ class SenderRuleController extends AbstractController
                 $filename = 'import-sender-rules-agentj-' . time() . ".txt";
                 $file = $fileUpload->move('/tmp/', $filename);
                 $this->importSenderRule($file->getPathname(), $form->get('domain')->getData(), $rule);
+                $this->addFlash('success', new TranslatableMessage('Entities.Import.SenderRule.success'));
             } else {
                 $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadImportFormat'));
             }
@@ -249,6 +250,7 @@ class SenderRuleController extends AbstractController
                 $this->em->persist($senderRule);
                 $senderRules[$domain->getId()][] = $senderRuleAddress->getId();
             }
+
             $this->em->flush();
         }
     }
