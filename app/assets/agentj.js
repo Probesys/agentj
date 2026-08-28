@@ -22,6 +22,7 @@ function trans (key) {
         return key;
     }
 };
+window.trans = trans;
 
 document.addEventListener("turbo:load", function () {
 

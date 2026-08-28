@@ -32,7 +32,7 @@
       // Original datasets
       var datasets = [
         {
-          label: Translator.trans('Navigation.untreated'),
+          label: trans('Navigation.untreated'),
           data: [
             {% for day in nbUntreadtedMsgByDay %}
               { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
@@ -44,7 +44,7 @@
           tension: 0.4
         },
         {
-          label: Translator.trans('Navigation.authorized'),
+          label: trans('Navigation.authorized'),
           data: [
             {% for day in nbAutorizeMsgByDay %}
               { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
@@ -56,7 +56,7 @@
           tension: 0.4
         },
         {
-          label: Translator.trans('Navigation.banned'),
+          label: trans('Navigation.banned'),
           data: [
             {% for day in nbBannedMsgByDay %}
               { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
@@ -68,7 +68,7 @@
           tension: 0.4
         },
         {
-          label: Translator.trans('Navigation.Messagedelete'),
+          label: trans('Navigation.Messagedelete'),
           data: [
             {% for day in nbDeletedMsgByDay %}
               { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },
@@ -80,7 +80,7 @@
           tension: 0.4
         },
         {
-          label: Translator.trans('Navigation.MessageRestored'),
+          label: trans('Navigation.MessageRestored'),
           data: [
             {% for day in nbRestoredMsgByDay %}
               { date: '{{ day.timeIso|date("Y-m-d") }}', value: {{ day.nb_result }} },

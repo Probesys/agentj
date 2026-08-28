@@ -27,11 +27,11 @@
         var ctx = document.getElementById('messagesChart').getContext('2d');
         var data = {
             labels: [
-                Translator.trans('Navigation.untreated'),
-                Translator.trans('Navigation.authorized'),
-                Translator.trans('Navigation.banned'),
-                Translator.trans('Navigation.Messagedelete'),
-                Translator.trans('Navigation.MessageRestored'),
+                trans('Navigation.untreated'),
+                trans('Navigation.authorized'),
+                trans('Navigation.banned'),
+                trans('Navigation.Messagedelete'),
+                trans('Navigation.MessageRestored'),
                 'Error',
                 'Spam',
                 'Virus'
@@ -101,7 +101,7 @@
                     },
                     title: {
                         display: true,
-                        text: Translator.trans('Navigation.mailBlocked')
+                        text: trans('Navigation.mailBlocked')
                     }
                 }
             });
