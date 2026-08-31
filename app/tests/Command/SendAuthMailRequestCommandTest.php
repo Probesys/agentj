@@ -3,6 +3,7 @@
 namespace App\Tests\Command;
 
 use App\Amavis\MessageStatus;
+use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\UserFactory;
@@ -24,6 +25,14 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
     use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
+
+    private EntityManagerInterface $entityManager;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
+    }
 
     public function testAuthMailIsSentToNotAuthenticatedSender(): void
     {
@@ -51,6 +60,38 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
                     return $email->getTo()[0]->getAddress() === $sender->getEmail();
                 })
             );
+        self::getContainer()->set(MailerInterface::class, $mailer);
+
+        $application = new Application(self::$kernel);
+        $command = $application->find('agentj:send-auth-mail-token');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            'command' => $command->getName(),
+        ]);
+    }
+
+    public function testAuthMailIsSentToNotAuthenticatedSenderSeveralTimes(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Generate a mail sent 8 hours ago, and whom the sender is unauthenticated
+        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $this->setMessageDate($mailId, '-8 hours');
+        // Generate a mail sent 6 hours ago, and whom the sender is unauthenticated
+        $senderAddressOtherCase = AddressFactory::createOne([
+            'domain' => $addrS->getDomain(),
+            'partitionTag' => 0,
+            'email' => strtoupper($sender->getEmail()),
+        ]);
+        $mailId = $this->setupMail($senderAddressOtherCase, $addrR, status: MessageStatus::UNRELEASED);
+        $this->setMessageDate($mailId, '-6 hours');
+        self::bootKernel();
+        // Create a mock to intercept mails and assert 2 are sent to the sender
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects($this->exactly(2))
+            ->method('send');
         self::getContainer()->set(MailerInterface::class, $mailer);
 
         $application = new Application(self::$kernel);
@@ -188,5 +229,16 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         $commandTester->execute([
             'command' => $command->getName(),
         ]);
+    }
+
+    private function setMessageDate(string $mailId, ?string $delta = '-6 hours'): void
+    {
+        $message = MessageFactory::findBy(['mailId' => $mailId])[0];
+        $message->setSendCaptcha(0);
+        $message->setTimeNum(new DateTimeImmutable($delta)->getTimestamp());
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient->setStatus(MessageStatus::UNTREATED);
+        $this->entityManager->flush();
     }
 }
