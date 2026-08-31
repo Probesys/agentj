@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -128,8 +129,10 @@ class SenderRuleController extends AbstractController
             $mainUser = $mainUser->getOriginalUser();
         }
 
-        // we check if aliases exist
         if ($mainUser) {
+            $this->checkSenderRuleOwnership($mainUser);
+
+            // we check if aliases exist
             $userAndAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $mainUser->getId()]);
             array_unshift($userAndAliases, $mainUser);
         }
@@ -137,6 +140,24 @@ class SenderRuleController extends AbstractController
         foreach ($userAndAliases as $userOrAlias) {
             $senderRuleRepository->delete($userOrAlias->getId(), $senderRuleAddressId, $priority);
         }
+    }
+
+
+    private function checkSenderRuleOwnership(User $targetUser): void
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $currentMainUser = $currentUser->getOriginalUser() ?? $currentUser;
+
+        if ($currentMainUser->getId() === $targetUser->getId()) {
+            return;
+        }
+
+        if ($this->isGranted('DOMAIN_ACCESS', $targetUser)) {
+            return;
+        }
+
+        throw new AccessDeniedException();
     }
 
     #[Route(
@@ -179,7 +200,6 @@ class SenderRuleController extends AbstractController
 
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('sender_rules_import', ['type' => $type]),
-            'user' => $this->getUser()
         ]);
         $form->handleRequest($request);
 

@@ -26,9 +26,9 @@ class ImapConnectorController extends AbstractController
     }
 
     #[Route('/{domain}/new', name: 'app_connector_imap_new', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
     {
-
         $connector = new ImapConnector();
         $connector->setDomain($domain);
         $form = $this->createForm(ImapConnectorType::class, $connector, [
@@ -53,9 +53,9 @@ class ImapConnectorController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_connector_imap_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function edit(Request $request, ImapConnector $connector, ConnectorRepository $connectorRepository): Response
     {
-
         $form = $this->createForm(ImapConnectorType::class, $connector, [
             'action' => $this->generateUrl('app_connector_imap_edit', ['id' => $connector->getId()]),
         ]);

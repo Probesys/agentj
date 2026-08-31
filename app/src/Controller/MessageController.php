@@ -8,9 +8,11 @@ use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Entity\SenderRule;
 use App\Form\ActionsFilterType;
+use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MessageRepository;
 use App\Service;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +34,7 @@ class MessageController extends AbstractController
         private EntityManagerInterface $em,
         private Service\MessageService $messageService,
         private Service\Referrer $referrer,
+        private DomainRepository $domainRepository,
     ) {
     }
 
@@ -604,12 +607,24 @@ class MessageController extends AbstractController
 
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
-        if (
-            !$this->isGranted("ROLE_ADMIN") &&
-            !in_array($messageRecipient->getAddress()->getEmail(), $accessibleRecipientEmails)
-        ) {
-            throw new AccessDeniedException();
+        $recipientEmail = $messageRecipient->getAddress()->getEmail();
+
+        if (in_array($recipientEmail, $accessibleRecipientEmails, true)) {
+            return;
         }
+
+        // Admins may access mails outside their own mailbox, but only for
+        // recipients that belong to a domain they actually manage.
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $recipientDomainName = Email::extractDomain($recipientEmail);
+            $recipientDomain = $this->domainRepository->findOneBy(['domain' => $recipientDomainName]);
+
+            if ($recipientDomain !== null && $this->isGranted('DOMAIN_ACCESS', $recipientDomain)) {
+                return;
+            }
+        }
+
+        throw new AccessDeniedException();
     }
 
     /**

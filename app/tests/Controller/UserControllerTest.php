@@ -788,7 +788,7 @@ class UserControllerTest extends WebTestCase
 
         $payload = $this->createPayload($client, $domain);
         $client->request(Request::METHOD_POST, '/admin/users/local/new', $payload);
-        
+
         self::assertSame(403, $client->getResponse()->getStatusCode());
         self::assertSame($initialCount, UserFactory::count());
     }

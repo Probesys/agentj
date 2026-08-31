@@ -30,6 +30,18 @@ class OutMessageRecipientRepository extends BaseMessageRecipientRepository
         return $queryBuilder;
     }
 
+    protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void
+    {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $queryBuilder->innerJoin('m.senderAddress', 'sa');
+        $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = sa.email');
+        $queryBuilder->andWhere('u.domain in (:restrictedDomains)');
+        $queryBuilder->setParameter('restrictedDomains', $user->getDomains());
+    }
+
     /**
      * @return OutMessageRecipient[]
      */

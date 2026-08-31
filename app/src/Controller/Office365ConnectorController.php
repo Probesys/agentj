@@ -27,6 +27,7 @@ class Office365ConnectorController extends AbstractController
     }
 
     #[Route('/{domain}/new', name: 'app_connector_o365_new', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
     {
         $connector = new Office365Connector();
@@ -53,6 +54,7 @@ class Office365ConnectorController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_connector_o365_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function edit(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
     {
         $form = $this->createForm(Office365ConnectorType::class, $connector, [
@@ -76,6 +78,7 @@ class Office365ConnectorController extends AbstractController
     }
 
     #[Route('/office365/{id}/sync-user', name: 'app_office365_connector_sync')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function syncUser(Request $request, Connector $connector): Response
     {
         if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {

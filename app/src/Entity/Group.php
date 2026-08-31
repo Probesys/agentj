@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Security\HasDomainInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
@@ -10,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Table(name: 'groups')]
 #[ORM\Entity(repositoryClass: 'App\Repository\GroupRepository')]
-class Group
+class Group implements HasDomainInterface
 {
     use RuleTrait;
 

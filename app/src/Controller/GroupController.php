@@ -22,7 +22,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -35,15 +34,6 @@ class GroupController extends AbstractController
         private TranslatorInterface $translator,
         private DomainRepository $domainsRepository,
     ) {
-    }
-
-    private function checkAccess(Group $group): void
-    {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
-                throw new AccessDeniedException();
-            }
-        }
     }
 
     #[Route(path: '/', name: 'group_index', methods: 'GET')]
@@ -86,7 +76,7 @@ class GroupController extends AbstractController
     public function new(Request $request): Response
     {
         $group = new Group();
-        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $form = $this->createForm(GroupType::class, $group, [
                 'action' => $this->generateUrl('group_new'),
                 'attr' => ['class' => 'modal-ajax-form']
@@ -136,6 +126,7 @@ class GroupController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'group_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function edit(
         Request $request,
         Group $group,
@@ -144,8 +135,7 @@ class GroupController extends AbstractController
         GroupRuleRepository $groupRuleRepository,
         RuleAddressRepository $ruleAddressRepository,
     ): Response {
-        $this->checkAccess($group);
-        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $form = $this->createForm(GroupType::class, $group, [
                 'action' => $this->generateUrl('group_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']
@@ -210,15 +200,13 @@ class GroupController extends AbstractController
     }
 
     #[Route(path: '/{id}/users', name: 'group_list_users', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function listUsers(
         Group $group,
         Request $request,
         UserRepository $userRepository,
         PaginatorInterface $paginator
     ): Response {
-
-        $this->checkAccess($group);
-
         $searchKey = $request->query->getString('search', '');
         $usersQuery = $userRepository->getSearchByGroupQuery($group, $searchKey);
 
@@ -238,6 +226,7 @@ class GroupController extends AbstractController
     }
 
     #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function removeUser(
         Request $request,
         Group $group,
@@ -246,7 +235,6 @@ class GroupController extends AbstractController
         GroupService $groupService,
         UserRepository $userRepository,
     ): Response {
-
         $csrfToken = $request->request->getString('_token', '');
 
         if (!$this->isCsrfTokenValid('removeUser' . $user->getId(), $csrfToken)) {
@@ -288,13 +276,13 @@ class GroupController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'group_delete', methods: 'POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function delete(
         Request $request,
         Group $group,
         UserService $userService,
         GroupService $groupService,
     ): Response {
-
         $csrfToken = $request->request->getString('_token', '');
 
         if (!$this->isCsrfTokenValid('delete' . $group->getId(), $csrfToken)) {
@@ -323,6 +311,12 @@ class GroupController extends AbstractController
     {
         $domainId = $request->request->get('domainId');
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
+
+        if (!$domain) {
+            throw $this->createNotFoundException();
+        }
+
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $domain);
 
         $priority = $request->request->get('priority');
         $group = $this->em->getRepository(Group::class)->findOneBy([

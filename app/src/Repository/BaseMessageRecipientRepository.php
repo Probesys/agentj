@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\MessageRecipient;
 use App\Entity\OutMessageRecipient;
+use App\Entity\User;
 use App\Util\Search;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -16,14 +17,19 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
 {
     abstract protected function getBaseQueryBuilder(): QueryBuilder;
 
+    abstract protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void;
+
     /**
      * @param ?array<string, mixed> $filters
      */
     public function getAdvancedSearchQuery(
+        User $user,
         ?array $filters = [],
     ): Query {
 
         $queryBuilder = $this->getBaseQueryBuilder();
+
+        $this->applyDomainRestriction($queryBuilder, $user);
 
         if (isset($filters['host'])) {
             $queryBuilder->andWhere('m.host like :host');
