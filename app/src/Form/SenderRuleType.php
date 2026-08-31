@@ -3,25 +3,34 @@
 namespace App\Form;
 
 use App\Entity\Domain;
+use App\Validator\Constraints\SenderAddress;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
-class ImportType extends AbstractType
+/**
+ * @extends AbstractType<array{email: string, domain?: Domain}>
+ */
+class SenderRuleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('attachment', FileType::class, ['label' => false]);
+        $builder->add('email', TextType::class, [
+            'label' => new TranslatableMessage('Generics.fields.sender'),
+            'constraints' => [new NotBlank(), new SenderAddress()],
+        ]);
 
-        if (is_array($options['domains'])) {
+        if ($options['is_admin'] === true) {
             $builder->add('domain', EntityType::class, [
                 'class' => Domain::class,
                 'choices' => $options['domains'],
                 'label' => new TranslatableMessage('Entities.SenderRule.fields.domain'),
-                'multiple' => false,
+                'placeholder' => new TranslatableMessage('Generics.actions.chooseDomain'),
+                'required' => true,
                 'attr' => ['class' => 'select2'],
             ]);
         }
@@ -31,8 +40,10 @@ class ImportType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => null,
-            'domains' => null,
+            'domains' => [],
+            'is_admin' => false,
         ]);
-        $resolver->setAllowedTypes('domains', ['array', 'null']);
+        $resolver->setAllowedTypes('domains', 'array');
+        $resolver->setAllowedTypes('is_admin', 'bool');
     }
 }

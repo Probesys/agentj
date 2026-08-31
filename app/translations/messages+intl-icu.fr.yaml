@@ -236,6 +236,8 @@ Entities.Report.title: "Rapport d'activité"
 Entities.Report.titleDay: 'Sur les dernières 24h'
 Entities.Report.titleMonth: 'Sur le dernier mois'
 Entities.Report.typeMessage: Type
+Entities.SenderRule.actions.addSenderB: 'Bannir un expéditeur'
+Entities.SenderRule.actions.addSenderW: 'Autoriser un expéditeur'
 Entities.SenderRule.actions.deleteSenderB: "Débloquer l'expéditeur"
 Entities.SenderRule.actions.deleteSenderW: "Supprimer l'expéditeur"
 Entities.SenderRule.fields.domain: Domaine

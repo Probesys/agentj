@@ -253,6 +253,7 @@ class SenderRuleRepository extends BaseRepository
         $senderRule = $this->findOneBy([
             'user' => $recipientUser,
             'senderRuleAddress' => $senderRuleAddress,
+            'priority' => $priority,
         ]);
 
         if (!$senderRule) {
