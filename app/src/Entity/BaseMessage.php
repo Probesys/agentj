@@ -351,10 +351,10 @@ class BaseMessage
         $fromEmail = $this->getFromMimeAddress()?->getAddress();
 
         if ($fromEmail) {
-            return $fromEmail;
+            return strtolower($fromEmail);
         }
 
-        return $senderEmail;
+        return strtolower($senderEmail);
     }
 
     public function getStatus(): ?int
