@@ -2,8 +2,12 @@
 
 namespace App\Tests\Controller;
 
+use App\Entity\SenderRule;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\RuleAddressFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
+use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +19,7 @@ use function PHPUnit\Framework\assertSame;
 class UserControllerTest extends WebTestCase
 {
     use Factories;
+    use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
 
@@ -195,5 +200,72 @@ class UserControllerTest extends WebTestCase
         );
         // But no user created (1 because of `@domain.tld`, and one for the admin)
         self::assertSame(2, UserFactory::count());
+    }
+
+    public function testCreateAnAliasForAUserWithSenderRulesShouldApplyThoseRules(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        [$senderAddress, $userAddress] = $this->setupAddresses($sender, $recipient);
+        $senderRuleAddress = RuleAddressFactory::new()->create([
+            'email' => $senderAddress->getEmail(),
+            'priority' => 7,
+        ]);
+        $senderRule = SenderRuleFactory::new()->create([
+            'user' => $sender,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => 'accept',
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+        ]);
+        self::assertCount(1, $sender->getSenderRules());
+        $initialCount = UserFactory::count();
+        // The rule is still associated to the user
+        $em = self::getContainer()->get('doctrine')->getManager();
+        $em->refresh($recipient);
+
+        $fullname = 'test fullname';
+        $alias = 'other@' . $domain->getDomain();
+        $username = $alias;
+        $client->request(Request::METHOD_POST, '/admin/users/newAlias', [
+            'user' => [
+                '_token' => $this->generateCsrfToken($client, 'user'),
+                'fullname' => $fullname,
+                'username' => $username,
+                'email' => $alias,
+                'originalUser' => $sender->getId(),
+                'report' => 1,
+            ],
+        ]);
+
+        $content = $client->getResponse()->getContent();
+        self::assertNotFalse($content);
+        self::assertResponseIsSuccessful();
+        self::assertJsonStringEqualsJsonString(
+            '{"status":"success","message":"Added successfully!"}',
+            $content,
+        );
+        // Alias has been created
+        self::assertSame($initialCount + 1, UserFactory::count());
+        $newAlias = UserFactory::last();
+        self::assertSame($fullname, $newAlias->getFullname());
+        self::assertSame($alias, $newAlias->getUsername());
+        self::assertSame($alias, $newAlias->getEmail());
+        // The rule has been associated to the new alias
+        self::assertSame(1, $newAlias->getSenderRules()->count());
+        $aliasSenderRule = $newAlias->getSenderRules()->first();
+        self::assertNotFalse($aliasSenderRule);
+        self::assertSame($newAlias->getId(), $aliasSenderRule->getUser()->getId());
+        self::assertSame($senderRule->getSenderRuleAddress(), $aliasSenderRule->getSenderRuleAddress());
+        self::assertSame($senderRule->getPriority(), $aliasSenderRule->getPriority());
+        // The rule is still associated to the user
+        $em = self::getContainer()->get('doctrine')->getManager();
+        $em->refresh($sender);
+        self::assertSame(1, $sender->getSenderRules()->count());
+        self::assertSame($senderRule, $sender->getSenderRules()->first());
     }
 }
