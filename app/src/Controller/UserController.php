@@ -380,6 +380,10 @@ class UserController extends AbstractController
                 $user->setRoles('["ROLE_USER"]');
                 $user->setUsername($user->getEmail());
                 $user->setDomain($newDomain);
+                // Marks the account as local for amavisd-new's default SQL
+                // policy lookup, so mail to this address isn't misclassified
+                // as a suspected open relay (see issue #537).
+                $user->setLocal('Y');
 
                 $policy = $this->computeUserPolicy($user);
                 $user->setPolicy($policy);
