@@ -181,13 +181,8 @@ class MessageController extends AbstractController
         );
 
         $perPage = (int) $this->getParameter('app.per_page_global');
-        if ($request->query->has('per_page') && $request->query->getInt('per_page') > 0) {
-            $perPage = $request->query->getInt('per_page', $perPage);
-            $request->getSession()->set('per_page', $perPage);
-        } elseif ($request->getSession()->has('per_page') && $request->getSession()->get('per_page') > 0) {
-            $perPage = $request->getSession()->get('per_page');
-        }
-        $filterForm->get('per_page')->setData($perPage);
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
+
 
         $messagesRecipients = $paginator->paginate(
             $messagesRecipientsQuery,

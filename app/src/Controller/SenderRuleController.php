@@ -45,24 +45,12 @@ class SenderRuleController extends AbstractController
             'action' => $this->generateUrl('sender_rules_batch'),
         ]);
 
-        $sortField = $request->query->getString('sortField');
-        if (!in_array($sortField, ['emailuser', 'email', 'wb.datemod'])) {
-            $sortField = 'email';
-        }
-        $sortDirection = $request->query->getString('sortDirection');
-        if ($sortDirection !== 'asc' && $sortDirection !== 'desc') {
-            $sortDirection = 'asc';
-        }
-
         $query = trim($request->query->getString('search'));
 
         /** @var User $user */
         $user = $this->getUser();
         $title = '';
-        $senderRule = $this->em->getRepository(SenderRule::class)->search($type, $user, $query, [
-            'field' => $sortField,
-            'direction' => $sortDirection,
-        ]);
+        $senderRuleQuery = $this->em->getRepository(SenderRule::class)->getSearchQuery($type, $user, $query);
 
         switch ($type) {
             case "W":
@@ -72,25 +60,27 @@ class SenderRuleController extends AbstractController
                 $title = $this->translator->trans('Navigation.blacklist');
                 break;
         }
-        $totalItemFound = count($senderRule);
 
-        // Retrieve perPage from the request or use the default value
-        $perPage = $request->query->getInt('per_page', (int) $this->getParameter('app.per_page_global'));
+        $perPage = (int) $this->getParameter('app.per_page_global');
+        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
 
-        // Set the initial value of perPage in the form
-        $filterForm->get('per_page')->setData($perPage);
 
         $senderRules = $paginator->paginate(
-            $senderRule,
+            $senderRuleQuery,
             $request->query->getInt('page', 1) /* page number */,
-            $perPage
+            $perPage,
+            [
+                'wrap-queries' => true,
+                'fetchJoinCollection' => false,
+                'distinct' => false,
+            ]
         );
+
         return $this->render('sender_rule/index.html.twig', [
             'controller_name' => 'SenderRuleController',
             'senderRules' => $senderRules,
             'senderRuleType' => $type,
             'title' => $title,
-            'totalItemFound' => $totalItemFound,
             'filter_form' => $filterForm->createView()
         ]);
     }
