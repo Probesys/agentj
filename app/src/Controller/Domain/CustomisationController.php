@@ -133,6 +133,7 @@ class CustomisationController extends AbstractController
                 'MESSAGE_SUBJECT' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT'),
                 'URL_MESSAGE_AUTHORIZE_SENDER' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_AUTHORIZE_SENDER'),
                 'URL_MESSAGE_RESTORE' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE'),
+                'URL_MESSAGE_BAN' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_BAN'),
             ],
             // phpcs:enable Generic.Files.LineLength
         ]);
