@@ -89,11 +89,11 @@ class AppExtension extends AbstractExtension
     /**
      * Check if sender rule is overridden by anotherOne with higher priority
      *
-     * @param array<string, mixed> $wbInfo
+     * @param SenderRule $senderRule
      */
-    public function senderRuleIsOverridden(array $wbInfo): bool
+    public function senderRuleIsOverridden(SenderRule $senderRule): bool
     {
-        return $this->em->getRepository(SenderRule::class)->senderRuleIsOverridden($wbInfo);
+        return $this->em->getRepository(SenderRule::class)->senderRuleIsOverridden($senderRule);
     }
 
     public function messageReleaseToken(Message $message, User $user): string
