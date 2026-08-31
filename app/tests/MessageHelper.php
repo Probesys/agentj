@@ -49,6 +49,7 @@ trait MessageHelper
             'subject' => $subject,
             'fromAddr' => $sender->getEmail(),
             'status' => $status,
+            'sendCaptcha' => 0,
         ]);
 
         MessageRecipientFactory::new()->create([
