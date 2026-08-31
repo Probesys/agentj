@@ -6,11 +6,12 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Repository\AlertRepository;
+use App\Security\OwnedByUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AlertRepository::class)]
 #[ORM\Table(name: 'alert')]
-class Alert
+class Alert implements OwnedByUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

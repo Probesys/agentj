@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AlertController extends AbstractController
@@ -21,6 +21,7 @@ class AlertController extends AbstractController
     }
 
     #[Route('/alert/read/{id}', name: 'alert_read')]
+    #[IsGranted('IS_OWNER', subject: 'alert')]
     public function read(Alert $alert, EntityManagerInterface $entityManager): Response
     {
         $alert->setIsRead(true);
@@ -30,6 +31,7 @@ class AlertController extends AbstractController
     }
 
     #[Route('/alert/delete/{id}', name: 'alert_delete', methods: 'POST')]
+    #[IsGranted('IS_OWNER', subject: 'alert')]
     public function delete(Alert $alert, EntityManagerInterface $entityManager, Request $request): Response
     {
         $csrfToken = $request->request->getString('_token', '');

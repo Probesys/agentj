@@ -289,6 +289,7 @@ class UserController extends AbstractController
     }
 
     #[Route(path: '/email/{id}/delete', name: 'user_email_delete', methods: 'POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
     public function deleteEmail(Request $request, User $user): Response
     {
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->getString('_token'))) {
@@ -311,7 +312,7 @@ class UserController extends AbstractController
 
         foreach ($request->request->all('id') as $id) {
             $user = $this->em->getRepository(User::class)->find($id);
-            if ($user) {
+            if ($user && $this->isGranted('DOMAIN_ACCESS', $user)) {
                 $this->em->remove($user);
             }
         }
@@ -487,6 +488,7 @@ class UserController extends AbstractController
 
 
     #[Route(path: '/email/{id}/edit', name: 'user_email_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
     public function editUserEmail(
         User $user,
         Request $request,
@@ -583,6 +585,7 @@ class UserController extends AbstractController
     }
 
     #[Route(path: '/alias/{id}/edit', name: 'user_email_alias_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
     public function editUserEmailAlias(
         Request $request,
         User $user,
@@ -666,7 +669,7 @@ class UserController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             $allowedDomains = $user->getDomains()->toArray();
         } else {
             $allowedDomains = $this->em
@@ -706,7 +709,7 @@ class UserController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             $allowedDomains = $user->getDomains()->toArray();
         }
 

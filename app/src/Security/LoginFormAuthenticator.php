@@ -161,7 +161,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     private function getLocalUser(string $userName): ?User
     {
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => strtolower($userName)]);
-        if ($user && (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles()))) {
+        if ($user && $user->isAdmin()) {
             return $user;
         }
         return null;

@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -37,18 +37,6 @@ class DomainController extends AbstractController
         private EntityManagerInterface $em,
         private UserService $userService,
     ) {
-    }
-
-    private function checkAccess(Domain $domain): void
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        if (
-            !in_array('ROLE_SUPER_ADMIN', $user->getRoles()) &&
-            !$user->hasDomain($domain)
-        ) {
-            throw new AccessDeniedException();
-        }
     }
 
     #[Route(path: '/', name: 'domain_index', methods: 'GET')]
@@ -89,15 +77,12 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function new(
         Request $request,
         ParameterBagInterface $params,
         SettingRepository $settingRepository,
     ): Response {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            throw new AccessDeniedException();
-        }
-
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
@@ -191,10 +176,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function edit(Request $request, Domain $domain): Response
     {
-
-        $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
             'is_edit' => true,
@@ -269,9 +253,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'domain_delete', methods: 'POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function delete(Request $request, Domain $domain): Response
     {
-        $this->checkAccess($domain);
         $token = $request->request->getString('_token');
         if ($this->isCsrfTokenValid('delete' . $domain->getId(), $token)) {
             $em = $this->em;
@@ -283,14 +267,13 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/rules', name: 'domain_sender_rules_index', methods: 'GET')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function domainSenderRule(
         Domain $domain,
         Request $request,
         PaginatorInterface $paginator,
         SenderRuleRepository $senderRuleRepository
     ): Response {
-        $this->checkAccess($domain);
-
         $userDomain = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
 
         $searchKey = $request->query->getString('search', '');
@@ -324,9 +307,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/rules/new', name: 'domain_sender_rules_new', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function newSenderRule(Domain $domain, Request $request, RuleAddressService $ruleAddressService): Response
     {
-        $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
             'action' => $this->generateUrl('domain_sender_rules_new', ['id' => $domain->getId()]),
@@ -391,7 +374,7 @@ class DomainController extends AbstractController
     ): Response {
         $senderRule = $senderRuleRepository->findOneBy(['user' => $rid, 'senderRuleAddress' => $sid]);
         $domain = $senderRule->getUser()->getDomain();
-        $this->checkAccess($domain);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $domain);
 
         $csrfToken = $request->request->getString('_token', '');
 

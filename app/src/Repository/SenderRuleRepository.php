@@ -54,12 +54,12 @@ class SenderRuleRepository extends BaseRepository
                 ->innerJoin('wb.senderRuleAddress', 's')
                 ->leftJoin('wb.group', 'g');
 
-        if (in_array('ROLE_USER', $user->getRoles())) {
+        if (!$user->isAdmin()) {
             $dql->andWhere('wb.user = :user');
             $dql->setParameter('user', $user);
         }
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+        if ($user->isAdmin(false)) {
             $dql->andWhere('u.domain in (:domains)');
             $dql->setParameter('domains', $user->getDomains());
         }
@@ -80,7 +80,7 @@ class SenderRuleRepository extends BaseRepository
         if ($query) {
             $whereQuery = 'LOWER(s.email) LIKE LOWER(:query)';
 
-            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            if ($user->isAdmin(false)) {
                 $whereQuery .= ' OR LOWER(u.email) LIKE LOWER(:query)';
                 $whereQuery .= ' OR LOWER(u.fullname) LIKE LOWER(:query)';
             }

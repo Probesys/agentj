@@ -17,6 +17,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ConnectorController extends AbstractController
 {
     #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function delete(
         Request $request,
         Connector $connector,
@@ -35,6 +36,7 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/sync/{id}/result', name: 'app_connector_sync_result', methods: ['GET'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function syncResult(Connector $connector): Response
     {
         return $this->render('connector/sync_result.html.twig', [
@@ -43,6 +45,7 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/sync/{id}/status', name: 'app_connector_sync_status', methods: ['GET'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function syncStatus(Connector $connector): JsonResponse
     {
         return new JsonResponse([

@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -40,13 +41,16 @@ class SearchController extends AbstractController
 
         $activeFilters = $form->getData();
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         $messageType = $activeFilters['messageType'] ?? 'incoming';
         if ($messageType == 'incoming') {
             $allMessages = $this->messageRecipientSearchRepository
-                ->getAdvancedSearchQuery($activeFilters);
+                ->getAdvancedSearchQuery($user, $activeFilters);
         } else {
             $allMessages = $this->outMessageRecipientRepository
-                ->getAdvancedSearchQuery($activeFilters);
+                ->getAdvancedSearchQuery($user, $activeFilters);
         }
 
         $perPage = (int) $this->getParameter('app.per_page_global');
@@ -109,13 +113,21 @@ class SearchController extends AbstractController
         ]);
         $outMessage = $stmtOutMessage->fetchAssociative();
 
+        if ($outMessage === false) {
+            throw $this->createNotFoundException();
+        }
+
         /** @var User $user */
         $user = $this->getUser();
         $allMessages = $this->em->getRepository(Message::class)->advancedSearch($user, 'outgoing');
 
         $messages = array_filter($allMessages, function ($message) use ($outMessage) {
-            return $outMessage !== false && $message['mail_id'] === $outMessage['mail_id'];
+            return $message['mail_id'] === $outMessage['mail_id'];
         });
+
+        if (empty($messages)) {
+            throw new AccessDeniedException();
+        }
 
         return $this->render('message/out_show.html.twig', [
             'controller_name' => 'MessageController',

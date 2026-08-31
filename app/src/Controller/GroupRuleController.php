@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -33,15 +32,6 @@ class GroupRuleController extends AbstractController
         $this->translator = $translator;
     }
 
-    private function checkAccess(Group $group): void
-    {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
-                throw new AccessDeniedException();
-            }
-        }
-    }
-
     #[Route(path: '/{groupId}/rules', name: 'groups_rules_index', methods: 'GET')]
     public function index(
         int $groupId,
@@ -51,7 +41,7 @@ class GroupRuleController extends AbstractController
     ): Response {
 
         $group = $this->em->getRepository(Group::class)->find($groupId);
-        $this->checkAccess($group);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
 
         $searchKey = $request->query->getString('search', '');
         $groupRulesSearchQuery = $groupRuleRepository->getSearchQuery(
@@ -92,6 +82,7 @@ class GroupRuleController extends AbstractController
         if (!$group) {
             throw $this->createNotFoundException('The group does not exist');
         }
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
 
         $groupRule = new GroupRule();
 
@@ -156,7 +147,7 @@ class GroupRuleController extends AbstractController
             'group' => $groupId,
         ]);
         $group = $this->em->getRepository(Group::class)->findOneBy(['id' => $groupId]);
-        $this->checkAccess($group);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
         $form = $this->createForm(GroupRuleType::class, null, [
             'action' => $this->generateUrl('groups_rules_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
         ]);
@@ -210,7 +201,7 @@ class GroupRuleController extends AbstractController
     public function delete(int $groupId, int $sid, Request $request, GroupService $groupService): RedirectResponse
     {
         $group = $this->em->getRepository(Group::class)->findOneBy(['id' => $groupId]);
-        $this->checkAccess($group);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
 
         $csrfToken = $request->request->getString('_token', '');
 

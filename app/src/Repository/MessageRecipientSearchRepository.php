@@ -126,6 +126,17 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         return $queryBuilder;
     }
 
+    protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void
+    {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email');
+        $queryBuilder->andWhere('u.domain in (:restrictedDomains)');
+        $queryBuilder->setParameter('restrictedDomains', $user->getDomains());
+    }
+
     private function createCountQueryBuilder(
         QueryBuilder $baseQueryBuilder,
         ?User $user,
