@@ -24,6 +24,31 @@ ifndef FORCE
 endif
 	docker compose down -v
 
+POC_COMPOSE = docker compose -f docker-compose.yml -f compose.dev.yml -f compose.milter-poc.yml
+
+.PHONY: poc-up
+poc-up: .env ## Start the URL rewriting POC
+	$(POC_COMPOSE) up -d --build --wait
+
+.PHONY: poc-down
+poc-down: ## Stop the URL rewriting POC
+	$(POC_COMPOSE) down
+
+.PHONY: poc-test-auth
+poc-test-auth: poc-up ## Check trusted incoming authentication results
+	./tests/rspamd-authentication-results.sh
+
+.PHONY: poc-test-pipeline
+poc-test-pipeline: poc-up ## Check rewriting, routing, DKIM and ARC
+	./tests/milter/integration.sh
+
+.PHONY: poc-test-failures
+poc-test-failures: poc-up ## Check final signer failure and retry behavior
+	./tests/authentication/failure.sh
+
+.PHONY: poc-test
+poc-test: poc-test-auth poc-test-pipeline poc-test-failures ## Run all URL rewriting POC checks
+
 .PHONY: test
 test: FILE ?= ./tests
 ifdef FILTER

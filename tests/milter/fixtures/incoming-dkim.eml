@@ -1,0 +1,10 @@
+DKIM-Signature: v=1; a=rsa-sha256; d=example.net; s=test;
+ h=from:to:subject; bh=invalid-for-poc; b=invalid-for-poc
+Authentication-Results: gateway.example; dkim=pass header.d=example.net
+From: sender@example.net
+To: recipient@example.org
+Subject: Incoming DKIM result
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Signed before transformation: https://signed.example/path

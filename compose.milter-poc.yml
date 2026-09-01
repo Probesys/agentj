@@ -1,0 +1,115 @@
+---
+
+services:
+  mailpit:
+    ports: !reset []
+
+  smtp:
+    environment:
+      INBOUND_MILTERS: inet:rspamdauth:11332
+      MILTER_AUTH_SERV_ID: auth.agentj.test
+      POST_AMAVIS_CONTENT_FILTER: smtp:[127.0.0.1]:10030
+      POST_REWRITE_MILTERS: inet:127.0.0.1:9999,inet:opendkimfinal:8892,inet:rspamdarc:11332
+    depends_on:
+      rspamdauth:
+        condition: service_healthy
+
+  rspamdauth:
+    image: rspamd/rspamd:4.1.5@sha256:c307774c4c83bc445f0ae6696fd1798c92b0b89355ae1d87c9c39694c875e51e
+    restart: "no"
+    hostname: auth.agentj.test
+    dns: 172.28.2.5
+    volumes:
+      - ./poc/rspamd-auth/local.d:/etc/rspamd/local.d:ro
+      - ./poc/rspamd-auth/override.d:/etc/rspamd/override.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q ':2C44 ' /proc/net/tcp"]
+      interval: 2s
+      timeout: 1s
+      retries: 30
+
+  policyrouter:
+    build:
+      context: poc/router/go
+    restart: "no"
+    network_mode: service:smtp
+    depends_on:
+      smtp:
+        condition: service_started
+    environment:
+      ROUTER_LISTEN: 127.0.0.1:10030
+      ROUTER_DOWNSTREAM: 127.0.0.1:10026
+      ROUTER_SPOOL_DIR: /tmp/agentj-router
+      ROUTER_MAX_MESSAGE_BYTES: "41943040"
+      ROUTER_READ_TIMEOUT: 2m
+      ROUTER_WRITE_TIMEOUT: 2m
+      ROUTER_DIAL_TIMEOUT: 10s
+      ROUTER_COMMAND_TIMEOUT: 30s
+      ROUTER_SUBMISSION_TIMEOUT: 2m
+    tmpfs:
+      - /tmp/agentj-router:rw,noexec,nosuid,size=64m,uid=65532,gid=65532,mode=0700
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'QUIT\\r\\n' | nc -w 1 127.0.0.1 10030 | grep -q '^220'"]
+      interval: 2s
+      timeout: 1s
+      retries: 15
+
+  urlrewritermilter:
+    build:
+      context: .
+      dockerfile: poc/milter/go/Dockerfile
+    restart: "no"
+    network_mode: service:smtp
+    depends_on:
+      smtp:
+        condition: service_started
+    environment:
+      MILTER_LISTEN: 127.0.0.1:9999
+      MILTER_SPOOL_DIR: /var/spool/agentj-milter
+      MILTER_MAX_MESSAGE_BYTES: "41943040"
+      MILTER_MAX_SPOOL_BYTES: "67108864"
+      MILTER_MAX_CONCURRENCY: "2"
+      MILTER_TRANSACTION_TIMEOUT: 2m
+    tmpfs:
+      - /var/spool/agentj-milter:rw,noexec,nosuid,size=64m,uid=10001,gid=10001,mode=0750
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 9999"]
+      interval: 2s
+      timeout: 1s
+      retries: 15
+
+  opendkimfinal:
+    build:
+      context: poc/opendkim-final
+    restart: "no"
+    dns: 172.28.2.5
+    healthcheck:
+      test: ["CMD-SHELL", "ss -ltn | grep -q ':8892'"]
+      interval: 2s
+      timeout: 1s
+      retries: 15
+
+  rspamdarc:
+    image: rspamd/rspamd:4.1.5@sha256:c307774c4c83bc445f0ae6696fd1798c92b0b89355ae1d87c9c39694c875e51e
+    restart: "no"
+    dns: 172.28.2.5
+    volumes:
+      - ./poc/rspamd-arc/local.d:/etc/rspamd/local.d:ro
+      - ./poc/rspamd-arc/keys/arc.private:/var/lib/rspamd/arc/arc.private:ro
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q ':2C44 ' /proc/net/tcp"]
+      interval: 2s
+      timeout: 1s
+      retries: 30
+
+  smtptest:
+    volumes:
+      - ./tests/milter/fixtures:/fixtures:ro
+
+  authenticationverifier:
+    build:
+      context: tests/authentication
+    profiles: [test]
+    restart: "no"
+    environment:
+      DNS_SERVER: 172.28.2.5

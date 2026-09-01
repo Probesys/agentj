@@ -21,6 +21,12 @@
 - [Working with Xdebug](/docs/developers/xdebug.md)
 - [Working with Bayes filtering](/docs/developers/bayes_filtering.md)
 
+## URL Rewriting POC
+
+- [POC runbook and validated scope](/docs/poc-reecriture-url.md)
+- [Target architecture](/architecture-agentj-url-rewriting.md)
+- [Product specifications](/docs/ticket-specifications-reecriture-url.md)
+
 Dedicated to the maintainers:
 
 - [Release a version](/docs/developers/release.md)

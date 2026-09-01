@@ -1,0 +1,26 @@
+From: sender@example.net
+To: recipient@example.org
+Subject: Multipart alternative and mixed
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mixed-boundary"
+
+--mixed-boundary
+Content-Type: multipart/alternative; boundary="alternative-boundary"
+
+--alternative-boundary
+Content-Type: text/plain; charset=UTF-8
+
+Plain https://plain.example/path
+--alternative-boundary
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<p><a href=3D'https://html.example/path'>HTML</a></p>
+--alternative-boundary--
+--mixed-boundary
+Content-Type: text/plain; charset=UTF-8; name="links.txt"
+Content-Disposition: attachment; filename="links.txt"
+Content-Transfer-Encoding: base64
+
+YXR0YWNobWVudCBodHRwczovL2F0dGFjaG1lbnQuZXhhbXBsZS9maWxl
+--mixed-boundary--

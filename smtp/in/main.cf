@@ -29,8 +29,9 @@ recipient_delimiter = +
 inet_interfaces = all
 
 milter_default_action = tempfail
-smtpd_milters = inet:opendkim:8891
-non_smtpd_milters = inet:opendkim:8891
+milter_macro_daemon_name = $MILTER_AUTH_SERV_ID
+smtpd_milters = $INBOUND_MILTERS
+non_smtpd_milters = $INBOUND_MILTERS
 
 transport_maps = proxy:mysql:/etc/postfix-common/mysql-transport_map.cf,
 	       lmdb:/etc/postfix-common/slow_dest_domains_transport

@@ -1,0 +1,9 @@
+From: sender@example.net
+To: recipient@example.org
+Subject: HTML base64
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+PGEgaHJlZj0iaHR0cHM6Ly9leGFtcGxlLm9yZy9hP2I9MSZhbXA7Yz0yIj5M
+aWVuPC9hPjxhIGhyZWY9Im1haWx0bzp4QHkiPk1haWw8L2E+PC9ib2R5PjwvaHRtbD4=

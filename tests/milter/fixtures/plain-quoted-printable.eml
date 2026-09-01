@@ -1,0 +1,8 @@
+From: sender@example.net
+To: recipient@example.org
+Subject: Quoted printable and ISO-8859-1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Caf=E9: <https://example.org/a?value=3D1>, puis https://example.net/end.
