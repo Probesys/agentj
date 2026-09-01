@@ -35,7 +35,7 @@ COPY --chown=www-data:www-data . /var/www/
 RUN chown www-data:www-data /var/www
 
 USER www-data:www-data
-RUN composer install --ignore-platform-reqs --no-scripts --no-cache
+RUN composer install --ignore-platform-reqs --no-scripts --no-cache --no-dev --optimize-autoloader
 RUN yarnpkg install
 RUN yarnpkg encore production
 

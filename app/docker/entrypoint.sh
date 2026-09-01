@@ -17,7 +17,11 @@ rm -rf /var/www/agentj/var/cache
 
 if [ -x "$(which composer)" ] && [ -x "$(which yarnpkg)" ] ; then
 	echo "Installing libraries"
-	sudo -u www-data composer install --ignore-platform-reqs --no-scripts
+	if [ -n "$SF_APP_ENV" ] && [ "$SF_APP_ENV" = "dev" ]; then
+		sudo -u www-data composer install --ignore-platform-reqs --no-scripts --optimize-autoloader
+	else
+		sudo -u www-data composer install --ignore-platform-reqs --no-scripts --no-dev --optimize-autoloader
+	fi
 	sudo -u www-data yarnpkg install
 fi
 
