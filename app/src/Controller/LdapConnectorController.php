@@ -11,7 +11,6 @@ use App\Model\ConnectorTypes;
 use App\Repository\ConnectorRepository;
 use App\Service\CryptEncryptService;
 use App\Service\LdapService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -42,6 +41,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/{domain}/new', name: 'app_connector_ldap_new', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function new(Request $request, Domain $domain, ConnectorRepository $connectorRepository): Response
     {
 
@@ -77,6 +77,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_connector_ldap_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function edit(Request $request, LdapConnector $connector, ConnectorRepository $connectorRepository): Response
     {
         $oldPass = $connector->getLdapPassword();
@@ -110,6 +111,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/{id}/sync-user', name: 'app_ldap_connector_sync')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function syncUser(Request $request, Connector $connector, ConnectorRepository $connectorRepository): Response
     {
         if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
@@ -126,6 +128,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/checkbind/{domain}', name: 'app_connector_ldap_checkbind', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function checkbindAction(Request $request, LdapService $ldapService, Domain $domain): Response
     {
         $testConnector = new LdapConnector();
@@ -163,6 +166,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/check-users-filter/{domain}', name: 'app_connector_ldap_check_user_filter', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function checkUserFilter(Domain $domain, Request $request, LdapService $ldapService): Response
     {
 
@@ -217,6 +221,7 @@ class LdapConnectorController extends AbstractController
     }
 
     #[Route('/check-groups-filter/{domain}', name: 'app_connector_ldap_check_groups_filter', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function checkGroupFilter(Domain $domain, Request $request, LdapService $ldapService): Response
     {
 

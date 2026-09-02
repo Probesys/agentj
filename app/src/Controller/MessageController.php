@@ -2,16 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Mailaddr;
 use App\Amavis\MessageStatus;
 use App\Entity\Msgrcpt;
 use App\Entity\Msgs;
-use App\Entity\Quarantine;
 use App\Entity\User;
 use App\Entity\Wblist;
 use App\Form\ActionsFilterType;
+use App\Repository\DomainRepository;
 use App\Repository\MsgrcptSearchRepository;
 use App\Repository\MsgsRepository;
+use App\Util\Email;
 use App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Webklex\PHPIMAP\Message;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route(path: '/message')]
@@ -34,6 +33,7 @@ class MessageController extends AbstractController
         private EntityManagerInterface $em,
         private Service\MessageService $messageService,
         private Service\Referrer $referrer,
+        private DomainRepository $domainRepository,
     ) {
     }
 
@@ -605,12 +605,24 @@ class MessageController extends AbstractController
 
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
-        if (
-            !$this->isGranted("ROLE_ADMIN") &&
-            !in_array($msgRcpt->getRid()->getEmailClear(), $accessibleRecipientEmails)
-        ) {
-            throw new AccessDeniedException();
+        $recipientEmail = $msgRcpt->getRid()->getEmailClear();
+
+        if (in_array($recipientEmail, $accessibleRecipientEmails, true)) {
+            return;
         }
+
+        // Admins may access mails outside their own mailbox, but only for
+        // recipients that belong to a domain they actually manage.
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $recipientDomainName = Email::extractDomain($recipientEmail);
+            $recipientDomain = $this->domainRepository->findOneBy(['domain' => $recipientDomainName]);
+
+            if ($recipientDomain !== null && $this->isGranted('DOMAIN_ACCESS', $recipientDomain)) {
+                return;
+            }
+        }
+
+        throw new AccessDeniedException();
     }
 
     /**

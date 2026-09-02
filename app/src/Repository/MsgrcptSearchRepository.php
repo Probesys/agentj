@@ -2,13 +2,11 @@
 
 namespace App\Repository;
 
-use App\Amavis\ContentType;
 use App\Entity\Domain;
 use App\Entity\Maddr;
 use App\Entity\Msgrcpt;
 use App\Entity\User;
 use App\Amavis\MessageStatus;
-use App\Amavis\DeliveryStatus;
 use App\Doctrine\SqlIndexWalker;
 use App\Repository\BaseMessageRecipientRepository;
 use App\Repository\UserRepository;
@@ -17,7 +15,6 @@ use App\Util\Search;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -143,6 +140,17 @@ class MsgrcptSearchRepository extends BaseMessageRecipientRepository
 
 
         return $queryBuilder;
+    }
+
+    protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void
+    {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = maddr.email');
+        $queryBuilder->andWhere('u.domain in (:restrictedDomains)');
+        $queryBuilder->setParameter('restrictedDomains', $user->getDomains());
     }
 
     private function createCountQueryBuilder(

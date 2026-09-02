@@ -2,18 +2,18 @@
 
 namespace App\Entity;
 
+use App\Security\HasDomainInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Doctrine\DBAL\Types\Types;
 
 /**
  * Groups
  */
 #[ORM\Table(name: 'groups')]
 #[ORM\Entity(repositoryClass: 'App\Repository\GroupsRepository')]
-class Groups
+class Groups implements HasDomainInterface
 {
     use WbRuleTrait;
 

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Traits\EntityBlameableTrait;
 use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\ConnectorRepository;
+use App\Security\HasDomainInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string')]
 #[ORM\DiscriminatorMap(['office365' => 'Office365Connector', 'LDAP' => 'LdapConnector', 'Imap' => 'ImapConnector'])]
-class Connector
+class Connector implements HasDomainInterface
 {
     use EntityBlameableTrait;
     use EntityTimestampableTrait;

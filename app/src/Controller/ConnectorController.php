@@ -16,6 +16,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ConnectorController extends AbstractController
 {
     #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function delete(
         Request $request,
         Connector $connector,

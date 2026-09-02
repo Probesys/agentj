@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Domain;
-use App\Entity\Groups;
 use App\Entity\Maddr;
 use App\Entity\Mailaddr;
 use App\Entity\User;
@@ -54,12 +53,12 @@ class WblistRepository extends BaseRepository
                 ->innerJoin('wb.sid', 's')
                 ->leftJoin('wb.groups', 'g');
 
-        if (in_array('ROLE_USER', $user->getRoles())) {
+        if (!$user->isAdmin()) {
             $dql->andWhere('wb.rid = :user');
             $dql->setParameter('user', $user);
         }
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+        if ($user->isAdmin(false)) {
             $dql->andWhere('u.domain in (:domains)');
             $dql->setParameter('domains', $user->getDomains());
         }
@@ -80,7 +79,7 @@ class WblistRepository extends BaseRepository
         if ($query) {
             $whereQuery = 'LOWER(s.email) LIKE LOWER(:query)';
 
-            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            if ($user->isAdmin(false)) {
                 $whereQuery .= ' OR LOWER(u.email) LIKE LOWER(:query)';
                 $whereQuery .= ' OR LOWER(u.fullname) LIKE LOWER(:query)';
             }

@@ -8,10 +8,6 @@ use App\Entity\Mailaddr;
 use App\Entity\Policy;
 use App\Entity\User;
 use App\Entity\Wblist;
-use App\Form\DomainCustomisationGeneralType;
-use App\Form\DomainCustomisationHumanAuthenticationType;
-use App\Form\DomainCustomisationReportType;
-use App\Form\DomainMessageType;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\SettingsRepository;
@@ -28,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -40,18 +36,6 @@ class DomainController extends AbstractController
         private EntityManagerInterface $em,
         private UserService $userService,
     ) {
-    }
-
-    private function checkAccess(Domain $domain): void
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        if (
-            !in_array('ROLE_SUPER_ADMIN', $user->getRoles()) &&
-            !$user->hasDomain($domain)
-        ) {
-            throw new AccessDeniedException();
-        }
     }
 
     #[Route(path: '/', name: 'domain_index', methods: 'GET')]
@@ -92,15 +76,12 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/new', name: 'domain_new', methods: 'GET|POST')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function new(
         Request $request,
         ParameterBagInterface $params,
         SettingsRepository $settingsRepository,
     ): Response {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            throw new AccessDeniedException();
-        }
-
         $domain = new Domain();
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_new'),
@@ -198,10 +179,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'domain_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function edit(Request $request, Domain $domain): Response
     {
-
-        $this->checkAccess($domain);
         $form = $this->createForm(DomainType::class, $domain, [
             'action' => $this->generateUrl('domain_edit', ['id' => $domain->getId()]),
             'is_edit' => true,
@@ -280,9 +260,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'domain_delete', methods: 'POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function delete(Request $request, Domain $domain): Response
     {
-        $this->checkAccess($domain);
         $token = $request->request->getString('_token');
         if ($this->isCsrfTokenValid('delete' . $domain->getId(), $token)) {
             $em = $this->em;
@@ -293,14 +273,12 @@ class DomainController extends AbstractController
         return $this->redirectToRoute('domain_index');
     }
 
-    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     */
     #[Route(path: '/{rid}/wblist/delete/{sid}', name: 'domain_wblist_delete', methods: 'GET|POST')]
     public function deleteWblist(int $rid, int $sid, Request $request): Response
     {
         $wbList = $this->em->getRepository(Wblist::class)->findOneBy(['rid' => $rid, 'sid' => $sid]);
         $domain = $wbList->getRid()->getDomain();
-        $this->checkAccess($domain);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $domain);
         if ($wbList) {
             $em = $this->em;
             $em->remove($wbList);
@@ -311,9 +289,9 @@ class DomainController extends AbstractController
     }
 
     #[Route(path: '/{id}/wblist', name: 'domain_wblist', methods: 'GET')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function domainwblist(Domain $domain): Response
     {
-        $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $wblist = $this->em->getRepository(Wblist::class)->findBy(['rid' => $user]);
         if (!$wblist) {
@@ -323,12 +301,10 @@ class DomainController extends AbstractController
         return $this->render('domain/wblist.html.twig', ['domain' => $domain, 'wblist' => $wblist]);
     }
 
-    /** Lors de l'ajout d'une règle sur un domaine, on peut préciser pour l'expéditeur email ou d'un domaine
-     */
     #[Route(path: '/{id}/wblist/new', name: 'domain_wblist_new', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
     public function newwblist(Domain $domain, Request $request, MailaddrService $mailaddrService): Response
     {
-        $this->checkAccess($domain);
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
             'action' => $this->generateUrl('domain_wblist_new', ['id' => $domain->getId()]),

@@ -13,7 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -31,22 +30,13 @@ class GroupsWblistController extends AbstractController
         $this->translator = $translator;
     }
 
-    private function checkAccess(Groups $group): void
-    {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
-                throw new AccessDeniedException();
-            }
-        }
-    }
-
     #[Route(path: '/{groupId}', name: 'groups_wblist_index', methods: 'GET')]
     public function index(int $groupId): Response
     {
         $groupswblists = $this->em->getRepository(GroupsWblist::class)->findBy((['groups' => $groupId]));
 
         $groups = $this->em->getRepository(Groups::class)->find($groupId);
-        $this->checkAccess($groups);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $groups);
 
         return $this->render('groups_wblist/index.html.twig', [
             'groups_wblists' => $groupswblists,
@@ -65,6 +55,7 @@ class GroupsWblistController extends AbstractController
         if (!$groups) {
             throw $this->createNotFoundException('The groups does not exist');
         }
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $groups);
 
         $groupsWblist = new GroupsWblist();
 
@@ -129,7 +120,7 @@ class GroupsWblistController extends AbstractController
             'groups' => $groupId,
         ]);
         $group = $this->em->getRepository(Groups ::class)->findOneBy(['id' => $groupId]);
-        $this->checkAccess($group);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
         $form = $this->createForm(GroupsWblistType::class, null, [
             'action' => $this->generateUrl('groups_wblist_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
         ]);
@@ -182,7 +173,7 @@ class GroupsWblistController extends AbstractController
     public function delete(int $groupId, int $sid, GroupService $groupService): RedirectResponse
     {
         $group = $this->em->getRepository(Groups::class)->findOneBy(['id' => $groupId]);
-        $this->checkAccess($group);
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
         $groupsWblist = $this->em->getRepository(GroupsWblist::class)->findOneBy(([
             'mailaddr' => $sid,
             'groups' => $groupId,

@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WblistController extends AbstractController
@@ -126,8 +127,10 @@ class WblistController extends AbstractController
             $mainUser = $mainUser->getOriginalUser();
         }
 
-        // we check if aliases exist
         if ($mainUser) {
+            $this->checkSenderRuleOwnership($mainUser);
+
+            // we check if aliases exist
             $userAndAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $mainUser->getId()]);
             array_unshift($userAndAliases, $mainUser);
         }
@@ -135,6 +138,23 @@ class WblistController extends AbstractController
         foreach ($userAndAliases as $user) {
             $wblistRepository->delete($user->getId(), $sid, $priority);
         }
+    }
+
+    private function checkSenderRuleOwnership(User $targetUser): void
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $currentMainUser = $currentUser->getOriginalUser() ?? $currentUser;
+
+        if ($currentMainUser->getId() === $targetUser->getId()) {
+            return;
+        }
+
+        if ($this->isGranted('DOMAIN_ACCESS', $targetUser)) {
+            return;
+        }
+
+        throw new AccessDeniedException();
     }
 
     #[Route(
@@ -190,7 +210,6 @@ class WblistController extends AbstractController
     {
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('import_wblist'),
-            'user' => $this->getUser()
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

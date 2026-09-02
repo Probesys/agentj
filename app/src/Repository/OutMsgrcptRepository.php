@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\OutMsgrcpt;
+use App\Entity\User;
 use App\Repository\BaseMessageRecipientRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\Expr\Join;
@@ -31,5 +32,17 @@ class OutMsgrcptRepository extends BaseMessageRecipientRepository
             ->leftJoin('App\Entity\Maddr', 'maddr', Join::WITH, 'maddr.id = mr.rid');
 
         return $queryBuilder;
+    }
+
+    protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void
+    {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
+        $queryBuilder->innerJoin('m.sid', 'sa');
+        $queryBuilder->innerJoin('App\Entity\User', 'u', Join::WITH, 'u.email = sa.email');
+        $queryBuilder->andWhere('u.domain in (:restrictedDomains)');
+        $queryBuilder->setParameter('restrictedDomains', $user->getDomains());
     }
 }

@@ -6,7 +6,6 @@ use App\Controller\Traits\ControllerCommonTrait;
 use App\Entity\Domain;
 use App\Entity\Groups;
 use App\Entity\User;
-use App\Entity\Wblist;
 use App\Form\ImportType;
 use App\Service\GroupService;
 use App\Service\Referrer;
@@ -117,8 +116,11 @@ class ImportController extends AbstractController
                                 'domain' => $domainEmail,
                             ]);
                         }
-                        //need domain exist in database
-                        if ($domains[$domainEmail]['entity']) {
+                        //need domain exist in database and be managed by the current admin
+                        if (
+                            $domains[$domainEmail]['entity'] &&
+                            $this->isGranted('DOMAIN_ACCESS', $domains[$domainEmail]['entity'])
+                        ) {
                             //group
                             $group = false;
                             if (isset($data[3]) && $data[3] != '') {
@@ -306,8 +308,11 @@ class ImportController extends AbstractController
                                 'domain' => $domainEmail,
                             ]);
                         }
-                        //need domain exist in database
-                        if ($domains[$domainEmail]['entity']) {
+                        //need domain exist in database and be managed by the current admin
+                        if (
+                            $domains[$domainEmail]['entity'] &&
+                            $this->isGranted('DOMAIN_ACCESS', $domains[$domainEmail]['entity'])
+                        ) {
                             if (!isset($emails[$email])) {
                                 //check if original email's user exist
                                 $originalUser = $em->getRepository(User::class)->findOneBy(['email' => $data[2]]);

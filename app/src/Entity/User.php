@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Policy;
 use App\Repository\UserRepository;
+use App\Security\HasDomainInterface;
 use App\Util\ResourceHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -20,7 +21,7 @@ use Doctrine\DBAL\Types\Types;
 #[ORM\Table(name: 'users')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], ignoreNull: true)]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDomainInterface
 {
     #[ORM\Column(name: 'id', type: 'integer', nullable: false, options: ['unsigned' => true])]
     #[ORM\Id]

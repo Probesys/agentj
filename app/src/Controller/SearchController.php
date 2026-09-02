@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -40,13 +41,16 @@ class SearchController extends AbstractController
 
         $activeFilters = $form->getData();
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         $messageType = $activeFilters['messageType'] ?? 'incoming';
         if ($messageType == 'incoming') {
             $allMessages = $this->msgrcptSearchRepository
-                ->getAdvancedSearchQuery($activeFilters);
+                ->getAdvancedSearchQuery($user, $activeFilters);
         } else {
             $allMessages = $this->outMsgrcptRepository
-                ->getAdvancedSearchQuery($activeFilters);
+                ->getAdvancedSearchQuery($user, $activeFilters);
         }
 
         $perPage = (int) $this->getParameter('app.per_page_global');
@@ -109,13 +113,21 @@ class SearchController extends AbstractController
         ]);
         $outMsg = $stmtOutMsgs->fetchAssociative();
 
+        if ($outMsg === false) {
+            throw $this->createNotFoundException();
+        }
+
         /** @var User $user */
         $user = $this->getUser();
         $allMessages = $this->em->getRepository(Msgs::class)->advancedSearch($user, 'outgoing');
 
         $ms = array_filter($allMessages, function ($msg) use ($outMsg) {
-            return $outMsg !== false && $msg['mail_id'] === $outMsg['mail_id'];
+            return $msg['mail_id'] === $outMsg['mail_id'];
         });
+
+        if (empty($ms)) {
+            throw new AccessDeniedException();
+        }
 
         return $this->render('message/out_show.html.twig', [
             'controller_name' => 'MessageController',

@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -33,15 +32,6 @@ class GroupsController extends AbstractController
         private GroupsRepository $groupsRepository,
         private TranslatorInterface $translator,
     ) {
-    }
-
-    private function checkAccess(Groups $group): void
-    {
-        if (!in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
-            if (!$group->getDomain()->getUsers()->contains($this->getUser())) {
-                throw new AccessDeniedException();
-            }
-        }
     }
 
     #[Route(path: '/', name: 'groups_index', methods: 'GET')]
@@ -64,7 +54,7 @@ class GroupsController extends AbstractController
     public function new(Request $request): Response
     {
         $group = new Groups();
-        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $form = $this->createForm(GroupsType::class, $group, [
                 'action' => $this->generateUrl('groups_new'),
                 'attr' => ['class' => 'modal-ajax-form']
@@ -114,6 +104,7 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/{id}/edit', name: 'groups_edit', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function edit(
         Request $request,
         Groups $group,
@@ -122,8 +113,7 @@ class GroupsController extends AbstractController
         GroupsWblistRepository $groupsWblistRepository,
         MailaddrRepository $mailaddrRepository,
     ): Response {
-        $this->checkAccess($group);
-        if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles())) {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
             $form = $this->createForm(GroupsType::class, $group, [
                 'action' => $this->generateUrl('groups_edit', ['id' => $group->getId()]),
                 'attr' => ['class' => 'modal-ajax-form']
@@ -188,9 +178,9 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/{id}/users', name: 'groups_list_users', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function listUsers(Request $request, Groups $group): Response
     {
-        $this->checkAccess($group);
         $users = $group->getUsers();
         return $this->render('groups/group_users.html.twig', [
                     'group' => $group,
@@ -199,6 +189,7 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/{id}/removeUser/{user}/', name: 'group_remove_user', methods: 'GET')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function removeUser(
         Request $request,
         Groups $group,
@@ -243,6 +234,7 @@ class GroupsController extends AbstractController
     }
 
     #[Route(path: '/{id}/delete', name: 'groups_delete', methods: 'GET')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'group')]
     public function delete(
         Request $request,
         Groups $group,
@@ -269,6 +261,10 @@ class GroupsController extends AbstractController
     {
         $domainId = $request->request->get('domainId');
         $domain = $this->em->getRepository(Domain::class)->find($domainId);
+        if (!$domain) {
+            throw $this->createNotFoundException();
+        }
+        $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $domain);
 
         $priority = $request->request->get('priority');
         $group = $this->em->getRepository(Groups::class)->findOneBy([

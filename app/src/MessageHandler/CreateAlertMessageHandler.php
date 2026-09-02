@@ -95,7 +95,7 @@ class CreateAlertMessageHandler
                         $locale = $this->localeService->getUserLocale($user);
 
                         // if $user has ROLE_ADMIN then check if they are an admin for the concerned domain
-                        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+                        if ($user->isAdmin(false)) {
                             $sid = $outMsg->getSid();
                             $maddr = $this->entityManager->getRepository(Maddr::class)->find($sid);
                             $domain = $maddr ? $maddr->getDomain() : null;
@@ -265,7 +265,7 @@ class CreateAlertMessageHandler
                     foreach ($reports as $report) {
                         $fromAddr = $report->getMailId();
                         // if user is an admin check if the address is in a domain he administer
-                        if ($user && in_array('ROLE_ADMIN', $user->getRoles())) {
+                        if ($user->isAdmin(false)) {
                             $domainString = strtolower(substr($fromAddr, strpos($fromAddr, '@') + 1));
                             $domain = $this->entityManager->getRepository(Domain::class)->findOneBy([
                                 'domain' => $domainString,

@@ -2,19 +2,12 @@
 
 namespace App\Repository;
 
-use App\Amavis\ContentType;
-use App\Amavis\DeliveryStatus;
-use App\Amavis\MessageStatus;
-use App\Entity\Domain;
 use App\Entity\User;
 use App\Entity\Msgrcpt;
 use App\Entity\OutMsgrcpt;
 use App\Util\Search;
-use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @template T of Msgrcpt|OutMsgrcpt
@@ -24,14 +17,19 @@ abstract class BaseMessageRecipientRepository extends BaseRepository
 {
     abstract protected function getBaseQueryBuilder(): QueryBuilder;
 
+    abstract protected function applyDomainRestriction(QueryBuilder $queryBuilder, User $user): void;
+
     /**
      * @param ?array<string, mixed> $filters
      */
     public function getAdvancedSearchQuery(
+        User $user,
         ?array $filters = [],
     ): Query {
 
         $queryBuilder = $this->getBaseQueryBuilder();
+
+        $this->applyDomainRestriction($queryBuilder, $user);
 
         if (isset($filters['host'])) {
             $queryBuilder->andWhere('m.host like :host');
