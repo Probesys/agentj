@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Util\Email;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -199,12 +200,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getEmail(): ?string
     {
-        return $this->email;
+        return $this->email ? Email::normalize($this->email) : null;
     }
 
     public function setEmail(string $email): self
     {
-        $this->email = $email;
+        $this->email = $email ? Email::normalize($email) : null;
 
         return $this;
     }

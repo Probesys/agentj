@@ -99,7 +99,7 @@
                                 </td>
                             {% endif %}
                             {% if is_granted('ROLE_ADMIN') %}
-                                <td>
+                                <td data-title="mailId">
                                     <span title="{{ msgRecipient.mailId }}">
                                         {{ msgRecipient.mailId }}
                                     </span>

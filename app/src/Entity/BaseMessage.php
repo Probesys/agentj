@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\Email;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Mime\Address as MimeAddress;
@@ -276,13 +277,13 @@ class BaseMessage
 
     public function getFromAddr(): ?string
     {
-        return $this->fromAddr;
+        return $this->fromAddr ? Email::normalize($this->fromAddr) : null;
     }
 
     public function getFromMimeAddress(): ?MimeAddress
     {
         try {
-            return MimeAddress::create($this->fromAddr ?? '');
+            return MimeAddress::create(Email::normalize($this->fromAddr ?? ''));
         } catch (\InvalidArgumentException $e) {
             return null;
         }
@@ -290,7 +291,7 @@ class BaseMessage
 
     public function setFromAddr(?string $fromAddr): self
     {
-        $this->fromAddr = $fromAddr;
+        $this->fromAddr = $fromAddr ? Email::normalize($fromAddr) : null;
 
         return $this;
     }
@@ -351,10 +352,10 @@ class BaseMessage
         $fromEmail = $this->getFromMimeAddress()?->getAddress();
 
         if ($fromEmail) {
-            return mb_strtolower($fromEmail);
+            return $fromEmail;
         }
 
-        return mb_strtolower($senderEmail);
+        return $senderEmail;
     }
 
     public function getStatus(): ?int

@@ -196,4 +196,33 @@ class UserControllerTest extends WebTestCase
         // But no user created (1 because of `@domain.tld`, and one for the admin)
         self::assertSame(2, UserFactory::count());
     }
+
+    public function testAdminCannotCreateUserWithSameAddressButDifferentCase(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        $user = UserFactory::new()->user($domain)->create();
+        $initialCount = UserFactory::count();
+
+        $client->request(Request::METHOD_POST, "/admin/users/email/newUser", [
+            'user' => [
+                '_token' => 'invalidCsrfToken',
+                'fullname' => 'Test User',
+                'email' => mb_strtoupper($user->getEmail()),
+                'imapLogin' => '',
+                'report' => true,
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $content = $client->getResponse()->getContent();
+        self::assertNotFalse($content);
+        self::assertJsonStringEqualsJsonString(
+            '{"status":"danger","message":"This email is already used. You can\'t use it"}',
+            $content,
+        );
+        self::assertSame($initialCount, UserFactory::count());
+    }
 }

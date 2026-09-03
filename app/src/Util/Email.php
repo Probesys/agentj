@@ -41,7 +41,7 @@ class Email
     public static function extractDomain(string $email): ?string
     {
         $parts = explode('@', $email);
-        return count($parts) === 2 ? strtolower($parts[1]) : null;
+        return count($parts) === 2 ? Domain::normalize($parts[1]) : null;
     }
 
     /**
@@ -83,5 +83,14 @@ class Email
         $lookup[] = '@.';
 
         return $lookup;
+    }
+    
+
+    /**
+     * Normalize an email address by trimming whitespaces and lowering the case
+     */
+    public static function normalize(string $email): string
+    {
+        return mb_strtolower(mb_trim($email));
     }
 }

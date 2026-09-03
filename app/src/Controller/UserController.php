@@ -673,12 +673,15 @@ class UserController extends AbstractController
 
     private function checkDomainAccess(string $domainName = ""): ?Domain
     {
-        $allowedDomains = $this->getAllowedDomains();
-        $allowedDomainNamesArray = array_map(function (Domain $entity) {
-            return $entity->getDomain();
-        }, $allowedDomains);
+        $name = mb_strtolower($domainName);
 
-        if (!in_array($domainName, $allowedDomainNamesArray)) {
+        $allowedDomains = $this->getAllowedDomains();
+        $allowedDomainNamesArray = array_map(
+            fn (Domain $entity) => $entity->getDomain(),
+            $allowedDomains,
+        );
+
+        if (!in_array($name, $allowedDomainNamesArray)) {
             return null;
         }
 
