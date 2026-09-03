@@ -11,6 +11,7 @@ use App\Form\ImportType;
 use App\Repository\SenderRuleRepository;
 use App\Service\LogService;
 use App\Service\Referrer;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -217,12 +218,15 @@ class SenderRuleController extends AbstractController
                 if ($data === null) {
                     continue;
                 }
+                $email = Email::normalize($data);
 
-                $senderRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
+                $senderRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy([
+                    'email' => $email,
+                ]);
                 // if email doesn't exist then we create email in RuleAddress
                 if (!$senderRuleAddress) {
                     $senderRuleAddress = new RuleAddress();
-                    $senderRuleAddress->setEmail($data);
+                    $senderRuleAddress->setEmail($email);
                     $senderRuleAddress->setPriority(6);
                     $this->em->persist($senderRuleAddress);
                     $this->em->flush();
