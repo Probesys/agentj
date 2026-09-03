@@ -89,18 +89,29 @@ final class AmavisReleaseHandler
             $messageRecipient->getAddress()->getEmail(),
         ]);
 
+        $messageRecipient->setAmavisOutput('');
         $process->run(
             function ($type, $buffer) use ($messageRecipient) {
-                $messageRecipient->setAmavisOutput($buffer);
+                $messageRecipient->setAmavisOutput($messageRecipient->getAmavisOutput() . $buffer);
             }
         );
 
-        if (!$process->isSuccessful()) {
+        // amavisd-release only reports whether it could talk to amavisd over
+        // the AM.PDP socket: it exits successfully even when the downstream
+        // MTA rejects the actual re-injection (e.g. a temporary "452 4.3.1
+        // Insufficient system storage"). The real outcome is the SMTP-style
+        // reply amavisd forwards to us in its output, so it must be checked
+        // too, otherwise a failed release still gets marked as released and
+        // can never be retried.
+        $amavisOutput = $messageRecipient->getAmavisOutput() ?? '';
+        $mtaAccepted = (bool) preg_match('/^\s*2\d\d[\s.]/', $amavisOutput);
+
+        if (!$process->isSuccessful() || !$mtaAccepted) {
             $this->logger->error('Amavis release failed', [
                 'mailId' => $messageRecipient->getMailId(),
                 'partitionTag' => $messageRecipient->getPartitionTag(),
                 'rseqnum' => $messageRecipient->getRseqnum(),
-                'output' => $process->getErrorOutput(),
+                'output' => $amavisOutput !== '' ? $amavisOutput : $process->getErrorOutput(),
             ]);
             $messageRecipient->setStatus(MessageStatus::ERROR);
         } else {
