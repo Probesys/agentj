@@ -9,6 +9,7 @@ use App\Form\GroupRuleType;
 use App\Repository\GroupRuleRepository;
 use App\Service\GroupService;
 use App\Service\RuleAddressService;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -104,12 +105,15 @@ class GroupRuleController extends AbstractController
             $em = $this->em;
 
             $data = $form->getData();
+            $email = Email::normalize($data['email']);
 
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy([
+                'email' => $email,
+            ]);
             if (!$ruleAddress) {
                 $ruleAddress = new RuleAddress();
-                $ruleAddress->setEmail($data['email']);
-                $ruleAddress->setPriority($ruleAddressService->computePriority($data['email']));
+                $ruleAddress->setEmail($email);
+                $ruleAddress->setPriority($ruleAddressService->computePriority($email));
                 $em->persist($ruleAddress);
             } else {
                 $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
@@ -165,12 +169,15 @@ class GroupRuleController extends AbstractController
             $em = $this->em;
 
             $data = $form->getData();
+            $email = Email::normalize($data['email']);
 
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy([
+                'email' => $email,
+            ]);
             if (!$ruleAddress) {
                 $ruleAddress = new RuleAddress();
-                $ruleAddress->setEmail($data['email']);
-                $ruleAddress->setPriority($ruleAddressService->computePriority($data['email']));
+                $ruleAddress->setEmail($email);
+                $ruleAddress->setPriority($ruleAddressService->computePriority($email));
                 $em->persist($ruleAddress);
             } else {
                 $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([

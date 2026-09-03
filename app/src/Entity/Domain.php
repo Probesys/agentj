@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\DomainRepository;
+use App\Util\Domain as DomainUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
@@ -138,7 +139,7 @@ class Domain
 
     public function __toString()
     {
-        return $this->domain;
+        return DomainUtil::normalize($this->domain);
     }
 
     public function getId(): ?int
@@ -148,12 +149,12 @@ class Domain
 
     public function getDomain(): ?string
     {
-        return $this->domain;
+        return DomainUtil::normalize($this->domain);
     }
 
     public function setDomain(string $domain): self
     {
-        $this->domain = $domain;
+        $this->domain = DomainUtil::normalize($domain);
 
         return $this;
     }
@@ -422,7 +423,7 @@ class Domain
      */
     public function getDefaultMailAuthenticationSender(): string
     {
-        return 'no-reply@' . $this->domain;
+        return 'no-reply@' . DomainUtil::normalize($this->domain);
     }
 
     public function setMailAuthenticationSender(?string $mailAuthenticationSender): self

@@ -6,6 +6,7 @@ use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\PolicyFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\SessionHelper;
+use App\Util\Domain;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,6 +103,45 @@ class DomainControllerTest extends WebTestCase
         self::assertEquals(26, $domain->getSmtpPort());
     }
 
+    public function testCannotCreateDomainWithSameAddressButDifferentCase(): void
+    {
+        $client = static::createClient();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        $payload = $this->createPayload($client);
+        $client->request('POST', '/domain/new', $payload);
+        $initialCount = DomainFactory::count();
+
+        $payload = $this->createPayload($client, [
+            'domain' => 'TesT2.fr',
+        ]);
+        $client->request('POST', '/domain/new', $payload);
+
+        self::assertResponseRedirects('/domain/new');
+        self::assertSame($initialCount, DomainFactory::count());
+    }
+
+    public function testCreatingDomainAlsoCreatesUser(): void
+    {
+        $client = static::createClient();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        $domainInitialCount = DomainFactory::count();
+        $userInitialCount = UserFactory::count();
+ 
+        $domainName = 'TesT2.fr';
+        $payload = $this->createPayload($client, [
+            'domain' => $domainName,
+        ]);
+        $client->request('POST', '/domain/new', $payload);
+   
+        self::assertSame($domainInitialCount + 1, DomainFactory::count());
+        self::assertSame($userInitialCount + 1, UserFactory::count());
+        $createdUser = UserFactory::last();
+        // @test2.fr
+        self::assertSame('@'.Domain::normalize($domainName), $createdUser->getEmail());
+    }
+
     public function testSuperAdminCanEditDomain(): void
     {
         $client = static::createClient();
@@ -153,7 +193,7 @@ class DomainControllerTest extends WebTestCase
             ],
         ];
 
-        if ($attributes !== null && !$attributes['active']) {
+        if ($attributes !== null && !($attributes['active'] ?? false)) {
             unset($payload['domain']['active']);
         }
 

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\LdapConnector;
 use App\Entity\User;
+use App\Util\Domain;
 use Symfony\Component\Ldap\Adapter\CollectionInterface;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\Entry;
@@ -98,7 +99,7 @@ class LdapService
             $attribute = $user->getAttribute($connector->getLdapEmailField());
             $email = $attribute ? $attribute[0] : null;
             $emailIsValid = $email && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-            $domainName = $emailIsValid ? explode('@', $email)[1] : null;
+            $domainName = $emailIsValid ? Domain::normalize(explode('@', $email)[1]) : null;
 
             return $domainName == $connector->getDomain()->getDomain();
         });

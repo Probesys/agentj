@@ -61,7 +61,7 @@ class MessageService
 
             $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
                 $user,
-                strtolower($message->getFromAddr()), // Case-insensitive
+                $message->getFromAddr(),
             );
 
             $domain = $user->getDomain();

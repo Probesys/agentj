@@ -43,7 +43,7 @@ final class MessageFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this->instantiateWith(
-            Instantiator::withoutConstructor()->alwaysForce(),
+            Instantiator::withConstructor()->alwaysForce(),
         );
     }
 }

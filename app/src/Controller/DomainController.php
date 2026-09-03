@@ -15,6 +15,7 @@ use App\Repository\SenderRuleRepository;
 use App\Repository\SettingRepository;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -346,14 +347,17 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+            $email = Email::normalize($data['email']);
 
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
+            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy([
+                'email' => $email,
+            ]);
 
             if (!$ruleAddress) {
                 $ruleAddress = new RuleAddress();
-                $ruleAddress->setEmail($data['email']);
+                $ruleAddress->setEmail($email);
 
-                $priority = $ruleAddressService->computePriority($data['email']);
+                $priority = $ruleAddressService->computePriority($email);
                 $ruleAddress->setPriority($priority);
 
                 $this->em->persist($ruleAddress);

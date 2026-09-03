@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\AddressRepository;
+use App\Util\Email;
 use App\Util\Url;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -49,12 +50,12 @@ class Address
 
     public function getEmail(): string
     {
-        return $this->email;
+        return Email::normalize($this->email);
     }
 
     public function setEmail(string $email): self
     {
-        $this->email = $email;
+        $this->email = Email::normalize($email);
 
         return $this;
     }
