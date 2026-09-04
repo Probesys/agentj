@@ -1,5 +1,25 @@
 # Changelog of AgentJ
 
+
+## 2026-09-08 - 2.7.1
+
+### Security
+
+- Fix insecure controller access vulnerabilities ([eb0ea32d](https://github.com/Probesys/agentj/commit/eb0ea32d))
+- Sanitize HTML email and sandbox display iframe ([56a1d0e3](https://github.com/Probesys/agentj/commit/56a1d0e3))
+- Make sure that only super admins can manage admins ([09903947](https://github.com/Probesys/agentj/commit/09903947))
+- Do not accept LDAP login without password ([553d519e](https://github.com/Probesys/agentj/commit/553d519e))
+- Update dependencies ([74638bb4]((https://github.com/Probesys/agentj/commit/74638bb4)))
+
+### Maintenance
+
+- Fix Sentry config ([231b9a50](https://github.com/Probesys/agentj/commit/231b9a50))
+- Revert making `validate_captcha` not nullable ([e4a0feed](https://github.com/Probesys/agentj/commit/e4a0feed))
+
+### Developers
+
+- Make sure to build assets before running tests ([4f23d856](https://github.com/Probesys/agentj/commit/4f23d856))
+
 ## 2026-08-11 - 2.7.0
 
 ### New
@@ -45,6 +65,15 @@
 - Allow OutMessageRecipient to have a status ([6770a2d6](https://github.com/Probesys/agentj/commit/6770a2d6))
 - Use ResourceHelper to read binary columns ([c4778817](https://github.com/Probesys/agentj/commit/c4778817))
 - Remove daily stats system ([3ffc3d5b](https://github.com/Probesys/agentj/commit/3ffc3d5b))
+
+## 2026-09-08 - 2.6.7
+
+### Security
+
+- Fix insecure controller access vulnerabilities ([46c9f4ea](https://github.com/Probesys/agentj/commit/46c9f4ea))
+- Sanitize HTML email and sandbox display iframe ([ade6dcb5](https://github.com/Probesys/agentj/commit/ade6dcb5))
+- Make sure that only super admins can manage admins ([a8009abe](https://github.com/Probesys/agentj/commit/a8009abe))
+- Do not accept LDAP login without password ([7bca0ee9](https://github.com/Probesys/agentj/commit/7bca0ee9))
 
 ## 2026-08-11 - 2.6.6
 
