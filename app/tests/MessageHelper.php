@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Address;
+use App\Entity\Message;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
@@ -39,7 +40,7 @@ trait MessageHelper
         Address $recipient,
         ?string $subject = 'test',
         ?int $status = null,
-    ): string {
+    ): Message {
         $mailId = bin2hex(random_bytes(8));
 
         $message = MessageFactory::new()->create([
@@ -85,6 +86,6 @@ trait MessageHelper
             'mailText' => $mailText,
         ]);
 
-        return $mailId;
+        return $message;
     }
 }
