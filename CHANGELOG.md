@@ -1,5 +1,16 @@
 # Changelog of AgentJ
 
+
+## 2026-09-08 - 2.6.7
+
+### Security
+
+- Fix insecure controller access vulnerabilities ([46c9f4ea](https://github.com/Probesys/agentj/commit/46c9f4ea))
+- Sanitize HTML email and sandbox display iframe ([ade6dcb5](https://github.com/Probesys/agentj/commit/ade6dcb5))
+- Make sure that only super admins can manage admins ([a8009abe](https://github.com/Probesys/agentj/commit/a8009abe))
+- Do not accept LDAP login without password ([7bca0ee9](https://github.com/Probesys/agentj/commit/7bca0ee9))
+
+
 ## 2026-08-11 - 2.6.6
 
 ### Security
