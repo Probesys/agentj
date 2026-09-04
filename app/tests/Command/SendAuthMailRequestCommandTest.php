@@ -200,7 +200,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         $sender = UserFactory::new()->user($domain)->create();
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $mailId = $this->setupMail($addrS, $addrR);
-        $otherMailId = $this->setupMail($addrS, $addrR, 'otherTest');
+        $otherMailId = $this->setupMail($addrS, $addrR, subject: 'otherTest');
         $em = self::getContainer()->get(EntityManagerInterface::class);
         $message = MessageFactory::findBy(['mailId' => $mailId])[0];
         $message->setSendCaptcha(0);
