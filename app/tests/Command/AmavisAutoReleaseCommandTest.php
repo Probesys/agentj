@@ -29,7 +29,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
 
         $kernel = static::createKernel();
         $application = new Application($kernel);
@@ -39,7 +39,32 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
             'command' => $command->getName(),
         ]);
 
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+    }
+
+    public function testAmavisReleaseMailFromMailingList(): void
+    {
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($otherDomain)->create([
+            'email' => 'tcs-forum-owner@' . $otherDomain->getDomain(),
+        ]);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $message->setFromAddr('"Jane Doe" (via tcs-forum Mailing List) <tcs-forum@listes.renater.fr>');
+
+        $kernel = static::createKernel();
+        $application = new Application($kernel);
+        $command = $application->find('agentj:auto-release-message');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            'command' => $command->getName(),
+        ]);
+
+        $messageRecipient = $message->getMessageRecipients()->first();
         $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
     }
