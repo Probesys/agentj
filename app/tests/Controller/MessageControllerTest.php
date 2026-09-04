@@ -239,9 +239,9 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/show/';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/show/';
         $crawler = $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
@@ -252,7 +252,6 @@ class MessageControllerTest extends WebTestCase
             ->filter('div.col-md-8')
             ->each(fn($node) => trim($node->text()));
         $result = array_combine($titles, $content);
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $date = DateTimeImmutable::createFromFormat(
             'Ymd\THis\Z',
             $message->getTimeIso(),
@@ -291,13 +290,13 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/delete/';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/delete/';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -326,14 +325,14 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/authorized';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/authorized';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -372,14 +371,14 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin([$domain])->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/authorizedDomain';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/authorizedDomain';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -418,20 +417,20 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/authorized', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -483,13 +482,13 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/banned';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/banned';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -527,14 +526,14 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin([$domain])->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/bannedDomain';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/bannedDomain';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -569,15 +568,15 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $message->setStatus(null);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/restore';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/restore';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -601,15 +600,15 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin()->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $message->setStatus(null);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -632,15 +631,15 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $message->setStatus(null);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertSame(403, $client->getResponse()->getStatusCode());
@@ -664,15 +663,15 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin()->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::RESTORED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::RESTORED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $message->setStatus(null);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -696,15 +695,15 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin()->create();
         $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::SPAMMED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::SPAMMED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
         $message->setStatus(null);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/markAsHam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsHam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -727,10 +726,9 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $message = MessageFactory::find(['mailId' => $mailId]);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
 
-        $url = '/message/0/' . $mailId . '/' . $addrR->getId() . '/content';
+        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/content';
         $crawler = $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
@@ -774,15 +772,16 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
-        $mailRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
+        $mailRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($mailRecipient);
         $now = new DateTimeImmutable();
         $endDate = $now;
         $startDate = $now->sub(new DateInterval('PT1M'));
         $mailRecipient->setAmavisReleaseStartedAt($startDate);
         $mailRecipient->setAmavisReleaseEndedAt($endDate);
 
-        $url = '/message/0/' . $mailId . '/' . $mailRecipient->getRseqnum() . '/release-status';
+        $url = '/message/0/' . $message->getMailId() . '/' . $mailRecipient->getRseqnum() . '/release-status';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
@@ -810,20 +809,20 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/authorized', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -875,20 +874,20 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/banned', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -940,20 +939,20 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $initialSenderRuleCount = SenderRuleFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/restore', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()]),
-                json_encode([0, $mailId2, $addrR->getId()]),
+                json_encode([0, $message->getMailId(), $addrR->getId()]),
+                json_encode([0, $message2->getMailId(), $addrR->getId()]),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -986,19 +985,19 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/delete', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -1035,19 +1034,23 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+
 
         $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20spam', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -1079,19 +1082,19 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $mailId = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
-        $mailId2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, $addrR, status: MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $message = MessageFactory::find(['mailId' => $mailId]);
-        $messageRecipient = MessageRecipientFactory::find(['mailId' => $mailId]);
-        $message2 = MessageFactory::find(['mailId' => $mailId2]);
-        $messageRecipient2 = MessageRecipientFactory::find(['mailId' => $mailId2]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
 
         $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20ham', [
             'id' => [
-                json_encode([0, $mailId, $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $mailId2, $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
