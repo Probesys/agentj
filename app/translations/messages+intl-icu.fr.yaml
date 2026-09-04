@@ -49,6 +49,7 @@ Entities.Domain.fields.quota_seconds: 'Période du quota (en secondes)'
 Entities.Domain.fields.reportSpamLevel: "Inclure les spams au rapport dont le niveau est inférieur à\_:"
 Entities.Domain.fields.sendUserAlerts: 'Envoyer les alertes aux utilisateurs sur le Dashboard AgentJ'
 Entities.Domain.fields.sendUserMailAlerts: 'Envoyer les alertes aux utilisateurs par mail'
+Entities.Domain.fields.showPortalLinkInReport: "Afficher le lien vers le portail AgentJ dans le rapport par mail"
 Entities.Domain.fields.smtp_port: 'Port SMTP'
 Entities.Domain.fields.srvSmtp: 'Serveur SMTP'
 Entities.Domain.index: 'Liste des domaines'
