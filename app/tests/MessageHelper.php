@@ -35,22 +35,26 @@ trait MessageHelper
         ];
     }
 
+    /**
+     * @param $messageAttributes array<int, mixed>
+     */
     private function setupMail(
         Address $sender,
         Address $recipient,
         ?string $subject = 'test',
         ?int $status = null,
+        array $messageAttributes = [],
     ): Message {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::new()->create([
+        $message = MessageFactory::new()->create(array_merge([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
             'subject' => $subject,
             'fromAddr' => $sender->getEmail(),
             'status' => $status,
-        ]);
+        ], $messageAttributes));
 
         MessageRecipientFactory::new()->create([
             'message' => $message,

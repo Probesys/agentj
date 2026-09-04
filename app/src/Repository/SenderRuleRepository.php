@@ -166,8 +166,6 @@ class SenderRuleRepository extends BaseRepository
         $entityManager = $this->getEntityManager();
         $connection = $entityManager->getConnection();
 
-        // FIXME:
-        // As getAddressLookups returns all splits until '@.', `sqlSelectUserIds` will return all users IDs.
         $sqlSelectUserIds = <<<SQL
             SELECT users.id
             FROM users
@@ -181,8 +179,6 @@ class SenderRuleRepository extends BaseRepository
             'recipientAddresses' => DBAL\ArrayParameterType::STRING,
         ])->fetchFirstColumn();
 
-        // FIXME:
-        // Sender rules will also contain all rules related to users retrieved in previous query.
         $senderRules = [];
 
         foreach ($recipientUserIds as $recipientUserId) {
@@ -217,7 +213,8 @@ class SenderRuleRepository extends BaseRepository
             return false;
         }
 
-        return $senderRules[0]->isWbRuleAuthorized();
+        // return $senderRules[0]->isWbRuleAuthorized();
+        return array_reduce($senderRules, fn ($result = false, $rule) => $result || $rule->isWbRuleAuthorized());
     }
 
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool

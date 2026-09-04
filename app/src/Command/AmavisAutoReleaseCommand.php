@@ -8,6 +8,7 @@ use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\MessageService;
+use App\Util\Email;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,7 +55,6 @@ class AmavisAutoReleaseCommand extends Command
 
         foreach ($messageRecipients as $messageRecipient) {
             $recipient = $messageRecipient->getAddress();
-            $senderEmail = $messageRecipient->getMessage()->getSenderEmail();
 
             $recipientUser = $this->userRepository->findOneByAddress($recipient);
 
@@ -65,7 +65,18 @@ class AmavisAutoReleaseCommand extends Command
 
             $recipientDomain = $recipientUser->getDomain();
 
+            $senderEmail = $messageRecipient->getMessage()->getSenderAddress()->getEmail();
             $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
+
+            if (!$senderIsAuthorized) {
+                $enveloppeMail = $messageRecipient->getMessage()->getFromMimeAddress()->getAddress();
+            
+                $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
+                    $enveloppeMail,
+                    $recipient,
+                );
+            }
+
             $humanAuthIsDisabled = !$recipientUser->isHumanAuthenticationEnabled();
 
             $spamLevel = $recipientDomain->getLevel();
