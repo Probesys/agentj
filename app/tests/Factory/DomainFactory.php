@@ -33,7 +33,9 @@ final class DomainFactory extends PersistentObjectFactory
     #[\Override]
     protected function defaults(): array
     {
-        $domain = self::faker()->unique()->domainName;
+        $prefix = random_int(1000, 10000);
+        $domain = "{$prefix}-" . self::faker()->unique()->domainName;
+
         return [
             'active' => true,
             'domain' => $domain,

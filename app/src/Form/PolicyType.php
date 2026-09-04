@@ -218,6 +218,7 @@ class PolicyType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Policy::class,
+            'csrf_token_id' => 'policy',
         ]);
     }
 }
