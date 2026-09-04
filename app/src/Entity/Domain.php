@@ -125,6 +125,9 @@ class Domain
     #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $sendUserMailAlerts = false;
 
+    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    private bool $showPortalLinkInReport = true;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -564,6 +567,17 @@ class Domain
     public function setSendUserMailAlerts(bool $sendUserMailAlerts): static
     {
         $this->sendUserMailAlerts = $sendUserMailAlerts;
+        return $this;
+    }
+
+    public function getShowPortalLinkInReport(): bool
+    {
+        return $this->showPortalLinkInReport;
+    }
+
+    public function setShowPortalLinkInReport(bool $showPortalLinkInReport): static
+    {
+        $this->showPortalLinkInReport = $showPortalLinkInReport;
         return $this;
     }
 
