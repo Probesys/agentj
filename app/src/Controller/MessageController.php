@@ -552,13 +552,17 @@ class MessageController extends AbstractController
 
         $email = $message->getQuarantineEmail();
         $subject = $email->getSubject();
+        $subject = mb_decode_mimeheader($subject);
 
         //get attachments
-        $attachments = $email->getAttachments()->filter(function ($attachment) {
+        $attachmentNames = $email->getAttachments()->filter(function ($attachment) {
             return $attachment->disposition !== 'inline';
+        })->map(function ($attachment) {
+            return mb_decode_mimeheader($attachment->getName());
         });
 
         $from = $email->getFrom();
+        $from = mb_decode_mimeheader($from);
         $textBody = $email->getTextBody();
         $htmlBody = $email->getHtmlBody();
         $htmlBody = $this->sanitizer->sanitize($htmlBody);
@@ -568,7 +572,7 @@ class MessageController extends AbstractController
             'htmlBody' => $htmlBody,
             'from' => $from,
             'subject' => $subject,
-            'attachments' => $attachments,
+            'attachments' => $attachmentNames,
             'messageRecipient' => $messageRecipient
         ]);
     }
