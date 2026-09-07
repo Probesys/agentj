@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Entity\SenderRule;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\MessageFactory;
@@ -772,6 +773,7 @@ class MessageControllerTest extends WebTestCase
         ]);
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        /** @var Message $message */
         $message = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
         $mailRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($mailRecipient);
