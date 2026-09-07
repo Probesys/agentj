@@ -77,10 +77,10 @@ for item in "${t[@]}"; do
   delim=","
 done
 
-body="'from ${from} to ${t:-$to} sent at $(date +%R)'"
+body="from ${from} to ${t:-$to} sent at $(date +%R)"
 
-if [ ! -z $content ] ; then
-    body=$content
+if [ ! -z "$content" ] ; then
+    body="$content"
 fi
 
 if [ "$spam" = true ] ; then
@@ -88,7 +88,7 @@ if [ "$spam" = true ] ; then
 fi
 
 command="swaks --from '${from}' --to '${joined:-$to}' --server '$ip_smtptest':27 \
-	--h-Subject '$subject' --body $body"
+	--h-Subject '$subject' --body '$body'"
 
 for h in "${headers[@]}"; do
     command="$command --add-header $h"
