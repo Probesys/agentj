@@ -17,8 +17,8 @@
 				{{ 'Generics.fields.attachments' | trans }}
 			</div>
 			<div class="col-md-9">
-				{% for attachment in attachments %}
-					{{ attachment.getName() }}
+				{% for attachmentName in attachments %}
+					{{ attachmentName }}
 					<br>
 				{% endfor %}
 			</div>

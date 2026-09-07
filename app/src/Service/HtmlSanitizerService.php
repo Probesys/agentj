@@ -14,6 +14,10 @@ final class HtmlSanitizerService
 
     public function sanitize(string $html): string
     {
+        if ($html === '') {
+            return $html;
+        }
+
         $html = $this->htmlSanitizer->sanitize($html);
 
         $dom = new \DOMDocument();

@@ -1,0 +1,6 @@
+framework:
+    html_sanitizer:
+        sanitizers:
+            default:
+                allow_safe_elements: true
+                max_input_length: 1000000
