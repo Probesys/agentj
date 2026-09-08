@@ -1,0 +1,19 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+  {{ ('Entities.SenderRule.actions.addSender' ~ senderRuleType) | trans }}
+{% endblock %}
+
+{% block modalContent %}
+  {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary mr-2">
+        {{ 'Generics.actions.save' | trans }}
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-close-modal">
+        {{ 'Generics.actions.cancel' | trans }}
+      </button>
+    </div>
+  {{ form_end(form) }}
+{% endblock %}

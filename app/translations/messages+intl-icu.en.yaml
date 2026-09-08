@@ -236,6 +236,8 @@ Entities.Report.title: 'Activity report'
 Entities.Report.titleDay: 'On the last 24 hours'
 Entities.Report.titleMonth: 'Last month'
 Entities.Report.typeMessage: Type
+Entities.SenderRule.actions.addSenderB: 'Ban a sender'
+Entities.SenderRule.actions.addSenderW: 'Authorize a sender'
 Entities.SenderRule.actions.deleteSenderB: 'Unlock the sender'
 Entities.SenderRule.actions.deleteSenderW: 'Delete sender'
 Entities.SenderRule.fields.domain: Domain

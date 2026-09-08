@@ -3,17 +3,22 @@
 namespace App\Controller;
 
 use App\Entity\Domain;
-use App\Entity\RuleAddress;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
+use App\Form\SenderRuleType;
+use App\Repository\DomainRepository;
 use App\Repository\SenderRuleRepository;
+use App\Repository\UserRepository;
 use App\Service\LogService;
 use App\Service\Referrer;
+use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +32,7 @@ class SenderRuleController extends AbstractController
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private Referrer $referrer,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -95,6 +101,101 @@ class SenderRuleController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/rules/new/{type}', name: 'sender_rules_new', requirements: ['type' => 'W|B'], methods: 'GET')]
+    public function newSenderRule(string $type, DomainRepository $domainRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $form = $this->createSenderRuleForm($type, $user, $domainRepository);
+
+        return $this->render('sender_rule/new.html.twig', [
+            'senderRuleType' => $type,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route(path: '/rules/new/{type}', name: 'sender_rules_create', requirements: ['type' => 'W|B'], methods: 'POST')]
+    public function createSenderRule(
+        string $type,
+        Request $request,
+        DomainRepository $domainRepository,
+        SenderRuleService $senderRuleService,
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+        $form = $this->createSenderRuleForm($type, $user, $domainRepository);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            $errors = iterator_to_array($form->getErrors(true), false);
+
+            return new JsonResponse([
+                'status' => 'danger',
+                'message' => $errors
+                    ? $errors[0]->getMessage()
+                    : $this->translator->trans('Generics.flash.genericFormError'),
+            ]);
+        }
+
+        /** @var array{email: string, domain?: Domain} $data */
+        $data = $form->getData();
+        $recipient = $user;
+        $source = SenderRule::TYPE_USER;
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        if ($isAdmin) {
+            $domain = $data['domain'] ?? null;
+            $domainName = $domain?->getDomain();
+            $recipient = $domainName ? $this->userRepository->findDomainUser($domainName) : null;
+            $source = SenderRule::TYPE_ADMIN;
+        }
+
+        $created = $recipient && ($isAdmin
+            ? $senderRuleService->createOrUpdateForRecipient(
+                $data['email'],
+                $recipient,
+                $type === 'W' ? 'accept' : 'block',
+                $source,
+            )
+            : $senderRuleService->createOrUpdateForUserAndAliases(
+                $data['email'],
+                $recipient,
+                $type === 'W' ? 'accept' : 'block',
+                $source,
+            ));
+
+        if (!$created) {
+            return new JsonResponse([
+                'status' => 'danger',
+                'message' => $this->translator->trans('Generics.flash.genericFormError'),
+            ]);
+        }
+
+        return new JsonResponse([
+            'status' => 'success',
+            'message' => $this->translator->trans(
+                $type === 'W' ? 'Message.Flash.senderAuthorized' : 'Message.Flash.senderBanned',
+            ),
+        ]);
+    }
+
+    /**
+     * @return FormInterface<array{email: string, domain?: Domain}>
+     */
+    private function createSenderRuleForm(
+        string $type,
+        User $user,
+        DomainRepository $domainRepository,
+    ): FormInterface {
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        return $this->createForm(SenderRuleType::class, null, [
+            'action' => $this->generateUrl('sender_rules_create', ['type' => $type]),
+            'attr' => ['class' => 'modal-ajax-form'],
+            'domains' => $isAdmin ? $domainRepository->findActiveForUser($user) : [],
+            'is_admin' => $isAdmin,
+        ]);
+    }
 
     #[Route(path: '/rules/{rid}/{sid}/{priority}/delete', name: 'sender_rules_delete', methods: 'GET')]
     public function deleteAction(
@@ -120,19 +221,8 @@ class SenderRuleController extends AbstractController
         int $priority,
         SenderRuleRepository $senderRuleRepository,
     ): void {
-        $mainUser = $this->em->getRepository(User::class)->find($userId);
-        $userAndAliases = [];
-
-        // if address in an alias we get the target mail
-        if ($mainUser && $mainUser->getOriginalUser()) {
-            $mainUser = $mainUser->getOriginalUser();
-        }
-
-        // we check if aliases exist
-        if ($mainUser) {
-            $userAndAliases = $this->em->getRepository(User::class)->findBy(['originalUser' => $mainUser->getId()]);
-            array_unshift($userAndAliases, $mainUser);
-        }
+        $user = $this->userRepository->find($userId);
+        $userAndAliases = $user ? $this->userRepository->findUserAndAliases($user) : [];
 
         foreach ($userAndAliases as $userOrAlias) {
             $senderRuleRepository->delete($userOrAlias->getId(), $senderRuleAddressId, $priority);
@@ -170,16 +260,22 @@ class SenderRuleController extends AbstractController
     }
 
     #[Route(path: '/rules/admin/import/{type}', name: 'sender_rules_import', options: ['expose' => true])]
-    public function importSenderRuleAction(Request $request, string $type): Response
-    {
+    public function importSenderRuleAction(
+        Request $request,
+        string $type,
+        DomainRepository $domainRepository,
+        SenderRuleService $senderRuleService,
+    ): Response {
         if ($type !== 'W' && $type !== 'B') {
             return new Response("Type has to be either `W` or `B`", 422);
         }
         $rule = $type === 'W' ? 'accept' : 'block';
 
+        /** @var User $user */
+        $user = $this->getUser();
         $form = $this->createForm(ImportType::class, null, [
             'action' => $this->generateUrl('sender_rules_import', ['type' => $type]),
-            'user' => $this->getUser()
+            'domains' => $domainRepository->findActiveForUser($user),
         ]);
         $form->handleRequest($request);
 
@@ -188,7 +284,11 @@ class SenderRuleController extends AbstractController
             if ($fileUpload->getClientMimeType() == "text/plain") {
                 $filename = 'import-sender-rules-agentj-' . time() . ".txt";
                 $file = $fileUpload->move('/tmp/', $filename);
-                $this->importSenderRule($file->getPathname(), $form->get('domain')->getData(), $rule);
+                $senderRuleService->importFile(
+                    $file->getPathname(),
+                    $form->get('domain')->getData(),
+                    $rule,
+                );
                 $this->addFlash('success', new TranslatableMessage('Entities.Import.SenderRule.success'));
             } else {
                 $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadImportFormat'));
@@ -202,78 +302,5 @@ class SenderRuleController extends AbstractController
             'form' => $form,
             'senderRuleType' => $type,
         ]);
-    }
-
-    /**
-     * @param 'accept'|'block' $rule
-     */
-    private function importSenderRule(string $pathFile, Domain $domain, string $rule): void
-    {
-        $senderRules = [];
-        if (($handle = fopen($pathFile, "r"))) {
-            while (($data = fgets($handle, 4096)) !== false) {
-                $data = $this->sanitizeImportedData($data);
-
-                if ($data === null) {
-                    continue;
-                }
-
-                $senderRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
-                // if email doesn't exist then we create email in RuleAddress
-                if (!$senderRuleAddress) {
-                    $senderRuleAddress = new RuleAddress();
-                    $senderRuleAddress->setEmail($data);
-                    $senderRuleAddress->setPriority(6);
-                    $this->em->persist($senderRuleAddress);
-                    $this->em->flush();
-                }
-
-                if (
-                    isset($senderRules[$domain->getId()]) &&
-                    in_array($senderRuleAddress->getId(), $senderRules[$domain->getId()])
-                ) {
-                    continue;
-                }
-
-                $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                $senderRule = $this->em->getRepository(SenderRule::class)->findOneBy([
-                    'senderRuleAddress' => $senderRuleAddress,
-                    'user' => $user,
-                ]);
-                if (!$senderRule) {
-                    $senderRule = new SenderRule($user, $senderRuleAddress);
-                }
-
-                $senderRule->setWbRule($rule);
-                $senderRule->setPriority(SenderRule::PRIORITY_USER);
-                $senderRule->setType(SenderRule::TYPE_IMPORT);
-                $this->em->persist($senderRule);
-                $senderRules[$domain->getId()][] = $senderRuleAddress->getId();
-            }
-
-            $this->em->flush();
-        }
-    }
-
-    private function sanitizeImportedData(string $data): ?string
-    {
-        $data = trim($data);
-
-        $email = filter_var($data, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE);
-        if ($email !== false) {
-            return $email;
-        }
-
-        // This allows domains to be imported in both formats: "example.org" and "@example.org".
-        if (str_starts_with($data, '@')) {
-            $data = substr($data, 1);
-        }
-
-        $domain = filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
-        if ($domain !== false) {
-            return '@' . $domain;
-        }
-
-        return null;
     }
 }
