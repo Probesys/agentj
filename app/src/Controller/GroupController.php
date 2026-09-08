@@ -14,6 +14,7 @@ use App\Repository\GroupRuleRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
+use App\Service\Referrer;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -33,6 +34,7 @@ class GroupController extends AbstractController
         private EntityManagerInterface $em,
         private TranslatorInterface $translator,
         private DomainRepository $domainsRepository,
+        private Referrer $referrer,
     ) {
     }
 
@@ -304,6 +306,27 @@ class GroupController extends AbstractController
         $this->em->flush();
 
         return $this->redirectToRoute('group_index');
+    }
+
+    #[Route(path: '/batchDelete', name: 'groups_batch_delete', methods: 'POST')]
+    public function batchDeleteEmail(Request $request): Response
+    {
+        $csrfToken = $request->request->getString('_csrf_token', 'delete');
+
+        if (!$this->isCsrfTokenValid('delete group', $csrfToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return $this->redirect($this->referrer->get());
+        }
+
+        foreach ($request->request->all('id') as $id) {
+            $group = $this->em->getRepository(Group::class)->find($id);
+            if ($group) {
+                $this->em->remove($group);
+            }
+        }
+        $this->em->flush();
+
+        return $this->redirect($this->referrer->get());
     }
 
     #[Route(path: '/check-priority', name: 'group_check_priority', methods: 'GET|POST')]
