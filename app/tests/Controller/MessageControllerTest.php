@@ -28,7 +28,7 @@ class MessageControllerTest extends WebTestCase
     use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
-    
+
     public function testHtmlBodyIsSanitized(): void
     {
         $client = static::createClient();

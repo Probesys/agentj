@@ -40,14 +40,14 @@ class DomainOwnershipVoter extends Voter
             return false;
         }
 
+        if ($this->security->isGrantedForUser($user, 'ROLE_SUPER_ADMIN')) {
+            return true;
+        }
+
         $domain = $subject instanceof Domain ? $subject : $subject->getDomain();
 
         if (!$domain instanceof Domain) {
             return false;
-        }
-
-        if ($this->security->isGrantedForUser($user, 'ROLE_SUPER_ADMIN')) {
-            return true;
         }
 
         return $this->security->isGrantedForUser($user, 'ROLE_ADMIN') && $user->hasDomain($domain);
