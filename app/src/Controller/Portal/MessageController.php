@@ -70,6 +70,53 @@ class MessageController extends AbstractController
     }
 
     #[Route(
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/banned',
+        name: 'portal_message_banned',
+    )]
+    public function banned(
+        string $token,
+        int $partitionTag,
+        string $mailId,
+        int $recipientId,
+    ): Response {
+        $result = $this->messageService->decryptReleaseToken($token);
+
+        if (!$result) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        $user = $result[0];
+        $tokenMailId = $result[1];
+
+        if ($tokenMailId !== null && $tokenMailId !== $mailId) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        $messageRecipient = $this->messageRecipientRepository->findOneBy([
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'address' => $recipientId,
+        ]);
+
+        if (!$messageRecipient) {
+            throw $this->createNotFoundException('Message recipient does not exist');
+        }
+
+        $this->checkMailAccess($user, $messageRecipient);
+
+        $result = $this->messageService->banSenderForRecipient(
+            $messageRecipient,
+            Entity\SenderRule::TYPE_USER,
+        );
+
+        if ($result) {
+            $this->logService->addLog('banned', $mailId);
+        }
+
+        return $this->render('portal/messages/banned.html.twig');
+    }
+
+    #[Route(
         path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/restore',
         name: 'portal_message_restore',
     )]

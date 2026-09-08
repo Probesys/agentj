@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
+use App\Util\ResourceHelper;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -24,7 +25,7 @@ class BaseMessageRecipient
     #[ORM\Column(name: 'mail_id', type: Types::BINARY, length: 255, nullable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private string $mailId; /** @phpstan-ignore property.onlyRead */
+    private mixed $mailId = null;
 
     #[ORM\Column(name: 'rseqnum', type: 'integer', nullable: false)]
     #[ORM\Id]
@@ -76,7 +77,13 @@ class BaseMessageRecipient
 
     public function getMailId(): string
     {
-        return $this->mailId;
+        // Doctrine's Types::BINARY always hydrates the column as a PHP
+        // stream resource (see DBAL's BinaryType::convertToPHPValue()), not
+        // a string, hence the mixed property above and the conversion here.
+        // Without it, callers that embed getMailId() in a URL
+        // (authorize/restore/ban links) end up with the literal
+        // "Resource id #N" instead of the actual id.
+        return ResourceHelper::toString($this->mailId) ?? '';
     }
 
     public function getRseqnum(): ?int

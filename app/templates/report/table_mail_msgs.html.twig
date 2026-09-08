@@ -48,6 +48,23 @@
             </div>
           </td>
 
+          <td width="100" style="min-width: 100px;">
+            <div style="width: 100px;">
+              <a href="{{ url('portal_message_banned',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.mailId,'recipientId':messageRecipient.address.id}) }}"
+                 title="{{ 'Message.Actions.BannedSender'|trans(locale: locale) }}" style="font-size:16px;
+                 -moz-border-radius: 5px;
+                 -webkit-border-radius: 5px;
+                 border-radius: 5px;
+                 line-height: 16px;
+                 background-color: #E76D6D;
+                 padding: 5px;
+                 color: #fff;
+                 text-decoration: none;
+                 ">
+                {{ 'Message.Actions.Banned'|trans(locale: locale) }}</a>
+            </div>
+          </td>
+
         </tr>
       {% endfor %}
 
