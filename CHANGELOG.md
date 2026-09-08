@@ -4,6 +4,12 @@
 
 ### Bugfixes
 
+- fix the domain ownership voter ([f31935fe](https://github.com/Probesys/agentj/commit/f31935fe))
+
+## 2026-09-08 - 2.7.2
+
+### Bugfixes
+
 - Fix characters encoding and email body sanitizing ([339aaf9f](https://github.com/Probesys/agentj/commit/339aaf9f))
 
 ## 2026-09-08 - 2.7.1
