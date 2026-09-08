@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Domain;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,6 +20,11 @@ class DomainCustomisationReportType extends AbstractType
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
+        ]);
+
+        $builder->add('showPortalLinkInReport', CheckboxType::class, [
+            'label' => new TranslatableMessage('Entities.Domain.fields.showPortalLinkInReport'),
+            'required' => false,
         ]);
 
         $builder->add('reportSpamLevel', RangeType::class, [
