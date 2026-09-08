@@ -88,7 +88,7 @@ if [ "$spam" = true ] ; then
 fi
 
 command="swaks --from '${from}' --to '${joined:-$to}' --server '$ip_smtptest':26 \
-	--h-Subject '$subject' --body $body"
+	--h-Subject '$subject' --body \"$body\""
 
 for h in "${headers[@]}"; do
     command="$command --add-header $h"
