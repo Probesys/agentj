@@ -213,7 +213,7 @@ class SenderRuleRepository extends BaseRepository
             return false;
         }
 
-        return $senderRules[0]->isWbRuleAuthorized();
+        return array_reduce($senderRules, fn ($result, $rule) => $result || $rule->isWbRuleAuthorized());
     }
 
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool
