@@ -163,6 +163,32 @@ then
 	send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
 fi
 
+if [ -z "$1" ] || [ "$1" = "mllist" ]
+then
+	echo "---- mailing list is not filtered ----" 1>&2
+	{ sleep 5 && $dx php bin/console agentj:send-auth-mail-token >/dev/null; } &
+	to_addr="news@liste.domaine.fr"
+    expected_sender="news@liste.domaine.fr"
+	send 'in_pass_mailing_list' 'in' 'user@blocnormal.fr' 0 1 '--add-header=List-Id:<news.liste.domaine.fr>'
+
+    # Check that user@blocnormal.fr did not received newsletter mail
+    sleep 5
+    mail_count=$($curl "$mailpit_api/search?query=to:user@blocnormal.fr%20subject:\"$message_subject\"" \
+      | jq '.messages_count')
+    if [ "$mail_count" -ne 0 ]; then
+        # user@blocknormal.fr should not receive email as news@liste.domaine.fr is not allowed
+        echo "unexpected mail for user@blocnormal.fr not found"
+        exit 1
+    fi
+
+    # Check that the newsletter address did not receive human auth mail
+    mail_count=$($curl "$mailpit_api/search?query=to:news@liste.domaine.fr" | jq '.messages_count')
+    if [ "$mail_count" -ne 0 ]; then
+        echo "unexpected mail sent to news@liste.domaine.fr"
+        exit 1
+    fi
+fi
+
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2
