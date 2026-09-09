@@ -22,12 +22,7 @@ class SwitchUserAuthorization
             return false;
         }
 
-        $targetDomain = $targetUser->getDomain();
-        if (
-            $this->security->isGrantedForUser($user, 'ROLE_ADMIN')
-            && $targetDomain !== null
-            && $user->hasDomain($targetDomain)
-        ) {
+        if ($this->security->isGrantedForUser($user, 'DOMAIN_ACCESS', $targetUser)) {
             return true;
         }
 
