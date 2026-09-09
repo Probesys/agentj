@@ -56,9 +56,10 @@ class SwitchToUserVoterTest extends WebTestCase
     {
         $client = static::createClient();
         // userA has access to both userB and userC's shared mailboxes.
-        $userA = UserFactory::new()->user()->create();
-        $userB = UserFactory::new()->user()->create(['sharedWith' => [$userA]]);
-        $userC = UserFactory::new()->user()->create(['sharedWith' => [$userA]]);
+        $domain = DomainFactory::createOne();
+        $userA = UserFactory::new()->user($domain)->create();
+        $userB = UserFactory::new()->user($domain)->create(['sharedWith' => [$userA]]);
+        $userC = UserFactory::new()->user($domain)->create(['sharedWith' => [$userA]]);
         $client->loginUser($userA);
 
         // userA switches to userB's mailbox.
@@ -76,14 +77,15 @@ class SwitchToUserVoterTest extends WebTestCase
     public function testUserCannotChainSwitchToAMailboxImpersonatedUserHasAccess(): void
     {
         $client = static::createClient();
-        $userA = UserFactory::new()->user()->create();
-        $userB = UserFactory::new()->user()->create(['sharedWith' => [$userA]]);
+        $domain = DomainFactory::createOne();
+        $userA = UserFactory::new()->user($domain)->create();
+        $userB = UserFactory::new()->user($domain)->create(['sharedWith' => [$userA]]);
         // userC is shared with userB but not userA. This case could be
         // legitimate (being careful with priviledge escalation), but
         // SwitchToUserVoter doesn't have access to the SwitchUserToken and so
         // we cannot support this case. It would probably require a different
         // system.
-        $userC = UserFactory::new()->user()->create(['sharedWith' => [$userB]]);
+        $userC = UserFactory::new()->user($domain)->create(['sharedWith' => [$userB]]);
         $client->loginUser($userA);
 
         $client->request(Request::METHOD_GET, '/', ['_switch_user' => $userB->getUsername()]);
@@ -96,8 +98,9 @@ class SwitchToUserVoterTest extends WebTestCase
     public function testUserCannotSwitchToAMailboxHeCannotAccess(): void
     {
         $client = static::createClient();
-        $userA = UserFactory::new()->user()->create();
-        $userB = UserFactory::new()->user()->create(['sharedWith' => []]);
+        $domain = DomainFactory::createOne();
+        $userA = UserFactory::new()->user($domain)->create();
+        $userB = UserFactory::new()->user($domain)->create(['sharedWith' => []]);
         $client->loginUser($userA);
 
         $client->request(Request::METHOD_GET, '/', ['_switch_user' => $userB->getUsername()]);

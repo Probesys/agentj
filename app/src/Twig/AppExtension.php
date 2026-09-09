@@ -7,6 +7,7 @@ use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\User;
 use App\Entity\SenderRule;
+use App\Security\SwitchUserAuthorization;
 use App\Service\LocaleService;
 use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,6 +24,7 @@ class AppExtension extends AbstractExtension
         private EntityManagerInterface $em,
         private MessageService $messageService,
         private Security $security,
+        private SwitchUserAuthorization $switchUserAuthorization,
         private Packages $packages,
         private string $uploadDirectory,
         private string $defaultLogoFilename,
@@ -46,6 +48,7 @@ class AppExtension extends AbstractExtension
         return [
             new TwigFunction('message_release_token', [$this, 'messageReleaseToken']),
             new TwigFunction('get_original_user', [$this, 'getOriginalUser']),
+            new TwigFunction('switchable_users', [$this, 'getSwitchableUsers']),
             new TwigFunction('domain_logo_asset', [$this, 'domainLogoAsset']),
             new TwigFunction('locales', [$this, 'locales']),
         ];
@@ -127,6 +130,34 @@ class AppExtension extends AbstractExtension
         }
 
         return null;
+    }
+
+    /**
+     * @return User[]
+     */
+    public function getSwitchableUsers(?User $originalUser): array
+    {
+        $currentUser = $this->security->getUser();
+
+        if (!$currentUser instanceof User) {
+            return [];
+        }
+
+        $switchingUser = $originalUser ?? $currentUser;
+        $isAdminSwitch = $originalUser !== null && $this->security->isGrantedForUser($originalUser, 'ROLE_ADMIN');
+
+        if ($isAdminSwitch) {
+            $users = $currentUser->getOwnedSharedBoxes()->toArray();
+        } else {
+            $users = $switchingUser->getOwnedSharedBoxes()->toArray();
+        }
+
+        return array_values(array_filter(
+            $users,
+            fn (User $user) => $user->getId() !== $currentUser->getId()
+                // For standard users, the source association already grants access.
+                && (!$isAdminSwitch || $this->switchUserAuthorization->canSwitch($switchingUser, $user)),
+        ));
     }
 
     /**
