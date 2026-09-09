@@ -26,30 +26,15 @@ class SenderRuleRepository extends BaseRepository
 
     /**
      * @param 'W'|'B'|'any' $type
-     * @param ?array{
-     *     field: 'emailuser'|'email'|'wb.datemod',
-     *     direction: 'asc'|'desc',
-     * } $sort
-     * @return array<int, array<string, mixed>>
+     * @return Query<SenderRule>
      */
-    public function search(
+    public function getSearchQuery(
         string $type,
         User $user,
         string $query = '',
-        ?array $sort = null
-    ): array {
+    ): Query {
         $dql = $this->createQueryBuilder('wb')
-                ->select(
-                    'u.id as userId, ' .
-                    's.id as senderRuleAddressId, ' .
-                    'wb.type as type, ' .
-                    'wb.priority as priority, ' .
-                    'wb.datemod, ' .
-                    'u.fullname, ' .
-                    's.email as email, ' .
-                    'u.email as emailuser, ' .
-                    'g.name as group'
-                )
+                ->select('wb', 'u', 's', 'g')
                 ->innerJoin('wb.user', 'u')
                 ->innerJoin('wb.senderRuleAddress', 's')
                 ->leftJoin('wb.group', 'g');
@@ -89,11 +74,7 @@ class SenderRuleRepository extends BaseRepository
             $dql->setParameter('query', "%{$query}%");
         }
 
-        if ($sort) {
-            $dql->orderBy($sort['field'], $sort['direction']);
-        }
-
-        return $dql->getQuery()->getScalarResult();
+        return $dql->getQuery();
     }
 
     public function findOneByRecipientDomain(Domain $domain): ?SenderRule
@@ -269,18 +250,18 @@ class SenderRuleRepository extends BaseRepository
     /**
      * Check if sender rule is overridden by anotherOne with higher priority
      *
-     * @param array<string, mixed> $wbInfo
+     * @param SenderRule $senderRule
      */
-    public function senderRuleIsOverridden(array $wbInfo): bool
+    public function senderRuleIsOverridden(SenderRule $senderRule): bool
     {
         $dql = $this->createQueryBuilder('wb')
                 ->select('wb')
                 ->where('wb.user =:user')
                 ->andWhere('wb.senderRuleAddress =:senderRuleAddress')
                 ->andWhere('wb.priority > :priority')
-                ->setParameter('user', $wbInfo['userId'])
-                ->setParameter('senderRuleAddress', $wbInfo['senderRuleAddressId'])
-                ->setParameter('priority', $wbInfo['priority'])
+                ->setParameter('user', $senderRule->getUser()->getId())
+                ->setParameter('senderRuleAddress', $senderRule->getSenderRuleAddress()->getId())
+                ->setParameter('priority', $senderRule->getPriority())
                 ->setMaxResults(1);
 
         $query = $dql->getQuery();

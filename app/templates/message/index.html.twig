@@ -372,8 +372,7 @@
         </section>
     </div>
     {{ form_end(filter_form) }}
-    <div class="navigation text-center">
-        {{ knp_pagination_render(messagesRecipients) }}
-    </div>
+
+{% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': messagesRecipients } %}
 
 {% endblock %}
