@@ -1,10 +1,36 @@
 # Changelog of AgentJ
 
-## 2026-09-08 - 2.7.2
+## 2026-09-11 - 2.7.4
 
-### Bugfixes
+### Bug Fixes
 
-- fix the domain ownership voter ([f31935fe](https://github.com/Probesys/agentj/commit/f31935fe))
+- Normalize sender rule addresses to ensure case-insensitive matching ([5bb0a2cf](https://github.com/Probesys/agentj/commit/5bb0a2cf), [9ff8df1c](https://github.com/Probesys/agentj/commit/9ff8df1c)).
+
+### Migration notes
+
+- Run the database migration while sender rule writes are paused.
+- To recover messages incorrectly marked as spam since upgrading to 2.7, first preview them with `agentj:recover-authorized-spam --since=<upgrade-date> -v`, then add `--release` after reviewing the results.
+
+## 2026-09-08 - 2.7.3
+
+### Bug Fixes
+
+- Fix domain ownership checks ([f31935fe](https://github.com/Probesys/agentj/commit/f31935fe)).
+- List the original user's shared mailboxes while impersonating another user ([ca69e0f2](https://github.com/Probesys/agentj/commit/ca69e0f2)).
+- Fix outdated and untranslated dashboard labels ([8fae21c5](https://github.com/Probesys/agentj/commit/8fae21c5), [740511ba](https://github.com/Probesys/agentj/commit/740511ba)).
+- Use the current domain name for `noreply` addresses ([8aa12262](https://github.com/Probesys/agentj/commit/8aa12262)).
+- Improve the authorized SMTP server form ([1cc9db2c](https://github.com/Probesys/agentj/commit/1cc9db2c)).
+- Remove the redundant DKIM popup during domain creation ([2205f286](https://github.com/Probesys/agentj/commit/2205f286)).
+
+### Improvements
+
+- Replace `bypassHumanAuth` with the explicit `humanAuthenticationEnabled` setting ([1e806fa2](https://github.com/Probesys/agentj/commit/1e806fa2)).
+- Display a confirmation after importing sender rules ([cb1b8a50](https://github.com/Probesys/agentj/commit/cb1b8a50)).
+
+### Maintenance
+
+- Modernize frontend dependencies and asset management.
+- Expand controller test coverage and developer tooling.
 
 ## 2026-09-08 - 2.7.2
 
