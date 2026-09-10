@@ -154,6 +154,7 @@ final class Version20260910120000 extends AbstractMigration
 
     private function stageGroupRules(): void
     {
+        $winnerOrder = $this->groupRuleWinnerOrder('gr.wb', 'map.old_sid');
         $this->addSql('CREATE TEMPORARY TABLE ' . self::GROUP_RULE_TABLE . ' LIKE groups_wblist');
         $this->addSql(<<<SQL
             INSERT INTO {$this->table(self::GROUP_RULE_TABLE)} (group_id, sid, wb)
@@ -165,7 +166,7 @@ final class Version20260910120000 extends AbstractMigration
                     gr.wb,
                     ROW_NUMBER() OVER (
                         PARTITION BY gr.group_id, map.keep_sid
-                        ORDER BY map.old_sid DESC
+                        ORDER BY {$winnerOrder}
                     ) AS rule_rank
                 FROM groups_wblist gr
                 INNER JOIN {$this->table(self::MAP_TABLE)} map ON map.old_sid = gr.sid
@@ -217,6 +218,7 @@ final class Version20260910120000 extends AbstractMigration
     {
         $action = $this->actionExpression('gr.wb');
         $logAction = self::CONFLICT_LOG_ACTION;
+        $winnerOrder = $this->groupRuleWinnerOrder('gr.wb', 'map.old_sid');
         $this->addSql(<<<SQL
             INSERT INTO log (action, mailId, details, created, updated)
             SELECT
@@ -226,7 +228,8 @@ final class Version20260910120000 extends AbstractMigration
                     'table', 'groups_wblist',
                     'address', CONVERT(normalized_email USING utf8mb4),
                     'group_id', group_id,
-                    'kept_sid', winner_sid,
+                    'kept_sid', keep_sid,
+                    'kept_source_sid', winner_source_sid,
                     'kept_action', winner_action,
                     'kept_wb_hex', HEX(winner_wb),
                     'discarded_sid', old_sid,
@@ -239,24 +242,25 @@ final class Version20260910120000 extends AbstractMigration
                 SELECT
                     gr.group_id,
                     map.old_sid,
+                    map.keep_sid,
                     map.normalized_email,
                     gr.wb,
                     {$action} AS rule_action,
                     FIRST_VALUE(map.old_sid) OVER (
                         PARTITION BY gr.group_id, map.keep_sid
-                        ORDER BY map.old_sid DESC
-                    ) AS winner_sid,
+                        ORDER BY {$winnerOrder}
+                    ) AS winner_source_sid,
                     FIRST_VALUE(gr.wb) OVER (
                         PARTITION BY gr.group_id, map.keep_sid
-                        ORDER BY map.old_sid DESC
+                        ORDER BY {$winnerOrder}
                     ) AS winner_wb,
                     FIRST_VALUE({$action}) OVER (
                         PARTITION BY gr.group_id, map.keep_sid
-                        ORDER BY map.old_sid DESC
+                        ORDER BY {$winnerOrder}
                     ) AS winner_action,
                     ROW_NUMBER() OVER (
                         PARTITION BY gr.group_id, map.keep_sid
-                        ORDER BY map.old_sid DESC
+                        ORDER BY {$winnerOrder}
                     ) AS rule_rank
                 FROM groups_wblist gr
                 INNER JOIN {$this->table(self::MAP_TABLE)} map ON map.old_sid = gr.sid
@@ -279,7 +283,8 @@ final class Version20260910120000 extends AbstractMigration
                     'address', CONVERT(normalized_email USING utf8mb4),
                     'recipient_id', rid,
                     'priority', priority,
-                    'kept_sid', winner_sid,
+                    'kept_sid', keep_sid,
+                    'kept_source_sid', winner_source_sid,
                     'kept_action', winner_action,
                     'kept_wb_hex', HEX(winner_wb),
                     'kept_datemod', winner_datemod,
@@ -295,6 +300,7 @@ final class Version20260910120000 extends AbstractMigration
                     sr.rid,
                     sr.priority,
                     map.old_sid,
+                    map.keep_sid,
                     map.normalized_email,
                     sr.wb,
                     sr.datemod,
@@ -302,7 +308,7 @@ final class Version20260910120000 extends AbstractMigration
                     FIRST_VALUE(map.old_sid) OVER (
                         PARTITION BY sr.rid, map.keep_sid, sr.priority
                         ORDER BY sr.datemod DESC, map.old_sid DESC
-                    ) AS winner_sid,
+                    ) AS winner_source_sid,
                     FIRST_VALUE(sr.wb) OVER (
                         PARTITION BY sr.rid, map.keep_sid, sr.priority
                         ORDER BY sr.datemod DESC, map.old_sid DESC
@@ -367,6 +373,22 @@ final class Version20260910120000 extends AbstractMigration
                 WHEN '' THEN 'none'
                 ELSE CONCAT('raw:', HEX({$column}))
             END
+        SQL;
+    }
+
+    private function groupRuleWinnerOrder(string $wbColumn, string $sidColumn): string
+    {
+        // Group rules have no modification date, so resolve unknown chronology conservatively.
+        return <<<SQL
+            CASE HEX({$wbColumn})
+                WHEN '42' THEN 3
+                WHEN '4E' THEN 3
+                WHEN '20' THEN 2
+                WHEN '57' THEN 1
+                WHEN '59' THEN 1
+                ELSE 0
+            END DESC,
+            {$sidColumn} DESC
         SQL;
     }
 

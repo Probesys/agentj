@@ -70,7 +70,7 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
         ]);
         $this->connection->executeStatement(<<<'SQL'
             INSERT INTO groups_wblist (group_id, sid, wb)
-            VALUES (:groupId, :uppercaseSid, 'W'), (:groupId, :lowercaseSid, 'Y')
+            VALUES (:groupId, :uppercaseSid, 'B'), (:groupId, :lowercaseSid, 'W')
         SQL, [
             'groupId' => $group->getId(),
             'uppercaseSid' => $uppercaseId,
@@ -118,7 +118,7 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
             'SELECT wb FROM wblist WHERE rid = ? AND priority = 50',
             [$user->getId()],
         ));
-        self::assertSame('Y', $this->connection->fetchOne(
+        self::assertSame('B', $this->connection->fetchOne(
             'SELECT wb FROM groups_wblist WHERE group_id = ?',
             [$group->getId()],
         ));
@@ -133,32 +133,49 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
             'SELECT wb FROM out_wblist WHERE rid = ? AND priority = 100',
             [$user->getId()],
         ));
+        self::assertSame($lowercaseId, (int) $this->connection->fetchOne(
+            'SELECT sid FROM out_wblist WHERE rid = ? AND priority = 100',
+            [$user->getId()],
+        ));
         self::assertSame('Y', $this->connection->fetchOne(
             'SELECT wb FROM out_wblist WHERE rid = ? AND priority = 50',
             [$user->getId()],
         ));
         $details = $this->conflictLogDetails();
-        self::assertCount(1, $details);
-        self::assertSame('out_wblist', $details[0]['table']);
-        self::assertSame('block', $details[0]['kept_action']);
-        self::assertSame('allow', $details[0]['discarded_action']);
+        self::assertCount(2, $details);
+        self::assertSame(['groups_wblist', 'out_wblist'], array_column($details, 'table'));
+        foreach ($details as $detail) {
+            self::assertSame($lowercaseId, $detail['kept_sid']);
+            self::assertSame($uppercaseId, $detail['kept_source_sid']);
+            self::assertSame('block', $detail['kept_action']);
+            self::assertSame('allow', $detail['discarded_action']);
+        }
     }
 
     public function testItResolvesContradictoryRulesByModificationDate(): void
     {
         $domain = DomainFactory::createOne();
         $user = UserFactory::new()->user($domain)->create();
-        $uppercaseId = $this->insertRuleAddress('Sender@Example.org');
         $lowercaseId = $this->insertRuleAddress('sender@example.org');
+        $uppercaseId = $this->insertRuleAddress('Sender@Example.org');
+        $group = GroupFactory::createOne(['domain' => $domain]);
         $this->connection->executeStatement(<<<'SQL'
             INSERT INTO wblist (rid, sid, group_id, wb, datemod, type, priority)
             VALUES
-                (:rid, :uppercaseSid, NULL, 'B', '2026-09-09 10:00:00', 3, 100),
-                (:rid, :lowercaseSid, NULL, 'W', '2026-09-10 10:00:00', 3, 100)
+                (:rid, :lowercaseSid, NULL, 'B', '2026-09-10 10:00:00', 3, 100),
+                (:rid, :uppercaseSid, NULL, 'W', '2026-09-09 10:00:00', 3, 100)
         SQL, [
             'rid' => $user->getId(),
             'uppercaseSid' => $uppercaseId,
             'lowercaseSid' => $lowercaseId,
+        ]);
+        $this->connection->executeStatement(<<<'SQL'
+            INSERT INTO groups_wblist (group_id, sid, wb)
+            VALUES (:groupId, :lowercaseSid, 'B'), (:groupId, :uppercaseSid, 'W')
+        SQL, [
+            'groupId' => $group->getId(),
+            'lowercaseSid' => $lowercaseId,
+            'uppercaseSid' => $uppercaseId,
         ]);
 
         $this->runMigration();
@@ -170,15 +187,23 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
             'SELECT COUNT(*) FROM wblist WHERE rid = ?',
             [$user->getId()],
         ));
-        self::assertSame('W', $this->connection->fetchOne(
+        self::assertSame('B', $this->connection->fetchOne(
             'SELECT wb FROM wblist WHERE rid = ?',
             [$user->getId()],
         ));
+        self::assertSame('B', $this->connection->fetchOne(
+            'SELECT wb FROM groups_wblist WHERE group_id = ?',
+            [$group->getId()],
+        ));
         $details = $this->conflictLogDetails();
-        self::assertCount(1, $details);
-        self::assertSame('wblist', $details[0]['table']);
-        self::assertSame('allow', $details[0]['kept_action']);
-        self::assertSame('block', $details[0]['discarded_action']);
+        self::assertCount(2, $details);
+        self::assertSame(['groups_wblist', 'wblist'], array_column($details, 'table'));
+        foreach ($details as $detail) {
+            self::assertSame($lowercaseId, $detail['kept_sid']);
+            self::assertSame($lowercaseId, $detail['kept_source_sid']);
+            self::assertSame('block', $detail['kept_action']);
+            self::assertSame('allow', $detail['discarded_action']);
+        }
     }
 
     public function testItUsesTheHighestAddressIdWhenModificationDatesAreEqual(): void
@@ -201,7 +226,7 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
         ]);
         $this->connection->executeStatement(<<<'SQL'
             INSERT INTO groups_wblist (group_id, sid, wb)
-            VALUES (:groupId, :lowercaseSid, 'W'), (:groupId, :uppercaseSid, 'B')
+            VALUES (:groupId, :lowercaseSid, 'W'), (:groupId, :uppercaseSid, 'Y')
         SQL, [
             'groupId' => $group->getId(),
             'lowercaseSid' => $lowercaseId,
@@ -219,9 +244,13 @@ class RuleAddressNormalizationMigrationTest extends KernelTestCase
         self::assertSame($group->getId(), (int) $rule['group_id']);
         self::assertSame('B', $rule['wb']);
         self::assertSame(4, (int) $rule['type']);
+        self::assertSame('Y', $this->connection->fetchOne(
+            'SELECT wb FROM groups_wblist WHERE group_id = ?',
+            [$group->getId()],
+        ));
         $details = $this->conflictLogDetails();
-        self::assertCount(2, $details);
-        self::assertSame(['groups_wblist', 'wblist'], array_column($details, 'table'));
+        self::assertCount(1, $details);
+        self::assertSame('wblist', $details[0]['table']);
     }
 
     public function testItRejectsDatabaseDependentUnicodeNormalization(): void
