@@ -424,12 +424,11 @@ class UserController extends AbstractController
                 $alias->setUsername($alias->getEmail());
                 $alias->setOriginalUser($user);
                 $alias->setDomain($newDomain);
+                $user->addAlias($alias);
 
                 $this->em->persist($alias);
                 $this->em->flush();
 
-                // The policy and the groups of the alias are inherited from
-                // its original user.
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
                 $groupService->updateSenderRules();
 
