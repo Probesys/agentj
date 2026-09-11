@@ -108,13 +108,13 @@ class PendingMessageApiService
             'token' => $token,
             'partitionTag' => $messageRecipient->getPartitionTag(),
             'mailId' => $messageRecipient->getMailId(),
-            'recipientId' => $messageRecipient->getAddress()->getId(),
+            'recipientId' => $messageRecipient->getRid()->getId(),
         ];
 
         return [
             'mailId' => $messageRecipient->getMailId(),
             'partitionTag' => $messageRecipient->getPartitionTag(),
-            'recipientId' => $messageRecipient->getAddress()->getId(),
+            'recipientId' => $messageRecipient->getRid()->getId(),
             'sender' => $message->getFromAddr(),
             'subject' => $message->getSubject(),
             'date' => $message->getTimeIso(),
