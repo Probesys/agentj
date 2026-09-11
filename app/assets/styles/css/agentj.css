@@ -427,3 +427,11 @@ table thead tr th {
 .domain-relay-row .form-group {
     margin-bottom: 0;
 }
+
+/* Buttons that may wrap on several lines (e.g. on narrow screens): the gap
+   keeps them spaced both horizontally and vertically. */
+.button-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}

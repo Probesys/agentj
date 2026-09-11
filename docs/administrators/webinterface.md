@@ -148,9 +148,9 @@ Alerts can be generated if a user exceeds its rate limits or if a user sends a v
 
 Users are managed under the `Users` tab.
 
-### Administrator
+### Administrators
 
-On the `Administrator` tab you can manage privileged users. When editing or creating an admin, there are the following fields:
+On the `Administrators` tab you can manage privileged users. When editing or creating an admin, there are the following fields:
 
 - Name: The display name of the user.
 - Login: The username of the user.
@@ -161,9 +161,9 @@ On the `Administrator` tab you can manage privileged users. When editing or crea
 - Password: The password of the user.
 - Domain: The domain(s) the user has access to. This field is only displayed if the user is a Local admin.
 
-### Email accounts
+### Email addresses
 
-This tab is here to configure email accounts managed by AgentJ.
+This tab is here to configure the email addresses managed by AgentJ.
 
 > [!IMPORTANT]
 > If an email account is missing, emails sent to him will be rejected by AgentJ.
@@ -184,11 +184,18 @@ When you create or edit an user, there is the following fields:
 - Rate limit: See the dedicated section on the subject.
 - Send report: Tick the box if the user should receive daily reports by email about blocked emails.
 
-### Alias
+#### Alias
 
-On the `Alias` tab, you can assign aliases to user. An alias is an email address which always point to one and only one other email address managed by AgentJ. For example mp@example.com could be an alias for martin.dupond@example.com.
+An alias is an email address which always point to one and only one other email address managed by AgentJ. For example mp@example.com could be an alias for martin.dupond@example.com.
 
 Each email sent to an alias is managed exactly as it was received directly by the user. It appears in the user reports, with every other email.
+
+The aliases are listed under the email address they belong to, on the `Email addresses` tab. There are two ways to create them.
+
+- Import a list of aliases from a text file. The format of the text file is defined in the pop-up opened after clicking on `Import aliases from file`.
+- Create an alias one by one. Click on `New alias` next to the email address it belongs to. You only have to fill the email address of the alias: everything else is inherited from the email address it points to.
+
+An alias cannot be edited: delete it with the trash button displayed next to it and create a new one instead. You cannot sign in as an alias either: sign in as the email address it points to.
 
 > [!NOTE]
 > Even if the alias is created correctly in AgentJ, it has to be created accordingly on your email server. Refer to its documentation for that.

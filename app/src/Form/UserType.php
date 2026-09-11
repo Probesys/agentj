@@ -22,9 +22,6 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $labelEmail = new TranslatableMessage('Entities.User.fields.email');
-        if ($options['alias']) {
-            $labelEmail = new TranslatableMessage('Entities.User.fields.alias');
-        }
         $allowedDomains = $options['allowedDomains'];
 
         $domainHasIMAPConnector = $options['domainHasIMAPConnector'] ?? false;
@@ -91,11 +88,6 @@ class UserType extends AbstractType
             ->add('report', null, [
                 'label' => new TranslatableMessage('Entities.User.fields.report'),
             ])
-            ->add('originalUser', UserAutocompleteField::class, [
-                'multiple' => false,
-                'required' => true,
-                'label' => new TranslatableMessage('Entities.User.fields.originalUser'),
-            ])
             ->add('sharedWith', UserAutocompleteField::class, [
                 'multiple' => true,
                 'required' => false,
@@ -136,7 +128,6 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'alias' => false,
             'allowedDomains' => [],
             'include_quota' => true,
             'adminForm' => false,

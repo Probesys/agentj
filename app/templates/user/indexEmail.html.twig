@@ -10,25 +10,37 @@
     {% embed 'common/blockTitleAndButtons.html.twig' %}
         {% block content_button_actions %}
             {% if is_granted('ROLE_ADMIN') %}
-                <button
-                    type="button"
-                    data-url-modal-content="{{ path('user_email_new') }}"
-                    class="btn-open-modal btn btn-success"
-                >
-                    <i class="fas fa-plus"></i>
-                    &nbsp;
-                    {{ 'Entities.User.actions.add_new'|trans }}
-                </button>
+                <div class="button-list justify-content-end">
+                    <button
+                        type="button"
+                        data-url-modal-content="{{ path('user_email_new') }}"
+                        class="btn-open-modal btn btn-success"
+                    >
+                        <i class="fas fa-plus"></i>
+                        &nbsp;
+                        {{ 'Entities.User.actions.add_new'|trans }}
+                    </button>
 
-                <button
-                    type="button"
-                    data-url-modal-content="{{ path('import_user_email') }}"
-                    class="btn-open-modal btn btn-success"
-                >
-                    <i class="fas fa-plus"></i>
-                    &nbsp;
-                    {{ 'Generics.actions.importFile'|trans }}
-                </button>
+                    <button
+                        type="button"
+                        data-url-modal-content="{{ path('import_user_email') }}"
+                        class="btn-open-modal btn btn-success"
+                    >
+                        <i class="fas fa-plus"></i>
+                        &nbsp;
+                        {{ 'Generics.actions.importFile'|trans }}
+                    </button>
+
+                    <button
+                        type="button"
+                        data-url-modal-content="{{ path('import_user_alias') }}"
+                        class="btn-open-modal btn btn-success"
+                    >
+                        <i class="fas fa-plus"></i>
+                        &nbsp;
+                        {{ 'Generics.actions.importAliasFile'|trans }}
+                    </button>
+                </div>
             {% endif %}
         {% endblock %}
     {% endembed %}
@@ -77,7 +89,18 @@
                                 <label class="for-cb"></label>
                             </td>
                             <td data-title="{{ 'Entities.User.fields.email'|trans }}">
-                                {{ user.email }}
+                                <span data-test="user-email">{{ user.email }}</span>
+
+                                {% if user.aliases|length > 0 %}
+                                    <ul class="list-unstyled mb-0">
+                                        {% for alias in user.aliases %}
+                                            <li class="mt-1">
+                                                <span class="text-muted" data-test="user-alias-email">{{ alias.email }}</span>
+                                                {% include 'user/_delete_alias_form.html.twig' %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
                             </td>
                             <td data-title="{{ 'Entities.User.fields.fullName'|trans }}">
                                 {{ user.fullname }}
@@ -93,24 +116,32 @@
                                 {% endfor %}
                             </td>
                             <td>
-                                <ul class="list-inline list-unstyled">
-                                    <li class="list-inline-item">
-                                        <button
-                                            type="button"
-                                            data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"
-                                            class="btn-open-modal btn btn-sm btn-success"
-                                            title="{{ 'Generics.actions.edit'|trans }}">
-                                            <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
-                                            <span class="d-md-none d-lg-block">
-                                                {{ 'Generics.actions.edit'|trans }}
-                                            </span>
-                                        </button>
+                                <div class="button-list">
+                                    <button
+                                        type="button"
+                                        data-url-modal-content="{{ path('user_email_edit', {'id': user.id}) }}"
+                                        class="btn-open-modal btn btn-sm btn-success"
+                                        title="{{ 'Generics.actions.edit'|trans }}"
+                                    >
+                                        <i class="fas fa-edit d-none d-md-block d-lg-none"></i>
+                                        <span class="d-md-none d-lg-block">
+                                            {{ 'Generics.actions.edit'|trans }}
+                                        </span>
+                                    </button>
 
-                                        {% include 'user/_delete_form.html.twig' with {'user': user} %}
+                                    <button
+                                        type="button"
+                                        data-url-modal-content="{{ path('new_user_email_alias', {'id': user.id}) }}"
+                                        class="btn-open-modal btn btn-sm btn-success"
+                                        title="{{ 'Entities.User.actions.add_new_alias'|trans }}"
+                                    >
+                                        {{ 'Entities.User.actions.add_new_alias'|trans }}
+                                    </button>
 
-                                        {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
-                                    </li>
-                                </ul>
+                                    {% include 'user/_delete_form.html.twig' with {'user': user} %}
+
+                                    {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
