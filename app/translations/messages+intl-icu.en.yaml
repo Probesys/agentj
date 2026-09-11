@@ -260,7 +260,8 @@ Entities.SenderRule.rules.block: 'Block all emails'
 Entities.SenderRule.rules.enabled: 'Antispam enabled'
 Entities.SenderRule.rules.none: 'No rule'
 Entities.User.actions.add_new: 'New user'
-Entities.User.actions.add_new_alias: 'Add a new alias'
+Entities.User.actions.add_new_alias: 'New alias'
+Entities.User.actions.delete_alias: 'Delete the alias'
 Entities.User.actions.edit: 'Edition of a user'
 Entities.User.fields.activateHumanAuthentication: 'Activate human authentication'
 Entities.User.fields.alias: Alias
@@ -284,8 +285,7 @@ Entities.User.fields.report: 'Send report'
 Entities.User.fields.roles: Role
 Entities.User.fields.sharedWith: 'Shared with'
 Entities.User.fields.userName: Login
-Entities.User.indexAlias: 'List of email aliases'
-Entities.User.indexEmail: 'List of email accounts'
+Entities.User.indexEmail: 'List of email addresses'
 Entities.User.indexLocal: 'List of administrators'
 Entities.User.labels.defaultGroupSetting: 'Default group setting'
 Entities.User.labels.domainSetting: 'Domain setting'
@@ -309,6 +309,7 @@ Generics.actions.edit: Edit
 Generics.actions.exitImpersonation: 'Back to life'
 Generics.actions.impersonate: 'Sign in'
 Generics.actions.import: Import
+Generics.actions.importAliasFile: 'Import aliases from file'
 Generics.actions.importFile: 'Import from file'
 Generics.actions.rememberme: 'Remember me'
 Generics.actions.remove: Remove
@@ -423,6 +424,7 @@ Message.Dialogs.confirmBannedDomainMsgContent: 'Are you sure you want to ban the
 Message.Dialogs.confirmBannedDomainMsgtitle: 'Ban sender for all users'
 Message.Dialogs.confirmBannedMsgContent: 'Are you sure you want to ban the sender?'
 Message.Dialogs.confirmBannedMsgtitle: 'Ban the sender'
+Message.Dialogs.confirmDeleteAliasContent: 'Are you sure you want to delete this alias?'
 Message.Dialogs.confirmDeleteDomainContent: 'Are you sure you want to delete this domain?'
 Message.Dialogs.confirmDeleteGroupContent: 'Are you sure you want to delete this group?'
 Message.Dialogs.confirmDeleteMsgContent: 'Are you sure you want to delete the message?'
@@ -502,9 +504,8 @@ Navigation.sourceCode: 'Source code'
 Navigation.spammed: 'Spam detected'
 Navigation.untreated: Untreated
 Navigation.user_profil: 'My account'
-Navigation.userlist.emailAliasUsers: Alias
-Navigation.userlist.emailUsers: 'Email accounts'
-Navigation.userlist.localUsers: Administrator
+Navigation.userlist.emailUsers: 'Email addresses'
+Navigation.userlist.localUsers: Administrators
 Navigation.userlist.title: Users
 Navigation.virus: Virus
 Navigation.whitelist: 'Authorized senders'

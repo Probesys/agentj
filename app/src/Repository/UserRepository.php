@@ -144,9 +144,9 @@ class UserRepository extends BaseRepository
     /**
      * Return a paginable Doctrine Query to search users.
      *
-     * Note that if you pass `isAlias: true`, you shouldn't pass any role as
-     * aliases don't always have one. If you pass both, results may be
-     * incoherent.
+     * Aliases are never returned as results on their own as they are attached
+     * to their original user. However, the search key is matched against their
+     * email as well, so searching for an alias returns its original user.
      *
      * @param array<string> $roles
      */
@@ -154,20 +154,14 @@ class UserRepository extends BaseRepository
         User $currentUser,
         ?array $roles = null,
         ?string $searchKey = null,
-        bool $isAlias = false
     ): ?Query {
 
         $qb = $this->createQueryBuilder('u')
                 ->select('u')
                 ->leftJoin('u.domain', 'd')
-                ->leftJoin('u.policy', 'p');
-
-        if ($isAlias) {
-            $qb->leftJoin('u.originalUser', 'ou');
-            $qb->where('u.originalUser is not null');
-        } else {
-            $qb->where('u.originalUser is null');
-        }
+                ->leftJoin('u.policy', 'p')
+                ->leftJoin('u.aliases', 'al')
+                ->where('u.originalUser is null');
 
         if ($roles) {
             $expr = new Expr\Orx();
@@ -193,7 +187,17 @@ class UserRepository extends BaseRepository
         }
 
         if ($searchKey) {
-            $qb->andWhere('u.email LIKE :searchKey or u.fullname LIKE :searchKey or u.username LIKE :searchKey');
+            $qb->andWhere(
+                'u.email LIKE :searchKey
+                or u.fullname LIKE :searchKey
+                or u.username LIKE :searchKey
+                or al IN (
+                    SELECT a
+                    FROM App\\Entity\\User a
+                    WHERE a.originalUser = u
+                    AND a.email LIKE :searchKey
+                )'
+            );
             $qb->setParameter('searchKey', "%{$searchKey}%");
         }
 

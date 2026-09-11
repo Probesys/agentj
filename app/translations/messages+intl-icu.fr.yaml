@@ -260,7 +260,8 @@ Entities.SenderRule.rules.block: 'Bloquer tous les mails'
 Entities.SenderRule.rules.enabled: 'Antispam activé'
 Entities.SenderRule.rules.none: 'Aucune règle'
 Entities.User.actions.add_new: 'Nouvel utilisateur'
-Entities.User.actions.add_new_alias: 'Ajouter un nouvel alias'
+Entities.User.actions.add_new_alias: 'Nouvel alias'
+Entities.User.actions.delete_alias: "Supprimer l'alias"
 Entities.User.actions.edit: "Edition d'un utilisateur"
 Entities.User.fields.activateHumanAuthentication: "Activer l'authentification humaine"
 Entities.User.fields.alias: Alias
@@ -284,8 +285,7 @@ Entities.User.fields.report: 'Envoyer le rapport'
 Entities.User.fields.roles: Rôle
 Entities.User.fields.sharedWith: 'Partagé avec'
 Entities.User.fields.userName: Login
-Entities.User.indexAlias: 'Liste des alias emails'
-Entities.User.indexEmail: 'Liste des comptes emails'
+Entities.User.indexEmail: 'Liste des adresses emails'
 Entities.User.indexLocal: 'Liste des administrateurs'
 Entities.User.labels.defaultGroupSetting: 'Paramètre du groupe par défaut'
 Entities.User.labels.domainSetting: 'Paramètre du domaine'
@@ -309,6 +309,7 @@ Generics.actions.edit: Éditer
 Generics.actions.exitImpersonation: 'Revenir à'
 Generics.actions.impersonate: 'Se connecter'
 Generics.actions.import: Importer
+Generics.actions.importAliasFile: 'Importer des alias depuis un fichier'
 Generics.actions.importFile: 'Importer depuis un fichier'
 Generics.actions.rememberme: 'Se souvenir de moi'
 Generics.actions.remove: Retirer
@@ -423,6 +424,7 @@ Message.Dialogs.confirmBannedDomainMsgContent: "Êtes-vous sur de bannir l'expé
 Message.Dialogs.confirmBannedDomainMsgtitle: "Bannir l'expéditeur pour tous les utilisateurs"
 Message.Dialogs.confirmBannedMsgContent: "Êtes-vous sur de vouloir bannir l'expéditeur ?"
 Message.Dialogs.confirmBannedMsgtitle: "Bannir l'expéditeur"
+Message.Dialogs.confirmDeleteAliasContent: 'Êtes-vous sûr de vouloir supprimer cet alias ?'
 Message.Dialogs.confirmDeleteDomainContent: 'Êtes-vous sur de vouloir supprimer ce domaine ?'
 Message.Dialogs.confirmDeleteGroupContent: 'Êtes-vous sûr de vouloir supprimer ce groupe ?'
 Message.Dialogs.confirmDeleteMsgContent: 'Êtes-vous sur de vouloir supprimer le message ?'
@@ -502,9 +504,8 @@ Navigation.sourceCode: 'Code source'
 Navigation.spammed: 'Spam détectés'
 Navigation.untreated: 'Non traités'
 Navigation.user_profil: 'Mon compte'
-Navigation.userlist.emailAliasUsers: Alias
-Navigation.userlist.emailUsers: 'Comptes email'
-Navigation.userlist.localUsers: Administrateur
+Navigation.userlist.emailUsers: 'Adresses email'
+Navigation.userlist.localUsers: Administrateurs
 Navigation.userlist.title: Utilisateurs
 Navigation.virus: 'Virus détectés'
 Navigation.whitelist: 'Expéditeurs autorisés'

@@ -119,7 +119,7 @@
                 </li>
 
                 {% if is_granted('ROLE_ADMIN') %}
-                    <li class="sidebar-dropdown {% if (route == 'users_email_index' or route == 'users_local_index') or route == 'users_email_alias_index' %}active{% endif %}">
+                    <li class="sidebar-dropdown {% if route == 'users_email_index' or route == 'users_local_index' %}active{% endif %}">
                         <a href="#" data-turbo="false">
                             <i class="fa fa-user-friends"></i>
                             <span class="menu-text">{{ 'Navigation.userlist.title'|trans }}</span>
@@ -136,11 +136,6 @@
                                 <li class="{% if route == 'users_email_index' %}active{% endif %}">
                                     <a href="{{ path('users_email_index') }}">
                                         {{ 'Navigation.userlist.emailUsers'|trans }}
-                                    </a>
-                                </li>
-                                <li class="{% if route == 'users_email_alias_index' %}active{% endif %}">
-                                    <a href="{{ path('users_email_alias_index') }}">
-                                        {{ 'Navigation.userlist.emailAliasUsers'|trans }}
                                     </a>
                                 </li>
                             </ul>
