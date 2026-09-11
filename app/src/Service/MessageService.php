@@ -14,6 +14,7 @@ use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class MessageService
 {
@@ -26,6 +27,7 @@ class MessageService
         private SenderRuleRepository $senderRuleRepository,
         private CryptEncryptService $cryptEncryptService,
         private SpamassassinService $spamassassinService,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -341,6 +343,81 @@ class MessageService
         }
 
         return $result;
+    }
+
+    /**
+     * Extract the sender/subject/attachments/body of a quarantined message,
+     * sanitizing the HTML body the same way as the admin portal's preview
+     * modal (MessageController::showIframeDetailMsgs): strip <script> tags
+     * and inline event handlers, and replace embedded images and links with
+     * a placeholder.
+     *
+     * showIframeDetailMsgs() isn't refactored to call this in this PR: it
+     * would conflict with unrelated changes already made to that method on
+     * main while #538/#596 are still unmerged. Do that refactor once this
+     * branch is rebased on main (see the PR description).
+     *
+     * Returns null if the message isn't in quarantine (nothing to parse).
+     *
+     * @return ?array{
+     *     sender: string,
+     *     subject: string,
+     *     attachments: string[],
+     *     textBody: string,
+     *     htmlBody: string,
+     * }
+     */
+    public function extractQuarantineContent(Message $message): ?array
+    {
+        if (!$message->isInQuarantine()) {
+            return null;
+        }
+
+        $email = $message->getQuarantineEmail();
+        $subject = $email->getSubject();
+
+        $attachmentNames = $email->getAttachments()->filter(function ($attachment) {
+            return $attachment->disposition !== 'inline';
+        })->map(function ($attachment) {
+            return $attachment->getName();
+        })->values()->all();
+
+        $from = $email->getFrom();
+        $textBody = $email->getTextBody();
+        $htmlBody = $email->getHtmlBody();
+
+        // Remove all script tags
+        $htmlBody = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $htmlBody);
+        // remove onclick=""
+        $htmlBody = preg_replace('/\son\w+="[^"]*"/i', '', $htmlBody); // attributs entre guillemets doubles
+        // remove onclick=''
+        $htmlBody = preg_replace('/\son\w+=\'[^\']*\'/i', '', $htmlBody); // attributs entre guillemets simples
+
+        // Remove original images
+        $htmlBody = preg_replace_callback(
+            '/<img\s+[^>]*src=["\']([^"\']+)["\'][^>]*>/is',
+            function ($matches) {
+                return '[' . $this->translator->trans('Entities.Message.labels.imgDisabled') . ']';
+            },
+            $htmlBody
+        );
+
+        // Remove all links
+        $htmlBody = preg_replace_callback(
+            '/<a\b[^>]*\bhref=["\'][^"\']+["\'][^>]*>.*?<\/a>/is',
+            function ($matches) {
+                return '[' . $this->translator->trans('Entities.Message.labels.linkDisabled') . ']';
+            },
+            $htmlBody
+        );
+
+        return [
+            'sender' => $from,
+            'subject' => $subject,
+            'attachments' => $attachmentNames,
+            'textBody' => $textBody,
+            'htmlBody' => $htmlBody,
+        ];
     }
 
     /**
