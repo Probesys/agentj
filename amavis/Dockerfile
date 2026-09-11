@@ -21,6 +21,7 @@ RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     spamassassin \
     gnupg \
     libmail-spf-perl \
+    libmail-dmarc-perl \
     libencode-detect-perl \
     libio-socket-ssl-perl \
     libnet-patricia-perl \
