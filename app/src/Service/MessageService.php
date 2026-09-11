@@ -13,6 +13,7 @@ use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
+use App\Util\Email;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class MessageService
@@ -43,9 +44,7 @@ class MessageService
             return false;
         }
 
-        // Sender rules are case-insensitive
-        $normalizedEmail = strtolower($senderEmail);
-        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($normalizedEmail);
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
 
         $recipient = $messageRecipient->getAddress();
         $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($recipient);
@@ -61,14 +60,14 @@ class MessageService
 
             $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
                 $user,
-                strtolower($message->getFromAddr()), // Case-insensitive
+                $message->getFromAddr(),
             );
 
             $domain = $user->getDomain();
             $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
 
             foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-                $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
+                $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
                 $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
                 if (!$isSameSender || $isSpam) {
                     continue;
@@ -121,7 +120,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-            $isSameSender = $messageRecipientToRelease->getMessage()->getSenderEmail() === $senderEmail;
+            $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
             $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
             if (!$isSameSender || $isSpam) {
                 continue;
@@ -170,7 +169,7 @@ class MessageService
             );
 
             foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-                $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
+                $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
                 if (
                     !$isSameSender ||
                     $messageRecipientToBan->isVirus() ||
@@ -225,7 +224,7 @@ class MessageService
         );
 
         foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            $isSameSender = $messageRecipientToBan->getMessage()->getSenderEmail() === $senderEmail;
+            $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
             if (
                 !$isSameSender ||
                 $messageRecipientToBan->isVirus() ||
@@ -242,6 +241,14 @@ class MessageService
         $this->messageRepository->save($message);
 
         return true;
+    }
+
+    private function hasSameSender(MessageRecipient $messageRecipient, string $senderEmail): bool
+    {
+        $candidateSenderEmail = $messageRecipient->getMessage()->getSenderEmail();
+
+        return $candidateSenderEmail !== null
+            && Email::normalize($candidateSenderEmail) === Email::normalize($senderEmail);
     }
 
     /**

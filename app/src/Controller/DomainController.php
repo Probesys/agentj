@@ -5,15 +5,14 @@ namespace App\Controller;
 use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Policy;
-use App\Entity\RuleAddress;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Form\DomainType;
 use App\Model\ConnectorTypes;
 use App\Repository\DomainRepository;
+use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\SettingRepository;
-use App\Service\RuleAddressService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -81,6 +80,7 @@ class DomainController extends AbstractController
     public function new(
         Request $request,
         ParameterBagInterface $params,
+        RuleAddressRepository $ruleAddressRepository,
         SettingRepository $settingRepository,
     ): Response {
         $domain = new Domain();
@@ -139,13 +139,7 @@ class DomainController extends AbstractController
             $wbRule = $form->get("wbRule")->getData();
 
             //for all domain @.
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => '@.']));
-            if (!$ruleAddress) {
-                $ruleAddress = new RuleAddress();
-                $ruleAddress->setPriority(0); // priority for domain is 0
-                $ruleAddress->setEmail('@.');
-                $this->em->persist($ruleAddress);
-            }
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail('@.', flush: false);
             $senderRule = new SenderRule($user, $ruleAddress);
             $senderRule->setWbRule($wbRule);
             $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
@@ -309,8 +303,11 @@ class DomainController extends AbstractController
 
     #[Route(path: '/{id}/rules/new', name: 'domain_sender_rules_new', methods: 'GET|POST')]
     #[IsGranted('DOMAIN_ACCESS', subject: 'domain')]
-    public function newSenderRule(Domain $domain, Request $request, RuleAddressService $ruleAddressService): Response
-    {
+    public function newSenderRule(
+        Domain $domain,
+        Request $request,
+        RuleAddressRepository $ruleAddressRepository,
+    ): Response {
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
             'action' => $this->generateUrl('domain_sender_rules_new', ['id' => $domain->getId()]),
@@ -330,25 +327,14 @@ class DomainController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => $data['email']]));
-
-            if (!$ruleAddress) {
-                $ruleAddress = new RuleAddress();
-                $ruleAddress->setEmail($data['email']);
-
-                $priority = $ruleAddressService->computePriority($data['email']);
-                $ruleAddress->setPriority($priority);
-
-                $this->em->persist($ruleAddress);
-            } else {
-                $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
-                    'user' => $user,
-                    'senderRuleAddress' => $ruleAddress,
-                ]));
-                if ($domainSenderRuleExists) {
-                    $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
-                    return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
-                }
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
+            $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
+                'user' => $user,
+                'senderRuleAddress' => $ruleAddress,
+            ]));
+            if ($domainSenderRuleExists) {
+                $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
+                return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
             }
             $senderRule = new SenderRule($user, $ruleAddress);
             $senderRule->setWbRule($data['wbRule']);
