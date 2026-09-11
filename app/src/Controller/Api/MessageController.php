@@ -132,9 +132,15 @@ class MessageController extends AbstractController
     }
 
     /**
-     * Make sure the recipient the message was sent to (or one of its
-     * aliases) belongs to the given domain, so a domain's API key can never
-     * be used to read a message addressed to another domain.
+     * Make sure the message's recipient address belongs to the given domain,
+     * so a domain's API key can never be used to read a message addressed to
+     * another domain.
+     *
+     * Compares by the address' own domain (like
+     * MessageService::authorizeSenderForDomain/banSenderForDomain), not via
+     * a User lookup: many quarantined recipients (e.g. plus-tagged
+     * addresses) have no matching row in `users` at all, so a User-based
+     * check would wrongly 404 legitimate, in-domain messages.
      */
     private function belongsToDomain(MessageRecipient $messageRecipient, Domain $domain): bool
     {
@@ -144,14 +150,6 @@ class MessageController extends AbstractController
             return false;
         }
 
-        $userAndAliases = $this->userRepository->findUserAndAliasesByAddress($address);
-
-        foreach ($userAndAliases as $user) {
-            if ($user->getDomain() === $domain) {
-                return true;
-            }
-        }
-
-        return false;
+        return strtolower($address->getReverseDomain()) === strtolower((string) $domain->getDomain());
     }
 }
