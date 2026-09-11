@@ -3,11 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Domain;
-use App\Entity\RuleAddress;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
+use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Service\LogService;
 use App\Service\Referrer;
@@ -28,6 +28,8 @@ class SenderRuleController extends AbstractController
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private Referrer $referrer,
+        private RuleAddressRepository $ruleAddressRepository,
+        private SenderRuleRepository $senderRuleRepository,
     ) {
     }
 
@@ -238,15 +240,7 @@ class SenderRuleController extends AbstractController
                     continue;
                 }
 
-                $senderRuleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy(['email' => $data]);
-                // if email doesn't exist then we create email in RuleAddress
-                if (!$senderRuleAddress) {
-                    $senderRuleAddress = new RuleAddress();
-                    $senderRuleAddress->setEmail($data);
-                    $senderRuleAddress->setPriority(6);
-                    $this->em->persist($senderRuleAddress);
-                    $this->em->flush();
-                }
+                $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($data);
 
                 if (
                     isset($senderRules[$domain->getId()]) &&
@@ -256,18 +250,14 @@ class SenderRuleController extends AbstractController
                 }
 
                 $user = $this->em->getRepository(User::class)->findOneBy(['email' =>  '@' . $domain->getDomain()]);
-                $senderRule = $this->em->getRepository(SenderRule::class)->findOneBy([
-                    'senderRuleAddress' => $senderRuleAddress,
-                    'user' => $user,
-                ]);
-                if (!$senderRule) {
-                    $senderRule = new SenderRule($user, $senderRuleAddress);
-                }
-
-                $senderRule->setWbRule($rule);
-                $senderRule->setPriority(SenderRule::PRIORITY_USER);
-                $senderRule->setType(SenderRule::TYPE_IMPORT);
-                $this->em->persist($senderRule);
+                $this->senderRuleRepository->updateOrCreateRule(
+                    $user,
+                    $senderRuleAddress,
+                    wbRule: $rule,
+                    type: SenderRule::TYPE_IMPORT,
+                    priority: SenderRule::PRIORITY_USER,
+                    flush: false,
+                );
                 $senderRules[$domain->getId()][] = $senderRuleAddress->getId();
             }
 

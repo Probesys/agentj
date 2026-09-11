@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\RuleAddress;
+use App\Service\RuleAddressService;
+use App\Util\Email;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,12 +19,13 @@ class RuleAddressRepository extends BaseRepository
 
     public function findOneOrCreateByEmail(string $email, bool $flush = true): RuleAddress
     {
-        $ruleAddress = $this->findOneBy(['email' => $email]);
+        $normalizedEmail = Email::normalize($email);
+        $ruleAddress = $this->findOneBy(['email' => $normalizedEmail]);
 
         if (!$ruleAddress) {
             $ruleAddress = new RuleAddress();
-            $ruleAddress->setEmail($email);
-            $ruleAddress->setPriority(6);
+            $ruleAddress->setEmail($normalizedEmail);
+            $ruleAddress->setPriority(RuleAddressService::computePriority($normalizedEmail));
             $this->save($ruleAddress, $flush);
         }
 

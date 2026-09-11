@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Amavis\MessageStatus;
 use App\Entity\SenderRule;
+use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
@@ -393,6 +394,43 @@ class MessageControllerTest extends WebTestCase
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $aliasRule);
+    }
+
+    public function testAuthorizeMessagesFromSameSenderWithDifferentCase(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create([
+            'email' => 'AddressCaseTest@' . $domain->getDomain(),
+        ]);
+        $client->loginUser($recipient);
+        [$senderAddress, $recipientAddress] = $this->setupAddresses($sender, $recipient);
+        $lowercaseSenderAddress = AddressFactory::createOne([
+            'domain' => $senderAddress->getDomain(),
+            'partitionTag' => 0,
+            'email' => strtolower($senderAddress->getEmail()),
+        ]);
+        $message = $this->setupMail($senderAddress, $recipientAddress, status: MessageStatus::UNTREATED);
+        $lowercaseMessage = $this->setupMail(
+            $lowercaseSenderAddress,
+            $recipientAddress,
+            status: MessageStatus::UNTREATED,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        $lowercaseMessageRecipient = $lowercaseMessage->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        self::assertNotFalse($lowercaseMessageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $recipientAddress->getId() . '/authorized';
+        $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseRedirects('/');
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $lowercaseMessageRecipient->getStatus());
+        self::assertSame(1, RuleAddressFactory::count([
+            'email' => strtolower($senderAddress->getEmail()),
+        ]));
     }
 
     public function testAuthorizedDomainMessage(): void
