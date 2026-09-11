@@ -1,10 +1,25 @@
 {% extends 'modalTemplate.html.twig' %}
 
 {% block modalTitle %}
-  {{ 'Entities.User.actions.add_new_alias'|trans() }}
+  {{ 'Entities.User.actions.add_new_alias'|trans }}
 {% endblock %}
 
 {% block modalContent %}
+  {{ form_start(form) }}
+    <div class="form-group row">
+      <div class="col-form-label col-sm-2">
+        {{ 'Entities.User.fields.originalUser'|trans }}
+      </div>
+      <div class="col-sm-10 col-form-label">
+        {{ user.email }}
+      </div>
+    </div>
 
-  {{ include('user/_form.html.twig') }}
+    {{ form_row(form.email) }}
+
+    <div class="d-flex justify-content-center">
+      <input type="submit" class="btn btn-primary mr-2" value="{{ 'Generics.actions.save'|trans }}">
+      <a class="btn btn-outline-secondary btn-close-modal" href="#">{{ 'Generics.actions.cancel'|trans }}</a>
+    </div>
+  {{ form_end(form) }}
 {% endblock %}

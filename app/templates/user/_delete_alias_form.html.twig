@@ -1,0 +1,16 @@
+<form
+    class="d-inline"
+    action="{{ path('user_email_delete', {'id': alias.id}) }}"
+    method="post"
+    data-turbo-confirm="{{ 'Message.Dialogs.confirmDeleteAliasContent'|trans }}"
+>
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ alias.id) }}">
+    <button
+        type="submit"
+        class="btn btn-sm btn-outline-danger"
+        title="{{ 'Entities.User.actions.delete_alias'|trans }}"
+    >
+        <i class="fas fa-trash"></i>
+        <span class="sr-only">{{ 'Entities.User.actions.delete_alias'|trans }}</span>
+    </button>
+</form>
