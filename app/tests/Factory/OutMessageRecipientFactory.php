@@ -3,14 +3,15 @@
 namespace App\Tests\Factory;
 
 use App\Entity\MessageRecipient;
+use App\Entity\OutMessageRecipient;
 use DateTimeImmutable;
 use Zenstruck\Foundry\Object\Instantiator;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<MessageRecipient>
+ * @extends PersistentObjectFactory<OutMessageRecipient>
  */
-final class MessageRecipientFactory extends PersistentObjectFactory
+final class OutMessageRecipientFactory extends PersistentObjectFactory
 {
     public function __construct()
     {
@@ -19,22 +20,7 @@ final class MessageRecipientFactory extends PersistentObjectFactory
     #[\Override]
     public static function class(): string
     {
-        return MessageRecipient::class;
-    }
-
-    public function amavisRelease(
-        ?DateTimeImmutable $amavisReleaseStartedAt = null,
-        ?DateTimeImmutable $amavisReleaseEndedAt = null,
-    ): self {
-        $releaseStart = $amavisReleaseStartedAt ?:
-            new DateTimeImmutable()->modify('-1 minutes');
-        $releaseEnd = $amavisReleaseEndedAt ?:
-            new DateTimeImmutable();
-
-        return $this->with([
-            'amavisReleaseStartedAt' => $releaseStart,
-            'amavisReleaseEndedAt' => $releaseEnd,
-        ]);
+        return OutMessageRecipient::class;
     }
 
     #[\Override]
@@ -51,7 +37,7 @@ final class MessageRecipientFactory extends PersistentObjectFactory
                 ' ', 'Y', 'N',
             ]),
             'rs' => ' ',
-            'sendCaptcha' => self::faker()->randomElement([0, self::faker()->unixTime()]),
+            'sendCaptcha' => self::faker()->randomElement([0, 1]),
         ];
     }
 

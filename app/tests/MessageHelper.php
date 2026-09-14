@@ -4,12 +4,17 @@ namespace App\Tests;
 
 use App\Entity\Address;
 use App\Entity\Message;
+use App\Entity\OutMessage;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
+use App\Tests\Factory\OutMessageFactory;
+use App\Tests\Factory\OutMessageRecipientFactory;
+use App\Tests\Factory\OutQuarantineFactory;
 use App\Tests\Factory\QuarantineFactory;
 use App\Util\Url;
+use DateTime;
 
 trait MessageHelper
 {
@@ -38,13 +43,15 @@ trait MessageHelper
     private function setupMail(
         Address $sender,
         Address $recipient,
+        bool $isInMessage = true,
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
-    ): Message {
+    ): Message|OutMessage {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::new()->create([
+        $messageFactory = $isInMessage ? MessageFactory::class : OutMessageFactory::class;
+        $message = $messageFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
@@ -53,7 +60,8 @@ trait MessageHelper
             'status' => $status,
         ]);
 
-        MessageRecipientFactory::new()->create([
+        $messageRecipientFactory = $isInMessage ? MessageRecipientFactory::class : OutMessageRecipientFactory::class;
+        $data = [
             'message' => $message,
             'partitionTag' => 0,
             'mailId' => $mailId,
@@ -69,18 +77,21 @@ trait MessageHelper
             'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
             'sendCaptcha' => 0,
             'amavisOutput' => null,
-            'amavisReleaseStartedAt' => null,
-            'amavisReleaseEndedAt' => null,
-        ]);
+        ];
+        if ($isInMessage) {
+            $data['amavisReleaseStartedAt'] = null;
+            $data['amavisReleaseEndedAt'] = null;
+        }
+        $messageRecipientFactory::new()->create($data);
 
-        $mailText = QuarantineFactory::generateMailText($mailId, [
+        $quarantineFactory = $isInMessage ? QuarantineFactory::class : OutQuarantineFactory::class;
+        $mailText = $quarantineFactory::generateMailText($mailId, [
             'subject' => $subject,
             'from' => $sender->getEmail(),
             'to' => [$recipient->getEmail()],
             'body' => $body ?? null,
         ]);
-
-        QuarantineFactory::new()->create([
+        $quarantineFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'message' => $message,
@@ -89,5 +100,37 @@ trait MessageHelper
         ]);
 
         return $message;
+    }
+
+    /**
+     * @param array<mixed> $attributes
+     */
+    public static function generateMailText(string $mailId, array $attributes = []): string
+    {
+        $date = $attributes['date'] ?? new DateTime();
+        $body = $attributes['body'] ?? '';
+
+        $headers = <<<TEXT
+                Message-ID: {$mailId}\r
+                Subject: {$attributes['subject']}\r
+                From: <{$attributes['from']}>\r
+                To: support@example.com\r
+                Date: {$date->format(DATE_RFC1123)}\r
+                Content-Type: text/html\r
+                TEXT;
+
+        if (isset($attributes['to'])) {
+            $toString = implode(', ', $attributes['to']);
+            $headers .= "\nTo: {$toString}\r";
+        } else {
+            $headers .= "\nTo: support@example.com\r";
+        }
+
+        $attributesHeaders = $attributes['headers'] ?? [];
+        foreach ($attributesHeaders as $name => $value) {
+            $headers .= "\n{$name}: {$value}\r";
+        }
+
+        return "{$headers}\n\r\n\r{$body}";
     }
 }
