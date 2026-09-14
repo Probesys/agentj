@@ -76,6 +76,37 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         ]);
     }
 
+    public function testAuthMailIsNotSentSeveralTimesToSameSender(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Generate a mail sent 8 hours ago, and whom the sender is unauthenticated
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $this->setMessageDate($message, '-8 hours');
+        $message = $this->setupMail($addrS, $addrR, status: MessageStatus::UNRELEASED);
+        $this->setMessageDate($message, '-6 hours');
+        self::bootKernel();
+        // Create a mock to intercept mails and assert 2 are sent to the sender
+        $mailer = $this->createMock(MailerInterface::class);
+        $mailer->expects($this->exactly(1))
+            ->method('send')
+            ->with(
+                $this->callback(function (Email $email) use ($sender): bool {
+                    return $email->getTo()[0]->getAddress() === $sender->getEmail();
+                })
+            );
+        self::getContainer()->set(MailerInterface::class, $mailer);
+
+        $application = new Application(self::$kernel);
+        $command = $application->find('agentj:send-auth-mail-token');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            'command' => $command->getName(),
+        ]);
+    }
+
     public function testAuthMailIsNotSentIfSenderIsAMailingList(): void
     {
         $domain = DomainFactory::createOne();
