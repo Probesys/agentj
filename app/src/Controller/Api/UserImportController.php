@@ -23,8 +23,9 @@ class UserImportController extends AbstractController
      * Auth: header "X-Api-Key: <key>" (see agentj:api-key:generate).
      *
      * Body: JSON array of objects, e.g.
-     * [{"email": "jane@example.com", "firstName": "Jane", "lastName": "Doe", "group": "Sales"}]
-     * Only "email" is required. "group" is created if it doesn't exist yet.
+     * [{"email": "jane@example.com", "firstName": "Jane", "lastName": "Doe", "group": "Sales", "policy": "strict"}]
+     * Only "email" is required. "group" is created if it doesn't exist yet. "policy" must be the
+     * name of an existing Policy and takes precedence over the group's and the domain's policy.
      */
     #[Route(path: '/users/import', name: 'api_users_import', methods: 'POST')]
     public function import(Request $request): JsonResponse

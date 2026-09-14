@@ -4,15 +4,18 @@ namespace App\Service;
 
 use App\Entity\Domain;
 use App\Entity\Group;
+use App\Entity\Policy;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Generic (non-CSV) user import used by the /api/users/import endpoint.
  * Rows are plain associative arrays decoded from a JSON request body:
- * {"email": "...", "firstName": "...", "lastName": "...", "group": "..."}
+ * {"email": "...", "firstName": "...", "lastName": "...", "group": "...", "policy": "..."}
  * Only "email" is required; the domain part of each email must match the
  * authenticated Domain, so a leaked API key only ever affects its own domain.
+ * "policy" is the name of an existing Policy to assign directly to the user; it
+ * takes precedence over the group's policy and the domain's default policy.
  */
 class UserApiImportService
 {
@@ -35,6 +38,7 @@ class UserApiImportService
         $updated = 0;
         $errors = [];
         $groups = [];
+        $policies = [];
         $seen = [];
         $domainSuffix = '@' . strtolower($domain->getDomain());
         $batchSize = 20;
@@ -83,6 +87,20 @@ class UserApiImportService
                 }
             }
 
+            $policyEntity = null;
+            $policyName = isset($row['policy']) && is_string($row['policy']) ? trim($row['policy']) : '';
+            if ($policyName !== '') {
+                if (!array_key_exists($policyName, $policies)) {
+                    $policies[$policyName] = $em->getRepository(Policy::class)->findOneBy([
+                        'policyName' => $policyName,
+                    ]);
+                }
+                $policyEntity = $policies[$policyName];
+                if (!$policyEntity) {
+                    $errors[] = "Row $index: policy '$policyName' not found";
+                }
+            }
+
             $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
             if ($user) {
                 $updated++;
@@ -103,7 +121,11 @@ class UserApiImportService
 
             if ($groupEntity) {
                 $user->addGroup($groupEntity);
-            } elseif ($domain->getPolicy()) {
+            }
+
+            if ($policyEntity) {
+                $user->setPolicy($policyEntity);
+            } elseif (!$groupEntity && $domain->getPolicy()) {
                 $user->setPolicy($domain->getPolicy());
             }
 
