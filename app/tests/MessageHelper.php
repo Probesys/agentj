@@ -35,9 +35,12 @@ trait MessageHelper
         ];
     }
 
+    /**
+     * @param array<int, Address> $recipients
+     */
     private function setupMail(
         Address $sender,
-        Address $recipient,
+        array $recipients,
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
@@ -53,30 +56,30 @@ trait MessageHelper
             'status' => $status,
         ]);
 
-        MessageRecipientFactory::new()->create([
-            'message' => $message,
-            'partitionTag' => 0,
-            'mailId' => $mailId,
-            'status' => $status,
-            'address' => $recipient,
-            'rseqnum' => 1,
-            'isLocal' => 'N',
-            'content' => 'S',
-            'ds' => 'D',
-            'bl' => 'N',
-            'wl' => 'N',
-            'bspamLevel' => -1.2,
-            'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
-            'sendCaptcha' => 0,
-            'amavisOutput' => null,
-            'amavisReleaseStartedAt' => null,
-            'amavisReleaseEndedAt' => null,
-        ]);
+        for ($i = 1; $i < count($recipients) + 1; $i++) {
+            MessageRecipientFactory::new()->create([
+                'message' => $message,
+                'partitionTag' => 0,
+                'mailId' => $mailId,
+                'status' => $status,
+                'address' => $recipients[$i - 1],
+                'rseqnum' => $i,
+                'isLocal' => 'N',
+                'content' => 'S',
+                'ds' => 'D',
+                'bl' => 'N',
+                'wl' => 'N',
+                'bspamLevel' => -1.2,
+                'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
+                'sendCaptcha' => 0,
+            ]);
+        }
 
+        $recipientsEmails = array_map(fn ($recipient) => $recipient->getEmail(), $recipients);
         $mailText = QuarantineFactory::generateMailText($mailId, [
             'subject' => $subject,
             'from' => $sender->getEmail(),
-            'to' => [$recipient->getEmail()],
+            'to' => $recipientsEmails,
             'body' => $body ?? null,
         ]);
 

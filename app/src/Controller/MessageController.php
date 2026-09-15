@@ -229,19 +229,19 @@ class MessageController extends AbstractController
         ]);
     }
 
-
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'message_show', methods: 'GET')]
-    public function showAction(int $partitionTag, string $mailId, int $rid): Response
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/show/', name: 'message_show', methods: 'GET')]
+    public function showAction(int $partitionTag, string $mailId, int $rseqnum): Response
     {
-
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'address' => $rid
+            'rseqnum' => $rseqnum,
         ]);
+
         if (!$messageRecipient) {
             throw $this->createNotFoundException('The message does not exist.');
         }
+
         $this->checkMailAccess($messageRecipient);
 
         $message = $this->em->getRepository(Message::class)->findOneBy([
@@ -264,12 +264,11 @@ class MessageController extends AbstractController
     /**
      * Delete a Message entity.
      */
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/delete/', name: 'message_delete', methods: 'GET')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/delete/', name: 'message_delete', methods: 'GET')]
     public function deleteAction(
         int $partitionTag,
         string $mailId,
-        int $rid,
-        Request $request,
+        int $rseqnum,
         Service\LogService $logService,
     ): Response {
         $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
@@ -280,7 +279,11 @@ class MessageController extends AbstractController
 
         $messageRecipient = $this->em
             ->getRepository(MessageRecipient::class)
-            ->findOneByMessageAndRecipientAddressId($message, $rid);
+            ->findOneBy([
+                'partitionTag' => $message->getPartitionTag(),
+                'mailId' => $message->getMailId(),
+                'rseqnum' => $rseqnum,
+            ]);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -349,10 +352,9 @@ class MessageController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorized', name: 'message_authorized')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/authorized', name: 'message_authorized')]
     public function authorized(
         MessageRecipient $messageRecipient,
-        Request $request,
         Service\LogService $logService,
     ): Response {
         $this->checkMailAccess($messageRecipient);
@@ -370,10 +372,9 @@ class MessageController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/banned', name: 'message_banned')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/banned', name: 'message_banned')]
     public function banned(
         MessageRecipient $messageRecipient,
-        Request $request,
         Service\LogService $logService,
     ): Response {
         $this->checkMailAccess($messageRecipient);
@@ -394,12 +395,11 @@ class MessageController extends AbstractController
     /**
      * Only release the message for all recipients. Does not add entries in sender rule.
      */
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/restore', name: 'message_restore')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/restore', name: 'message_restore')]
     public function restore(
         int $partitionTag,
         string $mailId,
-        int $rid,
-        Request $request,
+        int $rseqnum,
         Service\LogService $logService,
     ): Response {
         $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
@@ -410,7 +410,11 @@ class MessageController extends AbstractController
 
         $messageRecipient = $this->em
             ->getRepository(MessageRecipient::class)
-            ->findOneByMessageAndRecipientAddressId($message, $rid);
+            ->findOneBy([
+                'partitionTag' => $message->getPartitionTag(),
+                'mailId' => $message->getMailId(),
+                'rseqnum' => $rseqnum,
+            ]);
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -426,10 +430,9 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/authorizedDomain', name: 'message_authorized_domain')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/authorizedDomain', name: 'message_authorized_domain')]
     public function authorizedDomain(
         MessageRecipient $messageRecipient,
-        Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
@@ -448,10 +451,9 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/bannedDomain', name: 'message_banned_domain')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/bannedDomain', name: 'message_banned_domain')]
     public function bannedDomain(
         MessageRecipient $messageRecipient,
-        Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
@@ -509,13 +511,13 @@ class MessageController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/content', name: 'message_show_content')]
-    public function showMessageDetail(int $partitionTag, string $mailId, int $rid): Response
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/content', name: 'message_show_content')]
+    public function showMessageDetail(int $partitionTag, string $mailId, int $rseqnum): Response
     {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'address' => $rid,
+            'rseqnum' => $rseqnum,
         ]);
 
         if (!$messageRecipient) {
@@ -529,13 +531,13 @@ class MessageController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/iframe-content', name: 'message_show_iframe_content')]
-    public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rid): Response
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/iframe-content', name: 'message_show_iframe_content')]
+    public function showIframeDetailMsgs(int $partitionTag, string $mailId, int $rseqnum): Response
     {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'address' => $rid,
+            'rseqnum' => $rseqnum,
         ]);
 
         if (!$messageRecipient) {

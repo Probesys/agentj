@@ -30,7 +30,7 @@ class RecoverAuthorizedSpamCommandTest extends KernelTestCase
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
         [$senderAddress, $recipientAddress] = $this->setupAddresses($sender, $recipient);
-        $message = $this->setupMail($senderAddress, $recipientAddress, status: MessageStatus::SPAMMED);
+        $message = $this->setupMail($senderAddress, [$recipientAddress], status: MessageStatus::SPAMMED);
         $ruleAddress = RuleAddressFactory::createOne(['email' => $sender->getEmail()]);
         SenderRuleFactory::createOne([
             'user' => $recipient,
@@ -42,7 +42,7 @@ class RecoverAuthorizedSpamCommandTest extends KernelTestCase
         self::assertNotFalse($messageRecipient);
         $manuallyMarkedMessage = $this->setupMail(
             $senderAddress,
-            $recipientAddress,
+            [$recipientAddress],
             status: MessageStatus::SPAMMED,
         );
         $manuallyMarkedRecipient = $manuallyMarkedMessage->getMessageRecipients()->first();

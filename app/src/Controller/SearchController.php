@@ -78,8 +78,8 @@ class SearchController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/show/', name: 'out_message_show', methods: ['GET'])]
-    public function showAction(int $partitionTag, string $mailId, int $rid): Response
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/show/', name: 'out_message_show', methods: ['GET'])]
+    public function showAction(int $partitionTag, string $mailId, int $rseqnum): Response
     {
         $conn = $this->em->getConnection();
 
@@ -88,14 +88,14 @@ class SearchController extends AbstractController
             SELECT * FROM out_msgrcpt
             WHERE partition_tag = :partitionTag
             AND mail_id = :mailId
-            AND rid = :rid
+            AND rseqnum = :rseqnum
         SQL;
 
         // Execute the query and fetch data as an associative array
         $stmtOutMessageRecipient = $conn->executeQuery($sqlOutMessageRecipient, [
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
-            'rid' => $rid,
+            'rseqnum' => $rseqnum,
         ]);
         $outMessageRecipient = $stmtOutMessageRecipient->fetchAssociative();
 
