@@ -2,24 +2,13 @@
   {%  set sortDirection = 'asc' %}
   {% if app.request.get('sortDirection') == 'asc' and sortField == app.request.get('sortField')%}
     {%  set sortDirection = 'desc' %}
-  {% elseif app.request.get('sortDirection') == 'desc' and sortField == app.request.get('sortField')%}
-    {%  set sortDirection = 'asc' %}    
-  {% elseif sortField != app.request.get('sortField')%}
-    {%  set sortDirection = 'asc' %}      
   {% endif %}
 
-  {% if app.request.get('_route_params')['type']|length>0 %}
-    {% set url = app.request.getBaseURL() ~ '/' ~ app.request.get('_route') ~ '/' ~ app.request.get('_route_params')['type'] %}
-  {% else %}
-    {% set url = app.request.getBaseURL() ~ '/' ~ app.request.get('_route')  %}
+  {% set params = app.request.get('_route_params')|merge({'sortField': sortField, 'sortDirection': sortDirection}) %}
+  {% if app.request.get('search') is not empty %}
+    {% set params = params|merge({'search': app.request.get('search')}) %}
   {% endif %}
 
-  {% set searchSegment="" %}
-  {% if app.request.get('search') is defined %}
-    {% set searchSegment = "&search=" ~ app.request.get('search') %}
-{#    {{ searchSegment }}#}
-  {% endif %}
-
-  <a href="{{ url}}/?sortField={{ sortField }}&sortDirection={{ sortDirection }}{{ searchSegment }}">{{ title }}</a>
+  <a href="{{ path(app.request.get('_route'), params) }}">{{ title }}</a>
 
 {% endmacro %}
