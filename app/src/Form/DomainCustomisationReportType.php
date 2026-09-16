@@ -16,6 +16,7 @@ class DomainCustomisationReportType extends AbstractType
     {
         $builder->add('messageAlert', TextareaType::class, [
             'label' => new TranslatableMessage('Entities.Domain.fields.messageAlert'),
+            'required' => false,
             'attr' => [
                 'data-controller' => 'ckeditor',
             ],
