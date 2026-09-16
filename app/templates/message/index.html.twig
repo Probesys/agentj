@@ -91,7 +91,7 @@
                                             type="checkbox"
                                             name="id[]"
                                             value="{{ keyPairMessage|json_encode() }}"
-                                            id="{{ keyPairMessage|json_encode() }}"
+                                            id="msg-{{ msgRecipient.partitionTag }}-{{ msgRecipient.mailId }}-{{ msgRecipient.address.id }}"
                                             class="cb selected-msg"
                                         >
                                         <label class="for-cb"></label>
