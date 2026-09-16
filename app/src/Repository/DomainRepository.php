@@ -60,4 +60,12 @@ class DomainRepository extends BaseRepository
     {
         return $this->findOneBy(['domain' => strtolower($domainName)]);
     }
+
+    /**
+     * @return Domain[]
+     */
+    public function findAllowedForUser(User $user): array
+    {
+        return $user->isSuperAdmin() ? $this->findAll() : $user->getDomains()->toArray();
+    }
 }

@@ -306,6 +306,10 @@ class MessageController extends AbstractController
         ?string $action = null,
     ): Response {
         if ($action) {
+            /** @var User $user */
+            $user = $this->getUser();
+            $allowedDomains = $this->domainRepository->findAllowedForUser($user);
+
             foreach ($request->request->all('id') as $obj) {
                 list($message, $messageRecipient) = $this->fetchMessageFromBatchId($obj);
                 $mailId = $message->getMailId();
@@ -336,13 +340,15 @@ class MessageController extends AbstractController
                         $logService->addLog('restore batch', $mailId);
                         break;
                     case 'mark as spam':
+                        $this->denyAccessUnlessGranted('ROLE_ADMIN');
                         $message = $messageRecipient->getMessage();
-                        $this->messageService->markMessageAsSpam($message);
+                        $this->messageService->markMessageAsSpam($message, $allowedDomains);
                         $logService->addLog('marked as spam batch', $mailId);
                         break;
                     case 'mark as ham':
+                        $this->denyAccessUnlessGranted('ROLE_ADMIN');
                         $message = $messageRecipient->getMessage();
-                        $this->messageService->markMessageAsHam($message);
+                        $this->messageService->markMessageAsHam($message, $allowedDomains);
                         $logService->addLog('marked as ham batch', $mailId);
                         break;
                 }
@@ -472,7 +478,7 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsSpam', name: 'message_mark_as_spam')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsSpam', name: 'message_mark_as_spam')]
     public function markAsSpam(
         MessageRecipient $messageRecipient,
         Request $request,
@@ -480,8 +486,12 @@ class MessageController extends AbstractController
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         $message = $messageRecipient->getMessage();
-        $result = $this->messageService->markMessageAsSpam($message);
+        $allowedDomains = $this->domainRepository->findAllowedForUser($user);
+        $result = $this->messageService->markMessageAsSpam($message, $allowedDomains);
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsSpam'));
@@ -492,7 +502,7 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rid}/markAsHam', name: 'message_mark_as_ham')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsHam', name: 'message_mark_as_ham')]
     public function markAsHam(
         MessageRecipient $messageRecipient,
         Request $request,
@@ -500,8 +510,12 @@ class MessageController extends AbstractController
     ): RedirectResponse {
         $this->checkMailAccess($messageRecipient);
 
+        /** @var User $user */
+        $user = $this->getUser();
+
         $message = $messageRecipient->getMessage();
-        $result = $this->messageService->markMessageAsHam($message);
+        $allowedDomains = $this->domainRepository->findAllowedForUser($user);
+        $result = $this->messageService->markMessageAsHam($message, $allowedDomains);
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsHam'));

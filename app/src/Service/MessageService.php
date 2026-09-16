@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Domain;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
@@ -305,19 +306,27 @@ class MessageService
      * to the "spam" menu for each recipient that would have it in "untreated"
      * menu.
      *
+     * When $allowedDomains is given, only the recipients belonging to one of
+     * these domains are moved; the others are left untouched.
+     *
      * It returns false if the message couldn't be put in the spams folder.
+     *
+     * @param ?Domain[] $allowedDomains
      */
-    public function markMessageAsSpam(Message $message): bool
+    public function markMessageAsSpam(Message $message, ?array $allowedDomains = null): bool
     {
         $result = $this->spamassassinService->marksAsSpam($message);
+
+        $allowedDomainNames = $this->domainNames($allowedDomains);
 
         foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isUntreated()) {
                 continue;
             }
 
-            $recipient = $messageRecipient->getAddress();
-            $recipientEmail = $recipient->getEmail();
+            if (!$this->isRecipientInDomains($messageRecipient, $allowedDomainNames)) {
+                continue;
+            }
 
             $messageRecipient->setStatus(MessageStatus::SPAMMED);
             $this->messageRecipientRepository->save($messageRecipient);
@@ -333,14 +342,25 @@ class MessageService
      * Spamassassin will learn with Bayes classifier. It also restores the
      * message for each recipient that would have it in "spam" menu.
      *
+     * When $allowedDomains is given, only the recipients belonging to one of
+     * these domains are restored; the others are left untouched.
+     *
      * It returns false if the message couldn't be put in the hams folder.
+     *
+     * @param ?Domain[] $allowedDomains
      */
-    public function markMessageAsHam(Message $message): bool
+    public function markMessageAsHam(Message $message, ?array $allowedDomains = null): bool
     {
         $result = $this->spamassassinService->marksAsHam($message);
 
+        $allowedDomainNames = $this->domainNames($allowedDomains);
+
         foreach ($message->getMessageRecipients() as $messageRecipient) {
             if (!$messageRecipient->isSpam()) {
+                continue;
+            }
+
+            if (!$this->isRecipientInDomains($messageRecipient, $allowedDomainNames)) {
                 continue;
             }
 
@@ -348,6 +368,38 @@ class MessageService
         }
 
         return $result;
+    }
+
+    /**
+     * @param ?Domain[] $domains
+     * @return ?string[]
+     */
+    private function domainNames(?array $domains): ?array
+    {
+        if ($domains === null) {
+            return null;
+        }
+
+        return array_map(
+            fn (Domain $domain) => Email::normalize((string) $domain->getDomain()),
+            $domains,
+        );
+    }
+
+    /**
+     * A null list of domains means "no restriction".
+     *
+     * @param ?string[] $domainNames
+     */
+    private function isRecipientInDomains(MessageRecipient $messageRecipient, ?array $domainNames): bool
+    {
+        if ($domainNames === null) {
+            return true;
+        }
+
+        $recipientDomain = Email::normalize($messageRecipient->getAddress()->getReverseDomain());
+
+        return in_array($recipientDomain, $domainNames, true);
     }
 
     /**

@@ -336,7 +336,7 @@
                                                             href="{{path('message_mark_as_spam',{
                                                                 'partitionTag': msgRecipient.partitionTag,
                                                                 'mailId': msgRecipient.mailId,
-                                                                'rid': msgRecipient.address.id
+                                                                'rseqnum': msgRecipient.rseqnum
                                                                 })}}"
                                                                 class="dropdown-item"
                                                             >
@@ -350,7 +350,7 @@
                                                             href="{{path('message_mark_as_ham',{
                                                                 'partitionTag': msgRecipient.partitionTag,
                                                                     'mailId': msgRecipient.mailId,
-                                                                    'rid': msgRecipient.address.id
+                                                                    'rseqnum': msgRecipient.rseqnum
                                                                 })}}"
                                                                 class="dropdown-item"
                                                             >

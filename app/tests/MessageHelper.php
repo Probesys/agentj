@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Address;
 use App\Entity\Message;
+use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
@@ -57,22 +58,7 @@ trait MessageHelper
         ]);
 
         for ($i = 1; $i < count($recipients) + 1; $i++) {
-            MessageRecipientFactory::new()->create([
-                'message' => $message,
-                'partitionTag' => 0,
-                'mailId' => $mailId,
-                'status' => $status,
-                'address' => $recipients[$i - 1],
-                'rseqnum' => $i,
-                'isLocal' => 'N',
-                'content' => 'S',
-                'ds' => 'D',
-                'bl' => 'N',
-                'wl' => 'N',
-                'bspamLevel' => -1.2,
-                'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
-                'sendCaptcha' => 0,
-            ]);
+            $this->setupMailRecipient($message, $recipients[$i - 1], $i, $status);
         }
 
         $recipientsEmails = array_map(fn ($recipient) => $recipient->getEmail(), $recipients);
@@ -92,5 +78,29 @@ trait MessageHelper
         ]);
 
         return $message;
+    }
+
+    private function setupMailRecipient(
+        Message $message,
+        Address $recipient,
+        int $rseqnum,
+        ?int $status = null,
+    ): MessageRecipient {
+        return MessageRecipientFactory::new()->create([
+            'message' => $message,
+            'partitionTag' => $message->getPartitionTag(),
+            'mailId' => $message->getMailId(),
+            'status' => $status,
+            'address' => $recipient,
+            'rseqnum' => $rseqnum,
+            'isLocal' => 'N',
+            'content' => 'S',
+            'ds' => 'D',
+            'bl' => 'N',
+            'wl' => 'N',
+            'bspamLevel' => -1.2,
+            'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
+            'sendCaptcha' => 0,
+        ]);
     }
 }

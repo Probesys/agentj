@@ -919,7 +919,7 @@ class MessageControllerTest extends WebTestCase
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -928,6 +928,35 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
+    }
+
+    public function testMarkMessageAsSpamOnlyAffectsRecipientsOfManagedDomains(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
+        $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseRedirects('/');
+        self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient->getStatus());
     }
 
     public function testUserCannotMarkMessageAsSpam(): void
@@ -946,7 +975,7 @@ class MessageControllerTest extends WebTestCase
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseStatusCodeSame(403);
@@ -974,7 +1003,7 @@ class MessageControllerTest extends WebTestCase
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsSpam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -1002,7 +1031,7 @@ class MessageControllerTest extends WebTestCase
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $addrR->getId() . '/markAsHam';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsHam';
         $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseRedirects('/');
@@ -1011,6 +1040,35 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+    }
+
+    public function testMarkMessageAsHamOnlyAffectsRecipientsOfManagedDomains(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::SPAMMED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::SPAMMED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsHam';
+        $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseRedirects('/');
+        self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient->getStatus());
     }
 
     public function testUserCanShowItsMessageDetail(): void
@@ -1356,16 +1414,29 @@ class MessageControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
+        $domain2 = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        UserFactory::new()->user()->create([
-            'domain' => $domain,
-            'originalUser' => $recipient,
-        ]);
+        $recipient2 = UserFactory::new()->user($domain2)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $admin = UserFactory::new()->admin([$domain, $domain2])->create();
+        $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($domain2->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
         $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
-        $message2 = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, [$addrR2], status: MessageStatus::UNTREATED);
+        $otherMessageRecipient2 = $this->setupMailRecipient($message2, $addrOtherR, 2, MessageStatus::UNTREATED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $messageRecipient = $message->getMessageRecipients()->first();
@@ -1373,14 +1444,10 @@ class MessageControllerTest extends WebTestCase
         $messageRecipient2 = $message2->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient2);
 
-        $messageRecipient2 = $message2->getMessageRecipients()->first();
-        self::assertNotFalse($messageRecipient2);
-
-
         $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20spam', [
             'id' => [
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR2->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -1390,26 +1457,101 @@ class MessageControllerTest extends WebTestCase
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
-        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
-        self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient2->getStatus());
+        // Recipients of a domain not managed by the admin are left untouched.
+        self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient2->getStatus());
+    }
+
+    public function testBatchMarkAsSpamMessagesAsSuperAdmin(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20spam', [
+            'id' => [
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+            ],
+            'massive-actions-form' => [
+                '_token' => $this->generateCsrfToken($client, ''),
+            ],
+        ]);
+
+        self::assertResponseRedirects('/');
+        // A super admin manages every domain, so all recipients are affected.
+        self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient->getStatus());
+    }
+
+    public function testCannotBatchMarkAsSpamMessagesWhenLoggedAsUser(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20spam', [
+            'id' => [
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+            ],
+            'massive-actions-form' => [
+                '_token' => $this->generateCsrfToken($client, ''),
+            ],
+        ]);
+
+        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
     public function testAdminCanBatchMarkAsHamMessages(): void
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
+        $domain2 = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        UserFactory::new()->user()->create([
-            'domain' => $domain,
-            'originalUser' => $recipient,
-        ]);
+        $recipient2 = UserFactory::new()->user($domain2)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $admin = UserFactory::new()->admin([$domain, $domain2])->create();
+        $client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
-        $message2 = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($domain2->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::SPAMMED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::SPAMMED);
+        $message2 = $this->setupMail($addrS, [$addrR2], status: MessageStatus::SPAMMED);
+        $otherMessageRecipient2 = $this->setupMailRecipient($message2, $addrOtherR, 2, MessageStatus::SPAMMED);
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $messageRecipient = $message->getMessageRecipients()->first();
@@ -1420,7 +1562,7 @@ class MessageControllerTest extends WebTestCase
         $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20ham', [
             'id' => [
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
-                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR2->getId()], JSON_THROW_ON_ERROR),
             ],
             'massive-actions-form' => [
                 '_token' => $this->generateCsrfToken($client, ''),
@@ -1430,9 +1572,46 @@ class MessageControllerTest extends WebTestCase
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
-        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
-        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
-        self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
-        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+        // Recipients of a domain not managed by the admin are left untouched.
+        self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient->getStatus());
+        self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient2->getStatus());
+    }
+
+    public function testBatchMarkAsHamMessagesAsSuperAdmin(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $otherRecipient = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrOtherR = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain->getDomain()),
+            'partitionTag' => 0,
+            'email' => $otherRecipient->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::SPAMMED);
+        $otherMessageRecipient = $this->setupMailRecipient($message, $addrOtherR, 2, MessageStatus::SPAMMED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $client->request(Request::METHOD_POST, '/message/batch/mark%20as%20ham', [
+            'id' => [
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+            ],
+            'massive-actions-form' => [
+                '_token' => $this->generateCsrfToken($client, ''),
+            ],
+        ]);
+
+        self::assertResponseRedirects('/');
+        // A super admin manages every domain, so all recipients are affected.
+        self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::RESTORED, $otherMessageRecipient->getStatus());
     }
 }

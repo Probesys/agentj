@@ -669,14 +669,8 @@ class UserController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-            $allowedDomains = $user->getDomains()->toArray();
-        } else {
-            $allowedDomains = $this->em
-                ->getRepository(Domain::class)
-                ->findAll();
-        }
-        return $allowedDomains;
+
+        return $this->em->getRepository(Domain::class)->findAllowedForUser($user);
     }
 
     private function checkDomainAccess(string $domainName = ""): ?Domain
