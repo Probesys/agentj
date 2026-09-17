@@ -73,9 +73,9 @@ final class UserFactory extends PersistentObjectFactory
             if ($user->getDomain() === null) {
                 $domainName = Email::extractDomain($user->getEmail());
 
-                $domain = DomainFactory::new()
-                    ->withDomain($domainName)
-                    ->create();
+                $domain = DomainFactory::findOrCreate([
+                    'domain' => $domainName,
+                ]);
 
                 $user->setDomain($domain);
             }
