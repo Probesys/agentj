@@ -22,14 +22,14 @@ class MessageController extends AbstractController
     }
 
     #[Route(
-        path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/authorized',
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/authorized',
         name: 'portal_message_authorized',
     )]
     public function authorized(
         string $token,
         int $partitionTag,
         string $mailId,
-        int $recipientId,
+        int $rseqnum,
         Request $request,
     ): Response {
         $result = $this->messageService->decryptReleaseToken($token);
@@ -45,11 +45,20 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        $messageRecipient = $this->messageRecipientRepository->findOneBy([
-            'partitionTag' => $partitionTag,
-            'mailId' => $mailId,
-            'address' => $recipientId,
-        ]);
+        if (!$request->query->get('new')) {
+            // Here, we call route with rid, but stored in rseqnum (retrocompatibility of URL)
+            $messageRecipient = $this->messageRecipientRepository->findOneBy([
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'address' => $rseqnum,
+            ]);
+        } else {
+            $messageRecipient = $this->messageRecipientRepository->findOneBy([
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'rseqnum' => $rseqnum,
+            ]);
+        }
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');
@@ -70,14 +79,15 @@ class MessageController extends AbstractController
     }
 
     #[Route(
-        path: '/portal/{token}/message/{partitionTag}/{mailId}/{recipientId}/restore',
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/restore',
         name: 'portal_message_restore',
     )]
     public function restore(
         string $token,
         int $partitionTag,
         string $mailId,
-        int $recipientId,
+        int $rseqnum,
+        Request $request,
     ): Response {
         $result = $this->messageService->decryptReleaseToken($token);
 
@@ -98,8 +108,17 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        $messageRecipient = $this->messageRecipientRepository
-            ->findOneByMessageAndRecipientAddressId($message, $recipientId);
+        if (!$request->query->get('new')) {
+            $messageRecipient = $this->messageRecipientRepository
+                // Here, we call route with rid, but stored in rseqnum (retrocompatibility of URL)
+                ->findOneByMessageAndRecipientAddressId($message, $rseqnum);
+        } else {
+            $messageRecipient = $this->messageRecipientRepository->findOneBy([
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'rseqnum' => $rseqnum,
+            ]);
+        }
 
         if (!$messageRecipient) {
             throw $this->createNotFoundException('Message recipient does not exist');

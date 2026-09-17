@@ -168,7 +168,7 @@
                                                 {
                                                     'partitionTag' : msgRecipient.partitionTag,
                                                     'mailId' : msgRecipient.mailId,
-                                                    'rid' : msgRecipient.address.id
+                                                    'rseqnum' : msgRecipient.rseqnum,
                                                 }
                                             ) }}"
                                             class="btn-open-modal btn btn-info float-right"
@@ -186,7 +186,7 @@
                                                     {
                                                         'partitionTag' : msgRecipient.partitionTag,
                                                         'mailId' : msgRecipient.mailId,
-                                                        'rid' : msgRecipient.address.id
+                                                        'rseqnum' : msgRecipient.rseqnum,
                                                     }
                                                 ) }}"
                                                 class="btn-open-modal btn btn-info float-right"
@@ -229,7 +229,7 @@
                                                         {
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item confirmModal text-primary'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}'
@@ -248,7 +248,7 @@
                                                         {
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item confirmModal text-success'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}'
@@ -266,7 +266,7 @@
                                                         href="{{path('message_banned',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item confirmModal'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}'
@@ -284,7 +284,7 @@
                                                         href="{{path('message_delete',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item  confirmModal text-danger'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}'
@@ -304,7 +304,7 @@
                                                         href="{{path('message_authorized_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item  confirmModal  text-success'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}'
@@ -318,7 +318,7 @@
                                                         href="{{path('message_banned_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
-                                                            'rid':msgRecipient.address.id
+                                                            'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
                                                         class='dropdown-item confirmModal'
                                                         data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}'

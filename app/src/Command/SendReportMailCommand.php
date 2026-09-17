@@ -208,14 +208,16 @@ class SendReportMailCommand extends Command
                 'token' => $token,
                 'partitionTag' => $messageRecipient->getPartitionTag(),
                 'mailId' => $messageRecipient->getMailId(),
-                'recipientId' => $messageRecipient->getAddress()->getId(),
+                'rseqnum' => $messageRecipient->getRseqnum(),
+                'new' => 1,
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $urlRestore = $this->urlGenerator->generate('portal_message_restore', [
                 'token' => $token,
                 'partitionTag' => $messageRecipient->getPartitionTag(),
                 'mailId' => $messageRecipient->getMailId(),
-                'recipientId' => $messageRecipient->getAddress()->getId(),
+                'rseqnum' => $messageRecipient->getRseqnum(),
+                'new' => 1,
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $bodyMessage = $messageTemplate;
