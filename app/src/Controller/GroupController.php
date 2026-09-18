@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\GroupRule;
-use App\Entity\RuleAddress;
 use App\Entity\User;
 use App\Form\GroupType;
 use App\Repository\DomainRepository;
@@ -73,7 +72,7 @@ class GroupController extends AbstractController
     }
 
     #[Route(path: '/new', name: 'group_new', methods: 'GET|POST')]
-    public function new(Request $request): Response
+    public function new(Request $request, RuleAddressRepository $ruleAddressRepository): Response
     {
         $group = new Group();
         if ($this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -100,12 +99,7 @@ class GroupController extends AbstractController
 
             $this->em->persist($group);
 
-            $ruleAddress = $this->em->getRepository(RuleAddress::class)->findOneBy((['email' => '@.']));
-            if (!$ruleAddress) {
-                $ruleAddress = new RuleAddress();
-                $ruleAddress->setEmail('@.');
-                $this->em->persist($ruleAddress);
-            }
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail('@.', flush: false);
             $groupRule = new GroupRule();
             $groupRule->setRuleAddress($ruleAddress);
             $groupRule->setGroup($group);

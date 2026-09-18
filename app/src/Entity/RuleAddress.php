@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RuleAddressRepository;
+use App\Util\Email;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -47,7 +48,7 @@ class RuleAddress
 
     public function setEmail(string $email): self
     {
-        $this->email = $email;
+        $this->email = Email::normalize($email);
 
         return $this;
     }

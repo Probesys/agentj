@@ -44,6 +44,63 @@ class MessageRecipientRepository extends BaseRepository
     }
 
     /**
+     * @param null|array{timeNum: int, partitionTag: int, mailId: string, rseqnum: int} $cursor
+     * @return MessageRecipient[]
+     */
+    public function findSpammedSinceAfter(int $since, int $until, ?array $cursor, int $limit): array
+    {
+        $queryBuilder = $this->createQueryBuilder('mr')
+            ->innerJoin('mr.message', 'm')
+            ->where('mr.status = :status')
+            ->andWhere('m.timeNum >= :since')
+            ->andWhere('m.timeNum <= :until')
+            ->andWhere('mr.amavisReleaseStartedAt IS NULL')
+            ->andWhere(<<<'DQL'
+                NOT EXISTS (
+                    SELECT 1
+                    FROM App\Entity\Log manualSpamLog
+                    WHERE manualSpamLog.mailId = mr.mailId
+                    AND manualSpamLog.action IN (:manualSpamActions)
+                )
+            DQL)
+            ->setParameter('status', MessageStatus::SPAMMED)
+            ->setParameter('since', $since)
+            ->setParameter('until', $until)
+            ->setParameter('manualSpamActions', ['marked as spam', 'marked as spam batch'])
+            ->setMaxResults($limit)
+            ->orderBy('m.timeNum', 'ASC')
+            ->addOrderBy('mr.partitionTag', 'ASC')
+            ->addOrderBy('mr.mailId', 'ASC')
+            ->addOrderBy('mr.rseqnum', 'ASC');
+
+        if ($cursor !== null) {
+            $queryBuilder->andWhere(<<<'DQL'
+                (
+                m.timeNum > :cursorTimeNum
+                OR (m.timeNum = :cursorTimeNum AND mr.partitionTag > :cursorPartitionTag)
+                OR (
+                    m.timeNum = :cursorTimeNum
+                    AND mr.partitionTag = :cursorPartitionTag
+                    AND mr.mailId > :cursorMailId
+                )
+                OR (
+                    m.timeNum = :cursorTimeNum
+                    AND mr.partitionTag = :cursorPartitionTag
+                    AND mr.mailId = :cursorMailId
+                    AND mr.rseqnum > :cursorRseqnum
+                )
+                )
+            DQL)
+                ->setParameter('cursorTimeNum', $cursor['timeNum'])
+                ->setParameter('cursorPartitionTag', $cursor['partitionTag'])
+                ->setParameter('cursorMailId', $cursor['mailId'])
+                ->setParameter('cursorRseqnum', $cursor['rseqnum']);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
      * Return all message recipients sent by $senderFrom to $recipientUser.
      *
      * This method is used to fetch the messages sent by a sender who just had

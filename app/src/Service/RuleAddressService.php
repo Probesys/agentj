@@ -11,7 +11,7 @@ class RuleAddressService
         if (substr(trim($email), 0, 1) == '@') {
             $domain = substr($email, 1);
             if ($domain == '.') {
-                $priority = 0; //in case @.
+                return 0; //in case @.
             }
             $subdomain = explode('.', $domain);
             if (count($subdomain) == "2") {

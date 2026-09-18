@@ -45,6 +45,14 @@ class Email
     }
 
     /**
+     * Normalize an email address for case-insensitive comparisons and storage.
+     */
+    public static function normalize(string $email): string
+    {
+        return mb_strtolower($email, 'UTF-8');
+    }
+
+    /**
      * Return a list of email address lookups.
      *
      * The list is built according to how Amavis is looking for emails when
@@ -62,7 +70,7 @@ class Email
      */
     public static function getAddressLookups(string $email): array
     {
-        $normalizedEmail = strtolower($email);
+        $normalizedEmail = self::normalize($email);
         if (!self::validate($normalizedEmail)) {
             return [];
         }

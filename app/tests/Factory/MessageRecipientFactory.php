@@ -59,7 +59,12 @@ final class MessageRecipientFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this->instantiateWith(
-            Instantiator::withoutConstructor()->alwaysForce(),
+            Instantiator::withConstructor()->alwaysForce(
+                'partitionTag',
+                'mailId',
+                'rseqnum',
+                'address'
+            ),
         );
     }
 }
