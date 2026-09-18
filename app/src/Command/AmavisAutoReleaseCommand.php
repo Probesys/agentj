@@ -54,7 +54,6 @@ class AmavisAutoReleaseCommand extends Command
 
         foreach ($messageRecipients as $messageRecipient) {
             $recipient = $messageRecipient->getAddress();
-            $senderEmail = $messageRecipient->getMessage()->getSenderEmail();
 
             $recipientUser = $this->userRepository->findOneByAddress($recipient);
 
@@ -65,7 +64,23 @@ class AmavisAutoReleaseCommand extends Command
 
             $recipientDomain = $recipientUser->getDomain();
 
-            $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipient);
+            $senderEmail = $messageRecipient->getMessage()->getSenderAddress()->getEmail();
+            $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
+                $senderEmail,
+                $recipient,
+            );
+
+            if (!$senderIsAuthorized) {
+                $fromAddress = $messageRecipient->getMessage()->getFromMimeAddress();
+
+                if ($fromAddress !== null) {
+                    $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
+                        $fromAddress->getAddress(),
+                        $recipient,
+                    );
+                }
+            }
+
             $humanAuthIsDisabled = !$recipientUser->isHumanAuthenticationEnabled();
 
             $spamLevel = $recipientDomain->getLevel();
