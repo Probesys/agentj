@@ -156,7 +156,7 @@ class SendReportMailCommand extends Command
         $body = str_replace('[LIST_MAIL_MSGS]', $tableMessages, $body);
         $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
         $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
-        $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
+        $body = str_replace('[NB_BLOCKED_MESSAGES]', (string) $nbSpammed, $body);
         $body = str_replace('[NB_BANNED_MESSAGES]', (string) $nbBanned, $body);
         $body = str_replace('[NB_RESTORED_MESSAGES]', (string) $nbRestored, $body);
         $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);

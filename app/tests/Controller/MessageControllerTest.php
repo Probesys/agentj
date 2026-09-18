@@ -264,12 +264,8 @@ class MessageControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
-        $recipient = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
-        $sender = UserFactory::new()->user()->create([
-            'domain' => $domain,
-        ]);
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
         $client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, $addrR, status: MessageStatus::AUTHORIZED);
