@@ -46,7 +46,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
                 $attributes['senderRuleAddress'],
             );
 
-            $rule->setWb($attributes['wb']);
+            $rule->setWbRule($attributes['wb']);
             $rule->setPriority($attributes['priority']);
 
             return $rule;

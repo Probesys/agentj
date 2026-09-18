@@ -54,6 +54,7 @@ final class UserFactory extends PersistentObjectFactory
     {
         return $this->with([
             'originalUser' => $user,
+            'domain' => $user->getDomain(),
         ]);
     }
 

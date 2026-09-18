@@ -3,7 +3,6 @@
 namespace App\Tests;
 
 use PHPUnit\Framework\Attributes\Before;
-use PHPUnit\Framework\Attributes\BeforeClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\ApplicationTester;
 
@@ -15,7 +14,7 @@ trait CommandHelper
     protected static $application;
 
     #[Before]
-    public static function setUpApplicationTestsHelper(): void
+    public static function setUpConsoleTestsHelper(): void
     {
         self::bootKernel();
         self::$application = new Application(self::$kernel);

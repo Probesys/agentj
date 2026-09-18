@@ -38,6 +38,7 @@ trait MessageHelper
 
     /**
      * @param array<int, Address> $recipients
+     * @param array<mixed> $messageAttributes
      */
     private function setupMail(
         Address $sender,
@@ -45,17 +46,18 @@ trait MessageHelper
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
+        ?array $messageAttributes = [],
     ): Message {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::new()->create([
+        $message = MessageFactory::new()->create(array_merge([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
             'subject' => $subject,
             'fromAddr' => $sender->getEmail(),
             'status' => $status,
-        ]);
+        ], $messageAttributes));
 
         for ($i = 1; $i < count($recipients) + 1; $i++) {
             $this->setupMailRecipient($message, $recipients[$i - 1], $i, $status);

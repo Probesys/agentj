@@ -36,7 +36,7 @@ class SenderRuleRepositoryTest extends KernelTestCase
         SenderRuleFactory::createOne([
             'user' => $recipient,
             'senderRuleAddress' => $ruleAddress,
-            'wb' => ' ',
+            'wb' => 'accept',
             'priority' => SenderRule::PRIORITY_USER,
         ]);
 
