@@ -1,5 +1,13 @@
 # Changelog of AgentJ
 
+## 2026-09-18 - 2.7.5
+
+### Bug Fixes
+
+- Use the full composite key to select message recipients ([35c33f46](https://github.com/Probesys/agentj/commit/35c33f46), [aefec6ea](https://github.com/Probesys/agentj/commit/aefec6ea)).
+- Restrict marking messages as spam or ham to domains managed by the administrator ([cfe99036](https://github.com/Probesys/agentj/commit/cfe99036)).
+- Allow domains to use the default report message by leaving their custom message empty ([0bbea299](https://github.com/Probesys/agentj/commit/0bbea299)).
+
 ## 2026-09-11 - 2.7.4
 
 ### Bug Fixes
