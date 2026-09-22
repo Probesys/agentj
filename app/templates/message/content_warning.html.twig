@@ -1,0 +1,39 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+	{#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
+	{{ 'Entities.Message.labels.preview' | trans }}
+{% endblock %}
+
+{% block modalContent %}
+    <turbo-frame id="message-content">
+        <div class="col-md-12 text-center">
+            <p>
+                {{ 'Entities.Message.warning.content'|trans }}
+            </p>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <button
+                type="button"
+                class="btn btn-secondary mx-2"
+                data-dismiss="modal"
+            >
+                {{ 'Generics.actions.cancel'|trans }}
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primary mx-2"
+                onclick="this.closest('turbo-frame').src = '{{ path('message_show_content', {
+                    'partitionTag': partitionTag,
+                    'mailId': mailId,
+                    'rseqnum': rseqnum,
+                    'warned': true,
+                }) }}'"
+            >
+                {{ 'Generics.actions.displayMessage'|trans }}
+            </button>
+        </div>
+    </turbo-frame>
+{% endblock %}

@@ -171,6 +171,7 @@ Entities.Message.spamLevel: Note
 Entities.Message.spammedDetect: 'spams détectés automatiquement'
 Entities.Message.untreated: 'Non traités'
 Entities.Message.virus: 'avec virus'
+Entities.Message.warning.content: 'Cet e-mail est destiné à un autre utilisateur. Y accéder pourrait révéler des informations sensibles. Si vous poursuivez, cette action sera enregistrée.'
 Entities.Msgrcpt.fields.bspamLevel: 'Note de spam'
 Entities.Msgrcpt.labels.appliedRule: 'Informations sur le message'
 Entities.Msgrcpt.labels.infos: 'Informations sur le message'
@@ -305,6 +306,7 @@ Generics.actions.connectWithMicrosoft: 'Se connecter avec Microsoft'
 Generics.actions.delete: Supprimer
 Generics.actions.deleteSelection: 'Supprimer la sélection'
 Generics.actions.display: Afficher
+Generics.actions.displayMessage: Afficher l'email
 Generics.actions.edit: Éditer
 Generics.actions.exitImpersonation: 'Revenir à'
 Generics.actions.impersonate: 'Se connecter'
