@@ -12,6 +12,7 @@ use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
+use App\Service\LogService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -36,6 +37,7 @@ class MessageController extends AbstractController
         private Service\Referrer $referrer,
         private DomainRepository $domainRepository,
         private HtmlSanitizerService $sanitizer,
+        private LogService $logService,
     ) {
     }
 
@@ -592,7 +594,7 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/content', name: 'message_show_content')]
-    public function showMessageDetail(int $partitionTag, string $mailId, int $rseqnum): Response
+    public function showMessageDetail(Request $request, int $partitionTag, string $mailId, int $rseqnum): Response
     {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
@@ -604,7 +606,15 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The message does not exist.');
         }
 
-        $this->checkMailAccess($messageRecipient);
+        if (!$this->isAddressedToUserOrItsAliases($messageRecipient)) {
+            $this->checkMailAccess($messageRecipient);
+
+            if (!$request->query->getBoolean('warned', false)) {
+                return $this->render('message/content_warning.html.twig', [
+                    'messageRecipient' => $messageRecipient,
+                ]);
+            }
+        }
 
         return $this->render('message/content.html.twig', [
             'messageRecipient' => $messageRecipient,
@@ -649,6 +659,24 @@ class MessageController extends AbstractController
         $htmlBody = $email->getHtmlBody();
         $htmlBody = $this->sanitizer->sanitize($htmlBody);
 
+        if (!$this->isAddressedToUserOrItsAliases($messageRecipient)) {
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $logContent = sprintf(
+                "recipient=%s user=%s (%d)",
+                $messageRecipient->getAddress()->getEmail(),
+                $user->getUserIdentifier(),
+                $user->getId(),
+            );
+
+            $this->logService->addLog(
+                'message content displayed',
+                $messageRecipient->getMailId(),
+                $logContent,
+            );
+        }
+
         return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
             'htmlBody' => $htmlBody,
@@ -659,7 +687,7 @@ class MessageController extends AbstractController
         ]);
     }
 
-    private function checkMailAccess(MessageRecipient $messageRecipient): void
+    private function isAddressedToUserOrItsAliases(MessageRecipient $messageRecipient): bool
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -674,8 +702,19 @@ class MessageController extends AbstractController
         $recipientEmail = $messageRecipient->getAddress()->getEmail();
 
         if (in_array($recipientEmail, $accessibleRecipientEmails, true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function checkMailAccess(MessageRecipient $messageRecipient): void
+    {
+        if ($this->isAddressedToUserOrItsAliases($messageRecipient)) {
             return;
         }
+
+        $recipientEmail = $messageRecipient->getAddress()->getEmail();
 
         // Admins may access mails outside their own mailbox, but only for
         // recipients that belong to a domain they actually manage.
