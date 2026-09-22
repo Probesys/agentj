@@ -117,7 +117,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     private ?DateTimeInterface $humanAuthenticationEnabledAt = null;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
-    private ?string $preferedLang;
+    private ?string $preferedLang = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $uid;

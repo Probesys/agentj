@@ -19,4 +19,21 @@ trait FactoryHelper
         $repository = $repositoryDecorator->inner();
         $repository->refresh($entity);
     }
+
+    /**
+     * @template T of object
+     *
+     * @param T|T[] $entities
+     */
+    public function save($entities, bool $flush = true): void
+    {
+        $firstEntity = is_array($entities) ?
+            $entities[0]::class :
+            $entities::class
+        ;
+        $repositoryDecorator = Foundry\Persistence\repository($firstEntity);
+        /** @var Repository\BaseRepository<T> */
+        $repository = $repositoryDecorator->inner();
+        $repository->save($entities, $flush);
+    }
 }

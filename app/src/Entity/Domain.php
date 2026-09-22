@@ -85,10 +85,10 @@ class Domain
     private ?string $logo;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $mailAuthenticationSender;
+    private ?string $mailAuthenticationSender = null;
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
-    private ?string $defaultLang;
+    private ?string $defaultLang = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $smtpPort;

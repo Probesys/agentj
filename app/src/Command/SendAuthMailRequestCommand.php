@@ -107,7 +107,7 @@ class SendAuthMailRequestCommand
                     continue;
                 }
 
-                $senderEmail = $message->getFromMimeAddress()?->getAddress();
+                $senderEmail = $message->getSenderAddress()->getEmail();
                 if (!$senderEmail) {
                     continue;
                 }
