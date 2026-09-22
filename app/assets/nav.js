@@ -5,7 +5,6 @@ document.addEventListener("turbo:load", function () {
   }
 
   $(".sidebar-dropdown > a").click(function () {
-    console.log('click');
     $(".sidebar-submenu").slideUp(200);
     if ($(this).parent().hasClass("active")) {
       $(".sidebar-dropdown").removeClass("active");
