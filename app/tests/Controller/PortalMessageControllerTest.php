@@ -47,7 +47,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient2);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -86,7 +85,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient2);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -124,7 +122,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient1);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -163,7 +160,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient1);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -201,7 +197,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient2);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -240,7 +235,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient2);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -278,7 +272,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient1);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
@@ -317,7 +310,6 @@ class PortalMessageControllerTest extends WebTestCase
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient1);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
             'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),

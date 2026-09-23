@@ -8,8 +8,8 @@ use App\Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class MessageController extends AbstractController
 {
@@ -141,7 +141,7 @@ class MessageController extends AbstractController
         $accessibleRecipientEmails = array_merge([$user->getEmail()], $accessibleRecipientEmails);
 
         if (!in_array($messageRecipient->getAddress()->getEmail(), $accessibleRecipientEmails)) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedHttpException('This token cannot be used to access this message recipient.');
         }
     }
 }
