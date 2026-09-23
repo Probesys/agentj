@@ -12,3 +12,33 @@ Pull requests must target the corresponding branch.
 
 Maintainers must synchronize as often as possible the `main` branch with the latest patch branch by creating a branch from `main` and merge the patch branch in it.
 Then, follow the normal workflow by opening a pull request.
+
+## Git hooks
+
+### Predefined hooks
+
+* pre-commit:
+  * run lint with PHPStan only
+  * check that no (unwanted) SQL files are staged
+* pre-push:
+  * run lint
+  * run tests
+
+### Defining the hooks shared for all developers (or modify existing ones)
+
+1. Modify `scripts/install-git-hooks.sh` to define the expected behavior for the Git hooks.
+2. Run `scripts/install-git-hooks.sh` to apply changes.
+
+### Defining personal hooks
+
+Directly edit `.git/hooks` files.
+
+⚠️ Please note that if you launch install script again, hooks will be overridden.
+
+### Prevent hooks to run
+
+It's possible to prevent hooks to run.
+
+When needed, add `--no-verify` to your Git command.
+
+Please consider always pushing valid commits (passing lint and tests).

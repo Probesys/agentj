@@ -7,6 +7,12 @@ $ git clone git@github.com:Probesys/agentj.git
 $ cd agentj
 ```
 
+Install Git hooks:
+
+```console
+$ ./scripts/install-git-hooks.sh
+```
+
 Start the application:
 
 ```console
