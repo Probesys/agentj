@@ -24,7 +24,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'user' => UserFactory::new(),
+            'user' => UserFactory::new()->user(),
             'senderRuleAddress' => RuleAddressFactory::new(),
             'wb' => self::faker()->randomElement([
                 ' ',
@@ -33,6 +33,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
                 '0',
                 '',
             ]),
+            'group' => null,
             'priority' => SenderRule::PRIORITY_USER,
         ];
     }
@@ -46,6 +47,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
                 $attributes['senderRuleAddress'],
             );
 
+            $rule->setGroup($attributes['group'] ?? null);
             $rule->setWb($attributes['wb']);
             $rule->setPriority($attributes['priority']);
 

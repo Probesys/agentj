@@ -54,22 +54,25 @@ final class UserFactory extends PersistentObjectFactory
     {
         return $this->with([
             'originalUser' => $user,
+            'domain' => $user->getDomain(),
         ]);
     }
 
     public function user(?Domain $domain = null): self
     {
         return $this->with(function () use ($domain) {
-            $email = $domain
-                ? self::faker()->userName() . '@' . $domain->getDomain()
-                : self::faker()->unique()->email();
+            if (!$domain) {
+                $domain = DomainFactory::createOne();
+            }
+
+            $email = self::faker()->userName() . '@' . $domain->getDomain();
 
             return [
                 'email' => $email,
                 'domain' => $domain,
                 'roles' => '["ROLE_USER"]',
             ];
-        })->afterInstantiate(function (User $user) use ($domain): void {
+        })->afterInstantiate(function (User $user): void {
             if ($user->getDomain() === null) {
                 $domainName = Email::extractDomain($user->getEmail());
 
@@ -88,8 +91,10 @@ final class UserFactory extends PersistentObjectFactory
     public function admin(?array $domains = []): self
     {
         return $this->with(function () {
+            $domain = DomainFactory::randomDomain();
+
             return [
-                'email' => self::faker()->unique()->email(),
+                'email' => self::faker()->userName() . '@' . $domain,
                 'roles' => '["ROLE_ADMIN"]',
             ];
         })->afterInstantiate(function (User $user) use ($domains): void {
@@ -101,9 +106,11 @@ final class UserFactory extends PersistentObjectFactory
 
     public function superAdmin(): self
     {
+        $domain = DomainFactory::randomDomain();
+
         return $this
             ->with([
-                'email' => '',
+                'email' => self::faker()->userName() . '@' . $domain,
                 'roles' => '["ROLE_SUPER_ADMIN"]'
             ]);
     }
