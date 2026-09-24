@@ -161,9 +161,7 @@ Entities.Message.deleted: Supprimés
 Entities.Message.index: 'Liste des messages'
 Entities.Message.informationMessage: 'Les messages seront automatiquement effacés au bout de 30 jours.'
 Entities.Message.isMailingList: 'Mailing liste ? '
-Entities.Message.labels.imgDisabled: 'Image désactivée'
 Entities.Message.labels.infos: 'Informations sur les refus'
-Entities.Message.labels.linkDisabled: 'Lien désactivé'
 Entities.Message.labels.preview: 'Aperçu du message'
 Entities.Message.labels.reason: 'Type de refus'
 Entities.Message.noBlockedMessages: 'Aucun message bloqué'
@@ -237,6 +235,8 @@ Entities.Report.title: "Rapport d'activité"
 Entities.Report.titleDay: 'Sur les dernières 24h'
 Entities.Report.titleMonth: 'Sur le dernier mois'
 Entities.Report.typeMessage: Type
+Entities.SenderRule.actions.authorizeSender: 'Autoriser un expéditeur'
+Entities.SenderRule.actions.blockSender: 'Bloquer un expéditeur'
 Entities.SenderRule.actions.deleteSenderB: "Débloquer l'expéditeur"
 Entities.SenderRule.actions.deleteSenderW: "Supprimer l'expéditeur"
 Entities.SenderRule.fields.domain: Domaine
