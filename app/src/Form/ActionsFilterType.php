@@ -21,23 +21,6 @@ class ActionsFilterType extends AbstractType
                     'class' => 'form-control form-control-sm'
                 ],
             ])
-            ->add('per_page', ChoiceType::class, [
-                'label' => new TranslatableMessage('Generics.labels.item_per_page'),
-                'attr' => [
-                    'class' => 'form-control form-control-sm'
-                ],
-                'required' => false,
-                'choices' => [
-                    10 => 10,
-                    25 => 25,
-                    50 => 50,
-                    100 => 100,
-                    200 => 200,
-                    500 => 500,
-                    1000 => 1000,
-                    3000 => 3000,
-                ],
-            ])
         ;
     }
 

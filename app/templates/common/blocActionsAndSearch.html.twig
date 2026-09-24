@@ -3,11 +3,6 @@
         <div class="col-md-6">
             <div class="row ">
                 <div class="col-md-6 col-sm-12">
-                    <label class="col-form-label">{{'Generics.actions.display'|trans}}</label>
-                    {{ form_widget(filter_form.per_page) }}
-                    {% set per_page = filter_form.per_page.vars.value %}
-                </div>
-                <div class="col-md-6 col-sm-12">
                     {% if filter_form.actions is defined %}
                         <label class="col-form-label">Actions</label>
                         {{ form_widget(filter_form.actions) }}
