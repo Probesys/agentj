@@ -5,12 +5,14 @@ namespace App\Controller;
 use App\Entity\Domain;
 use App\Entity\Policy;
 use App\Entity\User;
+use App\Form\UserAliasType;
 use App\Form\UserType;
 use App\Repository\DomainRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
 use App\Service\Referrer;
 use App\Service\UserService;
+use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -95,34 +97,6 @@ class UserController extends AbstractController
         return $this->render('user/indexEmail.html.twig', ['users' => $users]);
     }
 
-    #[Route(path: '/alias', name: 'users_email_alias_index', methods: 'GET')]
-    public function indexUserEmailAlias(
-        Request $request,
-        PaginatorInterface $paginator,
-        UserRepository $userRepository
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        $perPage = (int) $this->getParameter('app.per_page_global');
-        $perPage = $request->getSession()->has('perPage') ? $request->getSession()->get('perPage') : $perPage;
-
-        $searchKey = $request->query->getString('search');
-
-        $users = $userRepository->search($user, isAlias: true, searchKey: $searchKey);
-        $users = $paginator->paginate(
-            $users,
-            $request->query->getInt('page', 1),
-            $perPage,
-            [
-                'defaultSortFieldName' => 'u.email',
-                'defaultSortDirection' => 'asc',
-            ]
-        );
-
-        return $this->render('user/indexAlias.html.twig', ['users' => $users]);
-    }
-
     #[IsGranted('ROLE_SUPER_ADMIN')]
     #[Route(path: '/local/new', name: 'user_local_new', methods: 'GET|POST')]
     public function new(Request $request, UserPasswordHasherInterface $passwordHasher): Response
@@ -135,7 +109,6 @@ class UserController extends AbstractController
             'include_quota' => false,
         ]);
 
-        $form->remove('originalUser');
         $form->remove('groups');
         $form->remove('domain');
         $form->remove('emailRecovery');
@@ -208,7 +181,6 @@ class UserController extends AbstractController
         $email = $user->getEmail();
         $form->get('email')->setData($email ?? '');
 
-        $form->remove('originalUser');
         $form->remove('emailRecovery');
         $form->remove('groups');
         $form->remove('domain');
@@ -263,7 +235,6 @@ class UserController extends AbstractController
         $form->remove('domain');
         $form->remove('groups');
         $form->remove('email');
-        $form->remove('originalUser');
         $form->remove('report');
         $form->remove('sharedWith');
         $form->remove('imapLogin');
@@ -345,7 +316,6 @@ class UserController extends AbstractController
             ],
         );
         $form->remove('password');
-        $form->remove('originalUser');
         $form->remove('roles');
         $form->remove('emailRecovery');
         $form->remove('username');
@@ -419,31 +389,27 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/newAlias', name: 'new_user_email_alias', methods: 'GET|POST')]
-    public function newUserAlias(Request $request, UserService $userService, GroupService $groupService): Response
-    {
-        $user = new User();
-        $form = $this->createForm(UserType::class, $user, [
-            'alias' => true,
-            'action' => $this->generateUrl('new_user_email_alias'),
+    #[Route(path: '/email/{id}/newAlias', name: 'new_user_email_alias', methods: 'GET|POST')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
+    public function newUserAlias(
+        Request $request,
+        User $user,
+        UserService $userService,
+        GroupService $groupService,
+    ): Response {
+        $alias = new User();
+        $form = $this->createForm(UserAliasType::class, $alias, [
+            'action' => $this->generateUrl('new_user_email_alias', ['id' => $user->getId()]),
             'attr' => ['class' => 'modal-ajax-form'],
-            'include_quota' => false,
         ]);
 
-        $form->remove('password');
-        $form->remove('emailRecovery');
-        $form->remove('groups');
-        $form->remove('roles');
-        $form->remove('domain');
-        $form->remove('sharedWith');
-        $form->remove('imapLogin');
-        $form->remove('');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            $data = $form->getData();
-            $aliasExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-            $newDomain = $this->checkDomainAccess(explode('@', $form->get('email')->getData())[1]);
+            $aliasEmail = $alias->getEmail() ?? '';
+            $aliasExists = $this->em->getRepository(User::class)->findOneBy(['email' => $aliasEmail]);
+            $newDomain = $this->checkDomainAccess(Email::extractDomain($aliasEmail) ?? '');
+
             if (!$newDomain) {
                 $return = [
                     'status' => 'danger',
@@ -455,17 +421,17 @@ class UserController extends AbstractController
                     'message' => $this->translator->trans('Generics.flash.aliasAlreadyExist'),
                 ];
             } elseif ($form->isValid()) {
-                $user->setRoles('["ROLE_USER"]');
-                $user->setDomain($newDomain);
-                $user->setUsername($user->getEmail());
+                $alias->setUsername($alias->getEmail());
+                $alias->setOriginalUser($user);
+                $alias->setDomain($newDomain);
+                $user->addAlias($alias);
 
-                $user->setPolicy($user->getOriginalUser()->getPolicy());
-
-                $this->em->persist($user);
+                $this->em->persist($alias);
                 $this->em->flush();
 
-                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
+                $userService->updateAliasGroupsAndPolicyFromUser($user);
                 $groupService->updateSenderRules();
+
                 $return = [
                     'status' => 'success',
                     'message' => $this->translator->trans('Generics.flash.addSuccess'),
@@ -513,7 +479,6 @@ class UserController extends AbstractController
             'attr' => ['class' => 'modal-ajax-form']
         ]);
         $form->remove('password');
-        $form->remove('originalUser');
         $form->remove('roles');
         $form->remove('domain');
         $form->remove('emailRecovery');
@@ -581,62 +546,6 @@ class UserController extends AbstractController
             'form' => $form->createView(),
             'imapDomains' => $imapDomains,
             'domainHasIMAPConnector' => $domainHasIMAPConnector,
-        ]);
-    }
-
-    #[Route(path: '/alias/{id}/edit', name: 'user_email_alias_edit', methods: 'GET|POST')]
-    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
-    public function editUserEmailAlias(
-        Request $request,
-        User $user,
-        UserService $userService,
-        GroupService $groupService,
-    ): Response {
-        $form = $this->createForm(UserType::class, $user, [
-            'action' => $this->generateUrl('user_email_alias_edit', ['id' => $user->getId()]),
-            'attr' => ['class' => 'modal-ajax-form'],
-            'include_quota' => false,
-        ]);
-
-        $form->remove('password');
-        $form->remove('emailRecovery');
-        $form->remove('groups');
-        $form->remove('roles');
-        $form->remove('domain');
-        $form->remove('sharedWith');
-        $form->remove('imapLogin');
-        $form->get('email')->setData($user->getEmail());
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            $return = [];
-            $data = $form->getData();
-            $emailExists = $this->em->getRepository(User::class)->findOneBy(['email' => $data->getEmail()]);
-            $oldUser = $this->em->getUnitOfWork()->getOriginalEntityData($user);
-            if (($oldUser['email'] !== $form->get('email')->getData()) && $emailExists) {
-                $return = [
-                    'status' => 'danger',
-                    'message' => $this->translator->trans('Generics.flash.emailAlreadyExist'),
-                ];
-            } elseif ($form->isValid()) {
-                $user->setUsername($user->getEmail());
-                $this->em->flush();
-
-                $userService->updateAliasGroupsAndPolicyFromUser($user->getOriginalUser());
-                $groupService->updateSenderRules();
-
-                $return = [
-                    'status' => 'success',
-                    'message' => $this->translator->trans('Generics.flash.editSuccess'),
-                ];
-            }
-
-            return new JsonResponse($return, 200);
-        }
-
-        return $this->render('user/edit.html.twig', [
-            'user' => $user,
-            'form' => $form->createView(),
         ]);
     }
 
