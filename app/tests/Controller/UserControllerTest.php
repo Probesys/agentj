@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Domain;
+use App\Entity\User;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\GroupFactory;
 use App\Tests\Factory\UserFactory;
@@ -514,7 +515,7 @@ class UserControllerTest extends WebTestCase
         self::assertNotSame($newEmail, $user->getEmail());
     }
 
-    public function testSuperAdminCanListAllAliases(): void
+    public function testSuperAdminCanListAliasesOfEmailAccounts(): void
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
@@ -524,14 +525,52 @@ class UserControllerTest extends WebTestCase
             'email' => 'test@' . $domain->getDomain(),
         ]);
         $alias = UserFactory::new()->alias($user)->create();
+        $otherUser = UserFactory::new()->user($domain)->create();
 
-        $crawler = $client->request('GET', '/admin/users/alias');
+        $crawler = $client->request('GET', '/admin/users/email');
 
         self::assertResponseIsSuccessful();
+        $seenUsers = $crawler
+            ->filter('span.user-email')
+            ->each(fn ($node) => trim($node->text()));
+        self::assertCount(2, $seenUsers);
+        self::assertContains($user->getEmail(), $seenUsers);
+        self::assertContains($otherUser->getEmail(), $seenUsers);
         $seenAliases = $crawler
-            ->filter('td[data-title="Alias"]')
+            ->filter('span.user-alias-email')
             ->each(fn ($node) => trim($node->text()));
         self::assertCount(1, $seenAliases);
+        self::assertContains($alias->getEmail(), $seenAliases);
+    }
+
+    public function testSuperAdminCanSearchAnEmailAccountByItsAlias(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        $user = UserFactory::new()->user($domain)->create([
+            'email' => 'test@' . $domain->getDomain(),
+        ]);
+        $alias = UserFactory::new()->alias($user)->create([
+            'email' => 'alias@' . $domain->getDomain(),
+        ]);
+        $otherUser = UserFactory::new()->user($domain)->create([
+            'email' => 'other@' . $domain->getDomain(),
+        ]);
+
+        $crawler = $client->request('GET', '/admin/users/email?search=alias@');
+
+        self::assertResponseIsSuccessful();
+        $seenUsers = $crawler
+            ->filter('span.user-email')
+            ->each(fn ($node) => trim($node->text()));
+        self::assertCount(1, $seenUsers);
+        self::assertContains($user->getEmail(), $seenUsers);
+        self::assertNotContains($otherUser->getEmail(), $seenUsers);
+        $seenAliases = $crawler
+            ->filter('span.user-alias-email')
+            ->each(fn ($node) => trim($node->text()));
         self::assertContains($alias->getEmail(), $seenAliases);
     }
 
@@ -541,23 +580,16 @@ class UserControllerTest extends WebTestCase
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $client->loginUser($superAdmin);
-        $email = 'test@' . $domain->getDomain();
         $user = UserFactory::new()->user($domain)->create([
-            'email' => $email,
+            'email' => 'test@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $fullname = 'test fullname';
-        $username = $user->getEmail();
-        $alias = 'other@' . $domain->getDomain();
-        $client->request(Request::METHOD_POST, '/admin/users/newAlias', [
-            'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
-                'fullname' => $fullname,
-                'username' => $username,
-                'email' => $alias,
-                'originalUser' => $user->getId(),
-                'report' => 1,
+        $aliasEmail = 'other@' . $domain->getDomain();
+        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+            'user_alias' => [
+                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                'email' => $aliasEmail,
             ],
         ]);
 
@@ -570,11 +602,34 @@ class UserControllerTest extends WebTestCase
         );
         self::assertSame($initialCount + 1, UserFactory::count());
         $newAlias = UserFactory::last();
-        self::assertSame($fullname, $newAlias->getFullname());
-        self::assertSame($alias, $newAlias->getUsername());
-        self::assertSame($alias, $newAlias->getEmail());
+        self::assertSame($aliasEmail, $newAlias->getEmail());
+        self::assertSame($aliasEmail, $newAlias->getUsername());
+        self::assertSame($domain->getId(), $newAlias->getDomain()?->getId());
+        self::assertSame($user->getId(), $newAlias->getOriginalUser()?->getId());
+        self::assertSame($user->getPolicy()?->getId(), $newAlias->getPolicy()?->getId());
         $this->refresh($user);
         self::assertCount(1, $user->getAliases());
+    }
+
+    public function testAdminCannotCreateAnAliasForAUserOutOfItsDomains(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        $otherDomain = DomainFactory::createOne();
+        $user = UserFactory::new()->user($otherDomain)->create();
+        $initialCount = UserFactory::count();
+
+        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+            'user_alias' => [
+                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                'email' => 'other@' . $otherDomain->getDomain(),
+            ],
+        ]);
+
+        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertSame($initialCount, UserFactory::count());
     }
 
     public function testSuperAdminCannotCreateAnAliasForNotExistingDomain(): void
@@ -583,23 +638,15 @@ class UserControllerTest extends WebTestCase
         $domain = DomainFactory::createOne();
         $superAdmin = UserFactory::new()->superAdmin()->create();
         $client->loginUser($superAdmin);
-        $email = 'test@' . $domain->getDomain();
         $user = UserFactory::new()->user($domain)->create([
-            'email' => $email,
+            'email' => 'test@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $fullname = 'test fullname';
-        $username = $user->getEmail();
-        $alias = 'other@other-domain.tld';
-        $client->request(Request::METHOD_POST, '/admin/users/newAlias', [
-            'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
-                'fullname' => $fullname,
-                'username' => $username,
-                'email' => $alias,
-                'originalUser' => $user->getId(),
-                'report' => 1,
+        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+            'user_alias' => [
+                '_token' => $this->generateCsrfToken($client, 'user_alias'),
+                'email' => 'other@other-domain.tld',
             ],
         ]);
 
@@ -621,21 +668,15 @@ class UserControllerTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
-        $aliasEmail = 'alias@' . $domain->getDomain();
-        $alias = UserFactory::new()->user($domain)->create([
-            'email' => $aliasEmail,
-            'originalUser' => $user,
+        $alias = UserFactory::new()->alias($user)->create([
+            'email' => 'alias@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $client->request(Request::METHOD_POST, '/admin/users/newAlias', [
-            'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
-                'fullname' => 'test',
-                'username' => $user->getEmail(),
+        $client->request(Request::METHOD_POST, $this->newAliasUrl($user), [
+            'user_alias' => [
+                '_token' => $this->generateCsrfToken($client, 'user_alias'),
                 'email' => $alias->getEmail(),
-                'originalUser' => $user->getId(),
-                'report' => 1,
             ],
         ]);
 
@@ -648,7 +689,7 @@ class UserControllerTest extends WebTestCase
         self::assertSame($initialCount, UserFactory::count());
     }
 
-    public function testSuperAdminCanEditAlias(): void
+    public function testSuperAdminCanDeleteAnAlias(): void
     {
         $client = static::createClient();
         $domain = DomainFactory::createOne();
@@ -657,79 +698,20 @@ class UserControllerTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
-        $aliasEmail = 'alias@' . $domain->getDomain();
-        $alias = UserFactory::new()->user($domain)->create([
-            'email' => $aliasEmail,
-            'originalUser' => $user,
+        $alias = UserFactory::new()->alias($user)->create([
+            'email' => 'alias@' . $domain->getDomain(),
         ]);
         $initialCount = UserFactory::count();
 
-        $url = '/admin/users/alias/' . $alias->getId() . '/edit';
-        $newEmail = 'newEmail@' . $domain->getDomain();
-        $client->request(Request::METHOD_POST, $url, [
-            'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
-                'fullname' => 'test',
-                'username' => $user->getEmail(),
-                'email' => $newEmail,
-                'originalUser' => $user->getId(),
-                'report' => 1,
-            ],
+        $aliasId = $alias->getId();
+        $client->request(Request::METHOD_POST, '/admin/users/email/' . $aliasId . '/delete', [
+            '_token' => $this->generateCsrfToken($client, 'delete' . $aliasId),
         ]);
 
-        $content = $client->getResponse()->getContent();
-        self::assertNotFalse($content);
-        self::assertJsonStringEqualsJsonString(
-            '{"status":"success","message":"The update has been successfully completed"}',
-            $content,
-        );
-        self::assertSame($initialCount, UserFactory::count());
-        $this->refresh($alias);
-        self::assertSame($newEmail, $alias->getEmail());
-        self::assertSame($newEmail, $alias->getUsername());
-    }
-
-    public function testSuperAdminCannotEditAlreadyExistingAlias(): void
-    {
-        $client = static::createClient();
-        $domain = DomainFactory::createOne();
-        $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
-        $user = UserFactory::new()->user($domain)->create([
-            'email' => 'test@' . $domain->getDomain(),
-        ]);
-        $aliasEmail = 'alias@' . $domain->getDomain();
-        $alias = UserFactory::new()->user($domain)->create([
-            'email' => $aliasEmail,
-            'originalUser' => $user,
-        ]);
-        $otherEmail = 'other@' . $domain->getDomain();
-        $otherAlias = UserFactory::new()->alias($user)->create([
-            'email' => $otherEmail,
-        ]);
-        $initialCount = UserFactory::count();
-
-        $url = '/admin/users/alias/' . $alias->getId() . '/edit';
-        $client->request(Request::METHOD_POST, $url, [
-            'user' => [
-                '_token' => $this->generateCsrfToken($client, 'user'),
-                'fullname' => 'test',
-                'username' => $user->getEmail(),
-                'email' => $otherAlias->getEmail(),
-                'originalUser' => $user->getId(),
-                'report' => 1,
-            ],
-        ]);
-
-        $content = $client->getResponse()->getContent();
-        self::assertNotFalse($content);
-        self::assertJsonStringEqualsJsonString(
-            '{"status":"danger","message":"This email is already used. You can\'t use it"}',
-            $content,
-        );
-        self::assertSame($initialCount, UserFactory::count());
-        $this->refresh($alias);
-        self::assertNotSame($user->getEmail(), $alias->getUsername());
+        self::assertResponseRedirects();
+        self::assertSame($initialCount - 1, UserFactory::count());
+        $this->refresh($user);
+        self::assertCount(0, $user->getAliases());
     }
 
     public function testUserCannotListAdmins(): void
@@ -1170,5 +1152,9 @@ class UserControllerTest extends WebTestCase
                 '_token' => $token,
             ],
         ];
+    }
+    private function newAliasUrl(User $user): string
+    {
+        return '/admin/users/email/' . $user->getId() . '/newAlias';
     }
 }
