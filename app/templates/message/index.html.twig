@@ -131,7 +131,8 @@
                                                 @
                                                 {{ email.1 |replace({'>':''})}}
                                             {% else %}
-                                                {{ senderSplit|replace({'>':''}) }}
+                                                {% set cleanSplit = senderSplit|replace({'>':''}) %}
+                                                {{ cleanSplit|slice(0,35) }}{% if cleanSplit|length > 35 %}…{% endif %}
                                             {% endif %}
                                         {% endfor %}
                                     </span>
