@@ -155,7 +155,21 @@
                             </td>
                             {% if not msgRecipient.isVirus %}
                                 <td>
-                                    {{ msgRecipient.bspamLevel }}
+                                    <a href="#"
+                                        title="{{ 'Entities.Msgrcpt.labels.showSpamDetails' | trans }}"
+                                        data-modal-method-type="GET"
+                                        data-url-modal-content="{{ path(
+                                            'message_show',
+                                            {
+                                                'partitionTag' : msgRecipient.partitionTag,
+                                                'mailId' : msgRecipient.mailId,
+                                                'rseqnum' : msgRecipient.rseqnum,
+                                            }
+                                        ) }}"
+                                        class="btn-open-modal"
+                                    >
+                                        {{ msgRecipient.bspamLevel }}
+                                    </a>
                                 </td>
                             {% endif %}
                             <td>
