@@ -87,7 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'aliases')]
     #[ORM\JoinColumn(name: 'original_user_id', nullable: true, onDelete: 'CASCADE')]
-    private ?User $originalUser;
+    private ?User $originalUser = null;
 
     /**
      * @var Collection<int, User>
