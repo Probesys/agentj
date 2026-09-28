@@ -2,15 +2,17 @@
 
 namespace App\Tests\Factory;
 
+use App\Entity\OutQuarantine;
 use App\Entity\Quarantine;
 use App\Tests\MessageHelper;
+use DateTime;
 use Zenstruck\Foundry\Object\Instantiator;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<Quarantine>
+ * @extends PersistentObjectFactory<OutQuarantine>
  */
-final class QuarantineFactory extends PersistentObjectFactory
+final class OutQuarantineFactory extends PersistentObjectFactory
 {
     use MessageHelper;
 
@@ -21,7 +23,7 @@ final class QuarantineFactory extends PersistentObjectFactory
     #[\Override]
     public static function class(): string
     {
-        return Quarantine::class;
+        return OutQuarantine::class;
     }
 
     #[\Override]

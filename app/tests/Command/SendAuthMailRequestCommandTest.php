@@ -33,6 +33,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 6 hours ago, and whom the sender is unauthenticated
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $this->setupMessageToAuthenticate($message, '-6 hours');
 
         $command = self::executeCommand('agentj:send-auth-mail-token');
@@ -50,9 +51,11 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         $sender = UserFactory::new()->user($domain)->create();
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $this->setupMessageToAuthenticate($message, '-6 hours');
         // Create another message sent 6 hours ago and for which authentication mail has already been sent
         $otherMessage = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($otherMessage instanceof Message);
         $sixHoursAgo = new DateTimeImmutable("-6 hours")->getTimestamp();
         $this->setupMessageToAuthenticate($otherMessage, '-6 hours', messageAttributes: [
             'sendCaptcha' => $sixHoursAgo,
@@ -72,6 +75,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 6 hours ago, and whom the sender has already received authentication mail
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $fromAddress = 'test@' . $domain->getDomain();
         $message->setFromAddr($fromAddress);
         $this->setupMessageToAuthenticate($message, '-6 hours', messageAttributes: [
@@ -79,6 +83,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         ]);
         // Generate a 2nd mail sent 6 hours ago, with same sender than for 1st authorized mail
         $message2 = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message2 instanceof Message);
         $message2->setFromAddr($fromAddress);
         $this->setupMessageToAuthenticate($message2, '-6 hours');
 
@@ -96,8 +101,10 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 8 hours ago, and whom the sender is unauthenticated
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $this->setupMessageToAuthenticate($message, '-8 hours');
         $message2 = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message2 instanceof Message);
         $this->setupMessageToAuthenticate($message2, '-6 hours');
 
         $command = self::executeCommand('agentj:send-auth-mail-token');
@@ -116,6 +123,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 6 hours ago, and whom the sender is a mailing list (unauthenticated)
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $message->setIsMlist(true);
         $this->setupMessageToAuthenticate($message, '-6 hours');
 
@@ -133,6 +141,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 6 hours ago, but not yet processed by Amavis
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $this->setupMessageToAuthenticate($message, '-6 hours', messageRecipientStatus: MessageStatus::UNRELEASED);
 
         $command = self::executeCommand('agentj:send-auth-mail-token');
@@ -149,6 +158,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         // Generate a mail sent 6 hours ago
         $message = $this->setupMail($addrS, [$addrR]);
+        self::assertTrue($message instanceof Message);
         $this->setupMessageToAuthenticate($message, '-6 hours', messageRecipientStatus: MessageStatus::RESTORED);
 
         $command = self::executeCommand('agentj:send-auth-mail-token');
