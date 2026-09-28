@@ -290,6 +290,36 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($expected, $result);
     }
 
+    public function testUserCanShowItsMessageSpamIndicators(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED, headers: [
+            'X-Spam-Status' => "Yes, score=2.6 tag=-60 tag2=-55 kill=-50.9999999\r\n"
+                . "\ttests=[DKIM_SIGNED=0.1, DKIM_VALID=-0.1, SPF_FAIL=3,\r\n"
+                . "\tTRACKER_ID=0.1] autolearn=no autolearn_force=no",
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $indicators = $crawler
+            ->filter('ul[aria-label="Main spam indicators"] li')
+            ->each(fn($node) => trim((string) preg_replace('/\s+/', ' ', $node->text())));
+        self::assertSame([
+            "+3 The sending server is not authorized by the sender's domain (SPF failed).",
+            "-0.1 The message carries a valid signature of the sender's domain (DKIM valid).",
+            '+0.1 Tracking mechanism detected.',
+        ], $indicators);
+    }
+
     public function testUserCanDeleteItsMessage(): void
     {
         $client = static::createClient();

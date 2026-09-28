@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\QuarantineRepository;
 use App\Util\ResourceHelper;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Quarantine
  */
 #[ORM\Table(name: 'quarantine')]
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: QuarantineRepository::class)]
 class Quarantine
 {
     #[ORM\Column(name: 'partition_tag', type: 'integer', nullable: false)]
