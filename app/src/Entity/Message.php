@@ -2,10 +2,15 @@
 
 namespace App\Entity;
 
+use App\Amavis\SpamIndicator;
 use App\Repository\MessageRepository;
+use Carbon\Exceptions\InvalidFormatException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use TypeError;
+use Webklex\PHPIMAP\Exceptions\InvalidMessageDateException;
+use Webklex\PHPIMAP\Exceptions\MessageContentFetchingException;
 use Webklex\PHPIMAP\Message as Email;
 
 #[ORM\Table(name: 'msgs')]
@@ -73,5 +78,46 @@ class Message extends BaseMessage
     public function getQuarantineEmail(): Email
     {
         return Email::fromString($this->getQuarantineContent());
+    }
+
+    /**
+     * @return list<array{indicator: SpamIndicator, score: ?float, rules: list<string>}>
+     */
+    public function getSpamIndicators(): array
+    {
+        if (!$this->isInQuarantine()) {
+            return [];
+        }
+
+        try {
+            $header = (string) $this->getQuarantineEmail()->getHeader()->get('x_spam_status')->first();
+        } catch (InvalidFormatException | InvalidMessageDateException | MessageContentFetchingException | TypeError) {
+            // Spam details are optional: malformed mail must not prevent displaying the message information.
+            return [];
+        }
+
+        $rule = '[A-Za-z0-9_]+';
+        $score = '[-+]?(?:\d+\.?\d*|\.\d+)';
+        $test = "{$rule}(?:={$score})?";
+
+        // Amavis provides tests=[A=1, B=-0.1]; native SpamAssassin uses tests=A,B without scores.
+        if (!preg_match("/(?:^|\s)tests=(?:\[([^\]]*)\]|({$test}(?:\s*,\s*{$test})*))/i", $header, $matches)) {
+            return [];
+        }
+
+        $rawTests = $matches[1] !== '' ? $matches[1] : ($matches[2] ?? '');
+        $tests = [];
+        foreach (preg_split('/\s*,\s*/', trim($rawTests), flags: PREG_SPLIT_NO_EMPTY) ?: [] as $rawTest) {
+            if (!preg_match("/^({$rule})(?:=({$score}))?$/", $rawTest, $testMatches)) {
+                continue;
+            }
+
+            $name = strtoupper($testMatches[1]);
+            if ($name !== 'NONE') {
+                $tests[$name] = isset($testMatches[2]) ? (float) $testMatches[2] : null;
+            }
+        }
+
+        return SpamIndicator::fromTests($tests);
     }
 }

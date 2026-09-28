@@ -44,12 +44,63 @@
         <div class="col-md-8" data-test="content-recipient-email">
             {{ messageRecipient.address.email }}
         </div>
+
+        {% set spamIndicators = message.spamIndicators %}
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
         </div>
         <div class="col-md-8" data-test="content-spam-rating">
             {{ messageRecipient.bspamLevel }}
+
+            {% if spamIndicators is not empty %}
+                <button
+                    type="button"
+                    class="btn btn-outline-info btn-sm ml-2"
+                    data-toggle="collapse"
+                    data-target="#message-spam-indicators"
+                    aria-expanded="false"
+                    aria-controls="message-spam-indicators"
+                    data-test="spam-indicators-toggle"
+                    title="{{ 'Entities.Msgrcpt.labels.spamIndicators' | trans }}"
+                >
+                    {{ 'Generics.labels.details' | trans }}
+                    <i class="fas fa-chevron-down ml-1" aria-hidden="true"></i>
+                </button>
+            {% endif %}
         </div>
+
+        {% if spamIndicators is not empty %}
+            <div class="col-12 collapse" id="message-spam-indicators" data-test="spam-indicators">
+                <ul class="list-unstyled mt-2 mb-2 p-2 bg-light" aria-label="{{ 'Entities.Msgrcpt.labels.spamIndicators' | trans }}">
+                    {% for spamIndicator in spamIndicators %}
+                        {% if spamIndicator.score > 0 %}
+                            {% set badgeClass = 'badge-danger' %}
+                            {% set badgeTitle = 'Entities.Msgrcpt.labels.spamIndicatorIncreases' | trans %}
+                        {% elseif spamIndicator.score < 0 %}
+                            {% set badgeClass = 'badge-success' %}
+                            {% set badgeTitle = 'Entities.Msgrcpt.labels.spamIndicatorDecreases' | trans %}
+                        {% else %}
+                            {% set badgeClass = 'badge-secondary' %}
+                            {% set badgeTitle = '' %}
+                        {% endif %}
+
+                        <li class="mb-2 text-break" data-test="spam-indicator">
+                            {% if spamIndicator.score is not null %}
+                                <span
+                                    class="badge {{ badgeClass }}"
+                                    title="{{ badgeTitle }}"
+                                    data-test="spam-indicator-score"
+                                >
+                                    {{ spamIndicator.score > 0 ? '+' : '' }}{{ spamIndicator.score }}
+                                </span>
+                            {% endif %}
+                            {{ spamIndicator.indicator.label | trans }}
+                            <span class="text-muted small">({{ spamIndicator.rules | join(', ') }})</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
 
         {% if message.sendCaptcha > 0 and not message.isMlist %}
             <div class="col-md-4">

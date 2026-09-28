@@ -191,6 +191,10 @@ div.modal-dialog h5.card-title {
   text-align: center;
 }
 
+[data-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
 
 
 table div.dropdown button {

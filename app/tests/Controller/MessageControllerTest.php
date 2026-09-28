@@ -284,6 +284,8 @@ class MessageControllerTest extends WebTestCase
         self::assertSelectorTextContains('[data-test=content-from]', $addrS->getEmail());
         self::assertSelectorTextContains('[data-test=content-recipient-email]', $addrR->getEmail());
         self::assertSelectorTextContains('[data-test=content-spam-rating]', $expectedSpamRating);
+        self::assertSelectorNotExists('[data-test="spam-indicators-toggle"]');
+        self::assertSelectorNotExists('[data-test="spam-indicators"]');
         self::assertSelectorTextContains('[data-test=content-auth-request-date]', $expectedAuthReqDate);
         self::assertSelectorTextContains('[data-test=content-mailing-list]', 'No.');
         self::assertSelectorTextContains('[data-test=content-status]', 'Authorized');
@@ -422,6 +424,36 @@ class MessageControllerTest extends WebTestCase
         self::assertContains($email, $fromAddress);
         // FromEnvelopeAddress and FromAddress are not identical, so FromEnvelopeAddress is displayed in popup
         self::assertContains($mailingListEmail, $envelopeFromAddress);
+    }
+
+    public function testUserCanShowItsMessageSpamIndicators(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED, headers: [
+            'X-Spam-Status' => "Yes, score=2.6 tag=-60 tag2=-55 kill=-50.9999999\r\n"
+                . "\ttests=[DKIM_SIGNED=0.1, DKIM_VALID=-0.1, SPF_FAIL=3,\r\n"
+                . "\tTRACKER_ID=0.1] autolearn=no autolearn_force=no",
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $indicators = $crawler
+            ->filter('[data-test="spam-indicator"]')
+            ->each(fn($node) => trim((string) preg_replace('/\s+/', ' ', $node->text())));
+        self::assertSame([
+            "+3 The sending server is not authorized by the sender's domain (SPF failed). (SPF_FAIL)",
+            '+0.1 The message carries a DKIM signature. (DKIM_SIGNED)',
+            '-0.1 The message carries a valid DKIM signature. (DKIM_VALID)',
+            '+0.1 Tracking mechanism detected. (TRACKER_ID)',
+        ], $indicators);
     }
 
     public function testUserCanDeleteItsMessage(): void
