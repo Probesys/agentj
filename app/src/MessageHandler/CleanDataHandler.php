@@ -2,7 +2,9 @@
 
 namespace App\MessageHandler;
 
+use App\Entity\UnsubscribeRequest;
 use App\Message\CleanData;
+use App\Repository\UnsubscribeRequestRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -19,6 +21,7 @@ final class CleanDataHandler
     public function __construct(
         KernelInterface $kernel,
         private LoggerInterface $logger,
+        private UnsubscribeRequestRepository $unsubscribeRequestRepository,
         #[Autowire(env: 'int:HISTORY_RETENTION_DAYS')]
         private int $historyRetentionDays,
     ) {
@@ -39,6 +42,16 @@ final class CleanDataHandler
             $this->logger->info("Data cleaned:\n{$output->fetch()}");
         } catch (\Exception $e) {
             $this->logger->error('Failed to clean data.', [
+                'exception' => $e,
+            ]);
+        }
+
+        try {
+            $deletedCount = $this->unsubscribeRequestRepository->truncateOlder(UnsubscribeRequest::RETENTION_DAYS);
+
+            $this->logger->info("Deleted {$deletedCount} unsubscribe request(s).");
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete the old unsubscribe requests.', [
                 'exception' => $e,
             ]);
         }
