@@ -1,7 +1,7 @@
 diff -ruN AMA/Conf.pm Amavis/Conf.pm
---- AMA/Conf.pm	2023-05-11 22:52:23.000000000 +0000
-+++ Amavis/Conf.pm	2023-10-04 09:23:59.772118073 +0000
-@@ -1238,8 +1238,8 @@
+--- AMA/Conf.pm	2026-09-30 10:42:15.310121998 +0200
++++ Amavis/Conf.pm	2026-09-30 10:42:15.310121998 +0200
+@@ -1239,8 +1239,8 @@
        'INSERT INTO maddr (partition_tag, email, domain) VALUES (?,?,?)',
      'ins_msg' =>
        'INSERT INTO msgs (partition_tag, mail_id, secret_id, am_id,'.
@@ -12,7 +12,7 @@ diff -ruN AMA/Conf.pm Amavis/Conf.pm
      'upd_msg' =>
        'UPDATE msgs SET content=?, quar_type=?, quar_loc=?, dsn_sent=?,'.
        ' spam_level=?, message_id=?, from_addr=?, subject=?, client_addr=?,'.
-@@ -1269,6 +1269,10 @@
+@@ -1270,6 +1270,11 @@
        " WHERE sid=? AND msgs.content!='V' AND ds='P' AND message_id IN (%m)".
          " AND rid!=sid".
        " ORDER BY rid=? DESC, msgs.time_num DESC",  # LIMIT 1
@@ -20,12 +20,13 @@ diff -ruN AMA/Conf.pm Amavis/Conf.pm
 +    'sel_mailadr' => "",
 +    'ins_mailadr' => "",
 +    'ins_wblist' => "",
++    'ins_mlist' => "",
    );
    # NOTE on $sql_clause{'upd_msg'}: MySQL clobbers timestamp on update
    # (unless DEFAULT 0 is used) setting it to a current local time and
 diff -ruN AMA/Out/SQL/Log.pm Amavis/Out/SQL/Log.pm
---- AMA/Out/SQL/Log.pm	2023-05-11 22:52:23.000000000 +0000
-+++ Amavis/Out/SQL/Log.pm	2023-10-04 10:20:04.943822809 +0000
+--- AMA/Out/SQL/Log.pm	2026-09-30 10:42:15.310121998 +0200
++++ Amavis/Out/SQL/Log.pm	2026-09-30 10:42:25.830057161 +0200
 @@ -122,6 +122,140 @@
    ($id, $existed);
  }
@@ -184,7 +185,53 @@ diff -ruN AMA/Out/SQL/Log.pm Amavis/Out/SQL/Log.pm
        $conn_h->commit;  1;
      } or do {
        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-@@ -292,6 +428,7 @@
+@@ -277,6 +413,45 @@
+       die $eval_stat  if $eval_stat =~ /^timed out\b/;  # resignal timeout
+       return 0;
+     };
++    #Add for AgentJ: save mailing list metadata (List-Id, List-Unsubscribe)
++    # outside of the msgs transaction, a failure must not prevent logging
++    my $ins_mlist = $sql_cl_r->{'ins_mlist'};
++    if (defined($ins_mlist) && $ins_mlist ne '' && $msginfo->is_mlist) {
++      eval {
++        my %max_len = ('list-id' => 255, 'list-unsubscribe' => 2048,
++                       'list-unsubscribe-post' => 255);
++        my %h;
++        for my $name (keys %max_len) {
++          my $v = $msginfo->get_header_field_body($name);
++          next  if !defined($v);
++          $v = untaint($v);
++          chomp $v; $v =~ s/\n(?=[ \t])//gs;  # unfold
++          $v =~ tr/\t/ /;  # tabs of folded lines would be replaced by "?"
++          $v =~ s/^ +//s; $v =~ s/ +\z//s;  # trim
++          $v =~ s/[^\040-\176]/?/gs;  # only use 7 bit printable characters
++          substr($v, $max_len{$name}) = ''  if length($v) > $max_len{$name};
++          $h{$name} = $v  if $v ne '';
++        }
++        if (defined $h{'list-id'}) {  # keep only "<list-id>" (RFC 2919)
++          local($1);
++          $h{'list-id'} = $h{'list-id'} =~ /<([^<>\s]+)>/ ? lc($1) : undef;
++        }
++        if (defined $h{'list-id'} || defined $h{'list-unsubscribe'}) {
++          $conn_h->begin_work_nontransaction;  # (re)connect if not connected
++          $conn_h->execute($ins_mlist, $partition_tag, $msginfo->mail_id,
++            $h{'list-id'}, $h{'list-unsubscribe'},
++            $h{'list-unsubscribe-post'});
++          do_log(4, "save_info_preliminary: mailing list metadata saved, %s",
++                    $h{'list-id'} // '-');
++        }
++        1;
++      } or do {
++        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
++        do_log(-1, "WARN save_info_preliminary: ins_mlist: %s", $eval_stat);
++        die $eval_stat  if $eval_stat =~ /^timed out\b/;  # resignal timeout
++      };
++    }
++    ### end
+   }
+   1;
+ }
+@@ -292,6 +467,7 @@
    my $ins_msg = $sql_cl_r->{'ins_msg'};
    my $upd_msg = $sql_cl_r->{'upd_msg'};
    my $ins_rcp = $sql_cl_r->{'ins_rcp'};
@@ -192,7 +239,7 @@ diff -ruN AMA/Out/SQL/Log.pm Amavis/Out/SQL/Log.pm
    if ($ins_msg eq '' || $upd_msg eq '' || $ins_rcp eq '') {
      # updates disabled
    } elsif (!defined($sid)) {
-@@ -328,7 +465,18 @@
+@@ -328,7 +504,18 @@
          my $recip_local_yn = $r->recip_is_local ? 'Y' : 'N';
          my $blacklisted_yn = $r->recip_blacklisted_sender ? 'Y' : 'N';
          my $whitelisted_yn = $r->recip_whitelisted_sender ? 'Y' : 'N';
