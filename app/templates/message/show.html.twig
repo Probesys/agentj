@@ -10,25 +10,25 @@
         <div class="col-md-4">
             {{ 'Generics.fields.date' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-date">
             {{ message.timeiso | format_datetime('short', 'short') }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.sender' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-sender-email">
             {{ message.senderAddress.email }}
         </div>
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-recipient-email">
             {{ messageRecipient.address.email }}
         </div>
         <div class="col-md-4">
             {{ 'Entities.Msgrcpt.fields.bspamLevel' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-spam-rating">
             {{ messageRecipient.bspamLevel }}
         </div>
 
@@ -37,7 +37,7 @@
                 {{ 'Entities.Message.dateAuthRequestAt' | trans }}
                 :
             </div>
-            <div class="col-md-8">
+            <div class="col-md-8" data-test="content-auth-request-date">
                 {{ message.sendCaptcha | format_datetime('short', 'short') }}
             </div>
         {% endif %}
@@ -45,7 +45,7 @@
         <div class="col-md-4">
             {{ 'Entities.Message.isMailingList' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-mailing-list">
             {%  if message.isMlist %}
                 {{ 'Generics.labels.yes' | trans() }}
             {% else %}
@@ -55,7 +55,7 @@
         <div class="col-md-4">
             {{ 'Message.Status.title' | trans }}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" data-test="content-status">
             {% if messageRecipient.isAlreadyReleased %}
                 {% set deliveryStatusClass = 'text-success' %}
                 {% set msgsStatus = messageRecipient.statusLabel | trans %}

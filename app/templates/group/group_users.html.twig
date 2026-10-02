@@ -53,25 +53,27 @@
 									<ul class="list-inline list-unstyled">
 										<li class="list-inline-item">
                                             <form
+												id="{{ 'delete-group-' ~ group.id ~ '-user-' ~ user.id }}"
                                                 method="post"
-                                                action="{{ path('group_remove_user',{'id' : group.id,'user' : user.id}) }}"
-                                                data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveUserFromGroupContent'|trans }}"
+                                                action="{{ path('group_remove_user', {'id' : group.id,'user' : user.id}) }}"
                                             >
-                                            <input
-                                                type="hidden"
-                                                name="_token"
-                                                value="{{ csrf_token('removeUser' ~ user.id) }}"
-                                            >
-											<button
-                                                type="submit"
-                                                class='btn btn-sm btn-danger confirmModal'
-                                                title="{{ 'Message.Dialogs.confirmRemoveUserFromGroupTitle'|trans() }}"
-                                            >
-												<i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-												<span class="d-md-none d-lg-block">
-													{{ 'Entities.Group.Actions.Delete'|trans() }}
-												</span>
-											</button>
+												<input
+													type="hidden"
+													name="_token"
+													value="{{ csrf_token('removeUser' ~ user.id) }}"
+												>
+												<button
+													type="submit"
+													class='btn btn-sm btn-danger confirmModal'
+													data-dialog-title="{{ 'Message.Dialogs.confirmRemoveUserFromGroupTitle'|trans }}"
+ 													data-dialog-content="{{ 'Message.Dialogs.confirmRemoveUserFromGroupContent'|trans }}"
+													title="{{ 'Entities.Group.Actions.Delete'|trans() }}"
+												>
+													<i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+													<span class="d-md-none d-lg-block">
+														{{ 'Entities.Group.Actions.Delete'|trans() }}
+													</span>
+												</button>
                                             </form>
 										</li>
 									</ul>

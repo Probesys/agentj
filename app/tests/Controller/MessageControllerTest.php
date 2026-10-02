@@ -18,8 +18,10 @@ use App\Tests\SessionHelper;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -84,7 +86,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -103,7 +105,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/banned');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -122,7 +124,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/authorized');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -141,7 +143,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/delete');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -160,7 +162,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/restored');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -179,7 +181,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/spam');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -198,7 +200,7 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, '/message/virus');
 
         $messages = $crawler
-            ->filter('td[data-title="Subject"]')
+            ->filter('[data-test="subject"]')
             ->each(fn($node) => trim($node->text()));
         self::assertCount(1, $messages);
         self::assertSame('test', $messages[0]);
@@ -257,13 +259,34 @@ class MessageControllerTest extends WebTestCase
         $crawler = $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
-        $titles = $crawler
-            ->filter('div.col-md-4')
-            ->each(fn($node) => trim($node->text()));
-        $content = $crawler
-            ->filter('div.col-md-8')
-            ->each(fn($node) => trim($node->text()));
-        $result = array_combine($titles, $content);
+        $contentDate = $crawler
+            ->filter('[data-test="content-date"]')
+            ->first()
+            ->text();
+        $senderEmail = $crawler
+            ->filter('[data-test="content-sender-email"]')
+            ->first()
+            ->text();
+        $recipientEmail = $crawler
+            ->filter('[data-test="content-recipient-email"]')
+            ->first()
+            ->text();
+        $spamRating = $crawler
+            ->filter('[data-test="content-spam-rating"]')
+            ->first()
+            ->text();
+        $authRequestDate = $crawler
+            ->filter('[data-test="content-auth-request-date"]')
+            ->first()
+            ->text();
+        $mailingList = $crawler
+            ->filter('[data-test="content-mailing-list"]')
+            ->first()
+            ->text();
+        $status = $crawler
+            ->filter('[data-test="content-status"]')
+            ->first()
+            ->text();
         $date = DateTimeImmutable::createFromFormat(
             'Ymd\THis\Z',
             $message->getTimeIso(),
@@ -273,21 +296,18 @@ class MessageControllerTest extends WebTestCase
         $date = $date->setTimezone(new DateTimeZone('Europe/Paris'));
         $dateFormatted = $date->format('n/j/y, g:i') . "\u{202F}" . $date->format('A');
         $authReqDate = new DateTimeImmutable()->setTimestamp($message->getSendCaptcha());
-        $authReqDateFormatted = $authReqDate->format('n/j/y, g:i') . "\u{202F}" . $authReqDate->format('A');
+        $expectedAuthReqDate = $authReqDate->format('n/j/y, g:i') . "\u{202F}" . $authReqDate->format('A');
         $recipient = $message->getMessageRecipients()->first();
-        $spamRating = $recipient !== false
+        $expectedSpamRating = $recipient !== false
             ? (string)$recipient->getBspamLevel()
             : '';
-        $expected = [
-            'Date' => $dateFormatted,
-            'Sender' => $addrS->getEmail(),
-            'Recipient' => $addrR->getEmail(),
-            'Spam rating' => $spamRating,
-            'Authentication request sent the :' => $authReqDateFormatted,
-            'Mailing list?' => 'No.',
-            'Status' => 'Authorized',
-        ];
-        self::assertSame($expected, $result);
+        self::assertSame($dateFormatted, $contentDate);
+        self::assertSame($senderEmail, $addrS->getEmail());
+        self::assertSame($recipientEmail, $addrR->getEmail());
+        self::assertSame($expectedSpamRating, $spamRating);
+        self::assertSame($expectedAuthReqDate, $authRequestDate);
+        self::assertSame('No.', $mailingList);
+        self::assertSame('Authorized', $status);
     }
 
     public function testUserCanDeleteItsMessage(): void
@@ -305,7 +325,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/delete/';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_delete'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -315,6 +337,39 @@ class MessageControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::DELETED, $messageRecipient->getStatus());
+    }
+
+    public function testUserCannotDeleteItsMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        $client->request(Request::METHOD_GET, '/');
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/delete/';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        $message = MessageFactory::findBy([
+            'mailId' => $message->getMailId(),
+        ])[0];
+        $messageRecipient = MessageRecipientFactory::findBy([
+            'mailId' => $messageRecipient->getMailId(),
+        ])[0];
+        self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
     }
 
     public function testSecondRecipientCannotDeleteMessageForFirstRecipient(): void
@@ -344,9 +399,11 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
 
         $url = '/message/0/' . $message->getMailId() . '/' .  $messageRecipient1->getRseqnum() . '/delete/';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_delete'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         // Since status update is done directly with Doctrine, we have to refresh entities.
@@ -378,7 +435,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/authorized';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -405,6 +464,36 @@ class MessageControllerTest extends WebTestCase
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $aliasRule);
+    }
+
+    public function testUserCannotAuthorizeItsMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/authorized';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
     public function testSecondRecipientCannotAuthorizeMessageForFirstRecipient(): void
@@ -435,12 +524,16 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient1);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient1->getRseqnum() . '/authorized';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
     }
@@ -472,7 +565,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($lowercaseMessageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/authorized';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
@@ -512,12 +607,17 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/authorizedDomain';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize_domain'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        $this->refresh($messageRecipient2);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
@@ -547,6 +647,52 @@ class MessageControllerTest extends WebTestCase
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $domainRule);
+    }
+
+    public function testAdminCannotAuthorizedDomainMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$otherDomain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/authorizedDomain';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        $this->refresh($messageRecipient2);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
     }
 
     public function testAdminCannotAuthorizedDomainMessageForOtherDomain(): void
@@ -579,12 +725,17 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/authorizedDomain';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize_domain'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        $this->refresh($messageRecipient2);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
@@ -617,9 +768,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -651,6 +800,47 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(1, $aliasRule);
     }
 
+    #[DataProvider('batchMessageActionProvider')]
+    public function testAdminCannotBatchMessageActionWithoutValidCsrfToken(string $action): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $message2 = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+
+        $client->request(Request::METHOD_POST, '/message/batch/' . $action, [
+            'id' => [
+                json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+                json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
+            ],
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        $this->refresh($message2);
+        $this->refresh($messageRecipient2);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+    }
+
     public function testUserCanBanItsMessage(): void
     {
         $client = static::createClient();
@@ -670,7 +860,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/banned';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -698,6 +890,34 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(1, $aliasRule);
     }
 
+    public function testUserCannotBanItsMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/banned';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
+    }
+
     public function testSecondRecipientCannotBanMessageForFirstRecipient(): void
     {
         $client = static::createClient();
@@ -722,9 +942,11 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient1);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient1->getRseqnum() . '/banned';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
@@ -762,7 +984,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/bannedDomain';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban_domain'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -799,6 +1023,38 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(1, $domainRule);
     }
 
+    public function testAdminCannotBannedDomainMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$otherDomain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR1], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/bannedDomain';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
+    }
+
     public function testAdminCannotBannedDomainMessageForOtherDomain(): void
     {
         $client = static::createClient();
@@ -829,9 +1085,11 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/bannedDomain';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban_domain'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
@@ -857,7 +1115,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/restore';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_restore'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -865,6 +1125,37 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+    }
+
+    public function testUserCannotRestoreItsMessageWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $message->setStatus(null);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/restore';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNRELEASED, $message->getStatus());
+        self::assertSame(MessageStatus::UNRELEASED, $messageRecipient->getStatus());
     }
 
     public function testSecondRecipientCannotRestoreMessageForFirstRecipient(): void
@@ -892,9 +1183,11 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient1);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient1->getRseqnum() . '/restore';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_restore'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
@@ -920,7 +1213,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_spam'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -928,6 +1223,38 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
+    }
+
+    public function testAdminCannotMarkMessageAsSpamWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $message->setStatus(null);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
     public function testMarkMessageAsSpamOnlyAffectsRecipientsOfManagedDomains(): void
@@ -952,9 +1279,13 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_spam'),
+        ]);
 
         self::assertResponseRedirects('/');
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient->getStatus());
     }
@@ -976,13 +1307,17 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_spam'),
+        ]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
-        self::assertNull($message->getStatus());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
@@ -1004,7 +1339,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsSpam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_spam'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
@@ -1032,14 +1369,50 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsHam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_ham'),
+        ]);
 
         self::assertResponseRedirects('/');
         self::assertSame($initialMessageCount, MessageFactory::count());
         self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+    }
+
+    public function testAdminCannotMarkMessageAsHamWithoutValidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::SPAMMED);
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $message->setStatus(null);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsHam';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => 'invalid CSRF token',
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
+        self::assertSame(MessageStatus::SPAMMED, $message->getStatus());
+        self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
     }
 
     public function testMarkMessageAsHamOnlyAffectsRecipientsOfManagedDomains(): void
@@ -1064,9 +1437,13 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/markAsHam';
-        $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_mark_as_ham'),
+        ]);
 
         self::assertResponseRedirects('/');
+        $this->refresh($message);
+        $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient->getStatus());
     }
@@ -1088,19 +1465,19 @@ class MessageControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $recover = $crawler
-            ->filter('a[data-dialog-title="Recover the message"]')
+            ->filter('[data-test="restore-button"]')
             ->first();
         self::assertSame('Recover', $recover->text());
         $authorize = $crawler
-            ->filter('a[data-dialog-title="Authorize the sender"]')
+            ->filter('[data-test="authorize-button"]')
             ->first();
         self::assertSame('Authorize', $authorize->text());
         $ban = $crawler
-            ->filter('a[data-dialog-title="Ban the sender"]')
+            ->filter('[data-test="ban-button"]')
             ->first();
         self::assertSame('Ban', $ban->text());
         $delete = $crawler
-            ->filter('a[data-dialog-title="Delete the message"]')
+            ->filter('[data-test="delete-button"]')
             ->first();
         self::assertSame('Delete', $delete->text());
         $iframeSrc = $crawler->filter('iframe');
@@ -1138,7 +1515,7 @@ class MessageControllerTest extends WebTestCase
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient1->getRseqnum() . '/content';
         $client->request(Request::METHOD_GET, $url);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     public function testUserCanGetItsMessageReleaseStatus(): void
@@ -1198,7 +1575,7 @@ class MessageControllerTest extends WebTestCase
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient1->getRseqnum() . '/release-status';
         $client->request(Request::METHOD_GET, $url);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     public function testAdminCanBatchAuthorizedMessages(): void
@@ -1228,9 +1605,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1289,9 +1664,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1350,9 +1723,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()]),
                 json_encode([0, $message2->getMailId(), $addrR->getId()]),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1391,9 +1762,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1449,9 +1818,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR2->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1489,9 +1856,7 @@ class MessageControllerTest extends WebTestCase
             'id' => [
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1516,12 +1881,10 @@ class MessageControllerTest extends WebTestCase
             'id' => [
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
@@ -1564,9 +1927,7 @@ class MessageControllerTest extends WebTestCase
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
                 json_encode([0, $message2->getMailId(), $addrR2->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
@@ -1604,14 +1965,26 @@ class MessageControllerTest extends WebTestCase
             'id' => [
                 json_encode([0, $message->getMailId(), $addrR->getId()], JSON_THROW_ON_ERROR),
             ],
-            'massive-actions-form' => [
-                '_token' => $this->generateCsrfToken($client, ''),
-            ],
+            '_token' => $this->generateCsrfToken($client, 'batch'),
         ]);
 
         self::assertResponseRedirects('/');
         // A super admin manages every domain, so all recipients are affected.
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
         self::assertSame(MessageStatus::RESTORED, $otherMessageRecipient->getStatus());
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function batchMessageActionProvider(): array
+    {
+        return [
+            'authorized' => ['authorized'],
+            'banned' => ['banned'],
+            'restore' => ['restore'],
+            'mark as spam' => ['mark_as_spam'],
+            'mark as ham' => ['mark_as_ham'],
+        ];
     }
 }

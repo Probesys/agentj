@@ -435,6 +435,7 @@ Message.Dialogs.confirmDeleteUserContent: 'Êtes-vous sur de vouloir supprimer c
 Message.Dialogs.confirmRemoveConnectorContent: 'Êtes-vous sûr de vouloir supprimer ce connecteur ?'
 Message.Dialogs.confirmRemoveConnectorTitle: 'Supprimer le connecteur.'
 Message.Dialogs.confirmRemoveRuleContent: 'Êtes-vous sûr de vouloir supprimer cette règle ?'
+Message.Dialogs.confirmRemoveRuleTitle: 'Supprimer la règle.'
 Message.Dialogs.confirmRemoveUserFromGroupContent: 'Êtes-vous sûr de vouloir enlever cet utilisateur du groupe ?'
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Supprimer du groupe ?'
 Message.Dialogs.confirmRestoreMsgContent: 'Êtes-vous sur de vouloir récupérer le message ?'

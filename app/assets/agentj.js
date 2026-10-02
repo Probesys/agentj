@@ -15,7 +15,6 @@ function $_GET(param) {
 
 function trans (key) {
     const translation = window.jsTranslations[key];
-    console.log(translation);
     if (translation) {
         return translation;
     } else {
@@ -50,9 +49,11 @@ document.addEventListener("turbo:load", function () {
   //massive form action confirm submission
   $(document).on('change', '#massive-actions-select, #massive-actions-form_actions', function (e) {
     e.preventDefault();
+
     e.stopImmediatePropagation();
     var select = $(this);
-    if ($('#massive-actions-form input[type="checkbox"]').filter(':checked').length > 0) {
+
+    if ($('input[type="checkbox"][form="massive-actions-form"]').filter(':checked').length > 0) {
       var curFormAction = $("#massive-actions-form").prop("action");
       if ($(this).val() != '') {
         $("#massive-actions-form").prop("action", curFormAction + "/" + $(this).val());
@@ -82,7 +83,6 @@ document.addEventListener("turbo:load", function () {
   });
 
   $(document).on('click', '.for-cb:not(.check-all)', function (e) {
-    console.log('click');
     var cb = $(this).prev();
     var isChecked = $(cb).is(':checked');
     cb.attr('checked', isChecked ? false : true);
@@ -189,8 +189,6 @@ document.addEventListener("turbo:load", function () {
       {
         text: trans('Generics.labels.yes'),
         click: function () {
-
-
           if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm")) {
             window.location.href = $(this).data("link-to-confirm");
           } else if ($(this).data('type-action-confirm') == 'form') {
@@ -209,21 +207,30 @@ document.addEventListener("turbo:load", function () {
     ]
   });
 
-
-  $(document).on('click', 'a.confirmModal', function (e) {
+  $(document).on('click', '.confirmModal', function (e) {
     e.preventDefault();
-    $('#dialog-confirm').dialog('option', 'title', $(this).data('dialog-title'));
-    $('#dialog-confirm').data("type-action-confirm", "link");
-    $('#dialog-confirm').data("link-to-confirm", $(this).attr("href"));
-    $("#dialog-content").html($(this).data('dialog-content'));
-    $("#dialog-confirm").dialog("open");
+
+    const isLink = this.tagName === 'A';
+
+    $('#dialog-confirm')
+        .dialog('option', 'title', $(this).data('dialog-title'));
+
+    if (isLink) {
+        $('#dialog-confirm')
+            .data('type-action-confirm', 'link')
+            .data('link-to-confirm', $(this).attr('href'));
+    } else {
+        $('#dialog-confirm')
+            .data('type-action-confirm', 'form')
+            .data('form-to-confirm', this.form.id);
+    }
+
+    $('#dialog-content').html($(this).data('dialog-content'));
+    $('#dialog-confirm').dialog('open');
   });
 
-
-
-
-
 });
+
 function showAlertMessage(type, message) {
   if ($('#alert-box').length) {
     dom = '<div class="alert alert-' + type + ' alert-dismissible alert-auto-hidden" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' + message + '</div>';
