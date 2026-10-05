@@ -32,6 +32,17 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
+        if (!$request->query->has('confirmed')) {
+            return $this->render('portal/messages/confirm.html.twig', [
+                'action' => 'authorized',
+                'token' => $token,
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'rseqnum' => $rseqnum,
+                'new' => $request->query->has('new'),
+            ]);
+        }
+
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -45,7 +56,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        if (!$request->query->get('new')) {
+        if (!$request->query->has('new')) {
             // Here, we call route with rid, but stored in rseqnum (retrocompatibility of URL)
             $messageRecipient = $this->messageRecipientRepository->findOneBy([
                 'partitionTag' => $partitionTag,
@@ -89,6 +100,17 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
+        if (!$request->query->has('confirmed')) {
+            return $this->render('portal/messages/confirm.html.twig', [
+                'action' => 'banned',
+                'token' => $token,
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'rseqnum' => $rseqnum,
+                'new' => $request->query->has('new'),
+            ]);
+        }
+
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -102,7 +124,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('The token is invalid.');
         }
 
-        if (!$request->query->get('new')) {
+        if (!$request->query->has('new')) {
             // Here, we call route with rid, but stored in rseqnum (retrocompatibility of URL)
             $messageRecipient = $this->messageRecipientRepository->findOneBy([
                 'partitionTag' => $partitionTag,
@@ -146,6 +168,17 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
+        if (!$request->query->has('confirmed')) {
+            return $this->render('portal/messages/confirm.html.twig', [
+                'action' => 'restore',
+                'token' => $token,
+                'partitionTag' => $partitionTag,
+                'mailId' => $mailId,
+                'rseqnum' => $rseqnum,
+                'new' => $request->query->has('new'),
+            ]);
+        }
+
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -165,7 +198,7 @@ class MessageController extends AbstractController
             throw $this->createNotFoundException('Message does not exist');
         }
 
-        if (!$request->query->get('new')) {
+        if (!$request->query->has('new')) {
             $messageRecipient = $this->messageRecipientRepository
                 // Here, we call route with rid, but stored in rseqnum (retrocompatibility of URL)
                 ->findOneByMessageAndRecipientAddressId($message, $rseqnum);

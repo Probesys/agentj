@@ -1,0 +1,44 @@
+{% extends 'base_security.html.twig' %}
+
+{% block body %}
+    <div class="h-100 ">
+        <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+            <div>
+                <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" alt="AgentJ">
+            </div>
+
+            {% set contentI18nKey = {
+                'authorized': 'Message.Dialogs.confirmAuthorizedMsgContent',
+                'banned': 'Message.Dialogs.confirmBannedMsgContent',
+                'restore': 'Message.Dialogs.confirmRestoreMsgContent',
+            } %}
+
+            <p data-test='confirm-content'>
+                {{ (contentI18nKey[action] ?? 'Portal.Messages.confirmAction') | trans }}
+            </p>
+
+            <p>
+                <a
+                    class="btn btn-primary"
+                    data-test="confirm-button"
+                    href="{{ path('portal_message_authorized', {
+                        token: token,
+                        partitionTag: partitionTag,
+                        mailId: mailId,
+                        rseqnum: rseqnum,
+                        confirmed: true,
+                        new: new ? 1 : 0,
+                    }) }}"
+                >
+                    {{ 'Portal.Messages.confirmAction' | trans }}
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <style>
+        img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}

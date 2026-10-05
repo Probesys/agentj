@@ -510,6 +510,7 @@ Navigation.userlist.localUsers: Administrators
 Navigation.userlist.title: Users
 Navigation.virus: Virus
 Navigation.whitelist: 'Authorized senders'
+Portal.Messages.confirmAction: "Confirm action"
 Portal.Messages.authorized.backToMessages: 'See my authorized mails'
 Portal.Messages.authorized.senderAuthorized: 'The address is now authorized.'
 Portal.Messages.banned.backToMessages: 'See my banned mails'
