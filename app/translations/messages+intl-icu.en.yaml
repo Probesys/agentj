@@ -161,9 +161,7 @@ Entities.Message.deleted: Deleted
 Entities.Message.index: 'List of messages'
 Entities.Message.informationMessage: 'The messages will be automatically deleted after 30 days.'
 Entities.Message.isMailingList: 'Mailing list? '
-Entities.Message.labels.imgDisabled: 'Image disabled'
 Entities.Message.labels.infos: 'Information about the blockage'
-Entities.Message.labels.linkDisabled: 'Link disabled'
 Entities.Message.labels.preview: 'Preview of the message'
 Entities.Message.labels.reason: 'Reason for blockage'
 Entities.Message.noBlockedMessages: 'No blocked messages'
@@ -305,7 +303,6 @@ Generics.actions.connectAs: 'Log in as a'
 Generics.actions.connectWithMicrosoft: 'Sign-in with Microsoft'
 Generics.actions.delete: Delete
 Generics.actions.deleteSelection: 'Delete selection'
-Generics.actions.display: Display
 Generics.actions.edit: Edit
 Generics.actions.exitImpersonation: 'Back to life'
 Generics.actions.impersonate: 'Sign in'
@@ -322,6 +319,7 @@ Generics.fields.active: Active
 Generics.fields.attachments: Attachments
 Generics.fields.date: Date
 Generics.fields.datemod: 'date of change'
+Generics.fields.envelopeAddress: 'Envelope address'
 Generics.fields.inactive: Inactive
 Generics.fields.name: Title
 Generics.fields.object: Subject

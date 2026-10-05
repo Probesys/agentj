@@ -244,15 +244,32 @@ class MessageController extends AbstractController
             'mailId' => $mailId,
         ]);
 
-        $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(
-            $message->getSenderEmail(),
-            $messageRecipient->getAddress(),
-        );
+        $envelopeFromAddress = $message->getSenderAddress()->getEmail();
+
+        $senderRuleRepository = $this->em->getRepository(SenderRule::class);
+
+        $senderRules = [];
+        $headerFromAddress = $message->getFromMimeAddress()?->getAddress();
+        $recipientAddress = $messageRecipient->getAddress();
+        if (
+            $headerFromAddress &&
+            $senderRuleRepository->isSenderInRecipientList($headerFromAddress, $recipientAddress)
+        ) {
+            $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(
+                $headerFromAddress,
+                $recipientAddress,
+            );
+        } else {
+            $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(
+                $envelopeFromAddress,
+                $recipientAddress,
+            );
+        }
 
         return $this->render('message/show.html.twig', [
             'message' => $message,
             'messageRecipient' => $messageRecipient,
-            'senderRules' => $senderRules
+            'senderRules' => $senderRules,
         ]);
     }
 

@@ -5,12 +5,16 @@ namespace App\Tests;
 use App\Entity\Address;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
+use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
 use App\Tests\Factory\QuarantineFactory;
+use App\Tests\Factory\RuleAddressFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Util\Url;
+use Webklex\PHPIMAP\Structure;
 
 trait MessageHelper
 {
@@ -103,6 +107,25 @@ trait MessageHelper
             'bspamLevel' => -1.2,
             'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
             'sendCaptcha' => 0,
+        ]);
+    }
+
+    private function createSenderRule(
+        string $senderAddress,
+        User $recipient,
+        ?string $rule = 'accept',
+        ?int $priority = SenderRule::PRIORITY_USER,
+    ): void {
+        $senderRuleAddress = RuleAddressFactory::new()->create([
+            'priority' => 6,
+            'email' => $senderAddress,
+        ]);
+
+        SenderRuleFactory::new()->create([
+            'user' => $recipient,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => $rule,
+            'priority' => $priority,
         ]);
     }
 }

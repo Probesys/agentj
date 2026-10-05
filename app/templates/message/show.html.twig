@@ -1,7 +1,9 @@
 {% extends 'modalTemplate.html.twig' %}
+
 {% set msgDeliveryStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
+{% set fromAddress = message.fromMimeAddress?.address %}
+
 {% block modalTitle %}
-    {#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
     {{ 'Entities.Msgrcpt.labels.infos' | trans }}
 {% endblock %}
 
@@ -13,12 +15,29 @@
         <div class="col-md-8">
             {{ message.timeiso | format_datetime('short', 'short') }}
         </div>
-        <div class="col-md-4">
-            {{ 'Generics.fields.sender' | trans }}
-        </div>
-        <div class="col-md-8">
-            {{ message.senderAddress.email }}
-        </div>
+        {% if fromAddress %}
+            <div class="col-md-4">
+                {{ 'Generics.fields.sender' | trans }}
+            </div>
+            <div class="col-md-8" data-test="fromAddress">
+                {{ message.fromAddr }}
+            </div>
+            {% if message.senderAddress.email != fromAddress %}
+                <div class="col-md-4">
+                    {{ 'Generics.fields.envelopeAddress' | trans }}
+                </div>
+                <div class="col-md-8" data-test="envelopeFromAddress">
+                    {{ message.senderAddress.email }}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="col-md-4">
+                {{ 'Generics.fields.sender' | trans }}
+            </div>
+            <div class="col-md-8" data-test="envelopeFromAddress">
+                {{ message.senderAddress.email }}
+            </div>
+        {% endif %}
         <div class="col-md-4">
             {{ 'Generics.fields.recipient' | trans }}
         </div>
@@ -104,19 +123,19 @@
                         {% set classTr = "bg-success text-white" %}
                     {% endif %}
                     <tr class="{{ classTr }} ">
-                        <td>
+                        <td data-test="recipient-email">
                             {{ senderRule.user.email }}
                         </td>
-                        <td>
+                        <td data-test="sender-email">
                             {{ senderRule.senderRuleAddress.email }}
                         </td>
-                        <td>
+                        <td data-test="rule-name">
                             {{ senderRule.wbRuleName | trans }}
                         </td>
-                        <td>
+                        <td data-test="rule-priority">
                             {{ senderRule.priority }}
                         </td>
-                        <td>
+                        <td data-test="group">
                             {{ senderRule.group?.name }}
                         </td>
                     </tr>

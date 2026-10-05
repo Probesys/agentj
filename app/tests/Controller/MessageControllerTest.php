@@ -290,6 +290,145 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($expected, $result);
     }
 
+    public function testUserCanDisplayMatchingRuleEnvelopeAddress(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
+        $mailingListSender = UserFactory::new()->user($otherDomain)->create([
+            'email' => $mailingListEmail,
+        ]);
+        [$addrS, $addrR] = $this->setupAddresses($mailingListSender, $recipient);
+        $fromEmail = 'address@' . $otherDomain->getDomain();
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED, messageAttributes: [
+            'fromAddr' => $fromEmail,
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        // Allow the sender from envelope address
+        $this->createSenderRule($addrS->getEmail(), $recipient, 'accept');
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $highestPrioRuleEmail = $crawler
+            ->filter('[data-test="sender-email"]')
+            ->each(fn($node) => trim($node->text()));
+        $highestPrioRulePriority = $crawler
+            ->filter('[data-test="rule-priority"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(SenderRule::PRIORITY_USER, (int)$highestPrioRulePriority[0]);
+        self::assertSame($addrS->getEmail(), $highestPrioRuleEmail[0]);
+    }
+
+    public function testUserCanDisplayMatchingRuleFromAddress(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
+        $mailingListSender = UserFactory::new()->user($otherDomain)->create([
+            'email' => $mailingListEmail,
+        ]);
+        [$addrS, $addrR] = $this->setupAddresses($mailingListSender, $recipient);
+        $fromEmail = 'address@' . $otherDomain->getDomain();
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED, messageAttributes: [
+            'fromAddr' => $fromEmail,
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        // Allow the sender from header and envelope addresses
+        $this->createSenderRule($fromEmail, $recipient, 'accept', SenderRule::PRIORITY_USER);
+        $this->createSenderRule($addrS->getEmail(), $recipient, 'accept', SenderRule::PRIORITY_USER);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $highestPrioRuleEmail = $crawler
+            ->filter('[data-test="sender-email"]')
+            ->each(fn($node) => trim($node->text()));
+        $highestPrioRulePriority = $crawler
+            ->filter('[data-test="rule-priority"]')
+            ->each(fn($node) => trim($node->text()));
+        // We consider rules applying to the From header in priority
+        self::assertSame(SenderRule::PRIORITY_USER, (int)$highestPrioRulePriority[0]);
+        self::assertSame($fromEmail, $highestPrioRuleEmail[0]);
+    }
+
+    public function testUserDoesNotDisplayEnvelopeFromIfIdenticalToFromAddress(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        $email = 'address@' . $otherDomain->getDomain();
+        $sender = UserFactory::new()->user($otherDomain)->create([
+            'email' => $email,
+        ]);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED, messageAttributes: [
+            'fromAddr' => $email,
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $envelopeFromAddress = $crawler
+            ->filter('[data-test="envelopeFromAddress"]')
+            ->each(fn($node) => trim($node->text()));
+        $fromAddress = $crawler
+            ->filter('[data-test="fromAddress"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertContains($email, $fromAddress);
+        // FromEnvelopeAddress and FromAddress are identical, so FromEnvelopeAddress not displayed in popup
+        self::assertEmpty($envelopeFromAddress);
+    }
+
+    public function testUserDisplaysEnvelopeFromIfNotIdenticalToFromAddress(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
+        $email = 'address@' . $otherDomain->getDomain();
+        $mailingListSender = UserFactory::new()->user($otherDomain)->create([
+            'email' => $mailingListEmail,
+        ]);
+        [$addrS, $addrR] = $this->setupAddresses($mailingListSender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::AUTHORIZED, messageAttributes: [
+            'fromAddr' => $email,
+        ]);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $crawler = $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $envelopeFromAddress = $crawler
+            ->filter('[data-test="envelopeFromAddress"]')
+            ->each(fn($node) => trim($node->text()));
+        $fromAddress = $crawler
+            ->filter('[data-test="fromAddress"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertContains($email, $fromAddress);
+        // FromEnvelopeAddress and FromAddress are not identical, so FromEnvelopeAddress is displayed in popup
+        self::assertContains($mailingListEmail, $envelopeFromAddress);
+    }
+
     public function testUserCanDeleteItsMessage(): void
     {
         $client = static::createClient();

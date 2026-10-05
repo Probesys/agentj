@@ -161,9 +161,7 @@ Entities.Message.deleted: Supprimés
 Entities.Message.index: 'Liste des messages'
 Entities.Message.informationMessage: 'Les messages seront automatiquement effacés au bout de 30 jours.'
 Entities.Message.isMailingList: 'Mailing liste ? '
-Entities.Message.labels.imgDisabled: 'Image désactivée'
 Entities.Message.labels.infos: 'Informations sur les refus'
-Entities.Message.labels.linkDisabled: 'Lien désactivé'
 Entities.Message.labels.preview: 'Aperçu du message'
 Entities.Message.labels.reason: 'Type de refus'
 Entities.Message.noBlockedMessages: 'Aucun message bloqué'
@@ -305,7 +303,6 @@ Generics.actions.connectAs: 'Se connecter en tant que'
 Generics.actions.connectWithMicrosoft: 'Se connecter avec Microsoft'
 Generics.actions.delete: Supprimer
 Generics.actions.deleteSelection: 'Supprimer la sélection'
-Generics.actions.display: Afficher
 Generics.actions.edit: Éditer
 Generics.actions.exitImpersonation: 'Revenir à'
 Generics.actions.impersonate: 'Se connecter'
@@ -322,6 +319,7 @@ Generics.fields.active: Actif
 Generics.fields.attachments: 'Pièce(s) jointe(s)'
 Generics.fields.date: Date
 Generics.fields.datemod: 'date de modification'
+Generics.fields.envelopeAddress: "Adresse de l'enveloppe"
 Generics.fields.inactive: Inactif
 Generics.fields.name: Intitulé
 Generics.fields.object: Objet
