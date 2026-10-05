@@ -297,6 +297,49 @@
                                                     </a>
                                                 {% endif %}
 
+                                                {# Unsubscribe from mailing list action #}
+                                                {% set unsubscribeMethods = list_unsubscribe_methods(msgRecipient) %}
+                                                {% set unsubscribeMethod = unsubscribeMethods ? unsubscribeMethods.preferredMethod : null %}
+                                                {% if unsubscribeMethod %}
+                                                    {% set lastUnsubscribeRequest = last_unsubscribe_request(msgRecipient) %}
+                                                    {# The URL comes from the message: escaped here as the content is
+                                                       inserted as HTML in the dialog (then escaped again for the attribute) #}
+                                                    {% set unsubscribeTarget = unsubscribeMethod == 'mailto'
+                                                        ? unsubscribeMethods.mailtoAddress
+                                                        : unsubscribeMethods.httpsUrl %}
+                                                    {% set unsubscribeDialogContent = 'Message.Dialogs.confirmUnsubscribeContent'|trans|e
+                                                        ~ '<br><br>'
+                                                        ~ ('Message.Dialogs.confirmUnsubscribeTarget.' ~ unsubscribeMethod)|trans|e
+                                                        ~ '<br><span class="text-break">' ~ unsubscribeTarget|e ~ '</span>' %}
+                                                    <div class="dropdown-divider"></div>
+                                                    <a
+                                                        href="{{ path('message_unsubscribe', {
+                                                            'partitionTag': msgRecipient.partitionTag,
+                                                            'mailId': msgRecipient.mailId,
+                                                            'rseqnum': msgRecipient.rseqnum,
+                                                            '_token': csrf_token('unsubscribe-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.rseqnum),
+                                                        }) }}"
+                                                        class="dropdown-item confirmModal"
+                                                        data-dialog-title="{{ 'Message.Dialogs.confirmUnsubscribeTitle'|trans }}"
+                                                        data-dialog-content="{{ unsubscribeDialogContent }}"
+                                                        {# The user is redirected to the list website: keep AgentJ open #}
+                                                        {% if unsubscribeMethod == 'https' %}data-confirm-target-blank="true"{% endif %}
+                                                        title="{{ 'Message.Actions.Unsubscribe'|trans }}"
+                                                    >
+                                                        <span class="fas fa-bell-slash"></span>
+                                                        {% if lastUnsubscribeRequest %}
+                                                            {{ ('Message.Unsubscribe.status.' ~ lastUnsubscribeRequest.status)|trans({
+                                                                'date': lastUnsubscribeRequest.createdAt|format_date('short'),
+                                                            }) }}
+                                                            <small class="d-block text-muted">
+                                                                {{ 'Message.Actions.UnsubscribeRetry'|trans }}
+                                                            </small>
+                                                        {% else %}
+                                                            {{ 'Message.Actions.Unsubscribe'|trans }}
+                                                        {% endif %}
+                                                    </a>
+                                                {% endif %}
+
 
                                                 {% if is_granted('ROLE_ADMIN') %}
                                                     <div class="dropdown-divider"></div>

@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: UnsubscribeRequestRepository::class)]
 class UnsubscribeRequest
 {
+    public const STATUS_PENDING = 'pending';
     public const STATUS_SENT = 'sent';
     public const STATUS_FAILED = 'failed';
     public const STATUS_INITIATED = 'initiated';
@@ -123,6 +124,28 @@ class UnsubscribeRequest
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * The one-click request has been accepted by the list server.
+     */
+    public function markAsSent(): void
+    {
+        $this->status = self::STATUS_SENT;
+    }
+
+    /**
+     * The one-click request has been refused by the list server, or could not
+     * be sent.
+     */
+    public function markAsFailed(): void
+    {
+        $this->status = self::STATUS_FAILED;
     }
 
     public function getRequestedBy(): ?User
