@@ -164,10 +164,18 @@ Entities.Message.isMailingList: 'Mailing list? '
 Entities.Message.labels.infos: 'Information about the blockage'
 Entities.Message.labels.preview: 'Preview of the message'
 Entities.Message.labels.reason: 'Reason for blockage'
+Entities.Message.lastUnsubscribeRequest: 'Last unsubscription request'
+Entities.Message.listId: 'List ID'
+Entities.Message.listIdUnknown: 'Not provided'
 Entities.Message.noBlockedMessages: 'No blocked messages'
 Entities.Message.restored: 'that have been Restored'
 Entities.Message.spamLevel: Note
 Entities.Message.spammedDetect: 'detected as a Spam'
+Entities.Message.unsubscribeMethod: Unsubscription
+Entities.Message.unsubscribeMethods.https: 'Web page'
+Entities.Message.unsubscribeMethods.mailto: Email
+Entities.Message.unsubscribeMethods.none: 'Not available'
+Entities.Message.unsubscribeMethods.one-click: 'Automatic (one-click)'
 Entities.Message.untreated: 'that are Untreated'
 Entities.Message.virus: 'detected with a Virus'
 Entities.Msgrcpt.fields.bspamLevel: 'Spam rating'
@@ -404,6 +412,8 @@ Message.Actions.MarkAsSpam: 'Mark as spam'
 Message.Actions.Restore: Recover
 Message.Actions.RestoreMessage: 'Recover the message'
 Message.Actions.Unlock: Unlock
+Message.Actions.Unsubscribe: 'Unsubscribe from the list'
+Message.Actions.UnsubscribeRetry: 'Unsubscribe again'
 Message.Actions.list: Actions
 Message.Actions.massiveActionContent: 'Are you sure you want to perform this action on all the selected items?'
 Message.Captcha.defaultMailContent: 'Hello.<br/><br/> You tried to send an email to: [EMAIL_DEST] <br/><br/> For security reasons we are obliged to check your email. <br/> <br/> Please confirm your email by clicking on the following link: <br/> <a href="[URL_HUMAN_AUTHENTICATION]">[URL_HUMAN_AUTHENTICATION]</a> <br/><br/> Thank you and good day '
@@ -442,6 +452,11 @@ Message.Dialogs.confirmRemoveUserFromGroupContent: 'Are you sure you want to rem
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Remove from the group?'
 Message.Dialogs.confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
 Message.Dialogs.confirmRestoreMsgtitle: 'Recover the message'
+Message.Dialogs.confirmUnsubscribeContent: 'Do you want to unsubscribe from this mailing list? You will no longer receive its messages.'
+Message.Dialogs.confirmUnsubscribeTarget.https: 'You will be redirected to the page:'
+Message.Dialogs.confirmUnsubscribeTarget.mailto: 'Your email client will open with an unsubscription email to send to:'
+Message.Dialogs.confirmUnsubscribeTarget.one-click: 'An unsubscription request will be sent to:'
+Message.Dialogs.confirmUnsubscribeTitle: 'Unsubscribe from the list'
 Message.Flash.checkMailUnsuccessful: 'This email address seems to be invalid, or has already been validated.'
 Message.Flash.connectionKo: 'Unable to connect'
 Message.Flash.connectionOk: 'Connection success'
@@ -464,6 +479,8 @@ Message.Flash.ruleUpdated: 'Rule has been updated!'
 Message.Flash.saved: 'Changes have been saved.'
 Message.Flash.senderAuthorized: 'The address is now authorized'
 Message.Flash.senderBanned: 'The address is now banned'
+Message.Flash.unsubscribeInitiated: 'Please complete the unsubscription on the list website or in your email client.'
+Message.Flash.unsubscribePending: 'Your unsubscription request is being sent to the list.'
 Message.HumanAuthentication.toVerify.content: 'Please confirm your address by entering it below.'
 Message.HumanAuthentication.toVerify.email: 'Email address'
 Message.HumanAuthentication.toVerify.submit: Submit
@@ -477,6 +494,10 @@ Message.Report.defaultMailSubject: 'Messages pending on AgentJ for '
 Message.Sender: Sender
 Message.Status.title: Status
 Message.Toast.defaultTitle: Information
+Message.Unsubscribe.status.failed: 'Unsubscription failed on {date}'
+Message.Unsubscribe.status.initiated: 'Unsubscription initiated on {date}'
+Message.Unsubscribe.status.pending: 'Unsubscription being sent (requested on {date})'
+Message.Unsubscribe.status.sent: 'Unsubscription sent on {date}'
 Message.http.403.description: "You don't have the right to view this page."
 Message.http.403.title: 'Unauthorized access'
 Message.http.404.description: 'The requested page was not found. Check the url or return to the home page.'
