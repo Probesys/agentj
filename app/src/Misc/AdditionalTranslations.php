@@ -9,6 +9,10 @@ use Symfony\Component\Translation\TranslatableMessage;
 // keys from the translations files. By listing them manually in this file, the
 // command detects them, even if this file is never used in the application.
 
+new TranslatableMessage('Entities.Message.unsubscribeMethods.https');
+new TranslatableMessage('Entities.Message.unsubscribeMethods.mailto');
+new TranslatableMessage('Entities.Message.unsubscribeMethods.one-click');
+
 new TranslatableMessage('Entities.SenderRule.rules.accept');
 new TranslatableMessage('Entities.SenderRule.rules.allow');
 new TranslatableMessage('Entities.SenderRule.rules.block');
@@ -37,3 +41,12 @@ new TranslatableMessage('Message.Dialogs.confirmDeleteSenderContentB');
 new TranslatableMessage('Message.Dialogs.confirmDeleteSenderContentW');
 new TranslatableMessage('Message.Dialogs.confirmDeleteSenderTitleB');
 new TranslatableMessage('Message.Dialogs.confirmDeleteSenderTitleW');
+
+new TranslatableMessage('Message.Dialogs.confirmUnsubscribeTarget.https');
+new TranslatableMessage('Message.Dialogs.confirmUnsubscribeTarget.mailto');
+new TranslatableMessage('Message.Dialogs.confirmUnsubscribeTarget.one-click');
+
+new TranslatableMessage('Message.Unsubscribe.status.failed');
+new TranslatableMessage('Message.Unsubscribe.status.initiated');
+new TranslatableMessage('Message.Unsubscribe.status.pending');
+new TranslatableMessage('Message.Unsubscribe.status.sent');

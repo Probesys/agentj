@@ -7,20 +7,24 @@ use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Entity\SenderRule;
+use App\Exception\CannotUnsubscribeException;
 use App\Form\ActionsFilterType;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
+use App\Service\ListUnsubscribeService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -223,8 +227,12 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/show/', name: 'message_show', methods: 'GET')]
-    public function showAction(int $partitionTag, string $mailId, int $rseqnum): Response
-    {
+    public function showAction(
+        int $partitionTag,
+        string $mailId,
+        int $rseqnum,
+        ListUnsubscribeService $listUnsubscribeService,
+    ): Response {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -264,10 +272,22 @@ class MessageController extends AbstractController
             );
         }
 
+        $listMetadata = null;
+        $unsubscribeMethods = null;
+        $lastUnsubscribeRequest = null;
+        if ($message->getIsMlist()) {
+            $listMetadata = $listUnsubscribeService->getMetadata($messageRecipient);
+            $unsubscribeMethods = $listUnsubscribeService->getUnsubscribeMethods($messageRecipient);
+            $lastUnsubscribeRequest = $listUnsubscribeService->getLastRequest($messageRecipient);
+        }
+
         return $this->render('message/show.html.twig', [
             'message' => $message,
             'messageRecipient' => $messageRecipient,
             'senderRules' => $senderRules,
+            'listMetadata' => $listMetadata,
+            'unsubscribeMethods' => $unsubscribeMethods,
+            'lastUnsubscribeRequest' => $lastUnsubscribeRequest,
         ]);
     }
 
@@ -471,6 +491,60 @@ class MessageController extends AbstractController
         $this->messageService->dispatchRelease($messageRecipient);
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
         $logService->addLog('restore', $mailId);
+
+        return new RedirectResponse($this->referrer->get());
+    }
+
+    /**
+     * Unsubscribe the recipient from the mailing list of the message.
+     */
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/unsubscribe', name: 'message_unsubscribe', methods: 'POST')]
+    public function unsubscribe(
+        MessageRecipient $messageRecipient,
+        Request $request,
+        ListUnsubscribeService $listUnsubscribeService,
+        Security $security,
+    ): Response {
+        if (!$this->isCsrfTokenValid('message_unsubscribe', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // An admin impersonating the user is recorded as the requester
+        $requestedBy = $user;
+        $token = $security->getToken();
+        if ($token instanceof SwitchUserToken) {
+            $originalUser = $token->getOriginalToken()->getUser();
+            if ($originalUser instanceof User) {
+                // The original user comes from the session: reload it to save it
+                $requestedBy = $this->em->getRepository(User::class)->find($originalUser->getId()) ?? $user;
+            }
+        }
+
+        if (!$this->isGranted('UNSUBSCRIBE', $messageRecipient)) {
+            $this->addFlash('error', $this->translator->trans('Message.Flash.unsubscribeImpossible'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        try {
+            $unsubscribeResult = $listUnsubscribeService->unsubscribe($messageRecipient, $requestedBy);
+        } catch (CannotUnsubscribeException) {
+            $this->addFlash('error', $this->translator->trans('Message.Flash.unsubscribeImpossible'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        if ($unsubscribeResult->redirectUrl !== null) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.unsubscribeInitiated'));
+
+            return new RedirectResponse($unsubscribeResult->redirectUrl);
+        }
+
+        // One-click: the request is sent in the background, its result is
+        // displayed in the quarantine once processed.
+        $this->addFlash('success', $this->translator->trans('Message.Flash.unsubscribePending'));
 
         return new RedirectResponse($this->referrer->get());
     }
