@@ -7,11 +7,13 @@ use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Entity\SenderRule;
+use App\Exception\CannotUnsubscribeException;
 use App\Form\ActionsFilterType;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
+use App\Service\ListUnsubscribeService;
 use App\Service\LogService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,6 +48,7 @@ class MessageController extends AbstractController
         Request $request,
         PaginatorInterface $paginator,
         MessageRecipientSearchRepository $messageRecipientSearchRepository,
+        ListUnsubscribeService $listUnsubscribeService,
         ?string $type = null
     ): Response {
         $subTitle = '';
@@ -199,10 +202,20 @@ class MessageController extends AbstractController
                 'distinct' => false,
             ]
         );
+
+        $unsubscribableRecipients = [];
+        foreach ($messagesRecipients as $messageRecipient) {
+            if ($this->isGranted('UNSUBSCRIBE', $messageRecipient)) {
+                $unsubscribableRecipients[] = $messageRecipient;
+            }
+        }
+        $unsubscribeStates = $listUnsubscribeService->getUnsubscribeStates($unsubscribableRecipients);
+
         return $this->render('message/index.html.twig', [
             'subTitle' => $subTitle,
             'messagesRecipients' => $messagesRecipients,
             'messageStatus' => $messageStatus,
+            'unsubscribeStates' => $unsubscribeStates,
             'filter_form' => $filterForm->createView()
         ]);
     }
@@ -225,8 +238,12 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/show/', name: 'message_show', methods: 'GET')]
-    public function showAction(int $partitionTag, string $mailId, int $rseqnum): Response
-    {
+    public function showAction(
+        int $partitionTag,
+        string $mailId,
+        int $rseqnum,
+        ListUnsubscribeService $listUnsubscribeService,
+    ): Response {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -266,10 +283,22 @@ class MessageController extends AbstractController
             );
         }
 
+        $listMetadata = null;
+        $unsubscribeMethods = null;
+        $lastUnsubscribeRequest = null;
+        if ($message->getIsMlist()) {
+            $listMetadata = $listUnsubscribeService->getMetadata($messageRecipient);
+            $unsubscribeMethods = $listUnsubscribeService->getUnsubscribeMethods($messageRecipient);
+            $lastUnsubscribeRequest = $listUnsubscribeService->getLastRequest($messageRecipient);
+        }
+
         return $this->render('message/show.html.twig', [
             'message' => $message,
             'messageRecipient' => $messageRecipient,
             'senderRules' => $senderRules,
+            'listMetadata' => $listMetadata,
+            'unsubscribeMethods' => $unsubscribeMethods,
+            'lastUnsubscribeRequest' => $lastUnsubscribeRequest,
         ]);
     }
 
@@ -473,6 +502,41 @@ class MessageController extends AbstractController
         $this->messageService->dispatchRelease($messageRecipient);
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
         $logService->addLog('restore', $mailId);
+
+        return new RedirectResponse($this->referrer->get());
+    }
+
+    /**
+     * Unsubscribe the recipient from the mailing list of the message.
+     */
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/unsubscribe', name: 'message_unsubscribe', methods: 'POST')]
+    public function unsubscribe(
+        MessageRecipient $messageRecipient,
+        Request $request,
+        ListUnsubscribeService $listUnsubscribeService,
+    ): Response {
+        if (!$this->isCsrfTokenValid('message_unsubscribe', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        if (!$this->isGranted('UNSUBSCRIBE', $messageRecipient)) {
+            $this->addFlash('error', $this->translator->trans('Message.Flash.unsubscribeImpossible'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        try {
+            $unsubscribeRequest = $listUnsubscribeService->unsubscribe($messageRecipient);
+        } catch (CannotUnsubscribeException) {
+            $this->addFlash('error', $this->translator->trans('Message.Flash.unsubscribeImpossible'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
+        if ($unsubscribeRequest->isPending()) {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.unsubscribePending'));
+        } else {
+            $this->addFlash('success', $this->translator->trans('Message.Flash.unsubscribeInitiated'));
+        }
 
         return new RedirectResponse($this->referrer->get());
     }
