@@ -33,14 +33,18 @@ final class UnsubscribeRequestFactory extends PersistentObjectFactory
     #[\Override]
     protected function initialize(): static
     {
-
-        return $this->instantiateWith(
-            Instantiator::withConstructor()->alwaysForce('createdAt'),
-        );
+        return $this
+            // ->afterInstantiate(function(UnsubscribeRequest $unsubscribeRequest): void {})
+            ;
     }
 
     public function forMessageRecipient(MessageRecipient $messageRecipient): self
     {
-        return $this->with(['messageRecipient' => $messageRecipient]);
+        return $this->with([
+            'partitionTag' => $messageRecipient->getPartitionTag(),
+            'mailId' => $messageRecipient->getMailId(),
+            'rseqnum' => $messageRecipient->getRseqnum(),
+            'address' => $messageRecipient->getAddress(),
+        ]);
     }
 }

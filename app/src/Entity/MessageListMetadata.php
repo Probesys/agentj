@@ -47,9 +47,23 @@ class MessageListMetadata
         return $this->partitionTag;
     }
 
+    public function setPartitionTag(int $partitionTag): static
+    {
+        $this->partitionTag = $partitionTag;
+
+        return $this;
+    }
+
     public function getMailId(): string
     {
         return $this->mailId;
+    }
+
+    public function setMailId(string $mailId): static
+    {
+        $this->mailId = $mailId;
+
+        return $this;
     }
 
     public function getMessage(): ?Message
@@ -57,9 +71,23 @@ class MessageListMetadata
         return $this->message;
     }
 
+    public function setMessage(?Message $message): static
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
     public function getListId(): ?string
     {
         return $this->listId;
+    }
+
+    public function setListId(?string $listId): static
+    {
+        $this->listId = $listId;
+
+        return $this;
     }
 
     public function getListUnsubscribe(): ?string
@@ -67,8 +95,22 @@ class MessageListMetadata
         return $this->listUnsubscribe;
     }
 
+    public function setListUnsubscribe(?string $listUnsubscribe): static
+    {
+        $this->listUnsubscribe = $listUnsubscribe;
+
+        return $this;
+    }
+
     public function getListUnsubscribePost(): ?string
     {
         return $this->listUnsubscribePost;
+    }
+
+    public function setListUnsubscribePost(?string $listUnsubscribePost): static
+    {
+        $this->listUnsubscribePost = $listUnsubscribePost;
+
+        return $this;
     }
 }

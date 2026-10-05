@@ -298,4 +298,11 @@ class BaseMessageRecipient
             || $this->getStatus() === MessageStatus::AUTHORIZED
             || $this->getStatus() === MessageStatus::RESTORED;
     }
+
+    public function getIdKey(): string
+    {
+        return $this->getPartitionTag()
+            . '-' . $this->getMailId()
+            . '-' . $this->getSmtpResp();
+    }
 }

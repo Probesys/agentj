@@ -397,6 +397,10 @@ body.sidebar-toggled footer.sticky-footer {
   z-index: 1060 !important;
 }
 
+#dialog-content {
+  max-width: min(500px, 80vw);
+}
+
 table thead tr {
   background-color: #ffffff;
 }

@@ -181,7 +181,7 @@ document.addEventListener("turbo:load", function () {
 
   $('#dialog-confirm').dialog({
     resizable: false,
-    height: 200,
+    height: 'auto',
     width: 'auto',
     autoOpen: false,
     modal: true,
@@ -192,7 +192,11 @@ document.addEventListener("turbo:load", function () {
           if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm")) {
             window.location.href = $(this).data("link-to-confirm");
           } else if ($(this).data('type-action-confirm') == 'form') {
-            $('#' + $(this).data('form-to-confirm')).submit();
+            const form = document.getElementById($(this).data('form-to-confirm'));
+            const confirmEvent = new CustomEvent('confirm:accepted', { cancelable: true });
+            if (form.dispatchEvent(confirmEvent)) {
+              form.submit();
+            }
           }
           $(this).dialog("close");
 
