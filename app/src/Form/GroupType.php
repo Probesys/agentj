@@ -79,6 +79,7 @@ class GroupType extends AbstractType
             ])
             ->add('active', null, [
                 'label' => new TranslatableMessage('Generics.fields.active'),
+                'data' => $options['data']->getActive() ?? true,
             ])
             ->add('quota', CollectionType::class, [
                 'entry_type' => QuotaType::class,

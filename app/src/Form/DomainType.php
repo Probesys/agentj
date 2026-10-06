@@ -38,6 +38,7 @@ class DomainType extends AbstractType
             ->add('active', null, [
                 'label' => new TranslatableMessage('Entities.Domain.fields.active'),
                 'required' => false,
+                'data' => $isEdit ? $options['data']->getActive() : true,
             ])
             ->add('wbRule', ChoiceType::class, [
                 'choices' => ['enabled', 'allow'],
