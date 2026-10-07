@@ -530,7 +530,7 @@ class MessageControllerTest extends WebTestCase
             'user' => $domainRecipient1[0],
             'senderRuleAddress' => $senderRuleAddress1,
             'type' => SenderRule::TYPE_USER,
-            'priority' => SenderRule::PRIORITY_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(0, $domainRule);
@@ -543,7 +543,7 @@ class MessageControllerTest extends WebTestCase
             'user' => $domainRecipient2[0],
             'senderRuleAddress' => $senderRuleAddress2,
             'type' => SenderRule::TYPE_USER,
-            'priority' => SenderRule::PRIORITY_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $domainRule);
@@ -780,7 +780,7 @@ class MessageControllerTest extends WebTestCase
             'user' => $domainRecipient1[0],
             'senderRuleAddress' => $senderRuleAddress1,
             'type' => SenderRule::TYPE_USER,
-            'priority' => SenderRule::PRIORITY_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
             'wb' => 'B',
         ]);
         self::assertCount(0, $domainRule);
@@ -793,7 +793,7 @@ class MessageControllerTest extends WebTestCase
             'user' => $domainRecipient2[0],
             'senderRuleAddress' => $senderRuleAddress2,
             'type' => SenderRule::TYPE_USER,
-            'priority' => SenderRule::PRIORITY_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
             'wb' => 'B',
         ]);
         self::assertCount(1, $domainRule);
