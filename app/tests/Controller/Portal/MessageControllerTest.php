@@ -19,7 +19,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
-class PortalMessageControllerTest extends WebTestCase
+class MessageControllerTest extends WebTestCase
 {
     use Factories;
     use FactoryHelper;
@@ -72,10 +72,9 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
@@ -120,17 +119,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmAuthorizedMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmAuthorize',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -162,10 +165,9 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
@@ -199,7 +201,7 @@ class PortalMessageControllerTest extends WebTestCase
             'token' => $token,
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
-            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
@@ -209,17 +211,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmAuthorizedMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmAuthorize',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -252,10 +258,9 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -290,10 +295,9 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -329,10 +333,9 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlRestore);
+        $this->client->request(Request::METHOD_POST, $urlRestore);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -377,17 +380,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmRestoreMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmRestore',
+                ['from' => $message->getFromAddr(), 'subject' => $message->getSubject()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -419,10 +426,9 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlRestore);
+        $this->client->request(Request::METHOD_POST, $urlRestore);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -456,7 +462,7 @@ class PortalMessageControllerTest extends WebTestCase
             'token' => $token,
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
-            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
@@ -466,17 +472,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmRestoreMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmRestore',
+                ['from' => $message->getFromAddr(), 'subject' => $message->getSubject()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -509,7 +519,6 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->client->request(Request::METHOD_GET, $urlRestore);
@@ -547,7 +556,6 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->client->request(Request::METHOD_GET, $urlRestore);
@@ -586,10 +594,9 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlBan);
+        $this->client->request(Request::METHOD_POST, $urlBan);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
@@ -634,17 +641,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmBannedMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmBan',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -676,10 +687,9 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlBan);
+        $this->client->request(Request::METHOD_POST, $urlBan);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
@@ -713,7 +723,7 @@ class PortalMessageControllerTest extends WebTestCase
             'token' => $token,
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
-            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
@@ -723,17 +733,21 @@ class PortalMessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
         $confirmContent = $crawler
-            ->filter('p[data-test="confirm-content"]')
+            ->filter('[data-test="confirm-content"]')
             ->each(fn($node) => trim($node->text()));
         $confirmButton = $crawler
-            ->filter('a[data-test="confirm-button"]')
+            ->filter('[data-test="confirm-button"]')
             ->each(fn($node) => trim($node->text()));
         self::assertSame(
-            $this->translator->trans('Message.Dialogs.confirmBannedMsgContent', locale: 'en'),
+            $this->translator->trans(
+                'Portal.Messages.confirmBan',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
             $confirmContent[0],
         );
         self::assertSame(
-            $this->translator->trans('Portal.Messages.confirmAction', locale: 'en'),
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
             $confirmButton[0],
         );
     }
@@ -766,7 +780,6 @@ class PortalMessageControllerTest extends WebTestCase
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getRseqnum(),
             'new' => 1,
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->client->request(Request::METHOD_GET, $urlBan);
@@ -804,7 +817,6 @@ class PortalMessageControllerTest extends WebTestCase
             'partitionTag' => $messageRecipient2->getPartitionTag(),
             'mailId' => $messageRecipient2->getMailId(),
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
-            'confirmed' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $this->client->request(Request::METHOD_GET, $urlBan);
