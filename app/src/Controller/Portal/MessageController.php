@@ -24,6 +24,7 @@ class MessageController extends AbstractController
     #[Route(
         path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/authorized',
         name: 'portal_message_authorized',
+        methods: ['GET', 'POST'],
     )]
     public function authorized(
         string $token,
@@ -32,17 +33,6 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
-        if (!$request->query->has('confirmed')) {
-            return $this->render('portal/messages/confirm.html.twig', [
-                'action' => 'authorized',
-                'token' => $token,
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rseqnum' => $rseqnum,
-                'new' => $request->query->has('new'),
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -77,21 +67,36 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        $result = $this->messageService->authorizeSenderForRecipient(
-            $messageRecipient,
-            Entity\SenderRule::TYPE_USER,
-        );
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $result = $this->messageService->authorizeSenderForRecipient(
+                $messageRecipient,
+                Entity\SenderRule::TYPE_USER,
+            );
 
-        if ($result) {
-            $this->logService->addLog('authorized', $mailId);
+            if ($result) {
+                $this->logService->addLog('authorized', $mailId);
+            }
+
+            return $this->render('portal/messages/authorized.html.twig');
         }
 
-        return $this->render('portal/messages/authorized.html.twig');
+        $from = $messageRecipient->getMessage()->getFromAddr();
+
+        return $this->render('portal/messages/confirm.html.twig', [
+            'action' => 'authorized',
+            'token' => $token,
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rseqnum' => $rseqnum,
+            'from' => $from,
+            'new' => $request->query->has('new'),
+        ]);
     }
 
     #[Route(
         path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/banned',
         name: 'portal_message_banned',
+        methods: ['GET', 'POST']
     )]
     public function banned(
         string $token,
@@ -100,17 +105,6 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
-        if (!$request->query->has('confirmed')) {
-            return $this->render('portal/messages/confirm.html.twig', [
-                'action' => 'banned',
-                'token' => $token,
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rseqnum' => $rseqnum,
-                'new' => $request->query->has('new'),
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -145,21 +139,36 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        $result = $this->messageService->banSenderForRecipient(
-            $messageRecipient,
-            Entity\SenderRule::TYPE_USER,
-        );
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $result = $this->messageService->banSenderForRecipient(
+                $messageRecipient,
+                Entity\SenderRule::TYPE_USER,
+            );
 
-        if ($result) {
-            $this->logService->addLog('banned', $mailId);
+            if ($result) {
+                $this->logService->addLog('banned', $mailId);
+            }
+
+            return $this->render('portal/messages/banned.html.twig');
         }
 
-        return $this->render('portal/messages/banned.html.twig');
+        $from = $messageRecipient->getMessage()->getFromAddr();
+
+        return $this->render('portal/messages/confirm.html.twig', [
+            'action' => 'banned',
+            'token' => $token,
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rseqnum' => $rseqnum,
+            'from' => $from,
+            'new' => $request->query->has('new'),
+        ]);
     }
 
     #[Route(
         path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/restore',
         name: 'portal_message_restore',
+        methods: ['GET', 'POST']
     )]
     public function restore(
         string $token,
@@ -168,17 +177,6 @@ class MessageController extends AbstractController
         int $rseqnum,
         Request $request,
     ): Response {
-        if (!$request->query->has('confirmed')) {
-            return $this->render('portal/messages/confirm.html.twig', [
-                'action' => 'restore',
-                'token' => $token,
-                'partitionTag' => $partitionTag,
-                'mailId' => $mailId,
-                'rseqnum' => $rseqnum,
-                'new' => $request->query->has('new'),
-            ]);
-        }
-
         $result = $this->messageService->decryptReleaseToken($token);
 
         if (!$result) {
@@ -216,10 +214,26 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($user, $messageRecipient);
 
-        $this->messageService->restore($messageRecipient);
-        $this->logService->addLog('restore', $mailId);
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $this->messageService->restore($messageRecipient);
+            $this->logService->addLog('restore', $mailId);
 
-        return $this->render('portal/messages/restore.html.twig');
+            return $this->render('portal/messages/restore.html.twig');
+        }
+
+        $from = $messageRecipient->getMessage()->getFromAddr();
+        $subject = $messageRecipient->getMessage()->getSubject();
+
+        return $this->render('portal/messages/confirm.html.twig', [
+            'action' => 'restore',
+            'token' => $token,
+            'partitionTag' => $partitionTag,
+            'mailId' => $mailId,
+            'rseqnum' => $rseqnum,
+            'from' => $from,
+            'subject' => $subject,
+            'new' => $request->query->has('new'),
+        ]);
     }
 
     private function checkMailAccess(Entity\User $user, Entity\MessageRecipient $messageRecipient): void
