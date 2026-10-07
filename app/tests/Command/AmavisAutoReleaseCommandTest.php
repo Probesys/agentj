@@ -200,7 +200,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
     }
 
-    public function testItSkipsOngoingReleasesAndRetriesExpiredOnes(): void
+    public function testExecuteSkipsOngoingReleasesAndRetriesExpiredOnes(): void
     {
         $domain = DomainFactory::createOne();
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
@@ -232,7 +232,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         self::assertNotNull($new->getAmavisReleaseStartedAt());
     }
 
-    public function testItProcessesMixedOutcomesInTheSameBatch(): void
+    public function testExecuteProcessesMixedOutcomesInTheSameBatch(): void
     {
         $domain = DomainFactory::createOne(['level' => 0]);
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
@@ -257,7 +257,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         self::assertNotNull($restored->getAmavisReleaseStartedAt());
     }
 
-    public function testItProcessesEveryBatchWithoutRetryingOngoingOrAlreadyDeliveredMessages(): void
+    public function testExecuteProcessesEveryBatchWithoutRetryingOngoingOrAlreadyDeliveredMessages(): void
     {
         $domain = DomainFactory::createOne();
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
@@ -299,7 +299,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         self::assertSame(MessageStatus::UNRELEASED, $inProgress->getStatus());
     }
 
-    public function testItQueuesTheNextBatchAfterTheReleaseJobs(): void
+    public function testExecuteQueuesTheNextBatchAfterTheReleaseJobs(): void
     {
         $domain = DomainFactory::createOne();
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
@@ -356,7 +356,7 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         }
     }
 
-    public function testRepeatedRecipientsAndSendersDoNotCauseNPlusOneSelects(): void
+    public function testExecuteAvoidsNPlusOneSelectsForRepeatedRecipientsAndSenders(): void
     {
         $domain = DomainFactory::createOne();
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
