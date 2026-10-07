@@ -47,7 +47,7 @@ class SenderRuleRepositoryTest extends KernelTestCase
         self::assertTrue($repository->isSenderAuthorizedForAutoRelease('Sender@Example.ORG', $recipientAddress));
     }
 
-    public function testAutoReleaseUsesTheSameRulePriorityAsTheRegularLookup(): void
+    public function testIsSenderAuthorizedForAutoReleaseUsesTheSameRulePriorityAsTheRegularLookup(): void
     {
         self::bootKernel();
         $domain = DomainFactory::createOne();
