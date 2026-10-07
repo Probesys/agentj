@@ -80,6 +80,8 @@ db-fixtures: ## Load the fixtures in the database
 translations: ## Update the translations from the code
 	$(CONSOLE) translation:extract --format=yaml --force --clean --sort=asc en
 	$(CONSOLE) translation:extract --format=yaml --force --clean --sort=asc fr
+	# Restore these files as keys are removed from them whereas they should not.
+	git restore app/translations/validators.*
 
 .PHONY: release
 release: ## Release a new version (take a VERSION argument)
