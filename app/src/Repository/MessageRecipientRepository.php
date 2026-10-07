@@ -44,6 +44,32 @@ class MessageRecipientRepository extends BaseRepository
     }
 
     /**
+     * Fetch only the next messages that can actually be processed. Unlike the
+     * paginated search, this does not count the entire msgrcpt table.
+     *
+     * @param int $limit Maximum number of recipients returned in one batch.
+     * @param \DateTimeImmutable $retryBefore Releases started before this instant can be retried.
+     * @return MessageRecipient[]
+     */
+    public function findForAutoRelease(int $limit, \DateTimeImmutable $retryBefore): array
+    {
+        return $this->createQueryBuilder('mr')
+            ->addSelect('m', 'recipient', 'sender')
+            ->innerJoin('mr.message', 'm')
+            ->innerJoin('mr.address', 'recipient')
+            ->innerJoin('m.senderAddress', 'sender')
+            ->where('mr.status = :status')
+            ->andWhere('(mr.amavisReleaseStartedAt IS NULL OR mr.amavisReleaseStartedAt < :retryBefore)')
+            ->andWhere('mr.ds != :alreadyDelivered')
+            ->setParameter('status', MessageStatus::UNRELEASED)
+            ->setParameter('retryBefore', $retryBefore)
+            ->setParameter('alreadyDelivered', DeliveryStatus::PASS)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @param null|array{timeNum: int, partitionTag: int, mailId: string, rseqnum: int} $cursor
      * @return MessageRecipient[]
      */

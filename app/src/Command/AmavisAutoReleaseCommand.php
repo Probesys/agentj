@@ -3,16 +3,20 @@
 namespace App\Command;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Address;
+use App\Entity\MessageRecipient;
+use App\Message\AmavisAutoRelease;
 use App\Repository\MessageRecipientRepository;
-use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\MessageService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand(
     name: 'agentj:auto-release-message',
@@ -24,11 +28,12 @@ class AmavisAutoReleaseCommand extends Command
 
     public function __construct(
         private MessageRecipientRepository $messageRecipientRepository,
-        private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private UserRepository $userRepository,
         private SenderRuleRepository $senderRuleRepository,
         private MessageService $messageService,
         private LockFactory $lockFactory,
+        private EntityManagerInterface $entityManager,
+        private MessageBusInterface $bus,
     ) {
         parent::__construct();
     }
@@ -44,18 +49,43 @@ class AmavisAutoReleaseCommand extends Command
             return Command::FAILURE;
         }
 
-        $unreleasedSearchQuery = $this->messageRecipientSearchRepository->getSearchQuery(
-            null,
-            messageStatus: MessageStatus::UNRELEASED,
-        );
-        $unreleasedSearchQuery->setMaxResults($this->batchSize);
+        try {
+            $messageRecipients = $this->messageRecipientRepository->findForAutoRelease(
+                $this->batchSize,
+                new \DateTimeImmutable('-10 minutes'),
+            );
+            $this->processBatch($messageRecipients);
+            $fullBatch = count($messageRecipients) === $this->batchSize;
+        } finally {
+            $lock->release();
+        }
 
-        $messageRecipients = $unreleasedSearchQuery->getResult();
+        if ($fullBatch) {
+            // Queue the next batch after this one's AmavisRelease messages.
+            // The shared worker can deliver these emails before looking for more.
+            $this->entityManager->clear();
+            $this->bus->dispatch(new AmavisAutoRelease());
+        }
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @param MessageRecipient[] $messageRecipients Recipients to process in this batch.
+     */
+    private function processBatch(array $messageRecipients): void
+    {
+        $recipientUsers = [];
+        $authorizedSenders = [];
 
         foreach ($messageRecipients as $messageRecipient) {
             $recipient = $messageRecipient->getAddress();
 
-            $recipientUser = $this->userRepository->findOneByAddress($recipient);
+            $recipientId = $recipient->getId();
+            if (!array_key_exists($recipientId, $recipientUsers)) {
+                $recipientUsers[$recipientId] = $this->userRepository->findForAutoRelease($recipient);
+            }
+            $recipientUser = $recipientUsers[$recipientId];
 
             $recipientOriginalUser = $recipientUser->getOriginalUser();
             if ($recipientOriginalUser) {
@@ -63,24 +93,6 @@ class AmavisAutoReleaseCommand extends Command
             }
 
             $recipientDomain = $recipientUser->getDomain();
-
-            $senderEmail = $messageRecipient->getMessage()->getSenderAddress()->getEmail();
-            $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
-                $senderEmail,
-                $recipient,
-            );
-
-            if (!$senderIsAuthorized) {
-                $fromAddress = $messageRecipient->getMessage()->getFromMimeAddress();
-
-                if ($fromAddress !== null) {
-                    $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
-                        $fromAddress->getAddress(),
-                        $recipient,
-                    );
-                }
-            }
-
             $humanAuthIsDisabled = !$recipientUser->isHumanAuthenticationEnabled();
 
             $spamLevel = $recipientDomain->getLevel();
@@ -88,21 +100,59 @@ class AmavisAutoReleaseCommand extends Command
             $isSpam = $messageRecipient->isSpamAtLevel($spamLevel);
             $isAuthorizedSendersSpam = $messageRecipient->isSpamAtLevel($authorizedSendersSpamLevel);
 
-            if ($senderIsAuthorized && !$isAuthorizedSendersSpam) {
+            $senderIsAuthorized = false;
+            if (!$isAuthorizedSendersSpam) {
+                $senderEmail = $messageRecipient->getMessage()->getSenderAddress()->getEmail();
+                $senderIsAuthorized = $this->isSenderAuthorized($senderEmail, $recipient, $authorizedSenders);
+
+                if (!$senderIsAuthorized) {
+                    $fromAddress = $messageRecipient->getMessage()->getFromMimeAddress();
+
+                    if ($fromAddress !== null) {
+                        $senderIsAuthorized = $this->isSenderAuthorized(
+                            $fromAddress->getAddress(),
+                            $recipient,
+                            $authorizedSenders,
+                        );
+                    }
+                }
+            }
+
+            if ($senderIsAuthorized) {
                 $this->messageService->dispatchRelease($messageRecipient, MessageStatus::AUTHORIZED);
             } elseif ($humanAuthIsDisabled && !$isSpam) {
                 $this->messageService->dispatchRelease($messageRecipient, MessageStatus::RESTORED);
             } elseif (!$isSpam) {
                 $messageRecipient->setStatus(MessageStatus::UNTREATED);
-                $this->messageRecipientRepository->save($messageRecipient);
+                $this->messageRecipientRepository->save($messageRecipient, flush: false);
             } else {
                 $messageRecipient->setStatus(MessageStatus::SPAMMED);
-                $this->messageRecipientRepository->save($messageRecipient);
+                $this->messageRecipientRepository->save($messageRecipient, flush: false);
             }
         }
 
-        $lock->release();
+        $this->entityManager->flush();
+    }
 
-        return Command::SUCCESS;
+    /**
+     * @param string $senderEmail Sender address to check.
+     * @param Address $recipient Recipient to authorize the sender for.
+     * @param array<int|string, array<string, bool>> $authorizedSenders Decisions cached for this batch.
+     */
+    private function isSenderAuthorized(
+        string $senderEmail,
+        Address $recipient,
+        array &$authorizedSenders,
+    ): bool {
+        $recipientId = $recipient->getId();
+        if (!isset($authorizedSenders[$recipientId][$senderEmail])) {
+            $isAuthorized = $this->senderRuleRepository->isSenderAuthorizedForAutoRelease(
+                $senderEmail,
+                $recipient,
+            );
+            $authorizedSenders[$recipientId][$senderEmail] = $isAuthorized;
+        }
+
+        return $authorizedSenders[$recipientId][$senderEmail];
     }
 }
