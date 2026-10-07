@@ -175,6 +175,44 @@ Entities.Message.virus: 'avec virus'
 Entities.Msgrcpt.fields.bspamLevel: 'Note de spam'
 Entities.Msgrcpt.labels.appliedRule: 'Informations sur le message'
 Entities.Msgrcpt.labels.infos: 'Informations sur le message'
+Entities.Msgrcpt.labels.showSpamDetails: 'Afficher le détail de la note de spam'
+Entities.Msgrcpt.labels.spamIndicatorDecreases: 'Diminue la note de spam'
+Entities.Msgrcpt.labels.spamIndicatorIncreases: 'Augmente la note de spam'
+Entities.Msgrcpt.labels.spamIndicators: 'Principaux indicateurs de spam'
+Entities.Msgrcpt.spamIndicators.dangerous_attachment: 'Type de pièce jointe potentiellement dangereux.'
+Entities.Msgrcpt.spamIndicators.dkim_invalid: 'La signature du message est absente ou invalide (DKIM invalide).'
+Entities.Msgrcpt.spamIndicators.dkim_valid: "Le message porte une signature valide du domaine de l'expéditeur (DKIM valide)."
+Entities.Msgrcpt.spamIndicators.dmarc_fail: "Le message ne respecte pas la politique du domaine de l'expéditeur (échec DMARC)."
+Entities.Msgrcpt.spamIndicators.dmarc_missing: "Le domaine de l'expéditeur n'a pas de politique anti-usurpation (pas de DMARC)."
+Entities.Msgrcpt.spamIndicators.dmarc_pass: "Le message respecte la politique du domaine de l'expéditeur (DMARC valide)."
+Entities.Msgrcpt.spamIndicators.freemail: 'Envoyé depuis un service de messagerie gratuit.'
+Entities.Msgrcpt.spamIndicators.known_spam: 'Le message correspond à un spam connu des bases collaboratives.'
+Entities.Msgrcpt.spamIndicators.learned_ham: 'Le contenu ressemble à des emails légitimes appris précédemment.'
+Entities.Msgrcpt.spamIndicators.learned_neutral: "Le contenu n'a pas pu être clairement classé à partir des emails appris précédemment."
+Entities.Msgrcpt.spamIndicators.learned_spam: 'Le contenu ressemble à des spams appris précédemment.'
+Entities.Msgrcpt.spamIndicators.link_blocklisted: 'Contient un lien vers un domaine connu pour le spam ou les logiciels malveillants.'
+Entities.Msgrcpt.spamIndicators.link_suspicious: 'Lien suspect détecté.'
+Entities.Msgrcpt.spamIndicators.mailing_list: 'Envoyé via une liste de diffusion.'
+Entities.Msgrcpt.spamIndicators.malformed_message: 'La structure ou les en-têtes du message sont incorrects ou incomplets.'
+Entities.Msgrcpt.spamIndicators.new_domain: 'Implique un nom de domaine enregistré récemment.'
+Entities.Msgrcpt.spamIndicators.other: 'Autres règles anti-spam.'
+Entities.Msgrcpt.spamIndicators.phishing: "Tentative d'hameçonnage suspectée."
+Entities.Msgrcpt.spamIndicators.sender_allowlisted: "L'expéditeur figure sur une liste d'autorisation."
+Entities.Msgrcpt.spamIndicators.sender_blocklisted: "L'expéditeur figure sur une liste de blocage."
+Entities.Msgrcpt.spamIndicators.sender_history: 'Ajustement basé sur les emails précédents de cet expéditeur.'
+Entities.Msgrcpt.spamIndicators.server_blocklisted: "Le serveur d'envoi figure sur une liste noire de spam."
+Entities.Msgrcpt.spamIndicators.server_good_reputation: "Le serveur d'envoi a une bonne réputation."
+Entities.Msgrcpt.spamIndicators.server_misconfigured: "Le serveur d'envoi semble mal configuré ou utilise une connexion résidentielle."
+Entities.Msgrcpt.spamIndicators.spammy_content: "Contenu de l'email suspect."
+Entities.Msgrcpt.spamIndicators.spf_error: "La validation SPF du domaine de l'expéditeur n'a pas pu aboutir."
+Entities.Msgrcpt.spamIndicators.spf_fail: "Le serveur d'envoi n'est pas autorisé par le domaine de l'expéditeur (échec SPF)."
+Entities.Msgrcpt.spamIndicators.spf_none: "Le domaine de l'expéditeur n'indique pas quels serveurs peuvent envoyer ses emails (pas de SPF)."
+Entities.Msgrcpt.spamIndicators.spf_pass: "Le serveur d'envoi est autorisé par le domaine de l'expéditeur (SPF valide)."
+Entities.Msgrcpt.spamIndicators.spf_softfail: "Le serveur d'envoi n'est probablement pas autorisé par le domaine de l'expéditeur (échec partiel SPF)."
+Entities.Msgrcpt.spamIndicators.spoofing: "Les informations de l'expéditeur semblent falsifiées ou incohérentes."
+Entities.Msgrcpt.spamIndicators.suspicious_formatting: 'Mise en forme inhabituelle (HTML uniquement, images, texte masqué…).'
+Entities.Msgrcpt.spamIndicators.tracking: 'Mécanisme de pistage détecté.'
+Entities.Msgrcpt.spamIndicators.trusted_relay: 'Expéditeur ou infrastructure de confiance.'
 Entities.Office365Connector.actions.add: 'Ajouter un connecteur Office365'
 Entities.Office365Connector.actions.edit: 'Editer le connecteur Office365'
 Entities.Office365Connector.fields.clientId: 'Client ID'

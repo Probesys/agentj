@@ -11,6 +11,7 @@ use App\Form\ActionsFilterType;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MessageRepository;
+use App\Repository\QuarantineRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
 use App\Util\Email;
@@ -230,8 +231,12 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/show/', name: 'message_show', methods: 'GET')]
-    public function showAction(int $partitionTag, string $mailId, int $rseqnum): Response
-    {
+    public function showAction(
+        int $partitionTag,
+        string $mailId,
+        int $rseqnum,
+        QuarantineRepository $quarantineRepository,
+    ): Response {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
             'mailId' => $mailId,
@@ -257,7 +262,8 @@ class MessageController extends AbstractController
         return $this->render('message/show.html.twig', [
             'message' => $message,
             'messageRecipient' => $messageRecipient,
-            'senderRules' => $senderRules
+            'senderRules' => $senderRules,
+            'spamIndicators' => $quarantineRepository->findSpamStatus($message)?->getIndicators() ?? [],
         ]);
     }
 

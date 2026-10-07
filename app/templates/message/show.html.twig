@@ -30,6 +30,35 @@
         </div>
         <div class="col-md-8">
             {{ messageRecipient.bspamLevel }}
+
+            {% if spamIndicators is not empty %}
+                <ul class="list-unstyled small mt-1 mb-2" aria-label="{{ 'Entities.Msgrcpt.labels.spamIndicators' | trans }}">
+                    {% for spamIndicator in spamIndicators %}
+                        {% if spamIndicator.increasesScore %}
+                            {% set badgeClass = 'badge-danger' %}
+                            {% set badgeTitle = 'Entities.Msgrcpt.labels.spamIndicatorIncreases' | trans %}
+                        {% elseif spamIndicator.decreasesScore %}
+                            {% set badgeClass = 'badge-success' %}
+                            {% set badgeTitle = 'Entities.Msgrcpt.labels.spamIndicatorDecreases' | trans %}
+                        {% else %}
+                            {% set badgeClass = 'badge-secondary' %}
+                            {% set badgeTitle = '' %}
+                        {% endif %}
+
+                        <li class="mb-1" title="{{ spamIndicator.ruleNames | join(', ') }}">
+                            {% if spamIndicator.formattedScore is not same as('') %}
+                                <span class="badge {{ badgeClass }}" title="{{ badgeTitle }}">
+                                    {{ spamIndicator.formattedScore }}
+                                </span>
+                            {% endif %}
+                            {{ spamIndicator.label | trans }}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <span class="text-muted">({{ spamIndicator.ruleNames | join(', ') }})</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
 
         {% if message.sendCaptcha > 0 and not message.isMlist %}

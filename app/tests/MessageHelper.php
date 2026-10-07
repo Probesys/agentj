@@ -39,6 +39,7 @@ trait MessageHelper
     /**
      * @param array<int, Address> $recipients
      * @param array<mixed> $messageAttributes
+     * @param array<string, string> $headers
      */
     private function setupMail(
         Address $sender,
@@ -47,6 +48,7 @@ trait MessageHelper
         ?string $body = null,
         ?int $status = null,
         ?array $messageAttributes = [],
+        ?array $headers = [],
     ): Message {
         $mailId = bin2hex(random_bytes(8));
 
@@ -69,6 +71,7 @@ trait MessageHelper
             'from' => $sender->getEmail(),
             'to' => $recipientsEmails,
             'body' => $body ?? null,
+            'headers' => $headers,
         ]);
 
         QuarantineFactory::new()->create([

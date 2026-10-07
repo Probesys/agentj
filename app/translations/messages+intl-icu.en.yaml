@@ -175,6 +175,44 @@ Entities.Message.virus: 'detected with a Virus'
 Entities.Msgrcpt.fields.bspamLevel: 'Spam rating'
 Entities.Msgrcpt.labels.appliedRule: 'Information about the message'
 Entities.Msgrcpt.labels.infos: 'Information about the message'
+Entities.Msgrcpt.labels.showSpamDetails: 'Show the spam rating details'
+Entities.Msgrcpt.labels.spamIndicatorDecreases: 'Decreases the spam rating'
+Entities.Msgrcpt.labels.spamIndicatorIncreases: 'Increases the spam rating'
+Entities.Msgrcpt.labels.spamIndicators: 'Main spam indicators'
+Entities.Msgrcpt.spamIndicators.dangerous_attachment: 'Potentially dangerous attachment type.'
+Entities.Msgrcpt.spamIndicators.dkim_invalid: 'The signature of the message is missing or invalid (DKIM invalid).'
+Entities.Msgrcpt.spamIndicators.dkim_valid: "The message carries a valid signature of the sender's domain (DKIM valid)."
+Entities.Msgrcpt.spamIndicators.dmarc_fail: "The message does not comply with the policy of the sender's domain (DMARC failed)."
+Entities.Msgrcpt.spamIndicators.dmarc_missing: "The sender's domain has no anti-spoofing policy (no DMARC)."
+Entities.Msgrcpt.spamIndicators.dmarc_pass: "The message complies with the policy of the sender's domain (DMARC passed)."
+Entities.Msgrcpt.spamIndicators.freemail: 'Sent from a free email service.'
+Entities.Msgrcpt.spamIndicators.known_spam: 'The message matches a known spam in collaborative databases.'
+Entities.Msgrcpt.spamIndicators.learned_ham: 'The content looks like legitimate emails learned previously.'
+Entities.Msgrcpt.spamIndicators.learned_neutral: 'The content could not be clearly classified from the emails learned previously.'
+Entities.Msgrcpt.spamIndicators.learned_spam: 'The content looks like spams learned previously.'
+Entities.Msgrcpt.spamIndicators.link_blocklisted: 'Contains a link to a domain known for spam or malware.'
+Entities.Msgrcpt.spamIndicators.link_suspicious: 'Suspicious link detected.'
+Entities.Msgrcpt.spamIndicators.mailing_list: 'Sent through a mailing list.'
+Entities.Msgrcpt.spamIndicators.malformed_message: 'The structure or the headers of the message are malformed or incomplete.'
+Entities.Msgrcpt.spamIndicators.new_domain: 'Involves a recently registered domain.'
+Entities.Msgrcpt.spamIndicators.other: 'Other anti-spam rules.'
+Entities.Msgrcpt.spamIndicators.phishing: 'Phishing attempt suspected.'
+Entities.Msgrcpt.spamIndicators.sender_allowlisted: 'The sender is on an allow list.'
+Entities.Msgrcpt.spamIndicators.sender_blocklisted: 'The sender is on a block list.'
+Entities.Msgrcpt.spamIndicators.sender_history: 'Adjustment based on the previous emails of this sender.'
+Entities.Msgrcpt.spamIndicators.server_blocklisted: 'The sending server is listed on a spam blocklist.'
+Entities.Msgrcpt.spamIndicators.server_good_reputation: 'The sending server has a good reputation.'
+Entities.Msgrcpt.spamIndicators.server_misconfigured: 'The sending server looks misconfigured or uses a residential connection.'
+Entities.Msgrcpt.spamIndicators.spammy_content: 'Suspicious email content.'
+Entities.Msgrcpt.spamIndicators.spf_error: "The SPF validation of the sender's domain could not be completed."
+Entities.Msgrcpt.spamIndicators.spf_fail: "The sending server is not authorized by the sender's domain (SPF failed)."
+Entities.Msgrcpt.spamIndicators.spf_none: "The sender's domain does not specify which servers can send its emails (no SPF)."
+Entities.Msgrcpt.spamIndicators.spf_pass: "The sending server is authorized by the sender's domain (SPF passed)."
+Entities.Msgrcpt.spamIndicators.spf_softfail: "The sending server is probably not authorized by the sender's domain (SPF soft fail)."
+Entities.Msgrcpt.spamIndicators.spoofing: 'The sender information looks forged or inconsistent.'
+Entities.Msgrcpt.spamIndicators.suspicious_formatting: 'Unusual formatting (HTML only, images, hidden text…).'
+Entities.Msgrcpt.spamIndicators.tracking: 'Tracking mechanism detected.'
+Entities.Msgrcpt.spamIndicators.trusted_relay: 'Trusted sender or infrastructure.'
 Entities.Office365Connector.actions.add: 'Add Office365 connector'
 Entities.Office365Connector.actions.edit: 'Edit Office365 connector'
 Entities.Office365Connector.fields.clientId: 'Client ID'
