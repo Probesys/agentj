@@ -164,10 +164,18 @@ Entities.Message.isMailingList: 'Mailing liste ? '
 Entities.Message.labels.infos: 'Informations sur les refus'
 Entities.Message.labels.preview: 'Aperçu du message'
 Entities.Message.labels.reason: 'Type de refus'
+Entities.Message.lastUnsubscribeRequest: 'Dernière demande de désabonnement'
+Entities.Message.listId: 'Identifiant de la liste'
+Entities.Message.listIdUnknown: 'Non renseigné'
 Entities.Message.noBlockedMessages: 'Aucun message bloqué'
 Entities.Message.restored: Récupérés
 Entities.Message.spamLevel: Note
 Entities.Message.spammedDetect: 'spams détectés automatiquement'
+Entities.Message.unsubscribeMethod: Désabonnement
+Entities.Message.unsubscribeMethods.https: 'Page web'
+Entities.Message.unsubscribeMethods.mailto: Email
+Entities.Message.unsubscribeMethods.none: 'Non disponible'
+Entities.Message.unsubscribeMethods.one-click: 'Automatique (one-click)'
 Entities.Message.untreated: 'Non traités'
 Entities.Message.virus: 'avec virus'
 Entities.Msgrcpt.fields.bspamLevel: 'Note de spam'
@@ -404,6 +412,8 @@ Message.Actions.MarkAsSpam: 'Marquer comme spam'
 Message.Actions.Restore: Récupérer
 Message.Actions.RestoreMessage: 'Récupérer le message'
 Message.Actions.Unlock: Débloquer
+Message.Actions.Unsubscribe: 'Se désabonner de la liste'
+Message.Actions.UnsubscribeRetry: 'Relancer le désabonnement'
 Message.Actions.list: Actions
 Message.Actions.massiveActionContent: 'Êtes-vous sûr de vouloir effectuer cette action sur tous les éléments sélectionnés ?'
 Message.Captcha.defaultMailContent: "Bonjour,<br /><br /> Vous avez tenté d'envoyer un mail à destination : [EMAIL_DEST] <br /><br /> Pour des raisons de sécurité nous sommes obligé de vérifier votre email. <br /><br /> Merci de confirmer votre email en cliquant sur le lien suivant : <br /> <a href='[URL_HUMAN_AUTHENTICATION]'>[URL_HUMAN_AUTHENTICATION]</a> <br /><br /> Merci et bonne journée "
@@ -442,6 +452,11 @@ Message.Dialogs.confirmRemoveUserFromGroupContent: 'Êtes-vous sûr de vouloir e
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Supprimer du groupe ?'
 Message.Dialogs.confirmRestoreMsgContent: 'Êtes-vous sur de vouloir récupérer le message ?'
 Message.Dialogs.confirmRestoreMsgtitle: 'Récupérer le message'
+Message.Dialogs.confirmUnsubscribeContent: 'Voulez-vous vous désabonner de cette liste de diffusion ? Vous ne recevrez plus ses messages.'
+Message.Dialogs.confirmUnsubscribeTarget.https: 'Vous allez être dirigé vers la page :'
+Message.Dialogs.confirmUnsubscribeTarget.mailto: 'Votre messagerie va s’ouvrir avec un email de désabonnement à envoyer à :'
+Message.Dialogs.confirmUnsubscribeTarget.one-click: 'Une demande de désabonnement va être envoyée à :'
+Message.Dialogs.confirmUnsubscribeTitle: 'Se désabonner de la liste'
 Message.Flash.checkMailUnsuccessful: 'Cette adresse email semble être invalide, ou a déjà été validée.'
 Message.Flash.connectionKo: 'Connexion échouée'
 Message.Flash.connectionOk: 'Connexion établie'
@@ -464,6 +479,8 @@ Message.Flash.ruleUpdated: 'Règle modifiée !'
 Message.Flash.saved: 'Les changements ont été enregistrés.'
 Message.Flash.senderAuthorized: "L'adresse est désormais autorisée"
 Message.Flash.senderBanned: "L'adresse est désormais bannie"
+Message.Flash.unsubscribeInitiated: 'Terminez le désabonnement sur le site de la liste ou dans votre client mail.'
+Message.Flash.unsubscribePending: 'Votre demande de désabonnement est en cours d’envoi à la liste.'
 Message.HumanAuthentication.toVerify.content: 'Merci de confirmer votre adresse email en la saisissant ci-dessous.'
 Message.HumanAuthentication.toVerify.email: 'Adresse email'
 Message.HumanAuthentication.toVerify.submit: Valider
@@ -477,6 +494,10 @@ Message.Report.defaultMailSubject: 'Messages en attente sur AgentJ pour '
 Message.Sender: Expéditeur
 Message.Status.title: Statut
 Message.Toast.defaultTitle: Information
+Message.Unsubscribe.status.failed: 'Échec du désabonnement le {date}'
+Message.Unsubscribe.status.initiated: 'Désabonnement initié le {date}'
+Message.Unsubscribe.status.pending: 'Désabonnement en cours d’envoi (demandé le {date})'
+Message.Unsubscribe.status.sent: 'Désabonnement envoyé le {date}'
 Message.http.403.description: "Vous n'avez pas les droits suffisants pour afficher cette page."
 Message.http.403.title: 'Accès non autorisé'
 Message.http.404.description: "La page demandée n'a pas été trouvée. Vérifiez l'url ou retournez sur la page d'accueil."

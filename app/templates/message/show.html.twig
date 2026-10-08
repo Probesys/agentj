@@ -71,6 +71,40 @@
                 {{ 'Generics.labels.no' | trans() }}
             {% endif %}
         </div>
+
+        {% if message.isMlist %}
+            <div class="col-md-4">
+                {{ 'Entities.Message.listId' | trans }}
+            </div>
+            <div class="col-md-8">
+                {{ listMetadata.listId ?? 'Entities.Message.listIdUnknown' | trans }}
+            </div>
+            <div class="col-md-4">
+                {{ 'Entities.Message.unsubscribeMethod' | trans }}
+            </div>
+            <div class="col-md-8">
+                {% if unsubscribeMethods %}
+                    {% set unsubscribeMethod = unsubscribeMethods.preferredMethod %}
+                    {{ ('Entities.Message.unsubscribeMethods.' ~ unsubscribeMethod) | trans }}
+                    <br>
+                    <span class="text-break">
+                        {{ unsubscribeMethod == 'mailto' ? unsubscribeMethods.mailtoAddress : unsubscribeMethods.httpsUrl }}
+                    </span>
+                {% else %}
+                    {{ 'Entities.Message.unsubscribeMethods.none' | trans }}
+                {% endif %}
+            </div>
+            {% if lastUnsubscribeRequest %}
+                <div class="col-md-4">
+                    {{ 'Entities.Message.lastUnsubscribeRequest' | trans }}
+                </div>
+                <div class="col-md-8">
+                    {{ ('Message.Unsubscribe.status.' ~ lastUnsubscribeRequest.status) | trans({
+                        'date': lastUnsubscribeRequest.createdAt | format_date('short'),
+                    }) }}
+                </div>
+            {% endif %}
+        {% endif %}
         <div class="col-md-4">
             {{ 'Message.Status.title' | trans }}
         </div>
