@@ -15,10 +15,11 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
-class PortalMessageControllerTest extends WebTestCase
+class MessageControllerTest extends WebTestCase
 {
     use Factories;
     use FactoryHelper;
@@ -29,6 +30,7 @@ class PortalMessageControllerTest extends WebTestCase
     private KernelBrowser $client;
     private UrlGeneratorInterface $urlGenerator;
     private MessageService $messageService;
+    private TranslatorInterface $translator;
 
     protected function setUp(): void
     {
@@ -39,6 +41,7 @@ class PortalMessageControllerTest extends WebTestCase
         $container = static::getContainer();
         $this->urlGenerator = $container->get(UrlGeneratorInterface::class);
         $this->messageService = $container->get(MessageService::class);
+        $this->translator = $container->get(TranslatorInterface::class);
     }
 
     public function testUserCanAuthorizeItsMessageFromReport(): void
@@ -71,12 +74,68 @@ class PortalMessageControllerTest extends WebTestCase
             'new' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmAuthorization(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'new' => 1,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmAuthorize',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCanAuthorizeItsMessageFromReportOldVersion(): void
@@ -108,12 +167,67 @@ class PortalMessageControllerTest extends WebTestCase
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmAuthorizationFromReportOldVersion(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmAuthorize',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCannotAuthorizeMessageFromOtherUser(): void
@@ -146,7 +260,7 @@ class PortalMessageControllerTest extends WebTestCase
             'new' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -183,7 +297,7 @@ class PortalMessageControllerTest extends WebTestCase
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlAuthorize);
+        $this->client->request(Request::METHOD_POST, $urlAuthorize);
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
@@ -221,12 +335,68 @@ class PortalMessageControllerTest extends WebTestCase
             'new' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlRestore);
+        $this->client->request(Request::METHOD_POST, $urlRestore);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmRestore(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_restore', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'new' => 1,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmRestore',
+                ['from' => $message->getFromAddr(), 'subject' => $message->getSubject()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCanRestoreMessageFromReportOldVersion(): void
@@ -258,12 +428,67 @@ class PortalMessageControllerTest extends WebTestCase
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlRestore);
+        $this->client->request(Request::METHOD_POST, $urlRestore);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmRestoreFromReportOldVersion(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_restore', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmRestore',
+                ['from' => $message->getFromAddr(), 'subject' => $message->getSubject()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCannotRestoreMessageFromOtherUser(): void
@@ -371,12 +596,68 @@ class PortalMessageControllerTest extends WebTestCase
             'new' => 1,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlBan);
+        $this->client->request(Request::METHOD_POST, $urlBan);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmBannishment(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getRseqnum(),
+            'new' => 1,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmBan',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCanBanItsMessageFromReportOldVersion(): void
@@ -408,12 +689,67 @@ class PortalMessageControllerTest extends WebTestCase
             'rseqnum' => $messageRecipient2->getAddress()->getId(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->client->request(Request::METHOD_GET, $urlBan);
+        $this->client->request(Request::METHOD_POST, $urlBan);
 
         self::assertResponseIsSuccessful();
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+    }
+
+    public function testUserHasToConfirmBannishmentFromReportOldVersion(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+        $token = $this->messageService->getReleaseToken($message, $recipient2);
+        $urlAuthorize = $this->urlGenerator->generate('portal_message_banned', [
+            'token' => $token,
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+            'rseqnum' => $messageRecipient2->getAddress()->getId(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $crawler = $this->client->request(Request::METHOD_GET, $urlAuthorize);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient2->getStatus());
+        $confirmContent = $crawler
+            ->filter('[data-test="confirm-content"]')
+            ->each(fn($node) => trim($node->text()));
+        $confirmButton = $crawler
+            ->filter('[data-test="confirm-button"]')
+            ->each(fn($node) => trim($node->text()));
+        self::assertSame(
+            $this->translator->trans(
+                'Portal.Messages.confirmBan',
+                ['from' => $message->getFromAddr()],
+                locale: 'en',
+            ),
+            $confirmContent[0],
+        );
+        self::assertSame(
+            $this->translator->trans('Portal.Messages.confirm', locale: 'en'),
+            $confirmButton[0],
+        );
     }
 
     public function testUserCannotBanMessageFromOtherUser(): void

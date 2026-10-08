@@ -514,6 +514,10 @@ Portal.Messages.authorized.backToMessages: 'Voir mes mails autorisés'
 Portal.Messages.authorized.senderAuthorized: 'L’adresse est désormais autorisée.'
 Portal.Messages.banned.backToMessages: 'Voir mes mails bannis'
 Portal.Messages.banned.senderBanned: "L'adresse est désormais bannie."
+Portal.Messages.confirm: "Confirmer"
+Portal.Messages.confirmAuthorize: "Vous êtes sur le point d’autoriser l’expéditeur {from}."
+Portal.Messages.confirmBan: "Vous êtes sur le point de bannir l’expéditeur {from}."
+Portal.Messages.confirmRestore: "Vous êtes sur le point de récupérer l’email « {subject} » de l’expéditeur {from}."
 Portal.Messages.restore.backToMessages: 'Voir mes mails récupérés'
 Portal.Messages.restore.messageRestored: 'Message récupéré avec succès.'
 Search.AdvancedFilter: 'Filtres avancés'

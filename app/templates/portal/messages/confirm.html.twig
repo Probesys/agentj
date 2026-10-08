@@ -1,0 +1,53 @@
+{% extends 'base_security.html.twig' %}
+
+{% block body %}
+    <form
+        method='POST'
+        action="{{ path('portal_message_' ~ action, {
+            token: token,
+            partitionTag: partitionTag,
+            mailId: mailId,
+            rseqnum: rseqnum,
+            new: new ? 1 : 0,
+        }) }}"
+    >
+        <div class="h-100 ">
+            <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+                <div>
+                    <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" alt="AgentJ">
+                </div>
+
+                <p data-test="confirm-content">
+                    {% if action == 'authorized' %}
+                        {{ 'Portal.Messages.confirmAuthorize' | trans({
+                            '{from}': from,
+                        }) }}
+                    {% elseif action == 'banned' %}
+                        {{ 'Portal.Messages.confirmBan' | trans({
+                            '{from}': from,
+                        }) }}
+                    {% elseif action == 'restore' %}
+                        {{ 'Portal.Messages.confirmRestore' | trans({
+                            '{from}': from,
+                            '{subject}': subject,
+                        }) }}
+                    {% endif %}
+                </p>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    data-test="confirm-button"
+                >
+                    {{ 'Portal.Messages.confirm' | trans }}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <style>
+        img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}
