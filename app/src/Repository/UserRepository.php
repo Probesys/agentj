@@ -94,6 +94,25 @@ class UserRepository extends BaseRepository
     }
 
     /**
+     * Load the recipient, its original user (if any), and their domains.
+     *
+     * @param Address $address Recipient address to look up.
+     * @return ?User
+     */
+    public function findForAutoRelease(Address $address): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->addSelect('original', 'domain', 'originalDomain')
+            ->leftJoin('u.originalUser', 'original')
+            ->leftJoin('u.domain', 'domain')
+            ->leftJoin('original.domain', 'originalDomain')
+            ->where('u.email = :email')
+            ->setParameter('email', $address->getEmail())
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
      * @return User[]
      */
     public function findUserAndAliasesByAddress(Address $address): array
