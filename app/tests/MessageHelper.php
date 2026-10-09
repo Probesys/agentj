@@ -115,13 +115,13 @@ trait MessageHelper
         User $recipient,
         ?string $rule = 'accept',
         ?int $priority = SenderRule::PRIORITY_USER,
-    ): void {
+    ): SenderRule {
         $senderRuleAddress = RuleAddressFactory::new()->create([
             'priority' => 6,
             'email' => $senderAddress,
         ]);
 
-        SenderRuleFactory::new()->create([
+        return SenderRuleFactory::new()->create([
             'user' => $recipient,
             'senderRuleAddress' => $senderRuleAddress,
             'wb' => $rule,

@@ -7,6 +7,7 @@ use App\Entity\Group;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Repository\GroupRepository;
+use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -16,6 +17,7 @@ class UserService
         private EntityManagerInterface $em,
         private UserRepository $userRepository,
         private GroupRepository $groupRepository,
+        private SenderRuleRepository $senderRuleRepository,
     ) {
     }
 
@@ -29,8 +31,10 @@ class UserService
         $defaultGroup = $this->groupRepository->getMainUserGroup($user);
 
         $policy = $defaultGroup ? $defaultGroup->getPolicy() : $user->getDomain()->getPolicy();
+
         $user->setPolicy($policy);
         $this->em->persist($user);
+
         $aliases = $user->getAliases();
         foreach ($aliases as $alias) {
             $alias->setPolicy($policy);
@@ -65,11 +69,12 @@ class UserService
     public function syncUserAndAliases(User $user): void
     {
         $parentUser = $user->getOriginalUser();
+
         if ($parentUser) {
-            // If there is a parent, it's an alias.
+            // If there is a parent, the user passed in argument is an alias.
             // We update this user using groups and rules from parent.
             $this->updateGroups($user, $parentUser->getGroups()->toArray());
-            $this->updateUserAndAliasPolicy($parentUser);
+            // $this->updateUserAndAliasPolicy($parentUser);
             $this->updateSenderRules($user, $parentUser->getSenderRules()->toArray());
         } else {
             // Otherwise it's an original user, so we update all its aliases.
@@ -81,17 +86,18 @@ class UserService
                 $alias->setPolicy($user->getPolicy());
 
                 $this->updateGroups($alias, $originalUserGroups);
-                $this->updateUserAndAliasPolicy($alias);
+                // $this->updateUserAndAliasPolicy($alias);
                 $this->updateSenderRules($alias, $originalUserSenderRules);
 
                 $this->em->persist($alias);
             }
         }
+        $this->updateUserAndAliasPolicy($user);
 
         $this->em->flush();
     }
 
-        /**
+    /**
      * @param array<Group> $userGroups
      */
     private function updateGroups(User $user, array $userGroups): void
@@ -125,42 +131,38 @@ class UserService
     private function updateSenderRules(User $user, array $userSenderRules): void
     {
         $existingRules = $user->getSenderRules()->toArray();
-        $existingMap = [];
-        foreach ($existingRules as $rule) {
-            $existingMap[$this->senderRuleKey($rule)] = $rule;
-        }
 
-        $sourceMap = [];
-        foreach ($userSenderRules as $rule) {
-            $sourceMap[$this->senderRuleKey($rule)] = $rule;
+        $rulesToAdd = array_udiff(
+            $userSenderRules,
+            $existingRules,
+            fn(SenderRule $a, SenderRule $b) => $this->senderRuleKey($a) <=> $this->senderRuleKey($b),
+        );
+
+        $rulesToRemove = array_udiff(
+            $existingRules,
+            $userSenderRules,
+            fn(SenderRule $a, SenderRule $b) => $this->senderRuleKey($a) <=> $this->senderRuleKey($b),
+        );
+
+        // Add copies of missing rules.
+        foreach ($rulesToAdd as $rule) {
+            $newRule = SenderRule::copy($user, $rule);
+            $this->em->persist($newRule);
+            $user->addSenderRule($newRule);
         }
 
         // Remove rules that shouldn't exist on this user.
-        foreach ($existingRules as $existingRule) {
-            $key = $this->senderRuleKey($existingRule);
-
-            if (!isset($sourceMap[$key])) {
-                $user->removeSenderRule($existingRule);
-                $this->em->remove($existingRule);
-            }
-        }
-
-        // Add copies of missing rules.
-        foreach ($sourceMap as $key => $sourceRule) {
-            $existingRule = $existingMap[$this->senderRuleKey($sourceRule)] ?? null;
-
-            if ($existingRule === null) {
-                // As a SenderRule is associated to a unique User, we have to clone it and associate to new User.
-                $newRule = new SenderRule($user, $sourceRule->getSenderRuleAddress());
-                $newRule->setPriority($sourceRule->getPriority());
-                $newRule->setWb($sourceRule->getWb());
-
-                $this->em->persist($newRule);
-                $user->addSenderRule($newRule);
-            }
+        foreach ($rulesToRemove as $rule) {
+            $this->senderRuleRepository->remove($rule);
         }
     }
 
+    /**
+     * Compute a key to compare SenderRules.
+     *
+     * User ID is not part of that key, to be able to compare
+     * SenderRules between users.
+     */
     private function senderRuleKey(SenderRule $rule): string
     {
         return sprintf(
