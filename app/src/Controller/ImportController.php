@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
-use App\Controller\Traits\ControllerCommonTrait;
 use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Form\ImportType;
 use App\Service\GroupService;
 use App\Service\Referrer;
+use App\Service\UserService;
 use App\Util\Text;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +25,7 @@ class ImportController extends AbstractController
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
+        private UserService $userService,
         private GroupService $groupService,
         private Referrer $referrer,
     ) {
@@ -341,6 +342,9 @@ class ImportController extends AbstractController
                                         $user->setOriginalUser($originalUser);
                                         $user->setPolicy($originalUser->getPolicy());
                                         $em->persist($user);
+
+                                        $this->userService->syncUserAndAliases($user);
+
                                         $emails[$user->getEmail()] = $user->getEmail();
                                     }
                                 } else {

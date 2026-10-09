@@ -597,7 +597,9 @@ class UserControllerTest extends WebTestCase
         self::assertSame($aliasEmail, $newAlias->getUsername());
         self::assertSame($domain->getId(), $newAlias->getDomain()?->getId());
         self::assertSame($user->getId(), $newAlias->getOriginalUser()?->getId());
-        self::assertSame($user->getPolicy()?->getId(), $newAlias->getPolicy()?->getId());
+        // By default take higher priority domain's policy, and if none, user's policy.
+        // Here, there is a policy associated to the domain. That's the one used.
+        self::assertSame($domain->getPolicy()?->getId(), $newAlias->getPolicy()?->getId());
         $this->refresh($user);
         self::assertCount(1, $user->getAliases());
     }
@@ -673,8 +675,7 @@ class UserControllerTest extends WebTestCase
         self::assertSame($senderRule->getSenderRuleAddress(), $aliasSenderRule->getSenderRuleAddress());
         self::assertSame($senderRule->getPriority(), $aliasSenderRule->getPriority());
         // The rule is still associated to the original user
-        $em = self::getContainer()->get('doctrine')->getManager();
-        $em->refresh($sender);
+        $this->refresh($sender);
         self::assertSame(1, $recipient->getSenderRules()->count());
         $userSenderRule = $recipient->getSenderRules()->first();
         self::assertSame($senderRule, $userSenderRule);

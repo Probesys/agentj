@@ -7,6 +7,7 @@ use App\Entity\Group;
 use App\Entity\Office365Connector;
 use App\Entity\User;
 use App\Service\RuleAddressService;
+use App\Service\UserService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -33,8 +34,10 @@ class Office365ImportCommand extends Command
     private ClientCredentialContext $tokenRequestContext;
     private GraphServiceClient $graphServiceClient;
 
-    public function __construct(private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private UserService $userService,
+    ) {
         parent::__construct();
     }
 
@@ -171,6 +174,8 @@ class Office365ImportCommand extends Command
                 $aliases = $this->addAliases($user, $graphUser->getProxyAddresses());
                 $nbAliasCreated += count($aliases);
             }
+
+            $this->userService->syncUserAndAliases($user);
 
             $this->em->persist($user);
             $this->em->flush();

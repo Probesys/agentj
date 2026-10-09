@@ -741,4 +741,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     {
         return in_array('ROLE_SUPER_ADMIN', $this->getRoles());
     }
+
+    /**
+     * Return whether the user is an alias or not.
+     */
+    public function isAlias(): bool
+    {
+        return $this->getOriginalUser() !== null;
+    }
 }
