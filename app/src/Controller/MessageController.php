@@ -554,7 +554,10 @@ class MessageController extends AbstractController
 
         $this->checkMailAccess($messageRecipient);
 
-        if ($this->isGranted('ROLE_ADMIN')) {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getEmail() !== $messageRecipient->getAddress()->getEmail()) {
             if (!$request->query->getBoolean('warned', false)) {
                 return $this->render('message/content_warning.html.twig', [
                     'partitionTag' => $partitionTag,
@@ -607,10 +610,22 @@ class MessageController extends AbstractController
         $htmlBody = $email->getHtmlBody();
         $htmlBody = $this->sanitizer->sanitize($htmlBody);
 
-        if ($this->isGranted('ROLE_ADMIN')) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-            $this->logAction($currentUser, $messageRecipient);
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getEmail() !== $messageRecipient->getAddress()->getEmail()) {
+            $logContent = sprintf(
+                "recipient=%s user=%s (%d)",
+                $messageRecipient->getAddress()->getEmail(),
+                $user->getUserIdentifier(),
+                $user->getId(),
+            );
+
+            $this->logService->addLog(
+                'message content displayed',
+                $messageRecipient->getMailId(),
+                $logContent,
+            );
         }
 
         return $this->render('message/iframe_content.html.twig', [
@@ -710,21 +725,5 @@ class MessageController extends AbstractController
             'releaseStartedAt' => $messageRecipient->getAmavisReleaseStartedAt(),
             'releaseEndedAt' => $messageRecipient->getAmavisReleaseEndedAt(),
         ]);
-    }
-
-    private function logAction(User $user, MessageRecipient $messageRecipient): void
-    {
-        $logContent = sprintf(
-            "recipient=%s user=%s (%d)",
-            $messageRecipient->getAddress()->getEmail(),
-            $user->getUserIdentifier(),
-            $user->getId(),
-        );
-
-        $this->logService->addLog(
-            'message content displayed',
-            $messageRecipient->getMailId(),
-            $logContent,
-        );
     }
 }

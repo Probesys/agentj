@@ -7,13 +7,13 @@ use App\Entity\SenderRule;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
-use App\Tests\LogHelper;
 use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
 use DateInterval;
@@ -22,6 +22,7 @@ use DateTimeZone;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -30,7 +31,6 @@ class MessageControllerTest extends WebTestCase
 {
     use Factories;
     use FactoryHelper;
-    use LogHelper;
     use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
@@ -296,11 +296,10 @@ class MessageControllerTest extends WebTestCase
 
     public function testUserCanDisplayMatchingRuleEnvelopeAddress(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $this->client->loginUser($recipient);
         $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
         $mailingListSender = UserFactory::new()->user($otherDomain)->create([
             'email' => $mailingListEmail,
@@ -316,7 +315,7 @@ class MessageControllerTest extends WebTestCase
         $this->createSenderRule($addrS->getEmail(), $recipient, 'accept');
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $client->request(Request::METHOD_GET, $url);
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
         $highestPrioRuleEmail = $crawler
@@ -331,11 +330,10 @@ class MessageControllerTest extends WebTestCase
 
     public function testUserCanDisplayMatchingRuleFromAddress(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $this->client->loginUser($recipient);
         $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
         $mailingListSender = UserFactory::new()->user($otherDomain)->create([
             'email' => $mailingListEmail,
@@ -352,7 +350,7 @@ class MessageControllerTest extends WebTestCase
         $this->createSenderRule($addrS->getEmail(), $recipient, 'accept', SenderRule::PRIORITY_USER);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $client->request(Request::METHOD_GET, $url);
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
         $highestPrioRuleEmail = $crawler
@@ -368,11 +366,10 @@ class MessageControllerTest extends WebTestCase
 
     public function testUserDoesNotDisplayEnvelopeFromIfIdenticalToFromAddress(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $this->client->loginUser($recipient);
         $email = 'address@' . $otherDomain->getDomain();
         $sender = UserFactory::new()->user($otherDomain)->create([
             'email' => $email,
@@ -385,7 +382,7 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $client->request(Request::METHOD_GET, $url);
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
         $envelopeFromAddress = $crawler
@@ -401,11 +398,10 @@ class MessageControllerTest extends WebTestCase
 
     public function testUserDisplaysEnvelopeFromIfNotIdenticalToFromAddress(): void
     {
-        $client = static::createClient();
         $domain = DomainFactory::createOne();
         $otherDomain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        $client->loginUser($recipient);
+        $this->client->loginUser($recipient);
         $mailingListEmail = 'my-list@' . $otherDomain->getDomain();
         $email = 'address@' . $otherDomain->getDomain();
         $mailingListSender = UserFactory::new()->user($otherDomain)->create([
@@ -419,7 +415,7 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $client->request(Request::METHOD_GET, $url);
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
         $envelopeFromAddress = $crawler
@@ -1733,7 +1729,13 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin([$domain])->create();
         $this->client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            subject: 'test subject',
+            body: 'test body',
+        );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
 
@@ -1756,7 +1758,31 @@ class MessageControllerTest extends WebTestCase
         );
     }
 
-    public function testUserActionShouldBeLoggedWhenAccessingUserEmail(): void
+    public function testUserOtherThanRecipientAndNotAdminHasNoAccessToMailContent(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $user = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($user);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            subject: 'test subject',
+            body: 'test body',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/content';
+        $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testAdminActionShouldBeLoggedWhenAccessingOtherUserEmail(): void
     {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
@@ -1773,7 +1799,7 @@ class MessageControllerTest extends WebTestCase
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
-        $logs = $this->getLogs();
+        $logs = LogFactory::all();
         self::assertEmpty($logs);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
@@ -1781,19 +1807,19 @@ class MessageControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         // Assert on log content
-        $logs = $this->getLogs();
+        $logs = LogFactory::all();
         self::assertCount(1, $logs);
         $log = $logs[0];
-        self::assertSame('message content displayed', $log['action']);
-        self::assertSame($message->getMailId(), $log['mailId']);
+        self::assertSame('message content displayed', $log->getAction());
+        self::assertSame($message->getMailId(), $log->getMailId());
         $expectedDetails = sprintf(
             "recipient=%s user=%s (%d)",
             $messageRecipient->getAddress()->getEmail(),
             $admin->getUserIdentifier(),
             $admin->getId(),
         );
-        self::assertSame($expectedDetails, $log['details']);
-        self::assertNotNull($log['created']);
+        self::assertSame($expectedDetails, $log->getDetails());
+        self::assertNotNull($log->getCreated());
     }
 
     public function testUserActionShouldNotBeLoggedWhenAccessingItsEmail(): void
@@ -1814,25 +1840,16 @@ class MessageControllerTest extends WebTestCase
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
-        $logs = $this->getLogs();
+        $logs = LogFactory::all();
         self::assertEmpty($logs);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/content';
         $crawler = $this->client->request(Request::METHOD_GET, $url);
 
-        // Assert on page content
-        $pageBody = $crawler->filter('body')->text();
-        // FIXME: empty body
-        // $this->assertStringContainsString(
-        //     'test subject',
-        //     $pageBody,
-        // );
-        // $this->assertStringContainsString(
-        //     'test body',
-        //     $pageBody,
-        // );
+        // iFrame is displayed, so does the message content
+        self::assertNotEmpty($crawler->filter('[data-test="iframe-message-content"]'));
         // Assert on log content
-        $logs = $this->getLogs();
+        $logs = LogFactory::all();
         self::assertCount(0, $logs);
     }
 }

@@ -1,7 +1,6 @@
 {% extends 'modalTemplate.html.twig' %}
 
 {% block modalTitle %}
-	{#  {{ 'Entities.Group.Actions.updateGroup'|trans }}#}
 	{{ 'Entities.Message.labels.preview' | trans }}
 {% endblock %}
 
@@ -22,7 +21,7 @@
                 {{ 'Generics.actions.cancel'|trans }}
             </button>
 
-            <button
+            <a
                 type="button"
                 class="btn btn-primary mx-2"
                 onclick="this.closest('turbo-frame').src = '{{ path('message_show_content', {
@@ -33,7 +32,7 @@
                 }) }}'"
             >
                 {{ 'Generics.actions.displayMessage'|trans }}
-            </button>
+            </a>
         </div>
     </turbo-frame>
 {% endblock %}
