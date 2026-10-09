@@ -13,6 +13,7 @@ use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\MessageRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
+use App\Service\LogService;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -37,6 +38,7 @@ class MessageController extends AbstractController
         private Service\Referrer $referrer,
         private DomainRepository $domainRepository,
         private HtmlSanitizerService $sanitizer,
+        private LogService $logService,
     ) {
     }
 
@@ -538,7 +540,7 @@ class MessageController extends AbstractController
     }
 
     #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/content', name: 'message_show_content')]
-    public function showMessageDetail(int $partitionTag, string $mailId, int $rseqnum): Response
+    public function showMessageDetail(Request $request, int $partitionTag, string $mailId, int $rseqnum): Response
     {
         $messageRecipient = $this->em->getRepository(MessageRecipient::class)->findOneBy([
             'partitionTag' => $partitionTag,
@@ -551,6 +553,19 @@ class MessageController extends AbstractController
         }
 
         $this->checkMailAccess($messageRecipient);
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getEmail() !== $messageRecipient->getAddress()->getEmail()) {
+            if (!$request->query->getBoolean('warned', false)) {
+                return $this->render('message/content_warning.html.twig', [
+                    'partitionTag' => $partitionTag,
+                    'mailId' => $mailId,
+                    'rseqnum' => $rseqnum,
+                ]);
+            }
+        }
 
         return $this->render('message/content.html.twig', [
             'messageRecipient' => $messageRecipient,
@@ -594,6 +609,24 @@ class MessageController extends AbstractController
         $textBody = $email->getTextBody();
         $htmlBody = $email->getHtmlBody();
         $htmlBody = $this->sanitizer->sanitize($htmlBody);
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user->getEmail() !== $messageRecipient->getAddress()->getEmail()) {
+            $logContent = sprintf(
+                "recipient=%s user=%s (%d)",
+                $messageRecipient->getAddress()->getEmail(),
+                $user->getUserIdentifier(),
+                $user->getId(),
+            );
+
+            $this->logService->addLog(
+                'message content displayed',
+                $messageRecipient->getMailId(),
+                $logContent,
+            );
+        }
 
         return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
