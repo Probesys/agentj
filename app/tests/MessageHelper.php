@@ -14,7 +14,6 @@ use App\Tests\Factory\QuarantineFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Util\Url;
-use Webklex\PHPIMAP\Structure;
 
 trait MessageHelper
 {
@@ -115,13 +114,13 @@ trait MessageHelper
         User $recipient,
         ?string $rule = 'accept',
         ?int $priority = SenderRule::PRIORITY_USER,
-    ): void {
-        $senderRuleAddress = RuleAddressFactory::new()->create([
+    ): SenderRule {
+        $senderRuleAddress = RuleAddressFactory::findOrCreate([
             'priority' => 6,
             'email' => $senderAddress,
         ]);
 
-        SenderRuleFactory::new()->create([
+        return SenderRuleFactory::new()->create([
             'user' => $recipient,
             'senderRuleAddress' => $senderRuleAddress,
             'wb' => $rule,

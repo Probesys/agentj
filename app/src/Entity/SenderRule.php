@@ -41,7 +41,7 @@ class SenderRule
     private ?\DateTimeInterface $datemod ;
 
     #[ORM\Column(name: 'type', type: 'integer', nullable: true)]
-    private ?int $type;
+    private ?int $type = null;
 
     #[ORM\ManyToOne(targetEntity: Group::class)]
     #[ORM\JoinColumn(name: 'group_id', nullable: true, onDelete: 'CASCADE')]
@@ -140,5 +140,18 @@ class SenderRule
         $this->priority = $priority;
 
         return $this;
+    }
+
+    public static function copy(User $user, SenderRule $sourceRule): SenderRule
+    {
+        $newRule = new SenderRule($user, $sourceRule->getSenderRuleAddress());
+        $newRule->setPriority($sourceRule->getPriority());
+        $newRule->setWb($sourceRule->getWb());
+        $newRule->setGroup($sourceRule->getGroup());
+        if ($sourceRule->getType()) {
+            $newRule->setType($sourceRule->getType());
+        }
+
+        return $newRule;
     }
 }
