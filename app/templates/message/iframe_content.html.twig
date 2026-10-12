@@ -1,38 +1,36 @@
 {% if not messageRecipient.isVirus %}
-	{# <turbo-frame id="message-content"> #}
-		<div class="row">
-			<div class="col-md-3 font-weight-bold">
-				{{ 'Generics.fields.sender' | trans }}
-			</div>
-			<div class="col-md-9">
-				{{ from }}
-			</div>
-			<div class="col-md-3  font-weight-bold">
-				{{ 'Generics.fields.object' | trans }}
-			</div>
-			<div class="col-md-9">
-				{{ subject}}
-			</div>
-			{% if attachments | length > 0 %}
-				<div class="col-md-3  font-weight-bold">
-					{{ 'Generics.fields.attachments' | trans }}
-				</div>
-				<div class="col-md-9">
-					{% for attachmentName in attachments %}
-						{{ attachmentName }}
-						<br>
-					{% endfor %}
-				</div>
-			{% endif %}
-			<div class="col-md-12">
-				{% if htmlBody %}
-					{{ htmlBody | raw}}
-				{% else %}
-					{{ textBody }}
-				{% endif %}
-			</div>
+	<div class="row">
+		<div class="col-md-3 font-weight-bold">
+			{{ 'Generics.fields.sender' | trans }}
 		</div>
-	{# </turbo-frame> #}
+		<div class="col-md-9" data-test="content-sender">
+			{{ from }}
+		</div>
+		<div class="col-md-3  font-weight-bold">
+			{{ 'Generics.fields.object' | trans }}
+		</div>
+		<div class="col-md-9" data-test="content-subject">
+			{{ subject}}
+		</div>
+		{% if attachments | length > 0 %}
+			<div class="col-md-3  font-weight-bold">
+				{{ 'Generics.fields.attachments' | trans }}
+			</div>
+			<div class="col-md-9">
+				{% for attachmentName in attachments %}
+					{{ attachmentName }}
+					<br>
+				{% endfor %}
+			</div>
+		{% endif %}
+		<div class="col-md-12" data-test="content-body">
+			{% if htmlBody %}
+				{{ htmlBody | raw}}
+			{% else %}
+				{{ textBody }}
+			{% endif %}
+		</div>
+	</div>
 {% else %}
 	<p class="text-center">
 		{{ 'Generics.messages.cannotPreviewMailWithvirus' | trans }}

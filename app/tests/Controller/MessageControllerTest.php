@@ -3,7 +3,9 @@
 namespace App\Tests\Controller;
 
 use App\Amavis\MessageStatus;
+use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
+use App\Entity\User;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -21,6 +23,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -1721,7 +1724,7 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::RESTORED, $otherMessageRecipient->getStatus());
     }
 
-    public function testAdminShouldBeWarnedBeforeAccessingUserEmail(): void
+    public function testAdminShouldBeWarnedBeforeAccessingUserEmailContent(): void
     {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
@@ -1729,12 +1732,14 @@ class MessageControllerTest extends WebTestCase
         $admin = UserFactory::new()->admin([$domain])->create();
         $this->client->loginUser($admin);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $mailSubject = 'test subject';
+        $mailBody = 'test body';
         $message = $this->setupMail(
             $addrS,
             [$addrR],
             status: MessageStatus::UNTREATED,
-            subject: 'test subject',
-            body: 'test body',
+            subject: $mailSubject,
+            body: $mailBody,
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
@@ -1749,13 +1754,48 @@ class MessageControllerTest extends WebTestCase
             $pageBody,
         );
         $this->assertStringNotContainsString(
-            'test subject',
+            $mailSubject,
             $pageBody,
         );
         $this->assertStringNotContainsString(
-            'test body',
+            $mailBody,
             $pageBody,
         );
+        // No access yet, no log
+        $logs = LogFactory::all();
+        self::assertCount(0, $logs);
+    }
+
+    public function testAdminAlreadyWarnedCanAccessUserEmailContent(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $mailSubject = 'test subject';
+        $mailBody = 'test body';
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            subject: $mailSubject,
+            body: $mailBody,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/content?warned=1';
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        // iFrame is displayed
+        $iframe = $crawler
+            ->filter('[data-test="iframe-message-content"]')
+            ->first();
+        self::assertNotEmpty($iframe);
+        // We cannot assert on logs here, since logs are inserted after the
+        // iframe content has been fetched.
     }
 
     public function testUserOtherThanRecipientAndNotAdminHasNoAccessToMailContent(): void
@@ -1782,13 +1822,13 @@ class MessageControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
-    public function testAdminActionShouldBeLoggedWhenAccessingOtherUserEmail(): void
+    public function testUserOtherThanRecipientAndNotAdminHasNoAccessToMailContentIframe(): void
     {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $admin = UserFactory::new()->admin([$domain])->create();
-        $this->client->loginUser($admin);
+        $user = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($user);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail(
             $addrS,
@@ -1799,30 +1839,45 @@ class MessageControllerTest extends WebTestCase
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
-        $logs = LogFactory::all();
-        self::assertEmpty($logs);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
         $this->client->request(Request::METHOD_GET, $url);
 
-        self::assertResponseIsSuccessful();
-        // Assert on log content
-        $logs = LogFactory::all();
-        self::assertCount(1, $logs);
-        $log = $logs[0];
-        self::assertSame('message content displayed', $log->getAction());
-        self::assertSame($message->getMailId(), $log->getMailId());
-        $expectedDetails = sprintf(
-            "recipient=%s user=%s (%d)",
-            $messageRecipient->getAddress()->getEmail(),
-            $admin->getUserIdentifier(),
-            $admin->getId(),
-        );
-        self::assertSame($expectedDetails, $log->getDetails());
-        self::assertNotNull($log->getCreated());
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
-    public function testUserActionShouldNotBeLoggedWhenAccessingItsEmail(): void
+    public function testAdminActionShouldBeLoggedWhenAccessingUserEmailIframe(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $mailSubject = 'test subject';
+        $mailBody = 'test body';
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            subject: $mailSubject,
+            body: $mailBody,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $logs = LogFactory::all();
+        self::assertEmpty($logs);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        // iFrame is displayed, so does the message content and access is logged
+        $this->assertIframeDisplayed($crawler, $addrS->getEmail(), $mailSubject, $mailBody);
+        $this->assertLogCreated($messageRecipient, $admin);
+    }
+
+    public function testUserActionShouldNotBeLoggedWhenAccessingItsEmailIframe(): void
     {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
@@ -1831,29 +1886,31 @@ class MessageControllerTest extends WebTestCase
         ]);
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $mailSubject = 'test subject';
+        $mailBody = 'test body';
         $message = $this->setupMail(
             $addrS,
             [$addrR],
             status: MessageStatus::AUTHORIZED,
-            subject: 'test subject',
-            body: 'test body',
+            subject: $mailSubject,
+            body: $mailBody,
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $logs = LogFactory::all();
         self::assertEmpty($logs);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/content';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
         $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         // iFrame is displayed, so does the message content
-        self::assertNotEmpty($crawler->filter('[data-test="iframe-message-content"]'));
-        // Assert on log content
+        $this->assertIframeDisplayed($crawler, $addrS->getEmail(), $mailSubject, $mailBody);
+        // Access is not logged
         $logs = LogFactory::all();
         self::assertCount(0, $logs);
     }
 
-    public function testUserActionShouldNotBeLoggedWhenAccessingItsAliasesEmail(): void
+    public function testUserActionShouldNotBeLoggedWhenAccessingItsAliasesEmailIframe(): void
     {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
@@ -1863,25 +1920,69 @@ class MessageControllerTest extends WebTestCase
         ]);
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $alias);
+        $mailSubject = 'test subject';
+        $mailBody = 'test body';
         $message = $this->setupMail(
             $addrS,
             [$addrR],
             status: MessageStatus::AUTHORIZED,
-            subject: 'test subject',
-            body: 'test body',
+            subject: $mailSubject,
+            body: $mailBody,
         );
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $logs = LogFactory::all();
         self::assertEmpty($logs);
 
-        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/content';
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
         $crawler = $this->client->request(Request::METHOD_GET, $url);
 
         // iFrame is displayed, so does the message content
-        self::assertNotEmpty($crawler->filter('[data-test="iframe-message-content"]'));
-        // Assert on log content
+        $this->assertIframeDisplayed($crawler, $addrS->getEmail(), $mailSubject, $mailBody);
+        // Access is not logged
         $logs = LogFactory::all();
         self::assertCount(0, $logs);
+    }
+
+    private function assertIframeDisplayed(
+        Crawler $crawler,
+        string $senderEmail,
+        string $mailSubject,
+        string $mailBody,
+    ): void {
+        // iFrame is displayed, so does the message content
+        $sender = $crawler
+            ->filter('[data-test="content-sender"]')
+            ->first()
+            ->text();
+        self::assertSame($senderEmail, $sender);
+        $subject = $crawler
+            ->filter('[data-test="content-subject"]')
+            ->first()
+            ->text();
+        self::assertSame($mailSubject, $subject);
+        $body = $crawler
+            ->filter('[data-test="content-body"]')
+            ->first()
+            ->text();
+        self::assertSame($mailBody, $body);
+        self::assertSame($senderEmail, $sender);
+    }
+
+    private function assertLogCreated(MessageRecipient $messageRecipient, User $admin): void
+    {
+        $logs = LogFactory::all();
+        self::assertCount(1, $logs);
+        $log = $logs[0];
+        self::assertSame('message content displayed', $log->getAction());
+        self::assertSame($messageRecipient->getMailId(), $log->getMailId());
+        $expectedDetails = sprintf(
+            "recipient=%s user=%s (%d)",
+            $messageRecipient->getAddress()->getEmail(),
+            $admin->getUserIdentifier(),
+            $admin->getId(),
+        );
+        self::assertSame($expectedDetails, $log->getDetails());
+        self::assertNotNull($log->getCreated());
     }
 }

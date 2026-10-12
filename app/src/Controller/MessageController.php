@@ -607,10 +607,10 @@ class MessageController extends AbstractController
         $htmlBody = $email->getHtmlBody();
         $htmlBody = $this->sanitizer->sanitize($htmlBody);
 
-        /** @var User $user */
-        $user = $this->getUser();
+        if (!$this->isAddressedToUserOrItsAliases($messageRecipient)) {
+            /** @var User $user */
+            $user = $this->getUser();
 
-        if ($user->getEmail() !== $messageRecipient->getAddress()->getEmail()) {
             $logContent = sprintf(
                 "recipient=%s user=%s (%d)",
                 $messageRecipient->getAddress()->getEmail(),
