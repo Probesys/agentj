@@ -8,6 +8,8 @@ use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\LogRepository;
 
 #[ORM\Entity(repositoryClass: LogRepository::class)]
+#[ORM\Index(name: 'log_idx_domain_created', columns: ['domain_id', 'created'])]
+#[ORM\Index(name: 'log_idx_created', columns: ['created'])]
 class Log
 {
     use EntityBlameableTrait;
@@ -26,6 +28,10 @@ class Log
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $details = null;
+
+    #[ORM\ManyToOne(targetEntity: Domain::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Domain $domain = null;
 
     public function getId(): int
     {
@@ -64,6 +70,18 @@ class Log
     public function setDetails(?string $details): self
     {
         $this->details = $details;
+
+        return $this;
+    }
+
+    public function getDomain(): ?Domain
+    {
+        return $this->domain;
+    }
+
+    public function setDomain(?Domain $domain): self
+    {
+        $this->domain = $domain;
 
         return $this;
     }
