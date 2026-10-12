@@ -15,7 +15,6 @@ function $_GET(param) {
 
 function trans (key) {
     const translation = window.jsTranslations[key];
-    console.log(translation);
     if (translation) {
         return translation;
     } else {
@@ -82,7 +81,6 @@ document.addEventListener("turbo:load", function () {
   });
 
   $(document).on('click', '.for-cb:not(.check-all)', function (e) {
-    console.log('click');
     var cb = $(this).prev();
     var isChecked = $(cb).is(':checked');
     cb.attr('checked', isChecked ? false : true);

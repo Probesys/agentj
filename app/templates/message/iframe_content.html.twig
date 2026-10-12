@@ -3,13 +3,13 @@
 		<div class="col-md-3 font-weight-bold">
 			{{ 'Generics.fields.sender' | trans }}
 		</div>
-		<div class="col-md-9">
+		<div class="col-md-9" data-test="content-sender">
 			{{ from }}
 		</div>
 		<div class="col-md-3  font-weight-bold">
 			{{ 'Generics.fields.object' | trans }}
 		</div>
-		<div class="col-md-9">
+		<div class="col-md-9" data-test="content-subject">
 			{{ subject}}
 		</div>
 		{% if attachments | length > 0 %}
@@ -23,7 +23,7 @@
 				{% endfor %}
 			</div>
 		{% endif %}
-		<div class="col-md-12">
+		<div class="col-md-12" data-test="content-body">
 			{% if htmlBody %}
 				{{ htmlBody | raw}}
 			{% else %}
