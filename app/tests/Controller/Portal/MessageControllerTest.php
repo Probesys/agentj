@@ -3,10 +3,12 @@
 namespace App\Tests\Controller\Portal;
 
 use App\Amavis\MessageStatus;
+use App\Model\LogAction;
 use App\Service\MessageService;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
@@ -80,6 +82,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Authorized->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmAuthorization(): void
@@ -341,6 +347,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Restore->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmRestore(): void
@@ -602,6 +612,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Banned->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmBannishment(): void

@@ -435,3 +435,8 @@ table thead tr th {
     flex-wrap: wrap;
     gap: 0.5rem;
 }
+
+.log__details {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
