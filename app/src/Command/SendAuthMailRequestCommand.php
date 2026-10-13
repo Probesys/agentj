@@ -155,7 +155,8 @@ class SendAuthMailRequestCommand
                     $this->logService->addLog(
                         'Authentification request sent',
                         $message->getMailId(),
-                        $mailBody['html_body']
+                        $mailBody['html_body'],
+                        $domain,
                     );
                     $subject = $this->getSubject($message, $locale);
                     $output->writeln(
