@@ -6,6 +6,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\Message;
 use App\Tests\CommandHelper;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
@@ -41,6 +42,10 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         self::assertEmailCount(1);
         $mail = self::getMailerMessage();
         self::assertEmailAddressContains($mail, 'To', $addrS->getEmail());
+        LogFactory::assert()->exists([
+            'action' => 'Authentification request sent',
+            'domain' => $domain,
+        ]);
     }
 
     public function testAuthMailIsNotSentIfAlreadySentSinceLessThanOneDayAgo(): void

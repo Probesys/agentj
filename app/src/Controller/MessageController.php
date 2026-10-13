@@ -311,7 +311,7 @@ class MessageController extends AbstractController
 
         if ($this->messageService->delete($message, $messageRecipient)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
-            $logService->addLog('delete', $mailId);
+            $logService->addLogForRecipient('delete', $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -346,22 +346,22 @@ class MessageController extends AbstractController
                             $messageRecipient,
                             SenderRule::TYPE_USER,
                         );
-                        $logService->addLog('authorized batch', $mailId);
+                        $logService->addLogForRecipient('authorized batch', $messageRecipient);
                         break;
                     case 'banned':
                         $this->messageService->banSenderForRecipient(
                             $messageRecipient,
                             SenderRule::TYPE_USER,
                         );
-                        $logService->addLog('banned batch', $mailId);
+                        $logService->addLogForRecipient('banned batch', $messageRecipient);
                         break;
                     case 'delete':
                         $this->messageService->delete($message, $messageRecipient);
-                        $logService->addLog('delete batch', $mailId);
+                        $logService->addLogForRecipient('delete batch', $messageRecipient);
                         break;
                     case 'restore':
                         $this->messageService->dispatchRelease($messageRecipient);
-                        $logService->addLog('restore batch', $mailId);
+                        $logService->addLogForRecipient('restore batch', $messageRecipient);
                         break;
                     case 'mark as spam':
                         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -402,7 +402,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized', $messageRecipient->getMailId());
+            $logService->addLogForRecipient('authorized', $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -428,7 +428,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned', $messageRecipient->getMailId());
+            $logService->addLogForRecipient('banned', $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -472,7 +472,7 @@ class MessageController extends AbstractController
 
         $this->messageService->dispatchRelease($messageRecipient);
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
-        $logService->addLog('restore', $mailId);
+        $logService->addLogForRecipient('restore', $messageRecipient);
 
         return new RedirectResponse($this->referrer->get());
     }
@@ -502,7 +502,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLog('authorized for domain', $messageRecipient->getMailId());
+            $logService->addLogForRecipient('authorized for domain', $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -529,7 +529,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLog('banned for domain', $messageRecipient->getMailId());
+            $logService->addLogForRecipient('banned for domain', $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());

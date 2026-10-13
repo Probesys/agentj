@@ -7,6 +7,7 @@ use App\Service\MessageService;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
@@ -80,6 +81,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => 'authorized',
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmAuthorization(): void

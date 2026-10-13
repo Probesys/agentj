@@ -582,6 +582,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount + 2, SenderRuleFactory::count());
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => 'authorized',
+            'domain' => $domain,
+        ]);
         $senderRuleAddress = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
         ])[0];
