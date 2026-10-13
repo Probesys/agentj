@@ -46,6 +46,7 @@ RUN apt-get update -q --fix-missing && \
     apt-get -y install --no-install-recommends \
     ca-certificates \
     cron \
+    iproute2 \
     libssl3 \
     mariadb-client \
     nginx-light \
