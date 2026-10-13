@@ -181,7 +181,7 @@ document.addEventListener("turbo:load", function () {
 
   $('#dialog-confirm').dialog({
     resizable: false,
-    height: 200,
+    height: 'auto',
     width: 'auto',
     autoOpen: false,
     modal: true,
@@ -192,7 +192,14 @@ document.addEventListener("turbo:load", function () {
 
 
           if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm")) {
-            window.location.href = $(this).data("link-to-confirm");
+            if ($(this).data('link-target-blank')) {
+              window.open($(this).data("link-to-confirm"), '_blank', 'noopener');
+              $(window).one('focus', function () {
+                window.location.reload();
+              });
+            } else {
+              window.location.href = $(this).data("link-to-confirm");
+            }
           } else if ($(this).data('type-action-confirm') == 'form') {
             $('#' + $(this).data('form-to-confirm')).submit();
           }
@@ -215,6 +222,7 @@ document.addEventListener("turbo:load", function () {
     $('#dialog-confirm').dialog('option', 'title', $(this).data('dialog-title'));
     $('#dialog-confirm').data("type-action-confirm", "link");
     $('#dialog-confirm').data("link-to-confirm", $(this).attr("href"));
+    $('#dialog-confirm').data("link-target-blank", $(this).data('confirm-target-blank') === true);
     $("#dialog-content").html($(this).data('dialog-content'));
     $("#dialog-confirm").dialog("open");
   });
