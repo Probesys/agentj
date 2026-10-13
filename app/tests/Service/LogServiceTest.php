@@ -9,6 +9,9 @@ use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\MessageHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -67,5 +70,43 @@ class LogServiceTest extends KernelTestCase
         $logService->addLogForRecipient('restore', $messageRecipient);
 
         self::assertNull(LogFactory::last()->getDomain());
+    }
+
+    public function testAddLogSavesTheLoggedInUserAsAuthor(): void
+    {
+        $user = UserFactory::new()->user(DomainFactory::createOne())->create();
+        static::getContainer()->get(TokenStorageInterface::class)->setToken(
+            new UsernamePasswordToken($user, 'main', $user->getRoles()),
+        );
+        $logService = static::getContainer()->get(LogService::class);
+
+        $logService->addLog('restore', 'mail-id');
+
+        self::assertSame($user->getId(), LogFactory::last()->getCreatedBy()?->getId());
+    }
+
+    public function testAddLogSavesTheImpersonatingAdminAsAuthor(): void
+    {
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $user = UserFactory::new()->user($domain)->create();
+        $originalToken = new UsernamePasswordToken($admin, 'main', $admin->getRoles());
+        static::getContainer()->get(TokenStorageInterface::class)->setToken(
+            new SwitchUserToken($user, 'main', $user->getRoles(), $originalToken),
+        );
+        $logService = static::getContainer()->get(LogService::class);
+
+        $logService->addLog('restore', 'mail-id');
+
+        self::assertSame($admin->getId(), LogFactory::last()->getCreatedBy()?->getId());
+    }
+
+    public function testAddLogHasNoAuthorWithoutLoggedInUser(): void
+    {
+        $logService = static::getContainer()->get(LogService::class);
+
+        $logService->addLog('restore', 'mail-id');
+
+        self::assertNull(LogFactory::last()->getCreatedBy());
     }
 }
