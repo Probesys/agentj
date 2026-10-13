@@ -2,6 +2,11 @@
 
 set -e
 
+# The requests coming from the host (e.g. from a reverse proxy) reach the
+# container through the gateway of the Docker network: always trust it.
+DOCKER_GATEWAY=$(ip route | awk '/^default/ { print $3 }')
+TRUSTED_PROXIES="${TRUSTED_PROXIES:+$TRUSTED_PROXIES,}$DOCKER_GATEWAY"
+
 env_file=/var/www/agentj/.env
 cp /var/www/agentj/.env.example $env_file
 sed -i "s|\$AGENTJ_VERSION|$VERSION|g" $env_file
