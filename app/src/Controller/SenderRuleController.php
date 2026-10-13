@@ -219,11 +219,12 @@ class SenderRuleController extends AbstractController
         methods: 'POST',
         options: ['expose' => true],
     )]
-    public function batchSenderRuleAction(Request $request, ?string $action = null): RedirectResponse
-    {
-        $em = $this->em;
+    public function batchSenderRuleAction(
+        Request $request,
+        LogService $logService,
+        ?string $action = null,
+    ): RedirectResponse {
         if ($action) {
-            $logService = new LogService($em);
             foreach ($request->request->all('id') as $obj) {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
@@ -233,7 +234,11 @@ class SenderRuleController extends AbstractController
                             $mailInfo[1],
                             $mailInfo[2],
                         );
-                        $logService->addLog('delete batch sender rule', $mailInfo[1]);
+                        $logService->addLog(
+                            'delete batch sender rule',
+                            $mailInfo[1],
+                            domain: $this->userRepository->find($mailInfo[0])?->getDomain(),
+                        );
                         break;
                 }
             }
