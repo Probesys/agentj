@@ -5,15 +5,21 @@ namespace App\Service;
 use App\Entity\Domain;
 use App\Entity\Log;
 use App\Entity\MessageRecipient;
+use App\Entity\User;
 use App\Repository\DomainRepository;
+use App\Repository\UserRepository;
 use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class LogService
 {
     public function __construct(
         private EntityManagerInterface $em,
         private DomainRepository $domainRepository,
+        private UserRepository $userRepository,
+        private Security $security,
     ) {
     }
 
@@ -27,6 +33,7 @@ class LogService
         $log->setMailId($mailId);
         $log->setDetails($details);
         $log->setDomain($domain);
+        $log->setCreatedBy($this->findAuthor());
         $this->em->persist($log);
         $this->em->flush();
         return true;
@@ -56,5 +63,23 @@ class LogService
         }
 
         return $this->domainRepository->findOneByDomain($domainName);
+    }
+
+    private function findAuthor(): ?User
+    {
+        $token = $this->security->getToken();
+
+        if ($token instanceof SwitchUserToken) {
+            $originalUser = $token->getOriginalToken()->getUser();
+            if (!$originalUser instanceof User) {
+                return null;
+            }
+
+            return $this->userRepository->find($originalUser->getId());
+        }
+
+        $user = $token?->getUser();
+
+        return $user instanceof User ? $user : null;
     }
 }
