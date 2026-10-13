@@ -172,7 +172,7 @@ class ImportController extends AbstractController
                                     $user->addGroup($group);
                                     $em->persist($group);
 
-                                    $groupWbUpdate[$group->getid()] = $group->getid();
+                                    $groupWbUpdate[$group->getId()] = $group;
                                 } else {
                                     if ($domains[$domainEmail]['entity']->getPolicy()) {
                                         $user->setPolicy($domains[$domainEmail]['entity']->getPolicy());
@@ -197,7 +197,7 @@ class ImportController extends AbstractController
 
                 //Need to flush if user new is inferior $batchSize
                 $em->flush();
-                $this->groupService->updateSenderRules();
+                $this->groupService->updateSenderRules(array_values($groupWbUpdate));
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);

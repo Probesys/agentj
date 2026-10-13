@@ -114,7 +114,7 @@ class GroupRuleController extends AbstractController
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
-            $groupService->updateSenderRules();
+            $groupService->updateSenderRules([$group]);
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         }
@@ -167,7 +167,7 @@ class GroupRuleController extends AbstractController
             $em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
-            $groupService->updateSenderRules();
+            $groupService->updateSenderRules([$group]);
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         } else {
@@ -205,7 +205,7 @@ class GroupRuleController extends AbstractController
             $this->em->flush();
         }
 
-        $groupService->updateSenderRules();
+        $groupService->updateSenderRules([$group]);
 
         return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
     }
