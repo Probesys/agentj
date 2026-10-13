@@ -153,6 +153,12 @@
                             <span class="menu-text">{{ 'Navigation.domainlist'|trans }}</span>
                         </a>
                     </li>
+                    <li class="{% if route == 'log_index' %}active{% endif %}">
+                        <a href="{{ path('log_index') }}">
+                            <i class="fa fa-clipboard-list"></i>
+                            <span class="menu-text">{{ 'Navigation.auditLog'|trans }}</span>
+                        </a>
+                    </li>
 
                     {% if is_granted('ROLE_SUPER_ADMIN') %}
                         <li class="{% if route == 'policy_index' %}active{% endif %}">
