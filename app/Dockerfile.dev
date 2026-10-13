@@ -37,6 +37,7 @@ RUN apt-get update -q --fix-missing && \
     yarnpkg \
     zip \
     cron \
+    iproute2 \
     libssl3 \
     mariadb-client \
     nginx-light \
