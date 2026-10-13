@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ 'Entities.Log.title'|trans }}
+{% endblock %}
+
+{% block body %}
+    <div class="m-4">
+        <h3 class="mb-3">
+            {{ 'Entities.Log.title'|trans }} : {{ logs.getTotalItemCount }}
+        </h3>
+
+        <button type="button" data-toggle="collapse" aria-expanded="true" data-target="#filterContainer" class="btn btn-primary mb-3">
+            {{ 'Generics.labels.filters'|trans }}
+        </button>
+
+        <div id="filterContainer" class="collapse show filtres mt-3 mb-5 col-md-12">
+            {{ form_start(form) }}
+            <div class="form-row">
+                <div class="col-md-6">
+                    {{ form_row(form.startDate) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.endDate) }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    {{ form_row(form.actor) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.action) }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    {{ form_row(form.mailId) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.domain) }}
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+
+        <div class="table-responsive">
+            <section id="no-more-tables">
+                <table class="table" data-test="logs">
+                    <thead>
+                        <tr>
+                            <th>{{ knp_pagination_sortable(logs, 'Entities.Log.fields.id'|trans, 'l.id') }}</th>
+                            <th>{{ knp_pagination_sortable(logs, 'Entities.Log.fields.date'|trans, 'l.created') }}</th>
+                            <th>{{ knp_pagination_sortable(logs, 'Entities.Log.fields.actor'|trans, 'u.username') }}</th>
+                            <th>{{ knp_pagination_sortable(logs, 'Entities.Log.fields.action'|trans, 'l.action') }}</th>
+                            <th>{{ knp_pagination_sortable(logs, 'Search.MailId'|trans, 'l.mailId') }}</th>
+                            <th>{{ knp_pagination_sortable(logs, 'Entities.Log.fields.domain'|trans, 'd.domain') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td data-title="{{ 'Entities.Log.fields.id'|trans }}">
+                                    {{ log.id }}
+                                </td>
+                                <td data-title="{{ 'Entities.Log.fields.date'|trans }}">
+                                    {{ log.created|format_datetime('short', 'medium') }}
+                                </td>
+                                <td data-title="{{ 'Entities.Log.fields.actor'|trans }}">
+                                    {% if log.createdBy %}
+                                        {{ log.createdBy.username }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td data-title="{{ 'Entities.Log.fields.action'|trans }}">
+                                    {{ log.action }}
+                                </td>
+                                <td data-title="{{ 'Search.MailId'|trans }}">
+                                    {{ log.mailId }}
+                                </td>
+                                <td data-title="{{ 'Entities.Log.fields.domain'|trans }}">
+                                    {{ log.domain ? log.domain.domain : '—' }}
+                                </td>
+                                <td>
+                                    <a href="#"
+                                        data-modal-method-type="GET"
+                                        data-url-modal-content="{{ path('log_show', {'id': log.id}) }}"
+                                        class="btn-open-modal btn btn-info"
+                                        title="{{ 'Entities.Log.fields.details'|trans }}"
+                                    >
+                                        <i class="fas fa-info"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7">{{ 'Entities.Log.noEntries'|trans }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': logs } %}
+    </div>
+{% endblock %}

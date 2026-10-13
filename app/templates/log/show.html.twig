@@ -1,0 +1,50 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% block modalTitle %}
+    {{ 'Entities.Log.title' | trans }}
+{% endblock %}
+
+{% block modalContent %}
+    <div class="row">
+        <div class="col-md-4">
+            {{ 'Entities.Log.fields.date' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ log.created | format_datetime('short', 'medium') }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Entities.Log.fields.actor' | trans }}
+        </div>
+        <div class="col-md-8">
+            {% if log.createdBy %}
+                {{ log.createdBy.username }}
+            {% else %}
+                —
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            {{ 'Entities.Log.fields.action' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ log.action }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Search.MailId' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ log.mailId }}
+        </div>
+        <div class="col-md-4">
+            {{ 'Entities.Log.fields.domain' | trans }}
+        </div>
+        <div class="col-md-8">
+            {{ log.domain ? log.domain.domain : '—' }}
+        </div>
+        <div class="col-md-12 mt-3">
+            {{ 'Entities.Log.fields.details' | trans }}
+        </div>
+        <div class="col-md-12">
+            <pre class="text-break" style="white-space: pre-wrap;" data-test="details">{{ log.details }}</pre>
+        </div>
+    </div>
+{% endblock %}

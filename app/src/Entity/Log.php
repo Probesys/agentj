@@ -6,10 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\EntityBlameableTrait;
 use App\Entity\Traits\EntityTimestampableTrait;
 use App\Repository\LogRepository;
+use App\Security\HasDomainInterface;
 
 #[ORM\Entity(repositoryClass: LogRepository::class)]
 #[ORM\Index(name: 'log_idx_domain_created', columns: ['domain_id', 'created'])]
-class Log
+class Log implements HasDomainInterface
 {
     use EntityBlameableTrait;
     use EntityTimestampableTrait;
