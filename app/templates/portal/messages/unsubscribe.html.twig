@@ -1,0 +1,31 @@
+{% extends 'base_security.html.twig' %}
+
+{% block body %}
+    <div class="h-100 ">
+        <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
+            <div>
+                <img src="{{ asset('img/agent-j-logo-desktop.svg') }}" alt="AgentJ">
+            </div>
+
+            <p>
+                {% if unsubscribeRequest.isPending %}
+                    {{ 'Message.Flash.unsubscribePending' | trans }}
+                {% else %}
+                    {{ 'Message.Flash.unsubscribeInitiated' | trans }}
+                {% endif %}
+            </p>
+
+            <p>
+                <a class="btn btn-primary" href="{{ path('message') }}">
+                    {{ 'Portal.Messages.unsubscribe.backToMessages' | trans }}
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <style>
+        img {
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}

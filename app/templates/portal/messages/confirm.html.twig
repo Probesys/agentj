@@ -10,6 +10,18 @@
             rseqnum: messageRecipient.rseqnum,
             new: 1,
         }) }}"
+        {% if action == 'unsubscribe' %}
+            {% set unsubscribeMethods = unsubscribeState.methods %}
+            {% set unsubscribeMethod = unsubscribeMethods.preferredMethod %}
+
+            data-controller="unsubscribe"
+            data-action="unsubscribe#submit"
+            {% if unsubscribeMethod == 'https' %}
+                data-unsubscribe-url-value="{{ unsubscribeMethods.httpsUrl }}"
+            {% elseif unsubscribeMethod == 'mailto' %}
+                data-unsubscribe-url-value="{{ unsubscribeMethods.mailto }}"
+            {% endif %}
+        {% endif %}
     >
         <div class="h-100 ">
             <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
@@ -28,6 +40,11 @@
                         }) }}
                     {% elseif action == 'restore' %}
                         {{ 'Portal.Messages.confirmRestore' | trans({
+                            'from': messageRecipient.message.fromAddr,
+                            'subject': messageRecipient.message.subject,
+                        }) }}
+                    {% elseif action == 'unsubscribe' %}
+                        {{ 'Portal.Messages.confirmUnsubscribe' | trans({
                             'from': messageRecipient.message.fromAddr,
                             'subject': messageRecipient.message.subject,
                         }) }}

@@ -4,6 +4,8 @@
 
 ### Migration notes
 
+#### Altcha
+
 Altcha (https://altcha.org/) is now used during human authentication. There are 3 new environment variables:
 - `ALTCHA_KEY_SECRET` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
 - `ALTCHA_KEY_SIGNATURE` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
@@ -11,7 +13,19 @@ Altcha (https://altcha.org/) is now used during human authentication. There are 
 
 You must set at least `ALTCHA_KEY_SECRET` to enable Altcha. Otherwise, the human authentication form will not show the widget.
 
+#### Daily reports
+
+Daily reports now can list emails in three categories: standard emails (`[LIST_MESSAGES_STANDARD]`), emails from lists (`[LIST_MESSAGES_LIST]`), and spams (`[LIST_MESSAGES_SPAM]`).
+Emails from lists display a button to unsubscribe from the corresponding list.
+This is how the default report is constructed for **new** domains.
+If you want to use this new report, create a new domain in the interface, and copy-paste the report HTML to your other domain reports.
+More variables are available to customize your reports (`[IF_MESSAGES_*]`, `[FOREACHE_MESSAGE_*]`, `[URL_MESSAGE_UNSUBSCRIBE]`).
+
+#### Unsubscribing from mailing lists
+
 The requests to unsubscribe from mailing lists are deleted after 90 days. To change the number of days of retention, set the (optional) `UNSUBSCRIBE_REQUEST_RETENTION_DAYS` environment variable in your `.env` file.
+
+#### LDAP connector
 
 Concerning the LDAP connector: if the synchronization starts to fail, you must re-enter the LDAP connector password.
 

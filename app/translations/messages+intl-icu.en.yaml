@@ -58,9 +58,24 @@ Entities.Domain.labels.dns: DNS
 Entities.Domain.labels.domain: DOMAIN
 Entities.Domain.labels.domainrules: 'Rules of the domain'
 Entities.Domain.labels.dynamicsVariables.EMAIL_DEST: 'Email of recipient'
-Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE: 'End of message loop'
-Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE: 'Start of message loop'
-Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'List of untreated messages'
+Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE: 'End of the message loop'
+Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE_LIST: 'End of the mailing message loop'
+Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE_SPAM: 'End of the spam message loop'
+Entities.Domain.labels.dynamicsVariables.ENDFOREACH_MESSAGE_STANDARD: 'End of the standard message loop'
+Entities.Domain.labels.dynamicsVariables.ENDIF_MESSAGES_LIST: 'End of the display condition of the mailing message list'
+Entities.Domain.labels.dynamicsVariables.ENDIF_MESSAGES_SPAM: 'End of the display condition of the spam message list'
+Entities.Domain.labels.dynamicsVariables.ENDIF_MESSAGES_STANDARD: 'End of the display condition of the standard message list'
+Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE: 'Start of the message loop'
+Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_LIST: 'Start of the mailing message loop'
+Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_SPAM: 'Start of the spam message loop'
+Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_STANDARD: 'Start of the standard message loop'
+Entities.Domain.labels.dynamicsVariables.IF_MESSAGES_LIST: 'Display condition of the mailing message list'
+Entities.Domain.labels.dynamicsVariables.IF_MESSAGES_SPAM: 'Display condition of the spam message list'
+Entities.Domain.labels.dynamicsVariables.IF_MESSAGES_STANDARD: 'Display condition of the standard message list'
+Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'List of the untreated messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_LIST: 'List of the mailing messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_SPAM: 'List of the spam messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_STANDARD: 'List of the standard messages'
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER: "Name of the message's sender"
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT: 'Subject of the message'
 Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES: 'Authorized messages'
@@ -73,6 +88,7 @@ Entities.Domain.labels.dynamicsVariables.URL_HUMAN_AUTHENTICATION: 'Link to the 
 Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_AUTHORIZE_SENDER: "URL to authorize the message's sender"
 Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_BAN: "URL to ban the message's sender"
 Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_RESTORE: 'URL to recover the message'
+Entities.Domain.labels.dynamicsVariables.URL_MESSAGE_UNSUBSCRIBE: 'URL to initiate unsubscription from mailing list'
 Entities.Domain.labels.dynamicsVariables.URL_MSGS: 'Link to pending emails'
 Entities.Domain.labels.dynamicsVariables.USERNAME: "User's name"
 Entities.Domain.labels.filters: 'FILTERS & RATES'
@@ -483,6 +499,7 @@ Message.Actions.Restore: Recover
 Message.Actions.RestoreMessage: 'Recover the message'
 Message.Actions.Unlock: Unlock
 Message.Actions.Unsubscribe: 'Unsubscribe from the list'
+Message.Actions.Unsubscribe.short: Unsubscribe
 Message.Actions.UnsubscribeRetry: 'Unsubscribe again'
 Message.Actions.list: Actions
 Message.Actions.massiveActionContent: 'Are you sure you want to perform this action on all the selected items?'
@@ -612,8 +629,10 @@ Portal.Messages.confirm: Confirm
 Portal.Messages.confirmAuthorize: 'You are about to allow the sender {from}.'
 Portal.Messages.confirmBan: 'You are about to ban the sender {from}.'
 Portal.Messages.confirmRestore: 'You are about to retrieve the email “{subject}” from the sender {from}.'
+Portal.Messages.confirmUnsubscribe: 'You are about to unsubscribe from the mailing list {from}.'
 Portal.Messages.restore.backToMessages: 'See my recovered mails'
 Portal.Messages.restore.messageRestored: 'Message successfully recovered.'
+Portal.Messages.unsubscribe.backToMessages: 'See my mails'
 Search.AdvancedFilter: 'Advanced filter'
 Search.AmavisOutput: 'Amavis Output'
 Search.BSpamLevelMax: 'Maximum Amavis spam level'

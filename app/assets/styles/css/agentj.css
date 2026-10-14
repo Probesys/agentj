@@ -444,6 +444,13 @@ table thead tr th {
     gap: 0.5rem;
 }
 
+/** Keep variable container within the screen boundaries (e.g. on report
+ * customisation page). */
+.container-variables__body {
+    overflow-y: auto;
+    max-height: 75vh;
+}
+
 .log__details {
     white-space: pre-wrap;
     word-break: break-word;

@@ -1,5 +1,8 @@
 {% if messageRecipients is not empty %}
-  <table style="width:100%;background-color: #fff;">
+  <table
+    style="width:100%;background-color: #fff;"
+    data-test="{{ type }}"
+  >
     <tbody>
       {% for messageRecipient in messageRecipients %}
         {% set token = message_release_token(messageRecipient.message, user) %}
@@ -7,7 +10,7 @@
 
           <td>
             <div>
-              <strong>{{ messageRecipient.message.fromAddr }}</strong><br>
+              <strong data-test="from-address">{{ messageRecipient.message.fromAddr }}</strong><br>
               <p style="font-size: 10px">{{ messageRecipient.message.subject }}</p>
             </div>
           </td>
@@ -15,17 +18,18 @@
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
               <a href="{{ url('portal_message_authorized',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum}) }}?new=1"
-                 title={{ 'Message.Actions.AutorizedSender'|trans(locale: locale) }} style="font-size:16px;
-                 -moz-border-radius: 5px;
-                 -webkit-border-radius: 5px;
-                 border-radius: 5px;
-                 line-height: 16px;
-                 background-color: #6DE7DA;
-                 padding: 5px;
-                 margin-right: 5px;
-                 color: #fff;
-                 text-decoration: none;
-                 ">
+                title={{ 'Message.Actions.AutorizedSender'|trans(locale: locale) }} style="font-size:16px;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                line-height: 16px;
+                background-color: #6DE7DA;
+                padding: 5px;
+                margin-right: 5px;
+                color: #fff;
+                text-decoration: none;
+                white-space: nowrap;
+              ">
                 {{ 'Message.Actions.Autorized'|trans(locale: locale) }}
               </a>
             </div>
@@ -34,48 +38,71 @@
           <td width="100" style="min-width: 100px;">
             <div style="width: 100px;">
               <a href="{{ url('portal_message_restore',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum})}}?new=1"
-                 title="{{ 'Message.Actions.RestoreMessage'|trans(locale: locale) }}" style="font-size:16px;
-                 -moz-border-radius: 5px;
-                 -webkit-border-radius: 5px;
-                 border-radius: 5px;
-                 line-height: 16px;
-                 background-color: #31B1BF;
-                 padding: 5px;
-                 color: #fff;
-                 text-decoration: none;
-                 ">
+                title="{{ 'Message.Actions.RestoreMessage'|trans(locale: locale) }}" style="font-size:16px;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                line-height: 16px;
+                background-color: #31B1BF;
+                padding: 5px;
+                color: #fff;
+                text-decoration: none;
+                white-space: nowrap;
+              ">
                 {{ 'Message.Actions.Restore'|trans(locale: locale) }}</a>
             </div>
           </td>
 
-          <td width="100" style="min-width: 100px;">
-            <div style="width: 100px;">
+          <td width="75" style="min-width: 75px;">
+            <div style="width: 75px;">
               <a href="{{ url('portal_message_banned',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum})}}?new=1"
-                 title="{{ 'Message.Actions.BannedSender'|trans(locale: locale) }}" style="font-size:16px;
-                 -moz-border-radius: 5px;
-                 -webkit-border-radius: 5px;
-                 border-radius: 5px;
-                 line-height: 16px;
-                 background-color: #E76D6D;
-                 padding: 5px;
-                 color: #fff;
-                 text-decoration: none;
-                 ">
+                title="{{ 'Message.Actions.BannedSender'|trans(locale: locale) }}" style="font-size:16px;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                line-height: 16px;
+                background-color: #E76D6D;
+                padding: 5px;
+                color: #fff;
+                text-decoration: none;
+                white-space: nowrap;
+              ">
                 {{ 'Message.Actions.Banned'|trans(locale: locale) }}</a>
             </div>
           </td>
 
+          {% if type === 'list' %}
+            <td width="130" style="min-width: 130px;">
+              <div style="width: 130px;">
+                <a href="{{ url('portal_message_unsubscribe',{'token':token,'partitionTag':messageRecipient.partitionTag,'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum})}}"
+                  title="{{ 'Message.Actions.Unsubscribe'|trans(locale: locale) }}" style="font-size:16px;
+                  -moz-border-radius: 5px;
+                  -webkit-border-radius: 5px;
+                  border-radius: 5px;
+                  line-height: 16px;
+                  background-color: #E76D6D;
+                  padding: 5px;
+                  color: #fff;
+                  text-decoration: none;
+                  white-space: nowrap;
+                ">
+                  {{ 'Message.Actions.Unsubscribe.short'|trans(locale: locale) }}</a>
+              </div>
+            </td>
+          {% endif %}
+
         </tr>
       {% endfor %}
 
-      <tr>
-        <td colspan="3">
-          <div style="text-align:center">
-            <a href="{{ url('homepage') }}">{{ url('homepage') }}</a>
-          </div>
-        </td>
-      </tr>
-
+      {% if type == 'all' %}
+        <tr data-test="footer-url">
+          <td colspan="3">
+            <div style="text-align:center">
+              <a href="{{ url('homepage') }}">{{ url('homepage') }}</a>
+            </div>
+          </td>
+        </tr>
+      {% endif %}
     </tbody>
   </table>
 {% endif %}

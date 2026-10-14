@@ -111,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     private Collection $ownedSharedBoxes;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $dateLastReport;
+    private ?int $dateLastReport = null;
 
     #[ORM\Column(type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?DateTimeInterface $humanAuthenticationEnabledAt = null;

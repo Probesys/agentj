@@ -110,6 +110,15 @@ class ListUnsubscribeService
         return $states;
     }
 
+    /**
+     * @return array{methods: UnsubscribeMethods, lastRequest: ?UnsubscribeRequest}
+     */
+    public function getUnsubscribeState(MessageRecipient $messageRecipient): ?array
+    {
+        $states = $this->getUnsubscribeStates([$messageRecipient]);
+        return $states[$messageRecipient->getIdKey()] ?? null;
+    }
+
     public function getLastRequest(MessageRecipient $messageRecipient): ?UnsubscribeRequest
     {
         return $this->findLastRequest($messageRecipient, $this->getMetadata($messageRecipient));

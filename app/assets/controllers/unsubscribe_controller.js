@@ -16,6 +16,6 @@ export default class extends Controller {
             window.open(this.urlValue, '_blank', 'noopener');
         }
 
-        this.element.requestSubmit();
+        this.element.submit();
     }
 }

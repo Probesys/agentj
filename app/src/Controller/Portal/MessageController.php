@@ -4,9 +4,11 @@ namespace App\Controller\Portal;
 
 use App\Entity;
 use App\Entity\MessageRecipient;
+use App\Exception\CannotUnsubscribeException;
 use App\Model\LogAction;
 use App\Repository;
 use App\Service;
+use App\Service\ListUnsubscribeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -215,6 +217,61 @@ class MessageController extends AbstractController
             'action' => 'restore',
             'token' => $token,
             'messageRecipient' => $messageRecipient,
+        ]);
+    }
+
+    #[Route(
+        path: '/portal/{token}/message/{partitionTag}/{mailId}/{rseqnum}/unsubscribe',
+        name: 'portal_message_unsubscribe',
+        methods: ['GET', 'POST']
+    )]
+    public function unsubscribe(
+        string $token,
+        MessageRecipient $messageRecipient,
+        ListUnsubscribeService $listUnsubscribeService,
+        Request $request,
+    ): Response {
+        $result = $this->messageService->decryptReleaseToken($token);
+
+        if (!$result) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        $user = $result[0];
+        $tokenMailId = $result[1];
+
+        if ($tokenMailId !== null && $tokenMailId !== $messageRecipient->getMailId()) {
+            throw $this->createNotFoundException('The token is invalid.');
+        }
+
+        if (!$listUnsubscribeService->isUnsubscribeable($messageRecipient)) {
+            throw $this->createNotFoundException('Cannot unsubscribe from the message list.');
+        }
+
+        $this->checkMailAccess($user, $messageRecipient);
+
+        if ($request->isMethod(Request::METHOD_POST)) {
+            try {
+                $unsubscribeRequest = $listUnsubscribeService->unsubscribe($messageRecipient);
+                $this->logService->addLogForRecipient(LogAction::UnsubscribeList, $messageRecipient);
+
+                return $this->render('portal/messages/unsubscribe.html.twig', [
+                    'unsubscribeRequest' => $unsubscribeRequest,
+                ]);
+            } catch (CannotUnsubscribeException) {
+                // This cannot happen as we tested above that we can
+                // unsubscribe from the message list.
+                throw $this->createNotFoundException('Cannot unsubscribe from the message list.');
+            }
+        }
+
+        $unsubscribeState = $listUnsubscribeService->getUnsubscribeState($messageRecipient);
+
+        return $this->render('portal/messages/confirm.html.twig', [
+            'action' => 'unsubscribe',
+            'token' => $token,
+            'messageRecipient' => $messageRecipient,
+            'unsubscribeState' => $unsubscribeState,
         ]);
     }
 
