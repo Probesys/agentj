@@ -26,7 +26,7 @@
             {{ 'Entities.Log.fields.action' | trans }}
         </div>
         <div class="col-md-8">
-            {{ log.action }}
+            {{ log.knownAction ? log.knownAction|trans : log.action }}
         </div>
         <div class="col-md-4">
             {{ 'Search.MailId' | trans }}

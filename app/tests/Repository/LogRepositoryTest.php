@@ -3,6 +3,7 @@
 namespace App\Tests\Repository;
 
 use App\Entity\Log;
+use App\Model\LogAction;
 use App\Repository\LogRepository;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\LogFactory;
@@ -112,12 +113,12 @@ class LogRepositoryTest extends KernelTestCase
     public function testGetSearchQueryFiltersByActionAndMailId(): void
     {
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $expectedLog = LogFactory::createOne(['action' => 'banned', 'mailId' => 'abc']);
-        LogFactory::createOne(['action' => 'banned', 'mailId' => 'def']);
-        LogFactory::createOne(['action' => 'restore', 'mailId' => 'abc']);
+        $expectedLog = LogFactory::createOne(['action' => LogAction::Banned->value, 'mailId' => 'abc']);
+        LogFactory::createOne(['action' => LogAction::Banned->value, 'mailId' => 'def']);
+        LogFactory::createOne(['action' => LogAction::Restore->value, 'mailId' => 'abc']);
 
         $logs = $this->logRepository->getSearchQuery($superAdmin, [
-            'action' => 'banned',
+            'action' => LogAction::Banned,
             'mailId' => 'abc',
         ])->getResult();
 
@@ -135,15 +136,6 @@ class LogRepositoryTest extends KernelTestCase
         $logs = $this->logRepository->getSearchQuery($superAdmin, ['domain' => $domain])->getResult();
 
         self::assertSame([$domainLog->getId()], $this->ids($logs));
-    }
-
-    public function testFindActionsReturnsTheDistinctActions(): void
-    {
-        LogFactory::createOne(['action' => 'restore']);
-        LogFactory::createOne(['action' => 'banned']);
-        LogFactory::createOne(['action' => 'restore']);
-
-        self::assertSame(['banned', 'restore'], $this->logRepository->findActions());
     }
 
     /**

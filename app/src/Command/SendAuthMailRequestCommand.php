@@ -6,6 +6,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\Message;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
@@ -153,7 +154,7 @@ class SendAuthMailRequestCommand
 
                 if ($this->sendAuthEmail($message, $email)) {
                     $this->logService->addLog(
-                        'Authentification request sent',
+                        LogAction::AuthenticationRequestSent,
                         $message->getMailId(),
                         $mailBody['html_body'],
                         $domain,
