@@ -4,6 +4,8 @@ namespace App\Tests\Controller;
 
 use App\Amavis\MessageStatus;
 use App\Entity\SenderRule;
+use App\Model\LogAction;
+use App\Repository\LogRepository;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -525,6 +527,9 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount + 2, SenderRuleFactory::count());
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        $log = static::getContainer()->get(LogRepository::class)->findOneBy(['action' => LogAction::Authorized->value]);
+        self::assertNotNull($log);
+        self::assertSame($domain->getId(), $log->getDomain()?->getId());
         $senderRuleAddress = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
         ])[0];

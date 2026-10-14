@@ -3,6 +3,7 @@
 namespace App\Controller\Portal;
 
 use App\Entity;
+use App\Model\LogAction;
 use App\Repository;
 use App\Service;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -72,7 +73,7 @@ class MessageController extends AbstractController
         );
 
         if ($result) {
-            $this->logService->addLog('authorized', $mailId);
+            $this->logService->addLogForRecipient(LogAction::Authorized, $messageRecipient);
         }
 
         return $this->render('portal/messages/authorized.html.twig');
@@ -129,7 +130,7 @@ class MessageController extends AbstractController
         );
 
         if ($result) {
-            $this->logService->addLog('banned', $mailId);
+            $this->logService->addLogForRecipient(LogAction::Banned, $messageRecipient);
         }
 
         return $this->render('portal/messages/banned.html.twig');
@@ -184,7 +185,7 @@ class MessageController extends AbstractController
         $this->checkMailAccess($user, $messageRecipient);
 
         $this->messageService->restore($messageRecipient);
-        $this->logService->addLog('restore', $mailId);
+        $this->logService->addLogForRecipient(LogAction::Restore, $messageRecipient);
 
         return $this->render('portal/messages/restore.html.twig');
     }
