@@ -3,10 +3,11 @@
 namespace App\Form;
 
 use App\Entity\Domain;
+use App\Model\LogAction;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,7 +19,7 @@ use Symfony\Component\Translation\TranslatableMessage;
  *     startDate?: ?\DateTimeImmutable,
  *     endDate?: ?\DateTimeImmutable,
  *     actor?: ?string,
- *     action?: ?string,
+ *     action?: ?LogAction,
  *     mailId?: ?string,
  *     domain?: ?Domain,
  * }>
@@ -44,11 +45,10 @@ class LogFilterType extends AbstractType
                 'required' => false,
                 'label' => new TranslatableMessage('Entities.Log.fields.actor'),
             ])
-            ->add('action', ChoiceType::class, [
+            ->add('action', EnumType::class, [
                 'required' => false,
                 'label' => new TranslatableMessage('Entities.Log.fields.action'),
-                'choices' => array_combine($options['actions'], $options['actions']),
-                'choice_translation_domain' => false,
+                'class' => LogAction::class,
             ])
             ->add('mailId', TextType::class, [
                 'required' => false,
@@ -73,8 +73,7 @@ class LogFilterType extends AbstractType
             'csrf_protection' => false,
         ]);
 
-        $resolver->setRequired(['actions', 'domains']);
-        $resolver->setAllowedTypes('actions', 'string[]');
+        $resolver->setRequired(['domains']);
         $resolver->setAllowedTypes('domains', Domain::class . '[]');
     }
 }

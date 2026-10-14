@@ -8,6 +8,7 @@ use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Entity\SenderRule;
 use App\Form\ActionsFilterType;
+use App\Model\LogAction;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service;
@@ -311,7 +312,7 @@ class MessageController extends AbstractController
 
         if ($this->messageService->delete($message, $messageRecipient)) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageDeleted'));
-            $logService->addLogForRecipient('delete', $messageRecipient);
+            $logService->addLogForRecipient(LogAction::Delete, $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -346,34 +347,34 @@ class MessageController extends AbstractController
                             $messageRecipient,
                             SenderRule::TYPE_USER,
                         );
-                        $logService->addLogForRecipient('authorized batch', $messageRecipient);
+                        $logService->addLogForRecipient(LogAction::AuthorizedBatch, $messageRecipient);
                         break;
                     case 'banned':
                         $this->messageService->banSenderForRecipient(
                             $messageRecipient,
                             SenderRule::TYPE_USER,
                         );
-                        $logService->addLogForRecipient('banned batch', $messageRecipient);
+                        $logService->addLogForRecipient(LogAction::BannedBatch, $messageRecipient);
                         break;
                     case 'delete':
                         $this->messageService->delete($message, $messageRecipient);
-                        $logService->addLogForRecipient('delete batch', $messageRecipient);
+                        $logService->addLogForRecipient(LogAction::DeleteBatch, $messageRecipient);
                         break;
                     case 'restore':
                         $this->messageService->dispatchRelease($messageRecipient);
-                        $logService->addLogForRecipient('restore batch', $messageRecipient);
+                        $logService->addLogForRecipient(LogAction::RestoreBatch, $messageRecipient);
                         break;
                     case 'mark as spam':
                         $this->denyAccessUnlessGranted('ROLE_ADMIN');
                         $message = $messageRecipient->getMessage();
                         $this->messageService->markMessageAsSpam($message, $allowedDomains);
-                        $logService->addLog('marked as spam batch', $mailId);
+                        $logService->addLog(LogAction::MarkedAsSpamBatch, $mailId);
                         break;
                     case 'mark as ham':
                         $this->denyAccessUnlessGranted('ROLE_ADMIN');
                         $message = $messageRecipient->getMessage();
                         $this->messageService->markMessageAsHam($message, $allowedDomains);
-                        $logService->addLog('marked as ham batch', $mailId);
+                        $logService->addLog(LogAction::MarkedAsHamBatch, $mailId);
                         break;
                 }
             }
@@ -402,7 +403,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLogForRecipient('authorized', $messageRecipient);
+            $logService->addLogForRecipient(LogAction::Authorized, $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -428,7 +429,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLogForRecipient('banned', $messageRecipient);
+            $logService->addLogForRecipient(LogAction::Banned, $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -472,7 +473,7 @@ class MessageController extends AbstractController
 
         $this->messageService->dispatchRelease($messageRecipient);
         $this->addFlash('success', $this->translator->trans('Message.Flash.messagePendingRelease'));
-        $logService->addLogForRecipient('restore', $messageRecipient);
+        $logService->addLogForRecipient(LogAction::Restore, $messageRecipient);
 
         return new RedirectResponse($this->referrer->get());
     }
@@ -502,7 +503,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderAuthorized'));
-            $logService->addLogForRecipient('authorized for domain', $messageRecipient);
+            $logService->addLogForRecipient(LogAction::AuthorizedForDomain, $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -529,7 +530,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.senderBanned'));
-            $logService->addLogForRecipient('banned for domain', $messageRecipient);
+            $logService->addLogForRecipient(LogAction::BannedForDomain, $messageRecipient);
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -558,7 +559,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsSpam'));
-            $logService->addLog('marked as spam', $message->getMailId());
+            $logService->addLog(LogAction::MarkedAsSpam, $message->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -587,7 +588,7 @@ class MessageController extends AbstractController
 
         if ($result) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.messageMarkedAsHam'));
-            $logService->addLog('marked as ham', $message->getMailId());
+            $logService->addLog(LogAction::MarkedAsHam, $message->getMailId());
         }
 
         return new RedirectResponse($this->referrer->get());
@@ -671,7 +672,7 @@ class MessageController extends AbstractController
             );
 
             $this->logService->addLog(
-                'message content displayed',
+                LogAction::MessageContentDisplayed,
                 $messageRecipient->getMailId(),
                 $logContent,
             );

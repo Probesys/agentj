@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Portal;
 
 use App\Amavis\MessageStatus;
+use App\Model\LogAction;
 use App\Service\MessageService;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
@@ -82,7 +83,7 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
         LogFactory::assert()->exists([
-            'action' => 'authorized',
+            'action' => LogAction::Authorized->value,
             'domain' => $domain,
         ]);
     }

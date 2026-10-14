@@ -5,6 +5,7 @@ namespace App\Tests\Controller;
 use App\Entity\Address;
 use App\Entity\SenderRule;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Service\SenderRuleService;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -355,7 +356,7 @@ class SenderRuleControllerTest extends WebTestCase
 
         self::assertResponseRedirects();
         LogFactory::assert()->exists([
-            'action' => 'delete batch sender rule',
+            'action' => LogAction::DeleteBatchSenderRule->value,
             'domain' => $domain,
         ]);
     }

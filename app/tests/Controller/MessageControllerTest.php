@@ -6,6 +6,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -583,7 +584,7 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
         LogFactory::assert()->exists([
-            'action' => 'authorized',
+            'action' => LogAction::Authorized->value,
             'domain' => $domain,
         ]);
         $senderRuleAddress = RuleAddressFactory::findBy([
@@ -2338,7 +2339,7 @@ class MessageControllerTest extends WebTestCase
         $logs = LogFactory::all();
         self::assertCount(1, $logs);
         $log = $logs[0];
-        self::assertSame('message content displayed', $log->getAction());
+        self::assertSame(LogAction::MessageContentDisplayed->value, $log->getAction());
         self::assertSame($messageRecipient->getMailId(), $log->getMailId());
         $expectedDetails = sprintf(
             "recipient=%s user=%s (%d)",

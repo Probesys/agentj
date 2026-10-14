@@ -76,7 +76,7 @@
                                     {% endif %}
                                 </td>
                                 <td data-title="{{ 'Entities.Log.fields.action'|trans }}">
-                                    {{ log.action }}
+                                    {{ log.knownAction ? log.knownAction|trans : log.action }}
                                 </td>
                                 <td data-title="{{ 'Search.MailId'|trans }}" data-test="log-mail-id">
                                     {{ log.mailId ?: '—' }}

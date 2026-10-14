@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use App\Model\LogAction;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\LogFactory;
 use App\Tests\Factory\UserFactory;
@@ -81,12 +82,12 @@ class LogControllerTest extends WebTestCase
     public function testGetIndexFiltersTheEntries(): void
     {
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        LogFactory::createOne(['mailId' => 'bannedMailId', 'action' => 'banned']);
-        LogFactory::createOne(['mailId' => 'restoredMailId', 'action' => 'restore']);
+        LogFactory::createOne(['mailId' => 'bannedMailId', 'action' => LogAction::Banned->value]);
+        LogFactory::createOne(['mailId' => 'restoredMailId', 'action' => LogAction::Restore->value]);
         $this->client->loginUser($superAdmin);
 
         $this->client->request(Request::METHOD_GET, '/logs', [
-            'log_filter' => ['action' => 'banned'],
+            'log_filter' => ['action' => LogAction::Banned->value],
         ]);
 
         self::assertResponseIsSuccessful();

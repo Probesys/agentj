@@ -4,6 +4,7 @@ namespace App\Tests\Command;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Message;
+use App\Model\LogAction;
 use App\Tests\CommandHelper;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\LogFactory;
@@ -43,7 +44,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         $mail = self::getMailerMessage();
         self::assertEmailAddressContains($mail, 'To', $addrS->getEmail());
         LogFactory::assert()->exists([
-            'action' => 'Authentification request sent',
+            'action' => LogAction::AuthenticationRequestSent->value,
             'domain' => $domain,
         ]);
     }
