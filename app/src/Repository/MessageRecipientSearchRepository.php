@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Amavis\MessageStatus;
 use App\Doctrine\SqlIndexWalker;
-use App\Entity\Address;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Util\Email;
@@ -43,8 +42,9 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         ?array $sortParams = null,
         ?int $fromDate = null,
         ?float $maxSpamLevel = null,
+        ?float $minSpamLevel = null,
+        ?bool $getMailingList = null,
     ): Query {
-
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
 
         if ($searchKey) {
@@ -59,6 +59,27 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         if (!is_null($maxSpamLevel)) {
             $queryBuilder->andWhere('mr.bspamLevel <= :maxSpamLevel');
             $queryBuilder->setParameter('maxSpamLevel', $maxSpamLevel);
+        }
+
+        if (!is_null($minSpamLevel)) {
+            $queryBuilder->andWhere('mr.bspamLevel > :minSpamLevel');
+            $queryBuilder->setParameter('minSpamLevel', $minSpamLevel);
+        }
+
+        if ($getMailingList !== null) {
+            if ($getMailingList === false) {
+                $queryBuilder->andWhere(
+                    // accept both false and null value as non mailing list mail
+                    $queryBuilder->expr()->orX(
+                        'm.isMlist IS NULL',
+                        'm.isMlist = :getMailingList'
+                    )
+                );
+            } else {
+                $queryBuilder->andWhere('m.isMlist = :getMailingList');
+            }
+
+            $queryBuilder->setParameter('getMailingList', $getMailingList);
         }
 
         if ($sortParams) {
@@ -79,7 +100,13 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
 
         $this->hintQueryWithIndexes($query, $user, $sortParams, $searchKey, $fromDate);
 
-        $countQueryBuilder = $this->createCountQueryBuilder($queryBuilder, $user, $searchKey, $fromDate);
+        $countQueryBuilder = $this->createCountQueryBuilder(
+            $queryBuilder,
+            $user,
+            $searchKey,
+            $fromDate,
+            $getMailingList,
+        );
         $countQuery = $countQueryBuilder->getQuery();
         $count = $countQuery->getSingleScalarResult();
 
@@ -141,11 +168,14 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         QueryBuilder $baseQueryBuilder,
         ?User $user,
         ?string $searchKey,
-        ?int $fromDate
+        ?int $fromDate,
+        ?bool $getMailingList = null,
     ): QueryBuilder {
         $countQueryBuilder = clone $baseQueryBuilder;
 
-        $hasFilters = !empty($searchKey) || $fromDate !== null;
+        $hasFilters = !empty($searchKey) ||
+            $fromDate !== null ||
+            $getMailingList !== null;
 
         if ($hasFilters) {
             $countQueryBuilder->resetDQLPart('orderBy');
