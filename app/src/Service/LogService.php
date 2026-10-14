@@ -6,6 +6,7 @@ use App\Entity\Domain;
 use App\Entity\Log;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Repository\DomainRepository;
 use App\Repository\UserRepository;
 use App\Util\Email;
@@ -26,10 +27,14 @@ class LogService
     /**
      * Add entry to the log table
      */
-    public function addLog(string $action, string $mailId = '', string $details = '', ?Domain $domain = null): bool
-    {
+    public function addLog(
+        LogAction $action,
+        string $mailId = '',
+        string $details = '',
+        ?Domain $domain = null,
+    ): bool {
         $log = new Log();
-        $log->setAction($action);
+        $log->setAction($action->value);
         $log->setMailId($mailId);
         $log->setDetails($details);
         $log->setDomain($domain);
@@ -43,8 +48,11 @@ class LogService
      * Add entry to the log table for an action on a message recipient, with
      * the domain of the recipient address.
      */
-    public function addLogForRecipient(string $action, MessageRecipient $messageRecipient, string $details = ''): bool
-    {
+    public function addLogForRecipient(
+        LogAction $action,
+        MessageRecipient $messageRecipient,
+        string $details = '',
+    ): bool {
         return $this->addLog(
             $action,
             $messageRecipient->getMailId(),

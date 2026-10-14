@@ -30,7 +30,6 @@ class LogController extends AbstractController
         $user = $this->getUser();
 
         $form = $this->createForm(LogFilterType::class, null, [
-            'actions' => $this->logRepository->findActions(),
             'domains' => $this->domainRepository->findAllowedForUser($user),
         ]);
         $form->handleRequest($request);

@@ -3,6 +3,7 @@
 namespace App\Tests\Service;
 
 use App\Entity\Log;
+use App\Model\LogAction;
 use App\Repository\LogRepository;
 use App\Service\LogService;
 use App\Tests\Factory\AddressFactory;
@@ -27,10 +28,10 @@ class LogServiceTest extends KernelTestCase
         $domain = DomainFactory::createOne();
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLog('restore', 'mail-id', 'details', $domain);
+        $logService->addLog(LogAction::Restore, 'mail-id', 'details', $domain);
 
         $log = $this->getLastLog();
-        self::assertSame('restore', $log->getAction());
+        self::assertSame(LogAction::Restore->value, $log->getAction());
         self::assertSame('mail-id', $log->getMailId());
         self::assertSame($domain->getId(), $log->getDomain()?->getId());
     }
@@ -46,7 +47,7 @@ class LogServiceTest extends KernelTestCase
         self::assertNotFalse($messageRecipient);
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLogForRecipient('restore', $messageRecipient);
+        $logService->addLogForRecipient(LogAction::Restore, $messageRecipient);
 
         $log = $this->getLastLog();
         self::assertSame($message->getMailId(), $log->getMailId());
@@ -68,7 +69,7 @@ class LogServiceTest extends KernelTestCase
         self::assertNotFalse($messageRecipient);
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLogForRecipient('restore', $messageRecipient);
+        $logService->addLogForRecipient(LogAction::Restore, $messageRecipient);
 
         self::assertNull($this->getLastLog()->getDomain());
     }
@@ -81,7 +82,7 @@ class LogServiceTest extends KernelTestCase
         );
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLog('restore', 'mail-id');
+        $logService->addLog(LogAction::Restore, 'mail-id');
 
         self::assertSame($user->getId(), $this->getLastLog()->getCreatedBy()?->getId());
     }
@@ -97,7 +98,7 @@ class LogServiceTest extends KernelTestCase
         );
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLog('restore', 'mail-id');
+        $logService->addLog(LogAction::Restore, 'mail-id');
 
         self::assertSame($admin->getId(), $this->getLastLog()->getCreatedBy()?->getId());
     }
@@ -106,7 +107,7 @@ class LogServiceTest extends KernelTestCase
     {
         $logService = static::getContainer()->get(LogService::class);
 
-        $logService->addLog('restore', 'mail-id');
+        $logService->addLog(LogAction::Restore, 'mail-id');
 
         self::assertNull($this->getLastLog()->getCreatedBy());
     }

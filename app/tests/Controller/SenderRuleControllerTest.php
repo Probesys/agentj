@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\SenderRule;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Repository\LogRepository;
 use App\Service\SenderRuleService;
 use App\Tests\Factory\DomainFactory;
@@ -143,7 +144,7 @@ class SenderRuleControllerTest extends WebTestCase
 
         self::assertResponseRedirects();
         $log = static::getContainer()->get(LogRepository::class)->findOneBy([
-            'action' => 'delete batch sender rule',
+            'action' => LogAction::DeleteBatchSenderRule->value,
         ]);
         self::assertNotNull($log);
         self::assertSame($domain->getId(), $log->getDomain()?->getId());

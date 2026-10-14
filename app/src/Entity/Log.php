@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\EntityBlameableTrait;
 use App\Entity\Traits\EntityTimestampableTrait;
+use App\Model\LogAction;
 use App\Repository\LogRepository;
 use App\Security\HasDomainInterface;
 
@@ -48,6 +49,14 @@ class Log implements HasDomainInterface
         $this->action = $action;
 
         return $this;
+    }
+
+    /**
+     * Return the action as a LogAction, or null if the saved action is unknown.
+     */
+    public function getKnownAction(): ?LogAction
+    {
+        return $this->action !== null ? LogAction::tryFrom($this->action) : null;
     }
 
     public function getMailId(): ?string

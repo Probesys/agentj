@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
 use App\Form\SenderRuleType;
+use App\Model\LogAction;
 use App\Repository\DomainRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
@@ -235,7 +236,7 @@ class SenderRuleController extends AbstractController
                             $mailInfo[2],
                         );
                         $logService->addLog(
-                            'delete batch sender rule',
+                            LogAction::DeleteBatchSenderRule,
                             $mailInfo[1],
                             domain: $this->userRepository->find($mailInfo[0])?->getDomain(),
                         );

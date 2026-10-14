@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Domain;
 use App\Entity\Log;
 use App\Entity\User;
+use App\Model\LogAction;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,7 +24,7 @@ class LogRepository extends BaseRepository
      *     startDate?: ?\DateTimeInterface,
      *     endDate?: ?\DateTimeInterface,
      *     actor?: ?string,
-     *     action?: ?string,
+     *     action?: ?LogAction,
      *     mailId?: ?string,
      *     domain?: ?Domain,
      * } $filters
@@ -74,9 +75,9 @@ class LogRepository extends BaseRepository
         }
 
         $action = $filters['action'] ?? null;
-        if ($action !== null && $action !== '') {
+        if ($action !== null) {
             $queryBuilder->andWhere('l.action = :action');
-            $queryBuilder->setParameter('action', $action);
+            $queryBuilder->setParameter('action', $action->value);
         }
 
         $mailId = trim($filters['mailId'] ?? '');
@@ -94,22 +95,6 @@ class LogRepository extends BaseRepository
         return $queryBuilder->getQuery();
     }
 
-    /**
-     * Return the distinct actions of the entries, sorted alphabetically.
-     *
-     * @return string[]
-     */
-    public function findActions(): array
-    {
-        $rows = $this->createQueryBuilder('l')
-            ->select('DISTINCT l.action')
-            ->where('l.action IS NOT NULL')
-            ->orderBy('l.action', 'ASC')
-            ->getQuery()
-            ->getSingleColumnResult();
-
-        return array_map('strval', $rows);
-    }
 
     /**
      * Truncate entries older than $nbDays from the the log table

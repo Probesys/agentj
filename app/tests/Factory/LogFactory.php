@@ -3,6 +3,7 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Log;
+use App\Model\LogAction;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
@@ -20,7 +21,7 @@ final class LogFactory extends PersistentObjectFactory
     protected function defaults(): array
     {
         return [
-            'action' => 'restore',
+            'action' => LogAction::Restore->value,
             'mailId' => self::faker()->regexify('[a-zA-Z0-9]{12}'),
             'details' => '',
         ];
