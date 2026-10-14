@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service\LocaleService;
 use App\Service\MessageService;
+use App\Service\ReportService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,6 +35,7 @@ class SendReportMailCommand extends Command
         private MailerInterface $mailer,
         private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private MessageService $messageService,
+        private ReportService $reportService,
         private UrlGeneratorInterface $urlGenerator,
         private LocaleService $localeService,
     ) {
@@ -62,13 +64,22 @@ class SendReportMailCommand extends Command
                 continue;
             }
 
-            $messageRecipients = $this->getMessageRecipients($user);
+            $messageRecipients = $this->reportService->getMessageRecipients($user);
+            $listMessageRecipients = $this->reportService->getListMessageRecipients($user);
+            $spamMessageRecipients = $this->reportService->getSpamMessageRecipients($user);
+            $standardMessageRecipients = $this->reportService->getStandardMessageRecipients($user);
 
             if (count($messageRecipients) === 0) {
                 continue;
             }
 
-            $body = $this->createEmailContent($user, $messageRecipients);
+            $body = $this->createEmailContent(
+                $user,
+                $messageRecipients,
+                $listMessageRecipients,
+                $spamMessageRecipients,
+                $standardMessageRecipients,
+            );
 
             $domain = $user->getDomain();
             $from = $domain->getMailAuthenticationSender();
@@ -125,9 +136,17 @@ class SendReportMailCommand extends Command
 
     /**
      * @param MessageRecipient[] $messageRecipients
+     * @param MessageRecipient[] $listMessageRecipients
+     * @param MessageRecipient[] $spamMessageRecipients
+     * @param MessageRecipient[] $standardMessageRecipients
      */
-    private function createEmailContent(User $user, array $messageRecipients): string
-    {
+    private function createEmailContent(
+        User $user,
+        array $messageRecipients,
+        array $listMessageRecipients,
+        array $spamMessageRecipients,
+        array $standardMessageRecipients,
+    ): string {
         $nbUntreated = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::UNTREATED);
         $nbAuthorized = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::AUTHORIZED);
         $nbBanned = $this->messageRecipientSearchRepository->countByType($user, MessageStatus::BANNED);
@@ -150,10 +169,31 @@ class SendReportMailCommand extends Command
             'locale' => $locale,
         ]);
 
+        $tableListMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'messageRecipients' => $listMessageRecipients,
+            'user' => $user,
+            'locale' => $locale,
+        ]);
+
+        $tableSpamMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'messageRecipients' => $spamMessageRecipients,
+            'user' => $user,
+            'locale' => $locale,
+        ]);
+
+        $tableStandardMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'messageRecipients' => $standardMessageRecipients,
+            'user' => $user,
+            'locale' => $locale,
+        ]);
+
         $url = $this->urlGenerator->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $body = str_replace('[USERNAME]', $this->escape($user->getFullname()), $body);
         $body = str_replace('[LIST_MAIL_MSGS]', $tableMessages, $body);
+        $body = str_replace('[LIST_MSGS_LIST]', $tableListMessages, $body);
+        $body = str_replace('[LIST_SPAM_MSGS]', $tableSpamMessages, $body);
+        $body = str_replace('[LIST_STANDARD_MSGS]', $tableStandardMessages, $body);
         $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
         $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
         $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
@@ -162,111 +202,119 @@ class SendReportMailCommand extends Command
         $body = str_replace('[NB_DELETED_MESSAGES]', (string) $nbDeleted, $body);
         $body = str_replace('[URL_MSGS]', $url, $body);
 
-        $body = $this->replaceForeachMessages($body, $user, $messageRecipients);
+        $body = $this->replaceForeachMessages(
+            $body,
+            $user,
+            $messageRecipients,
+            $standardMessageRecipients,
+            $listMessageRecipients,
+            $spamMessageRecipients,
+        );
 
         return $body;
     }
 
     /**
      * @param MessageRecipient[] $messageRecipients
+     * @param MessageRecipient[] $standardMessageRecipients
+     * @param MessageRecipient[] $listMessageRecipients
+     * @param MessageRecipient[] $spamMessageRecipients
      */
     private function replaceForeachMessages(
         string $body,
         User $user,
-        array $messageRecipients
+        array $messageRecipients,
+        array $standardMessageRecipients,
+        array $listMessageRecipients,
+        array $spamMessageRecipients,
     ): string {
-        // Get the part of the body before [FOREACH_MESSAGE].
-        $splitBody = explode('[FOREACH_MESSAGE]', $body, 2);
+        $types = [
+            'MESSAGE',
+            'MESSAGE_STANDARD',
+            'MESSAGE_LIST',
+            'MESSAGE_SPAM',
+        ];
 
-        if (count($splitBody) !== 2) {
-            return $body;
+        foreach ($types as $type) {
+            // Get the part of the body before [FOREACH_$type].
+            $splitBody = explode("[FOREACH_$type]", $body, 2);
+
+            if (count($splitBody) !== 2) {
+                return $body;
+            }
+
+            $bodyStart = $splitBody[0];
+
+            // Get the part of the body after [ENDFOREACH_$type].
+            $bodyRest = $splitBody[1];
+
+            $splitBody = explode("[ENDFOREACH_$type]", $bodyRest, 2);
+
+            if (count($splitBody) !== 2) {
+                return $body;
+            }
+
+            $bodyEnd = $splitBody[1];
+
+            // The remaining section is the one between the two previous tags, i.e.
+            // the message template.
+            $messageTemplate = $splitBody[0];
+
+            $messageRecipientByType = match ($type) {
+                'MESSAGE' => $messageRecipients,
+                'MESSAGE_STANDARD' => $standardMessageRecipients,
+                'MESSAGE_LIST' => $listMessageRecipients,
+                'MESSAGE_SPAM' => $spamMessageRecipients,
+            };
+
+            if (count($messageRecipientByType) === 0) {
+                $body = $bodyStart . $bodyEnd;
+                continue;
+            }
+
+            $bodyMessages = '';
+            foreach ($messageRecipientByType as $messageRecipient) {
+                $message = $messageRecipient->getMessage();
+                $token = $this->messageService->getReleaseToken($message, $user);
+
+                $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
+                    'token' => $token,
+                    'partitionTag' => $messageRecipient->getPartitionTag(),
+                    'mailId' => $messageRecipient->getMailId(),
+                    'rseqnum' => $messageRecipient->getRseqnum(),
+                    'new' => 1,
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $urlRestore = $this->urlGenerator->generate('portal_message_restore', [
+                    'token' => $token,
+                    'partitionTag' => $messageRecipient->getPartitionTag(),
+                    'mailId' => $messageRecipient->getMailId(),
+                    'rseqnum' => $messageRecipient->getRseqnum(),
+                    'new' => 1,
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $urlBan = $this->urlGenerator->generate('portal_message_banned', [
+                    'token' => $token,
+                    'partitionTag' => $messageRecipient->getPartitionTag(),
+                    'mailId' => $messageRecipient->getMailId(),
+                    'rseqnum' => $messageRecipient->getRseqnum(),
+                    'new' => 1,
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $bodyMessage = $messageTemplate;
+                $bodyMessage = str_replace('[MESSAGE_SENDER]', $this->escape($message->getFromAddr()), $bodyMessage);
+                $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $this->escape($message->getSubject()), $bodyMessage);
+                $bodyMessage = str_replace('[URL_MESSAGE_AUTHORIZE_SENDER]', $urlAuthorize, $bodyMessage);
+                $bodyMessage = str_replace('[URL_MESSAGE_RESTORE]', $urlRestore, $bodyMessage);
+                $bodyMessage = str_replace('[URL_MESSAGE_BAN]', $urlBan, $bodyMessage);
+
+                $bodyMessages .= $bodyMessage;
+
+                $body = $bodyStart . $bodyMessages . $bodyEnd;
+            }
         }
 
-        $bodyStart = $splitBody[0];
-
-        // Get the part of the body after [ENDFOREACH_MESSAGE].
-        $bodyRest = $splitBody[1];
-
-        $splitBody = explode('[ENDFOREACH_MESSAGE]', $bodyRest, 2);
-
-        if (count($splitBody) !== 2) {
-            return $body;
-        }
-
-        $bodyEnd = $splitBody[1];
-
-        // The remaining section is the one between the two previous tags, i.e.
-        // the message template.
-        $messageTemplate = $splitBody[0];
-
-        $bodyMessages = '';
-        foreach ($messageRecipients as $messageRecipient) {
-            $message = $messageRecipient->getMessage();
-            $token = $this->messageService->getReleaseToken($message, $user);
-
-            $urlAuthorize = $this->urlGenerator->generate('portal_message_authorized', [
-                'token' => $token,
-                'partitionTag' => $messageRecipient->getPartitionTag(),
-                'mailId' => $messageRecipient->getMailId(),
-                'rseqnum' => $messageRecipient->getRseqnum(),
-                'new' => 1,
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
-
-            $urlRestore = $this->urlGenerator->generate('portal_message_restore', [
-                'token' => $token,
-                'partitionTag' => $messageRecipient->getPartitionTag(),
-                'mailId' => $messageRecipient->getMailId(),
-                'rseqnum' => $messageRecipient->getRseqnum(),
-                'new' => 1,
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
-
-            $urlBan = $this->urlGenerator->generate('portal_message_banned', [
-                'token' => $token,
-                'partitionTag' => $messageRecipient->getPartitionTag(),
-                'mailId' => $messageRecipient->getMailId(),
-                'rseqnum' => $messageRecipient->getRseqnum(),
-                'new' => 1,
-            ], UrlGeneratorInterface::ABSOLUTE_URL);
-
-            $bodyMessage = $messageTemplate;
-            $bodyMessage = str_replace('[MESSAGE_SENDER]', $this->escape($message->getFromAddr()), $bodyMessage);
-            $bodyMessage = str_replace('[MESSAGE_SUBJECT]', $this->escape($message->getSubject()), $bodyMessage);
-            $bodyMessage = str_replace('[URL_MESSAGE_AUTHORIZE_SENDER]', $urlAuthorize, $bodyMessage);
-            $bodyMessage = str_replace('[URL_MESSAGE_RESTORE]', $urlRestore, $bodyMessage);
-            $bodyMessage = str_replace('[URL_MESSAGE_BAN]', $urlBan, $bodyMessage);
-
-            $bodyMessages .= $bodyMessage;
-        }
-
-        return $bodyStart . $bodyMessages . $bodyEnd;
-    }
-
-    /**
-     * @return MessageRecipient[]
-     */
-    private function getMessageRecipients(User $user): array
-    {
-        $messageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
-            $user,
-            messageStatus: MessageStatus::UNTREATED,
-            fromDate: $user->getDateLastReport(),
-        )->getResult();
-
-        $domain = $user->getDomain();
-        $reportSpamLevel = $domain->getReportSpamLevel();
-
-        if ($reportSpamLevel > 0) {
-            $spamMessageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
-                $user,
-                messageStatus: MessageStatus::SPAMMED,
-                maxSpamLevel: $reportSpamLevel,
-                fromDate: $user->getDateLastReport(),
-            )->getResult();
-
-            $messageRecipients = array_merge($messageRecipients, $spamMessageRecipients);
-        }
-
-        return $messageRecipients;
+        return $body;
     }
 
     private function escape(string $value): string
