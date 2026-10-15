@@ -319,7 +319,7 @@ class LdapImportCommand extends Command
             $user->addGroup($group);
         }
 
-        $this->userService->updateAliasGroupsAndPolicyFromUser($user);
+        $this->userService->syncUserAndAliases($user);
     }
 
     /**
