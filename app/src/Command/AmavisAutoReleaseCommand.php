@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Amavis\MessageStatus;
 use App\Entity\Address;
 use App\Entity\MessageRecipient;
+use App\Entity\User;
 use App\Message\AmavisAutoRelease;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\SenderRuleRepository;
@@ -14,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -24,7 +26,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
 )]
 class AmavisAutoReleaseCommand extends Command
 {
-    private int $batchSize = 500;
+    /** @var array<int|string, User|null> */
+    private array $recipientUsersCache = [];
+
+    /** @var array<int|string, array<string, bool>> */
+    private array $authorizationsCache = [];
 
     public function __construct(
         private MessageRecipientRepository $messageRecipientRepository,
@@ -38,9 +44,20 @@ class AmavisAutoReleaseCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Number of messages read per batch', '500');
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $batchSize = filter_var($input->getOption('batch-size'), FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]);
+        if ($batchSize === false) {
+            $output->writeln('<error>The --batch-size option must be a positive integer.</error>');
+            return Command::INVALID;
+        }
 
         $lock = $this->lockFactory->createLock('msgs-auto-release', ttl: 1800);
 
@@ -51,20 +68,21 @@ class AmavisAutoReleaseCommand extends Command
 
         try {
             $messageRecipients = $this->messageRecipientRepository->findForAutoRelease(
-                $this->batchSize,
-                new \DateTimeImmutable('-10 minutes'),
+                $batchSize,
+                new \DateTimeImmutable(MessageRecipient::AMAVIS_RELEASE_TIMEOUT),
             );
             $this->processBatch($messageRecipients);
-            $fullBatch = count($messageRecipients) === $this->batchSize;
+            $fullBatch = count($messageRecipients) === $batchSize;
         } finally {
             $lock->release();
         }
 
         if ($fullBatch) {
             // Queue the next batch after this one's AmavisRelease messages.
-            // The shared worker can deliver these emails before looking for more.
+            // Continue without waiting for the scheduler, while giving the shared
+            // worker a chance to deliver these emails before looking for more.
             $this->entityManager->clear();
-            $this->bus->dispatch(new AmavisAutoRelease());
+            $this->bus->dispatch(new AmavisAutoRelease($batchSize));
         }
 
         return Command::SUCCESS;
@@ -75,17 +93,13 @@ class AmavisAutoReleaseCommand extends Command
      */
     private function processBatch(array $messageRecipients): void
     {
-        $recipientUsers = [];
-        $authorizedSenders = [];
+        $this->recipientUsersCache = [];
+        $this->authorizationsCache = [];
 
         foreach ($messageRecipients as $messageRecipient) {
             $recipient = $messageRecipient->getAddress();
 
-            $recipientId = $recipient->getId();
-            if (!array_key_exists($recipientId, $recipientUsers)) {
-                $recipientUsers[$recipientId] = $this->userRepository->findForAutoRelease($recipient);
-            }
-            $recipientUser = $recipientUsers[$recipientId];
+            $recipientUser = $this->findUserRecipient($recipient);
 
             $recipientOriginalUser = $recipientUser->getOriginalUser();
             if ($recipientOriginalUser) {
@@ -102,19 +116,15 @@ class AmavisAutoReleaseCommand extends Command
 
             $senderIsAuthorized = false;
             if (!$isAuthorizedSendersSpam) {
-                $senderEmail = $messageRecipient->getMessage()->getSenderAddress()->getEmail();
-                $senderIsAuthorized = $this->isSenderAuthorized($senderEmail, $recipient, $authorizedSenders);
+                $message = $messageRecipient->getMessage();
+                $fromAddress = $message->getFromMimeAddress();
+                if ($fromAddress !== null) {
+                    $senderIsAuthorized = $this->isSenderAuthorized($fromAddress->getAddress(), $recipient);
+                }
 
                 if (!$senderIsAuthorized) {
-                    $fromAddress = $messageRecipient->getMessage()->getFromMimeAddress();
-
-                    if ($fromAddress !== null) {
-                        $senderIsAuthorized = $this->isSenderAuthorized(
-                            $fromAddress->getAddress(),
-                            $recipient,
-                            $authorizedSenders,
-                        );
-                    }
+                    $senderEmail = $message->getSenderAddress()->getEmail();
+                    $senderIsAuthorized = $this->isSenderAuthorized($senderEmail, $recipient);
                 }
             }
 
@@ -134,25 +144,35 @@ class AmavisAutoReleaseCommand extends Command
         $this->entityManager->flush();
     }
 
+    private function findUserRecipient(Address $recipient): ?User
+    {
+        $recipientId = $recipient->getId();
+        if (!array_key_exists($recipientId, $this->recipientUsersCache)) {
+            $this->recipientUsersCache[$recipientId] = $this->userRepository->findOneByAddressForAutoRelease(
+                $recipient,
+            );
+        }
+
+        return $this->recipientUsersCache[$recipientId];
+    }
+
     /**
      * @param string $senderEmail Sender address to check.
      * @param Address $recipient Recipient to authorize the sender for.
-     * @param array<int|string, array<string, bool>> $authorizedSenders Decisions cached for this batch.
      */
     private function isSenderAuthorized(
         string $senderEmail,
         Address $recipient,
-        array &$authorizedSenders,
     ): bool {
         $recipientId = $recipient->getId();
-        if (!isset($authorizedSenders[$recipientId][$senderEmail])) {
-            $isAuthorized = $this->senderRuleRepository->isSenderAuthorizedForAutoRelease(
+        if (!isset($this->authorizationsCache[$recipientId][$senderEmail])) {
+            $isAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
                 $senderEmail,
                 $recipient,
             );
-            $authorizedSenders[$recipientId][$senderEmail] = $isAuthorized;
+            $this->authorizationsCache[$recipientId][$senderEmail] = $isAuthorized;
         }
 
-        return $authorizedSenders[$recipientId][$senderEmail];
+        return $this->authorizationsCache[$recipientId][$senderEmail];
     }
 }
