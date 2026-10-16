@@ -3,6 +3,7 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Address;
+use App\Util\Email;
 use App\Util\Url;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
@@ -25,16 +26,18 @@ final class AddressFactory extends PersistentObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'domain' => Url::reverseDomainName(self::faker()->domainName()),
-            'email' => null,
+            'partitionTag' => 0,
+            'email' => self::faker()->unique()->email(),
         ];
     }
 
     #[\Override]
     protected function initialize(): static
     {
-        return $this
-            // ->afterInstantiate(function(Address $address): void {})
-        ;
+        return $this->beforeInstantiate(function (array $attributes): array {
+            $attributes['domain'] ??= Url::reverseDomainName(Email::extractDomain($attributes['email']));
+
+            return $attributes;
+        });
     }
 }

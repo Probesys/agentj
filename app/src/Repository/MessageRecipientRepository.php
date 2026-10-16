@@ -59,11 +59,10 @@ class MessageRecipientRepository extends BaseRepository
             ->innerJoin('mr.address', 'recipient')
             ->innerJoin('m.senderAddress', 'sender')
             ->where('mr.status = :status')
+            // Do not queue releases again while AmavisRelease is still processing them.
             ->andWhere('(mr.amavisReleaseStartedAt IS NULL OR mr.amavisReleaseStartedAt < :retryBefore)')
-            ->andWhere('mr.ds != :alreadyDelivered')
             ->setParameter('status', MessageStatus::UNRELEASED)
             ->setParameter('retryBefore', $retryBefore)
-            ->setParameter('alreadyDelivered', DeliveryStatus::PASS)
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();

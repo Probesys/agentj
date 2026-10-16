@@ -2,15 +2,13 @@
 
 namespace App\Tests\Command;
 
-use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
-use App\Command\AmavisAutoReleaseCommand;
+use App\Entity\MessageRecipient;
 use App\Message\AmavisAutoRelease;
 use App\Message\AmavisRelease;
-use App\Repository\MessageRecipientRepository;
-use App\Service\MessageService;
 use App\Tests\CommandHelper;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\MessageRecipientFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
@@ -18,6 +16,7 @@ use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Zenstruck\Foundry\Test\Factories;
@@ -218,18 +217,24 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         self::assertNotFalse($expired);
         self::assertNotFalse($new);
 
-        $ongoing->setAmavisReleaseStartedAt(new \DateTimeImmutable('-1 minute'));
+        $ongoingStartedAt = new \DateTimeImmutable('-1 minute');
+        $ongoing->setAmavisReleaseStartedAt($ongoingStartedAt);
         $expired->setAmavisReleaseStartedAt(new \DateTimeImmutable('-11 minutes'));
         $this->save([$ongoing, $expired]);
 
+        // Database timestamps have second precision: compare against the start of the command.
+        $startedAt = new \DateTimeImmutable(date('Y-m-d H:i:s'));
         self::executeCommand('agentj:auto-release-message')->assertCommandIsSuccessful();
 
         $this->refresh($ongoing);
         $this->refresh($expired);
         $this->refresh($new);
         self::assertSame(MessageStatus::UNRELEASED, $ongoing->getStatus());
-        self::assertGreaterThan(new \DateTimeImmutable('-2 minutes'), $expired->getAmavisReleaseStartedAt());
-        self::assertNotNull($new->getAmavisReleaseStartedAt());
+        self::assertSame($ongoingStartedAt->getTimestamp(), $ongoing->getAmavisReleaseStartedAt()?->getTimestamp());
+        self::assertSame(MessageStatus::RESTORED, $expired->getStatus());
+        self::assertSame(MessageStatus::RESTORED, $new->getStatus());
+        self::assertGreaterThanOrEqual($startedAt, $expired->getAmavisReleaseStartedAt());
+        self::assertGreaterThanOrEqual($startedAt, $new->getAmavisReleaseStartedAt());
     }
 
     public function testExecuteProcessesMixedOutcomesInTheSameBatch(): void
@@ -254,64 +259,45 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         $this->refresh($spam);
         $this->refresh($restored);
         self::assertSame(MessageStatus::SPAMMED, $spam->getStatus());
+        self::assertSame(MessageStatus::RESTORED, $restored->getStatus());
         self::assertNotNull($restored->getAmavisReleaseStartedAt());
     }
 
-    public function testExecuteProcessesEveryBatchWithoutRetryingOngoingOrAlreadyDeliveredMessages(): void
+    public function testExecuteProcessesEveryBatchWithoutRetryingOngoingReleases(): void
     {
         $domain = DomainFactory::createOne();
         $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
         $recipient = UserFactory::new()->user($domain)->create();
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
 
-        $mailIds = [];
+        $messageRecipients = [];
         for ($i = 0; $i < 5; ++$i) {
-            $mailIds[] = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)->getMailId();
+            $messageRecipient = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)
+                ->getMessageRecipients()->first();
+            self::assertNotFalse($messageRecipient);
+            $messageRecipients[] = $messageRecipient;
         }
 
-        $alreadyDelivered = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)
-            ->getMessageRecipients()->first();
         $ongoing = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)
             ->getMessageRecipients()->first();
-        self::assertNotFalse($alreadyDelivered);
         self::assertNotFalse($ongoing);
-        $alreadyDelivered->setDs(DeliveryStatus::PASS);
         $ongoing->setAmavisReleaseStartedAt(new \DateTimeImmutable());
-        $this->save([$alreadyDelivered, $ongoing]);
+        $this->save($ongoing);
 
         // Five eligible messages with a batch size of two require three batches.
-        $command = self::getContainer()->get(AmavisAutoReleaseCommand::class);
-        (new \ReflectionProperty($command, 'batchSize'))->setValue($command, 2);
-        self::executeCommand('agentj:auto-release-message')->assertCommandIsSuccessful();
+        self::executeCommand('agentj:auto-release-message', ['--batch-size' => 2])->assertCommandIsSuccessful();
 
-        $repository = self::getContainer()->get(MessageRecipientRepository::class);
-        foreach ($mailIds as $mailId) {
-            $messageRecipient = $repository->findOneBy(['mailId' => $mailId]);
-            self::assertNotNull($messageRecipient);
+        foreach ($messageRecipients as $messageRecipient) {
+            $messageRecipient = $this->reloadMessageRecipient($messageRecipient);
             self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
         }
 
-        $delivered = $repository->findOneBy(['mailId' => $alreadyDelivered->getMailId()]);
-        $inProgress = $repository->findOneBy(['mailId' => $ongoing->getMailId()]);
-        self::assertNotNull($delivered);
-        self::assertNotNull($inProgress);
-        self::assertSame(MessageStatus::UNRELEASED, $delivered->getStatus());
-        self::assertSame(MessageStatus::UNRELEASED, $inProgress->getStatus());
+        $ongoing = $this->reloadMessageRecipient($ongoing);
+        self::assertSame(MessageStatus::UNRELEASED, $ongoing->getStatus());
     }
 
     public function testExecuteQueuesTheNextBatchAfterTheReleaseJobs(): void
     {
-        $domain = DomainFactory::createOne();
-        $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
-        $recipient = UserFactory::new()->user($domain)->create();
-        $recipient->setHumanAuthenticationEnabled(false);
-        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
-
-        $mailIds = [];
-        for ($i = 0; $i < 3; ++$i) {
-            $mailIds[] = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)->getMailId();
-        }
-
         $bus = new class implements MessageBusInterface {
             /** @var list<object> */
             public array $messages = [];
@@ -322,37 +308,46 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
                 return Envelope::wrap($message, $stamps);
             }
         };
-        $command = self::getContainer()->get(AmavisAutoReleaseCommand::class);
-        $messageService = self::getContainer()->get(MessageService::class);
-        $commandBus = new \ReflectionProperty($command, 'bus');
-        $serviceBus = new \ReflectionProperty($messageService, 'bus');
-        $originalCommandBus = $commandBus->getValue($command);
-        $originalServiceBus = $serviceBus->getValue($messageService);
+        // Replace the bus before fixtures initialize Doctrine listeners and their services.
+        self::getContainer()->set('messenger.bus.default', $bus);
 
-        try {
-            (new \ReflectionProperty($command, 'batchSize'))->setValue($command, 2);
-            $commandBus->setValue($command, $bus);
-            $serviceBus->setValue($messageService, $bus);
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user(DomainFactory::createOne())->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $recipient->setHumanAuthenticationEnabled(false);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
 
-            self::executeCommand('agentj:auto-release-message')->assertCommandIsSuccessful();
-            self::assertCount(3, $bus->messages);
-            self::assertInstanceOf(AmavisRelease::class, $bus->messages[0]);
-            self::assertInstanceOf(AmavisRelease::class, $bus->messages[1]);
-            self::assertInstanceOf(AmavisAutoRelease::class, $bus->messages[2]);
+        $messageRecipients = [];
+        for ($i = 0; $i < 3; ++$i) {
+            $messageRecipient = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNRELEASED)
+                ->getMessageRecipients()->first();
+            self::assertNotFalse($messageRecipient);
+            $messageRecipients[] = $messageRecipient;
+        }
 
-            self::executeCommand('agentj:auto-release-message')->assertCommandIsSuccessful();
-            self::assertCount(4, $bus->messages);
-            self::assertInstanceOf(AmavisRelease::class, $bus->messages[3]);
+        self::executeCommand('agentj:auto-release-message', ['--batch-size' => 2])->assertCommandIsSuccessful();
+        self::assertCount(3, $bus->messages);
+        self::assertInstanceOf(AmavisRelease::class, $bus->messages[0]);
+        self::assertInstanceOf(AmavisRelease::class, $bus->messages[1]);
+        self::assertInstanceOf(AmavisAutoRelease::class, $bus->messages[2]);
+        self::assertSame(2, $bus->messages[2]->batchSize);
 
-            $repository = self::getContainer()->get(MessageRecipientRepository::class);
-            foreach ($mailIds as $mailId) {
-                $messageRecipient = $repository->findOneBy(['mailId' => $mailId]);
-                self::assertNotNull($messageRecipient);
-                self::assertNotNull($messageRecipient->getAmavisReleaseStartedAt());
-            }
-        } finally {
-            $commandBus->setValue($command, $originalCommandBus);
-            $serviceBus->setValue($messageService, $originalServiceBus);
+        self::executeCommand('agentj:auto-release-message', ['--batch-size' => 2])->assertCommandIsSuccessful();
+        self::assertCount(4, $bus->messages);
+        self::assertInstanceOf(AmavisRelease::class, $bus->messages[3]);
+
+        foreach ($messageRecipients as $messageRecipient) {
+            $messageRecipient = $this->reloadMessageRecipient($messageRecipient);
+            self::assertNotNull($messageRecipient->getAmavisReleaseStartedAt());
+        }
+    }
+
+    public function testExecuteRejectsInvalidBatchSizes(): void
+    {
+        foreach (['0', '-1', '1.5', 'invalid'] as $batchSize) {
+            $tester = self::executeCommand('agentj:auto-release-message', ['--batch-size' => $batchSize]);
+            self::assertSame(Command::INVALID, $tester->getStatusCode());
+            self::assertStringContainsString('must be a positive integer', $tester->getDisplay());
         }
     }
 
@@ -372,20 +367,16 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
         }
 
         $connection = self::getContainer()->get(EntityManagerInterface::class)->getConnection();
+        // MySQL's session counter measures SQL statements on this connection,
+        // including the SHOW query itself; its delta detects per-message lookups.
         $questions = function () use ($connection): int {
             $status = $connection->fetchAssociative("SHOW SESSION STATUS LIKE 'Questions'");
             self::assertNotFalse($status);
             return (int) $status['Value'];
         };
         $before = $questions();
-        $startedAt = hrtime(true);
         self::executeCommand('agentj:auto-release-message')->assertCommandIsSuccessful();
         $queries = $questions() - $before;
-        $elapsedMs = (hrtime(true) - $startedAt) / 1_000_000;
-
-        if (getenv('AUTO_RELEASE_BENCHMARK') === '1') {
-            fwrite(STDERR, sprintf("Auto-release: 25 messages, %d SQL queries, %.1f ms\n", $queries, $elapsedMs));
-        }
 
         // One batch SELECT, one user lookup, one sender rule lookup, then 25 updates.
         // Per-message lookups or flushes would break this bound.
@@ -394,5 +385,16 @@ class AmavisAutoReleaseCommandTest extends KernelTestCase
             $this->refresh($messageRecipient);
             self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
         }
+    }
+
+    private function reloadMessageRecipient(MessageRecipient $messageRecipient): MessageRecipient
+    {
+        // Full batches clear the entity manager, so the stored entities are detached
+        // and cannot be refreshed directly.
+        return MessageRecipientFactory::find([
+            'partitionTag' => $messageRecipient->getPartitionTag(),
+            'mailId' => $messageRecipient->getMailId(),
+            'rseqnum' => $messageRecipient->getRseqnum(),
+        ]);
     }
 }

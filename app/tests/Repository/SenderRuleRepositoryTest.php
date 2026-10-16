@@ -10,7 +10,6 @@ use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
-use App\Util\Url;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -26,9 +25,7 @@ class SenderRuleRepositoryTest extends KernelTestCase
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $recipientAddress = AddressFactory::createOne([
-            'partitionTag' => 0,
             'email' => $recipient->getEmail(),
-            'domain' => Url::reverseDomainName($domain->getDomain()),
         ]);
         $ruleAddress = RuleAddressFactory::createOne([
             'email' => 'sender@example.org',
@@ -44,18 +41,15 @@ class SenderRuleRepositoryTest extends KernelTestCase
         $repository = static::getContainer()->get(SenderRuleRepository::class);
 
         self::assertTrue($repository->isSenderAuthorizedByRecipient('Sender@Example.ORG', $recipientAddress));
-        self::assertTrue($repository->isSenderAuthorizedForAutoRelease('Sender@Example.ORG', $recipientAddress));
     }
 
-    public function testIsSenderAuthorizedForAutoReleaseUsesTheSameRulePriorityAsTheRegularLookup(): void
+    public function testIsSenderAuthorizedByRecipientUsesTheSameRulePriorityAsTheRegularLookup(): void
     {
         self::bootKernel();
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $recipientAddress = AddressFactory::createOne([
-            'partitionTag' => 0,
             'email' => $recipient->getEmail(),
-            'domain' => Url::reverseDomainName($domain->getDomain()),
         ]);
         $domainUser = static::getContainer()->get(UserRepository::class)->findDomainUser($domain->getDomain());
         self::assertNotNull($domainUser);
@@ -83,12 +77,14 @@ class SenderRuleRepositoryTest extends KernelTestCase
         ]);
 
         $repository = static::getContainer()->get(SenderRuleRepository::class);
+        $rules = $repository->findBySenderEmailAndRecipient($sender, $recipientAddress);
+        self::assertNotEmpty($rules);
         self::assertSame(
+            $rules[0]->isWbRuleAuthorized(),
             $repository->isSenderAuthorizedByRecipient($sender, $recipientAddress),
-            $repository->isSenderAuthorizedForAutoRelease($sender, $recipientAddress),
         );
-        self::assertFalse($repository->isSenderAuthorizedForAutoRelease($sender, $recipientAddress));
+        self::assertFalse($repository->isSenderAuthorizedByRecipient($sender, $recipientAddress));
 
-        self::assertTrue($repository->isSenderAuthorizedForAutoRelease('someone@example.org', $recipientAddress));
+        self::assertTrue($repository->isSenderAuthorizedByRecipient('someone@example.org', $recipientAddress));
     }
 }

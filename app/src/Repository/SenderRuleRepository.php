@@ -186,19 +186,8 @@ class SenderRuleRepository extends BaseRepository
         return $senderRules;
     }
 
-    public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
-    {
-        $senderRules = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);
-
-        if (count($senderRules) === 0) {
-            return false;
-        }
-
-        return $senderRules[0]->isWbRuleAuthorized();
-    }
-
     /**
-     * The auto-release process only needs the decision, not hydrated rules.
+     * Only fetch the authorization decision, without hydrating rules.
      * Preserve the Amavis order: recipient specificity (users.priority), then
      * rule priority, then sender address specificity.
      *
@@ -206,7 +195,7 @@ class SenderRuleRepository extends BaseRepository
      * @param Address $recipient Recipient address to match against the rules.
      * @return bool
      */
-    public function isSenderAuthorizedForAutoRelease(string $senderEmail, Address $recipient): bool
+    public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
     {
         $recipientAddresses = Email::getAddressLookups($recipient->getEmail());
         $senderAddresses = Email::getAddressLookups($senderEmail);

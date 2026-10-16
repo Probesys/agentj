@@ -99,7 +99,7 @@ class UserRepository extends BaseRepository
      * @param Address $address Recipient address to look up.
      * @return ?User
      */
-    public function findForAutoRelease(Address $address): ?User
+    public function findOneByAddressForAutoRelease(Address $address): ?User
     {
         return $this->createQueryBuilder('u')
             ->addSelect('original', 'domain', 'originalDomain')
