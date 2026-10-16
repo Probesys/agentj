@@ -14,7 +14,6 @@ use App\Tests\Factory\QuarantineFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Util\Url;
-use Webklex\PHPIMAP\Structure;
 
 trait MessageHelper
 {
@@ -43,6 +42,7 @@ trait MessageHelper
     /**
      * @param array<int, Address> $recipients
      * @param array<mixed> $messageAttributes
+     * @param array<mixed> $messageRecipientAttributes
      */
     private function setupMail(
         Address $sender,
@@ -51,6 +51,7 @@ trait MessageHelper
         ?string $body = null,
         ?int $status = null,
         ?array $messageAttributes = [],
+        ?array $messageRecipientAttributes = [],
     ): Message {
         $mailId = bin2hex(random_bytes(8));
 
@@ -64,7 +65,13 @@ trait MessageHelper
         ], $messageAttributes));
 
         for ($i = 1; $i < count($recipients) + 1; $i++) {
-            $this->setupMailRecipient($message, $recipients[$i - 1], $i, $status);
+            $this->setupMailRecipient(
+                $message,
+                $recipients[$i - 1],
+                $i,
+                $status,
+                $messageRecipientAttributes,
+            );
         }
 
         $recipientsEmails = array_map(fn ($recipient) => $recipient->getEmail(), $recipients);
@@ -86,13 +93,17 @@ trait MessageHelper
         return $message;
     }
 
+    /**
+     * @param array<mixed> $messageRecipientAttributes
+     */
     private function setupMailRecipient(
         Message $message,
         Address $recipient,
         int $rseqnum,
         ?int $status = null,
+        ?array $messageRecipientAttributes = [],
     ): MessageRecipient {
-        return MessageRecipientFactory::new()->create([
+        return MessageRecipientFactory::new()->create(array_merge([
             'message' => $message,
             'partitionTag' => $message->getPartitionTag(),
             'mailId' => $message->getMailId(),
@@ -107,7 +118,7 @@ trait MessageHelper
             'bspamLevel' => -1.2,
             'smtpResp' => '250 2.7.0 Ok, discarded, id=00045-01 - spam',
             'sendCaptcha' => 0,
-        ]);
+        ], $messageRecipientAttributes));
     }
 
     private function createSenderRule(
