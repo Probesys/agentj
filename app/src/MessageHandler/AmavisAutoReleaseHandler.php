@@ -2,7 +2,6 @@
 
 namespace App\MessageHandler;
 
-use App\Command\AmavisAutoReleaseCommand;
 use App\Message\AmavisAutoRelease;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -27,7 +26,7 @@ final class AmavisAutoReleaseHandler
     {
         try {
             $output = new BufferedOutput();
-            $input = new ArrayInput([]);
+            $input = new ArrayInput(['--batch-size' => $amavisAutoReleaseMessage->batchSize]);
             $command = $this->application->find('agentj:auto-release-message');
 
             $command->run($input, $output);

@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MessageRecipientRepository::class)]
 class MessageRecipient extends BaseMessageRecipient
 {
+    public const AMAVIS_RELEASE_TIMEOUT = '-10 minutes';
+
     #[ORM\ManyToOne(inversedBy: 'messageRecipients')]
     #[ORM\JoinColumn(name: 'mail_id', referencedColumnName: 'mail_id', onDelete: 'CASCADE')]
     #[ORM\JoinColumn(name: 'partition_tag', referencedColumnName: 'partition_tag', onDelete: 'CASCADE')]
@@ -61,10 +63,10 @@ class MessageRecipient extends BaseMessageRecipient
 
     public function isAmavisReleaseOngoing(): bool
     {
-        $tenMinutesAgo = (new \DateTimeImmutable())->modify('-10 minutes');
+        $retryBefore = new \DateTimeImmutable(self::AMAVIS_RELEASE_TIMEOUT);
 
         return !$this->isAlreadyReleased()
             && $this->amavisReleaseStartedAt !== null
-            && $this->amavisReleaseStartedAt >= $tenMinutesAgo;
+            && $this->amavisReleaseStartedAt >= $retryBefore;
     }
 }
