@@ -14,11 +14,13 @@ use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Users
  */
 #[ORM\Table(name: 'users')]
+#[ORM\Index(name: 'idx_users_report_next_at', columns: ['report_next_at'])]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], ignoreNull: true)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDomainInterface
@@ -73,7 +75,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: Domain::class)]
     #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
-    private ?Domain $domain;
+    private ?Domain $domain = null;
 
     /**
      * @var Collection<int, Group>
@@ -99,6 +101,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     private bool $report = true;
 
     /**
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[Assert\Unique]
+    #[Assert\All([
+        new Assert\NotBlank(message: 'invalid_report_time'),
+        new Assert\Regex(pattern: '/^([01][0-9]|2[0-3]):[0-5][0-9]$/D', message: 'invalid_report_time'),
+    ])]
+    private ?array $reportTimes = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $reportSkipWeekends = null;
+
+    /**
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'ownedSharedBoxes')]
@@ -111,7 +127,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     private Collection $ownedSharedBoxes;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $dateLastReport;
+    private ?int $dateLastReport = null;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $reportPeriodEnd = null;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $reportNextAt = null;
 
     #[ORM\Column(type: 'datetime', nullable: true, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?DateTimeInterface $humanAuthenticationEnabledAt = null;
@@ -253,7 +275,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     public function getRoles(): array
     {
-        $roles = json_decode($this->roles, associative: true);
+        $roles = json_decode($this->roles ?? '[]', associative: true);
 
         if (!is_array($roles)) {
             $roles = [];
@@ -443,6 +465,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     }
 
     /**
+     * @return list<string>|null
+     */
+    public function getReportTimes(): ?array
+    {
+        return $this->reportTimes;
+    }
+
+    /**
+     * @param list<string>|null $reportTimes
+     */
+    public function setReportTimes(?array $reportTimes): static
+    {
+        $this->reportTimes = $reportTimes ?: null;
+
+        return $this;
+    }
+
+    public function getReportSkipWeekends(): ?bool
+    {
+        return $this->reportSkipWeekends;
+    }
+
+    public function setReportSkipWeekends(?bool $reportSkipWeekends): static
+    {
+        $this->reportSkipWeekends = $reportSkipWeekends;
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getEffectiveReportTimes(): array
+    {
+        return $this->reportTimes ?? $this->getDomain()?->getReportTimes() ?? [];
+    }
+
+    public function getEffectiveReportSkipWeekends(): bool
+    {
+        return $this->reportSkipWeekends ?? $this->getDomain()?->getReportSkipWeekends() ?? false;
+    }
+
+    /**
      * @return Collection<int, self>
      */
     public function getSharedWith(): Collection
@@ -508,6 +573,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     public function setDateLastReport(?int $dateLastReport): self
     {
         $this->dateLastReport = $dateLastReport;
+
+        return $this;
+    }
+
+    public function getReportPeriodEnd(): ?int
+    {
+        return $this->reportPeriodEnd ?? $this->dateLastReport;
+    }
+
+    public function setReportPeriodEnd(?int $reportPeriodEnd): static
+    {
+        $this->reportPeriodEnd = $reportPeriodEnd;
+
+        return $this;
+    }
+
+    public function getReportNextAt(): ?int
+    {
+        return $this->reportNextAt;
+    }
+
+    public function setReportNextAt(?int $reportNextAt): static
+    {
+        $this->reportNextAt = $reportNextAt;
 
         return $this;
     }

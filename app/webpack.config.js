@@ -46,8 +46,9 @@ Encore
         .cleanupOutputBeforeBuild()
         .enableBuildNotifications()
         .enableSourceMaps(!Encore.isProduction())
-        // enables hashed filenames (e.g. app.abc123.css)
-        .enableVersioning(Encore.isProduction())
+        // Hash filenames in development too: watched rebuilds must not reuse
+        // cached CSS/JS from a previous compilation.
+        .enableVersioning()
 
         // enables @babel/preset-env polyfills
         .configureBabel(() => {

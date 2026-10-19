@@ -102,6 +102,11 @@ class DomainType extends AbstractType
             ->add('sendUserMailAlerts', CheckboxType::class, [
                 'label' => new TranslatableMessage('Entities.Domain.fields.sendUserMailAlerts'),
                 'required' => false,
+            ])
+            ->add('reportTimes', ReportTimesType::class)
+            ->add('reportSkipWeekends', CheckboxType::class, [
+                'label' => new TranslatableMessage('Entities.Report.fields.skipWeekends'),
+                'required' => false,
             ]);
     }
 

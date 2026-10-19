@@ -150,7 +150,9 @@ then
 		send 'in_bloc_unknown' 'in' 'user@blocnormal.fr' 1
 	send 'in_pass_unknown' 'in' 'user@laissepasser.fr' 1
 
-	$dx php bin/console agentj:send-report-mail >/dev/null
+	# Bypass sending times and weekend restrictions so this integration test
+	# does not depend on when it runs or on the configured report schedule.
+	$dx php bin/console agentj:send-report-mail --force >/dev/null
 	expected_subject="Messages en attente sur AgentJ pour user@blocnormal.fr" \
 		expected_sender="will@blocnormal.fr" \
 		to_addr="user@blocnormal.fr" \

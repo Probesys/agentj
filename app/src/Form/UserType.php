@@ -88,6 +88,10 @@ class UserType extends AbstractType
             ->add('report', null, [
                 'label' => new TranslatableMessage('Entities.User.fields.report'),
             ])
+            ->add('reportTimes', ReportTimesType::class, [
+                'required' => false,
+                'help' => new TranslatableMessage('Entities.Report.help.userTimes'),
+            ])
             ->add('sharedWith', UserAutocompleteField::class, [
                 'multiple' => true,
                 'required' => false,

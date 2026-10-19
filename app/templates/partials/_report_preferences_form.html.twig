@@ -1,0 +1,91 @@
+{% set userPreferences = form.reportSkipWeekendsMode is defined %}
+{% set reportUser = userPreferences ? form.vars.data : null %}
+{% set reportDomain = userPreferences ? reportUser.domain : null %}
+<fieldset
+    class="report-preferences"
+    data-controller="report-preferences"
+    data-report-preferences-domain-weekends-value="{{ reportDomain and reportDomain.reportSkipWeekends ? 'true' : 'false' }}"
+    data-report-preferences-inherited-label-value="{{ 'Entities.Report.labels.inheritedWeekends' | trans }}"
+    data-report-preferences-custom-label-value="{{ 'Entities.Report.labels.customWeekends' | trans }}"
+    data-test="report-preferences"
+>
+    <legend class="h5">{{ 'Entities.Report.title.section'|trans }}</legend>
+    {% if userPreferences %}
+    <div class="report-preferences__toolbar">
+        {{ form_widget(form.report) }}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="{{ form.reportTimes.vars.id }}_defaults"
+                data-report-preferences-target="defaults" data-action="report-preferences#toggleDefaults"
+                data-test="report-domain-defaults" {% if not form.reportTimes.vars.value %}checked{% endif %}>
+            <label class="form-check-label" for="{{ form.reportTimes.vars.id }}_defaults">{{ 'Entities.Report.actions.useDomainDefaults'|trans }}</label>
+        </div>
+    </div>
+    {{ form_errors(form.report) }}
+    {% endif %}
+    <div class="form-group">
+        <div class="report-preferences__heading">
+            {{ form_label(form.reportTimes) }}
+            <details class="report-help">
+                <summary aria-label="{{ 'Entities.Report.labels.help'|trans }}">?</summary>
+                <div class="report-help__content">{{ form_help(form.reportTimes) }}</div>
+            </details>
+        </div>
+        {{ form_widget(form.reportTimes, { attr: {
+            'class': 'form-control',
+            'data-report-preferences-target': 'times'
+        } }) }}
+        <div class="report-preferences__times" data-report-preferences-target="picker" hidden>
+            <div class="report-preferences__slots" data-report-preferences-target="slots"></div>
+            <button type="button" class="btn btn-outline-primary" data-action="report-preferences#addTime" aria-label="{{ 'Entities.Report.actions.addTime'|trans }}" title="{{ 'Entities.Report.actions.addTime'|trans }}">+</button>
+        </div>
+        {% if userPreferences %}
+        <div class="report-preferences__times" data-report-preferences-target="domainSchedule" data-test="report-domain-schedule" hidden>
+            {% for time in reportDomain ? reportDomain.reportTimes : [] %}
+                <input type="time" class="form-control report-preferences__inherited-time" value="{{ time }}" disabled aria-label="{{ 'Entities.Report.fields.times'|trans }}">
+            {% else %}
+                <span class="text-muted small">{{ 'Entities.Report.labels.noDomainSchedule'|trans }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <template data-report-preferences-target="slotTemplate">
+            <div class="report-preferences__slot">
+                <input type="time" step="60" class="form-control" aria-label="{{ 'Entities.Report.fields.times'|trans }}" data-action="input->report-preferences#changeTime">
+                <button type="button" class="btn btn-outline-secondary" data-action="report-preferences#removeTime" aria-label="{{ 'Entities.Report.actions.removeTime'|trans }}" title="{{ 'Entities.Report.actions.removeTime'|trans }}">−</button>
+            </div>
+        </template>
+        {{ form_errors(form.reportTimes) }}
+    </div>
+    <div class="form-group">
+        <div class="report-preferences__heading">
+        {% if userPreferences %}
+            {{ form_widget(form.reportSkipWeekendsMode, { attr: {
+                'class': 'report-preferences__weekend-mode',
+                'aria-label': 'Entities.Report.labels.weekendMode'|trans,
+                'data-report-preferences-target': 'mode',
+                'data-action': 'change->report-preferences#changeWeekendMode'
+            } }) }}
+        {% endif %}
+        {{ form_widget(form.reportSkipWeekends, { attr: {
+            'class': 'form-check-input',
+            'data-report-preferences-target': 'weekends',
+            'data-action': 'change->report-preferences#chooseWeekends'
+        } }) }}
+            {% if form.reportSkipWeekends.vars.help %}
+            <details class="report-help">
+                <summary aria-label="{{ 'Entities.Report.labels.help'|trans }}">?</summary>
+                <div class="report-help__content">{{ form_help(form.reportSkipWeekends) }}</div>
+            </details>
+            {% endif %}
+        </div>
+        {{ form_errors(form.reportSkipWeekends) }}
+    </div>
+    {% if userPreferences %}
+    {% if showWeekendOrigin is not defined or showWeekendOrigin %}
+    <p class="text-muted small" data-report-preferences-target="origin" data-test="report-weekend-origin" aria-live="polite">
+        {{ (reportUser.reportSkipWeekends is null
+            ? 'Entities.Report.labels.inheritedWeekends'
+            : 'Entities.Report.labels.customWeekends') | trans }}
+    </p>
+    {% endif %}
+    {% endif %}
+</fieldset>

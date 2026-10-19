@@ -9,6 +9,7 @@ use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Domain
@@ -74,6 +75,21 @@ class Domain
 
     #[ORM\Column(options: ['default' => 0])]
     private float $reportSpamLevel = 0;
+
+    /**
+     * @var list<string>
+     */
+    #[ORM\Column(type: Types::JSON, options: ['default' => '["07:00"]'])]
+    #[Assert\Count(min: 1)]
+    #[Assert\Unique]
+    #[Assert\All([
+        new Assert\NotBlank(message: 'invalid_report_time'),
+        new Assert\Regex(pattern: '/^([01][0-9]|2[0-3]):[0-5][0-9]$/D', message: 'invalid_report_time'),
+    ])]
+    private array $reportTimes = ['07:00'];
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $reportSkipWeekends = false;
 
     /**
      * @var Collection<int, Group>
@@ -327,6 +343,36 @@ class Domain
     public function setReportSpamLevel(float $reportSpamLevel): static
     {
         $this->reportSpamLevel = $reportSpamLevel;
+
+        return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getReportTimes(): array
+    {
+        return $this->reportTimes;
+    }
+
+    /**
+     * @param list<string> $reportTimes
+     */
+    public function setReportTimes(array $reportTimes): static
+    {
+        $this->reportTimes = $reportTimes;
+
+        return $this;
+    }
+
+    public function getReportSkipWeekends(): bool
+    {
+        return $this->reportSkipWeekends;
+    }
+
+    public function setReportSkipWeekends(bool $reportSkipWeekends): static
+    {
+        $this->reportSkipWeekends = $reportSkipWeekends;
 
         return $this;
     }

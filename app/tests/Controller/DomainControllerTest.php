@@ -6,6 +6,7 @@ use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\PolicyFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\SessionHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,6 +101,8 @@ class DomainControllerTest extends WebTestCase
         self::assertEquals($domain->getDomain(), $domain->getDomain());
         self::assertEquals('smtp.test2.fr', $domain->getSrvSmtp());
         self::assertEquals(26, $domain->getSmtpPort());
+        self::assertSame(['07:00'], $domain->getReportTimes());
+        self::assertFalse($domain->getReportSkipWeekends());
     }
 
     public function testSuperAdminCanEditDomain(): void
@@ -115,6 +118,8 @@ class DomainControllerTest extends WebTestCase
             "smtpPort" => "27",
             "level" => "2",
             "authorizedSendersSpamLevel" => "10",
+            "reportTimes" => "09:00, 15:00",
+            "reportSkipWeekends" => "1",
         ]);
         $client->request('POST', '/domain/' . $domain->getId() . '/edit', $payload);
 
@@ -126,8 +131,47 @@ class DomainControllerTest extends WebTestCase
         self::assertEquals(27, $updatedDomain->getSmtpPort());
         self::assertEquals(2, $updatedDomain->getLevel());
         self::assertEquals(10, $updatedDomain->getAuthorizedSendersSpamLevel());
+        self::assertSame(['09:00', '15:00'], $updatedDomain->getReportTimes());
+        self::assertTrue($updatedDomain->getReportSkipWeekends());
 
         self::assertResponseRedirects('/domain/?id=' . $domain->getId());
+    }
+
+    public function testDomainScheduleCannotBeEmpty(): void
+    {
+        $client = static::createClient();
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $client->loginUser($superAdmin);
+        $domain = DomainFactory::createOne();
+        $payload = $this->createPayload($client);
+        $payload['domain']['reportTimes'] = '';
+
+        $client->request('POST', '/domain/' . $domain->getId() . '/edit', $payload);
+
+        self::assertResponseRedirects('/domain/' . $domain->getId() . '/edit');
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+        self::assertSame(['07:00'], DomainFactory::find($domain->getId())->getReportTimes());
+    }
+
+    public function testDomainFormsUseTheSharedReportPreferences(): void
+    {
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->superAdmin()->create());
+        $domain = DomainFactory::createOne(['reportTimes' => ['09:00', '15:00']]);
+
+        foreach (['/domain/new', '/domain/' . $domain->getId() . '/edit'] as $url) {
+            $client->request(Request::METHOD_GET, $url);
+
+            self::assertResponseIsSuccessful();
+            self::assertSelectorCount(1, '[data-test="report-preferences"]');
+            self::assertSelectorExists('[data-report-preferences-target="slotTemplate"] input[type="time"]');
+            self::assertSelectorExists('button[data-action="report-preferences#addTime"]');
+            self::assertSelectorCount(1, 'label[for="domain_reportSkipWeekends"]');
+            self::assertSelectorExists('input[name="domain[reportSkipWeekends]"].form-check-input');
+            self::assertSelectorExists('.report-help summary');
+            self::assertSelectorNotExists('[data-test="report-domain-defaults"]');
+            self::assertSelectorNotExists('[data-report-preferences-target="mode"]');
+        }
     }
 
     /**
@@ -149,12 +193,17 @@ class DomainControllerTest extends WebTestCase
                 "level" => $attributes['level'] ?? "0.5",
                 "authorizedSendersSpamLevel" => $attributes['authorizedSendersSpamLevel'] ?? "5",
                 "mailAuthenticationSender" => $attributes['mailAuthenticationSender'] ?? "",
+                "reportTimes" => $attributes['reportTimes'] ?? "07:00",
                 "_token" => $token,
             ],
         ];
 
         if ($attributes !== null && !$attributes['active']) {
             unset($payload['domain']['active']);
+        }
+
+        if ($attributes['reportSkipWeekends'] ?? false) {
+            $payload['domain']['reportSkipWeekends'] = $attributes['reportSkipWeekends'];
         }
 
         return $payload;

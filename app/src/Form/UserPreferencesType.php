@@ -18,6 +18,10 @@ class UserPreferencesType extends AbstractType
                 'label' => new TranslatableMessage('Entities.User.fields.report'),
                 'required' => false,
             ])
+            ->add('reportTimes', ReportTimesType::class, [
+                'required' => false,
+                'help' => new TranslatableMessage('Entities.Report.help.userTimes'),
+            ])
             ->add('humanAuthenticationEnabled', CheckboxType::class, [
                 'label' => new TranslatableMessage('Entities.User.fields.activateHumanAuthentication'),
                 'required' => false,

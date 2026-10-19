@@ -8,6 +8,7 @@ use App\Entity\Address;
 use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\User;
+use DateTimeImmutable;
 use Doctrine\DBAL;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr;
@@ -131,6 +132,49 @@ class UserRepository extends BaseRepository
 
         $stmt = $conn->prepare($sql);
         return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findUsersForReport(DateTimeImmutable $now, bool $force = false): array
+    {
+        $sql = <<<SQL
+            SELECT u.id
+            FROM users u
+            INNER JOIN domain d ON u.domain_id = d.id
+            WHERE d.active = 1
+                AND u.roles = :roles
+                AND u.original_user_id IS NULL
+                AND u.report = 1
+        SQL;
+        $parameters = ['roles' => '["ROLE_USER"]'];
+
+        if (!$force) {
+            $sql .= "\n" . <<<SQL
+                AND u.report_next_at <= :now
+            SQL;
+            $parameters['now'] = $now->getTimestamp();
+
+            if ((int) $now->format('N') >= 6) {
+                $sql .= "\n" . <<<SQL
+                    AND COALESCE(u.report_skip_weekends, d.report_skip_weekends) = 0
+                SQL;
+            }
+        }
+
+        $ids = $this->getEntityManager()->getConnection()->executeQuery($sql, $parameters)->fetchFirstColumn();
+        if ($ids === []) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('u')
+            ->addSelect('d')
+            ->innerJoin('u.domain', 'd')
+            ->andWhere('u.id IN (:ids)')
+            ->setParameter('ids', array_map('intval', $ids))
+            ->getQuery()
+            ->getResult();
     }
 
 

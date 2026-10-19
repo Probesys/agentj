@@ -435,3 +435,117 @@ table thead tr th {
     flex-wrap: wrap;
     gap: 0.5rem;
 }
+
+.report-preferences {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.report-preferences legend {
+    float: left;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.report-preferences > .form-group {
+    clear: both;
+}
+
+.report-preferences__toolbar {
+    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 2rem;
+    margin-bottom: 1rem;
+}
+
+.report-preferences__heading,
+.report-preferences__times,
+.report-preferences__slots,
+.report-preferences__slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-preferences__heading {
+    flex-wrap: wrap;
+}
+
+.report-preferences .report-preferences__weekend-mode {
+    width: auto;
+    max-width: 100%;
+}
+
+.report-preferences__times[hidden] {
+    display: none;
+}
+
+.report-preferences__times,
+.report-preferences__slots {
+    flex-wrap: wrap;
+}
+
+.report-preferences__slot {
+    gap: 0.25rem;
+}
+
+.report-preferences__slot input,
+.report-preferences .report-preferences__inherited-time {
+    width: 8rem;
+    padding-top: 0.1875rem;
+    padding-bottom: 0.1875rem;
+}
+
+.report-preferences__slot input,
+.report-preferences .report-preferences__inherited-time,
+.report-preferences__times .btn {
+    height: 2rem;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.report-preferences__times .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    padding: 0;
+}
+
+.report-help {
+    position: relative;
+}
+
+.report-help summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1px solid #6c757d;
+    border-radius: 50%;
+    color: #6c757d;
+    font-size: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.report-help summary::-webkit-details-marker {
+    display: none;
+}
+
+.report-help__content {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+    width: min(18rem, 75vw);
+    padding: 0.75rem;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 1rem #0002;
+    font-size: 0.8rem;
+}
