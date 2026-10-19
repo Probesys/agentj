@@ -1,0 +1,79 @@
+{% extends 'modalTemplate.html.twig' %}
+
+{% set origin = '' %}
+
+{% if type == 'user' %}
+    {% set origin = '- ' ~ ('Message.Dialogs.quotas.categoryUser' | trans) %}
+{% elseif type == 'group' %}
+    {% set origin = '- ' ~ ('Message.Dialogs.quotas.categoryGroup' | trans) %}
+{% elseif type == 'domain' %}
+    {% set origin = '- ' ~ ('Message.Dialogs.quotas.categoryDomain' | trans) %}
+{% endif %}
+
+{% block modalTitle %}
+    {{ 'Message.Dialogs.quotas.title' | trans }} {{ origin }}
+{% endblock %}
+
+{% block modalContent %}
+    <div id="quota-content">
+        <div class="row">
+            {% if usage is empty %}
+                <div class="col-12">
+                    <p>
+                        {{ 'Message.Dialogs.quotas.noQuota' | trans }}
+                    </p>
+                </div>
+            {% else %}
+                {% for unitUse in usage %}
+                    {% set percentage = unitUse.limit > 0
+                        ? ((unitUse.current / unitUse.limit) * 100)|round
+                        : 0
+                    %}
+
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div
+                                    class="progress mb-3"
+                                    style="height: 20px;"
+                                    role="progressbar"
+                                    aria-valuenow="{{ min(percentage, 100) }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    aria-label="Utilisation du quota"
+                                >
+                                    <div
+                                        class="progress-bar text-dark {% if percentage >= 90 %}bg-danger{% elseif percentage >= 70 %}bg-warning{% else %}bg-success{% endif %}"
+                                        style="width: {{ min(percentage, 100) }}%;"
+                                    >
+                                        {{ percentage }}%
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>{{ 'Message.Dialogs.quotas.period' | trans }}</span>
+                                    <strong>{{ unitUse.period }}s</strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>{{ 'Message.Dialogs.quotas.limit' | trans }}</span>
+                                    <strong>{{ unitUse.limit }}</strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>{{ 'Message.Dialogs.quotas.usage' | trans }}</span>
+                                    <strong>{{ unitUse.current }}</strong>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ 'Message.Dialogs.quotas.remaining' | trans }}</span>
+                                    <strong>{{ unitUse.remaining }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

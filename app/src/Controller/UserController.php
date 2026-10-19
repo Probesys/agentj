@@ -7,9 +7,11 @@ use App\Entity\Policy;
 use App\Entity\User;
 use App\Form\UserAliasType;
 use App\Form\UserType;
+use App\Repository\AddressRepository;
 use App\Repository\DomainRepository;
 use App\Repository\UserRepository;
 use App\Service\GroupService;
+use App\Service\RateLimitService;
 use App\Service\Referrer;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -433,7 +435,6 @@ class UserController extends AbstractController
         ]);
     }
 
-
     #[Route(path: '/email/{id}/edit', name: 'user_email_edit', methods: 'GET|POST')]
     #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
     public function editUserEmail(
@@ -527,6 +528,27 @@ class UserController extends AbstractController
             'form' => $form->createView(),
             'imapDomains' => $imapDomains,
             'domainHasIMAPConnector' => $domainHasIMAPConnector,
+        ]);
+    }
+
+    #[Route(path: '/email/{id}/quota', name: 'user_email_quotas', methods: 'GET')]
+    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
+    public function getUserQuota(
+        User $user,
+        RateLimitService $rateLimitService,
+        AddressRepository $addressRepository,
+    ): Response {
+        $userAddress = $addressRepository->findOneBy([
+            'email' => $user->getEmail(),
+        ]);
+
+        $quotaData = $rateLimitService->getQuotaUsage($user, $userAddress);
+
+        return $this->render('user/quotas.html.twig', [
+            'user' => $user,
+            // 'quotas' => $applicableQuotas,
+            'type' => $quotaData['type'],
+            'usage' => $quotaData['usage'],
         ]);
     }
 

@@ -19,7 +19,6 @@ Entities.Domain.actions.add_new_rule: 'New rule'
 Entities.Domain.actions.backToDomainList: 'Return to the list of domains'
 Entities.Domain.actions.customisation: Customisation
 Entities.Domain.actions.deleteRule: 'Delete rule'
-Entities.Domain.actions.importUserAndAliases: 'Import users and aliases'
 Entities.Domain.customisation.general.tab: General
 Entities.Domain.customisation.general.title: 'General customisation of domain {domain}'
 Entities.Domain.customisation.human_authentication.tab: 'Human authentication'
@@ -265,6 +264,7 @@ Entities.User.actions.add_new_alias: 'New alias'
 Entities.User.actions.add_new_alias_for: 'New alias for {email}'
 Entities.User.actions.delete_alias: 'Delete the alias'
 Entities.User.actions.edit: 'Edition of a user'
+Entities.User.actions.quotas: Quotas
 Entities.User.fields.activateHumanAuthentication: 'Activate human authentication'
 Entities.User.fields.alias: Alias
 Entities.User.fields.domain: Domain
@@ -443,6 +443,15 @@ Message.Dialogs.confirmRemoveUserFromGroupContent: 'Are you sure you want to rem
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Remove from the group?'
 Message.Dialogs.confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
 Message.Dialogs.confirmRestoreMsgtitle: 'Recover the message'
+Message.Dialogs.quotas.categoryDomain: domain
+Message.Dialogs.quotas.categoryGroup: groups
+Message.Dialogs.quotas.categoryUser: user
+Message.Dialogs.quotas.limit: Limit
+Message.Dialogs.quotas.noQuota: 'No applicable quota'
+Message.Dialogs.quotas.period: Period
+Message.Dialogs.quotas.remaining: Remaining
+Message.Dialogs.quotas.title: 'Applicable quotas'
+Message.Dialogs.quotas.usage: Usage
 Message.Flash.checkMailUnsuccessful: 'This email address seems to be invalid, or has already been validated.'
 Message.Flash.connectionKo: 'Unable to connect'
 Message.Flash.connectionOk: 'Connection success'

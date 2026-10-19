@@ -76,7 +76,7 @@
                 <tbody>
                     {% for user in users %}
                         {% set groups = user.id|user_groups %}
-                        <tr>
+                        <tr class="user-details-row">
                             <td>
                                 <input
                                     type="checkbox"
@@ -138,11 +138,39 @@
                                         {{ 'Entities.User.actions.add_new_alias'|trans }}
                                     </button>
 
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-success btn-open-modal"
+                                        data-url-modal-content="{{ path('user_email_quotas', {id: user.id}) }}"
+                                        data-modal-method-type="get"
+                                        title="{{ 'Entities.User.actions.quotas' | trans }}"
+                                    >
+                                        {{ 'Entities.User.actions.quotas' | trans }}
+                                    </button>
+
                                     {% include 'user/_delete_form.html.twig' with {'user': user} %}
 
                                     {% include 'user/_impersonation_form.html.twig' with {'user': user} %}
                                 </div>
                             </td>
+                            <div class="modal fade" id="quotas-modal" tabindex="-1"
+                                 role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Quotas</h5>
+                                            <button type="button" class="close"
+                                                    data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body" id="quotas-modal-body">
+                                            Loading...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </tr>
                     {% endfor %}
                 </tbody>
