@@ -5,6 +5,8 @@ namespace App\Tests\Controller;
 use App\Entity\Address;
 use App\Entity\SenderRule;
 use App\Entity\User;
+use App\Model\LogAction;
+use App\Repository\LogRepository;
 use App\Service\SenderRuleService;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -331,6 +333,33 @@ class SenderRuleControllerTest extends WebTestCase
             'senderRuleAddress' => $senderRule->getSenderRuleAddress(),
             'priority' => $senderRule->getPriority(),
         ]));
+    }
+
+    public function testPostBatchDeleteActionLogsTheDomainOfTheUser(): void
+    {
+        $domain = DomainFactory::createOne();
+        $user = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($user);
+        $service = static::getContainer()->get(SenderRuleService::class);
+        self::assertTrue($service->createOrUpdateForUserAndAliases(
+            'sender@example.org',
+            $user,
+            'accept',
+            SenderRule::TYPE_USER,
+        ));
+        $ruleAddress = RuleAddressFactory::find(['email' => 'sender@example.org']);
+
+        $this->client->request(Request::METHOD_POST, '/rules/batch/delete', [
+            'id' => [json_encode([$user->getId(), $ruleAddress->getId(), SenderRule::PRIORITY_USER])],
+            '_token' => $this->generateCsrfToken($this->client, 'batch'),
+        ]);
+
+        self::assertResponseRedirects();
+        $log = static::getContainer()->get(LogRepository::class)->findOneBy([
+            'action' => LogAction::DeleteBatchSenderRule->value,
+        ]);
+        self::assertNotNull($log);
+        self::assertSame($domain->getId(), $log->getDomain()?->getId());
     }
 
     public function testPostDeleteActionDeletesRulesForUserAndAliases(): void
