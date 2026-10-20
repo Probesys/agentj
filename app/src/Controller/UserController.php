@@ -363,7 +363,7 @@ class UserController extends AbstractController
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
-                $groupService->updateSenderRules();
+                $groupService->updateSenderRules($user->getGroups()->toArray());
 
                 $return = [
                     'status' => 'success',
@@ -411,7 +411,7 @@ class UserController extends AbstractController
                 $this->em->flush();
 
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
-                $groupService->updateSenderRules();
+                $groupService->updateSenderRules($user->getGroups()->toArray());
 
                 $return = [
                     'status' => 'success',
@@ -465,6 +465,7 @@ class UserController extends AbstractController
         $form->remove('emailRecovery');
         $form->remove('username');
         $form->get('email')->setData($user->getEmail());
+        $oldGroups = $user->getGroups()->toArray();
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -511,7 +512,8 @@ class UserController extends AbstractController
                 $userService->updateUserAndAliasPolicy($user);
                 $userService->updateAliasGroupsAndPolicyFromUser($user);
 
-                $groupService->updateSenderRules();
+                // Also update the groups the user has been removed from.
+                $groupService->updateSenderRules(array_merge($oldGroups, $user->getGroups()->toArray()));
 
                 $return = [
                     'status' => 'success',

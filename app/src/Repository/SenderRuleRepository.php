@@ -89,14 +89,25 @@ class SenderRuleRepository extends BaseRepository
         return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 
-    public function deleteFromGroup(): DBAL\Result
+    /**
+     * Delete the sender rules generated from the given groups, or from all the
+     * groups if $groupIds is null.
+     *
+     * @param ?int[] $groupIds
+     */
+    public function deleteFromGroup(?array $groupIds = null): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
-        $sql = " DELETE FROM wblist "
-                . " WHERE group_id  is not null";
-        $stmt = $conn->prepare($sql);
 
-        return $stmt->executeQuery();
+        if ($groupIds === null) {
+            return $conn->executeQuery('DELETE FROM wblist WHERE group_id IS NOT NULL');
+        }
+
+        return $conn->executeQuery(
+            'DELETE FROM wblist WHERE group_id IN (:groupIds)',
+            ['groupIds' => $groupIds],
+            ['groupIds' => DBAL\ArrayParameterType::INTEGER],
+        );
     }
 
     public function delete(int $userId, int $senderRuleAddressId, int $priority): mixed
@@ -113,7 +124,13 @@ class SenderRuleRepository extends BaseRepository
         return $qdl->getQuery()->execute();
     }
 
-    public function insertFromGroup(): DBAL\Result
+    /**
+     * Generate the sender rules of the given groups, or of all the groups if
+     * $groupIds is null.
+     *
+     * @param ?int[] $groupIds
+     */
+    public function insertFromGroup(?array $groupIds = null): DBAL\Result
     {
         $conn = $this->getEntityManager()->getConnection();
         $sqlSelectGroupRule = "insert into wblist (rid, sid, group_id, wb, datemod, type, priority)
@@ -128,7 +145,17 @@ class SenderRuleRepository extends BaseRepository
                                     inner join groups_wblist gw on gw.group_id =g.id
                                     where g.active = true and gw.wb != BINARY '' and g.priority is not null";
 
-        return $conn->prepare($sqlSelectGroupRule)->executeQuery();
+        if ($groupIds === null) {
+            return $conn->executeQuery($sqlSelectGroupRule);
+        }
+
+        $sqlSelectGroupRule .= ' and g.id IN (:groupIds)';
+
+        return $conn->executeQuery(
+            $sqlSelectGroupRule,
+            ['groupIds' => $groupIds],
+            ['groupIds' => DBAL\ArrayParameterType::INTEGER],
+        );
     }
 
     /**
