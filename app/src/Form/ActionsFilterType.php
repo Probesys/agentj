@@ -28,6 +28,7 @@ class ActionsFilterType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => null,
+            'csrf_token_id' => 'batch',
         ]);
 
         $resolver->setRequired('avalaibleActions');

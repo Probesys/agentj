@@ -363,9 +363,14 @@ class DomainController extends AbstractController
         $domain = $senderRule->getUser()->getDomain();
         $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $domain);
 
-        $csrfToken = $request->request->getString('_token', '');
+        $csrfToken = $request->request->getString('_token');
 
-        if (!$this->isCsrfTokenValid('delete', $csrfToken)) {
+        if (
+            !$this->isCsrfTokenValid(
+                'delete' . $senderRule->getUser()->getId() . $senderRule->getSenderRuleAddress()->getId(),
+                $csrfToken,
+            )
+        ) {
             $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
             return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
         }

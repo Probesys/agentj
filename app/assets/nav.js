@@ -5,7 +5,6 @@ document.addEventListener("turbo:load", function () {
   }
 
   $(".sidebar-dropdown > a").click(function () {
-    console.log('click');
     $(".sidebar-submenu").slideUp(200);
     if ($(this).parent().hasClass("active")) {
       $(".sidebar-dropdown").removeClass("active");
@@ -15,7 +14,6 @@ document.addEventListener("turbo:load", function () {
       $(this).next(".sidebar-submenu").slideDown(200);
       $(this).parent().addClass("active");
     }
-
   });
 
   $(".sidebar-dropdown.active").each(function () {
@@ -28,8 +26,6 @@ document.addEventListener("turbo:load", function () {
   $("#toggle-sidebar").click(function () {
     $(".page-wrapper").toggleClass("toggled");
   });
-
-
 
   //toggle sidebar overlay
   $("#overlay").click(function () {

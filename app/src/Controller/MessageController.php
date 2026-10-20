@@ -10,7 +10,6 @@ use App\Entity\SenderRule;
 use App\Form\ActionsFilterType;
 use App\Repository\DomainRepository;
 use App\Repository\MessageRecipientSearchRepository;
-use App\Repository\MessageRepository;
 use App\Service;
 use App\Service\HtmlSanitizerService;
 use App\Util\Email;
@@ -40,12 +39,11 @@ class MessageController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/{type}', name: 'message')]
+    #[Route(path: '/{type}', name: 'message', methods: ['GET'])]
     public function index(
         Request $request,
         PaginatorInterface $paginator,
         MessageRecipientSearchRepository $messageRecipientSearchRepository,
-        MessageRepository $messageRepository,
         ?string $type = null
     ): Response {
         $subTitle = '';
@@ -276,13 +274,19 @@ class MessageController extends AbstractController
     /**
      * Delete a Message entity.
      */
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/delete/', name: 'message_delete', methods: 'GET')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/delete/', name: 'message_delete', methods: 'POST')]
     public function deleteAction(
         int $partitionTag,
         string $mailId,
         int $rseqnum,
         Service\LogService $logService,
+        Request $request,
     ): Response {
+        if (!$this->isCsrfTokenValid('message_delete', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
@@ -317,6 +321,12 @@ class MessageController extends AbstractController
         Service\LogService $logService,
         ?string $action = null,
     ): Response {
+        $submittedToken = $request->request->getString('_token');
+        if (!$this->isCsrfTokenValid('batch', $submittedToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         if ($action) {
             /** @var User $user */
             $user = $this->getUser();
@@ -370,11 +380,17 @@ class MessageController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/authorized', name: 'message_authorized')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/authorized', name: 'message_authorized', methods: 'POST')]
     public function authorized(
         MessageRecipient $messageRecipient,
         Service\LogService $logService,
+        Request $request,
     ): Response {
+        if (!$this->isCsrfTokenValid('message_authorize', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         $result = $this->messageService->authorizeSenderForRecipient(
@@ -390,11 +406,17 @@ class MessageController extends AbstractController
         return new RedirectResponse($this->referrer->get());
     }
 
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/banned', name: 'message_banned')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/banned', name: 'message_banned', methods: 'POST')]
     public function banned(
         MessageRecipient $messageRecipient,
         Service\LogService $logService,
+        Request $request,
     ): Response {
+        if (!$this->isCsrfTokenValid('message_ban', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         $result = $this->messageService->banSenderForRecipient(
@@ -413,13 +435,19 @@ class MessageController extends AbstractController
     /**
      * Only release the message for all recipients. Does not add entries in sender rule.
      */
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/restore', name: 'message_restore')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/restore', name: 'message_restore', methods: 'POST')]
     public function restore(
         int $partitionTag,
         string $mailId,
         int $rseqnum,
         Service\LogService $logService,
+        Request $request,
     ): Response {
+        if (!$this->isCsrfTokenValid('message_restore', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $message = $this->em->getRepository(Message::class)->findOneByMailId($partitionTag, $mailId);
 
         if (!$message) {
@@ -448,11 +476,21 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/authorizedDomain', name: 'message_authorized_domain')]
+    #[Route(
+        path: '/{partitionTag}/{mailId}/{rseqnum}/authorizedDomain',
+        name: 'message_authorized_domain',
+        methods: 'POST'
+    )]
     public function authorizedDomain(
         MessageRecipient $messageRecipient,
         Service\LogService $logService,
+        Request $request,
     ): RedirectResponse {
+        if (!$this->isCsrfTokenValid('message_authorize_domain', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         $result = $this->messageService->authorizeSenderForDomain(
@@ -469,11 +507,17 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/bannedDomain', name: 'message_banned_domain')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/bannedDomain', name: 'message_banned_domain', methods: 'POST')]
     public function bannedDomain(
         MessageRecipient $messageRecipient,
         Service\LogService $logService,
+        Request $request,
     ): RedirectResponse {
+        if (!$this->isCsrfTokenValid('message_ban_domain', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         $result = $this->messageService->banSenderForDomain(
@@ -490,12 +534,17 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsSpam', name: 'message_mark_as_spam')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsSpam', name: 'message_mark_as_spam', methods: 'POST')]
     public function markAsSpam(
         MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
     ): RedirectResponse {
+        if (!$this->isCsrfTokenValid('message_mark_as_spam', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         /** @var User $user */
@@ -514,12 +563,17 @@ class MessageController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsHam', name: 'message_mark_as_ham')]
+    #[Route(path: '/{partitionTag}/{mailId}/{rseqnum}/markAsHam', name: 'message_mark_as_ham', methods: 'POST')]
     public function markAsHam(
         MessageRecipient $messageRecipient,
         Request $request,
         Service\LogService $logService,
-    ): RedirectResponse {
+    ): Response {
+        if (!$this->isCsrfTokenValid('message_mark_as_ham', $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        }
+
         $this->checkMailAccess($messageRecipient);
 
         /** @var User $user */

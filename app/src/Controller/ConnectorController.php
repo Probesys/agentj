@@ -16,7 +16,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/connector')]
 class ConnectorController extends AbstractController
 {
-    #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['GET', 'POST'])]
+    #[Route('/delete/{id}', name: 'app_connector_delete', methods: ['POST'])]
     #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function delete(
         Request $request,
@@ -24,9 +24,11 @@ class ConnectorController extends AbstractController
         ConnectorRepository $connectorRepository,
         TranslatorInterface $translator,
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->query->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->request->getString('_token'))) {
             $connectorRepository->remove($connector);
             $this->addFlash('success', $translator->trans('Message.Flash.deleteSuccesFull'));
+        } else {
+            $this->addFlash('error', $translator->trans('Generics.flash.invalidCsrfToken'));
         }
 
         return $this->redirectToRoute('domain_edit', [

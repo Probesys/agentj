@@ -57,12 +57,35 @@
     </li>
 </ul>
 
+
+{% for connector in domain.connectors %}
+    <form
+        id="{{ 'delete-connector-' ~ connector.id }}"
+        method="POST"
+        action="{{ path('app_connector_delete', { id: connector.id }) }}"
+    >
+    </form>
+
+    {% if connector.type == 'LDAP' or connector.type == 'Office365' %}
+        <form
+            id="{{ 'sync-user-' ~ connector.id }}"
+            method="POST"
+            {% if connector.type == 'LDAP' %}
+                action="{{ path('app_ldap_connector_sync', { id: connector.id }) }}"
+            {% elseif connector.type == 'Office365' %}
+                action="{{ path('app_office365_connector_sync', { id: connector.id }) }}"
+            {% endif %}
+        >
+        </form>
+    {% endif %}
+{% endfor %}
+
 {{ form_start(form, { attr: {
     'data-controller': 'add-ip-address',
     'data-add-ip-address-error-label-value': 'Generics.labels.error' | trans() ,
     'data-add-ip-address-error-duplicated-label-value': 'Generics.flash.ipAddressDuplicated' | trans() ,
     'data-add-ip-address-error-bad-format-label-value': 'Generics.flash.ipAddressInvalid' | trans() ,
-    'data-add-ip-address-remove-label-value': 'Generics.flash.ipAddressInvalid' | trans() ,
+    'data-add-ip-address-remove-label-value': 'Generics.actions.remove' | trans() ,
     'data-action': 'submit->add-ip-address#onSubmit' } }) }}
 <div class="tab-content" id="policyTabContent">
     <div
@@ -256,15 +279,29 @@
                                             data-import-ongoing="true"
                                         {% endif %}
                                     >
-                                        <a
-                                            href="{{ urlSync }}?_token={{ csrf_token('sync' ~ connector.id) }}"
+                                        <input
+                                            form="sync-user-{{ connector.id }}"
+                                            id="{{ 'sync-user-token' ~ connector.id }}"
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('sync' ~ connector.id) }}"
+                                        >
+                                        <input
+                                            form="sync-user-{{ connector.id }}"
+                                            id="{{ 'sync-user-id' ~ connector.id }}"
+                                            type="hidden"
+                                            name="id"
+                                            value="{{ connector.id }}"
+                                        >
+                                        <button
+                                            type="submit"
+                                            form="sync-user-{{ connector.id }}"
                                             class="btn btn-sm btn-success"
-                                            title="{{ 'Entities.Domain.actions.importUserAndAliases' | trans }}"
                                             data-turbo="false"
                                         >
                                             <i class="fas fa-sync"></i>
                                             <span class="d-none d-lg-inline">{{ 'Generics.actions.import' | trans }}</span>
-                                        </a>
+                                        </button>
 
                                         <button
                                             type="button"
@@ -300,16 +337,24 @@
                                     <span class="d-none d-lg-block">{{ 'Generics.actions.edit'|trans() }}</span>
                                 </a>
 
-                                <a
-                                    href="{{ path('app_connector_delete', {'id': connector.id}) }}?_token={{ csrf_token('delete' ~ connector.id) }}"
+                                <input
+                                    form="{{ 'delete-connector-' ~ connector.id }}"
+                                    id="{{ 'delete-connector-token-' ~ connector.id }}"
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('delete' ~ connector.id) }}"
+                                >
+                                <button
+                                    form="{{ 'delete-connector-' ~ connector.id }}"
+                                    id="{{ 'delete-connector-submit-' ~ connector.id }}"
+                                    type="submit"
                                     class='btn btn-sm btn-danger confirmModal'
                                     data-dialog-title='{{ 'Message.Dialogs.confirmRemoveConnectorTitle'|trans }}'
                                     data-dialog-content='{{ 'Message.Dialogs.confirmRemoveConnectorContent'|trans }}'
-                                    title="{{ 'Generics.actions.delete'|trans() }}"
                                 >
                                     <i class="fas fa-trash-alt d-xsd-sm-block d-sm-block d-md-block d-lg-none"></i>
                                     <span class="d-none d-lg-block">{{ 'Generics.actions.delete'|trans() }}</span>
-                                </a>
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}

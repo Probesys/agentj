@@ -53,19 +53,23 @@
 									<ul class="list-inline list-unstyled">
 										<li class="list-inline-item">
                                             <form
+												id="{{ 'delete-sender-rule-' ~ senderRule.user.id ~ '-' ~ senderRule.senderRuleAddress.id }}"
                                                 method="post"
                                                 action="{{ path('domain_sender_rules_delete',{'rid' : senderRule.user.id, 'sid' : senderRule.senderRuleAddress.id}) }}"
-                                                data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
-											<button
-                                                type="submit"
-                                                class="btn btn-sm btn-danger confirmModal"
-                                                title="{{ 'Entities.Domain.actions.deleteRule'|trans }}"
-                                            >
-												<i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
-												<span class="d-md-none d-lg-block">{{ 'Entities.Domain.actions.deleteRule'|trans }}</span>
-											</button>
+												<input type="hidden" name="_token" value="{{
+													csrf_token('delete' ~ senderRule.user.id ~ senderRule.senderRuleAddress.id) 
+												}}">
+												<button
+													type="submit"
+													class="btn btn-sm btn-danger confirmModal"
+													data-dialog-title="{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}"
+													data-dialog-content="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
+													title="{{ 'Entities.Domain.actions.deleteRule'|trans }}"
+												>
+													<i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>
+													<span class="d-md-none d-lg-block">{{ 'Entities.Domain.actions.deleteRule'|trans }}</span>
+												</button>
                                             </form>
 										</li>
 									</ul>

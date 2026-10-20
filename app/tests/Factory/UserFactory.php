@@ -4,12 +4,16 @@ namespace App\Tests\Factory;
 
 use App\Entity\Domain;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Util\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
+use Zenstruck\Foundry\Persistence\RepositoryDecorator;
 
 /**
  * @extends PersistentObjectFactory<User>
+ *
+ * @method static RepositoryDecorator<User, UserRepository> repository()
  */
 final class UserFactory extends PersistentObjectFactory
 {
