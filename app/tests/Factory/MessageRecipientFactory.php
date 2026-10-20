@@ -4,18 +4,12 @@ namespace App\Tests\Factory;
 
 use App\Entity\MessageRecipient;
 use DateTimeImmutable;
-use Zenstruck\Foundry\Object\Instantiator;
-use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<MessageRecipient>
+ * @extends BaseMessageRecipientFactory<MessageRecipient>
  */
-final class MessageRecipientFactory extends PersistentObjectFactory
+final class MessageRecipientFactory extends BaseMessageRecipientFactory
 {
-    public function __construct()
-    {
-    }
-
     #[\Override]
     public static function class(): string
     {
@@ -35,36 +29,5 @@ final class MessageRecipientFactory extends PersistentObjectFactory
             'amavisReleaseStartedAt' => $releaseStart,
             'amavisReleaseEndedAt' => $releaseEnd,
         ]);
-    }
-
-    #[\Override]
-    protected function defaults(): array|callable
-    {
-        return [
-            'content' => self::faker()->randomElement([
-                'V','B','U','S','Y','M','H','O','T','C',
-            ]),
-            'ds' => self::faker()->randomElement([
-                'P','R','B','D','T',
-            ]),
-            'isLocal' => self::faker()->randomElement([
-                ' ', 'Y', 'N',
-            ]),
-            'rs' => ' ',
-            'sendCaptcha' => self::faker()->randomElement([0, self::faker()->unixTime()]),
-        ];
-    }
-
-    #[\Override]
-    protected function initialize(): static
-    {
-        return $this->instantiateWith(
-            Instantiator::withConstructor()->alwaysForce(
-                'partitionTag',
-                'mailId',
-                'rseqnum',
-                'address'
-            ),
-        );
     }
 }
