@@ -53,7 +53,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
-        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);
@@ -128,7 +127,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
-        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);
@@ -164,7 +162,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
-        self::assertTrue($message instanceof Message);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
         $messageRecipient->setStatus(MessageStatus::UNTREATED);

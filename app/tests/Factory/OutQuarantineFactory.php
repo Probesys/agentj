@@ -3,21 +3,13 @@
 namespace App\Tests\Factory;
 
 use App\Entity\OutQuarantine;
-use App\Tests\MessageHelper;
 use Zenstruck\Foundry\Object\Instantiator;
-use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<OutQuarantine>
+ * @extends BaseQuarantineFactory<OutQuarantine>
  */
-final class OutQuarantineFactory extends PersistentObjectFactory
+final class OutQuarantineFactory extends BaseQuarantineFactory
 {
-    use MessageHelper;
-
-    public function __construct()
-    {
-    }
-
     #[\Override]
     public static function class(): string
     {
