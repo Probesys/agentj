@@ -47,12 +47,14 @@ trait MessageHelper
 
     /**
      * @param array<int, Address> $recipients
+     * @param 'incoming'|'outgoing' $direction
      * @param array<mixed> $messageAttributes
+     * @return ($direction is 'incoming' ? Message : OutMessage)
      */
     private function setupMail(
         Address $sender,
         array $recipients,
-        bool $isInMessage = true,
+        string $direction = 'incoming',
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
@@ -60,7 +62,7 @@ trait MessageHelper
     ): Message|OutMessage {
         $mailId = bin2hex(random_bytes(8));
 
-        $messageFactory = $isInMessage ? MessageFactory::class : OutMessageFactory::class;
+        $messageFactory = $direction === 'incoming' ? MessageFactory::class : OutMessageFactory::class;
         $message = $messageFactory::new()->create(array_merge([
             'partitionTag' => 0,
             'mailId' => $mailId,
@@ -81,7 +83,7 @@ trait MessageHelper
             'to' => $recipientsEmails,
             'body' => $body ?? null,
         ]);
-        $quarantineFactory = $isInMessage ? QuarantineFactory::class : OutQuarantineFactory::class;
+        $quarantineFactory = $direction === 'incoming' ? QuarantineFactory::class : OutQuarantineFactory::class;
         $quarantineFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,

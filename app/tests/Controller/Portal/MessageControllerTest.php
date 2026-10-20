@@ -58,7 +58,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -153,7 +152,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -246,7 +244,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -285,7 +282,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -323,7 +319,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -418,7 +413,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -511,7 +505,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -550,7 +543,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -588,7 +580,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -683,7 +674,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -776,7 +766,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -815,7 +804,6 @@ class MessageControllerTest extends WebTestCase
             'email' => $recipient2->getEmail(),
         ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        self::assertTrue($message instanceof Message);
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
