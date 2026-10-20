@@ -181,7 +181,7 @@ document.addEventListener("turbo:load", function () {
 
   $('#dialog-confirm').dialog({
     resizable: false,
-    height: 200,
+    height: 'auto',
     width: 'auto',
     autoOpen: false,
     modal: true,
@@ -192,7 +192,13 @@ document.addEventListener("turbo:load", function () {
           if ($(this).data('type-action-confirm') == 'link' && $(this).data("link-to-confirm")) {
             window.location.href = $(this).data("link-to-confirm");
           } else if ($(this).data('type-action-confirm') == 'form') {
-            $('#' + $(this).data('form-to-confirm')).submit();
+            const form = $('#' + $(this).data('form-to-confirm'));
+            form.submit();
+            if (form.attr('target') === '_blank') {
+              $(window).one('focus', function () {
+                window.location.reload();
+              });
+            }
           }
           $(this).dialog("close");
 
