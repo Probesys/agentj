@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Portal;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Service\MessageService;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
