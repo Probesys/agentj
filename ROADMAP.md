@@ -1,24 +1,21 @@
-# Roadmap 2026
+# AgentJ roadmap
 
-Here, we list the different features that we want to add to AgentJ.
+Updated October 2026. Indicative plans and dates, subject to development and release candidate feedback.
 
-## AgentJ 2.4
+## 2.8 — Stability and ease of use
 
-- More options to customise the human authentication page
-- Performance improvements
+Improve the reliability of AgentJ and the everyday experience of users and administrators, while addressing customer requests: reports, aliases, visibility into spam scores and sending quotas, and access to existing audit logs.
 
-## AgentJ 2.5
+**Schedule:** first release candidate around late October 2026, release around early November 2026. [Track the milestone](https://github.com/Probesys/agentj/milestone/10).
 
-- [Prometheus](https://prometheus.io/) integration
-- Advanced search improvements
-- Daily report improvements
-- Logs management from an admin interface
+## 3.0 — URL protection
 
-## AgentJ 3.0
+Introduce protection for links in email: route eligible links through AgentJ and use administrator-defined rules to allow, warn or block when a link is opened.
 
-- Phishing campaign management
-- Graphic charter update
-- [Altcha](https://altcha.org/) protection
-- UX improvements to manage alias and shared mailboxes
-- Quota limits on the number of users
-- Technical stabilisation
+**Schedule:** first release candidate around mid-January 2027, release date to be confirmed. [Track the milestone](https://github.com/Probesys/agentj/milestone/14).
+
+## 3.1 — Administration and multi-tenancy
+
+Make application and mail-service logs more useful for application and system administrators diagnosing issues. Improve the separation of organizations and make it easier to apply common rules across domains while respecting access rights.
+
+**Schedule:** after 3.0 [Track the milestone](https://github.com/Probesys/agentj/milestone/13).
