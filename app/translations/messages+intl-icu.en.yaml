@@ -170,6 +170,7 @@ Entities.Message.spamLevel: Note
 Entities.Message.spammedDetect: 'detected as a Spam'
 Entities.Message.untreated: 'that are Untreated'
 Entities.Message.virus: 'detected with a Virus'
+Entities.Message.warning.content: 'This email is intended for another user. Accessing it may reveal sensitive information. If you proceed, this will be recorded.'
 Entities.Msgrcpt.fields.bspamLevel: 'Spam rating'
 Entities.Msgrcpt.labels.appliedRule: 'Information about the message'
 Entities.Msgrcpt.labels.infos: 'Information about the message'
@@ -305,6 +306,8 @@ Generics.actions.connectAs: 'Log in as a'
 Generics.actions.connectWithMicrosoft: 'Sign-in with Microsoft'
 Generics.actions.delete: Delete
 Generics.actions.deleteSelection: 'Delete selection'
+Generics.actions.display: Display
+Generics.actions.displayMessage: Display the email
 Generics.actions.edit: Edit
 Generics.actions.exitImpersonation: 'Back to life'
 Generics.actions.impersonate: 'Sign in'
@@ -438,6 +441,7 @@ Message.Dialogs.confirmDeleteUserContent: 'Are you sure you want to delete this 
 Message.Dialogs.confirmRemoveConnectorContent: 'Are you sure you want to delete this connector?'
 Message.Dialogs.confirmRemoveConnectorTitle: 'Delete connector.'
 Message.Dialogs.confirmRemoveRuleContent: 'Are you sure you want to delete this rule?'
+Message.Dialogs.confirmRemoveRuleTitle: 'Delete rule.'
 Message.Dialogs.confirmRemoveUserFromGroupContent: 'Are you sure you want to remove this user from the group?'
 Message.Dialogs.confirmRemoveUserFromGroupTitle: 'Remove from the group?'
 Message.Dialogs.confirmRestoreMsgContent: 'Are you sure you want to get the message back?'
@@ -514,6 +518,10 @@ Portal.Messages.authorized.backToMessages: 'See my authorized mails'
 Portal.Messages.authorized.senderAuthorized: 'The address is now authorized.'
 Portal.Messages.banned.backToMessages: 'See my banned mails'
 Portal.Messages.banned.senderBanned: 'The address is now banned.'
+Portal.Messages.confirm: Confirm
+Portal.Messages.confirmAuthorize: 'You are about to allow the sender {from}.'
+Portal.Messages.confirmBan: 'You are about to ban the sender {from}.'
+Portal.Messages.confirmRestore: 'You are about to retrieve the email “{subject}” from the sender {from}.'
 Portal.Messages.restore.backToMessages: 'See my recovered mails'
 Portal.Messages.restore.messageRestored: 'Message successfully recovered.'
 Search.AdvancedFilter: 'Advanced filter'

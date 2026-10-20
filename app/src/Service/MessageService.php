@@ -112,7 +112,7 @@ class MessageService
             $senderRuleAddress,
             wbRule: 'accept',
             type: $validationSource,
-            priority: SenderRule::PRIORITY_USER,
+            priority: SenderRule::PRIORITY_DOMAIN,
         );
 
         $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
@@ -216,7 +216,7 @@ class MessageService
             $senderRuleAddress,
             wbRule: 'block',
             type: $validationSource,
-            priority: SenderRule::PRIORITY_USER,
+            priority: SenderRule::PRIORITY_DOMAIN,
         );
 
         $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(

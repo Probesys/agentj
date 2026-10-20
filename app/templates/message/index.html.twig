@@ -14,10 +14,8 @@
         {{'Entities.Message.informationMessage'|trans()}}
     </p>
 
+    {% include 'common/blocActionsAndSearch.html.twig' %}
 
-    {% include 'common/blocActionsAndSearch.html.twig'  %}
-
-    {{ form_start(filter_form, {'attr': {'id': 'massive-actions-form'}}) }}
     <div class="table-responsive">
         <section id="no-more-tables">
             <table id="table_msgs" data-type-list-msgs="{{ messageStatus }}" class="table table-hover">
@@ -26,7 +24,7 @@
                         {# it not virus #}
                         {% if messageStatus != '7' %}
                             <th>
-                                <input type="checkbox" id='checkAll' class="cb" data-target-checkall-class="selected-msg">
+                                <input form="massive-actions-form" type="checkbox" id='checkAll' class="cb" data-target-checkall-class="selected-msg">
                                 <label class="for-cb check-all" for="checkAll"></label>
                             </th>
                         {% endif %}
@@ -38,7 +36,6 @@
                                 {{ knp_pagination_sortable(messagesRecipients, 'Message.Recipient'|trans,'maddr.email') }}
                             </th>
                         {% endif %}
-                        {#            <th>{{ 'Message.Status'|trans() }}</th> #}
                         <th>
                             {% if feature_flag_disable_sort_by_subject %}
                                 {{ 'Message.Object'|trans }}
@@ -67,8 +64,8 @@
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody>
 
+                <tbody>
                     {% for msgRecipient in messagesRecipients %}
                         {% set error_badge = "" %}
                         {% set bold = "" %}
@@ -88,6 +85,7 @@
                                 <td>
                                     {% if not msgRecipient.isAmavisReleaseOngoing %}
                                         <input
+                                            form="massive-actions-form"
                                             type="checkbox"
                                             name="id[]"
                                             value="{{ keyPairMessage|json_encode() }}"
@@ -112,7 +110,10 @@
                                     </span>
                                 </td>
                             {% endif %}
-                            <td data-title="{{'Message.Object'|trans }}">
+                            <td
+                                data-title="{{'Message.Object'|trans }}"
+                                data-test="subject"
+                            >
                                 <span
                                     data-msg-id="{{ keyPairMessage|json_encode() }}"
                                     title="{{msgRecipient.message.subject|replace({'_':' '})}}"
@@ -224,139 +225,188 @@
                                             <div class="dropdown-menu" style="z-index:10300">
                                                 {# Restore action #}
                                                 {% if msgRecipient.isUntreated or msgRecipient.isSpam or msgRecipient.isDeleted or msgRecipient.isBanned %}
-                                                    <a
-                                                        href="{{path('message_restore',
-                                                        {
-                                                            'partitionTag':msgRecipient.partitionTag,
-                                                            'mailId':msgRecipient.mailId,
-                                                            'rseqnum':msgRecipient.rseqnum,
+                                                    <form
+                                                        id="{{ 'restore' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_restore', {
+                                                            'partitionTag': msgRecipient.partitionTag,
+                                                            'mailId': msgRecipient.mailId,
+                                                            'rseqnum': msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item confirmModal text-primary'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}'
-                                                        title='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                                        method="POST"
                                                     >
-                                                        <span class="fas fa-download"></span>
-                                                        {{ 'Message.Actions.Restore'|trans() }}
-                                                    </a>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_restore') }}">
+                                                        <button
+                                                            type="submit"
+                                                            class="dropdown-item confirmModal text-success"
+                                                            data-test="confirm-restore"
+                                                            data-dialog-title="{{ 'Message.Dialogs.confirmRestoreMsgtitle'|trans }}"
+                                                            data-dialog-content="{{ 'Message.Dialogs.confirmRestoreMsgContent'|trans }}"
+                                                            title='{{ 'Message.Actions.RestoreMessage'|trans }}'
+                                                        >
+                                                            <span class="fas fa-download"></span>
+                                                            {{ 'Message.Actions.Restore'|trans }}
+                                                        </button>
+                                                    </form>
                                                 {% endif %}
 
                                                 {# Authorize action #}
-                                                {% if msgRecipient.isUntreated  or msgRecipient.isSpam or msgRecipient.isBanned or msgRecipient.isDeleted or msgRecipient.isRestored%}
-                                                    <a
-                                                        href="{{path('message_authorized',
-                                                        {
+                                                {% if msgRecipient.isUntreated  or msgRecipient.isSpam or msgRecipient.isBanned or msgRecipient.isDeleted or msgRecipient.isRestored %}
+                                                    <form
+                                                        id="{{ 'authorized' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_authorized', {
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
                                                             'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item confirmModal text-success'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
-                                                        title='{{ 'Message.Actions.AutorizedSender'|trans }}'
+                                                        method='POST'
                                                     >
-                                                        <span class="fas fa-user-check "></span>
-                                                        {{ 'Message.Actions.Autorized'|trans() }}
-                                                    </a>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_authorize') }}">
+                                                        <button
+                                                            type="submit"
+                                                            class='dropdown-item confirmModal text-success'
+                                                            data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedMsgtitle'|trans }}'
+                                                            data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedMsgContent'|trans }}'
+                                                            title='{{ 'Message.Actions.AutorizedSender'|trans }}'
+                                                        >
+                                                            <span class="fas fa-user-check "></span>
+                                                            {{ 'Message.Actions.Autorized'|trans() }}
+                                                        </button>
+                                                    </form>
                                                 {% endif %}
 
                                                 {# Ban action #}
                                                 {% if msgRecipient.isUntreated  or msgRecipient.isSpam or msgRecipient.isAuthorized or msgRecipient.isDeleted or msgRecipient.isRestored %}
-                                                    <a
-                                                        href="{{path('message_banned',{
+                                                    <form
+                                                        id="{{ 'banned' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_banned',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
                                                             'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item confirmModal'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'
-                                                        title="{{ 'Message.Actions.BannedSender'|trans() }}"
+                                                        method='POST'
                                                     >
-                                                        <span class="fas fa-user-slash "></span>
-                                                        {{ 'Message.Actions.Banned'|trans() }}
-                                                    </a>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_ban') }}">
+                                                        <button
+                                                            type="submit"
+                                                            class='dropdown-item confirmModal'
+                                                            data-dialog-title='{{ 'Message.Dialogs.confirmBannedMsgtitle'|trans }}'
+                                                            data-dialog-content='{{ 'Message.Dialogs.confirmBannedMsgContent'|trans }}'
+                                                            title="{{ 'Message.Actions.BannedSender'|trans() }}"
+                                                        >
+                                                            <span class="fas fa-user-slash "></span>
+                                                            {{ 'Message.Actions.Banned'|trans() }}
+                                                        </button>
+                                                    </form>
                                                 {% endif %}
 
                                                 {# Delete action #}
                                                 {% if msgRecipient.isUntreated  or msgRecipient.isSpam or msgRecipient.isAuthorized or msgRecipient.isBanned or msgRecipient.isRestored %}
-                                                    <a
-                                                        href="{{path('message_delete',{
+                                                    <form
+                                                        id="{{ 'delete' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_delete',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
                                                             'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item  confirmModal text-danger'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}'
-                                                        data-target='delete'
-                                                        title="{{ 'Message.Actions.DeleteMessage'|trans() }}"
+                                                        method='POST'
                                                     >
-                                                        <span class="fas fa-trash-alt "></span>
-                                                        {{ 'Message.Actions.Delete'|trans() }}
-                                                    </a>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_delete') }}">
+                                                        <button
+                                                            type="submit"
+                                                            class='dropdown-item confirmModal text-danger'
+                                                            data-dialog-title='{{ 'Message.Dialogs.confirmDeleteMsgtitle'|trans }}'
+                                                            data-dialog-content='{{ 'Message.Dialogs.confirmDeleteMsgContent'|trans }}'
+                                                            data-target='delete'
+                                                            title="{{ 'Message.Actions.DeleteMessage'|trans() }}"
+                                                        >
+                                                            <span class="fas fa-trash-alt "></span>
+                                                            {{ 'Message.Actions.Delete'|trans() }}
+                                                        </button>
+                                                    </form>
                                                 {% endif %}
 
 
                                                 {% if is_granted('ROLE_ADMIN') %}
                                                     <div class="dropdown-divider"></div>
-                                                    <a
-                                                        href="{{path('message_authorized_domain',{
+
+                                                    <form
+                                                        id="{{ 'authorized_domain' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_authorized_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
                                                             'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item  confirmModal  text-success'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgContent'|trans }}'
-                                                        title="{{ 'Message.Actions.AutorizedDomain'|trans() }}"
+                                                        method='POST'
                                                     >
-                                                        <span class="fas fa-check-double "></span>
-                                                        {{ 'Message.Actions.Autorized'|trans() }}
-                                                    </a>
-                                                    <a
-                                                        href="{{path('message_banned_domain',{
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_authorize_domain') }}">
+                                                        <button
+                                                            type="submit"
+                                                            class='dropdown-item confirmModal text-success'
+                                                            data-dialog-title='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgtitle'|trans }}'
+                                                            data-dialog-content='{{ 'Message.Dialogs.confirmAuthorizedDomainMsgContent'|trans }}'
+                                                            title="{{ 'Message.Actions.AutorizedDomain'|trans() }}"
+                                                        >
+                                                            <span class="fas fa-check-double "></span>
+                                                            {{ 'Message.Actions.Autorized'|trans() }}
+                                                        </button>
+                                                    </form>
+                                                    <form
+                                                        id="{{ 'banned_domain' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                        action="{{path('message_banned_domain',{
                                                             'partitionTag':msgRecipient.partitionTag,
                                                             'mailId':msgRecipient.mailId,
                                                             'rseqnum':msgRecipient.rseqnum,
                                                         })}}"
-                                                        class='dropdown-item confirmModal'
-                                                        data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}'
-                                                        data-dialog-content='{{ 'Message.Dialogs.confirmBannedDomainMsgContent'|trans }}'
-                                                        title="{{ 'Message.Actions.BannedDomain'|trans() }}"
+                                                        method='POST'
                                                     >
-                                                        <span class="fas fa-ban "></span>
-                                                        {{ 'Message.Actions.Banned'|trans() }}
-                                                    </a>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('message_ban_domain') }}">
+                                                        <button type="submit"
+                                                            class='dropdown-item confirmModal'
+                                                            data-dialog-title='{{ 'Message.Dialogs.confirmBannedDomainMsgtitle'|trans }}'
+                                                            data-dialog-content='{{ 'Message.Dialogs.confirmBannedDomainMsgContent'|trans }}'
+                                                            title="{{ 'Message.Actions.BannedDomain'|trans() }}"
+                                                        >
+                                                            <span class="fas fa-ban "></span>
+                                                            {{ 'Message.Actions.Banned'|trans() }}
+                                                        </button>
+                                                    </form>
 
                                                     <div class="dropdown-divider"></div>
 
                                                     {% if msgRecipient.isUntreated or msgRecipient.isAuthorized or msgRecipient.isBanned or msgRecipient.isDeleted  or msgRecipient.isRestored %}
-                                                        <a
-                                                            href="{{path('message_mark_as_spam',{
+                                                        <form
+                                                            id="{{ 'mark-as-spam' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                            action="{{path('message_mark_as_spam',{
                                                                 'partitionTag': msgRecipient.partitionTag,
                                                                 'mailId': msgRecipient.mailId,
                                                                 'rseqnum': msgRecipient.rseqnum
                                                                 })}}"
-                                                                class="dropdown-item"
-                                                            >
+                                                            method='POST'
+                                                        >
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('message_mark_as_spam') }}">
+                                                            <button type="submit" class="dropdown-item">
                                                                 <span class="fas fa-thumbs-down"></span>
                                                                 {{ 'Message.Actions.MarkAsSpam' | trans }}
-                                                            </a>
+                                                            </button>
+                                                        </form>
                                                     {% endif %}
 
                                                     {% if msgRecipient.isSpam  or msgRecipient.isRestored %}
-                                                        <a
-                                                            href="{{path('message_mark_as_ham',{
+                                                        <form
+                                                            id="{{ 'mark-as-ham' ~ msgRecipient.partitionTag ~ '-' ~ msgRecipient.mailId ~ '-' ~ msgRecipient.address.id }}"
+                                                            action="{{path('message_mark_as_ham',{
                                                                 'partitionTag': msgRecipient.partitionTag,
-                                                                    'mailId': msgRecipient.mailId,
-                                                                    'rseqnum': msgRecipient.rseqnum
-                                                                })}}"
-                                                                class="dropdown-item"
-                                                            >
+                                                                'mailId': msgRecipient.mailId,
+                                                                'rseqnum': msgRecipient.rseqnum
+                                                            })}}"
+                                                            method='POST'
+                                                        >
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('message_mark_as_ham') }}">
+                                                            <button type="submit" class="dropdown-item">
                                                                 <span class="fas fa-thumbs-up"></span>
                                                                 {{ 'Message.Actions.MarkAsHam' | trans }}
-                                                            </a>
+                                                            </button>
+                                                        </form>
                                                     {% endif %}
                                                 {% endif %}
                                             </div>
@@ -371,7 +421,6 @@
             </table>
         </section>
     </div>
-    {{ form_end(filter_form) }}
 
     {% include 'common/_paginationAndPerPageSelector.html.twig' with { 'pagination': messagesRecipients } %}
 

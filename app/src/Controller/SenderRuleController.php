@@ -17,7 +17,6 @@ use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,7 +39,7 @@ class SenderRuleController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/rules/{type}', name: 'sender_rules_index')]
+    #[Route(path: '/rules/{type}', name: 'sender_rules_index', methods: 'GET')]
     public function index(string $type, Request $request, PaginatorInterface $paginator): Response
     {
         if ($type !== 'W' && $type !== 'B') {
@@ -162,19 +161,20 @@ class SenderRuleController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/rules/{rid}/{sid}/{priority}/delete', name: 'sender_rules_delete', methods: 'GET')]
+    #[Route(path: '/rules/{rid}/{sid}/{priority}/delete', name: 'sender_rules_delete', methods: 'POST')]
     public function deleteAction(
         int $rid,
         int $sid,
         int $priority,
         Request $request
     ): RedirectResponse {
-        if ($this->isCsrfTokenValid('delete_sender_rule' . $rid . $sid, $request->query->get('_token'))) {
-            $this->deleteSenderRule($rid, $sid, $priority);
-            $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
-        } else {
-            $this->addFlash('error', 'Invalid csrf token');
+        if (!$this->isCsrfTokenValid('delete' . $rid . $sid, $request->request->getString('_token'))) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
         }
+
+        $this->deleteSenderRule($rid, $sid, $priority);
+        $this->addFlash('success', $this->translator->trans('Message.Flash.deleteSuccesFull'));
 
         return new RedirectResponse($this->referrer->get());
     }
@@ -219,8 +219,16 @@ class SenderRuleController extends AbstractController
         methods: 'POST',
         options: ['expose' => true],
     )]
-    public function batchSenderRuleAction(Request $request, ?string $action = null): RedirectResponse
-    {
+    public function batchSenderRuleAction(
+        Request $request,
+        ?string $action = null,
+    ): RedirectResponse {
+        $submittedToken = $request->request->getString('_token');
+        if (!$this->isCsrfTokenValid('batch', $submittedToken)) {
+            $this->addFlash('error', $this->translator->trans('Generics.flash.invalidCsrfToken'));
+            return new RedirectResponse($this->referrer->get());
+        };
+
         $em = $this->em;
         if ($action) {
             $logService = new LogService($em);

@@ -62,9 +62,9 @@
                                         </li>
                                         <li class="list-inline-item">
                                             <form
+                                                id="{{ 'delete-group-rule-' ~ group_rule.group.id ~ '-' ~ group_rule.ruleAddress.id }}"
                                                 method="post"
                                                 action="{{ path('groups_rules_delete',{'groupId':group_rule.group.id,'sid':group_rule.ruleAddress.id}) }}"
-                                                data-turbo-confirm="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                             >
                                                 <input
                                                     type="hidden"
@@ -74,6 +74,8 @@
                                                 <button
                                                     type="submit"
                                                     class='btn btn-sm btn-danger confirmModal'
+                                                    data-dialog-title="{{ 'Message.Dialogs.confirmRemoveRuleTitle'|trans }}"
+                                                    data-dialog-content="{{ 'Message.Dialogs.confirmRemoveRuleContent'|trans }}"
                                                     title="{{ 'Entities.Group.Actions.deleteRule'|trans() }}"
                                                 >
                                                     <i class="fas fa-trash-alt d-none d-md-block d-lg-none"></i>

@@ -77,14 +77,15 @@ class Office365ConnectorController extends AbstractController
         ]);
     }
 
-    #[Route('/office365/{id}/sync-user', name: 'app_office365_connector_sync')]
+    #[Route('/office365/{id}/sync-user', name: 'app_office365_connector_sync', methods: ['POST'])]
     #[IsGranted('DOMAIN_ACCESS', subject: 'connector')]
     public function syncUser(Request $request, Connector $connector): Response
     {
-        if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->query->get('_token'))) {
+        if ($this->isCsrfTokenValid('sync' . $connector->getId(), $request->request->getString('_token'))) {
             $this->bus->dispatch(new SynchronizeConnectors($connector->getId()));
-
             $this->addFlash('success', new TranslatableMessage('Message.Connector.syncStarted'));
+        } else {
+            $this->addFlash('error', new TranslatableMessage('Generics.flash.invalidCsrfToken'));
         }
 
         return $this->redirectToRoute('domain_edit', [
