@@ -263,7 +263,7 @@ class SenderRuleController extends AbstractController
                     $senderRuleAddress,
                     wbRule: $rule,
                     type: SenderRule::TYPE_IMPORT,
-                    priority: SenderRule::PRIORITY_USER,
+                    priority: SenderRule::PRIORITY_DOMAIN,
                     flush: false,
                 );
                 $senderRules[$domain->getId()][] = $senderRuleAddress->getId();

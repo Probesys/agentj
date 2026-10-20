@@ -68,7 +68,7 @@ final class DomainFactory extends PersistentObjectFactory
 
                 $senderRule = new SenderRule($user, $rootMailAddr);
                 $senderRule->setWb('enabled');
-                $senderRule->setPriority(SenderRule::PRIORITY_USER);
+                $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
 
                 $this->senderRuleRepository->save($senderRule);
             })
