@@ -1,5 +1,20 @@
 # Changelog of AgentJ
 
+## 2026-10-20 - 2.7.6
+
+### Security
+
+- Make sure that all actions are protected against CSRF attacks ([1be2d31d](https://github.com/Probesys/agentj/commit/1be2d31d))
+
+### Bug fixes
+
+- Apply correct priority on sender rules created for domains ([934a7edf](https://github.com/Probesys/agentj/commit/934a7edf), [60fc4c5f](https://github.com/Probesys/agentj/commit/60fc4c5f))
+- Do not send human authentication mail to same sender mail several times ([f2b04cd2](https://github.com/Probesys/agentj/commit/f2b04cd2))
+- List impersonated user's shared boxes when impersonating as admin ([2d6e76f1](https://github.com/Probesys/agentj/commit/2d6e76f1))
+- Fix errors 404 when sorting sender rules ([0d307d64](https://github.com/Probesys/agentj/commit/0d307d64))
+- Fix the "Remove" IP address label ([8833eb01](https://github.com/Probesys/agentj/commit/8833eb01))
+- Use a plain id for message selection checkboxes ([87e6673e](https://github.com/Probesys/agentj/commit/87e6673e))
+
 ## 2026-09-18 - 2.7.5
 
 ### Bug Fixes
