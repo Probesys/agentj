@@ -1,5 +1,15 @@
 # Changelog of AgentJ
 
+## 2026-10-21 - 2.7.7
+
+### Security
+
+- Rebuild Docker images with the PHP 8.4.27 security update to fix critical remote code execution vulnerabilities CVE-2026-109618 and CVE-2026-109619.
+
+### Migration notes
+
+- Pull the updated Docker images and recreate the containers to apply the PHP security fixes. Restarting existing containers does not update PHP.
+
 ## 2026-10-20 - 2.7.6
 
 ### Security
