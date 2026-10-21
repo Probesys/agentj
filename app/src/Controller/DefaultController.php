@@ -36,9 +36,12 @@ class DefaultController extends AbstractController
         if ($user->getDomain() && $user->getDomain()->getSendUserAlerts() == false) {
             $showAlertWidget = false;
         }
+        $showQuotasWidget = !$this->isGranted('ROLE_ADMIN');
 
         return $this->render('home/index.html.twig', [
-            'showAlert' => $showAlertWidget
+            'user' => $user,
+            'showAlert' => $showAlertWidget,
+            'showQuotas' => $showQuotasWidget,
         ]);
     }
 

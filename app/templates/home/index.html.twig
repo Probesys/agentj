@@ -85,6 +85,24 @@
 				</div>
 			</div>
 		{% endif %}
+		{% if showQuotas %}
+			<div class="col-12 col-sm-6">
+				<div class="card my-2" style="height: 300px; position: relative;">
+					<turbo-frame
+						id="dashboard-quotas"
+						src="{{ path('dashboard_quotas') }}"
+						loading="lazy"
+						target="_top"
+						{# class="w-100 h-100 d-flex justify-content-center align-items-center" #}
+						class="w-100 h-100"
+					>
+						<div class="d-flex justify-content-center align-items-center h-100" style="background: #fff;">
+							<div class="spinner-border text-primary" role="status"></div>
+						</div>
+					</turbo-frame>
+				</div>
+			</div>
+		{% endif %}
 		<div class="col-12 col-sm-6">
 			<div class="card my-2" style="height: 300px; position: relative;">
 				<turbo-frame id="dashboard-stats-by-status" src="{{ path('dashboard_stats_by_status') }}" loading="lazy" target="_top" class="w-100 h-100">

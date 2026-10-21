@@ -357,6 +357,7 @@ Generics.flash.userNameAlreadyExist: "Ce login existe déjà. Vous ne pouvez pas
 Generics.footer.sourceCode: 'Code source'
 Generics.labels.actions: Actions
 Generics.labels.alerts: Alertes
+Generics.labels.quotas: Quotas
 Generics.labels.all: Tous
 Generics.labels.blockedMessages: 'Messages bloqués'
 Generics.labels.byDefault: 'par défaut'
@@ -379,6 +380,20 @@ Generics.labels.unblockedMessages: 'Messages non bloqués'
 Generics.labels.unreadAlerts: '{count, plural, one {Alerte non lue} other {Alertes non lues}}'
 Generics.labels.variables: Variables
 Generics.labels.yes: Oui
+Generics.labels.duration.second: 's'
+Generics.labels.duration.second_plural: 's'
+Generics.labels.duration.minute: 'min'
+Generics.labels.duration.minute_plural: 'min'
+Generics.labels.duration.hour: 'h'
+Generics.labels.duration.hour_plural: 'h'
+Generics.labels.duration.day: 'j'
+Generics.labels.duration.day_plural: 'j'
+Generics.labels.duration.week: 'sem.'
+Generics.labels.duration.week_plural: 'sem.'
+Generics.labels.duration.month: 'mois'
+Generics.labels.duration.month_plural: 'mois'
+Generics.labels.duration.year: 'an'
+Generics.labels.duration.year_plural: 'ans'
 Generics.messages.azurOAuthInvalidIdentity: "Les données d'identification à Microsoft sont erronées. Veuillez contacter votre administrateur"
 Generics.messages.cannotPreviewMailWithvirus: 'Vous ne pouvez pas visualiser ce message car il contient un virus'
 Generics.messages.groupWithPriorityExists: 'Un groupe avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'

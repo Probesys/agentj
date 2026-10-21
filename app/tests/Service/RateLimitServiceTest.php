@@ -26,7 +26,6 @@ class RateLimitServiceTest extends WebTestCase
     public function setUp(): void
     {
         parent::setUp();
-        // $this->client = static::getClient();
         $this->rateLimitService = static::getContainer()->get(RateLimitService::class);
     }
 
@@ -61,7 +60,13 @@ class RateLimitServiceTest extends WebTestCase
 
         $quotas = $this->rateLimitService->getApplicableQuotas($user);
 
-        self::assertSame($expected, $quotas);
+        self::assertSame(
+            [
+                'type' => 'user',
+                'quotas' => $expected,
+            ],
+            $quotas,
+        );
     }
 
     /**
@@ -86,9 +91,15 @@ class RateLimitServiceTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create();
         $user->addGroup($group);
 
-        $quota = $this->rateLimitService->getApplicableQuotas($user);
+        $quotas = $this->rateLimitService->getApplicableQuotas($user);
 
-        self::assertSame($expected, $quota);
+        self::assertSame(
+            [
+                'type' => 'group',
+                'quotas' => $expected,
+            ],
+            $quotas,
+        );
     }
 
     public function testGetApplicableQuotasRespectsPriorityGroupMultiple(): void
@@ -141,7 +152,13 @@ class RateLimitServiceTest extends WebTestCase
             $quota2,
             $quota3,
         ];
-        self::assertSame($expected, $quotas);
+        self::assertSame(
+            [
+                'type' => 'group',
+                'quotas' => $expected,
+            ],
+            $quotas,
+        );
     }
 
     /**
@@ -160,9 +177,15 @@ class RateLimitServiceTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create();
         $user->addGroup($group);
 
-        $quota = $this->rateLimitService->getApplicableQuotas($user);
+        $quotas = $this->rateLimitService->getApplicableQuotas($user);
 
-        self::assertSame($expected, $quota);
+        self::assertSame(
+            [
+                'type' => 'domain',
+                'quotas' => $expected,
+            ],
+            $quotas,
+        );
     }
 
     public function testAdminAlsoHaveQuotasAssociatedToItsDomain(): void
@@ -198,7 +221,13 @@ class RateLimitServiceTest extends WebTestCase
 
         $quotas = $this->rateLimitService->getApplicableQuotas($admin);
 
-        self::assertSame($expected, $quotas);
+        self::assertSame(
+            [
+                'type' => 'domain',
+                'quotas' => $expected,
+            ],
+            $quotas,
+        );
     }
 
     public function testSuperAdminHasNoEmail(): void
@@ -326,7 +355,13 @@ class RateLimitServiceTest extends WebTestCase
                 'remaining' => 0,
             ],
         ];
-        self::assertSame($expected, $quotaUsages);
+        self::assertSame(
+            [
+                'type' => 'user',
+                'usage' => $expected,
+            ],
+            $quotaUsages,
+        );
     }
 
     public function testUserQuotaUsageIsComputedPartial(): void
@@ -368,17 +403,20 @@ class RateLimitServiceTest extends WebTestCase
         $quotaUsages = $this->rateLimitService->getQuotaUsage($sender, $addrS);
 
         $expected = [
-            [
-                'limit' => 3,
-                'period' => 10,
-                'current' => 2,
-                'remaining' => 1,
-            ],
-            [
-                'limit' => 2,
-                'period' => 5,
-                'current' => 1,
-                'remaining' => 1,
+            'type' => 'user',
+            'usage' => [
+                [
+                    'limit' => 3,
+                    'period' => 10,
+                    'current' => 2,
+                    'remaining' => 1,
+                ],
+                [
+                    'limit' => 2,
+                    'period' => 5,
+                    'current' => 1,
+                    'remaining' => 1,
+                ],
             ],
         ];
         self::assertSame($expected, $quotaUsages);

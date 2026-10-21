@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Amavis\MessageStatus;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
+use App\Repository\AddressRepository;
 use App\Repository\AlertRepository;
 use App\Repository\DomainRepository;
 use App\Repository\LimitReportRepository;
@@ -12,6 +13,7 @@ use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Repository\OutMessageRecipientRepository;
 use App\Repository\UserRepository;
+use App\Service\RateLimitService;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +46,26 @@ final class DashboardController extends AbstractController
         return $this->render('dashboard/alerts.html.twig', [
             'alerts' => $alerts,
             'unreadAlertsCount' => $unreadAlertsCount,
+        ]);
+    }
+
+    #[Route('/dashboard/quotas', name: 'dashboard_quotas')]
+    public function quotas(
+        RateLimitService $rateLimitService,
+        AddressRepository $addressRepository,
+    ): Response {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $userAddress = $addressRepository->findOneBy([
+            'email' => $user->getEmail(),
+        ]);
+
+        $quotaData = $rateLimitService->getQuotaUsage($user, $userAddress);
+
+        return $this->render('dashboard/quotas.html.twig', [
+            'user' => $user,
+            'type' => $quotaData['type'],
+            'usage' => $quotaData['usage'],
         ]);
     }
 

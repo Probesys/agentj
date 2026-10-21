@@ -60,6 +60,7 @@ security:
          - { path: ^/login, roles: PUBLIC_ACCESS }
          - { path: ^/connect, roles: PUBLIC_ACCESS }
          - { path: ^/portal, roles: PUBLIC_ACCESS }
+         - { path: ^/quotas, roles: ROLE_USER }
          - { path: ^/admin, roles: [ROLE_ADMIN] }
          - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
          - { path: ^/domain, roles: ROLE_ADMIN }

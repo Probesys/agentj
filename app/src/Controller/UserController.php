@@ -531,27 +531,6 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/email/{id}/quota', name: 'user_email_quotas', methods: 'GET')]
-    #[IsGranted('DOMAIN_ACCESS', subject: 'user')]
-    public function getUserQuota(
-        User $user,
-        RateLimitService $rateLimitService,
-        AddressRepository $addressRepository,
-    ): Response {
-        $userAddress = $addressRepository->findOneBy([
-            'email' => $user->getEmail(),
-        ]);
-
-        $quotaData = $rateLimitService->getQuotaUsage($user, $userAddress);
-
-        return $this->render('user/quotas.html.twig', [
-            'user' => $user,
-            // 'quotas' => $applicableQuotas,
-            'type' => $quotaData['type'],
-            'usage' => $quotaData['usage'],
-        ]);
-    }
-
     /**
      * Return the policy of user if exists. Else return the domain policy
      * @param User $user

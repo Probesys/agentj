@@ -54,7 +54,7 @@ class RateLimitService
         if (!$userAddress) {
             return [
                 'type' => $type,
-                'usage' => $this->computeQuotasUsage($quotas, $type, $queryTime, []),
+                'usage' => $this->computeQuotasUsage($quotas, $queryTime, []),
             ];
         }
 
@@ -75,7 +75,7 @@ class RateLimitService
 
         return [
             'type' => $type,
-            'usage' => $this->computeQuotasUsage($quotas, $type, $queryTime, $messages),
+            'usage' => $this->computeQuotasUsage($quotas, $queryTime, $messages),
         ];
     }
 
@@ -139,11 +139,9 @@ class RateLimitService
      * Compute usage for quotas.
      *
      * @param list<array<string, int>> $quotas
-     * @param QuotaType $type
      * @param DateTimeImmutable $queryTime Time the request was made
      * @param OutMessage[] $messages Messages that are in widest quota time window
      * @return array<int, array{
-     *     type: QuotaType,
      *     limit: int,
      *     period: int,
      *     current: int,
@@ -152,7 +150,6 @@ class RateLimitService
      */
     private function computeQuotasUsage(
         array $quotas,
-        string $type,
         DateTimeImmutable $queryTime,
         array $messages,
     ): array {
@@ -161,6 +158,18 @@ class RateLimitService
         foreach ($quotas as $quota) {
             $period = $quota['quota_seconds'];
             $limit = $quota['quota_emails'];
+
+            // If no messages, quota is untouched.
+            if (empty($messages)) {
+                $usage[] = [
+                    'limit' => $limit,
+                    'period' => $period,
+                    'current' => 0,
+                    'remaining' => $limit,
+                ];
+                // Pass to next quota.
+                continue;
+            }
 
             $quotaCutoff = $queryTime
                 ->modify("-{$period} seconds")
@@ -173,7 +182,6 @@ class RateLimitService
             ));
 
             $usage[] = [
-                'type' => $type,
                 'limit' => $limit,
                 'period' => $period,
                 'current' => $used,
