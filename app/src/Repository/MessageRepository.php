@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Message;
 use App\Entity\User;
+use App\Util\Email;
 use App\Util\Search;
 use Doctrine\DBAL;
 use Doctrine\Persistence\ManagerRegistry;
@@ -131,12 +132,12 @@ class MessageRepository extends BaseMessageRepository
     }
 
     /**
-     * Check the last request sent
+     * Check the last request sent to an envelope address for the same sender identity.
      */
-    public function getDaysSinceLastRequest(string $to, string $from): ?int
+    public function getDaysSinceLastRequest(string $to, string $from, string $senderToAuthenticate): ?int
     {
         $query = $this->getEntityManager()->createQuery(<<<SQL
-            SELECT m.sendCaptcha
+            SELECT DISTINCT m
             FROM App\Entity\Message m
             JOIN m.messageRecipients mr
             JOIN mr.address ra
@@ -149,15 +150,19 @@ class MessageRepository extends BaseMessageRepository
 
         $query->setParameter('to', $to);
         $query->setParameter('from', $from);
-        $query->setMaxResults(1);
 
-        try {
-            $sendCaptcha = (int) $query->getSingleScalarResult();
-            $sinceSeconds = time() - $sendCaptcha;
+        $senderToAuthenticate = Email::normalize($senderToAuthenticate);
+
+        foreach ($query->toIterable() as $message) {
+            if (Email::normalize($message->getSenderEmail() ?? '') !== $senderToAuthenticate) {
+                continue;
+            }
+
+            $sinceSeconds = time() - (int) $message->getSendCaptcha();
             return (int) floor($sinceSeconds / (60 * 60 * 24));
-        } catch (\Doctrine\ORM\NoResultException $e) {
-            return null;
         }
+
+        return null;
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
 use DateTimeImmutable;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -86,6 +87,107 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
 
         $command->assertCommandIsSuccessful();
         self::assertEmailCount(0);
+    }
+
+    #[DataProvider('senderIdentityProvider')]
+    public function testAuthMailDeduplicationUsesSenderIdentity(
+        ?string $previousFrom,
+        ?string $currentFrom,
+        int $expectedEmailCount,
+        int $requestAge = 60,
+    ): void {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+
+        $previousMessage = $this->setupMail($addrS, [$addrR]);
+        $previousMessage->setFromAddr($previousFrom);
+        $this->setupMessageToAuthenticate($previousMessage, '-30 hours', messageAttributes: [
+            'sendCaptcha' => time() - $requestAge,
+        ]);
+
+        $message = $this->setupMail($addrS, [$addrR]);
+        $message->setFromAddr($currentFrom);
+        $this->setupMessageToAuthenticate($message);
+
+        $command = self::executeCommand('agentj:send-auth-mail-token');
+
+        $command->assertCommandIsSuccessful($command->getDisplay());
+        self::assertEmailCount($expectedEmailCount);
+        if ($expectedEmailCount > 0) {
+            self::assertEmailAddressContains(self::getMailerMessage(), 'To', $addrS->getEmail());
+        }
+    }
+
+    /**
+     * @return array<string, array{?string, ?string, int, int}>
+     */
+    public static function senderIdentityProvider(): array
+    {
+        return [
+            'different senders sharing an envelope' => [
+                'compta@prestataire.example', 'support@prestataire.example', 1, 60,
+            ],
+            'same sender with a different display name' => [
+                'Comptabilite <compta@prestataire.example>', 'Facturation <compta@prestataire.example>', 0, 60,
+            ],
+            'same sender with different casing' => [
+                'COMPTA@PRESTATAIRE.EXAMPLE', 'compta@prestataire.example', 0, 60,
+            ],
+            'missing From falls back to envelope' => [
+                null, null, 0, 60,
+            ],
+            'same sender after more than one day' => [
+                'compta@prestataire.example', 'compta@prestataire.example', 1, 25 * 60 * 60,
+            ],
+        ];
+    }
+
+    public function testAuthMailDeduplicationFindsMatchingRequestBeforeAnotherSendersRequest(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+
+        foreach (['compta@prestataire.example' => 120, 'support@prestataire.example' => 60] as $from => $age) {
+            $previousMessage = $this->setupMail($addrS, [$addrR]);
+            $previousMessage->setFromAddr($from);
+            $this->setupMessageToAuthenticate($previousMessage, messageAttributes: [
+                'sendCaptcha' => time() - $age,
+            ]);
+        }
+
+        $message = $this->setupMail($addrS, [$addrR]);
+        $message->setFromAddr('compta@prestataire.example');
+        $this->setupMessageToAuthenticate($message);
+
+        $command = self::executeCommand('agentj:send-auth-mail-token');
+
+        $command->assertCommandIsSuccessful();
+        self::assertEmailCount(0);
+    }
+
+    public function testAuthMailIsSentToEachSenderSharingAnEnvelopeInTheSameRun(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+
+        foreach (['compta@prestataire.example', 'support@prestataire.example'] as $from) {
+            $message = $this->setupMail($addrS, [$addrR]);
+            $message->setFromAddr($from);
+            $this->setupMessageToAuthenticate($message);
+        }
+
+        $command = self::executeCommand('agentj:send-auth-mail-token');
+
+        $command->assertCommandIsSuccessful();
+        self::assertEmailCount(2);
+        self::assertEmailAddressContains(self::getMailerMessage(0), 'To', $addrS->getEmail());
+        self::assertEmailAddressContains(self::getMailerMessage(1), 'To', $addrS->getEmail());
     }
 
     public function testAuthMailIsNotSentSeveralTimesToSameSender(): void

@@ -115,7 +115,8 @@ class SendAuthMailRequestCommand
                 // Send only one mail per day and per recipient to the sender.
                 $nbDaysLastSentMsgToUser = $this->messageRepository->getDaysSinceLastRequest(
                     $recipientUser->getEmail(),
-                    $senderEmail
+                    $senderEmail,
+                    $message->getSenderEmail() ?? $senderEmail,
                 );
                 if ($nbDaysLastSentMsgToUser === 0) {
                     continue;
