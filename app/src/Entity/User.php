@@ -58,7 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     #[ORM\ManyToOne(targetEntity: Policy::class)]
     #[ORM\JoinColumn(name: 'policy_id', nullable: true)]
-    private ?Policy $policy;
+    private ?Policy $policy = null;
 
     #[ORM\ManyToOne(targetEntity: Policy::class)]
     #[ORM\JoinColumn(name: 'out_policy_id', nullable: true)]
@@ -740,5 +740,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     public function isSuperAdmin(): bool
     {
         return in_array('ROLE_SUPER_ADMIN', $this->getRoles());
+    }
+
+    /**
+     * Return whether the user is an alias or not.
+     */
+    public function isAlias(): bool
+    {
+        return $this->getOriginalUser() !== null;
     }
 }
