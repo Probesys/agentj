@@ -8,7 +8,6 @@ use App\Entity\User;
 use App\Repository\MessageRecipientSearchRepository;
 use App\Service\LocaleService;
 use App\Service\MessageService;
-use App\Service\ReportService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -35,7 +34,6 @@ class SendReportMailCommand extends Command
         private MailerInterface $mailer,
         private MessageRecipientSearchRepository $messageRecipientSearchRepository,
         private MessageService $messageService,
-        private ReportService $reportService,
         private UrlGeneratorInterface $urlGenerator,
         private LocaleService $localeService,
     ) {
@@ -64,21 +62,18 @@ class SendReportMailCommand extends Command
                 continue;
             }
 
-            $messageRecipients = $this->reportService->getMessageRecipients($user);
-            $listMessageRecipients = $this->reportService->getListMessageRecipients($user);
-            $spamMessageRecipients = $this->reportService->getSpamMessageRecipients($user);
-            $standardMessageRecipients = $this->reportService->getStandardMessageRecipients($user);
+            $messageRecipients = $this->getMessageRecipients($user);
 
-            if (count($messageRecipients) === 0) {
+            if (count($messageRecipients['all']) === 0) {
                 continue;
             }
 
             $body = $this->createEmailContent(
                 $user,
-                $messageRecipients,
-                $listMessageRecipients,
-                $spamMessageRecipients,
-                $standardMessageRecipients,
+                $messageRecipients['all'],
+                $messageRecipients['list'],
+                $messageRecipients['spam'],
+                $messageRecipients['standard'],
             );
 
             $domain = $user->getDomain();
@@ -164,24 +159,28 @@ class SendReportMailCommand extends Command
         }
 
         $tableMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'type' => 'all',
             'messageRecipients' => $messageRecipients,
             'user' => $user,
             'locale' => $locale,
         ]);
 
         $tableListMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'type' => 'list',
             'messageRecipients' => $listMessageRecipients,
             'user' => $user,
             'locale' => $locale,
         ]);
 
         $tableSpamMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'type' => 'spam',
             'messageRecipients' => $spamMessageRecipients,
             'user' => $user,
             'locale' => $locale,
         ]);
 
         $tableStandardMessages = $this->twig->render('report/table_mail_msgs.html.twig', [
+            'type' => 'standard',
             'messageRecipients' => $standardMessageRecipients,
             'user' => $user,
             'locale' => $locale,
@@ -191,9 +190,9 @@ class SendReportMailCommand extends Command
 
         $body = str_replace('[USERNAME]', $this->escape($user->getFullname()), $body);
         $body = str_replace('[LIST_MAIL_MSGS]', $tableMessages, $body);
-        $body = str_replace('[LIST_MSGS_LIST]', $tableListMessages, $body);
-        $body = str_replace('[LIST_SPAM_MSGS]', $tableSpamMessages, $body);
-        $body = str_replace('[LIST_STANDARD_MSGS]', $tableStandardMessages, $body);
+        $body = str_replace('[LIST_MESSAGES_LIST]', $tableListMessages, $body);
+        $body = str_replace('[LIST_MESSAGES_SPAM]', $tableSpamMessages, $body);
+        $body = str_replace('[LIST_MESSAGES_STANDARD]', $tableStandardMessages, $body);
         $body = str_replace('[NB_UNTREATED_MESSAGES]', (string) $nbUntreated, $body);
         $body = str_replace('[NB_AUTHORIZED_MESSAGES]', (string) $nbAuthorized, $body);
         $body = str_replace('[NB_SPAMMED_MESSAGES]', (string) $nbSpammed, $body);
@@ -240,7 +239,7 @@ class SendReportMailCommand extends Command
             $splitBody = explode("[FOREACH_$type]", $body, 2);
 
             if (count($splitBody) !== 2) {
-                return $body;
+                continue;
             }
 
             $bodyStart = $splitBody[0];
@@ -251,7 +250,7 @@ class SendReportMailCommand extends Command
             $splitBody = explode("[ENDFOREACH_$type]", $bodyRest, 2);
 
             if (count($splitBody) !== 2) {
-                return $body;
+                continue;
             }
 
             $bodyEnd = $splitBody[1];
@@ -309,12 +308,69 @@ class SendReportMailCommand extends Command
                 $bodyMessage = str_replace('[URL_MESSAGE_BAN]', $urlBan, $bodyMessage);
 
                 $bodyMessages .= $bodyMessage;
-
-                $body = $bodyStart . $bodyMessages . $bodyEnd;
             }
+
+            $body = $bodyStart . $bodyMessages . $bodyEnd;
         }
 
         return $body;
+    }
+
+
+    /**
+     * @return array{
+     *     all: MessageRecipient[],
+     *     standard: MessageRecipient[],
+     *     list: MessageRecipient[],
+     *     spam: MessageRecipient[],
+     * }
+     *  */
+    private function getMessageRecipients(User $user): array
+    {
+        $messageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
+            $user,
+            messageStatus: MessageStatus::UNTREATED,
+            fromDate: $user->getDateLastReport(),
+        )->getResult();
+
+        $domain = $user->getDomain();
+        $reportSpamLevel = $domain->getReportSpamLevel();
+
+        if ($reportSpamLevel > 0) {
+            $spamMessageRecipients = $this->messageRecipientSearchRepository->getSearchQuery(
+                $user,
+                messageStatus: MessageStatus::SPAMMED,
+                maxSpamLevel: $reportSpamLevel,
+                fromDate: $user->getDateLastReport(),
+            )->getResult();
+
+            $messageRecipients = array_merge($messageRecipients, $spamMessageRecipients);
+        }
+
+        $standard = array_filter(
+            $messageRecipients,
+            fn (MessageRecipient $messageRecipient) =>
+                $messageRecipient->getStatus() === MessageStatus::UNTREATED &&
+                !$messageRecipient->getMessage()->getIsMlist(),
+        );
+        $list = array_filter(
+            $messageRecipients,
+            fn (MessageRecipient $messageRecipient) =>
+                $messageRecipient->getStatus() === MessageStatus::UNTREATED &&
+                $messageRecipient->getMessage()->getIsMlist(),
+        );
+        $spam = array_filter(
+            $messageRecipients,
+            fn (MessageRecipient $messageRecipient) =>
+                $messageRecipient->getStatus() === MessageStatus::SPAMMED,
+        );
+
+        return [
+            'all' => $messageRecipients,
+            'standard' => $standard,
+            'list' => $list,
+            'spam' => $spam,
+        ];
     }
 
     private function escape(string $value): string

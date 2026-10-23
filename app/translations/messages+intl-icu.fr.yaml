@@ -68,9 +68,9 @@ Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_LIST: 'Début de la bou
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_SPAM: 'Début de la boucle des spams'
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_STANDARD: 'Début de la boucle des messages standards'
 Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'Liste des messages non traités'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_LIST: 'Liste des messages non traités de mailing listes et de newsletters'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_SPAM: 'Liste des messages en spam'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_STANDARD: 'Liste des messages standards'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_LIST: 'Liste des messages non traités de mailing listes et de newsletters'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_SPAM: 'Liste des messages en spam'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_STANDARD: 'Liste des messages standards'
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER: "Nom de l'expéditeur du message"
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT: 'Sujet du message'
 Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES: 'Nombre messages autorisés'
