@@ -421,7 +421,11 @@ class MessageService
      */
     public function decryptReleaseToken(string $token): ?array
     {
-        list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+        try {
+            list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+        } catch (\Exception) {
+            return null;
+        }
 
         if ($expiry < time()) {
             return null;

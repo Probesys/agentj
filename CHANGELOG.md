@@ -11,6 +11,8 @@ Altcha (https://altcha.org/) is now used during human authentication. There are 
 
 You must set at least `ALTCHA_KEY_SECRET` to enable Altcha. Otherwise, the human authentication form will not show the widget.
 
+Concerning the LDAP connector: if the synchronization starts to fail, you must re-enter the LDAP connector password.
+
 ## 2026-10-20 - 2.7.6
 
 ### Security

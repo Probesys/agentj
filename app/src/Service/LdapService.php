@@ -45,15 +45,16 @@ class LdapService
 
         try {
             $clearPassword = $this->cryptEncryptService->decrypt($searchPassword)[1];
-            if ($clearPassword === false) {
-                throw new ConnectionException('Could not connect to ldap server');
-            }
-
-            $ldap->bind($bindDN, $clearPassword);
-            return $ldap;
-        } catch (ConnectionException $exception) {
-            throw new ConnectionException('Could not connect to ldap server');
+        } catch (\Exception) {
+            $clearPassword = false;
         }
+
+        if ($clearPassword === false) {
+            throw new ConnectionException('Could not connect to ldap server: invalid password');
+        }
+
+        $ldap->bind($bindDN, $clearPassword);
+        return $ldap;
     }
 
     public function bindUser(User $user, string $password): bool

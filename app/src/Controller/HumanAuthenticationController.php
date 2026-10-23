@@ -28,15 +28,13 @@ class HumanAuthenticationController extends AbstractController
         HumanAuthenticationService $humanAuthenticationService,
         TranslatorInterface $translator,
     ): Response {
-        list($message, $domain, $messageRecipients) = $humanAuthenticationService->decryptToken($token);
+        $tokenData = $humanAuthenticationService->decryptToken($token);
 
-        if (!$message) {
-            throw $this->createNotFoundException('The message does not exist.');
+        if ($tokenData === null) {
+            throw $this->createNotFoundException('The token is invalid.');
         }
 
-        if (!$domain) {
-            throw $this->createNotFoundException('The domain does not exist.');
-        }
+        list($message, $domain, $messageRecipients) = $tokenData;
 
         $senderEmail = $message->getSenderEmail();
 

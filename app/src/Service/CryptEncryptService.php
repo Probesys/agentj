@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Symfony\Component\Clock\Clock;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class CryptEncryptService
@@ -23,9 +24,11 @@ class CryptEncryptService
         $key = $this->params->get('salt');
         $iv = $this->params->get('iv');
 
-        $expiry = time() + $lifetime;
+        $clock = Clock::get();
+        $now = $clock->now();
+        $expiry = $now->modify("{$lifetime} seconds");
 
-        $expiryStr = (string)$expiry;
+        $expiryStr = (string)$expiry->getTimestamp();
 
         // Build payload: expiry and data separated by a colon
         $payload = 'v2:' . $expiryStr . ':' . $data;
@@ -57,13 +60,7 @@ class CryptEncryptService
         $payload = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, 0, $iv);
 
         if ($payload === false) {
-            // Handle the old (deprecated) version of the token. In this
-            // version, expiration date was concatanated to the ciphertext in
-            // the base64 string.
-            $expiry = (int) substr(base64_decode($token), 0, 10);
-            $ciphertext = substr_replace(base64_decode($token), '', 0, 10);
-            $data = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, 0, $iv);
-            return [$expiry, $data];
+            throw new \Exception('Decryption failed.');
         }
 
         if (strpos($payload, 'v2:') === 0) {

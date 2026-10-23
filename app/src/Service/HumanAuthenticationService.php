@@ -20,11 +20,15 @@ class HumanAuthenticationService
     }
 
     /**
-     * @return ?array{?Message, ?Domain, MessageRecipient[]}
+     * @return ?array{Message, Domain, MessageRecipient[]}
      */
     public function decryptToken(string $token): ?array
     {
-        list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+        try {
+            list($expiry, $decryptedToken) = $this->cryptEncryptService->decrypt($token);
+        } catch (\Exception) {
+            return null;
+        }
 
         if ($expiry < time()) {
             return null;
@@ -41,23 +45,35 @@ class HumanAuthenticationService
         }
 
         $mailId = $tokenParts[0];
+        $secretId = $tokenParts[1];
         $partitionTag = (int) $tokenParts[2];
         $domainId = $tokenParts[3];
 
         $message = $this->messageRepository->findOneByMailId($partitionTag, $mailId);
+
+        if (!$message) {
+            return null;
+        }
+
+        $messageSecretId = $message->getSecretId() ?? '';
+        if (!hash_equals($messageSecretId, $secretId)) {
+            return null;
+        }
+
         $domain = $this->domainRepository->find($domainId);
 
-        $messageRecipients = [];
-        if ($message) {
-            $messageRecipients = $this->messageRecipientRepository->findByMessage($message);
-
-            $messageRecipients = array_filter(
-                $messageRecipients,
-                function (MessageRecipient $messageRecipient) use ($domain) {
-                    return $messageRecipient->getAddress()->getReverseDomain() == $domain->getDomain();
-                },
-            );
+        if ($domain === null) {
+            return null;
         }
+
+        $messageRecipients = $this->messageRecipientRepository->findByMessage($message);
+
+        $messageRecipients = array_filter(
+            $messageRecipients,
+            function (MessageRecipient $messageRecipient) use ($domain) {
+                return $messageRecipient->getAddress()->getReverseDomain() == $domain->getDomain();
+            },
+        );
 
         return [$message, $domain, $messageRecipients];
     }
