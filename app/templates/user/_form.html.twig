@@ -123,14 +123,12 @@
     {% include 'partials/_quota_form.html.twig' with {'form': form} %}
 {% endif %}
 
-{% if form.report is defined %}
-    <div class="form-group">
-        {{ form_widget(form.report, {'attr': {'class': 'form-check-input'}}) }}
-        <label class="form-check-label" for="{{ form.report.vars.id }}">
-            {{ form_label(form.report, 'Envoyer le rapport') }}
-        </label>
-        {{ form_errors(form.report) }}
-    </div>
+{% if form.report is defined and form.reportTimes is not defined %}
+    {% include 'partials/_report_checkbox.html.twig' with {'form': form} %}
+{% endif %}
+
+{% if form.reportTimes is defined %}
+    {% include 'partials/_report_preferences_form.html.twig' with {'form': form, 'showWeekendOrigin': false} only %}
 {% endif %}
 
 <div class="d-flex justify-content-center">

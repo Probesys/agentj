@@ -1,2 +1,3 @@
 Error: Error
 invalid_altcha: 'Unable to verify the captcha. Please tick the checkbox.'
+invalid_report_time: 'Enter a valid time in HH:MM format, between 00:00 and 23:59.'

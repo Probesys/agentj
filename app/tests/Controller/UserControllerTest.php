@@ -353,6 +353,8 @@ class UserControllerTest extends WebTestCase
                 'groups' => [
                     $group->getId(),
                 ],
+                'reportTimes' => '11:00, 17:30',
+                'reportSkipWeekends' => true,
             ],
         ]);
 
@@ -368,6 +370,31 @@ class UserControllerTest extends WebTestCase
         self::assertSame($newFullname, $user->getFullname());
         self::assertSame($newEmail, $user->getEmail());
         self::assertCount(1, $user->getGroups());
+        self::assertSame(['11:00', '17:30'], $user->getReportTimes());
+        self::assertTrue($user->getReportSkipWeekends());
+    }
+
+    public function testEmailUserEditFormUsesCheckboxLayoutForReportPreferences(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        $user = UserFactory::new()->user($domain)->create();
+
+        $client->request(Request::METHOD_GET, '/admin/users/email/' . $user->getId() . '/edit');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('input[name="user[report]"].form-check-input');
+        self::assertSelectorExists('input[name="user[reportSkipWeekends]"].form-check-input');
+        self::assertSelectorNotExists('input[name="user[report]"].form-control');
+        self::assertSelectorNotExists('input[name="user[reportSkipWeekends]"].form-control');
+        self::assertSelectorCount(1, 'label[for="user_report"]');
+        self::assertSelectorCount(1, 'label[for="user_reportSkipWeekends"]');
+        self::assertSelectorExists('[data-report-preferences-target="slotTemplate"] input[type="time"]');
+        self::assertSelectorExists('button[data-action="report-preferences#addTime"]');
+        self::assertSelectorExists('.report-help summary');
+        self::assertSelectorNotExists('[data-test="report-weekend-origin"]');
     }
 
     public function testSuperAdminCanEditUsers(): void
@@ -402,6 +429,30 @@ class UserControllerTest extends WebTestCase
         $this->refresh($user);
         self::assertSame($newFullname, $user->getFullname());
         self::assertSame($newEmail, $user->getEmail());
+    }
+
+    public function testAdminEditWithoutWeekendInputPreservesDomainInheritance(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne(['reportSkipWeekends' => true]);
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $client->loginUser($admin);
+        $user = UserFactory::new()->user($domain)->create();
+
+        $client->request(Request::METHOD_POST, '/admin/users/email/' . $user->getId() . '/edit', [
+            'user' => [
+                '_token' => $this->generateCsrfToken($client, 'user'),
+                'fullname' => 'Updated name',
+                'email' => $user->getEmail(),
+                'report' => true,
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $this->refresh($user);
+        self::assertSame('Updated name', $user->getFullname());
+        self::assertNull($user->getReportSkipWeekends());
+        self::assertTrue($user->getEffectiveReportSkipWeekends());
     }
 
     public function testSuperAdminCannotEditUsersWithANotExistingDomain(): void

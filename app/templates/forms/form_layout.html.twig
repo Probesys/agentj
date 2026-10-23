@@ -30,6 +30,11 @@
     {% endif %}
 {% endblock form_row %}
 
+{% block report_times_row %}
+    {{ block('form_row') }}
+    {{ form_help(form) }}
+{% endblock report_times_row %}
+
 
 {% block form_label %}
     {% if label is same as(false) %}

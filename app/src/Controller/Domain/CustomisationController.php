@@ -122,6 +122,7 @@ class CustomisationController extends AbstractController
                 'URL_MSGS' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.URL_MSGS'),
                 'NB_UNTREATED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_UNTREATED_MESSAGES'),
                 'NB_AUTHORIZED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES'),
+                'NB_BLOCKED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_BLOCKED_MESSAGES'),
                 'NB_SPAMMED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_SPAMMED_MESSAGES'),
                 'NB_BANNED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_BANNED_MESSAGES'),
                 'NB_DELETED_MESSAGES' => new TranslatableMessage('Entities.Domain.labels.dynamicsVariables.NB_DELETED_MESSAGES'),

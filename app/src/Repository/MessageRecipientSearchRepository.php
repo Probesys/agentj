@@ -43,6 +43,8 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         ?array $sortParams = null,
         ?int $fromDate = null,
         ?float $maxSpamLevel = null,
+        ?int $toDate = null,
+        bool $halfOpenPeriod = false,
     ): Query {
 
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
@@ -52,8 +54,13 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         }
 
         if (!is_null($fromDate)) {
-            $queryBuilder->andWhere('m.timeNum > :date');
+            $queryBuilder->andWhere($halfOpenPeriod ? 'm.timeNum >= :date' : 'm.timeNum > :date');
             $queryBuilder->setParameter('date', $fromDate);
+        }
+
+        if ($toDate !== null) {
+            $queryBuilder->andWhere($halfOpenPeriod ? 'm.timeNum < :toDate' : 'm.timeNum <= :toDate');
+            $queryBuilder->setParameter('toDate', $toDate);
         }
 
         if (!is_null($maxSpamLevel)) {
@@ -79,7 +86,7 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
 
         $this->hintQueryWithIndexes($query, $user, $sortParams, $searchKey, $fromDate);
 
-        $countQueryBuilder = $this->createCountQueryBuilder($queryBuilder, $user, $searchKey, $fromDate);
+        $countQueryBuilder = $this->createCountQueryBuilder($queryBuilder, $user, $searchKey, $fromDate, $toDate);
         $countQuery = $countQueryBuilder->getQuery();
         $count = $countQuery->getSingleScalarResult();
 
@@ -89,9 +96,20 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
     }
 
 
-    public function countByType(?User $user = null, ?int $messageStatus = MessageStatus::UNTREATED): int
-    {
-        $query = $this->getSearchQuery($user, $messageStatus);
+    public function countByType(
+        ?User $user = null,
+        ?int $messageStatus = MessageStatus::UNTREATED,
+        ?int $fromDate = null,
+        ?int $toDate = null,
+        bool $halfOpenPeriod = false,
+    ): int {
+        $query = $this->getSearchQuery(
+            $user,
+            $messageStatus,
+            fromDate: $fromDate,
+            toDate: $toDate,
+            halfOpenPeriod: $halfOpenPeriod,
+        );
         $count = $query->getHint('knp_paginator.count');
 
         return $count;
@@ -141,11 +159,12 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         QueryBuilder $baseQueryBuilder,
         ?User $user,
         ?string $searchKey,
-        ?int $fromDate
+        ?int $fromDate,
+        ?int $toDate,
     ): QueryBuilder {
         $countQueryBuilder = clone $baseQueryBuilder;
 
-        $hasFilters = !empty($searchKey) || $fromDate !== null;
+        $hasFilters = !empty($searchKey) || $fromDate !== null || $toDate !== null;
 
         if ($hasFilters) {
             $countQueryBuilder->resetDQLPart('orderBy');

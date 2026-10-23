@@ -114,6 +114,9 @@ class UserController extends AbstractController
         $form->remove('sharedWith');
         $form->remove('imapLogin');
         $form->remove('report');
+        $form->remove('reportTimes');
+        $form->remove('reportSkipWeekends');
+        $form->remove('reportSkipWeekendsMode');
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -187,6 +190,9 @@ class UserController extends AbstractController
         $form->remove('password');
         $form->remove('imapLogin');
         $form->remove('report');
+        $form->remove('reportTimes');
+        $form->remove('reportSkipWeekends');
+        $form->remove('reportSkipWeekendsMode');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -235,6 +241,9 @@ class UserController extends AbstractController
         $form->remove('groups');
         $form->remove('email');
         $form->remove('report');
+        $form->remove('reportTimes');
+        $form->remove('reportSkipWeekends');
+        $form->remove('reportSkipWeekendsMode');
         $form->remove('sharedWith');
         $form->remove('imapLogin');
         $form->handleRequest($request);

@@ -151,11 +151,7 @@ class DomainController extends AbstractController
         } elseif ($form->isSubmitted()) {
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
-                $cause = $error->getCause();
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue())
-                );
+                $this->addFlash('error', $error->getMessage());
             }
 
             return $this->redirectToRoute('domain_new');
@@ -225,11 +221,7 @@ class DomainController extends AbstractController
         } elseif ($form->isSubmitted()) {
             $errors = $form->getErrors(true);
             foreach ($errors as $error) {
-                $cause = $error->getCause();
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans($cause->getMessage() . ' : ' . $cause->getInvalidValue()),
-                );
+                $this->addFlash('error', $error->getMessage());
             }
 
             return $this->redirectToRoute('domain_edit', ['id' => $domain->getId()]);

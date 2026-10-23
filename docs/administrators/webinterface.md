@@ -135,6 +135,65 @@ On the `Filters & Rates` tab of a domain, you have the following parameters:
 - Email address that sends authentication requests: The noreply email address used to send authentication requests and reports.
 - Rate limit: Refer to the previous section.
 
+### Report schedules
+
+When creating or editing a domain, configure report sending times in the `Domain` tab.
+Select sending times using the time inputs, with `+` and `−` to add or remove slots.
+Times use the application time zone. By default, reports are sent at `07:00` every day.
+Tick `Disable report sending during weekends` to skip Saturday and Sunday.
+
+Users can customize their schedule in their account preferences; administrators can also edit it on the user form.
+Empty personal sending times inherit the domain times. The weekend setting is inherited independently
+until the user checks or unchecks its checkbox. Either explicit choice then takes precedence over the
+domain, even when it matches the current domain value or personal sending times are empty.
+Saving other preferences without changing the checkbox preserves inheritance.
+Check `Domain default values` to clear personal times and display the inherited times read-only.
+For weekends, choose `Weekends: domain setting` to restore inheritance, or `Weekends: personal setting`
+to customize the checkbox. This selection also works without JavaScript.
+Save the form to apply these choices. Neither choice changes whether reports are enabled.
+
+Each report contains reportable messages not covered by the last successfully sent report.
+All counters also refer to newly received messages in the same half-open period `[start, cutoff[`.
+Messages timestamped at the preparation cutoff second belong to the following report, including
+messages inserted during sending in that same second.
+The blocked-message counter groups banned messages, spam and viruses in this period.
+The first report includes all reportable messages. Empty reports are not sent and do not advance the last report date.
+When weekends are disabled, the next report includes messages received during the weekend.
+
+Reports are queued for Messenger workers. Their content is prepared when a worker processes the report,
+and is retained unchanged for retries. The last successful sending date is recorded only after the SMTP
+transport accepts the email; a separate content cutoff prevents messages arriving during sending from being skipped.
+Missed sending times are picked up on a later cron run, without reconstructing one report for every missed time.
+When a weekend blocks delivery, it waits until the first configured sending time on Monday.
+Failures use Messenger's existing retry policy, and terminal failures are logged; the next scheduled report
+includes messages not covered by a successful report. Only pending deliveries are retained for tracking.
+Only one delivery per user can be pending, including while it is being retried. Later scheduling runs
+do not queue a second delivery until the first succeeds, is cancelled or reaches terminal failure.
+The next scheduling run can then cover the remaining period without overlapping the prepared retry.
+
+The scheduled command checks sending times every minute. To send reports manually regardless of the schedule, run
+`docker compose exec app php bin/console agentj:send-report-mail --force`.
+Users who have disabled reports still receive no reports. An additional manual report is refused if one is already pending.
+New accounts, re-enabled reports and schedule changes use the next future occurrence of the configured sending times.
+
+#### Manual verification
+
+Related feature: [#622](https://github.com/Probesys/agentj/issues/622).
+
+1. Configure a domain with two sending times and weekend sending disabled. Save and reopen it.
+2. Create a user, check inherited times are read-only, and verify its initial weekend setting.
+3. Uncheck `Domain default values`, add and remove personal times, save and reopen the user.
+4. Check `Domain default values` again. Verify only the times reset; personal weekend choices remain.
+5. Select a personal weekend setting, save, then select the domain weekend setting and save again.
+   Change the domain's weekend setting and verify this user follows it. Repeat the explicit selection
+   from `/account` without JavaScript to verify the server-side form controls.
+6. In a development environment, stop the Messenger worker, receive a reportable message and run
+   the scheduled command at a due slot. Verify no successful sending date is recorded yet and later
+   scheduling runs do not add another pending delivery for that user. Restart the worker and verify
+   the email content and successful sending date; the next report must contain only the remaining messages.
+
+The 1,000-user test checks exhaustive queueing, not a bound on execution time, memory or SQL queries.
+
 ### Alerts
 
 On the `Alerts` tab of a domain, you can tick two checkboxes:
@@ -182,7 +241,10 @@ When you create or edit an user, there is the following fields:
 - Group: The group(s) the user belongs to. Not mandatory. Groups must be created before.
 - Shared with: If another user should be able to manage this user (Manage blocked mails, authorize senders, etc.). Not mandatory. An user can be shared with multiple users. The other user(s) must be created before.
 - Rate limit: See the dedicated section on the subject.
-- Send report: Tick the box if the user should receive daily reports by email about blocked emails.
+- Send report: Tick the box if the user should receive reports by email about blocked emails.
+- Report sending times: Leave empty to inherit the domain schedule, or enter personal times separated by commas.
+- Disable report sending during weekends: Inherits the domain setting until explicitly checked or unchecked.
+- Domain default values: Restore inherited report sending times and weekend settings, then save the form.
 
 #### Alias
 

@@ -101,6 +101,8 @@
             {{ form_row(form.smtpPort) }}
         </p>
 
+        {% include 'partials/_report_preferences_form.html.twig' with {'form': form} only %}
+
         <div class="card mt-4">
             <div class="card-header">
                 {{ 'Entities.Domain.labels.ipAddresses' | trans() }}
