@@ -5,6 +5,7 @@ namespace App\Tests\Controller;
 use AltchaOrg\Altcha\Solution;
 use App\Amavis\MessageStatus;
 use App\Service\AltchaService;
+use App\Service\CryptEncryptService;
 use App\Service\HumanAuthenticationService;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\UserFactory;
@@ -74,6 +75,27 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+    }
+
+    public function testHumanAuthenticationFailsIfTheDomainDoesNotExist(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR]);
+        // Same content as HumanAuthenticationService::encryptToken(), with an
+        // unknown domain (e.g. deleted since the email was sent)
+        $token = static::getContainer()->get(CryptEncryptService::class)->encrypt(
+            $message->getMailId()
+            . '%%%' . $message->getSecretId()
+            . '%%%' . $message->getPartitionTag()
+            . '%%%' . 999999
+        );
+
+        $this->client->request(Request::METHOD_GET, '/check/' . $token);
+
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testHumanAuthenticationFailsIfAltchaTokenIsInvalid(): void

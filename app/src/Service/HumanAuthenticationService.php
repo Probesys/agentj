@@ -47,6 +47,10 @@ class HumanAuthenticationService
         $message = $this->messageRepository->findOneByMailId($partitionTag, $mailId);
         $domain = $this->domainRepository->find($domainId);
 
+        if ($domain === null) {
+            return null;
+        }
+
         $messageRecipients = [];
         if ($message) {
             $messageRecipients = $this->messageRecipientRepository->findByMessage($message);
