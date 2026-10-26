@@ -69,10 +69,11 @@ class UserService
         $parentUser = $user->getMainUser();
 
         if ($user->isAlias()) {
-            // If there is a parent, the user passed in argument is an alias.
-            // We update this user using groups and rules from parent.
+            // In alias case, we update the alias using groups, rules and policy from parent.
             $this->updateGroups($user, $parentUser->getGroups()->toArray());
             $this->updateSenderRules($user, $parentUser->getSenderRules()->toArray());
+            $user->setPolicy($parentUser->getPolicy());
+            $this->em->persist($user);
         } else {
             // Otherwise it's an original user, so we update all its aliases.
             $originalUserGroups = $parentUser->getGroups()->toArray();
@@ -87,9 +88,10 @@ class UserService
 
                 $this->em->persist($alias);
             }
+
+            $this->updateUserAndAliasPolicy($user);
         }
 
-        $this->updateUserAndAliasPolicy($user);
         $this->em->flush();
     }
 

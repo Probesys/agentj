@@ -129,15 +129,15 @@ class UserServiceTest extends WebTestCase
         $alias2 = UserFactory::new()->alias($user)->create([
             'policy' => null,
         ]);
-        self::assertSame($userPolicy, $user->getPolicy());
+        $user->setPolicy($groupPolicy2); // Manually set to reflect an already computed user's policy
+        $this->save($user);
         self::assertNull($alias1->getPolicy());
         self::assertNull($alias2->getPolicy());
 
         $this->userService->syncUserAndAliases($user);
 
-        // Assert that policy has been updated for user and aliases.
-        // Group policy has the priority over user Policy.
-        // $groupPolicy2 is used, as $group2 priority is highest.
+        // Assert that policy has been updated for aliases.
+        // Aliases should use the same policy as parent User.
         $this->refresh($user);
         $this->refresh($alias1);
         $this->refresh($alias2);

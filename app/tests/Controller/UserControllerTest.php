@@ -479,6 +479,7 @@ class UserControllerTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
+        $user->setPolicy($domain->getPolicy()); // Manually set to reflect an already computed user's policy
         UserFactory::new()->user($otherDomain)->create([
             'email' => 'test@' . $otherDomain->getDomain(),
             'imapLogin' => 'test'
@@ -574,6 +575,7 @@ class UserControllerTest extends WebTestCase
         $user = UserFactory::new()->user($domain)->create([
             'email' => 'test@' . $domain->getDomain(),
         ]);
+        $user->setPolicy($domain->getPolicy()); // Manually set to reflect an already computed user's policy
         $initialCount = UserFactory::count();
 
         $aliasEmail = 'other@' . $domain->getDomain();
