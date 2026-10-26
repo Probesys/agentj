@@ -24,9 +24,10 @@ final class GroupFactory extends PersistentObjectFactory
     protected function defaults(): array|callable
     {
         return [
+            'active' => true,
             'domain' => DomainFactory::new(),
-            'name' => self::faker()->text(255),
-            'slug' => self::faker()->text(128),
+            'name' => self::faker()->text(25),
+            'slug' => self::faker()->text(10),
             'wb' => self::faker()->text(10),
         ];
     }
