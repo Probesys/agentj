@@ -238,6 +238,8 @@ class Office365ImportCommand extends Command
 
             $this->em->persist($alias);
 
+            $user->addAlias($alias);
+
             $aliases[] = $alias;
         }
         return $aliases;
