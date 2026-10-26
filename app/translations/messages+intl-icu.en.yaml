@@ -19,7 +19,6 @@ Entities.Domain.actions.add_new_rule: 'New rule'
 Entities.Domain.actions.backToDomainList: 'Return to the list of domains'
 Entities.Domain.actions.customisation: Customisation
 Entities.Domain.actions.deleteRule: 'Delete rule'
-Entities.Domain.actions.importUserAndAliases: 'Import users and aliases'
 Entities.Domain.customisation.general.tab: General
 Entities.Domain.customisation.general.title: 'General customisation of domain {domain}'
 Entities.Domain.customisation.human_authentication.tab: 'Human authentication'
@@ -68,9 +67,9 @@ Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_LIST: 'Start of mailing
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_SPAM: 'End of spam messages loop'
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_STANDARD: 'Start of standard messages loop'
 Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'List of untreated messages'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_LIST: 'List of untreated mailing lists and newsletters messages'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_SPAM: 'List of spam messages'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_STANDARD: 'List of standard messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_LIST: 'List of untreated mailing lists and newsletters messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_SPAM: 'List of spam messages'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_STANDARD: 'List of standard messages'
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER: "Name of the message's sender"
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT: 'Subject of the message'
 Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES: 'Authorized messages'
@@ -315,8 +314,7 @@ Generics.actions.connectAs: 'Log in as a'
 Generics.actions.connectWithMicrosoft: 'Sign-in with Microsoft'
 Generics.actions.delete: Delete
 Generics.actions.deleteSelection: 'Delete selection'
-Generics.actions.display: Display
-Generics.actions.displayMessage: Display the email
+Generics.actions.displayMessage: 'Display the email'
 Generics.actions.edit: Edit
 Generics.actions.exitImpersonation: 'Back to life'
 Generics.actions.impersonate: 'Sign in'

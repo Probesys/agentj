@@ -42,8 +42,6 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         ?array $sortParams = null,
         ?int $fromDate = null,
         ?float $maxSpamLevel = null,
-        ?float $minSpamLevel = null,
-        ?bool $getMailingList = null,
     ): Query {
         $queryBuilder = $this->getSearchQueryBuilder($user, $messageStatus);
 
@@ -59,27 +57,6 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
         if (!is_null($maxSpamLevel)) {
             $queryBuilder->andWhere('mr.bspamLevel <= :maxSpamLevel');
             $queryBuilder->setParameter('maxSpamLevel', $maxSpamLevel);
-        }
-
-        if (!is_null($minSpamLevel)) {
-            $queryBuilder->andWhere('mr.bspamLevel > :minSpamLevel');
-            $queryBuilder->setParameter('minSpamLevel', $minSpamLevel);
-        }
-
-        if ($getMailingList !== null) {
-            if ($getMailingList === false) {
-                $queryBuilder->andWhere(
-                    // accept both false and null value as non mailing list mail
-                    $queryBuilder->expr()->orX(
-                        'm.isMlist IS NULL',
-                        'm.isMlist = :getMailingList'
-                    )
-                );
-            } else {
-                $queryBuilder->andWhere('m.isMlist = :getMailingList');
-            }
-
-            $queryBuilder->setParameter('getMailingList', $getMailingList);
         }
 
         if ($sortParams) {
@@ -105,7 +82,6 @@ class MessageRecipientSearchRepository extends BaseMessageRecipientRepository
             $user,
             $searchKey,
             $fromDate,
-            $getMailingList,
         );
         $countQuery = $countQueryBuilder->getQuery();
         $count = $countQuery->getSingleScalarResult();

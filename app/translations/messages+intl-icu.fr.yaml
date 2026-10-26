@@ -19,7 +19,6 @@ Entities.Domain.actions.add_new_rule: 'Nouvelle règle'
 Entities.Domain.actions.backToDomainList: 'Retour à la liste des domaines'
 Entities.Domain.actions.customisation: Personnalisation
 Entities.Domain.actions.deleteRule: 'Supprimer la règle'
-Entities.Domain.actions.importUserAndAliases: 'Importer les utilisateurs et les alias'
 Entities.Domain.customisation.general.tab: Général
 Entities.Domain.customisation.general.title: 'Personnalisation générale du domaine {domain}'
 Entities.Domain.customisation.human_authentication.tab: 'Authentification humaine'
@@ -68,9 +67,9 @@ Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_LIST: 'Début de la bou
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_SPAM: 'Début de la boucle des spams'
 Entities.Domain.labels.dynamicsVariables.FOREACH_MESSAGE_STANDARD: 'Début de la boucle des messages standards'
 Entities.Domain.labels.dynamicsVariables.LIST_MAIL_MSGS: 'Liste des messages non traités'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_LIST: 'Liste des messages non traités de mailing listes et de newsletters'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_SPAM: 'Liste des messages en spam'
-Entities.Domain.labels.dynamicsVariables.LIST_MSGS_STANDARD: 'Liste des messages standards'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_LIST: 'Liste des messages non traités de mailing listes et de newsletters'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_SPAM: 'Liste des messages en spam'
+Entities.Domain.labels.dynamicsVariables.LIST_MESSAGES_STANDARD: 'Liste des messages standards'
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SENDER: "Nom de l'expéditeur du message"
 Entities.Domain.labels.dynamicsVariables.MESSAGE_SUBJECT: 'Sujet du message'
 Entities.Domain.labels.dynamicsVariables.NB_AUTHORIZED_MESSAGES: 'Nombre messages autorisés'
@@ -315,8 +314,7 @@ Generics.actions.connectAs: 'Se connecter en tant que'
 Generics.actions.connectWithMicrosoft: 'Se connecter avec Microsoft'
 Generics.actions.delete: Supprimer
 Generics.actions.deleteSelection: 'Supprimer la sélection'
-Generics.actions.display: Afficher
-Generics.actions.displayMessage: Afficher l'email
+Generics.actions.displayMessage: "Afficher l'email"
 Generics.actions.edit: Éditer
 Generics.actions.exitImpersonation: 'Revenir à'
 Generics.actions.impersonate: 'Se connecter'
