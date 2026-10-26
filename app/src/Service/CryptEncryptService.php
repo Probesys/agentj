@@ -57,13 +57,7 @@ class CryptEncryptService
         $payload = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, 0, $iv);
 
         if ($payload === false) {
-            // Handle the old (deprecated) version of the token. In this
-            // version, expiration date was concatanated to the ciphertext in
-            // the base64 string.
-            $expiry = (int) substr(base64_decode($token), 0, 10);
-            $ciphertext = substr_replace(base64_decode($token), '', 0, 10);
-            $data = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, 0, $iv);
-            return [$expiry, $data];
+            return [0, false];
         }
 
         if (strpos($payload, 'v2:') === 0) {
