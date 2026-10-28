@@ -46,6 +46,7 @@ class SendAuthMailRequestCommandTest extends KernelTestCase
         LogFactory::assert()->exists([
             'action' => LogAction::AuthenticationRequestSent->value,
             'domain' => $domain,
+            'details' => "To: {$addrS->getEmail()}",
         ]);
     }
 
