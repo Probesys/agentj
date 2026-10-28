@@ -11,6 +11,8 @@ Altcha (https://altcha.org/) is now used during human authentication. There are 
 
 You must set at least `ALTCHA_KEY_SECRET` to enable Altcha. Otherwise, the human authentication form will not show the widget.
 
+The requests to unsubscribe from mailing lists are deleted after 90 days. To change the number of days of retention, set the (optional) `UNSUBSCRIBE_REQUEST_RETENTION_DAYS` environment variable in your `.env` file.
+
 ## 2026-10-20 - 2.7.6
 
 ### Security
