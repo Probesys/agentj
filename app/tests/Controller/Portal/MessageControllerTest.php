@@ -347,6 +347,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Restore->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmRestore(): void
@@ -608,6 +612,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Banned->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserHasToConfirmBannishment(): void
