@@ -335,7 +335,7 @@ class SenderRuleControllerTest extends WebTestCase
         ]));
     }
 
-    public function testPostBatchDeleteActionLogsTheDomainOfTheUser(): void
+    public function testPostBatchDeleteActionLogsTheDeletedRule(): void
     {
         $domain = DomainFactory::createOne();
         $user = UserFactory::new()->user($domain)->create();
@@ -358,6 +358,8 @@ class SenderRuleControllerTest extends WebTestCase
         LogFactory::assert()->exists([
             'action' => LogAction::DeleteBatchSenderRule->value,
             'domain' => $domain,
+            'mailId' => null,
+            'details' => "User: {$user->getEmail()}, Sender: sender@example.org",
         ]);
     }
 

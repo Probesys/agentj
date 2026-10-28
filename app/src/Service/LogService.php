@@ -29,7 +29,7 @@ class LogService
      */
     public function addLog(
         LogAction $action,
-        string $mailId = '',
+        ?string $mailId = null,
         string $details = '',
         ?Domain $domain = null,
     ): bool {
