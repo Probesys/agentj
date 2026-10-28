@@ -1,5 +1,8 @@
 {% if messageRecipients is not empty %}
-  <table style="width:100%;background-color: #fff;">
+  <table
+    style="width:100%;background-color: #fff;"
+    data-test="{{ type }}"
+  >
     <tbody>
       {% for messageRecipient in messageRecipients %}
         {% set token = message_release_token(messageRecipient.message, user) %}
@@ -7,7 +10,7 @@
 
           <td>
             <div>
-              <strong>{{ messageRecipient.message.fromAddr }}</strong><br>
+              <strong data-test="from-address">{{ messageRecipient.message.fromAddr }}</strong><br>
               <p style="font-size: 10px">{{ messageRecipient.message.subject }}</p>
             </div>
           </td>
@@ -68,14 +71,15 @@
         </tr>
       {% endfor %}
 
-      <tr>
-        <td colspan="3">
-          <div style="text-align:center">
-            <a href="{{ url('homepage') }}">{{ url('homepage') }}</a>
-          </div>
-        </td>
-      </tr>
-
+      {% if type == 'all' %}
+        <tr data-test="footer-url">
+          <td colspan="3">
+            <div style="text-align:center">
+              <a href="{{ url('homepage') }}">{{ url('homepage') }}</a>
+            </div>
+          </td>
+        </tr>
+      {% endif %}
     </tbody>
   </table>
 {% endif %}

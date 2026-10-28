@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Entity\Policy;
 use App\Entity\RuleAddress;
 use App\Entity\SenderRule;
+use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -17,12 +18,12 @@ use Doctrine\Persistence\ObjectManager;
  */
 class DomainFixture extends Fixture
 {
-    private EntityManagerInterface $em;
     private ObjectManager $manager;
 
-    public function __construct(EntityManagerInterface $em)
-    {
-        $this->em = $em;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private SettingRepository $settingRepository,
+    ) {
     }
 
     public function load(ObjectManager $manager): void
@@ -86,6 +87,9 @@ class DomainFixture extends Fixture
 
         $this->fillDomainCommon($laissepasser, $ruleAddress, wbRule: 'allow');
 
+        $this->setDefaultCustomizations($blocnormal);
+        $this->setDefaultCustomizations($laissepasser);
+
         $manager->persist($blocnormal);
         $manager->persist($laissepasser);
         $manager->flush();
@@ -94,7 +98,7 @@ class DomainFixture extends Fixture
     /**
      * @param WbRule $wbRule
      */
-    public function fillDomainCommon(Domain $domain, RuleAddress $ruleAddress, string $wbRule): void
+    private function fillDomainCommon(Domain $domain, RuleAddress $ruleAddress, string $wbRule): void
     {
         $domain->setLevel(0.5);
         $domain->setSrvSmtp('smtp.test');
@@ -117,5 +121,28 @@ class DomainFixture extends Fixture
         $dkim = $domain->getDomainKeys();
         $dkim->setDomainName($domain->getDomain());
         $dkim->setSelector('agentj');
+    }
+
+    private function setDefaultCustomizations(Domain $domain): void
+    {
+        $messageConfig = $this->settingRepository->findBy(['context' => 'default_domain_messages']);
+        if ($messageConfig) {
+            $domain->setMessage($this->settingRepository->findOneBy([
+                'context' => 'default_domain_messages',
+                'name' => 'page_content_authentification_request',
+            ])->getValue());
+            $domain->setConfirmCaptchaMessage($this->settingRepository->findOneBy([
+                'context' => 'default_domain_messages',
+                'name' => 'page_content_authentification_valid',
+            ])->getValue());
+            $domain->setMailmessage($this->settingRepository->findOneBy([
+                'context' => 'default_domain_messages',
+                'name' => 'mail_content_authentification_request',
+            ])->getValue());
+            $domain->setMessageAlert($this->settingRepository->findOneBy([
+                'context' => 'default_domain_messages',
+                'name' => 'mail_content_report',
+            ])->getValue());
+        }
     }
 }
