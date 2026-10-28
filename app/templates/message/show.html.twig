@@ -1,7 +1,7 @@
 {% extends 'modalTemplate.html.twig' %}
 
 {% set msgDeliveryStatus = {'D' : 'Deffered', 'P' : 'Passed', 'B' : 'Bounce' } %}
-{% set fromAddress = message.fromMimeAddress?.address %}
+{% set fromAddress = message.from %}
 
 {% block modalTitle %}
     {{ 'Entities.Msgrcpt.labels.infos' | trans }}

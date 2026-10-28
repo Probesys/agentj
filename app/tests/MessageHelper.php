@@ -47,6 +47,7 @@ trait MessageHelper
     private function setupMail(
         Address $sender,
         array $recipients,
+        ?string $fromAddr = null,
         ?string $subject = 'test',
         ?string $body = null,
         ?int $status = null,
@@ -59,7 +60,7 @@ trait MessageHelper
             'mailId' => $mailId,
             'senderAddress' => $sender,
             'subject' => $subject,
-            'fromAddr' => $sender->getEmail(),
+            'fromAddr' => $fromAddr ?? $sender->getEmail(),
             'status' => $status,
         ], $messageAttributes));
 
@@ -70,7 +71,7 @@ trait MessageHelper
         $recipientsEmails = array_map(fn ($recipient) => $recipient->getEmail(), $recipients);
         $mailText = QuarantineFactory::generateMailText($mailId, [
             'subject' => $subject,
-            'from' => $sender->getEmail(),
+            'from' => $fromAddr ?? $sender->getEmail(),
             'to' => $recipientsEmails,
             'body' => $body ?? null,
         ]);

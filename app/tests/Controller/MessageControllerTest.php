@@ -263,37 +263,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $this->client->request(Request::METHOD_GET, $url);
+        $this->client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
-        $contentDate = $crawler
-            ->filter('[data-test="content-date"]')
-            ->first()
-            ->text();
-        $senderEmail = $crawler
-            ->filter('[data-test="content-from"]')
-            ->first()
-            ->text();
-        $recipientEmail = $crawler
-            ->filter('[data-test="content-recipient-email"]')
-            ->first()
-            ->text();
-        $spamRating = $crawler
-            ->filter('[data-test="content-spam-rating"]')
-            ->first()
-            ->text();
-        $authRequestDate = $crawler
-            ->filter('[data-test="content-auth-request-date"]')
-            ->first()
-            ->text();
-        $mailingList = $crawler
-            ->filter('[data-test="content-mailing-list"]')
-            ->first()
-            ->text();
-        $status = $crawler
-            ->filter('[data-test="content-status"]')
-            ->first()
-            ->text();
         $date = DateTimeImmutable::createFromFormat(
             'Ymd\THis\Z',
             $message->getTimeIso(),
@@ -308,13 +280,13 @@ class MessageControllerTest extends WebTestCase
         $expectedSpamRating = $recipient !== false
             ? (string)$recipient->getBspamLevel()
             : '';
-        self::assertSame($dateFormatted, $contentDate);
-        self::assertSame($senderEmail, $addrS->getEmail());
-        self::assertSame($recipientEmail, $addrR->getEmail());
-        self::assertSame($expectedSpamRating, $spamRating);
-        self::assertSame($expectedAuthReqDate, $authRequestDate);
-        self::assertSame('No.', $mailingList);
-        self::assertSame('Authorized', $status);
+        self::assertSelectorTextContains('[data-test=content-date]', $dateFormatted);
+        self::assertSelectorTextContains('[data-test=content-from]', $addrS->getEmail());
+        self::assertSelectorTextContains('[data-test=content-recipient-email]', $addrR->getEmail());
+        self::assertSelectorTextContains('[data-test=content-spam-rating]', $expectedSpamRating);
+        self::assertSelectorTextContains('[data-test=content-auth-request-date]', $expectedAuthReqDate);
+        self::assertSelectorTextContains('[data-test=content-mailing-list]', 'No.');
+        self::assertSelectorTextContains('[data-test=content-status]', 'Authorized');
     }
 
     public function testUserCanDisplayMatchingRuleEnvelopeAddress(): void

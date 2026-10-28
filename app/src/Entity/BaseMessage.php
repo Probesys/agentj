@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
+use App\Util\Email;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Mime\Address as MimeAddress;
 
 #[ORM\MappedSuperclass]
 #[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
@@ -279,20 +279,16 @@ class BaseMessage
         return $this->fromAddr;
     }
 
-    public function getFromMimeAddress(): ?MimeAddress
-    {
-        try {
-            return MimeAddress::create($this->fromAddr ?? '');
-        } catch (\InvalidArgumentException $e) {
-            return null;
-        }
-    }
-
     public function setFromAddr(?string $fromAddr): self
     {
         $this->fromAddr = $fromAddr;
 
         return $this;
+    }
+
+    public function getFrom(): string
+    {
+        return Email::parse($this->fromAddr ?? '');
     }
 
     public function getSubject(): ?string
@@ -348,9 +344,8 @@ class BaseMessage
         $sender = $this->getSenderAddress();
         $senderEmail = $sender->getEmail();
 
-        $fromEmail = $this->getFromMimeAddress()?->getAddress();
-
-        if ($fromEmail) {
+        $fromEmail = $this->getFrom();
+        if (!empty($fromEmail)) {
             return $fromEmail;
         }
 

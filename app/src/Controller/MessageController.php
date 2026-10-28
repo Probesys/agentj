@@ -250,10 +250,10 @@ class MessageController extends AbstractController
         $senderRuleRepository = $this->em->getRepository(SenderRule::class);
 
         $senderRules = [];
-        $headerFromAddress = $message->getFromMimeAddress()?->getAddress();
+        $headerFromAddress = $message->getFrom();
         $recipientAddress = $messageRecipient->getAddress();
         if (
-            $headerFromAddress &&
+            !empty($headerFromAddress) &&
             $senderRuleRepository->isSenderInRecipientList($headerFromAddress, $recipientAddress)
         ) {
             $senderRules = $this->em->getRepository(SenderRule::class)->findBySenderEmailAndRecipient(

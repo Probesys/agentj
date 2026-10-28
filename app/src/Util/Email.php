@@ -2,6 +2,9 @@
 
 namespace App\Util;
 
+use Email\Parse;
+use Email\ParseOptions;
+
 class Email
 {
     /**
@@ -14,6 +17,22 @@ class Email
         } else {
             return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
         }
+    }
+
+    /**
+     * Parse email address according to RFC 5322 from a string.
+     */
+    public static function parse(string $fromAddress): string
+    {
+        $options = ParseOptions::rfc5322();
+        $parser = new Parse(null, $options);
+        $parsedEmail = $parser->parseSingle($fromAddress);
+
+        if ($parsedEmail->invalid) {
+            return '';
+        }
+
+        return $parsedEmail->simpleAddress;
     }
 
     /**

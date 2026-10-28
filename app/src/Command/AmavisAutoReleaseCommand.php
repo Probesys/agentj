@@ -117,9 +117,9 @@ class AmavisAutoReleaseCommand extends Command
             $senderIsAuthorized = false;
             if (!$isAuthorizedSendersSpam) {
                 $message = $messageRecipient->getMessage();
-                $fromAddress = $message->getFromMimeAddress();
-                if ($fromAddress !== null) {
-                    $senderIsAuthorized = $this->isSenderAuthorized($fromAddress->getAddress(), $recipient);
+                $fromAddress = $message->getFrom();
+                if (!empty($fromAddress)) {
+                    $senderIsAuthorized = $this->isSenderAuthorized($fromAddress, $recipient);
                 }
 
                 if (!$senderIsAuthorized) {
