@@ -143,6 +143,31 @@ Entities.LdapConnector.fields.ldapVersion: 'Version LDAP'
 Entities.LdapConnector.fields.report: 'Envoyer le rapport journalier pour les utilisateurs créés'
 Entities.LdapConnector.fields.synchronizeGroup: 'Synchronisez également les groupes'
 Entities.LdapConnector.fields.usersInformation: 'Informations utilisateurs'
+Entities.Log.actions.AuthenticationRequestSent: 'Demande d’authentification envoyée'
+Entities.Log.actions.Authorized: 'Expéditeur autorisé'
+Entities.Log.actions.AuthorizedBatch: 'Expéditeur autorisé (par lot)'
+Entities.Log.actions.AuthorizedForDomain: 'Expéditeur autorisé pour le domaine'
+Entities.Log.actions.Banned: 'Expéditeur banni'
+Entities.Log.actions.BannedBatch: 'Expéditeur banni (par lot)'
+Entities.Log.actions.BannedForDomain: 'Expéditeur banni pour le domaine'
+Entities.Log.actions.Delete: 'Message supprimé'
+Entities.Log.actions.DeleteBatch: 'Message supprimé (par lot)'
+Entities.Log.actions.DeleteBatchSenderRule: 'Règle d’expéditeur supprimée (par lot)'
+Entities.Log.actions.MarkedAsHam: 'Message marqué comme acceptable'
+Entities.Log.actions.MarkedAsHamBatch: 'Message marqué comme acceptable (par lot)'
+Entities.Log.actions.MarkedAsSpam: 'Message marqué comme spam'
+Entities.Log.actions.MarkedAsSpamBatch: 'Message marqué comme spam (par lot)'
+Entities.Log.actions.MessageContentDisplayed: 'Contenu du message affiché'
+Entities.Log.actions.Restore: 'Message récupéré'
+Entities.Log.actions.RestoreBatch: 'Message récupéré (par lot)'
+Entities.Log.fields.action: Action
+Entities.Log.fields.actor: Auteur
+Entities.Log.fields.date: Date
+Entities.Log.fields.details: Détails
+Entities.Log.fields.domain: Domaine
+Entities.Log.fields.id: ID
+Entities.Log.noEntries: 'Aucune entrée'
+Entities.Log.title: 'Journal d’audit'
 Entities.Message.Quota: Quota
 Entities.Message.Status.Authorized: Autorisé
 Entities.Message.Status.Banned: Banni
@@ -491,6 +516,7 @@ Navigation.Dashboard: 'Tableau de bord'
 Navigation.MessageRestored: Récupérés
 Navigation.Messagedelete: Supprimés
 Navigation.all: Tous
+Navigation.auditLog: 'Journal d’audit'
 Navigation.authorized: Autorisés
 Navigation.banned: Bannis
 Navigation.blacklist: 'Expéditeurs bloqués'

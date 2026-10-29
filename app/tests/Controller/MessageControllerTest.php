@@ -6,6 +6,7 @@ use App\Amavis\MessageStatus;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
+use App\Model\LogAction;
 use App\Util\Url;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
@@ -477,6 +478,10 @@ class MessageControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::DELETED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Delete->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserCannotDeleteItsMessageWithoutValidCsrfToken(): void
@@ -582,6 +587,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount + 2, SenderRuleFactory::count());
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Authorized->value,
+            'domain' => $domain,
+        ]);
         $senderRuleAddress = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
         ])[0];
@@ -780,6 +789,10 @@ class MessageControllerTest extends WebTestCase
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $domainRule);
+        LogFactory::assert()->exists([
+            'action' => LogAction::AuthorizedForDomain->value,
+            'domain' => $otherDomain,
+        ]);
     }
 
     public function testAdminCannotAuthorizedDomainMessageWithoutValidCsrfToken(): void
@@ -1016,6 +1029,10 @@ class MessageControllerTest extends WebTestCase
             'wb' => 'B',
         ]);
         self::assertCount(1, $aliasRule);
+        LogFactory::assert()->exists([
+            'action' => LogAction::Banned->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserCannotBanItsMessageWithoutValidCsrfToken(): void
@@ -1146,6 +1163,10 @@ class MessageControllerTest extends WebTestCase
             'wb' => 'B',
         ]);
         self::assertCount(1, $domainRule);
+        LogFactory::assert()->exists([
+            'action' => LogAction::BannedForDomain->value,
+            'domain' => $otherDomain,
+        ]);
     }
 
     public function testAdminCannotBannedDomainMessageWithoutValidCsrfToken(): void
@@ -1247,6 +1268,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::Restore->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testUserCannotRestoreItsMessageWithoutValidCsrfToken(): void
@@ -1342,6 +1367,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame($initialSenderRuleCount, SenderRuleFactory::count());
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::MarkedAsSpam->value,
+            'domain' => null,
+        ]);
     }
 
     public function testAdminCannotMarkMessageAsSpamWithoutValidCsrfToken(): void
@@ -1495,6 +1524,10 @@ class MessageControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::MarkedAsHam->value,
+            'domain' => null,
+        ]);
     }
 
     public function testAdminCannotMarkMessageAsHamWithoutValidCsrfToken(): void
@@ -1742,6 +1775,10 @@ class MessageControllerTest extends WebTestCase
             'wb' => ' ', // Mapped from 'accept' by RuleTrait
         ]);
         self::assertCount(1, $aliasRule);
+        LogFactory::assert()->exists([
+            'action' => LogAction::AuthorizedBatch->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testAdminCanBatchBannedMessages(): void
@@ -1800,6 +1837,10 @@ class MessageControllerTest extends WebTestCase
             'wb' => 'B',
         ]);
         self::assertCount(1, $aliasRule);
+        LogFactory::assert()->exists([
+            'action' => LogAction::BannedBatch->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testAdminCanBatchRestoreMessages(): void
@@ -1839,6 +1880,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::RESTORED, $messageRecipient->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
         self::assertSame(MessageStatus::RESTORED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::RestoreBatch->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testAdminCanBatchDeleteMessages(): void
@@ -1881,6 +1926,10 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::DELETED, $messageRecipient->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
         self::assertSame(MessageStatus::DELETED, $messageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::DeleteBatch->value,
+            'domain' => $domain,
+        ]);
     }
 
     public function testAdminCanBatchMarkAsSpamMessages(): void
@@ -1932,6 +1981,10 @@ class MessageControllerTest extends WebTestCase
         // Recipients of a domain not managed by the admin are left untouched.
         self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::MarkedAsSpamBatch->value,
+            'domain' => null,
+        ]);
     }
 
     public function testBatchMarkAsSpamMessagesAsSuperAdmin(): void
@@ -2038,6 +2091,10 @@ class MessageControllerTest extends WebTestCase
         // Recipients of a domain not managed by the admin are left untouched.
         self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient->getStatus());
         self::assertSame(MessageStatus::SPAMMED, $otherMessageRecipient2->getStatus());
+        LogFactory::assert()->exists([
+            'action' => LogAction::MarkedAsHamBatch->value,
+            'domain' => null,
+        ]);
     }
 
     public function testBatchMarkAsHamMessagesAsSuperAdmin(): void
@@ -2334,7 +2391,7 @@ class MessageControllerTest extends WebTestCase
         $logs = LogFactory::all();
         self::assertCount(1, $logs);
         $log = $logs[0];
-        self::assertSame('message content displayed', $log->getAction());
+        self::assertSame(LogAction::MessageContentDisplayed->value, $log->getAction());
         self::assertSame($messageRecipient->getMailId(), $log->getMailId());
         $expectedDetails = sprintf(
             "recipient=%s user=%s (%d)",

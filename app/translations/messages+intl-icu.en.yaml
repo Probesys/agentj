@@ -143,6 +143,31 @@ Entities.LdapConnector.fields.ldapVersion: 'LDAP version'
 Entities.LdapConnector.fields.report: 'Send the daily report for created users'
 Entities.LdapConnector.fields.synchronizeGroup: 'Also synchronize groups'
 Entities.LdapConnector.fields.usersInformation: 'Users information'
+Entities.Log.actions.AuthenticationRequestSent: 'Authentication request sent'
+Entities.Log.actions.Authorized: 'Sender authorized'
+Entities.Log.actions.AuthorizedBatch: 'Sender authorized (batch)'
+Entities.Log.actions.AuthorizedForDomain: 'Sender authorized for the domain'
+Entities.Log.actions.Banned: 'Sender banned'
+Entities.Log.actions.BannedBatch: 'Sender banned (batch)'
+Entities.Log.actions.BannedForDomain: 'Sender banned for the domain'
+Entities.Log.actions.Delete: 'Message deleted'
+Entities.Log.actions.DeleteBatch: 'Message deleted (batch)'
+Entities.Log.actions.DeleteBatchSenderRule: 'Sender rule deleted (batch)'
+Entities.Log.actions.MarkedAsHam: 'Message marked as ham'
+Entities.Log.actions.MarkedAsHamBatch: 'Message marked as ham (batch)'
+Entities.Log.actions.MarkedAsSpam: 'Message marked as spam'
+Entities.Log.actions.MarkedAsSpamBatch: 'Message marked as spam (batch)'
+Entities.Log.actions.MessageContentDisplayed: 'Message content displayed'
+Entities.Log.actions.Restore: 'Message recovered'
+Entities.Log.actions.RestoreBatch: 'Message recovered (batch)'
+Entities.Log.fields.action: Action
+Entities.Log.fields.actor: Author
+Entities.Log.fields.date: Date
+Entities.Log.fields.details: Details
+Entities.Log.fields.domain: Domain
+Entities.Log.fields.id: ID
+Entities.Log.noEntries: 'No entries'
+Entities.Log.title: 'Audit log'
 Entities.Message.Quota: Quota
 Entities.Message.Status.Authorized: Authorized
 Entities.Message.Status.Banned: Banned
@@ -491,6 +516,7 @@ Navigation.Dashboard: Dashboard
 Navigation.MessageRestored: Restored
 Navigation.Messagedelete: Deleted
 Navigation.all: All
+Navigation.auditLog: 'Audit log'
 Navigation.authorized: Authorized
 Navigation.banned: Banned
 Navigation.blacklist: 'Blocked senders'

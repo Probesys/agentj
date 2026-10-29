@@ -8,7 +8,9 @@ use App\Entity\User;
 use App\Form\ActionsFilterType;
 use App\Form\ImportType;
 use App\Form\SenderRuleType;
+use App\Model\LogAction;
 use App\Repository\DomainRepository;
+use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\LogService;
@@ -221,6 +223,8 @@ class SenderRuleController extends AbstractController
     )]
     public function batchSenderRuleAction(
         Request $request,
+        LogService $logService,
+        RuleAddressRepository $ruleAddressRepository,
         ?string $action = null,
     ): RedirectResponse {
         $submittedToken = $request->request->getString('_token');
@@ -229,9 +233,7 @@ class SenderRuleController extends AbstractController
             return new RedirectResponse($this->referrer->get());
         };
 
-        $em = $this->em;
         if ($action) {
-            $logService = new LogService($em);
             foreach ($request->request->all('id') as $obj) {
                 $mailInfo = json_decode($obj);
                 switch ($action) {
@@ -241,7 +243,13 @@ class SenderRuleController extends AbstractController
                             $mailInfo[1],
                             $mailInfo[2],
                         );
-                        $logService->addLog('delete batch sender rule', $mailInfo[1]);
+                        $user = $this->userRepository->find($mailInfo[0]);
+                        $ruleAddress = $ruleAddressRepository->find($mailInfo[1]);
+                        $logService->addLog(
+                            LogAction::DeleteBatchSenderRule,
+                            details: "User: {$user?->getEmail()}, Sender: {$ruleAddress?->getEmail()}",
+                            domain: $user?->getDomain(),
+                        );
                         break;
                 }
             }
