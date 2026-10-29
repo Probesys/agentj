@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Mime\Address as MimeAddress;
+use Email\Parse;
+use Email\ParsedEmailAddress;
+use Email\ParseOptions;
 
 #[ORM\MappedSuperclass]
 #[ORM\Index(name: 'msg_fulltext_idx', columns: ['from_addr', 'subject', 'message_id'], flags: ['fulltext'])]
@@ -279,10 +281,12 @@ class BaseMessage
         return $this->fromAddr;
     }
 
-    public function getFromMimeAddress(): ?MimeAddress
+    public function getFromMimeAddress(): ?ParsedEmailAddress
     {
         try {
-            return MimeAddress::create($this->fromAddr ?? '');
+            $options = ParseOptions::rfc5322();
+            $parser = new Parse(null, $options);
+            return $parser->parseSingle($this->fromAddr ?? '');
         } catch (\InvalidArgumentException $e) {
             return null;
         }
@@ -348,9 +352,8 @@ class BaseMessage
         $sender = $this->getSenderAddress();
         $senderEmail = $sender->getEmail();
 
-        $fromEmail = $this->getFromMimeAddress()?->getAddress();
-
-        if ($fromEmail) {
+        $fromEmail = (string)$this->getFromMimeAddress();
+        if (!empty($fromEmail)) {
             return $fromEmail;
         }
 

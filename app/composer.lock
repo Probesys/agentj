@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2794b7aad0c225bee3d26b8a550307c2",
+    "content-hash": "4928dc3b3f85462a5013f51ac7a7c713",
     "packages": [
         {
             "name": "brick/math",
@@ -3345,6 +3345,71 @@
                 "source": "https://github.com/microsoftgraph/msgraph-sdk-php-core/tree/v3.0.0"
             },
             "time": "2026-05-19T07:47:55+00:00"
+        },
+        {
+            "name": "mmucklo/email-parse",
+            "version": "3.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mmucklo/email-parse.git",
+                "reference": "6d4a62841c8a4e8d38b307a0233c121435219d76"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mmucklo/email-parse/zipball/6d4a62841c8a4e8d38b307a0233c121435219d76",
+                "reference": "6d4a62841c8a4e8d38b307a0233c121435219d76",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8.1",
+                "psr/log": "^3.0",
+                "symfony/polyfill-intl-idn": "^1.31"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.65",
+                "infection/infection": "^0.29.8",
+                "phpbench/phpbench": "^1.4",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "symfony/yaml": "^6.4|^7.2",
+                "vimeo/psalm": "^6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Email\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matthew J. Mucklo",
+                    "email": "mmucklo@gmail.com"
+                }
+            ],
+            "description": "RFC 5322 / RFC 6531-compliant library for batch parsing multiple (and single) email addresses",
+            "keywords": [
+                "RFC2822",
+                "RFC5322",
+                "RFC6531",
+                "RFC822",
+                "batch-email",
+                "email",
+                "email-parse",
+                "internationalized-email",
+                "multiple-email",
+                "parse",
+                "utf-8"
+            ],
+            "support": {
+                "issues": "https://github.com/mmucklo/email-parse/issues",
+                "source": "https://github.com/mmucklo/email-parse/tree/3.9.0"
+            },
+            "time": "2026-08-26T06:12:39+00:00"
         },
         {
             "name": "monolog/monolog",

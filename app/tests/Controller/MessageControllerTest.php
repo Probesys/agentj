@@ -256,37 +256,9 @@ class MessageControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
-        $crawler = $client->request(Request::METHOD_GET, $url);
+        $client->request(Request::METHOD_GET, $url);
 
         self::assertResponseIsSuccessful();
-        $contentDate = $crawler
-            ->filter('[data-test="content-date"]')
-            ->first()
-            ->text();
-        $senderEmail = $crawler
-            ->filter('[data-test="content-sender-email"]')
-            ->first()
-            ->text();
-        $recipientEmail = $crawler
-            ->filter('[data-test="content-recipient-email"]')
-            ->first()
-            ->text();
-        $spamRating = $crawler
-            ->filter('[data-test="content-spam-rating"]')
-            ->first()
-            ->text();
-        $authRequestDate = $crawler
-            ->filter('[data-test="content-auth-request-date"]')
-            ->first()
-            ->text();
-        $mailingList = $crawler
-            ->filter('[data-test="content-mailing-list"]')
-            ->first()
-            ->text();
-        $status = $crawler
-            ->filter('[data-test="content-status"]')
-            ->first()
-            ->text();
         $date = DateTimeImmutable::createFromFormat(
             'Ymd\THis\Z',
             $message->getTimeIso(),
@@ -301,13 +273,115 @@ class MessageControllerTest extends WebTestCase
         $expectedSpamRating = $recipient !== false
             ? (string)$recipient->getBspamLevel()
             : '';
-        self::assertSame($dateFormatted, $contentDate);
-        self::assertSame($senderEmail, $addrS->getEmail());
-        self::assertSame($recipientEmail, $addrR->getEmail());
-        self::assertSame($expectedSpamRating, $spamRating);
-        self::assertSame($expectedAuthReqDate, $authRequestDate);
-        self::assertSame('No.', $mailingList);
-        self::assertSame('Authorized', $status);
+        self::assertSelectorTextContains('[data-test=content-date]', $dateFormatted);
+        self::assertSelectorTextContains('[data-test=content-sender-email]', $addrS->getEmail());
+        self::assertSelectorTextContains('[data-test=content-recipient-email]', $addrR->getEmail());
+        self::assertSelectorTextContains('[data-test=content-spam-rating]', $expectedSpamRating);
+        self::assertSelectorTextContains('[data-test=content-auth-request-date]', $expectedAuthReqDate);
+        self::assertSelectorTextContains('[data-test=content-mailing-list]', 'No.');
+        self::assertSelectorTextContains('[data-test=content-status]', 'Authorized');
+    }
+
+    #[DataProvider('fromAddressProvider')]
+    public function testShowsFromAddressByDefault(string $fromAddr, string $expected): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user()->create([
+            'domain' => $domain,
+        ]);
+        $sender = UserFactory::new()->user()->create([
+            'domain' => $domain,
+        ]);
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            fromAddr: $fromAddr,
+            status: MessageStatus::AUTHORIZED,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $date = DateTimeImmutable::createFromFormat(
+            'Ymd\THis\Z',
+            $message->getTimeIso(),
+            new DateTimeZone('UTC'),
+        );
+        self::assertInstanceOf(DateTimeImmutable::class, $date);
+        $date = $date->setTimezone(new DateTimeZone('Europe/Paris'));
+        $dateFormatted = $date->format('n/j/y, g:i') . "\u{202F}" . $date->format('A');
+        $authReqDate = new DateTimeImmutable()->setTimestamp($message->getSendCaptcha());
+        $expectedAuthReqDate = $authReqDate->format('n/j/y, g:i') . "\u{202F}" . $authReqDate->format('A');
+        $recipient = $message->getMessageRecipients()->first();
+        $expectedSpamRating = $recipient !== false
+            ? (string)$recipient->getBspamLevel()
+            : '';
+        self::assertSelectorTextContains('[data-test=content-date]', $dateFormatted);
+        self::assertSelectorTextContains('[data-test=content-sender-email]', $expected);
+        self::assertSelectorTextContains('[data-test=content-recipient-email]', $addrR->getEmail());
+        self::assertSelectorTextContains('[data-test=content-spam-rating]', $expectedSpamRating);
+        self::assertSelectorTextContains('[data-test=content-auth-request-date]', $expectedAuthReqDate);
+        self::assertSelectorTextContains('[data-test=content-mailing-list]', 'No.');
+        self::assertSelectorTextContains('[data-test=content-status]', 'Authorized');
+    }
+
+    public function testShowsFromAddressWhenEmptyFromEnvelope(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user()->create([
+            'domain' => $domain,
+        ]);
+        $sender = UserFactory::new()->user()->create([
+            'domain' => $domain,
+        ]);
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Envelope From can be null. (e.g. bounce message)
+        $addrS->setEmail('<>');
+        $this->save($addrS);
+        $fromAddr = 'address <from-addr(d)@' . $domain->getDomain() . ' (comment)>';
+        $fromAddrClean = 'from-addr@' . $domain->getDomain();
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            fromAddr: $fromAddr,
+            status: MessageStatus::AUTHORIZED,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/show/';
+        $client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        $date = DateTimeImmutable::createFromFormat(
+            'Ymd\THis\Z',
+            $message->getTimeIso(),
+            new DateTimeZone('UTC'),
+        );
+        self::assertInstanceOf(DateTimeImmutable::class, $date);
+        $date = $date->setTimezone(new DateTimeZone('Europe/Paris'));
+        $dateFormatted = $date->format('n/j/y, g:i') . "\u{202F}" . $date->format('A');
+        $authReqDate = new DateTimeImmutable()->setTimestamp($message->getSendCaptcha());
+        $expectedAuthReqDate = $authReqDate->format('n/j/y, g:i') . "\u{202F}" . $authReqDate->format('A');
+        $recipient = $message->getMessageRecipients()->first();
+        $expectedSpamRating = $recipient !== false
+            ? (string)$recipient->getBspamLevel()
+            : '';
+        self::assertSelectorTextContains('[data-test=content-date]', $dateFormatted);
+        self::assertSelectorTextContains('[data-test=content-sender-email]', $fromAddrClean);
+        self::assertSelectorTextContains('[data-test=content-recipient-email]', $addrR->getEmail());
+        self::assertSelectorTextContains('[data-test=content-spam-rating]', $expectedSpamRating);
+        self::assertSelectorTextContains('[data-test=content-auth-request-date]', $expectedAuthReqDate);
+        self::assertSelectorTextContains('[data-test=content-mailing-list]', 'No.');
+        self::assertSelectorTextContains('[data-test=content-status]', 'Authorized');
     }
 
     public function testUserCanDeleteItsMessage(): void
@@ -447,6 +521,66 @@ class MessageControllerTest extends WebTestCase
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
         $senderRuleAddress = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
+        ])[0];
+        $recipientRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipient,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => ' ', // Mapped from 'accept' by RuleTrait
+        ]);
+        self::assertCount(1, $recipientRule);
+        $aliasRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipientAlias,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => ' ', // Mapped from 'accept' by RuleTrait
+        ]);
+        self::assertCount(1, $aliasRule);
+    }
+
+    public function testUserCanAuthorizeItsMessageEvenIfNoEnvelopeFrom(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $recipientAlias = UserFactory::new()->user()->create([
+            'domain' => $domain,
+            'originalUser' => $recipient,
+        ]);
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Envelope From can be null. (e.g. bounce message)
+        $addrS->setEmail('<>');
+        $this->save($addrS);
+        $fromAddr = 'address <from-addr(d)@' . $domain->getDomain() . ' (comment)>';
+        $fromAddrClean = 'from-addr@' . $domain->getDomain();
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            fromAddr: $fromAddr,
+            status: MessageStatus::UNTREATED,
+        );
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/authorized';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize'),
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        // In the case envelope from is <>, fromAddr is use to create SenderRuleAddress
+        $senderRuleAddress = RuleAddressFactory::findBy([
+            'email' => $fromAddrClean,
         ])[0];
         $recipientRule = SenderRuleFactory::findBy([
             'senderRuleAddress' => $senderRuleAddress,
@@ -638,6 +772,88 @@ class MessageControllerTest extends WebTestCase
         $domainRecipient2 = UserFactory::findBy(['email' => '@' . $recipient2->getDomain()]);
         $senderRuleAddress2 = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
+        ])[0];
+        $domainRule = SenderRuleFactory::findBy([
+            'user' => $domainRecipient2[0],
+            'senderRuleAddress' => $senderRuleAddress2,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
+            'wb' => ' ', // Mapped from 'accept' by RuleTrait
+        ]);
+        self::assertCount(1, $domainRule);
+    }
+
+    #[DataProvider('fromAddressProvider')]
+    public function testAdminCanAuthorizedDomainMessageForItsDomainEmptyFromEnvelope(
+        string $fromAddr,
+        string $expected,
+    ): void {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$otherDomain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        // Envelope From can be null. (e.g. bounce message)
+        $addrS->setEmail('<>');
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR1,$addrR2],
+            fromAddr: $fromAddr,
+            status: MessageStatus::UNTREATED,
+        );
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/authorizedDomain';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_authorize_domain'),
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        $this->refresh($messageRecipient2);
+        self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+        // No SenderRule has been created for other domain
+        $domainRecipient1 = UserFactory::findBy(['email' => '@' . $recipient1->getDomain()]);
+        $senderRuleAddress1 = RuleAddressFactory::findBy([
+            'email' => $expected,
+        ])[0];
+        $domainRule = SenderRuleFactory::findBy([
+            'user' => $domainRecipient1[0],
+            'senderRuleAddress' => $senderRuleAddress1,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
+            'wb' => ' ', // Mapped from 'accept' by RuleTrait
+        ]);
+        self::assertCount(0, $domainRule);
+        // A SenderRule has been created for admin's domain
+        $domainRecipient2 = UserFactory::findBy(['email' => '@' . $recipient2->getDomain()]);
+        $senderRuleAddress2 = RuleAddressFactory::findBy([
+            'email' => $expected,
         ])[0];
         $domainRule = SenderRuleFactory::findBy([
             'user' => $domainRecipient2[0],
@@ -890,6 +1106,123 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(1, $aliasRule);
     }
 
+    public function testUserCanBanItsMessageEvenIfNoEnvelopeFrom(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $recipientAlias = UserFactory::new()->user()->create([
+            'domain' => $domain,
+            'originalUser' => $recipient,
+        ]);
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Envelope From can be null. (e.g. bounce message)
+        $addrS->setEmail('<>');
+        $this->save($addrS);
+        $fromAddr = 'address <from-addr(d)@' . $domain->getDomain() . ' (comment)>';
+        $fromAddrClean = 'from-addr@' . $domain->getDomain();
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            fromAddr: $fromAddr,
+            status: MessageStatus::UNTREATED,
+        );
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/banned';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban'),
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient->getStatus());
+        // In the case envelope from is <>, fromAddr is use to create SenderRuleAddress
+        $senderRuleAddress = RuleAddressFactory::findBy([
+            'email' => $fromAddrClean,
+        ])[0];
+        $recipientRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipient,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => 'B',
+        ]);
+        self::assertCount(1, $recipientRule);
+        $aliasRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipientAlias,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => 'B',
+        ]);
+        self::assertCount(1, $aliasRule);
+    }
+
+    public function testUserCannotBanItsMessageEvenIfNoEnvelopeFrom(): void
+    {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $recipientAlias = UserFactory::new()->user()->create([
+            'domain' => $domain,
+            'originalUser' => $recipient,
+        ]);
+        $sender = UserFactory::new()->user($domain)->create();
+        $client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $addrS->setEmail('');
+        $this->save($addrS);
+        $fromAddr = 'from-addr@' . $domain->getDomain();
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            fromAddr: $fromAddr,
+            status: MessageStatus::UNTREATED,
+        );
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/banned';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban'),
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient->getStatus());
+        $senderRuleAddress = RuleAddressFactory::findBy([
+            'email' => $fromAddr,
+        ])[0];
+        $recipientRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipient,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => 'B',
+        ]);
+        self::assertCount(1, $recipientRule);
+        $aliasRule = SenderRuleFactory::findBy([
+            'senderRuleAddress' => $senderRuleAddress,
+            'user' => $recipientAlias,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_USER,
+            'wb' => 'B',
+        ]);
+        self::assertCount(1, $aliasRule);
+    }
+
     public function testUserCannotBanItsMessageWithoutValidCsrfToken(): void
     {
         $client = static::createClient();
@@ -1012,6 +1345,85 @@ class MessageControllerTest extends WebTestCase
         $domainRecipient2 = UserFactory::findBy(['email' => '@' . $recipient2->getDomain()]);
         $senderRuleAddress2 = RuleAddressFactory::findBy([
             'email' => strtolower($sender->getEmail()),
+        ])[0];
+        $domainRule = SenderRuleFactory::findBy([
+            'user' => $domainRecipient2[0],
+            'senderRuleAddress' => $senderRuleAddress2,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
+            'wb' => 'B',
+        ]);
+        self::assertCount(1, $domainRule);
+    }
+
+    #[DataProvider('fromAddressProvider')]
+    public function testAdminCanBannedDomainMessageForItsDomainEmptyFromEnvelope(
+        string $fromAddr,
+        string $expected,
+    ): void {
+        $client = static::createClient();
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->user($otherDomain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$otherDomain])->create();
+        $client->loginUser($admin);
+        [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        // Envelope From can be null. (e.g. bounce message)
+        $addrS->setEmail('<>');
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR1,$addrR2],
+            fromAddr: $fromAddr,
+            status: MessageStatus::UNTREATED,
+        );
+        $initialMessageCount = MessageFactory::count();
+        $initialMessageRecipientCount = MessageRecipientFactory::count();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $messageRecipient1 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
+        )->first();
+        self::assertNotFalse($messageRecipient1);
+        $messageRecipient2 = $message->getMessageRecipients()->filter(
+            fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
+        )->first();
+        self::assertNotFalse($messageRecipient2);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/bannedDomain';
+        $client->request(Request::METHOD_POST, $url, [
+            '_token' => $this->generateCsrfToken($client, 'message_ban_domain'),
+        ]);
+
+        self::assertResponseRedirects('/');
+        self::assertSame($initialMessageCount, MessageFactory::count());
+        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
+        self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+        // No SenderRule has been created for other domain
+        $domainRecipient1 = UserFactory::findBy(['email' => '@' . $recipient1->getDomain()]);
+        $senderRuleAddress1 = RuleAddressFactory::findBy([
+            'email' => $expected,
+        ])[0];
+        $domainRule = SenderRuleFactory::findBy([
+            'user' => $domainRecipient1[0],
+            'senderRuleAddress' => $senderRuleAddress1,
+            'type' => SenderRule::TYPE_USER,
+            'priority' => SenderRule::PRIORITY_DOMAIN,
+            'wb' => 'B',
+        ]);
+        self::assertCount(0, $domainRule);
+        // A SenderRule has been created for admin's domain
+        $domainRecipient2 = UserFactory::findBy(['email' => '@' . $recipient2->getDomain()]);
+        $senderRuleAddress2 = RuleAddressFactory::findBy([
+            'email' => $expected,
         ])[0];
         $domainRule = SenderRuleFactory::findBy([
             'user' => $domainRecipient2[0],
@@ -1985,6 +2397,27 @@ class MessageControllerTest extends WebTestCase
             'restore' => ['restore'],
             'mark as spam' => ['mark_as_spam'],
             'mark as ham' => ['mark_as_ham'],
+        ];
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function fromAddressProvider(): array
+    {
+        return [
+            'John Doe <john@example.com>' => [
+                'John Doe <john@example.com>',
+                'john@example.com',
+            ],
+            'test(comment1)(comment2)@example.com' => [
+                'test(comment1)(comment2)@example.com',
+                'test@example.com',
+            ],
+            'test@example.com (comment with (nested) parents)' => [
+                'test@example.com (comment with (nested) parents)',
+                'test@example.com',
+            ],
         ];
     }
 }
