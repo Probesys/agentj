@@ -3,19 +3,31 @@
 namespace App\Service;
 
 use RuntimeException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
 final class HtmlSanitizerService
 {
     public function __construct(
         private HtmlSanitizerInterface $htmlSanitizer,
+        #[Autowire(param: 'app.message_preview_max_length')]
+        private int $maxLength,
     ) {
+    }
+
+    public function isTooLarge(string $html): bool
+    {
+        return strlen($html) > $this->maxLength;
     }
 
     public function sanitize(string $html): string
     {
         if ($html === '') {
             return $html;
+        }
+
+        if ($this->isTooLarge($html)) {
+            throw new \LogicException('HTML is too large to be sanitized.');
         }
 
         $html = $this->htmlSanitizer->sanitize($html);

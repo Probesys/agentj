@@ -20,6 +20,7 @@ use App\Util\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,6 +42,8 @@ class MessageController extends AbstractController
         private DomainRepository $domainRepository,
         private HtmlSanitizerService $sanitizer,
         private LogService $logService,
+        #[Autowire(param: 'app.message_preview_max_length')]
+        private int $previewMaxLength,
     ) {
     }
 
@@ -724,7 +727,22 @@ class MessageController extends AbstractController
         $from = mb_decode_mimeheader($from);
         $textBody = $email->getTextBody();
         $htmlBody = $email->getHtmlBody();
-        $htmlBody = $this->sanitizer->sanitize($htmlBody);
+        $htmlTooLarge = $this->sanitizer->isTooLarge($htmlBody);
+        if ($htmlTooLarge) {
+            // Never render an HTML that cannot be sanitized: display it as escaped text instead.
+            if ($textBody === '') {
+                $textBody = $htmlBody;
+            }
+            $htmlBody = '';
+        } else {
+            $htmlBody = $this->sanitizer->sanitize($htmlBody);
+        }
+
+        // Do not overload the browser with a huge text: only display its beginning.
+        $textTruncated = $htmlBody === '' && strlen($textBody) > $this->previewMaxLength;
+        if ($textTruncated) {
+            $textBody = mb_strcut($textBody, 0, $this->previewMaxLength, 'UTF-8');
+        }
 
         if (!$this->isAddressedToUserOrItsAliases($messageRecipient)) {
             /** @var User $user */
@@ -747,6 +765,8 @@ class MessageController extends AbstractController
         return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
             'htmlBody' => $htmlBody,
+            'htmlTooLarge' => $htmlTooLarge,
+            'textTruncated' => $textTruncated,
             'from' => $from,
             'subject' => $subject,
             'attachments' => $attachmentNames,

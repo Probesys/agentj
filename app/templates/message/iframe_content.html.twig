@@ -23,13 +23,28 @@
 				{% endfor %}
 			</div>
 		{% endif %}
-		<div class="col-md-12" data-test="content-body">
-			{% if htmlBody %}
+		{# The project stylesheets are not loaded in the iframe, hence the inline styles #}
+		{% if htmlTooLarge or textTruncated %}
+			<div
+				data-test="content-preview-warning"
+				style="margin: 1em 0; padding: .75em 1em; border: 1px solid #ffe69c; border-radius: .375rem; background: #fff3cd; color: #664d03;"
+			>
+				{% if htmlTooLarge and textTruncated %}
+					{{ 'Generics.messages.htmlPreviewTooLargeTruncated' | trans }}
+				{% elseif htmlTooLarge %}
+					{{ 'Generics.messages.htmlPreviewTooLarge' | trans }}
+				{% else %}
+					{{ 'Generics.messages.previewTruncated' | trans }}
+				{% endif %}
+			</div>
+		{% endif %}
+		{% if htmlBody %}
+			<div class="col-md-12" data-test="content-body">
 				{{ htmlBody | raw}}
-			{% else %}
-				{{ textBody }}
-			{% endif %}
-		</div>
+			</div>
+		{% else %}
+			<div class="col-md-12" data-test="content-body" style="white-space: pre-wrap">{{ textBody }}</div>
+		{% endif %}
 	</div>
 {% else %}
 	<p class="text-center">
