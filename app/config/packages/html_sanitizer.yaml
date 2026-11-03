@@ -3,4 +3,4 @@ framework:
         sanitizers:
             default:
                 allow_safe_elements: true
-                max_input_length: 1000000
+                max_input_length: '%app.message_preview_max_length%'

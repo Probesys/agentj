@@ -477,9 +477,12 @@ Generics.messages.azurOAuthInvalidIdentity: "Les données d'identification à Mi
 Generics.messages.cannotPreviewMailWithvirus: 'Vous ne pouvez pas visualiser ce message car il contient un virus'
 Generics.messages.groupWithPriorityExists: 'Un groupe avec cette priorité existe déjà pour ce domain. Veuillez en choisir une autre'
 Generics.messages.helpAlert: 'Alertes sur les mails sortant bloqués (quota dépassé, etc...)'
+Generics.messages.htmlPreviewTooLarge: 'Ce message est trop volumineux pour être affiché en HTML, il est affiché en texte brut.'
+Generics.messages.htmlPreviewTooLargeTruncated: 'Ce message est trop volumineux pour être affiché en HTML, seul le début est affiché en texte brut.'
 Generics.messages.incorrectCredential: 'Identifiants incorrects'
 Generics.messages.no_records_found: 'Aucun résultat trouvé'
 Generics.messages.oauthInvalidSetup: 'Une erreur est survenue lors de la connexion. Veuillez contacter votre administrateur.'
+Generics.messages.previewTruncated: 'Ce message est trop volumineux pour être affiché entièrement, seul le début est affiché.'
 Generics.messages.selectAtLeastOneDomain: 'Veuillez sélectionner au moins un domaine'
 Generics.messages.welcome: Bienvenue
 Generics.messages.welcomeAgentJ: 'Bienvenue sur AgentJ'
