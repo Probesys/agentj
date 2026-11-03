@@ -722,7 +722,16 @@ class MessageController extends AbstractController
         $from = mb_decode_mimeheader($from);
         $textBody = $email->getTextBody();
         $htmlBody = $email->getHtmlBody();
-        $htmlBody = $this->sanitizer->sanitize($htmlBody);
+        $htmlTooLarge = $this->sanitizer->isTooLarge($htmlBody);
+        if ($htmlTooLarge) {
+            // Never render an HTML that cannot be sanitized: display it as escaped text instead.
+            if ($textBody === '') {
+                $textBody = $htmlBody;
+            }
+            $htmlBody = '';
+        } else {
+            $htmlBody = $this->sanitizer->sanitize($htmlBody);
+        }
 
         if (!$this->isAddressedToUserOrItsAliases($messageRecipient)) {
             /** @var User $user */
@@ -745,6 +754,7 @@ class MessageController extends AbstractController
         return $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
             'htmlBody' => $htmlBody,
+            'htmlTooLarge' => $htmlTooLarge,
             'from' => $from,
             'subject' => $subject,
             'attachments' => $attachmentNames,

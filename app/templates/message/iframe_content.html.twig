@@ -23,6 +23,11 @@
 				{% endfor %}
 			</div>
 		{% endif %}
+		{% if htmlTooLarge %}
+			<div class="col-md-12 alert alert-warning" data-test="content-html-too-large">
+				{{ 'Generics.messages.htmlPreviewTooLarge' | trans }}
+			</div>
+		{% endif %}
 		<div class="col-md-12" data-test="content-body">
 			{% if htmlBody %}
 				{{ htmlBody | raw}}

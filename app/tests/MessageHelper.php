@@ -51,6 +51,7 @@ trait MessageHelper
         ?string $body = null,
         ?int $status = null,
         ?array $messageAttributes = [],
+        ?string $contentType = null,
     ): Message {
         $mailId = bin2hex(random_bytes(8));
 
@@ -73,6 +74,7 @@ trait MessageHelper
             'from' => $fromAddr ?? $sender->getEmail(),
             'to' => $recipientsEmails,
             'body' => $body ?? null,
+            'contentType' => $contentType,
         ]);
 
         QuarantineFactory::new()->create([

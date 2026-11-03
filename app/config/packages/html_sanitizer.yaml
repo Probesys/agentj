@@ -3,4 +3,6 @@ framework:
         sanitizers:
             default:
                 allow_safe_elements: true
-                max_input_length: 1000000
+                # HtmlSanitizerService refuses longer inputs instead of letting
+                # Symfony truncate them.
+                max_input_length: '%app.html_preview_max_length%'

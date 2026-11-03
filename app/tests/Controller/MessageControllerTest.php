@@ -2319,6 +2319,67 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(0, $logs);
     }
 
+    public function testGetIframeContentDisplaysTheTextPartIfTheHtmlIsTooLarge(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Larger than app.html_preview_max_length in the test environment
+        $htmlBody = str_repeat('<b>bold</b>', 100);
+        $mailBody = "--boundary\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n\r\n"
+            . "text body\r\n"
+            . "--boundary\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+            . "{$htmlBody}\r\n"
+            . "--boundary--\r\n";
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $mailBody,
+            contentType: 'multipart/alternative; boundary="boundary"',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-test="content-html-too-large"]');
+        self::assertSame('text body', $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentDisplaysTheEscapedHtmlIfTooLargeAndWithoutTextPart(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Larger than app.html_preview_max_length in the test environment
+        $htmlBody = str_repeat('<b>bold</b>', 100);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $htmlBody,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/iframe-content';
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-test="content-html-too-large"]');
+        self::assertSelectorNotExists('[data-test="content-body"] b');
+        self::assertSame($htmlBody, $crawler->filter('[data-test="content-body"]')->text());
+    }
+
     /**
      * @return array<string, list<string>>
      */
@@ -2356,6 +2417,7 @@ class MessageControllerTest extends WebTestCase
             ->text();
         self::assertSame($mailBody, $body);
         self::assertSame($senderEmail, $sender);
+        self::assertSelectorNotExists('[data-test="content-html-too-large"]');
     }
 
     private function assertLogCreated(MessageRecipient $messageRecipient, User $admin): void

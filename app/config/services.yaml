@@ -21,6 +21,7 @@ parameters:
     app.domain_min_spam_level: "%env(DOMAIN_MIN_SPAM_LEVEL)%"
     app.domain_max_spam_level: "%env(DOMAIN_MAX_SPAM_LEVEL)%"
     app.per_page_global: "25"
+    app.html_preview_max_length: 1000000
     timezone: "%env(TIMEZONE)%"
 
 services:
@@ -57,6 +58,9 @@ services:
             - { name: 'controller.service_arguments' }
 
 when@test:
+    parameters:
+        app.html_preview_max_length: 1000
+
     services:
         _defaults:
             autowire: true
