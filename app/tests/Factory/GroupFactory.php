@@ -3,6 +3,7 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Group;
+use App\Entity\SenderRule;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
@@ -26,9 +27,15 @@ final class GroupFactory extends PersistentObjectFactory
         return [
             'active' => true,
             'domain' => DomainFactory::new(),
+            'priority' => SenderRule::PRIORITY_USER,
             'name' => self::faker()->text(25),
             'slug' => self::faker()->text(10),
-            'wb' => self::faker()->text(10),
+            'wb' => self::faker()->randomElement([
+                ' ',
+                'W',
+                'B',
+            ]),
+            'overrideUser' => false,
         ];
     }
 

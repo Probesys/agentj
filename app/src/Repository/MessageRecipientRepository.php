@@ -6,6 +6,7 @@ use App\Amavis\ContentType;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\MessageRecipient;
 use App\Entity\Message;
 use App\Entity\User;
@@ -155,6 +156,31 @@ class MessageRecipientRepository extends BaseRepository
         SQL);
 
         $query->setParameter('recipientEmail', $recipientUser->getEmail());
+        $query->setParameter('senderFrom', $senderFrom);
+
+        return $query->getResult();
+    }
+
+    /**
+     * // TODO: complete the doc
+     *
+     * @return MessageRecipient[]
+     */
+    public function findSentToGroup(int $groupId, string $senderFrom): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT mr
+            FROM App\Entity\MessageRecipient mr
+            JOIN mr.message m
+            JOIN mr.address ra
+            JOIN App\Entity\User u WITH u.email = ra.email
+            JOIN u.groups g
+            WHERE g.id = :groupId
+            AND m.fromAddr = :senderFrom
+            AND mr.status IS NOT NULL
+        SQL);
+
+        $query->setParameter('groupId', $groupId);
         $query->setParameter('senderFrom', $senderFrom);
 
         return $query->getResult();

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\DomainKey;
 use App\Entity\Policy;
@@ -13,6 +14,7 @@ use App\Repository\DomainRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\SettingRepository;
+use App\Service\MessageService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -35,6 +37,7 @@ class DomainController extends AbstractController
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private UserService $userService,
+        private MessageService $messageService,
     ) {
     }
 
@@ -311,6 +314,7 @@ class DomainController extends AbstractController
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
             'action' => $this->generateUrl('domain_sender_rules_new', ['id' => $domain->getId()]),
+            'csrf_token_id' => 'domain-sender-rule',
         ]);
         $formBuilder->add('email', TextType::class);
 
@@ -324,26 +328,33 @@ class DomainController extends AbstractController
 
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $data = $form->getData();
 
-            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
-            $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
+                $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
+                $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
                 'user' => $user,
                 'senderRuleAddress' => $ruleAddress,
-            ]));
-            if ($domainSenderRuleExists) {
-                $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
+                ]));
+                if ($domainSenderRuleExists) {
+                    $this->addFlash('danger', $this->translator->trans('Message.Flash.ruleExistForDomain'));
+                    return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
+                }
+                $senderRule = new SenderRule($user, $ruleAddress);
+                $senderRule->setWbRule($data['wbRule']);
+                $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
+
+                $this->em->persist($senderRule);
+                $this->em->flush();
+
+                // Evaluate new rule on UNTREATED emails for this domain
+                $domainId = $user->getDomain()->getId();
+                $this->messageService->applyOnAllRecipients($domainId, $data['email'], $data['wbRule'], 'domain');
+
+                $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
                 return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
             }
-            $senderRule = new SenderRule($user, $ruleAddress);
-            $senderRule->setWbRule($data['wbRule']);
-            $senderRule->setPriority(SenderRule::PRIORITY_DOMAIN);
-
-            $this->em->persist($senderRule);
-            $this->em->flush();
-            $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
-            return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
         }
 
         return $this->render('domain/sender_rule/new.html.twig', [

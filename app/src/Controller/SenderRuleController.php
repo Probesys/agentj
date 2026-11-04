@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Amavis\MessageStatus;
 use App\Entity\Domain;
 use App\Entity\SenderRule;
 use App\Entity\User;
@@ -14,6 +15,7 @@ use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\LogService;
+use App\Service\MessageService;
 use App\Service\Referrer;
 use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,6 +40,7 @@ class SenderRuleController extends AbstractController
         private SenderRuleRepository $senderRuleRepository,
         private UserRepository $userRepository,
         private SenderRuleService $senderRuleService,
+        private MessageService $messageService,
     ) {
     }
 
@@ -154,6 +157,11 @@ class SenderRuleController extends AbstractController
                 'message' => $this->translator->trans('Generics.flash.genericFormError'),
             ]);
         }
+
+        // TODO: trigger evaluation on incoming mails
+        $ruleType = $type === 'W' ? 'accept' : 'block';
+        $domainId = $user->getDomain()->getId();
+        $this->messageService->applyOnAllRecipients($domainId, $data['email'], $ruleType, 'domain');
 
         return new JsonResponse([
             'status' => 'success',
@@ -284,6 +292,9 @@ class SenderRuleController extends AbstractController
                     $form->get('domain')->getData(),
                     $rule,
                 );
+
+                // TODO: trigger evaluation on incoming mails
+
                 $this->addFlash('success', new TranslatableMessage('Entities.Import.SenderRule.success'));
             } else {
                 $this->addFlash('danger', new TranslatableMessage('Generics.flash.BadImportFormat'));

@@ -2,25 +2,43 @@
 
 namespace App\Tests\Controller;
 
+use App\Amavis\MessageStatus;
+use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\PolicyFactory;
+use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
+use App\Tests\FactoryHelper;
+use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
+use App\Util\Url;
+use Override;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 class DomainControllerTest extends WebTestCase
 {
     use Factories;
+    use FactoryHelper;
+    use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
 
+    private KernelBrowser $client;
+
+    #[Override]
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->client = static::createClient();
+    }
+
     public function testAdminCanListDomainsButSeeOnlyItsOwn(): void
     {
-        $client = static::createClient();
         $domain1Title = 'test.fr';
         $domain2Title = 'test.it';
         $domain3Title = 'test.com';
@@ -29,9 +47,9 @@ class DomainControllerTest extends WebTestCase
         DomainFactory::createOne(['domain' => $domain3Title]);
         self::assertSame(3, DomainFactory::count());
         $admin = UserFactory::new()->admin([$domain1, $domain2])->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
 
-        $crawler = $client->request(Request::METHOD_GET, '/domain/');
+        $crawler = $this->client->request(Request::METHOD_GET, '/domain/');
 
         $titles = $crawler
             ->filter('td[data-title="Title"]')
@@ -43,15 +61,14 @@ class DomainControllerTest extends WebTestCase
 
     public function testSuperAdminCanListDomainsAndSeeAll(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $domain1Title = 'test.fr';
         $domain2Title = 'test.com';
         DomainFactory::createOne(['domain' => $domain1Title]);
         DomainFactory::createOne(['domain' => $domain2Title]);
 
-        $crawler = $client->request(Request::METHOD_GET, '/domain/');
+        $crawler = $this->client->request(Request::METHOD_GET, '/domain/');
 
         $titles = $crawler
             ->filter('td[data-title="Title"]')
@@ -63,36 +80,33 @@ class DomainControllerTest extends WebTestCase
 
     public function testUserCannotCreateDomain(): void
     {
-        $client = static::createClient();
         $user = UserFactory::new()->user()->create();
-        $client->loginUser($user);
+        $this->client->loginUser($user);
 
-        $payload = $this->createPayload($client);
-        $client->request('POST', '/domain/new', $payload);
+        $payload = $this->createPayload($this->client);
+        $this->client->request('POST', '/domain/new', $payload);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     public function testAdminCannotCreateDomain(): void
     {
-        $client = static::createClient();
         $admin = UserFactory::new()->admin()->create();
-        $client->loginUser($admin);
+        $this->client->loginUser($admin);
 
-        $payload = $this->createPayload($client);
-        $client->request('POST', '/domain/new', $payload);
+        $payload = $this->createPayload($this->client);
+        $this->client->request('POST', '/domain/new', $payload);
 
-        self::assertSame(403, $client->getResponse()->getStatusCode());
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     public function testSuperAdminCanCreateDomain(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
 
-        $payload = $this->createPayload($client);
-        $client->request('POST', '/domain/new', $payload);
+        $payload = $this->createPayload($this->client);
+        $this->client->request('POST', '/domain/new', $payload);
 
         self::assertSame(1, DomainFactory::count());
         $domain = DomainFactory::last();
@@ -104,19 +118,18 @@ class DomainControllerTest extends WebTestCase
 
     public function testSuperAdminCanEditDomain(): void
     {
-        $client = static::createClient();
         $superAdmin = UserFactory::new()->superAdmin()->create();
-        $client->loginUser($superAdmin);
+        $this->client->loginUser($superAdmin);
         $domain = DomainFactory::createOne();
 
-        $payload = $this->createPayload($client, [
+        $payload = $this->createPayload($this->client, [
             "active" => false,
             "srvSmtp" => "smtp.other.fr",
             "smtpPort" => "27",
             "level" => "2",
             "authorizedSendersSpamLevel" => "10",
         ]);
-        $client->request('POST', '/domain/' . $domain->getId() . '/edit', $payload);
+        $this->client->request('POST', '/domain/' . $domain->getId() . '/edit', $payload);
 
         self::assertSame(1, DomainFactory::count());
         $updatedDomain = DomainFactory::find($domain->getId());
@@ -128,6 +141,54 @@ class DomainControllerTest extends WebTestCase
         self::assertEquals(10, $updatedDomain->getAuthorizedSendersSpamLevel());
 
         self::assertResponseRedirects('/domain/?id=' . $domain->getId());
+    }
+
+    public function testCreateSenderRuleShouldApplyOnPendingMessages(): void
+    {
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $this->client->loginUser($superAdmin);
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        [$senderAddress, $recipientAddress] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($senderAddress, [$recipientAddress], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        $message2 = $this->setupMail($senderAddress, [$recipientAddress], status: MessageStatus::UNTREATED);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+        $otherSenderAddress = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($domain->getDomain()),
+            'partitionTag' => 0,
+            'email' => 'other@' . $domain->getDomain(),
+        ]);
+        $otherMessage = $this->setupMail($otherSenderAddress, [$recipientAddress], status: MessageStatus::UNTREATED);
+        $otherMessageRecipient = $otherMessage->getMessageRecipients()->first();
+        self::assertNotFalse($otherMessageRecipient);
+        $initialSenderRulesCount = SenderRuleFactory::count();
+
+        $token = $this->generateCsrfToken($this->client, 'domain-sender-rule');
+        $payload = [
+            "form" => [
+                "email" => $sender->getEmail(),
+                "wbRule" => "block",
+                "_token" => $token,
+            ],
+        ];
+        $url = '/domain/' . $domain->getId() . '/rules/new';
+        $this->client->request('POST', $url, $payload);
+
+        self::assertSame($initialSenderRulesCount + 1, SenderRuleFactory::count());
+        // Status is updated for all MessageRecipient of this domain for this sender
+        $this->refresh($messageRecipient);
+        $this->refresh($otherMessageRecipient);
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $message2->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+        // Message from other sender not touched
+        self::assertSame(MessageStatus::UNTREATED, $otherMessage->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $otherMessageRecipient->getStatus());
     }
 
     /**

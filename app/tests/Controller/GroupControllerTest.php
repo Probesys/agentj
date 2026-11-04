@@ -7,6 +7,7 @@ use App\Tests\Factory\GroupFactory;
 use App\Tests\Factory\PolicyFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
+use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -18,6 +19,7 @@ class GroupControllerTest extends WebTestCase
 {
     use Factories;
     use FactoryHelper;
+    use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
 

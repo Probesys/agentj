@@ -4,11 +4,14 @@ namespace App\Service;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Message\AmavisRelease;
+use App\Repository\DomainRepository;
+use App\Repository\GroupRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
@@ -25,6 +28,8 @@ class MessageService
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
+        private GroupRepository $groupRepository,
+        private DomainRepository $domainRepository,
         private SenderRuleRepository $senderRuleRepository,
         private CryptEncryptService $cryptEncryptService,
         private SpamassassinService $spamassassinService,
@@ -59,23 +64,8 @@ class MessageService
                 priority: SenderRule::PRIORITY_USER,
             );
 
-            $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
-                $user,
-                $message->getFromAddr(),
-            );
-
-            $domain = $user->getDomain();
-            $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
-
-            foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-                $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
-                $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
-                if (!$isSameSender || $isSpam) {
-                    continue;
-                }
-
-                $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
-            }
+            // TODO: optimize not to call if loop
+            $this->applyOnAllRecipients($user->getId(), $senderEmail, 'accept', 'user');
         }
 
         $message->setStatus(MessageStatus::AUTHORIZED);
@@ -104,8 +94,7 @@ class MessageService
         $recipientDomainName = $recipient->getReverseDomain();
 
         $domainUser = $this->userRepository->findDomainUser($recipientDomainName);
-        $domain = $domainUser->getDomain();
-        $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+        $domain = $domainUser?->getDomain();
 
         $this->senderRuleRepository->updateOrCreateRule(
             $domainUser,
@@ -115,20 +104,7 @@ class MessageService
             priority: SenderRule::PRIORITY_DOMAIN,
         );
 
-        $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
-            $domain,
-            $message->getFromAddr(),
-        );
-
-        foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
-            $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
-            $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
-            if (!$isSameSender || $isSpam) {
-                continue;
-            }
-
-            $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
-        }
+        $this->applyOnAllRecipients($domain->getId(), $senderEmail, 'accept', 'domain');
 
         $message->setStatus(MessageStatus::AUTHORIZED);
         $this->messageRepository->save($message);
@@ -164,24 +140,7 @@ class MessageService
                 priority: SenderRule::PRIORITY_USER,
             );
 
-            $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
-                $user,
-                $message->getFromAddr()
-            );
-
-            foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-                $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
-                if (
-                    !$isSameSender ||
-                    $messageRecipientToBan->isVirus() ||
-                    $messageRecipientToBan->isAlreadyReleased()
-                ) {
-                    continue;
-                }
-
-                $messageRecipientToBan->setStatus(MessageStatus::BANNED);
-                $this->messageRecipientRepository->save($messageRecipientToBan);
-            }
+            $this->applyOnAllRecipients($user->getId(), $senderEmail, 'block', 'user');
         }
 
         $message->setStatus(MessageStatus::BANNED);
@@ -219,24 +178,7 @@ class MessageService
             priority: SenderRule::PRIORITY_DOMAIN,
         );
 
-        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
-            $domainUser->getDomain(),
-            $message->getFromAddr(),
-        );
-
-        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
-            if (
-                !$isSameSender ||
-                $messageRecipientToBan->isVirus() ||
-                $messageRecipientToBan->isAlreadyReleased()
-            ) {
-                continue;
-            }
-
-            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
-            $this->messageRecipientRepository->save($messageRecipientToBan);
-        }
+        $this->applyOnAllRecipients($domainUser?->getDomain()->getId(), $senderEmail, 'block', 'domain');
 
         $message->setStatus(MessageStatus::BANNED);
         $this->messageRepository->save($message);
@@ -451,5 +393,110 @@ class MessageService
         }
 
         return [$user, $mailId];
+    }
+
+    /**
+     * @param 'user'|'group'|'domain' $type
+     * @param 'accept'|'allow'|'block' $rule
+     */
+    public function applyOnAllRecipients(
+        int $id,
+        string $senderEmail,
+        string $rule,
+        string $type,
+        bool $isUpdate = false,
+    ): void {
+        $user = null;
+        $group = null;
+        $domain = null;
+
+        if ($type === 'user') {
+            $user = $this->userRepository->findOneBy(['id' => $id]);
+            $domain = $user->getDomain();
+            $messageRecipients = $this->messageRecipientRepository->findSentToUserByEmail(
+                $user,
+                $senderEmail,
+            );
+        } elseif ($type === 'group') {
+            $group = $this->groupRepository->findOneBy(['id' => $id]);
+            $domain = $group->getDomain();
+            $messageRecipients = $this->messageRecipientRepository->findSentToGroup(
+                $group->getId(),
+                $senderEmail,
+            );
+        } else {
+            $domain = $this->domainRepository->findOneBy(['id' => $id]);
+            $messageRecipients = $this->messageRecipientRepository->findSentToDomainByEmail(
+                $domain,
+                $senderEmail,
+            );
+        }
+
+        $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+
+        // FIXME: does not handle priority...
+        foreach ($messageRecipients as $messageRecipientToRelease) {
+            $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
+            $isSpam = match ($rule) {
+                // always accept without checking spam level
+                'allow' => false,
+                // under domain's authorized spam level
+                'accept' => $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel),
+                // do not need to check spam as it is blocked
+                'block' => false,
+            };
+
+            if (!$isSameSender || $isSpam) {
+                continue;
+            }
+
+
+            if ($type === 'group') {
+                // TODO: do not try to apply if it already exists a User rule for this sender
+                $currentUser = $this->userRepository->findOneByAddress($messageRecipientToRelease->getAddress());
+
+                $rules = $this->senderRuleRepository->findBySenderEmailAndRecipient(
+                    $senderEmail,
+                    $messageRecipientToRelease->getAddress(),
+                );
+                // dump($currentUser->getId());
+                // dump($rules[0]->getUser()->getId());
+                // dump($senderEmail);
+                // dump($rules[0]->getSenderRuleAddress()->getEmail());
+                // dump($rules[0]->getWb());
+                // dump($rules[0]->getPriority());
+                // dump($rules[0]->getType());
+
+                if (empty($rules)) {
+                    continue;
+                }
+
+                // If it exists a SenderRule associated to a User for this sender, adding a group Rule should not update
+                // MessageRecipient status as User's rules have higher priority than Group's rules.
+                $highestPriorityGroup = $group;
+
+                array_reduce(
+                    $currentUser->getGroups()?->toArray(),
+                    fn ($group1, $group2) => $group1 > $group2 ? $group1 : $group2,
+                    $highestPriorityGroup,
+                );
+
+                if ($highestPriorityGroup !== $group && !$isUpdate) {
+                    // If it's an update, the group has to have the hiqhest priority to trigger status update.
+                    continue;
+                }
+            }
+
+            $status = match ($rule) {
+                'allow' => MessageStatus::AUTHORIZED, // TODO: check domain spam level to determine allow/block
+                'accept' => MessageStatus::AUTHORIZED,
+                'block' => MessageStatus::BANNED,
+            };
+
+            // FIXME: cannot use dispatchRelease as it save an amavisReleaseAt attributes
+            // $this->dispatchRelease($messageRecipientToRelease, $status);
+            $messageRecipientToRelease->setStatus($status);
+            $this->messageRecipientRepository->save($messageRecipientToRelease);
+        }
     }
 }

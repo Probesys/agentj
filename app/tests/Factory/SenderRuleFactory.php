@@ -35,6 +35,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
             ]),
             'type' => null,
             'priority' => SenderRule::PRIORITY_USER,
+            'group' => null,
         ];
     }
 
@@ -52,6 +53,7 @@ final class SenderRuleFactory extends PersistentObjectFactory
                 $rule->setType($attributes['type']);
             }
             $rule->setPriority($attributes['priority']);
+            $rule->setGroup($attributes['group']);
 
             return $rule;
         });

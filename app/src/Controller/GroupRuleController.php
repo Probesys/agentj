@@ -8,6 +8,7 @@ use App\Form\GroupRuleType;
 use App\Repository\GroupRuleRepository;
 use App\Repository\RuleAddressRepository;
 use App\Service\GroupService;
+use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,13 +23,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/groups')]
 class GroupRuleController extends AbstractController
 {
-    private EntityManagerInterface $em;
-    private TranslatorInterface $translator;
-
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator)
-    {
-        $this->em = $em;
-        $this->translator = $translator;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator,
+        private MessageService $messageService,
+    ) {
     }
 
     #[Route(path: '/{groupId}/rules', name: 'groups_rules_index', methods: 'GET')]
@@ -87,6 +86,7 @@ class GroupRuleController extends AbstractController
 
         $form = $this->createForm(GroupRuleType::class, null, [
             'action' => $this->generateUrl('groups_rules_new', ['groupId' => $group->getId()]),
+            'csrf_token_id' => 'group-sender-rule-create',
         ]);
 
         $form->handleRequest($request);
@@ -116,6 +116,8 @@ class GroupRuleController extends AbstractController
 
             $groupService->updateSenderRules();
 
+            $this->messageService->applyOnAllRecipients($group->getId(), $data['email'], $data['wbRule'], 'group');
+
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         }
 
@@ -142,6 +144,7 @@ class GroupRuleController extends AbstractController
         $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
         $form = $this->createForm(GroupRuleType::class, null, [
             'action' => $this->generateUrl('groups_rules_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
+            'csrf_token_id' => 'group-sender-rule-edit',
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -168,6 +171,14 @@ class GroupRuleController extends AbstractController
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
             $groupService->updateSenderRules();
+
+            $this->messageService->applyOnAllRecipients(
+                $group->getId(),
+                $data['email'],
+                $data['wbRule'],
+                'group',
+                isUpdate: true,
+            );
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         } else {
