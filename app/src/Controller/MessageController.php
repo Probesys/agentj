@@ -533,6 +533,8 @@ class MessageController extends AbstractController
             return new RedirectResponse($this->referrer->get());
         }
 
+        $this->logService->addLogForRecipient(LogAction::UnsubscribeList, $messageRecipient);
+
         if ($unsubscribeRequest->isPending()) {
             $this->addFlash('success', $this->translator->trans('Message.Flash.unsubscribePending'));
         } else {

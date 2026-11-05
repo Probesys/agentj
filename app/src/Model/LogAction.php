@@ -21,6 +21,7 @@ enum LogAction: string implements TranslatableInterface
     case MarkedAsSpamBatch = 'marked as spam batch';
     case MarkedAsHam = 'marked as ham';
     case MarkedAsHamBatch = 'marked as ham batch';
+    case UnsubscribeList = 'unsubscribe from list';
     case DeleteBatchSenderRule = 'delete batch sender rule';
     case AuthenticationRequestSent = 'Authentification request sent';
     case MessageContentDisplayed = 'message content displayed';
