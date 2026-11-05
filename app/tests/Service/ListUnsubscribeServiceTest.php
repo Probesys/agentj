@@ -175,6 +175,23 @@ class ListUnsubscribeServiceTest extends KernelTestCase
         self::assertNull($this->service->getUnsubscribeMethods($messageRecipient));
     }
 
+    public function testGetUnsubscribeStatesReturnsTheLastRequestWithoutListId(): void
+    {
+        $messageRecipient = $this->setupListMessage(self::ONE_CLICK_HEADERS);
+        $lastRequest = UnsubscribeRequestFactory::new()->forMessageRecipient($messageRecipient)->create();
+        UnsubscribeRequestFactory::new()->forMessageRecipient($messageRecipient)->create([
+            'status' => UnsubscribeRequest::STATUS_FAILED,
+            'createdAt' => new \DateTimeImmutable('-1 day'),
+        ]);
+
+        $states = $this->service->getUnsubscribeStates([$messageRecipient]);
+
+        $state = $states[$messageRecipient->getIdKey()] ?? null;
+        self::assertNotNull($state);
+        self::assertNotNull($state['lastRequest']);
+        self::assertSame($lastRequest->getId(), $state['lastRequest']->getId());
+    }
+
     /**
      * Create a message sent to a new user, with its list metadata (as Amavis
      * would save them), or without metadata if $headers is null.

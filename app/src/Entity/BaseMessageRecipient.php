@@ -303,6 +303,6 @@ class BaseMessageRecipient
     {
         return $this->getPartitionTag()
             . '-' . $this->getMailId()
-            . '-' . $this->getSmtpResp();
+            . '-' . $this->getRseqnum();
     }
 }
