@@ -32,7 +32,7 @@
         "altcha": "^3.1.0",
         "bootstrap": "^4.6.2",
         "chart.js": "^4.5.1",
-        "ckeditor5": "^48.4.0",
+        "ckeditor5": "^49.1.0",
         "jquery": "^3.7.1",
         "jquery-ui-dist": "^1.13.3",
         "popper.js": "^1.16.1",
