@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Amavis\MessageStatus;
 use App\Entity\Address;
 use App\Entity\MessageListMetadata;
 use App\Entity\MessageRecipient;
@@ -30,6 +31,15 @@ class ListUnsubscribeService
     public function getUnsubscribeMethods(MessageRecipient $messageRecipient): ?UnsubscribeMethods
     {
         return $this->parseMetadata($this->getMetadata($messageRecipient));
+    }
+
+    public function isUnsubscribeable(MessageRecipient $messageRecipient): bool
+    {
+        return (
+            $messageRecipient->getMessage()->getIsMlist() &&
+            !in_array($messageRecipient->getStatus(), [MessageStatus::SPAMMED, MessageStatus::VIRUS], true) &&
+            $this->getUnsubscribeMethods($messageRecipient)?->hasMethod()
+        );
     }
 
     /**

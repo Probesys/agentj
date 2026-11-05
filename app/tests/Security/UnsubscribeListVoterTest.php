@@ -7,6 +7,7 @@ use App\Entity\MessageRecipient;
 use App\Entity\User;
 use App\Security\UnsubscribeListVoter;
 use App\Tests\Factory\DomainFactory;
+use App\Tests\Factory\MessageListMetadataFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
@@ -22,6 +23,13 @@ class UnsubscribeListVoterTest extends KernelTestCase
     use FactoryHelper;
     use MessageHelper;
     use ResetDatabase;
+
+    private const ONE_CLICK_HEADERS = [
+        'list-id' => 'news.example.com',
+        'list-unsubscribe' => '<https://lists.example.com/unsubscribe/abc>, <mailto:leave@lists.example.com>',
+        'list-unsubscribe-post' => 'List-Unsubscribe=One-Click',
+    ];
+
 
     public function testRecipientCanUnsubscribe(): void
     {
@@ -58,6 +66,22 @@ class UnsubscribeListVoterTest extends KernelTestCase
         self::assertSame(VoterInterface::ACCESS_DENIED, $this->vote($user, $messageRecipient));
     }
 
+    public function testCannotUnsubscribeWithoutMetadata(): void
+    {
+        [$user, $messageRecipient] = $this->setupListMessage(headers: null);
+
+        self::assertSame(VoterInterface::ACCESS_DENIED, $this->vote($user, $messageRecipient));
+    }
+
+    public function testCannotUnsubscribeWithoutUnsubscribeMethod(): void
+    {
+        [$user, $messageRecipient] = $this->setupListMessage(headers: [
+            'list-id' => 'news.example.com',
+        ]);
+
+        self::assertSame(VoterInterface::ACCESS_DENIED, $this->vote($user, $messageRecipient));
+    }
+
     public function testCannotUnsubscribeFromSpam(): void
     {
         [$user, $messageRecipient] = $this->setupListMessage(status: MessageStatus::SPAMMED);
@@ -76,16 +100,27 @@ class UnsubscribeListVoterTest extends KernelTestCase
     {
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
-        return (new UnsubscribeListVoter())->vote($token, $messageRecipient, ['UNSUBSCRIBE_LIST']);
+        $voter = self::getContainer()->get(UnsubscribeListVoter::class);
+
+        return $voter->vote($token, $messageRecipient, ['UNSUBSCRIBE_LIST']);
     }
 
     /**
      * Create a mailing list message sent to a new user.
      *
+     * @param ?array{
+     *     list-id?: string,
+     *     list-unsubscribe?: string,
+     *     list-unsubscribe-post?: string,
+     * } $headers
+     *
      * @return array{User, MessageRecipient}
      */
-    private function setupListMessage(?int $status = null, bool $isMlist = true): array
-    {
+    private function setupListMessage(
+        ?int $status = null,
+        bool $isMlist = true,
+        ?array $headers = self::ONE_CLICK_HEADERS,
+    ): array {
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
@@ -95,6 +130,14 @@ class UnsubscribeListVoterTest extends KernelTestCase
         ]);
         $messageRecipient = $message->getMessageRecipients()->first();
         self::assertNotFalse($messageRecipient);
+
+        if ($headers !== null) {
+            MessageListMetadataFactory::new()->forMessage($message)->create([
+                'listId' => $headers['list-id'] ?? null,
+                'listUnsubscribe' => $headers['list-unsubscribe'] ?? null,
+                'listUnsubscribePost' => $headers['list-unsubscribe-post'] ?? null,
+            ]);
+        }
 
         return [$recipient, $messageRecipient];
     }

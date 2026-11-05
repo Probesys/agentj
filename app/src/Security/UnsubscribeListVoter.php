@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Amavis\MessageStatus;
 use App\Entity\MessageRecipient;
 use App\Entity\User;
+use App\Service\ListUnsubscribeService;
 use App\Util\Email;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
@@ -18,6 +19,11 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  */
 class UnsubscribeListVoter extends Voter
 {
+    public function __construct(
+        private ListUnsubscribeService $listUnsubscribeService,
+    ) {
+    }
+
     protected function supports(string $attribute, mixed $subject): bool
     {
         return $attribute === 'UNSUBSCRIBE_LIST' && $subject instanceof MessageRecipient;
@@ -35,11 +41,7 @@ class UnsubscribeListVoter extends Voter
             return false;
         }
 
-        if (!$subject->getMessage()->getIsMlist()) {
-            return false;
-        }
-
-        if (in_array($subject->getStatus(), [MessageStatus::SPAMMED, MessageStatus::VIRUS], true)) {
+        if (!$this->listUnsubscribeService->isUnsubscribeable($subject)) {
             return false;
         }
 
