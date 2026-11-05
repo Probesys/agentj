@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Service;
+namespace App\Tests\Entity;
 
 use App\Entity\SenderRule;
 use App\Tests\Factory\GroupFactory;
