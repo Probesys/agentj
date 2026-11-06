@@ -18,7 +18,7 @@
                     {{ description_key|trans({}, 'messages')|raw }}
                 {% else %}
                     {% if exception.message %}
-                        {{ exception.message|raw }}
+                        {{ exception.message }}
                     {% else %}
                         {{ 'Message.http.500.description'|trans|raw }}
                     {% endif %}

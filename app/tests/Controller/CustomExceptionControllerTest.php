@@ -33,6 +33,19 @@ class CustomExceptionControllerTest extends KernelTestCase
         self::assertSame('405 Method Not Allowed', $this->getTitle($response));
     }
 
+    public function testEscapesTheExceptionMessage(): void
+    {
+        // Exception messages can contain user input, e.g. the Host header
+        // for the "Invalid Host" 400 error.
+        $response = $this->renderError(
+            new MethodNotAllowedHttpException(['POST'], '<script>alert("xss")</script>'),
+        );
+
+        $content = (string) $response->getContent();
+        self::assertStringNotContainsString('<script>alert("xss")</script>', $content);
+        self::assertStringContainsString('&lt;script&gt;', $content);
+    }
+
     private function renderError(\Throwable $exception): Response
     {
         self::bootKernel();
