@@ -1,12 +1,13 @@
 # Changelog of AgentJ
 
-## UNRELASED
+## 2026-11-06 - 2.8.0-rc1
 
 ### Migration notes
 
 #### Altcha
 
-Altcha (https://altcha.org/) is now used during human authentication. There are 3 new environment variables:
+Altcha (<https://altcha.org/>) is now used during human authentication. There are 3 new environment variables:
+
 - `ALTCHA_KEY_SECRET` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
 - `ALTCHA_KEY_SIGNATURE` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
 - `ALTCHA_COST` an (optional) value that we recommend to be between 5000 and 10000. A higher cost takes more time to validate.
@@ -28,6 +29,53 @@ The requests to unsubscribe from mailing lists are deleted after 90 days. To cha
 #### LDAP connector
 
 Concerning the LDAP connector: if the synchronization starts to fail, you must re-enter the LDAP connector password.
+
+### Features
+
+- Unsubscribe from mailing lists ([c1bfcd2e](https://github.com/Probesys/agentj/commit/c1bfcd2e), [8b373cf9](https://github.com/Probesys/agentj/commit/8b373cf9), [f2bfa0af](https://github.com/Probesys/agentj/commit/f2bfa0af), [503bf5cf](https://github.com/Probesys/agentj/commit/503bf5cf))
+- Show the spam score indicators in the message info ([36982177](https://github.com/Probesys/agentj/commit/36982177))
+- Add an audit log page ([b5441111](https://github.com/Probesys/agentj/commit/b5441111))
+- Log when an admin access user's emails ([4e141910](https://github.com/Probesys/agentj/commit/4e141910))
+- Protect human authentication with a captcha ([f93337ec](https://github.com/Probesys/agentj/commit/f93337ec))
+- Display and manage email aliases from the email addresses page ([bda1bf70](https://github.com/Probesys/agentj/commit/bda1bf70))
+- Improve the report:
+    - Reorganize the default report and add new variables to customize the report template ([b119ea78](https://github.com/Probesys/agentj/commit/b119ea78))
+    - Allow banning a sender from the report email ([0aa0a516](https://github.com/Probesys/agentj/commit/0aa0a516))
+    - Protect report links with confirmation ([e9168f96](https://github.com/Probesys/agentj/commit/e9168f96))
+- Allow to authorize or ban senders manually ([12f1644c](https://github.com/Probesys/agentj/commit/12f1644c))
+- Add batch deletion for groups and users of group ([63a87feb](https://github.com/Probesys/agentj/commit/63a87feb))
+
+### Improvements
+
+- Release emails if the sender address OR the from address match a rule ([afae29f9](https://github.com/Probesys/agentj/commit/afae29f9))
+- Make domains and groups active by default ([1a40e377](https://github.com/Probesys/agentj/commit/1a40e377))
+- Display rules applying to a message more accuratetly ([fb615e28](https://github.com/Probesys/agentj/commit/fb615e28))
+- Standardize the pagination ([8c5b1e1c](https://github.com/Probesys/agentj/commit/8c5b1e1c))
+
+### Bug fixes
+
+- Apply original user rules on alias creation ([dacd76b6](https://github.com/Probesys/agentj/commit/dacd76b6))
+- Check the human auth tokens thoroughly ([70a58b33](https://github.com/Probesys/agentj/commit/70a58b33))
+- Do not show human authenticate date for mailing lists in message info ([87deab58](https://github.com/Probesys/agentj/commit/87deab58))
+- Fix 403 error on portal actions ([757a1f95](https://github.com/Probesys/agentj/commit/757a1f95))
+- Parse from address according to RFC 5322 ([ad591b11](https://github.com/Probesys/agentj/commit/ad591b11))
+
+### Maintenance
+
+- Optimize Amavis auto-release processing ([8bad1cd0](https://github.com/Probesys/agentj/commit/8bad1cd0))
+- Update CKEditor5 ([6f991ff5](https://github.com/Probesys/agentj/commit/6f991ff5))
+- Update Symfony ([e0966dfb](https://github.com/Probesys/agentj/commit/e0966dfb))
+
+### Documentation
+
+- Update roadmap with versions from 2.8 to 3.0 ([aa78be44](https://github.com/Probesys/agentj/commit/aa78be44))
+
+### Developers
+
+- Add Git hooks and installer ([3d75f38f](https://github.com/Probesys/agentj/commit/3d75f38f))
+- Fix handling of content parameter in mail scripts ([b15ab182](https://github.com/Probesys/agentj/commit/b15ab182))
+- Do not try to create a domain that already exists in UserFactory ([0ac0bbdd](https://github.com/Probesys/agentj/commit/0ac0bbdd))
+- Ignore changes on validators files on `make translations` ([99a7bf1d](https://github.com/Probesys/agentj/commit/99a7bf1d))
 
 ## 2026-10-21 - 2.7.7
 
