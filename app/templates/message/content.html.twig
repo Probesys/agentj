@@ -14,8 +14,9 @@
                 src="{{ path('message_show_iframe_content', { 'partitionTag':messageRecipient.partitionTag, 'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum}) }}"
             ></iframe>
             {% if not messageRecipient.isAmavisReleaseOngoing %}
-                <div class="row text-center">
+                <div class="d-flex flex-wrap justify-content-center">
                 <form
+                    class="mx-1 mb-2"
                     id="{{ 'restore' ~ messageRecipient.partitionTag ~ '-' ~ messageRecipient.mailId ~ '-' ~ messageRecipient.address.id }}"
                     action="{{path('message_restore', {
                         'partitionTag': messageRecipient.partitionTag,
@@ -39,6 +40,7 @@
                 </form>
 
                 <form
+                    class="mx-1 mb-2"
                     id="{{ 'authorized' ~ messageRecipient.partitionTag ~ '-' ~ messageRecipient.mailId ~ '-' ~ messageRecipient.address.id }}"
                     action="{{path('message_authorized', {
                         'partitionTag':messageRecipient.partitionTag,
@@ -62,6 +64,7 @@
                 </form>
 
                 <form
+                    class="mx-1 mb-2"
                     id="{{ 'banned' ~ messageRecipient.partitionTag ~ '-' ~ messageRecipient.mailId ~ '-' ~ messageRecipient.address.id }}"
                     action="{{path('message_banned',{
                         'partitionTag':messageRecipient.partitionTag,
@@ -85,6 +88,7 @@
                 </form>
 
                 <form
+                    class="mx-1 mb-2"
                     id="{{ 'delete' ~ messageRecipient.partitionTag ~ '-' ~ messageRecipient.mailId ~ '-' ~ messageRecipient.address.id }}"
                     action="{{path('message_delete',{
                         'partitionTag':messageRecipient.partitionTag,
