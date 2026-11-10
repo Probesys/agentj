@@ -477,9 +477,12 @@ Generics.messages.azurOAuthInvalidIdentity: 'The identification data for Microso
 Generics.messages.cannotPreviewMailWithvirus: 'You cannot view this message because it contains a virus.'
 Generics.messages.groupWithPriorityExists: 'A group with same priority already exists for this domain. Please choose another one'
 Generics.messages.helpAlert: 'Alerts on blocked outgoing emails (quota exceeded, etc.)'
+Generics.messages.htmlPreviewTooLarge: 'This message is too large to be previewed as HTML, it is displayed as plain text.'
+Generics.messages.htmlPreviewTooLargeTruncated: 'This message is too large to be previewed as HTML, only its beginning is displayed as plain text.'
 Generics.messages.incorrectCredential: 'Invalid credentials'
 Generics.messages.no_records_found: 'No results found'
 Generics.messages.oauthInvalidSetup: 'An error occurred during connection. Please contact your administrator.'
+Generics.messages.previewTruncated: 'This message is too large to be displayed entirely, only its beginning is displayed.'
 Generics.messages.selectAtLeastOneDomain: 'You must select at least one domain'
 Generics.messages.welcome: Welcome
 Generics.messages.welcomeAgentJ: 'Welcome on AgentJ'
