@@ -9,12 +9,14 @@ class CreateAlertMessage
     private string $type;
     private string $id;
     private string $target;
+    private ?int $count = null;
 
-    public function __construct(string $type, string $id, string $target)
+    public function __construct(string $type, string $id, string $target, ?int $count = null)
     {
         $this->type = $type;
         $this->id = $id;
         $this->target = $target;
+        $this->count = $count;
     }
 
     public function getId(): string
@@ -30,5 +32,10 @@ class CreateAlertMessage
     public function getTarget(): string
     {
         return $this->target;
+    }
+
+    public function getCount(): ?int
+    {
+        return $this->count;
     }
 }

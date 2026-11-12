@@ -131,6 +131,54 @@ class MessageRepository extends BaseMessageRepository
     }
 
     /**
+     * Count, per recipient email, the bounces received since the given date.
+     *
+     * A bounce is a delivery status notification: a message sent by a
+     * MAILER-DAEMON or postmaster address, or a message with an empty envelope
+     * sender (RFC 5321) and a "Mail Delivery" or "System Administrator" From.
+     *
+     * Read receipts (RFC 8098) and auto-replies (RFC 3834) also use an empty
+     * envelope sender but are not counted: a legitimate mailing to many
+     * recipients triggers dozens of them within minutes.
+     *
+     * @return array<string, int> Number of bounces indexed by recipient email
+     */
+    public function countBouncesByRecipientSince(\DateTimeImmutable $since, int $minCount = 1): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT ra.email AS email, COUNT(mr.rseqnum) AS bounces
+            FROM App\Entity\Message m
+            JOIN m.messageRecipients mr
+            JOIN mr.address ra
+            LEFT JOIN m.senderAddress sa
+            WHERE m.timeNum >= :sinceTimestamp
+            AND (
+                LOWER(m.fromAddr) LIKE '%mailer-daemon@%'
+                OR LOWER(m.fromAddr) LIKE '%postmaster@%'
+                OR (
+                    (sa.id IS NULL OR sa.email = '')
+                    AND (
+                        LOWER(m.fromAddr) LIKE '%mail delivery%'
+                        OR LOWER(m.fromAddr) LIKE '%system administrator%'
+                    )
+                )
+            )
+            GROUP BY ra.email
+            HAVING COUNT(mr.rseqnum) >= :minCount
+        SQL);
+
+        $query->setParameter('sinceTimestamp', $since->getTimestamp());
+        $query->setParameter('minCount', $minCount);
+
+        $result = [];
+        foreach ($query->getArrayResult() as $row) {
+            $result[strtolower($row['email'])] = (int) $row['bounces'];
+        }
+
+        return $result;
+    }
+
+    /**
      * Check the last request sent
      */
     public function getDaysSinceLastRequest(string $to, string $from): ?int
