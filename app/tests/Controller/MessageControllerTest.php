@@ -2317,6 +2317,33 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(0, $logs);
     }
 
+    public function testGetIframeContentHasAStrictContentSecurityPolicy(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame(
+            'Content-Security-Policy',
+            "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'",
+        );
+        self::assertResponseHeaderSame('X-Frame-Options', 'SAMEORIGIN');
+    }
+
     public function testUserActionShouldNotBeLoggedWhenAccessingItsAliasesEmailIframe(): void
     {
         $domain = DomainFactory::createOne();

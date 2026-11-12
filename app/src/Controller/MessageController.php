@@ -762,7 +762,7 @@ class MessageController extends AbstractController
             );
         }
 
-        return $this->render('message/iframe_content.html.twig', [
+        $response = $this->render('message/iframe_content.html.twig', [
             'textBody' => $textBody,
             'htmlBody' => $htmlBody,
             'htmlTooLarge' => $htmlTooLarge,
@@ -772,6 +772,15 @@ class MessageController extends AbstractController
             'attachments' => $attachmentNames,
             'messageRecipient' => $messageRecipient
         ]);
+
+        // The message content must not load or execute anything, whatever
+        // the sanitizer lets through.
+        $response->headers->set(
+            'Content-Security-Policy',
+            "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'",
+        );
+
+        return $response;
     }
 
     private function isAddressedToUserOrItsAliases(MessageRecipient $messageRecipient): bool
