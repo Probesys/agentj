@@ -131,6 +131,45 @@ class MessageRepository extends BaseMessageRepository
     }
 
     /**
+     * Count, per recipient email, the bounces received since the given date.
+     *
+     * A bounce is a message with an empty envelope sender (delivery status
+     * notifications and most auto-replies, see RFC 5321 and RFC 3834), or a
+     * message sent by a MAILER-DAEMON or postmaster address.
+     *
+     * @return array<string, int> Number of bounces indexed by recipient email
+     */
+    public function countBouncesByRecipientSince(\DateTimeImmutable $since, int $minCount = 1): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<SQL
+            SELECT ra.email AS email, COUNT(mr.rseqnum) AS bounces
+            FROM App\Entity\Message m
+            JOIN m.messageRecipients mr
+            JOIN mr.address ra
+            LEFT JOIN m.senderAddress sa
+            WHERE m.timeNum >= :sinceTimestamp
+            AND (
+                sa.id IS NULL
+                OR sa.email = ''
+                OR LOWER(m.fromAddr) LIKE '%mailer-daemon@%'
+                OR LOWER(m.fromAddr) LIKE '%postmaster@%'
+            )
+            GROUP BY ra.email
+            HAVING COUNT(mr.rseqnum) >= :minCount
+        SQL);
+
+        $query->setParameter('sinceTimestamp', $since->getTimestamp());
+        $query->setParameter('minCount', $minCount);
+
+        $result = [];
+        foreach ($query->getArrayResult() as $row) {
+            $result[strtolower($row['email'])] = (int) $row['bounces'];
+        }
+
+        return $result;
+    }
+
+    /**
      * Check the last request sent
      */
     public function getDaysSinceLastRequest(string $to, string $from): ?int
