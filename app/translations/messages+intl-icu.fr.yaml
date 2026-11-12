@@ -1,9 +1,13 @@
 Entities.Alert.actions.delete: Supprimer
 Entities.Alert.actions.read: 'Marquer comme lu'
+Entities.Alert.messages.admin.bounceFlood.content: "La boîte {email} a reçu {count} notifications de non-remise (bounces) ou réponses automatiques au cours de la dernière heure. Elle est probablement compromise et utilisée pour envoyer du spam : vérifiez-la et faites changer son mot de passe."
+Entities.Alert.messages.admin.bounceFlood.title: 'Boîte probablement compromise (afflux de bounces)'
 Entities.Alert.messages.admin.quota.content: 'Des mails ont été bloqués en raison de quota dépassés. Utilisateurs concernés : '
 Entities.Alert.messages.admin.quota.title: 'Limite de quota franchie'
 Entities.Alert.messages.admin.virus.content: 'Un virus a été détecté dans un mail sortant. Utilisateur concerné : '
 Entities.Alert.messages.admin.virus.title: 'Mail sortant contenant un virus bloqué'
+Entities.Alert.messages.user.bounceFlood.content: "Votre boîte a reçu {count} notifications de non-remise au cours de la dernière heure. Cela signifie souvent que des messages sont envoyés en votre nom à votre insu. Changez votre mot de passe et prévenez votre administrateur."
+Entities.Alert.messages.user.bounceFlood.title: 'Activité inhabituelle sur votre boîte mail'
 Entities.Alert.messages.user.quota.content: "Vous avez dépassé le quota. Votre mail n'a pas été distribué."
 Entities.Alert.messages.user.quota.title: 'Vous avez dépassé le quota'
 Entities.Alert.messages.user.virus.content: 'Un virus a été détecté dans un mail que vous avez envoyé.'
@@ -30,6 +34,7 @@ Entities.Domain.edit: 'Edition du domaine'
 Entities.Domain.fields.active: 'Domaine actif'
 Entities.Domain.fields.addQuota: 'Ajouter un quota'
 Entities.Domain.fields.authorizedSendersSpamLevel: "Accepter le spam des expéditeurs autorisés dont le niveau est inférieur à\_:"
+Entities.Domain.fields.bounceFloodThreshold: "Seuil d'alerte « boîte compromise » : nombre de bounces reçus par une boîte en une heure (0 pour désactiver)"
 Entities.Domain.fields.confirmCaptchaMessage: "Message de validation de l'authentification humaine"
 Entities.Domain.fields.defaultLang: 'Langue par défaut'
 Entities.Domain.fields.domain: 'Nom de domaine'

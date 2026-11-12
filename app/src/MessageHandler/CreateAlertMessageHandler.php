@@ -20,6 +20,14 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class CreateAlertMessageHandler
 {
+    public const TYPE_BOUNCE_FLOOD = 'bounce_flood';
+
+    /**
+     * Delay during which a new bounce flood alert is not raised again for the
+     * same mailbox.
+     */
+    public const BOUNCE_FLOOD_ALERT_DELAY = '-24 hours';
+
     private EntityManagerInterface $entityManager;
     private ConsoleOutput $output;
     private TranslatorInterface $translator;
@@ -47,6 +55,8 @@ class CreateAlertMessageHandler
             $this->handleOutMessage($message);
         } elseif ($type === 'sql_limit_report') {
             $this->handleSqlLimitReport($message);
+        } elseif ($type === self::TYPE_BOUNCE_FLOOD) {
+            $this->handleBounceFlood($message);
         } else {
             $this->output->writeln('Error: Unknown message type: ' . $type);
         }
@@ -387,5 +397,161 @@ class CreateAlertMessageHandler
         } else {
             $this->output->writeln('No SqlLimitReport entries found for Date: ' . $reportDate->format('Y-m-d H:i:s'));
         }
+    }
+
+    /**
+     * Alert the admins (and optionally the user) that a mailbox receives a lot
+     * of bounces: it is probably compromised and used to send spam.
+     *
+     * The message id is the email address of the mailbox.
+     */
+    private function handleBounceFlood(CreateAlertMessage $message): void
+    {
+        $email = strtolower($message->getId());
+        $count = $message->getCount() ?? 0;
+        $target = $message->getTarget();
+
+        $domainName = substr($email, strrpos($email, '@') + 1);
+        $domain = $this->entityManager->getRepository(Domain::class)->findOneBy(['domain' => $domainName]);
+        if ($domain === null) {
+            $this->output->writeln('No domain found for bounce flood alert: ' . $email);
+            return;
+        }
+
+        $timezone = new \DateTimeZone('Europe/Paris');
+        $now = new \DateTime('now', $timezone);
+        $refId = $now->format('Y-m-d H:i');
+
+        if ($target === 'admin') {
+            $users = $this->entityManager->getRepository(User::class)->createQueryBuilder('u')
+                ->where('u.roles LIKE :superAdminRole')
+                ->orWhere('u.roles LIKE :adminRole')
+                ->setParameter('superAdminRole', '%"ROLE_SUPER_ADMIN"%')
+                ->setParameter('adminRole', '%"ROLE_ADMIN"%')
+                ->getQuery()
+                ->getResult();
+
+            foreach ($users as $user) {
+                if ($user->isAdmin(false) && !in_array($domain, $user->getDomains()->toArray(), true)) {
+                    continue;
+                }
+
+                if ($this->hasRecentBounceFloodAlert($user, $email)) {
+                    continue;
+                }
+
+                $locale = $this->localeService->getUserLocale($user);
+                $subject = $this->translator->trans(
+                    'Entities.Alert.messages.admin.bounceFlood.title',
+                    locale: $locale,
+                );
+
+                $alert = new Alert();
+                $alert->setAlertType(self::TYPE_BOUNCE_FLOOD);
+                $alert->setRefId($refId);
+                $alert->setDate(new \DateTime('now', $timezone));
+                $alert->setSubject($subject);
+                $alert->setIsRead(false);
+                $alert->setUser($user);
+                $alert->setRefUser($email);
+                $this->entityManager->persist($alert);
+
+                $emailAddress = $user->getEmail();
+                if ($emailAddress !== null && $user->getDomain() !== null) {
+                    $text = $this->translator->trans(
+                        'Entities.Alert.messages.admin.bounceFlood.content',
+                        ['email' => $email, 'count' => $count],
+                        locale: $locale,
+                    );
+                    $this->sendAlertEmail(
+                        $user->getDomain()->getMailAuthenticationSender(),
+                        $emailAddress,
+                        $subject,
+                        $text,
+                    );
+                } else {
+                    $this->output->writeln('No email address found for user: ' . $user->getId());
+                }
+            }
+        } elseif ($target === 'user') {
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            if ($user === null || $user->getDomain() === null) {
+                $this->output->writeln('No user found with email: ' . $email);
+                return;
+            }
+
+            $userDomain = $user->getDomain();
+            if (!$userDomain->getSendUserAlerts() && !$userDomain->getSendUserMailAlerts()) {
+                $this->output->writeln('Alerts disabled for user: ' . $user->getId());
+                return;
+            }
+
+            if ($this->hasRecentBounceFloodAlert($user, $email)) {
+                return;
+            }
+
+            $locale = $this->localeService->getUserLocale($user);
+            $subject = $this->translator->trans(
+                'Entities.Alert.messages.user.bounceFlood.title',
+                locale: $locale,
+            );
+
+            // The alert is always stored, even when it is only sent by email,
+            // so that the user is not alerted again during the next hours.
+            $alert = new Alert();
+            $alert->setAlertType(self::TYPE_BOUNCE_FLOOD);
+            $alert->setRefId($refId);
+            $alert->setDate(new \DateTime('now', $timezone));
+            $alert->setSubject($subject);
+            $alert->setIsRead(!$userDomain->getSendUserAlerts());
+            $alert->setUser($user);
+            $alert->setRefUser($email);
+            $this->entityManager->persist($alert);
+
+            if ($userDomain->getSendUserMailAlerts()) {
+                $text = $this->translator->trans(
+                    'Entities.Alert.messages.user.bounceFlood.content',
+                    ['email' => $email, 'count' => $count],
+                    locale: $locale,
+                );
+                $this->sendAlertEmail($userDomain->getMailAuthenticationSender(), $email, $subject, $text);
+            }
+        }
+
+        $this->entityManager->flush();
+    }
+
+    private function hasRecentBounceFloodAlert(User $user, string $email): bool
+    {
+        $since = new \DateTime(self::BOUNCE_FLOOD_ALERT_DELAY, new \DateTimeZone('Europe/Paris'));
+
+        $count = $this->entityManager->getRepository(Alert::class)->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->where('a.alertType = :type')
+            ->andWhere('a.user = :user')
+            ->andWhere('a.refUser = :email')
+            ->andWhere('a.date >= :since')
+            ->setParameter('type', self::TYPE_BOUNCE_FLOOD)
+            ->setParameter('user', $user)
+            ->setParameter('email', $email)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int) $count > 0;
+    }
+
+    private function sendAlertEmail(string $from, string $to, string $subject, string $text): void
+    {
+        $email = (new Email())
+            ->from($from)
+            ->to($to)
+            ->subject($subject)
+            ->text($text);
+
+        $email->getHeaders()->addTextHeader('Auto-Submitted', 'auto-replied');
+        $email->getHeaders()->addTextHeader('X-Auto-Response-Suppress', 'All');
+
+        $this->mailer->send($email);
     }
 }

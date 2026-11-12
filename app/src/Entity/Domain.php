@@ -9,6 +9,7 @@ use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Domain
@@ -124,6 +125,14 @@ class Domain
 
     #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $sendUserMailAlerts = false;
+
+    /**
+     * Number of bounces received by a mailbox within one hour above which an
+     * alert is raised (the mailbox is probably compromised). 0 disables it.
+     */
+    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 20])]
+    #[Assert\PositiveOrZero]
+    private int $bounceFloodThreshold = 20;
 
     public function __construct()
     {
@@ -564,6 +573,17 @@ class Domain
     public function setSendUserMailAlerts(bool $sendUserMailAlerts): static
     {
         $this->sendUserMailAlerts = $sendUserMailAlerts;
+        return $this;
+    }
+
+    public function getBounceFloodThreshold(): int
+    {
+        return $this->bounceFloodThreshold;
+    }
+
+    public function setBounceFloodThreshold(?int $bounceFloodThreshold): static
+    {
+        $this->bounceFloodThreshold = $bounceFloodThreshold ?? 20;
         return $this;
     }
 
