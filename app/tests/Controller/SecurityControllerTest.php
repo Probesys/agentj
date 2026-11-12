@@ -39,6 +39,25 @@ class SecurityControllerTest extends WebTestCase
         $this->assertNotNull($user);
     }
 
+    public function testHttpRequestsAreRedirectedToHttpsIfRequired(): void
+    {
+        $_ENV['REQUIRES_CHANNEL'] = $_SERVER['REQUIRES_CHANNEL'] = 'https';
+        try {
+            $client = static::createClient();
+
+            $client->request(Request::METHOD_GET, 'http://localhost/login');
+            $this->assertResponseRedirects('https://localhost/login', 301);
+
+            $client->request(Request::METHOD_GET, 'https://localhost/login');
+            $this->assertResponseIsSuccessful();
+
+            $client->request(Request::METHOD_GET, 'http://localhost/check/token');
+            $this->assertResponseRedirects('https://localhost/check/token', 301);
+        } finally {
+            unset($_ENV['REQUIRES_CHANNEL'], $_SERVER['REQUIRES_CHANNEL']);
+        }
+    }
+
     protected function getLoggedUser(): ?User
     {
         /** @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface */

@@ -32,6 +32,8 @@ services:
     working_dir: /var/www/agentj
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    environment:
+      - REQUIRES_CHANNEL=http
 
   worker:
     build:
@@ -44,6 +46,8 @@ services:
       - ./app/:/var/www/agentj
       - ./app/var:/var/www/agentj/var
       - ./app/public/files:/var/www/agentj/public/files
+    environment:
+      - REQUIRES_CHANNEL=http
 
   watcher:
     image: probesys38/agentj_app:$VERSION

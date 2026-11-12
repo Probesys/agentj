@@ -29,9 +29,6 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
-        check:
-            pattern: ^/check
-            security:  false
         main:
             lazy: true
 #            provider: users_in_memory
@@ -57,15 +54,16 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-         - { path: ^/login, roles: PUBLIC_ACCESS }
-         - { path: ^/connect, roles: PUBLIC_ACCESS }
-         - { path: ^/portal, roles: PUBLIC_ACCESS }
-         - { path: ^/admin, roles: [ROLE_ADMIN] }
-         - { path: ^/policy/, roles: ROLE_SUPER_ADMIN }
-         - { path: ^/domain, roles: ROLE_ADMIN }
-         - { path: ^/rules/admin, roles: ROLE_ADMIN }
-         - { path: ^/altcha, roles: PUBLIC_ACCESS }
-         - { path: ^/, roles: ROLE_USER }
+         - { path: ^/check, roles: PUBLIC_ACCESS, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/login, roles: PUBLIC_ACCESS, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/connect, roles: PUBLIC_ACCESS, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/portal, roles: PUBLIC_ACCESS, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/admin, roles: [ROLE_ADMIN], requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/policy/, roles: ROLE_SUPER_ADMIN, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/domain, roles: ROLE_ADMIN, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/rules/admin, roles: ROLE_ADMIN, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/altcha, roles: PUBLIC_ACCESS, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
+         - { path: ^/, roles: ROLE_USER, requires_channel: '%env(default::REQUIRES_CHANNEL)%' }
 
 when@test:
     security:

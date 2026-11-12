@@ -49,7 +49,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
         $messageRecipient = $message->getMessageRecipients()->first();
@@ -123,7 +122,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
         $messageRecipient = $message->getMessageRecipients()->first();
@@ -158,7 +156,6 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
         $sender = UserFactory::new()->user($domain)->create();
-        $this->client->loginUser($recipient);
         [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
         $message = $this->setupMail($addrS, [$addrR]);
         $messageRecipient = $message->getMessageRecipients()->first();

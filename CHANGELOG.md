@@ -1,5 +1,13 @@
 # Changelog of AgentJ
 
+## UNRELEASED
+
+### Migration notes
+
+#### HTTPS
+
+The HTTP requests are now redirected to HTTPS. If AgentJ is behind a reverse proxy that terminates HTTPS, make sure that the `TRUSTED_PROXIES` environment variable is set (e.g. `TRUSTED_PROXIES=private_ranges`) before upgrading, otherwise the requests are endlessly redirected.
+
 ## 2026-11-06 - 2.8.0-rc1
 
 ### Migration notes
