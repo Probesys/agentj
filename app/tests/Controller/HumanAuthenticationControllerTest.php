@@ -77,6 +77,20 @@ class HumanAuthenticationControllerTest extends WebTestCase
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
     }
 
+    public function testHumanAuthenticationIsAccessibleWithoutBeingLoggedIn(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR]);
+        $token = $this->humanAuthenticationService->encryptToken($message, $domain);
+
+        $this->client->request(Request::METHOD_GET, '/check/' . $token);
+
+        self::assertResponseIsSuccessful();
+    }
+
     public function testHumanAuthenticationFailsIfTheDomainDoesNotExist(): void
     {
         $domain = DomainFactory::createOne();
