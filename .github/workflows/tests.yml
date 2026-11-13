@@ -36,6 +36,7 @@ jobs:
             sed -i "s|\$OAUTH_AZURE_CLIENT_ID||g" .env
             sed -i "s|\$OAUTH_AZURE_CLIENT_SECRET||g" .env
             sed -i "s|\$TRUSTED_PROXIES||g" .env
+            sed -i "s|\$REQUIRES_CHANNEL||g" .env
             sed -i "s|\$TZ|Europe/Paris|g" .env
             sed -i "s|\$DEFAULT_LOCALE|en|g" .env
             sed -i "s|\$HISTORY_RETENTION_DAYS|30|g" .env
