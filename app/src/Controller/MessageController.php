@@ -737,9 +737,9 @@ class MessageController extends AbstractController
                 $user->getId(),
             );
 
-            $this->logService->addLog(
+            $this->logService->addLogForRecipient(
                 LogAction::MessageContentDisplayed,
-                $messageRecipient->getMailId(),
+                $messageRecipient,
                 $logContent,
             );
         }
