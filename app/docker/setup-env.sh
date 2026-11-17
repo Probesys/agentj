@@ -31,14 +31,13 @@ sed -i "s|\$TRUSTED_PROXIES|$TRUSTED_PROXIES|g" $env_file
 sed -i "s|\$TZ|$TZ|g" $env_file
 sed -i "s|\$DEFAULT_LOCALE|$DEFAULT_LOCALE|g" $env_file
 sed -i "s|\$HISTORY_RETENTION_DAYS|${HISTORY_RETENTION_DAYS:-30}|g" $env_file
-sed -i "s|\$UNSUBSCRIBE_REQUEST_RETENTION_DAYS|${UNSUBSCRIBE_REQUEST_RETENTION_DAYS:-90}|g" $env_file
 sed -i "s|\$SCHEDULER_CONSOLIDATE_FREQUENCY|${SCHEDULER_CONSOLIDATE_FREQUENCY:-30 seconds}|g" $env_file
 sed -i "s|\$SCHEDULER_AUTORELEASE_FREQUENCY|${SCHEDULER_AUTORELEASE_FREQUENCY:-1 minute}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_DISABLE_DASHBOARD|${FEATURE_FLAG_DISABLE_DASHBOARD:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT|${FEATURE_FLAG_DISABLE_SORT_BY_SUBJECT:-false}|g" $env_file
 sed -i "s|\$FEATURE_FLAG_HINT_INDEX|${FEATURE_FLAG_HINT_INDEX:-false}|g" $env_file
-sed -i "s|\$ALTCHA_KEY_SECRET|$ALTCHA_KEY_SECRET|g" $env_file
-sed -i "s|\$ALTCHA_KEY_SIGNATURE|$ALTCHA_KEY_SIGNATURE|g" $env_file
+sed -i "s|\$ALTCHA_KEY_SECRET|${ALTCHA_KEY_SECRET:-$(openssl rand -hex 32)}|g" "$env_file"
+sed -i "s|\$ALTCHA_KEY_SIGNATURE|${ALTCHA_KEY_SIGNATURE:-$(openssl rand -hex 32)}|g" "$env_file"
 sed -i "s|\$ALTCHA_COST|${ALTCHA_COST:-5000}|g" $env_file
 
 if [ "$SF_APP_ENV" != 'prod' ]; then
