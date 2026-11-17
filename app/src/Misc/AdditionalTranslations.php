@@ -26,6 +26,7 @@ new TranslatableMessage('Entities.Log.actions.MarkedAsSpamBatch');
 new TranslatableMessage('Entities.Log.actions.MessageContentDisplayed');
 new TranslatableMessage('Entities.Log.actions.Restore');
 new TranslatableMessage('Entities.Log.actions.RestoreBatch');
+new TranslatableMessage('Entities.Log.actions.UnsubscribeList');
 
 new TranslatableMessage('Entities.Message.unsubscribeMethods.https');
 new TranslatableMessage('Entities.Message.unsubscribeMethods.mailto');

@@ -175,6 +175,7 @@ Entities.Log.actions.MarkedAsSpamBatch: 'Message marked as spam (batch)'
 Entities.Log.actions.MessageContentDisplayed: 'Message content displayed'
 Entities.Log.actions.Restore: 'Message recovered'
 Entities.Log.actions.RestoreBatch: 'Message recovered (batch)'
+Entities.Log.actions.UnsubscribeList: 'Unsubscription from the list requested'
 Entities.Log.fields.action: Action
 Entities.Log.fields.actor: Author
 Entities.Log.fields.date: Date
