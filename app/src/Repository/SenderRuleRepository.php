@@ -187,6 +187,40 @@ class SenderRuleRepository extends BaseRepository
     }
 
     /**
+     * @phpstan-type WbRule 'accept'|'block'|'allow'|'enabled'|'none'
+     *
+     *
+     */
+    public function getRuleByRecipient(string $senderEmail, string $recipientEmail): bool
+    {
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
+        $senderAddresses = Email::getAddressLookups($senderEmail);
+
+        if (!$recipientAddresses || !$senderAddresses) {
+            return false;
+        }
+
+        $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
+            SELECT w.wb
+            FROM users u
+            INNER JOIN wblist w ON w.rid = u.id
+            INNER JOIN mailaddr s ON s.id = w.sid
+            WHERE u.email IN (:recipientAddresses)
+            AND s.email IN (:senderAddresses)
+            ORDER BY u.priority DESC, w.priority DESC, s.priority DESC
+            LIMIT 1
+        SQL, [
+            'recipientAddresses' => $recipientAddresses,
+            'senderAddresses' => $senderAddresses,
+        ], [
+            'recipientAddresses' => DBAL\ArrayParameterType::STRING,
+            'senderAddresses' => DBAL\ArrayParameterType::STRING,
+        ])->fetchOne();
+
+        return $wb !== false && $wb;
+    }
+
+    /**
      * Only fetch the authorization decision, without hydrating rules.
      * Preserve the Amavis order: recipient specificity (users.priority), then
      * rule priority, then sender address specificity.

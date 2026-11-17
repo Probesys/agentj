@@ -10,11 +10,14 @@ use App\Form\ImportType;
 use App\Form\SenderRuleType;
 use App\Model\LogAction;
 use App\Repository\DomainRepository;
+use App\Repository\MessageRecipientRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\LogService;
+use App\Service\MessageService;
 use App\Service\Referrer;
+use App\Service\SenderAddressSanitizer;
 use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -38,6 +41,7 @@ class SenderRuleController extends AbstractController
         private SenderRuleRepository $senderRuleRepository,
         private UserRepository $userRepository,
         private SenderRuleService $senderRuleService,
+        private MessageService $messageService,
     ) {
     }
 
@@ -140,9 +144,10 @@ class SenderRuleController extends AbstractController
 
         /** @var array{email: string} $data */
         $data = $form->getData();
+        $senderEmail = $data['email'];
 
         $created = $this->senderRuleService->createOrUpdateForUserAndAliases(
-            $data['email'],
+            $senderEmail,
             $user,
             $type === 'W' ? 'accept' : 'block',
             SenderRule::TYPE_USER,
@@ -154,6 +159,11 @@ class SenderRuleController extends AbstractController
                 'message' => $this->translator->trans('Generics.flash.genericFormError'),
             ]);
         }
+
+        // FIXME: should not ban a MessageRecipient if it has already been released
+        $type === 'W' ?
+            $this->messageService->authorizeSenderForRecipientInDomain($user, $senderEmail) :
+            $this->messageService->banSenderForRecipientInDomain($user, $senderEmail);
 
         return new JsonResponse([
             'status' => 'success',
@@ -195,6 +205,7 @@ class SenderRuleController extends AbstractController
 
         foreach ($userAndAliases as $userOrAlias) {
             $this->senderRuleRepository->delete($userOrAlias->getId(), $senderRuleAddressId, $priority);
+            // $this->messageService->
         }
     }
 

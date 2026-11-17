@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use App\Amavis\MessageStatus;
 use App\Entity\Address;
 use App\Entity\SenderRule;
 use App\Entity\User;
@@ -10,14 +11,17 @@ use App\Service\SenderRuleService;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\LogFactory;
+use App\Tests\Factory\MessageRecipientFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
 use App\Tests\Factory\UserFactory;
+use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
 use App\Util\Url;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
@@ -26,6 +30,7 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 class SenderRuleControllerTest extends WebTestCase
 {
     use Factories;
+    use FactoryHelper;
     use MessageHelper;
     use ResetDatabase;
     use SessionHelper;
@@ -38,6 +43,7 @@ class SenderRuleControllerTest extends WebTestCase
 
         $this->client = static::createClient();
     }
+
     public function testPostCreateSenderRuleCreatesRuleForUser(): void
     {
         $user = UserFactory::new()->user()->create();
@@ -61,6 +67,62 @@ class SenderRuleControllerTest extends WebTestCase
         self::assertSame('block', $senderRule->getWbRule());
         self::assertSame(SenderRule::TYPE_USER, $senderRule->getType());
         self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
+    }
+
+    public function testPostCreateSenderRuleReprocessPendingEmailsAuthorize(): void
+    {
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $csrfToken = $this->generateCsrfToken($this->client, 'sender_rule');
+        $this->client->request(Request::METHOD_POST, '/rules/new/W', [
+            'sender_rule' => [
+                '_token' => $csrfToken,
+                'email' => $sender->getEmail(),
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+
+        $senderRule = $this->getSenderRule($recipient, $sender->getEmail());
+        self::assertSame('accept', $senderRule->getWbRule());
+        self::assertSame(SenderRule::TYPE_USER, $senderRule->getType());
+        self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+    }
+
+    public function testPostCreateSenderRuleReprocessPendingEmailsBan(): void
+    {
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $csrfToken = $this->generateCsrfToken($this->client, 'sender_rule');
+        $this->client->request(Request::METHOD_POST, '/rules/new/B', [
+            'sender_rule' => [
+                '_token' => $csrfToken,
+                'email' => $sender->getEmail(),
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+
+        $senderRule = $this->getSenderRule($recipient, $sender->getEmail());
+        self::assertSame('block', $senderRule->getWbRule());
+        self::assertSame(SenderRule::TYPE_USER, $senderRule->getType());
+        self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient->getStatus());
     }
 
     public function testPostCreateSenderRuleFailsForAdmins(): void
@@ -131,6 +193,94 @@ class SenderRuleControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertCount(1, $crawler->filter("option[value='{$managedDomain->getId()}']"));
         self::assertCount(0, $crawler->filter("option[value='{$unmanagedDomain->getId()}']"));
+    }
+
+    public function testImportAuthorizedSenderRuleReprocessPendingEmails(): void
+    {
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        // Get the page to retrieve CSRF token
+        $crawler = $this->client->request(Request::METHOD_GET, '/rules/admin/import/W');
+        self::assertResponseIsSuccessful();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+
+        $path = sys_get_temp_dir() . '/importRuleAddresses_' . uniqid() . '.txt';
+        file_put_contents(
+            $path,
+            "test@domain1.fr\ntest2@domain2.fr\n" . $sender->getEmail(),
+        );
+        $form = $crawler->filter('form[name="import"]')->form();
+        $form['import[domain]'] = (string) $domain->getId();
+        $values = $form->getPhpValues(); // includes the CSRF token and domain
+        $files = [
+            'import' => [
+                'attachment' => new UploadedFile($path, 'importSenderRule.txt', 'text/plain', null, true),
+            ],
+        ];
+        $this->client->request($form->getMethod(), $form->getUri(), $values, $files);
+
+        self::assertResponseRedirects();
+        self::assertSame($initialSenderRuleCount + 3, SenderRuleFactory::count());
+        // MessageRecipientRepository broke the Doctrine cache when we call
+        // findSentToDomainByEmail method. That's why we have to query
+        // message recipient again.
+        $messageRecipient = MessageRecipientFactory::findBy([
+            'partitionTag' => $messageRecipient->getPartitionTag(),
+            'mailId' => $messageRecipient->getMailId(),
+            'rseqnum' => $messageRecipient->getRseqnum(),
+        ])[0];
+        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+    }
+
+    public function testImportBannedSenderRuleReprocessPendingEmails(): void
+    {
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        // Get the page to retrieve CSRF token
+        $crawler = $this->client->request(Request::METHOD_GET, '/rules/admin/import/B');
+        self::assertResponseIsSuccessful();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+
+        $path = sys_get_temp_dir() . '/importRuleAddresses_' . uniqid() . '.txt';
+        file_put_contents(
+            $path,
+            "test@domain1.fr\ntest2@domain2.fr\n" . $sender->getEmail(),
+        );
+        $form = $crawler->filter('form[name="import"]')->form();
+        $form['import[domain]'] = (string) $domain->getId();
+        $values = $form->getPhpValues(); // includes the CSRF token and domain
+        $files = [
+            'import' => [
+                'attachment' => new UploadedFile($path, 'importSenderRule.txt', 'text/plain', null, true),
+            ],
+        ];
+        $this->client->request($form->getMethod(), $form->getUri(), $values, $files);
+
+        self::assertResponseRedirects();
+        self::assertSame($initialSenderRuleCount + 3, SenderRuleFactory::count());
+        // MessageRecipientRepository broke the Doctrine cache when we call
+        // findSentToDomainByEmail method. That's why we have to query
+        // message recipient again.
+        $messageRecipient = MessageRecipientFactory::findBy([
+            'partitionTag' => $messageRecipient->getPartitionTag(),
+            'mailId' => $messageRecipient->getMailId(),
+            'rseqnum' => $messageRecipient->getRseqnum(),
+        ])[0];
+        self::assertSame(MessageStatus::BANNED, $messageRecipient->getStatus());
     }
 
     public function testAdminCanBatchDeleteSenderRulesInItsDomain(): void

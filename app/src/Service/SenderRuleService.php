@@ -18,6 +18,7 @@ class SenderRuleService
         private SenderRuleRepository $senderRuleRepository,
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
+        private MessageService $messageService,
     ) {
     }
 
@@ -103,6 +104,11 @@ class SenderRuleService
                     priority: SenderRule::PRIORITY_DOMAIN,
                     flush: false,
                 );
+
+                $rule === 'accept' ?
+                    $this->messageService->reprocessAuthorizationsForSenderEmailInDomain($domain, $normalizedAddress) :
+                    $this->messageService->reprocessBansForSenderEmailInDomain($domain, $normalizedAddress);
+
                 $importedAddresses[$normalizedAddress] = true;
             }
 
