@@ -14,7 +14,7 @@
                 src="{{ path('message_show_iframe_content', { 'partitionTag':messageRecipient.partitionTag, 'mailId':messageRecipient.mailId,'rseqnum':messageRecipient.rseqnum}) }}"
             ></iframe>
             {% if not messageRecipient.isAmavisReleaseOngoing %}
-                <div class="row text-center">
+                <div class="row justify-content-center button-list">
                 <form
                     id="{{ 'restore' ~ messageRecipient.partitionTag ~ '-' ~ messageRecipient.mailId ~ '-' ~ messageRecipient.address.id }}"
                     action="{{path('message_restore', {
