@@ -84,6 +84,26 @@ class MessageService
         return true;
     }
 
+    public function authorizeSenderForRecipientInDomain(User $recipient, string $senderEmail): bool
+    {
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
+        $userAndAliases = $recipient->getUserAndAliases();
+
+        foreach ($userAndAliases as $user) {
+            $this->senderRuleRepository->updateOrCreateRule(
+                $user,
+                $senderRuleAddress,
+                wbRule: 'accept',
+                type: SenderRule::TYPE_USER,
+                priority: SenderRule::PRIORITY_USER,
+            );
+        }
+
+        $this->reprocessAuthorizationsForSenderEmailInDomain($recipient->getDomain(), $senderEmail);
+
+        return true;
+    }
+
     /**
      * Authorize the message's sender for the given recipient's domain and
      * release the messages that he sent to it.
@@ -134,6 +154,38 @@ class MessageService
         $this->messageRepository->save($message);
 
         return true;
+    }
+
+    /**
+     * Reprocess autorizations for the pending emails that are concerned by the
+     * rule on given sender email.
+     */
+    public function reprocessAuthorizationsForSenderEmailInDomain(Domain $domain, string $senderEmail): void
+    {
+        $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+
+        $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domain,
+            $senderEmail,
+        );
+
+        $messages = [];
+
+        foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+            $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
+            $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
+            if (!$isSameSender || $isSpam) {
+                continue;
+            }
+
+            $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+            $messages[] = $messageRecipientToRelease->getMessage();
+        }
+
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::AUTHORIZED);
+            $this->messageRepository->save($message);
+        }
     }
 
     /**
@@ -190,6 +242,26 @@ class MessageService
         return true;
     }
 
+    public function banSenderForRecipientInDomain(User $recipient, string $senderEmail): bool
+    {
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
+        $userAndAliases = $recipient->getUserAndAliases();
+
+        foreach ($userAndAliases as $user) {
+            $this->senderRuleRepository->updateOrCreateRule(
+                $user,
+                $senderRuleAddress,
+                wbRule: 'block',
+                type: SenderRule::TYPE_USER,
+                priority: SenderRule::PRIORITY_USER,
+            );
+        }
+
+        $this->reprocessBansForSenderEmailInDomain($recipient->getDomain(), $senderEmail);
+
+        return true;
+    }
+
     /**
      * Ban the message's sender for the given recipient's domain and reject the
      * messages that he sent to it.
@@ -242,6 +314,41 @@ class MessageService
         $this->messageRepository->save($message);
 
         return true;
+    }
+
+
+    /**
+     * Reprocess bans for the pending emails that are concerned by the rule on
+     * given sender email.
+     */
+    public function reprocessBansForSenderEmailInDomain(Domain $domain, string $senderEmail): void
+    {
+        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
+            $domain,
+            $senderEmail,
+        );
+
+        $messages = [];
+
+        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+            $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
+            if (
+                !$isSameSender ||
+                $messageRecipientToBan->isVirus() ||
+                $messageRecipientToBan->isAlreadyReleased()
+            ) {
+                continue;
+            }
+
+            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+            $this->messageRecipientRepository->save($messageRecipientToBan);
+            $messages[] = $messageRecipientToBan->getMessage();
+        }
+
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::BANNED);
+            $this->messageRepository->save($message);
+        }
     }
 
     private function hasSameSender(MessageRecipient $messageRecipient, string $senderEmail): bool
