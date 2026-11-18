@@ -3,12 +3,15 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Address;
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Message\AmavisRelease;
+use App\Repository\AddressRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
@@ -22,6 +25,7 @@ class MessageService
     public function __construct(
         private MessageBusInterface $bus,
         private RuleAddressRepository $ruleAddressRepository,
+        private AddressRepository $addressRepository,
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
@@ -189,6 +193,45 @@ class MessageService
     }
 
     /**
+     * Reprocess autorizations for the pending emails that are concerned by the
+     * rule on given sender email.
+     */
+    public function reprocessAuthorizationsForSenderEmailForUser(
+        User $user,
+        string $senderEmail,
+        bool $checkSpam = true,
+    ): void {
+        $domain = $user->getDomain();
+        $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+
+        $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
+            $user,
+            $senderEmail,
+        );
+
+        $messages = [];
+
+        foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+            $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
+            $isSpam = $checkSpam ?
+                $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel) :
+                false;
+
+            if (!$isSameSender || $isSpam) {
+                continue;
+            }
+
+            $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+            $messages[] = $messageRecipientToRelease->getMessage();
+        }
+
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::AUTHORIZED);
+            $this->messageRepository->save($message);
+        }
+    }
+
+    /**
      * Ban the message's sender for the given recipient and reject the messages
      * that he sent to him.
      */
@@ -325,6 +368,42 @@ class MessageService
     {
         $messageRecipientsToBan = $this->messageRecipientRepository->findSentToDomainByEmail(
             $domain,
+            $senderEmail,
+        );
+
+        $messages = [];
+
+        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+            $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
+            if (
+                !$isSameSender ||
+                $messageRecipientToBan->isVirus() ||
+                $messageRecipientToBan->isAlreadyReleased()
+            ) {
+                continue;
+            }
+
+            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+            $this->messageRecipientRepository->save($messageRecipientToBan);
+            $messages[] = $messageRecipientToBan->getMessage();
+        }
+
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::BANNED);
+            $this->messageRepository->save($message);
+        }
+    }
+
+    /**
+     * Reprocess bans for the pending emails that are concerned by the
+     * rule on given sender email.
+     */
+    public function reprocessBansForSenderEmailForUser(
+        User $user,
+        string $senderEmail,
+    ): void {
+        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
+            $user,
             $senderEmail,
         );
 
@@ -558,5 +637,19 @@ class MessageService
         }
 
         return [$user, $mailId];
+    }
+
+
+    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?SenderRule
+    {
+        return $this->senderRuleRepository->getApplicableSenderRule($senderEmail, $recipientEmail);
+    }
+
+    public function isSenderAuthorizedByRecipient(string $senderEmail, string $recipientEmail): bool
+    {
+        $recipientAddress = $this->addressRepository->findOneBy([
+            'email' => $recipientEmail,
+        ]);
+        return $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipientAddress);
     }
 }

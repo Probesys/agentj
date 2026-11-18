@@ -160,7 +160,6 @@ class SenderRuleController extends AbstractController
             ]);
         }
 
-        // FIXME: should not ban a MessageRecipient if it has already been released
         $type === 'W' ?
             $this->messageService->authorizeSenderForRecipientInDomain($user, $senderEmail) :
             $this->messageService->banSenderForRecipientInDomain($user, $senderEmail);

@@ -258,6 +258,44 @@ class SenderRuleRepository extends BaseRepository
         return $wb !== false && !in_array($wb, ['B', 'N', '0', ''], true);
     }
 
+    /**
+     * Only fetch the applicable SenderRule for the recipient, without hydrating rules.
+     * Preserve the Amavis order: recipient specificity (users.priority), then
+     * rule priority, then sender address specificity.
+     *
+     * @param string $senderEmail Sender address to match against the rules.
+     * @param string $recipientEmail Recipient address to match against the rules.
+     * @return SenderRule
+     */
+    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?SenderRule
+    {
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
+        $senderAddresses = Email::getAddressLookups($senderEmail);
+
+        if (!$recipientAddresses || !$senderAddresses) {
+            return null;
+        }
+
+        $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
+            SELECT w
+            FROM users u
+            INNER JOIN wblist w ON w.rid = u.id
+            INNER JOIN mailaddr s ON s.id = w.sid
+            WHERE u.email IN (:recipientAddresses)
+            AND s.email IN (:senderAddresses)
+            ORDER BY u.priority DESC, w.priority DESC, s.priority DESC
+            LIMIT 1
+        SQL, [
+            'recipientAddresses' => $recipientAddresses,
+            'senderAddresses' => $senderAddresses,
+        ], [
+            'recipientAddresses' => DBAL\ArrayParameterType::STRING,
+            'senderAddresses' => DBAL\ArrayParameterType::STRING,
+        ])->fetchOne();
+
+        return $wb;
+    }
+
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool
     {
         $senderRules = $this->findBySenderEmailAndRecipient($senderEmail, $recipient);

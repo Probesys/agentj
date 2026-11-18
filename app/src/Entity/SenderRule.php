@@ -154,4 +154,14 @@ class SenderRule
 
         return $newRule;
     }
+
+    // public function getPrimaryKey(): string
+    // {
+    //     return sprintf(
+    //         "%d-%d-%d",
+    //         $this->getUser()->getId(),
+    //         $this->getSenderRuleAddress()->getId(),
+    //         $this->getPriority(),
+    //     );
+    // }
 }
