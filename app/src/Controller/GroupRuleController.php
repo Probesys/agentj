@@ -8,6 +8,7 @@ use App\Form\GroupRuleType;
 use App\Repository\GroupRuleRepository;
 use App\Repository\RuleAddressRepository;
 use App\Service\GroupService;
+use App\Service\MessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,13 +23,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/groups')]
 class GroupRuleController extends AbstractController
 {
-    private EntityManagerInterface $em;
-    private TranslatorInterface $translator;
-
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator)
-    {
-        $this->em = $em;
-        $this->translator = $translator;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private TranslatorInterface $translator,
+        private MessageService $messageService,
+    ) {
     }
 
     #[Route(path: '/{groupId}/rules', name: 'groups_rules_index', methods: 'GET')]
@@ -38,7 +37,6 @@ class GroupRuleController extends AbstractController
         Request $request,
         PaginatorInterface $paginator
     ): Response {
-
         $group = $this->em->getRepository(Group::class)->find($groupId);
         $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
 
@@ -87,6 +85,7 @@ class GroupRuleController extends AbstractController
 
         $form = $this->createForm(GroupRuleType::class, null, [
             'action' => $this->generateUrl('groups_rules_new', ['groupId' => $group->getId()]),
+            'csrf_token_id' => 'group-sender-rule-create',
         ]);
 
         $form->handleRequest($request);
@@ -94,8 +93,9 @@ class GroupRuleController extends AbstractController
             $em = $this->em;
 
             $data = $form->getData();
+            $senderEmail = $data['email'];
 
-            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($senderEmail, flush: false);
             $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
                 'ruleAddress' => $ruleAddress,
                 'group' => $group,
@@ -115,6 +115,30 @@ class GroupRuleController extends AbstractController
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
 
             $groupService->updateSenderRules();
+
+            foreach ($group->getUsers() as $user) {
+                if ($data['wbRule'] === 'allow') {
+                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                            false,
+                        );
+                    }
+                } elseif ($data['wbRule'] === 'accept') {
+                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                        );
+                    }
+                } else {
+                    $this->messageService->reprocessBansForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                    );
+                }
+            }
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         }
@@ -142,14 +166,16 @@ class GroupRuleController extends AbstractController
         $this->denyAccessUnlessGranted('DOMAIN_ACCESS', $group);
         $form = $this->createForm(GroupRuleType::class, null, [
             'action' => $this->generateUrl('groups_rules_edit', ['groupId' => $group->getId(), 'sid' => $sid]),
+            'csrf_token_id' => 'group-sender-rule-edit',
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->em;
 
             $data = $form->getData();
+            $senderEmail = $data['email'];
 
-            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($senderEmail, flush: false);
             $groupRuleExists = $this->em->getRepository(GroupRule::class)->findOneBy(([
                 'ruleAddress' => $ruleAddress,
                 'group' => $group,
@@ -168,6 +194,26 @@ class GroupRuleController extends AbstractController
             $this->addFlash('success', $this->translator->trans('Message.Flash.ruleUpdated'));
 
             $groupService->updateSenderRules();
+
+            foreach ($group->getUsers() as $user) {
+                if ($data['wbRule'] === 'allow') {
+                    $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                        false,
+                    );
+                } elseif ($data['wbRule'] === 'accept') {
+                    $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                    );
+                } else {
+                    $this->messageService->reprocessBansForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                    );
+                }
+            }
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         } else {

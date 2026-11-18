@@ -29,6 +29,7 @@ final class GroupFactory extends PersistentObjectFactory
             'name' => self::faker()->text(25),
             'slug' => self::faker()->text(10),
             'wb' => self::faker()->text(10),
+            'overrideUser' => false,
         ];
     }
 

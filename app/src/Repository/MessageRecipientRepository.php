@@ -6,6 +6,7 @@ use App\Amavis\ContentType;
 use App\Amavis\DeliveryStatus;
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\MessageRecipient;
 use App\Entity\Message;
 use App\Entity\User;
@@ -159,6 +160,36 @@ class MessageRecipientRepository extends BaseRepository
 
         return $query->getResult();
     }
+
+    /**
+     * Return all message recipients sent by $senderFrom to $recipientGroup.
+     *
+     * As for findSentToUserByEmail, this method fetches the messages by using
+     * the raw "From" value. See above for the reasons.
+     *
+     * It is highly recommended to recheck the senderEmail on the messages
+     * returned by this method in order to be sure to release or ban the
+     * correct messages.
+     *
+     * @return MessageRecipient[]
+     */
+    // public function findSentToGroupByEmail(Group $recipientGroup, string $senderFrom): array
+    // {
+    //     $query = $this->getEntityManager()->createQuery(<<<SQL
+    //         SELECT mr
+    //         FROM App\Entity\MessageRecipient as mr
+    //         JOIN mr.message m
+    //         JOIN mr.address ra
+    //         WHERE ra.email = :recipientEmail
+    //         AND m.fromAddr = :senderFrom
+    //         AND mr.status IS NOT NULL
+    //     SQL);
+
+    //     $query->setParameter('recipientEmail', $recipientUser->getEmail());
+    //     $query->setParameter('senderFrom', $senderFrom);
+
+    //     return $query->getResult();
+    // }
 
     /**
      * Return all message recipients sent by $senderFrom to $recipientDomain.
