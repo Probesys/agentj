@@ -2519,7 +2519,7 @@ class MessageControllerTest extends WebTestCase
             $addrS,
             [$addrR],
             status: MessageStatus::UNTREATED,
-            body: '<b>bold</b> text<script>alert(1)</script>',
+            body: '<b style="color: red">bold</b> text<script>alert(1)</script>',
             contentType: 'text/html; charset=UTF-8',
         );
         $messageRecipient = $message->getMessageRecipients()->first();
@@ -2536,6 +2536,7 @@ class MessageControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('[data-test="content-preview-warning"]');
         self::assertSelectorTextSame('[data-test="content-body"] b', 'bold');
+        self::assertSelectorExists('[data-test="content-body"] b[style="color: red"]');
         self::assertSelectorNotExists('[data-test="content-body"] script');
         self::assertSame('bold text', $crawler->filter('[data-test="content-body"]')->text());
     }

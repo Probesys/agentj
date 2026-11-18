@@ -3,4 +3,6 @@ framework:
         sanitizers:
             default:
                 allow_safe_elements: true
+                allow_attributes:
+                    style: '*'
                 max_input_length: '%app.message_preview_max_length%'
