@@ -26,7 +26,7 @@
                         data-message-counter-url-value="{{ path('message_counts') }}"
                     >
                         <ul>
-                            <li class="{% if route == 'message' and route_params['type'] == 'untreated' %}active{% endif %}">
+                            <li class="{% if route == 'message' and route_params['type'] is empty %}active{% endif %}">
                                 <a href="{{ path('message', {'type': ''}) }}">
                                     <span
                                         data-message-counter-target="untreated"
@@ -37,7 +37,7 @@
                                 </a>
                             </li>
 
-                            <li class="{% if route == 'message' and route_params['type'] == 'spammed' %}active{% endif %}">
+                            <li class="{% if route == 'message' and route_params['type'] == 'spam' %}active{% endif %}">
                                 <a href="{{ path('message', {'type': 'spam'}) }}">
                                     <span
                                         data-message-counter-target="spammed"
