@@ -1,5 +1,16 @@
 # Changelog of AgentJ
 
+## 2026-11-19 - 2.7.8
+
+### Security
+
+- Rebuild Docker images with PHP 8.4.28, nginx 1.26.3-3+deb13u11 and ClamAV 1.5.5
+- Disable PHP `session.upload_progress` ([0e0a362a](https://github.com/Probesys/agentj/commit/0e0a362a))
+
+### Maintenance
+
+- Update ClamAV to 1.5 ([d282f6e1](https://github.com/Probesys/agentj/commit/d282f6e1))
+
 ## 2026-10-21 - 2.7.7
 
 ### Security
