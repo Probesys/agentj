@@ -349,6 +349,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
     {
         $this->domain = $domain;
 
+        // The addresses of a protected domain are local: Amavis reads this
+        // column (`users.local`) to tell local recipients from the others.
+        if ($domain !== null) {
+            $this->local = 'Y';
+        }
+
         return $this;
     }
 
