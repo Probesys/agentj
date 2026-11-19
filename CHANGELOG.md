@@ -1,6 +1,6 @@
 # Changelog of AgentJ
 
-## 2026-11-06 - 2.8.0-rc2
+## 2026-11-19 - 2.8.0-rc3
 
 ### Migration notes
 
@@ -18,6 +18,7 @@ Concerning the LDAP connector: if the synchronization starts to fail, you must r
 
 ### Security
 
+- Rebuild Docker images with PHP 8.4.28, nginx 1.26.3-3+deb13u11 and ClamAV 1.5.5
 - Add default security headers to responses ([b2486e98](https://github.com/Probesys/agentj/commit/b2486e98))
 - Add an audit log page ([b5441111](https://github.com/Probesys/agentj/commit/b5441111))
 
