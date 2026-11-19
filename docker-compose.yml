@@ -173,7 +173,7 @@ services:
         condition: service_healthy
 
   clamav:
-    image: clamav/clamav:stable
+    image: clamav/clamav:1.5
     restart: unless-stopped
     user: clamav
     entrypoint: /init-unprivileged
