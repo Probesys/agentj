@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Connector;
 use App\Repository\ConnectorRepository;
+use App\Repository\GroupRepository;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,13 +24,21 @@ class ConnectorController extends AbstractController
         Request $request,
         Connector $connector,
         ConnectorRepository $connectorRepository,
+        UserRepository $userRepository,
+        GroupRepository $groupRepository,
         TranslatorInterface $translator,
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $connector->getId(), $request->request->getString('_token'))) {
+        if (!$this->isCsrfTokenValid('delete' . $connector->getId(), $request->request->getString('_token'))) {
+            $this->addFlash('error', $translator->trans('Generics.flash.invalidCsrfToken'));
+        } elseif (
+            $userRepository->count(['originConnector' => $connector]) > 0 ||
+            $groupRepository->count(['originConnector' => $connector]) > 0
+        ) {
+            // Users and groups keep a reference to the connector that imported them.
+            $this->addFlash('error', $translator->trans('Message.Flash.connectorUsedCannotBeDeleted'));
+        } else {
             $connectorRepository->remove($connector);
             $this->addFlash('success', $translator->trans('Message.Flash.deleteSuccesFull'));
-        } else {
-            $this->addFlash('error', $translator->trans('Generics.flash.invalidCsrfToken'));
         }
 
         return $this->redirectToRoute('domain_edit', [
