@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\SenderRule;
+use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\GroupFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\UserFactory;
@@ -15,8 +16,9 @@ class SenderRuleTest extends KernelTestCase
 
     public function testCopyCopiesSenderRuleAttributes(): void
     {
-        $user = UserFactory::new()->user()->withoutPersisting()->create();
-        $otherUser = UserFactory::new()->user()->withoutPersisting()->create();
+        $domain = DomainFactory::new()->withoutPersisting()->create();
+        $user = UserFactory::new()->user($domain)->withoutPersisting()->create();
+        $otherUser = UserFactory::new()->user($domain)->withoutPersisting()->create();
         $senderRuleAddress = RuleAddressFactory::new()->withoutPersisting()->create();
         $group = GroupFactory::new()->withoutPersisting()->create();
         $originalSenderRule = new SenderRule($user, $senderRuleAddress);

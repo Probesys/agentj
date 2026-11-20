@@ -11,7 +11,6 @@ use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Message\AmavisRelease;
-use App\Repository\AddressRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
@@ -25,7 +24,6 @@ class MessageService
     public function __construct(
         private MessageBusInterface $bus,
         private RuleAddressRepository $ruleAddressRepository,
-        private AddressRepository $addressRepository,
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
@@ -647,9 +645,6 @@ class MessageService
 
     public function isSenderAuthorizedByRecipient(string $senderEmail, string $recipientEmail): bool
     {
-        $recipientAddress = $this->addressRepository->findOneBy([
-            'email' => $recipientEmail,
-        ]);
-        return $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipientAddress);
+        return $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipientEmail);
     }
 }

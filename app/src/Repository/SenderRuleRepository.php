@@ -226,12 +226,12 @@ class SenderRuleRepository extends BaseRepository
      * rule priority, then sender address specificity.
      *
      * @param string $senderEmail Sender address to match against the rules.
-     * @param Address $recipient Recipient address to match against the rules.
+     * @param string $recipientEmail Recipient address to match against the rules.
      * @return bool
      */
-    public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
+    public function isSenderAuthorizedByRecipient(string $senderEmail, string $recipientEmail): bool
     {
-        $recipientAddresses = Email::getAddressLookups($recipient->getEmail());
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
         $senderAddresses = Email::getAddressLookups($senderEmail);
 
         if (!$recipientAddresses || !$senderAddresses) {

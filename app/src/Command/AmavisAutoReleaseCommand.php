@@ -168,7 +168,7 @@ class AmavisAutoReleaseCommand extends Command
         if (!isset($this->authorizationsCache[$recipientId][$senderEmail])) {
             $isAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
                 $senderEmail,
-                $recipient,
+                $recipient->getEmail(),
             );
             $this->authorizationsCache[$recipientId][$senderEmail] = $isAuthorized;
         }

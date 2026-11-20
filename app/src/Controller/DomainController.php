@@ -13,6 +13,7 @@ use App\Repository\DomainRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\SettingRepository;
+use App\Service\MessageService;
 use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -35,6 +36,7 @@ class DomainController extends AbstractController
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
         private UserService $userService,
+        private MessageService $messageService,
     ) {
     }
 
@@ -311,6 +313,7 @@ class DomainController extends AbstractController
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => '@' . $domain->getDomain()]);
         $formBuilder = $this->createFormBuilder(null, [
             'action' => $this->generateUrl('domain_sender_rules_new', ['id' => $domain->getId()]),
+            'csrf_token_id' => 'domain-sender-rule-create',
         ]);
         $formBuilder->add('email', TextType::class);
 
@@ -326,8 +329,9 @@ class DomainController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
+            $senderEmail = $data['email'];
 
-            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($data['email'], flush: false);
+            $ruleAddress = $ruleAddressRepository->findOneOrCreateByEmail($senderEmail, flush: false);
             $domainSenderRuleExists = $this->em->getRepository(SenderRule::class)->findOneBy(([
                 'user' => $user,
                 'senderRuleAddress' => $ruleAddress,
@@ -343,6 +347,31 @@ class DomainController extends AbstractController
             $this->em->persist($senderRule);
             $this->em->flush();
             $this->addFlash('success', $this->translator->trans('Message.Flash.newRuleCreated'));
+
+            foreach ($domain->getUsers() as $user) {
+                if ($data['wbRule'] === 'allow') {
+                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                            false,
+                        );
+                    }
+                } elseif ($data['wbRule'] === 'accept') {
+                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                        );
+                    }
+                } else {
+                    $this->messageService->reprocessBansForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                    );
+                }
+            }
+
             return $this->redirectToRoute('domain_sender_rules_index', ['id' => $domain->getId()]);
         }
 
