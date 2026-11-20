@@ -4,14 +4,21 @@
     <div class="h-100 ">
         <div class="col-lg-4 col-md-6 col-sm-12 text-center pb-4 m-auto login">
             <div class="mb-3"><img class="logo" src="{{ asset('img/agent-j-logo-desktop.svg') }}" /></div>
-            <h1>{{ ('Message.http.' ~ status_code ~ '.title')|trans({}, 'messages')|default(status_code ~ ' ' ~ status_text) }}</h1>
+            {% set title_key = 'Message.http.' ~ status_code ~ '.title' %}
+            <h1>
+                {% if title_key|trans({}, 'messages') is not same as(title_key) %}
+                    {{ title_key|trans({}, 'messages') }}
+                {% else %}
+                    {{ status_code ~ ' ' ~ status_text }}
+                {% endif %}
+            </h1>
             <p>
                 {% set description_key = 'Message.http.' ~ status_code ~ '.description' %}
                 {% if description_key|trans({}, 'messages') is not same as(description_key) %}
                     {{ description_key|trans({}, 'messages')|raw }}
                 {% else %}
                     {% if exception.message %}
-                        {{ exception.message|raw }}
+                        {{ exception.message }}
                     {% else %}
                         {{ 'Message.http.500.description'|trans|raw }}
                     {% endif %}
