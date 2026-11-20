@@ -175,7 +175,7 @@ class GroupController extends AbstractController
 
             $this->em->flush();
 
-            $groupService->updateSenderRules();
+            $groupService->updateSenderRules([$group]);
             foreach ($group->getUsers() as $user) {
                 $userService->updateUserAndAliasPolicy($user);
             }
@@ -246,7 +246,7 @@ class GroupController extends AbstractController
         }
         $this->em->flush();
         $userService->updateUserAndAliasPolicy($user);
-        $groupService->updateSenderRules();
+        $groupService->updateSenderRules([$group]);
 
         $this->em->flush();
 
@@ -277,7 +277,6 @@ class GroupController extends AbstractController
         Request $request,
         Group $group,
         UserService $userService,
-        GroupService $groupService,
     ): Response {
         $csrfToken = $request->request->getString('_token', '');
 
@@ -288,10 +287,9 @@ class GroupController extends AbstractController
 
         $groupUsers = $group->getUsers()->toArray();
 
+        // The sender rules of the group are deleted by the database (ON DELETE CASCADE).
         $this->em->remove($group);
         $this->em->flush();
-
-        $groupService->updateSenderRules();
 
         foreach ($groupUsers as $user) {
             $userService->updateUserAndAliasPolicy($user);
