@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Validator\Constraints\Image;
 
 class DomainCustomisationGeneralType extends AbstractType
 {
@@ -31,6 +32,12 @@ class DomainCustomisationGeneralType extends AbstractType
             'label' => new TranslatableMessage('Entities.Domain.fields.logo'),
             'mapped' => false,
             'required' => false,
+            'constraints' => [
+                new Image(
+                    maxSize: '1M',
+                    mimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'],
+                ),
+            ],
         ]);
     }
 
