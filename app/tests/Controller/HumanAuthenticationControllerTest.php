@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use AltchaOrg\Altcha\Solution;
 use App\Amavis\MessageStatus;
+use App\EventSubscriber\SecurityHeadersSubscriber;
 use App\Service\AltchaService;
 use App\Service\CryptEncryptService;
 use App\Service\HumanAuthenticationService;
@@ -183,6 +184,23 @@ class HumanAuthenticationControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertNull($message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient->getStatus());
+    }
+
+    public function testHumanAuthenticationAllowsTheAltchaWorker(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR]);
+        $token = $this->humanAuthenticationService->encryptToken($message, $domain);
+
+        $this->client->request(Request::METHOD_GET, '/check/' . $token);
+
+        self::assertResponseHeaderSame('Content-Security-Policy', implode('; ', [
+            ...SecurityHeadersSubscriber::CONTENT_SECURITY_POLICY,
+            "worker-src 'self' blob:",
+        ]));
     }
 
     private function altchaPayload(bool $valid = true): string

@@ -2317,6 +2317,33 @@ class MessageControllerTest extends WebTestCase
         self::assertCount(0, $logs);
     }
 
+    public function testGetIframeContentHasAStrictContentSecurityPolicy(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame(
+            'Content-Security-Policy',
+            "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'",
+        );
+        self::assertResponseHeaderSame('X-Frame-Options', 'SAMEORIGIN');
+    }
+
     public function testUserActionShouldNotBeLoggedWhenAccessingItsAliasesEmailIframe(): void
     {
         $domain = DomainFactory::createOne();
@@ -2349,6 +2376,227 @@ class MessageControllerTest extends WebTestCase
         // Access is not logged
         $logs = LogFactory::all();
         self::assertCount(0, $logs);
+    }
+
+    public function testGetIframeContentDisplaysTheTextPartIfTheHtmlIsTooLarge(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Larger than app.message_preview_max_length in the test environment
+        $htmlBody = str_repeat('<b>bold</b>', 100);
+        $mailBody = "--boundary\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n\r\n"
+            . "text body\r\n"
+            . "--boundary\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+            . "{$htmlBody}\r\n"
+            . "--boundary--\r\n";
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $mailBody,
+            contentType: 'multipart/alternative; boundary="boundary"',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            $this->translator->trans('Generics.messages.htmlPreviewTooLarge', locale: 'en'),
+            $crawler->filter('[data-test="content-preview-warning"]')->text(),
+        );
+        self::assertSame('text body', $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentDisplaysTheEscapedHtmlIfTooLargeAndWithoutTextPart(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Larger than app.message_preview_max_length in the test environment
+        $htmlBody = str_repeat('<b>bold</b>', 100);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $htmlBody,
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        // The escaped HTML is also too large to be displayed entirely
+        self::assertSame(
+            $this->translator->trans('Generics.messages.htmlPreviewTooLargeTruncated', locale: 'en'),
+            $crawler->filter('[data-test="content-preview-warning"]')->text(),
+        );
+        self::assertSelectorNotExists('[data-test="content-body"] b');
+        self::assertSame(substr($htmlBody, 0, 1000), $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentTruncatesATooLargeText(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // 1200 bytes, larger than app.message_preview_max_length in the test
+        // environment: the text must not be cut in the middle of a character
+        $textBody = str_repeat('é', 600);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $textBody,
+            contentType: 'text/plain; charset=UTF-8',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            $this->translator->trans('Generics.messages.previewTruncated', locale: 'en'),
+            $crawler->filter('[data-test="content-preview-warning"]')->text(),
+        );
+        self::assertSame(str_repeat('é', 500), $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentTruncatesTheTextPartIfBothPartsAreTooLarge(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        // Both larger than app.message_preview_max_length in the test environment
+        $htmlBody = str_repeat('<b>bold</b>', 100);
+        $textBody = str_repeat('a', 1200);
+        $mailBody = "--boundary\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n\r\n"
+            . "{$textBody}\r\n"
+            . "--boundary\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+            . "{$htmlBody}\r\n"
+            . "--boundary--\r\n";
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: $mailBody,
+            contentType: 'multipart/alternative; boundary="boundary"',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(
+            $this->translator->trans('Generics.messages.htmlPreviewTooLargeTruncated', locale: 'en'),
+            $crawler->filter('[data-test="content-preview-warning"]')->text(),
+        );
+        self::assertSame(str_repeat('a', 1000), $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentDisplaysTheSanitizedHtml(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: '<b style="color: red">bold</b> text<script>alert(1)</script>',
+            contentType: 'text/html; charset=UTF-8',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-test="content-preview-warning"]');
+        self::assertSelectorTextSame('[data-test="content-body"] b', 'bold');
+        self::assertSelectorExists('[data-test="content-body"] b[style="color: red"]');
+        self::assertSelectorNotExists('[data-test="content-body"] script');
+        self::assertSame('bold text', $crawler->filter('[data-test="content-body"]')->text());
+    }
+
+    public function testGetIframeContentDisplaysTheText(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        $this->client->loginUser($recipient);
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $addrS,
+            [$addrR],
+            status: MessageStatus::UNTREATED,
+            body: 'text with <b>tags</b>',
+            contentType: 'text/plain; charset=UTF-8',
+        );
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+
+        $url = sprintf(
+            '/message/%s/%s/%s/iframe-content',
+            $messageRecipient->getPartitionTag(),
+            $message->getMailId(),
+            $messageRecipient->getRseqnum(),
+        );
+        $crawler = $this->client->request(Request::METHOD_GET, $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-test="content-preview-warning"]');
+        self::assertSelectorNotExists('[data-test="content-body"] b');
+        self::assertSame('text with <b>tags</b>', $crawler->filter('[data-test="content-body"]')->text());
     }
 
     /**
@@ -2388,6 +2636,7 @@ class MessageControllerTest extends WebTestCase
             ->text();
         self::assertSame($mailBody, $body);
         self::assertSame($senderEmail, $sender);
+        self::assertSelectorNotExists('[data-test="content-preview-warning"]');
     }
 
     private function assertLogCreated(MessageRecipient $messageRecipient, User $admin): void

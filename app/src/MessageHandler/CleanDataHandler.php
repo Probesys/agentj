@@ -23,8 +23,6 @@ final class CleanDataHandler
         private UnsubscribeRequestRepository $unsubscribeRequestRepository,
         #[Autowire(env: 'int:HISTORY_RETENTION_DAYS')]
         private int $historyRetentionDays,
-        #[Autowire(env: 'int:UNSUBSCRIBE_REQUEST_RETENTION_DAYS')]
-        private int $unsubscribeRequestRetentionDays,
     ) {
         $this->application = new Application($kernel);
     }
@@ -48,7 +46,7 @@ final class CleanDataHandler
         }
 
         try {
-            $deletedCount = $this->unsubscribeRequestRepository->truncateOlder($this->unsubscribeRequestRetentionDays);
+            $deletedCount = $this->unsubscribeRequestRepository->truncateOlder($this->historyRetentionDays);
 
             $this->logger->info("Deleted {$deletedCount} unsubscribe request(s).");
         } catch (\Exception $e) {

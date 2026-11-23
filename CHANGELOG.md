@@ -1,18 +1,8 @@
 # Changelog of AgentJ
 
-## 2026-11-06 - 2.8.0-rc1
+## 2026-11-19 - 2.8.0-rc3
 
 ### Migration notes
-
-#### Altcha
-
-Altcha (<https://altcha.org/>) is now used during human authentication. There are 3 new environment variables:
-
-- `ALTCHA_KEY_SECRET` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
-- `ALTCHA_KEY_SIGNATURE` that has to be generated and long enough (e.g. `openssl rand -hex 32`)
-- `ALTCHA_COST` an (optional) value that we recommend to be between 5000 and 10000. A higher cost takes more time to validate.
-
-You must set at least `ALTCHA_KEY_SECRET` to enable Altcha. Otherwise, the human authentication form will not show the widget.
 
 #### Daily reports
 
@@ -22,20 +12,21 @@ This is how the default report is constructed for **new** domains.
 If you want to use this new report, create a new domain in the interface, and copy-paste the report HTML to your other domain reports.
 More variables are available to customize your reports (`[IF_MESSAGES_*]`, `[FOREACHE_MESSAGE_*]`, `[URL_MESSAGE_UNSUBSCRIBE]`).
 
-#### Unsubscribing from mailing lists
-
-The requests to unsubscribe from mailing lists are deleted after 90 days. To change the number of days of retention, set the (optional) `UNSUBSCRIBE_REQUEST_RETENTION_DAYS` environment variable in your `.env` file.
-
 #### LDAP connector
 
 Concerning the LDAP connector: if the synchronization starts to fail, you must re-enter the LDAP connector password.
 
+### Security
+
+- Rebuild Docker images with PHP 8.4.28, nginx 1.26.3-3+deb13u11 and ClamAV 1.5.5
+- Add default security headers to responses ([b2486e98](https://github.com/Probesys/agentj/commit/b2486e98))
+- Add an audit log page ([b5441111](https://github.com/Probesys/agentj/commit/b5441111))
+
 ### Features
 
-- Unsubscribe from mailing lists ([c1bfcd2e](https://github.com/Probesys/agentj/commit/c1bfcd2e), [8b373cf9](https://github.com/Probesys/agentj/commit/8b373cf9), [f2bfa0af](https://github.com/Probesys/agentj/commit/f2bfa0af), [503bf5cf](https://github.com/Probesys/agentj/commit/503bf5cf))
+- Unsubscribe from mailing lists ([c1bfcd2e](https://github.com/Probesys/agentj/commit/c1bfcd2e), [8b373cf9](https://github.com/Probesys/agentj/commit/8b373cf9), [f2bfa0af](https://github.com/Probesys/agentj/commit/f2bfa0af), [503bf5cf](https://github.com/Probesys/agentj/commit/503bf5cf), [9b8f333a](https://github.com/Probesys/agentj/commit/9b8f333a))
 - Show the spam score indicators in the message info ([36982177](https://github.com/Probesys/agentj/commit/36982177))
-- Add an audit log page ([b5441111](https://github.com/Probesys/agentj/commit/b5441111))
-- Log when an admin access user's emails ([4e141910](https://github.com/Probesys/agentj/commit/4e141910))
+- Log when an admin access user's emails ([4e141910](https://github.com/Probesys/agentj/commit/4e141910), [08e97b57](https://github.com/Probesys/agentj/commit/08e97b57))
 - Protect human authentication with a captcha ([f93337ec](https://github.com/Probesys/agentj/commit/f93337ec))
 - Display and manage email aliases from the email addresses page ([bda1bf70](https://github.com/Probesys/agentj/commit/bda1bf70))
 - Improve the report:
@@ -55,14 +46,19 @@ Concerning the LDAP connector: if the synchronization starts to fail, you must r
 ### Bug fixes
 
 - Apply original user rules on alias creation ([dacd76b6](https://github.com/Probesys/agentj/commit/dacd76b6))
+- Accept style attributes in the HTML preview ([4b723760](https://github.com/Probesys/agentj/commit/4b723760))
+- Limit the content's length in HTML preview ([e4a1ca85](https://github.com/Probesys/agentj/commit/e4a1ca85))
+- Add space between buttons and center them below the HTML preview ([6dfe6465](https://github.com/Probesys/agentj/commit/6dfe6465))
 - Check the human auth tokens thoroughly ([70a58b33](https://github.com/Probesys/agentj/commit/70a58b33))
 - Do not show human authenticate date for mailing lists in message info ([87deab58](https://github.com/Probesys/agentj/commit/87deab58))
 - Fix 403 error on portal actions ([757a1f95](https://github.com/Probesys/agentj/commit/757a1f95))
 - Parse from address according to RFC 5322 ([ad591b11](https://github.com/Probesys/agentj/commit/ad591b11))
+- Strengthen the checks in senderverifmilter ([ef89eeca](https://github.com/Probesys/agentj/commit/ef89eeca))
 
 ### Maintenance
 
 - Optimize Amavis auto-release processing ([8bad1cd0](https://github.com/Probesys/agentj/commit/8bad1cd0))
+- Trust the Docker network gateway as a proxy by default ([278d74ad](https://github.com/Probesys/agentj/commit/278d74ad))
 - Update CKEditor5 ([6f991ff5](https://github.com/Probesys/agentj/commit/6f991ff5))
 - Update Symfony ([e0966dfb](https://github.com/Probesys/agentj/commit/e0966dfb))
 
@@ -76,6 +72,17 @@ Concerning the LDAP connector: if the synchronization starts to fail, you must r
 - Fix handling of content parameter in mail scripts ([b15ab182](https://github.com/Probesys/agentj/commit/b15ab182))
 - Do not try to create a domain that already exists in UserFactory ([0ac0bbdd](https://github.com/Probesys/agentj/commit/0ac0bbdd))
 - Ignore changes on validators files on `make translations` ([99a7bf1d](https://github.com/Probesys/agentj/commit/99a7bf1d))
+
+## 2026-11-19 - 2.7.8
+
+### Security
+
+- Rebuild Docker images with PHP 8.4.28, nginx 1.26.3-3+deb13u11 and ClamAV 1.5.5
+- Disable PHP `session.upload_progress` ([0e0a362a](https://github.com/Probesys/agentj/commit/0e0a362a))
+
+### Maintenance
+
+- Update ClamAV to 1.5 ([d282f6e1](https://github.com/Probesys/agentj/commit/d282f6e1))
 
 ## 2026-10-21 - 2.7.7
 

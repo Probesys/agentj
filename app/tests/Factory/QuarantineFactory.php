@@ -43,6 +43,7 @@ final class QuarantineFactory extends PersistentObjectFactory
     {
         $date = $attributes['date'] ?? new DateTime();
         $body = $attributes['body'] ?? '';
+        $contentType = $attributes['contentType'] ?? 'text/html; charset=UTF-8';
 
         $headers = <<<TEXT
                 Message-ID: {$mailId}\r
@@ -50,7 +51,7 @@ final class QuarantineFactory extends PersistentObjectFactory
                 From: <{$attributes['from']}>\r
                 To: support@example.com\r
                 Date: {$date->format(DATE_RFC1123)}\r
-                Content-Type: text/html; charset=UTF-8\r
+                Content-Type: {$contentType}\r
                 TEXT;
 
         if (isset($attributes['to'])) {

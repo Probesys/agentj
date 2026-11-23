@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Domain;
 use App\Entity\SenderRule;
+use App\EventSubscriber\SecurityHeadersSubscriber;
 use App\Form\HumanAuthenticationType;
 use App\Repository\MessageRepository;
 use App\Repository\SenderRuleRepository;
@@ -79,11 +80,18 @@ class HumanAuthenticationController extends AbstractController
             }
         }
 
-        return $this->render('human_authentications/show.html.twig', [
+        $response = $this->render('human_authentications/show.html.twig', [
             'form' => $form,
             'domain' => $domain,
             'verified' => $verified,
         ]);
+        // Altcha computes its challenge in a worker created from a blob: URL.
+        $response->headers->set('Content-Security-Policy', implode('; ', [
+            ...SecurityHeadersSubscriber::CONTENT_SECURITY_POLICY,
+            "worker-src 'self' blob:",
+        ]));
+
+        return $response;
     }
 
     #[Route(

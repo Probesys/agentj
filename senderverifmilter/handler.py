@@ -44,14 +44,34 @@ class Handler:
         # request.get('cc_address'),
         # request.get('bcc_address'),
 
-        # https://datatracker.ietf.org/doc/html/rfc2821.html#section-3.7
-        if 'sender' not in request:
-            print('OK ', request['client_address'], "without sender")
-            self.send_response('OK')
-            return
-
         self.db = self.db_pool.connection()
         self.cursor = self.db.cursor()
+
+        if 'sender' not in request:
+            # An empty sender is a valid value that we should allow, but only
+            # in certain situations: we verify that the client address is
+            # authorized by at least one domain.
+            # See https://datatracker.ietf.org/doc/html/rfc2821.html#section-3.7
+            self.cursor.execute(
+                '''
+                select 1 from domain d
+                join domain_relay dr on d.id = dr.domain_id
+                where dr.ip_address = %s
+                and d.active = true
+                ''',
+                (request['client_address'],)
+            )
+
+            result = self.cursor.fetchone()
+            if result is None:
+                print('INVALID ip:', request['client_address'], "without sender")
+                self.send_response('REJECT')
+            else:
+                print('OK', request['client_address'], "without sender")
+                self.send_response('OK')
+
+            return
+
         # If the antispoofing protection is disabled we only check the domain, not the full email
         # address
         if os.environ.get('DISABLE_OUTGOING_ANTISPOOFING_PROTECTION') == "true":
@@ -59,7 +79,9 @@ class Handler:
                 '''
                 select 1 from domain d
                 join domain_relay dr on d.id = dr.domain_id
-                where dr.ip_address = %s and d.domain = %s
+                where dr.ip_address = %s
+                and d.active = true
+                and d.domain = %s
                 ''',
                 (request['client_address'], request['sender'].split("@")[1])
             )
@@ -69,7 +91,9 @@ class Handler:
                 select 1 from domain d
                 join domain_relay dr on d.id = dr.domain_id
                 join users u on d.id = u.domain_id
-                where dr.ip_address = %s and u.email = %s
+                where dr.ip_address = %s
+                and d.active = true
+                and u.email = %s
                 ''',
                 (request['client_address'], request['sender'])
             )
