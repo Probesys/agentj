@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -102,6 +103,12 @@ class DomainType extends AbstractType
             ->add('sendUserMailAlerts', CheckboxType::class, [
                 'label' => new TranslatableMessage('Entities.Domain.fields.sendUserMailAlerts'),
                 'required' => false,
+            ])
+            ->add('bounceFloodThreshold', IntegerType::class, [
+                'label' => new TranslatableMessage('Entities.Domain.fields.bounceFloodThreshold'),
+                'required' => false,
+                'empty_data' => '20',
+                'attr' => ['min' => 0],
             ]);
     }
 
