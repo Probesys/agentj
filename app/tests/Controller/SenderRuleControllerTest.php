@@ -18,8 +18,10 @@ use App\Tests\SessionHelper;
 use App\Util\Url;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -32,11 +34,14 @@ class SenderRuleControllerTest extends WebTestCase
 
     private KernelBrowser $client;
 
+    private TranslatorInterface $translator;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->client = static::createClient();
+        $this->translator = static::getContainer()->get(TranslatorInterface::class);
     }
     public function testPostCreateSenderRuleCreatesRuleForUser(): void
     {
@@ -432,5 +437,58 @@ class SenderRuleControllerTest extends WebTestCase
         ])[0];
 
         return $senderRule;
+    }
+
+    public function testImportSenderRuleActionImportsATextFile(): void
+    {
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+
+        $this->importSenderRules($domain->getId(), "allowed@example.org\n");
+
+        self::assertSelectorTextContains(
+            '.flash-success',
+            $this->translator->trans('Entities.Import.SenderRule.success', locale: 'en'),
+        );
+        self::assertSame(1, RuleAddressFactory::count(['email' => 'allowed@example.org']));
+    }
+
+    public function testImportSenderRuleActionRefusesAnHtmlFileSentAsText(): void
+    {
+        $domain = DomainFactory::createOne();
+        $admin = UserFactory::new()->admin([$domain])->create();
+        $this->client->loginUser($admin);
+
+        $this->importSenderRules($domain->getId(), "<html><body>\nallowed@example.org\n</body></html>\n");
+
+        self::assertSelectorTextContains(
+            '.alert-danger',
+            $this->translator->trans('Generics.flash.BadImportFormat', locale: 'en'),
+        );
+        self::assertSame(0, RuleAddressFactory::count(['email' => 'allowed@example.org']));
+    }
+
+    private function importSenderRules(?int $domainId, string $content): void
+    {
+        $filePath = (string) tempnam(sys_get_temp_dir(), 'import');
+        file_put_contents($filePath, $content);
+
+        // The browser claims that the file is a text file, whatever its content.
+        $file = new UploadedFile($filePath, 'senders.txt', 'text/plain', null, true);
+        $crawler = $this->client->request(Request::METHOD_GET, '/rules/admin/import/W');
+        $csrfToken = $crawler->filter('input[name="import[_token]"]')->attr('value');
+        $this->client->request(Request::METHOD_POST, '/rules/admin/import/W', [
+            'import' => ['_token' => $csrfToken, 'domain' => $domainId],
+        ], [
+            'import' => ['attachment' => $file],
+        ], [
+            // Go back to a page that displays the flash messages.
+            'HTTP_REFERER' => 'http://localhost/',
+        ]);
+
+        @unlink($filePath);
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
     }
 }
