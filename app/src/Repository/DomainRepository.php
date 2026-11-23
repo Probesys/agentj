@@ -65,7 +65,7 @@ class DomainRepository extends BaseRepository
         $queryBuilder = $this->createQueryBuilder('d');
 
         if (!$currentUser->isSuperAdmin()) {
-            $queryBuilder->andWhere(':user MEMBER OF d.users')
+            $queryBuilder->andWhere(':user MEMBER OF d.admins')
                 ->setParameter('user', $currentUser);
         }
 

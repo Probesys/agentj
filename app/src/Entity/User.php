@@ -68,10 +68,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
      * @var Collection<int, Domain>
      */
     #[ORM\JoinTable(name: 'users_domains')]
-    #[ORM\ManyToMany(targetEntity: Domain::class, inversedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Domain::class, inversedBy: 'admins')]
     private Collection $domains;
 
-    #[ORM\ManyToOne(targetEntity: Domain::class)]
+    #[ORM\ManyToOne(targetEntity: Domain::class, inversedBy: 'users')]
     #[ORM\JoinColumn(name: 'domain_id', nullable: true, onDelete: 'CASCADE')]
     private ?Domain $domain;
 
@@ -253,7 +253,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, HasDoma
 
     public function getRoles(): array
     {
-        $roles = json_decode($this->roles, associative: true);
+        $roles = json_decode($this->roles ?? '', associative: true);
 
         if (!is_array($roles)) {
             $roles = [];

@@ -10,14 +10,12 @@ use App\Form\ImportType;
 use App\Form\SenderRuleType;
 use App\Model\LogAction;
 use App\Repository\DomainRepository;
-use App\Repository\MessageRecipientRepository;
 use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\LogService;
 use App\Service\MessageService;
 use App\Service\Referrer;
-use App\Service\SenderAddressSanitizer;
 use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -161,8 +159,8 @@ class SenderRuleController extends AbstractController
         }
 
         $type === 'W' ?
-            $this->messageService->authorizeSenderForRecipientInDomain($user, $senderEmail) :
-            $this->messageService->banSenderForRecipientInDomain($user, $senderEmail);
+            $this->messageService->reprocessAuthorizations($user, $senderEmail) :
+            $this->messageService->reprocessBans($user, $senderEmail);
 
         return new JsonResponse([
             'status' => 'success',

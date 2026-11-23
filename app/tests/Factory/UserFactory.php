@@ -74,19 +74,6 @@ final class UserFactory extends PersistentObjectFactory
                 'domain' => $domain,
                 'roles' => '["ROLE_USER"]',
             ];
-        // })->afterInstantiate(function (User $user): void {
-        //     if ($user->getDomain() === null) {
-        //         $domainName = Email::extractDomain($user->getEmail());
-
-        //         $domain = DomainFactory::findOrCreate([
-        //             'domain' => $domainName,
-        //         ]);
-
-        //         $user->setDomain($domain);
-        //     }
-
-        //     $domain->addUser($user);
-        // });
         })->afterInstantiate(function (User $user): void {
             $domain = $user->getDomain();
 
@@ -97,8 +84,6 @@ final class UserFactory extends PersistentObjectFactory
 
                 $user->setDomain($domain);
             }
-
-            $domain->addUser($user);
         });
     }
 

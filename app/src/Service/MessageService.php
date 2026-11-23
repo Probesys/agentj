@@ -86,26 +86,6 @@ class MessageService
         return true;
     }
 
-    public function authorizeSenderForRecipientInDomain(User $recipient, string $senderEmail): bool
-    {
-        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
-        $userAndAliases = $recipient->getUserAndAliases();
-
-        foreach ($userAndAliases as $user) {
-            $this->senderRuleRepository->updateOrCreateRule(
-                $user,
-                $senderRuleAddress,
-                wbRule: 'accept',
-                type: SenderRule::TYPE_USER,
-                priority: SenderRule::PRIORITY_USER,
-            );
-        }
-
-        $this->reprocessAuthorizationsForSenderEmailInDomain($recipient->getDomain(), $senderEmail);
-
-        return true;
-    }
-
     /**
      * Authorize the message's sender for the given recipient's domain and
      * release the messages that he sent to it.
@@ -142,6 +122,7 @@ class MessageService
             $message->getFromAddr(),
         );
 
+        $messages = [];
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
             $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
             $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
@@ -150,12 +131,71 @@ class MessageService
             }
 
             $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+            $messages[] = $messageRecipientToRelease->getMessage();
         }
 
-        $message->setStatus(MessageStatus::AUTHORIZED);
-        $this->messageRepository->save($message);
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::AUTHORIZED);
+            $this->messageRepository->save($message, false);
+        }
+        $this->entityManager->flush();
 
         return true;
+    }
+
+    /**
+     * Reprocess autorizations for the pending emails that are concerned by the
+     * rule on given sender email.
+     *
+     * @param User $recipient Recipient for which pending mails will be reprocessed
+     * (including mails sent to its aliases).
+     * @param string $senderEmail Email address to authorize as legitimate sender.
+     * @param bool $checkSpam Rather to apply domain's spam level check or not.
+     */
+    public function reprocessAuthorizations(User $recipient, string $senderEmail, bool $checkSpam = true): void
+    {
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
+        $userAndAliases = $recipient->getUserAndAliases();
+
+        foreach ($userAndAliases as $user) {
+            $this->senderRuleRepository->updateOrCreateRule(
+                $user,
+                $senderRuleAddress,
+                wbRule: $checkSpam ? 'accept' : 'allow',
+                type: SenderRule::TYPE_USER,
+                priority: SenderRule::PRIORITY_USER,
+                flush: false,
+            );
+
+            $domain = $user->getDomain();
+            $domainSpamLevel = $domain->getAuthorizedSendersSpamLevel();
+
+            $messageRecipientsToRelease = $this->messageRecipientRepository->findSentToUserByEmail(
+                $user,
+                $senderEmail,
+            );
+
+            $messages = [];
+
+            foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
+                $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
+                $isSpam = $checkSpam ?
+                    $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel) :
+                    false;
+
+                if (!$isSameSender || $isSpam) {
+                    continue;
+                }
+
+                $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
+                $messages[] = $messageRecipientToRelease->getMessage();
+            }
+
+            foreach ($messages as $message) {
+                $message->setStatus(MessageStatus::AUTHORIZED);
+                $this->messageRepository->save($message);
+            }
+        }
     }
 
     /**
@@ -275,26 +315,6 @@ class MessageService
         return true;
     }
 
-    public function banSenderForRecipientInDomain(User $recipient, string $senderEmail): bool
-    {
-        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
-        $userAndAliases = $recipient->getUserAndAliases();
-
-        foreach ($userAndAliases as $user) {
-            $this->senderRuleRepository->updateOrCreateRule(
-                $user,
-                $senderRuleAddress,
-                wbRule: 'block',
-                type: SenderRule::TYPE_USER,
-                priority: SenderRule::PRIORITY_USER,
-            );
-        }
-
-        $this->reprocessBansForSenderEmailInDomain($recipient->getDomain(), $senderEmail);
-
-        return true;
-    }
-
     /**
      * Ban the message's sender for the given recipient's domain and reject the
      * messages that he sent to it.
@@ -329,6 +349,7 @@ class MessageService
             $message->getFromAddr(),
         );
 
+        $messages = [];
         foreach ($messageRecipientsToBan as $messageRecipientToBan) {
             $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
             if (
@@ -340,15 +361,70 @@ class MessageService
             }
 
             $messageRecipientToBan->setStatus(MessageStatus::BANNED);
-            $this->messageRecipientRepository->save($messageRecipientToBan);
+            $this->messageRecipientRepository->save($messageRecipientToBan, false);
+
+            $messages[] = $messageRecipientToBan->getMessage();
         }
 
-        $message->setStatus(MessageStatus::BANNED);
-        $this->messageRepository->save($message);
+        foreach ($messages as $message) {
+            $message->setStatus(MessageStatus::BANNED);
+            $this->messageRepository->save($message, false);
+        }
+        $this->entityManager->flush();
 
         return true;
     }
 
+    /**
+     * Reprocess bans for the pending emails that are concerned by the
+     * rule on given sender email.
+     *
+     * @param User $recipient Recipient for which pending mails will be reprocessed
+     * (including mails sent to its aliases).
+     * @param string $senderEmail Email address to ban as rejected sender.
+     */
+    public function reprocessBans(User $recipient, string $senderEmail): void
+    {
+        $senderRuleAddress = $this->ruleAddressRepository->findOneOrCreateByEmail($senderEmail);
+        $userAndAliases = $recipient->getUserAndAliases();
+
+        foreach ($userAndAliases as $user) {
+            $this->senderRuleRepository->updateOrCreateRule(
+                $user,
+                $senderRuleAddress,
+                wbRule: 'block',
+                type: SenderRule::TYPE_USER,
+                priority: SenderRule::PRIORITY_USER,
+            );
+
+            $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
+                $user,
+                $senderEmail,
+            );
+
+            $messages = [];
+
+            foreach ($messageRecipientsToBan as $messageRecipientToBan) {
+                $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
+                if (
+                    !$isSameSender ||
+                    $messageRecipientToBan->isVirus() ||
+                    $messageRecipientToBan->isAlreadyReleased()
+                ) {
+                    continue;
+                }
+
+                $messageRecipientToBan->setStatus(MessageStatus::BANNED);
+                $this->messageRecipientRepository->save($messageRecipientToBan);
+                $messages[] = $messageRecipientToBan->getMessage();
+            }
+
+            foreach ($messages as $message) {
+                $message->setStatus(MessageStatus::BANNED);
+                $this->messageRepository->save($message);
+            }
+        }
+    }
 
     /**
      * Reprocess bans for the pending emails that are concerned by the rule on

@@ -69,16 +69,28 @@ class SenderRuleControllerTest extends WebTestCase
         self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
     }
 
-    public function testPostCreateSenderRuleReprocessPendingEmailsAuthorize(): void
+    public function testPostCreateSenderRuleReprocessPendingEmailsAndAliasesAuthorize(): void
     {
         $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
         $sender = UserFactory::new()->user($domain)->create();
         $recipient = UserFactory::new()->user($domain)->create();
+        $alias = UserFactory::new()->user($otherDomain)->create([
+            'originalUser' => $recipient,
+        ]);
+        $aliasAddress = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain),
+            'partitionTag' => 0,
+            'email' => $alias->getEmail(),
+        ]);
         $this->client->loginUser($recipient);
         [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
-        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
-        $messageRecipient = $message->getMessageRecipients()->first();
-        self::assertNotFalse($messageRecipient);
+        $message1 = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $message1Recipient = $message1->getMessageRecipients()->first();
+        self::assertNotFalse($message1Recipient);
+        $message2 = $this->setupMail($addrSender, [$aliasAddress], status: MessageStatus::UNTREATED);
+        $message2Recipient = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($message2Recipient);
 
         $csrfToken = $this->generateCsrfToken($this->client, 'sender_rule');
         $this->client->request(Request::METHOD_POST, '/rules/new/W', [
@@ -94,7 +106,53 @@ class SenderRuleControllerTest extends WebTestCase
         self::assertSame('accept', $senderRule->getWbRule());
         self::assertSame(SenderRule::TYPE_USER, $senderRule->getType());
         self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
-        self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message1->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message2->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message1Recipient->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message2Recipient->getStatus());
+    }
+
+    public function testPostCreateSenderRuleReprocessPendingEmailsAndAliasesBan(): void
+    {
+        $domain = DomainFactory::createOne();
+        $otherDomain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $alias = UserFactory::new()->user($otherDomain)->create([
+            'originalUser' => $recipient,
+        ]);
+        $aliasAddress = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain),
+            'partitionTag' => 0,
+            'email' => $alias->getEmail(),
+        ]);
+        $this->client->loginUser($recipient);
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message1 = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $message1Recipient = $message1->getMessageRecipients()->first();
+        self::assertNotFalse($message1Recipient);
+        $message2 = $this->setupMail($addrSender, [$aliasAddress], status: MessageStatus::UNTREATED);
+        $message2Recipient = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($message2Recipient);
+
+        $csrfToken = $this->generateCsrfToken($this->client, 'sender_rule');
+        $this->client->request(Request::METHOD_POST, '/rules/new/B', [
+            'sender_rule' => [
+                '_token' => $csrfToken,
+                'email' => $sender->getEmail(),
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+
+        $senderRule = $this->getSenderRule($recipient, $sender->getEmail());
+        self::assertSame('block', $senderRule->getWbRule());
+        self::assertSame(SenderRule::TYPE_USER, $senderRule->getType());
+        self::assertSame(SenderRule::PRIORITY_USER, $senderRule->getPriority());
+        self::assertSame(MessageStatus::BANNED, $message1->getStatus());
+        self::assertSame(MessageStatus::BANNED, $message2->getStatus());
+        self::assertSame(MessageStatus::BANNED, $message1Recipient->getStatus());
+        self::assertSame(MessageStatus::BANNED, $message2Recipient->getStatus());
     }
 
     public function testPostCreateSenderRuleReprocessPendingEmailsBan(): void
