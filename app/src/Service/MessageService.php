@@ -3,9 +3,7 @@
 namespace App\Service;
 
 use App\Amavis\MessageStatus;
-use App\Entity\Address;
 use App\Entity\Domain;
-use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
@@ -17,12 +15,14 @@ use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Util\Email;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class MessageService
 {
     public function __construct(
         private MessageBusInterface $bus,
+        private EntityManagerInterface $entityManager,
         private RuleAddressRepository $ruleAddressRepository,
         private MessageRecipientRepository $messageRecipientRepository,
         private MessageRepository $messageRepository,
@@ -171,8 +171,6 @@ class MessageService
             $senderEmail,
         );
 
-        $messages = [];
-
         foreach ($messageRecipientsToRelease as $messageRecipientToRelease) {
             $isSameSender = $this->hasSameSender($messageRecipientToRelease, $senderEmail);
             $isSpam = $messageRecipientToRelease->isSpamAtLevel($domainSpamLevel);
@@ -181,12 +179,6 @@ class MessageService
             }
 
             $this->dispatchRelease($messageRecipientToRelease, MessageStatus::AUTHORIZED);
-            $messages[] = $messageRecipientToRelease->getMessage();
-        }
-
-        foreach ($messages as $message) {
-            $message->setStatus(MessageStatus::AUTHORIZED);
-            $this->messageRepository->save($message);
         }
     }
 
@@ -393,39 +385,59 @@ class MessageService
     }
 
     /**
-     * Reprocess bans for the pending emails that are concerned by the
-     * rule on given sender email.
+     * @param iterable<MessageRecipient> $candidates
+     * @return MessageRecipient[] the recipients that were banned
      */
-    public function reprocessBansForSenderEmailForUser(
-        User $user,
-        string $senderEmail,
-    ): void {
-        $messageRecipientsToBan = $this->messageRecipientRepository->findSentToUserByEmail(
-            $user,
-            $senderEmail,
-        );
+    private function banMatchingRecipients(iterable $candidates, string $senderEmail): array
+    {
+        $banned = [];
 
-        $messages = [];
-
-        foreach ($messageRecipientsToBan as $messageRecipientToBan) {
-            $isSameSender = $this->hasSameSender($messageRecipientToBan, $senderEmail);
+        foreach ($candidates as $candidate) {
             if (
-                !$isSameSender ||
-                $messageRecipientToBan->isVirus() ||
-                $messageRecipientToBan->isAlreadyReleased()
+                !$this->hasSameSender($candidate, $senderEmail)
+                || $candidate->isVirus()
+                || $candidate->isAlreadyReleased()
             ) {
                 continue;
             }
 
-            $messageRecipientToBan->setStatus(MessageStatus::BANNED);
-            $this->messageRecipientRepository->save($messageRecipientToBan);
-            $messages[] = $messageRecipientToBan->getMessage();
+            $candidate->setStatus(MessageStatus::BANNED);
+            $this->messageRecipientRepository->save($candidate, flush: false);
+            $banned[] = $candidate;
+        }
+
+        return $banned;
+    }
+
+    /**
+     * @param MessageRecipient[] $bannedRecipients
+     */
+    private function banMessages(array $bannedRecipients): void
+    {
+        $messages = [];
+        foreach ($bannedRecipients as $recipient) {
+            $message = $recipient->getMessage();
+            $messages[spl_object_id($message)] = $message; // dedupe
         }
 
         foreach ($messages as $message) {
+            $this->messageRepository->save($message, flush: false);
             $message->setStatus(MessageStatus::BANNED);
-            $this->messageRepository->save($message);
         }
+    }
+
+    /**
+     * Reprocess bans for the pending emails that are concerned by the
+     * rule on given sender email.
+     */
+    public function reprocessBansForSenderEmailForUser(User $user, string $senderEmail): void
+    {
+        $banned = $this->banMatchingRecipients(
+            $this->messageRecipientRepository->findSentToUserByEmail($user, $senderEmail),
+            $senderEmail,
+        );
+        $this->banMessages($banned);
+        $this->entityManager->flush();
     }
 
     private function hasSameSender(MessageRecipient $messageRecipient, string $senderEmail): bool
