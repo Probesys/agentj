@@ -560,6 +560,7 @@ Message.Flash.failedToGeneratePublicKey: 'Erreur lors de la génération de la c
 Message.Flash.invalidLdapQuery: 'Requête LDAP incorrecte'
 Message.Flash.ldapNbGroupfound: '$NB_GROUP groupe(s) trouvé(s)'
 Message.Flash.ldapNbUserfound: '$NB_USER utilisateur(s) trouvé(s)'
+Message.Flash.logoUploadFailed: "Le logo n'a pas pu être enregistré, veuillez réessayer."
 Message.Flash.messageDeleted: 'Message supprimé avec succès'
 Message.Flash.messageMarkedAsHam: 'Message marqué comme acceptable avec succès'
 Message.Flash.messageMarkedAsSpam: 'Message marqué comme spam avec succès'

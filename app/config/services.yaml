@@ -40,7 +40,8 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     App\Service\FileUploader:
-        arguments: ["%app.upload_directory%", "@doctrine.orm.entity_manager"]
+        arguments:
+            $targetDirectory: "%app.upload_directory%"
 
     App\Twig\AppExtension:
         arguments:
@@ -60,6 +61,7 @@ services:
 when@test:
     parameters:
         app.message_preview_max_length: 1000
+        app.upload_directory: "%kernel.project_dir%/var/test/upload/"
 
     services:
         _defaults:

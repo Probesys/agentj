@@ -10,6 +10,7 @@ use App\Form\DomainCustomisationReportType;
 use App\Repository\DomainRepository;
 use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -36,19 +37,41 @@ class CustomisationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $domain = $form->getData();
 
+            $previousLogo = $domain->getLogo();
+            $uploadedLogo = null;
             $uploadedFile = $form->get('logoFile')->getData();
             if ($uploadedFile) {
                 $uploadedLogo = $fileUploader->upload($uploadedFile);
-                $domain->setLogo($uploadedLogo);
             }
 
-            $this->domainRepository->save($domain);
+            if ($uploadedLogo === '') {
+                // The form is displayed again with the error, nothing is saved.
+                $form->get('logoFile')->addError(new FormError(
+                    $this->translator->trans('Message.Flash.logoUploadFailed'),
+                ));
+            } else {
+                if ($uploadedLogo !== null) {
+                    $domain->setLogo($uploadedLogo);
+                }
 
-            $this->addFlash('success', $this->translator->trans('Message.Flash.saved'));
+                $this->domainRepository->save($domain);
 
-            return $this->redirectToRoute('domain_customisation_general', [
-                'id' => $domain->getId(),
-            ]);
+                // Before the file names were made unique, several domains could
+                // share the same logo file: it must be kept while it is used.
+                if (
+                    $uploadedLogo !== null
+                    && $previousLogo
+                    && $this->domainRepository->count(['logo' => $previousLogo]) === 0
+                ) {
+                    $fileUploader->remove($previousLogo);
+                }
+
+                $this->addFlash('success', $this->translator->trans('Message.Flash.saved'));
+
+                return $this->redirectToRoute('domain_customisation_general', [
+                    'id' => $domain->getId(),
+                ]);
+            }
         }
 
         return $this->render('domain/customisation/general.html.twig', [

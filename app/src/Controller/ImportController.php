@@ -12,7 +12,6 @@ use App\Service\UserService;
 use App\Util\Text;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,6 +21,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(path: '/admin/import')]
 class ImportController extends AbstractController
 {
+    /**
+     * A CSV file is often detected as text/plain, e.g. with ";" separators.
+     */
+    private const ACCEPTED_MIME_TYPES = ['text/csv', 'text/plain'];
+
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $em,
@@ -42,13 +46,8 @@ class ImportController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
-            if ($fileUpload->getClientMimeType() == "text/csv") {
-                $filename = 'import-agentj-' . time() . ".csv";
-                $file = $fileUpload->move('/tmp/', $filename);
-                $result = $this->import($file->getPathname());
-                //delete file after import
-                $fileSystem = new Filesystem();
-                $fileSystem->remove([$file->getPathname()]);
+            if (in_array($fileUpload->getMimeType(), self::ACCEPTED_MIME_TYPES, true)) {
+                $result = $this->import($fileUpload->getPathname());
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
                     $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
@@ -99,7 +98,7 @@ class ImportController extends AbstractController
         $domains = [];
         try {
             if (($handle = fopen($pathfile, "r")) !== false) {
-                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split, escape: '\\')) !== false) {
                     //check line number of columns, if empty
                     if ((count($data) != 4)) {
                         $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);
@@ -235,13 +234,8 @@ class ImportController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
-            if ($fileUpload->getClientMimeType() == "text/csv") {
-                $filename = 'import-agentj-alias-' . time() . ".csv";
-                $file = $fileUpload->move('/tmp/', $filename);
-                $result = $this->importAlias($file->getPathname());
-                //delete file after import
-                $fileSystem = new Filesystem();
-                $fileSystem->remove([$file->getPathname()]);
+            if (in_array($fileUpload->getMimeType(), self::ACCEPTED_MIME_TYPES, true)) {
+                $result = $this->importAlias($fileUpload->getPathname());
                 if ($result['user_import'] > 0) {
                     $message = $translator->trans('Generics.flash.ImportSuccess');
                     $message = str_replace('[NB_USER]', strval($result['user_import']), $message);
@@ -292,7 +286,7 @@ class ImportController extends AbstractController
             if (($handle = fopen($pathfile, "r")) !== false) {
                 $originalUserByIds = [];
 
-                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split, escape: '\\')) !== false) {
                     //check line number of columns, if empty
                     if ((count($data) != 4)) {
                         $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);

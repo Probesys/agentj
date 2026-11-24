@@ -276,11 +276,9 @@ class SenderRuleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $fileUpload = $form['attachment']->getData();
-            if ($fileUpload->getClientMimeType() == "text/plain") {
-                $filename = 'import-sender-rules-agentj-' . time() . ".txt";
-                $file = $fileUpload->move('/tmp/', $filename);
+            if ($fileUpload->getMimeType() === 'text/plain') {
                 $this->senderRuleService->importFile(
-                    $file->getPathname(),
+                    $fileUpload->getPathname(),
                     $form->get('domain')->getData(),
                     $rule,
                 );
