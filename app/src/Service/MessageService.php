@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
-use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;

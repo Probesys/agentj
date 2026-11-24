@@ -277,7 +277,7 @@ class SenderRuleRepository extends BaseRepository
         }
 
         $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
-            SELECT *
+            SELECT w.wb
             FROM wblist w
             INNER JOIN users u ON u.id = w.rid
             INNER JOIN mailaddr s ON s.id = w.sid
@@ -293,7 +293,12 @@ class SenderRuleRepository extends BaseRepository
             'senderAddresses' => DBAL\ArrayParameterType::STRING,
         ])->fetchOne();
 
-        return $wb;
+        return match ($wb) {
+            'B' => 'block',
+            ' ' => 'accept',
+            'W' => 'allow',
+            default => null,
+        };
     }
 
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool

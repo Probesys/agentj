@@ -8,6 +8,7 @@ use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Service\GroupService;
 use App\Service\LdapService;
+use App\Service\MessageService;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
 use App\Util\Email;
@@ -48,6 +49,7 @@ class LdapImportCommand extends Command
         private LdapService $ldapService,
         private UserService $userService,
         private GroupService $groupService,
+        private MessageService $messageService,
     ) {
         parent::__construct();
     }
@@ -192,6 +194,13 @@ class LdapImportCommand extends Command
 
                 $this->userService->syncUserAndAliases($user);
             }
+
+            $groupIds = array_reduce(
+                $this->connector->getTargetGroups()->toArray(),
+                fn ($carry, $group) => array_merge($carry, [$group->getId()]),
+                [],
+            );
+            $this->messageService->reprocessForGroup($groupIds);
         }
 
         $result = [
@@ -323,6 +332,7 @@ class LdapImportCommand extends Command
 
         foreach ($targetGroups as $group) {
             $user->addGroup($group);
+            // TODO: reprocess pending emails status
         }
 
         $this->em->persist($user);
