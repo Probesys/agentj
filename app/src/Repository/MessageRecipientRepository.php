@@ -173,23 +173,29 @@ class MessageRecipientRepository extends BaseRepository
      *
      * @return MessageRecipient[]
      */
-    // public function findSentToGroupByEmail(Group $recipientGroup, string $senderFrom): array
-    // {
-    //     $query = $this->getEntityManager()->createQuery(<<<SQL
-    //         SELECT mr
-    //         FROM App\Entity\MessageRecipient as mr
-    //         JOIN mr.message m
-    //         JOIN mr.address ra
-    //         WHERE ra.email = :recipientEmail
-    //         AND m.fromAddr = :senderFrom
-    //         AND mr.status IS NOT NULL
-    //     SQL);
+    // public function findSentToGroupMembersByEmail(Group $group, string $senderFrom): array
+    public function findSentToGroupMembersByEmail(Group $group): array
+    {
+        $query = $this->getEntityManager()->createQuery(<<<DQL
+            SELECT mr
+            FROM App\Entity\MessageRecipient mr
+            JOIN mr.message m
+            JOIN mr.address ra
+            -- WHERE m.fromAddr = :senderFrom
+            WHERE mr.status IS NOT NULL
+            AND ra.email IN (
+                SELECT u.email
+                FROM App\Entity\User u
+                JOIN u.groups g
+                WHERE g = :group
+            )
+        DQL);
 
-    //     $query->setParameter('recipientEmail', $recipientUser->getEmail());
-    //     $query->setParameter('senderFrom', $senderFrom);
+        $query->setParameter('group', $group);
+        // $query->setParameter('senderFrom', $senderFrom);
 
-    //     return $query->getResult();
-    // }
+        return $query->getResult();
+    }
 
     /**
      * Return all message recipients sent by $senderFrom to $recipientDomain.

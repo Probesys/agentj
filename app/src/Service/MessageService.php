@@ -4,11 +4,13 @@ namespace App\Service;
 
 use App\Amavis\MessageStatus;
 use App\Entity\Domain;
+use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Message\AmavisRelease;
+use App\Repository\GroupRepository;
 use App\Repository\MessageRecipientRepository;
 use App\Repository\MessageRepository;
 use App\Repository\RuleAddressRepository;
@@ -28,6 +30,7 @@ class MessageService
         private MessageRepository $messageRepository,
         private UserRepository $userRepository,
         private SenderRuleRepository $senderRuleRepository,
+        private GroupRepository $groupRepository,
         private CryptEncryptService $cryptEncryptService,
         private SpamassassinService $spamassassinService,
     ) {
@@ -493,12 +496,12 @@ class MessageService
         $messages = [];
         foreach ($bannedRecipients as $recipient) {
             $message = $recipient->getMessage();
-            $messages[spl_object_id($message)] = $message; // dedupe
+            $messages[] = $message;
         }
 
         foreach ($messages as $message) {
-            $this->messageRepository->save($message, flush: false);
             $message->setStatus(MessageStatus::BANNED);
+            $this->messageRepository->save($message, flush: false);
         }
     }
 
@@ -726,7 +729,7 @@ class MessageService
     }
 
 
-    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?SenderRule
+    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?string
     {
         return $this->senderRuleRepository->getApplicableSenderRule($senderEmail, $recipientEmail);
     }
@@ -734,5 +737,51 @@ class MessageService
     public function isSenderAuthorizedByRecipient(string $senderEmail, string $recipientEmail): bool
     {
         return $this->senderRuleRepository->isSenderAuthorizedByRecipient($senderEmail, $recipientEmail);
+    }
+
+    /**
+     * @param array<int> $groupIds
+     */
+    public function reprocessForGroup(array $groupIds): void
+    {
+        foreach ($groupIds as $groupId) {
+            $group = $this->groupRepository->findOneBy(['id' => $groupId]);
+
+            $messageRecipients = $this->messageRecipientRepository->findSentToGroupMembersByEmail($group);
+            foreach ($messageRecipients as $messageRecipient) {
+                $rule = $this->getApplicableSenderRule(
+                    $messageRecipient->getMessage()->getSenderAddress()->getEmail(),
+                    $messageRecipient->getAddress()->getEmail(),
+                );
+
+                if (!in_array($rule, ['allow', 'accept', 'block'], true)) {
+                    continue;
+                }
+
+                $user = $this->userRepository->findOneByAddress($messageRecipient->getAddress());
+
+                if (!$user) {
+                    continue;
+                }
+
+                if ($rule === 'allow') {
+                    $this->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $messageRecipient->getMessage()->getSenderEmail(),
+                        false,
+                    );
+                } elseif ($rule === 'accept') {
+                    $this->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $messageRecipient->getMessage()->getSenderEmail(),
+                    );
+                } elseif ($rule === 'block') {
+                    $this->reprocessBansForSenderEmailForUser(
+                        $user,
+                        $messageRecipient->getMessage()->getSenderEmail(),
+                    );
+                }
+            }
+        }
     }
 }

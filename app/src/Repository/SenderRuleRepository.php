@@ -265,9 +265,9 @@ class SenderRuleRepository extends BaseRepository
      *
      * @param string $senderEmail Sender address to match against the rules.
      * @param string $recipientEmail Recipient address to match against the rules.
-     * @return SenderRule
+     * @return ?string
      */
-    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?SenderRule
+    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?string
     {
         $recipientAddresses = Email::getAddressLookups($recipientEmail);
         $senderAddresses = Email::getAddressLookups($senderEmail);
@@ -277,9 +277,9 @@ class SenderRuleRepository extends BaseRepository
         }
 
         $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
-            SELECT w
-            FROM users u
-            INNER JOIN wblist w ON w.rid = u.id
+            SELECT *
+            FROM wblist w
+            INNER JOIN users u ON u.id = w.rid
             INNER JOIN mailaddr s ON s.id = w.sid
             WHERE u.email IN (:recipientAddresses)
             AND s.email IN (:senderAddresses)

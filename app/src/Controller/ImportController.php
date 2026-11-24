@@ -7,6 +7,7 @@ use App\Entity\Group;
 use App\Entity\User;
 use App\Form\ImportType;
 use App\Service\GroupService;
+use App\Service\MessageService;
 use App\Service\Referrer;
 use App\Service\UserService;
 use App\Util\Text;
@@ -27,6 +28,7 @@ class ImportController extends AbstractController
         private EntityManagerInterface $em,
         private UserService $userService,
         private GroupService $groupService,
+        private MessageService $messageService,
         private Referrer $referrer,
     ) {
     }
@@ -99,7 +101,7 @@ class ImportController extends AbstractController
         $domains = [];
         try {
             if (($handle = fopen($pathfile, "r")) !== false) {
-                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split, "\"", "\\")) !== false) {
                     //check line number of columns, if empty
                     if ((count($data) != 4)) {
                         $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);
@@ -196,9 +198,12 @@ class ImportController extends AbstractController
                     $row++;
                 }
 
-                //Need to flush if user new is inferior $batchSize
+                // Need to flush if user new is inferior $batchSize
                 $em->flush();
+
                 $this->groupService->updateSenderRules();
+
+                $this->messageService->reprocessForGroup($groupWbUpdate);
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);
@@ -292,7 +297,7 @@ class ImportController extends AbstractController
             if (($handle = fopen($pathfile, "r")) !== false) {
                 $originalUserByIds = [];
 
-                while (($data = fgetcsv($handle, 1024, $split)) !== false) {
+                while (($data = fgetcsv($handle, 1024, $split, "\"", "\\")) !== false) {
                     //check line number of columns, if empty
                     if ((count($data) != 4)) {
                         $errors[] = $translator->trans('Generics.flash.IncorrectColumns', ['ROW' => $row + 1]);
