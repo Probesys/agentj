@@ -6,6 +6,8 @@ use App\Entity\Domain;
 use App\Entity\Group;
 use App\Entity\Office365Connector;
 use App\Entity\User;
+use App\Service\GroupService;
+use App\Service\MessageService;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
 use App\Util\Email;
@@ -37,6 +39,8 @@ class Office365ImportCommand extends Command
     public function __construct(
         private EntityManagerInterface $em,
         private UserService $userService,
+        private GroupService $groupService,
+        private MessageService $messageService,
     ) {
         parent::__construct();
     }
@@ -98,9 +102,30 @@ class Office365ImportCommand extends Command
             }
         }
 
+        $this->groupService->updateSenderRules();
+
+        $groupIds = $groupsResult['existing_group_ids'] ?? [];
+        $tagetGroupIds = array_reduce(
+            $connector->getTargetGroups()->toArray(),
+            function (array $carry, $group) {
+                $id = $group->getId();
+                $carry[$id] = $id;
+                return $carry;
+            },
+            [],
+        );
+        $groupIds = array_merge($groupIds, $tagetGroupIds);
+
+        if (count($groupIds) > 0) {
+            $this->messageService->reprocessForGroup($groupIds);
+        }
+
         $this->connector->finishImportWithSuccess([
             'users' => $usersResult,
-            'groups' => $groupsResult,
+            'groups' => [
+                'nb_groups_created' => $groupsResult['nb_groups_created'] ?? 0,
+                'nb_groups_updated' => $groupsResult['nb_groups_updated'] ?? 0,
+            ],
         ]);
         $this->em->persist($this->connector);
         $this->em->flush();
@@ -245,11 +270,14 @@ class Office365ImportCommand extends Command
         return $aliases;
     }
 
-    /**
-     * @return array<string, int>
-     *
-     * @throws Exception
-     */
+   /**
+    * @return array{
+    *     nb_groups_created: int,
+    *     nb_groups_updated: int,
+    *     existing_group_ids: array<int, int>
+    * }
+    * @throws Exception
+    */
     private function importGroups(): array
     {
         $domain = $this->connector->getDomain();
@@ -269,6 +297,7 @@ class Office365ImportCommand extends Command
 
         $nbGroupCreated = 0;
         $nbGroupUpdated = 0;
+        $existingGroupIds = [];
 
         $result = $this->graphServiceClient->groups()->get($requestConfiguration)->wait();
         $groups = $result->getValue();
@@ -314,6 +343,8 @@ class Office365ImportCommand extends Command
             $this->em->persist($userGroup);
             $this->em->flush();
 
+            $existingGroupIds[(int)$localGroup->getId()] = (int)$localGroup->getId();
+
             $this->addUserGroupOwners($userGroup);
             $this->addMembersToGroup($localGroup);
         }
@@ -321,6 +352,7 @@ class Office365ImportCommand extends Command
         return [
             'nb_groups_created' => $nbGroupCreated,
             'nb_groups_updated' => $nbGroupUpdated,
+            'existing_group_ids' => $existingGroupIds,
         ];
     }
 
