@@ -163,6 +163,15 @@ then
 	send 'in_pass_known' 'in' 'user@laissepasser.fr' 1
 fi
 
+if [ -z "$1" ] || [ "$1" = "alias" ]
+then
+	echo "---- authorize by sending mail from an alias, for the user and all its aliases ----" 1>&2
+	send 'out_alias' 'out' 'user.alias1@blocnormal.fr' 1
+
+	send 'in_alias_known_other_alias' 'in' 'user.alias2@blocnormal.fr' 1
+	send 'in_alias_known_main_user' 'in' 'user.main@blocnormal.fr' 1
+fi
+
 if [ -z "$1" ] || [ "$1" = "virusspam" ]
 then
 	echo "---- virus/spam ----" 1>&2

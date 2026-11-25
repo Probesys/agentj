@@ -85,6 +85,31 @@ class UserFixture extends Fixture
 
         $manager->persist($user);
 
+        // A user with 2 aliases
+        $mainUser = new User();
+        $mainUser->setEmail('user.main@blocnormal.fr');
+        $mainUser->setFullname('userMain blocnormal');
+        $mainUser->setUsername('user.main@blocnormal.fr');
+        $mainUser->setRoles('["ROLE_USER"]');
+        $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
+        $mainUser->setDomain($domain);
+        $mainUser->setPolicy($mainUser->getDomain()->getPolicy());
+
+        $manager->persist($mainUser);
+
+        foreach (['user.alias1@blocnormal.fr', 'user.alias2@blocnormal.fr'] as $aliasEmail) {
+            $alias = new User();
+            $alias->setEmail($aliasEmail);
+            $alias->setFullname('userMain blocnormal');
+            $alias->setUsername($aliasEmail);
+            $alias->setRoles('["ROLE_USER"]');
+            $alias->setDomain($domain);
+            $alias->setOriginalUser($mainUser);
+            $alias->setPolicy($mainUser->getPolicy());
+
+            $manager->persist($alias);
+        }
+
         $user = new User();
         $user->setEmail('user@laissepasser.fr');
         $user->setFullname('user laissepasser');

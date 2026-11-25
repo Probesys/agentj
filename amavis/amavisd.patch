@@ -258,7 +258,7 @@ diff -ruN AMA/Out/SQL/Log.pm Amavis/Out/SQL/Log.pm
 +                my ($myrid,$myrexisted) = $self->find_or_save_mailaddr($r->recip_addr);
 +                my ($mysid,$mysexisted) = $self->find_user($msginfo->rfc2822_from);
 +                if ($mysexisted == 1) {
-+                        $conn_h->execute($ins_wblist,untaint($mysid),untaint($myrid),untaint($mysid),untaint($myrid));
++                        $conn_h->execute($ins_wblist,untaint($myrid),untaint($mysid),untaint($myrid));
 +                }
 +        }
 +        ### end
