@@ -40,7 +40,9 @@ final class GroupRuleFactory extends PersistentObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(GroupRule $groupRule): void {})
+            ->afterInstantiate(function(GroupRule $groupRule): void {
+                $groupRule->setWbRule($groupRule->getWb());
+            })
         ;
     }
 }

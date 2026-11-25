@@ -749,9 +749,10 @@ class MessageService
 
             $messageRecipients = $this->messageRecipientRepository->findSentToGroupMembersByEmail($group);
             foreach ($messageRecipients as $messageRecipient) {
+                $senderEmail = $messageRecipient->getMessage()->getSenderEmail();
+
                 $rule = $this->getApplicableSenderRule(
-                    // $messageRecipient->getMessage()->getSenderAddress()->getEmail(),
-                    $messageRecipient->getMessage()->getSenderEmail(),
+                    $senderEmail,
                     $messageRecipient->getAddress()->getEmail(),
                 );
 
@@ -766,20 +767,24 @@ class MessageService
                 }
 
                 if ($rule === 'allow') {
-                    $this->reprocessAuthorizationsForSenderEmailForUser(
-                        $user,
-                        $messageRecipient->getMessage()->getSenderEmail(),
-                        false,
-                    );
+                    // if ($this->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                            false,
+                        );
+                    // }
                 } elseif ($rule === 'accept') {
-                    $this->reprocessAuthorizationsForSenderEmailForUser(
-                        $user,
-                        $messageRecipient->getMessage()->getSenderEmail(),
-                    );
-                } elseif ($rule === 'block') {
+                    // if ($this->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
+                        $this->reprocessAuthorizationsForSenderEmailForUser(
+                            $user,
+                            $senderEmail,
+                        );
+                    // }
+                } else {
                     $this->reprocessBansForSenderEmailForUser(
                         $user,
-                        $messageRecipient->getMessage()->getSenderEmail(),
+                        $senderEmail,
                     );
                 }
             }

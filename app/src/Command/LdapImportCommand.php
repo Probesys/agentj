@@ -112,9 +112,14 @@ class LdapImportCommand extends Command
 
         $this->groupService->updateSenderRules();
 
+        $this->messageService->reprocessForGroup($groupsResult['existing_group_ids']);
+
         $this->connector->finishImportWithSuccess([
             'users' => $usersResult,
-            'groups' => $groupsResult,
+            'groups' => [
+                'nb_groups_created' => $groupsResult['nb_groups_created'],
+                'nb_groups_updated' => $groupsResult['nb_groups_updated'],
+            ],
         ]);
         $this->em->persist($this->connector);
         $this->em->flush();
@@ -362,6 +367,7 @@ class LdapImportCommand extends Command
             $results = $query->execute();
             $nbGroupUpdated = 0;
             $nbGroupCreated = 0;
+            $existingGroupIds = [];
             $results = $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
 
             foreach ($results as $ldapGroup) {
@@ -380,18 +386,24 @@ class LdapImportCommand extends Command
                     $group->setOriginConnector($this->connector);
                     $isNew = true;
                     $priorityMax++;
+                } else {
+                    // TODO: reprocess
                 }
 
                 $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
                 $this->em->persist($group);
                 $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
                 $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
+                if (!$isNew) {
+                    $existingGroupIds[] = $group->getId();
+                }
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
             $result = [
                 'nb_groups_created' => $nbGroupCreated,
                 'nb_groups_updated' => $nbGroupUpdated,
+                'existing_group_ids' => $existingGroupIds,
             ];
 
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', $result));
