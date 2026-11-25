@@ -14,12 +14,18 @@ Then, create a LDAP connector with the following values:
 - port: 1389
 - bind DN: `cn=admin,dc=example,dc=com`
 - password: `secret`
-- BaseDN: `ou=users,dc=example,dc=com`
+- BaseDN: `dc=example,dc=com`
 - Name field: `displayName`
 - Email field: `mail`
 - Alias field: `alias`
 - Shared mailboxes field: `SharedWith`
 - Users filter: `(cn=*)`
+
+For group import:
+
+- Filter for groups; `(objectClass=groupOfNames)`
+- LDAP field for group name (ex: sn): `cn`
+- LDAP field for group members: `member`
 
 Then, import the users.
 You can login with one of the LDAP users:
