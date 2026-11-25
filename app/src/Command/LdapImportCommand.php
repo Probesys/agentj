@@ -112,13 +112,33 @@ class LdapImportCommand extends Command
 
         $this->groupService->updateSenderRules();
 
-        $this->messageService->reprocessForGroup($groupsResult['existing_group_ids']);
+        dump('SENDER RULES UPDATED');
+
+        $groupIds = $groupsResult['existing_group_ids'] ?? [];
+        $tagetGroupIds = array_reduce(
+            $connector->getTargetGroups()->toArray(),
+            function (array $carry, $group) {
+                $id = $group->getId();
+                $carry[$id] = $id;
+                return $carry;
+            },
+            [],
+        );
+        $groupIds = array_merge($groupIds, $tagetGroupIds);
+
+        dump($groupIds);
+        // $groupIds = $tagetGroupIds;
+
+        if (count($groupIds) > 0) {
+            dump('REPROCESS FOR GROUP');
+            $this->messageService->reprocessForGroup($groupIds);
+        }
 
         $this->connector->finishImportWithSuccess([
             'users' => $usersResult,
             'groups' => [
-                'nb_groups_created' => $groupsResult['nb_groups_created'],
-                'nb_groups_updated' => $groupsResult['nb_groups_updated'],
+                'nb_groups_created' => $groupsResult['nb_groups_created'] ?? 0,
+                'nb_groups_updated' => $groupsResult['nb_groups_updated'] ?? 0,
             ],
         ]);
         $this->em->persist($this->connector);
@@ -199,17 +219,6 @@ class LdapImportCommand extends Command
 
                 $this->userService->syncUserAndAliases($user);
             }
-
-            $groupIds = array_reduce(
-                $this->connector->getTargetGroups()->toArray(),
-                function (array $carry, $group) {
-                    $id = $group->getId();
-                    $carry[$id] = $id;
-                    return $carry;
-                },
-                [],
-            );
-            $this->messageService->reprocessForGroup($groupIds);
         }
 
         $result = [
@@ -349,9 +358,13 @@ class LdapImportCommand extends Command
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, int>|null
-     */
+   /**
+    * @return array{
+    *     nb_groups_created: int,
+    *     nb_groups_updated: int,
+    *     existing_group_ids: array<int, int>
+    * }
+    */
     private function importGroups(): ?array
     {
         $realNameAttribute = $this->connector->getLdapGroupNameField();
@@ -395,10 +408,12 @@ class LdapImportCommand extends Command
                 $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
                 $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
                 if (!$isNew) {
-                    $existingGroupIds[] = $group->getId();
+                    $existingGroupIds[(int)$group->getId()] = (int)$group->getId();
                 }
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
+
+            dump($existingGroupIds);
 
             $result = [
                 'nb_groups_created' => $nbGroupCreated,
