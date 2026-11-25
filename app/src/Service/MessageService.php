@@ -743,13 +743,15 @@ class MessageService
      */
     public function reprocessForGroup(array $groupIds): void
     {
+        dump($groupIds);
         foreach ($groupIds as $groupId) {
             $group = $this->groupRepository->findOneBy(['id' => $groupId]);
 
             $messageRecipients = $this->messageRecipientRepository->findSentToGroupMembersByEmail($group);
             foreach ($messageRecipients as $messageRecipient) {
                 $rule = $this->getApplicableSenderRule(
-                    $messageRecipient->getMessage()->getSenderAddress()->getEmail(),
+                    // $messageRecipient->getMessage()->getSenderAddress()->getEmail(),
+                    $messageRecipient->getMessage()->getSenderEmail(),
                     $messageRecipient->getAddress()->getEmail(),
                 );
 

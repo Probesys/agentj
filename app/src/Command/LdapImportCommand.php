@@ -197,7 +197,11 @@ class LdapImportCommand extends Command
 
             $groupIds = array_reduce(
                 $this->connector->getTargetGroups()->toArray(),
-                fn ($carry, $group) => array_merge($carry, [$group->getId()]),
+                function (array $carry, $group) {
+                    $id = $group->getId();
+                    $carry[$id] = $id;
+                    return $carry;
+                },
                 [],
             );
             $this->messageService->reprocessForGroup($groupIds);
@@ -332,6 +336,7 @@ class LdapImportCommand extends Command
 
         foreach ($targetGroups as $group) {
             $user->addGroup($group);
+            $group->addUser($user);
             // TODO: reprocess pending emails status
         }
 
