@@ -44,6 +44,8 @@ services:
       - ./app/:/var/www/agentj
       - ./app/var:/var/www/agentj/var
       - ./app/public/files:/var/www/agentj/public/files
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   watcher:
     image: probesys38/agentj_app:$VERSION
