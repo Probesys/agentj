@@ -434,7 +434,7 @@ class GroupRuleControllerTest extends WebTestCase
         GroupRuleFactory::createOne([
             'group' => $group1,
             'ruleAddress' => $senderRuleAddress,
-            'wb' => 'B',
+            'wb' => 'block',
         ]);
         $message->setStatus(MessageStatus::BANNED);
         $this->save($message);

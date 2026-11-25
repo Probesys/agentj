@@ -743,7 +743,6 @@ class MessageService
      */
     public function reprocessForGroup(array $groupIds): void
     {
-        dump($groupIds);
         foreach ($groupIds as $groupId) {
             $group = $this->groupRepository->findOneBy(['id' => $groupId]);
 

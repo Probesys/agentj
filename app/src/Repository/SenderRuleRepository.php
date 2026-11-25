@@ -293,19 +293,15 @@ class SenderRuleRepository extends BaseRepository
             'senderAddresses' => DBAL\ArrayParameterType::STRING,
         ])->fetchOne();
 
-        $wbFromDb = $wb === false ? null : $wb;
-        if ($wb) {
+        if (!$wb) {
             $wb = null;
         }
-        dump($wbFromDb);
-        $rule = $this->mapWb($wbFromDb);
-        dump($rule);
-        return $rule;
+        return $this->mapWb($wb);
     }
 
     private function mapWb(?string $wb): string
     {
-        return match ($wb === false ? null : $wb) {
+        return match ($wb) {
             'W', 'Y' => 'allow',
             'B', 'N' => 'block',
             '0' => 'enabled',

@@ -200,7 +200,7 @@ class ImportControllerTest extends WebTestCase
         SenderRuleFactory::assert()->count(1, [
             'user' => $createdGroupUser,
             'senderRuleAddress' => $senderRuleAddress,
-            'wb' => 'allow',
+            'wb' => 'W',
             'type' => SenderRule::TYPE_GROUP,
             'priority' => SenderRule::PRIORITY_GROUP + $group->getPriority(),
         ]);
@@ -287,7 +287,7 @@ class ImportControllerTest extends WebTestCase
         SenderRuleFactory::assert()->count(1, [
             'user' => $createdGroupUser,
             'senderRuleAddress' => $senderRuleAddress,
-            'wb' => 'accept',
+            'wb' => '',
             'type' => SenderRule::TYPE_GROUP,
             'priority' => SenderRule::PRIORITY_GROUP + $group->getPriority(),
         ]);

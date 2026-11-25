@@ -112,8 +112,6 @@ class LdapImportCommand extends Command
 
         $this->groupService->updateSenderRules();
 
-        dump('SENDER RULES UPDATED');
-
         $groupIds = $groupsResult['existing_group_ids'] ?? [];
         $tagetGroupIds = array_reduce(
             $connector->getTargetGroups()->toArray(),
@@ -126,11 +124,7 @@ class LdapImportCommand extends Command
         );
         $groupIds = array_merge($groupIds, $tagetGroupIds);
 
-        dump($groupIds);
-        // $groupIds = $tagetGroupIds;
-
         if (count($groupIds) > 0) {
-            dump('REPROCESS FOR GROUP');
             $this->messageService->reprocessForGroup($groupIds);
         }
 
@@ -399,8 +393,6 @@ class LdapImportCommand extends Command
                     $group->setOriginConnector($this->connector);
                     $isNew = true;
                     $priorityMax++;
-                } else {
-                    // TODO: reprocess
                 }
 
                 $group->setName($ldapGroup->getAttribute($realNameAttribute)[0]);
@@ -413,15 +405,17 @@ class LdapImportCommand extends Command
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
-            dump($existingGroupIds);
-
             $result = [
                 'nb_groups_created' => $nbGroupCreated,
                 'nb_groups_updated' => $nbGroupUpdated,
                 'existing_group_ids' => $existingGroupIds,
             ];
 
-            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', $result));
+            // $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', $result));
+            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', [
+                'nb_groups_created' => $result['nb_groups_created'],
+                'nb_groups_updated' => $result['nb_groups_updated'],
+            ]));
 
             $this->em->flush();
 
