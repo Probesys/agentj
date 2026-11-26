@@ -293,7 +293,7 @@ class SenderRuleRepository extends BaseRepository
             'senderAddresses' => DBAL\ArrayParameterType::STRING,
         ])->fetchOne();
 
-        if (!$wb) {
+        if ($wb === false) {
             $wb = null;
         }
         return $this->mapWb($wb);
