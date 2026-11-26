@@ -162,7 +162,7 @@ class MessageRecipientRepository extends BaseRepository
     }
 
     /**
-     * Return all message recipients sent by $senderFrom to $recipientGroup.
+     * Return all message recipients sent to users member of $group.
      *
      * As for findSentToUserByEmail, this method fetches the messages by using
      * the raw "From" value. See above for the reasons.
@@ -173,7 +173,6 @@ class MessageRecipientRepository extends BaseRepository
      *
      * @return MessageRecipient[]
      */
-    // public function findSentToGroupMembersByEmail(Group $group, string $senderFrom): array
     public function findSentToGroupMembersByEmail(Group $group): array
     {
         $query = $this->getEntityManager()->createQuery(<<<DQL
@@ -181,7 +180,6 @@ class MessageRecipientRepository extends BaseRepository
             FROM App\Entity\MessageRecipient mr
             JOIN mr.message m
             JOIN mr.address ra
-            -- WHERE m.fromAddr = :senderFrom
             WHERE mr.status IS NOT NULL
             AND ra.email IN (
                 SELECT u.email
@@ -192,7 +190,6 @@ class MessageRecipientRepository extends BaseRepository
         DQL);
 
         $query->setParameter('group', $group);
-        // $query->setParameter('senderFrom', $senderFrom);
 
         return $query->getResult();
     }

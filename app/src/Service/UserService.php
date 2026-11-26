@@ -66,7 +66,6 @@ class UserService
      */
     public function syncUserAndAliases(User $user): void
     {
-        // TODO: call GroupService->updateSenderRules() after groups update?
         $parentUser = $user->getMainUser();
 
         if ($user->isAlias()) {

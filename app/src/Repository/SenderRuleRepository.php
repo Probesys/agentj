@@ -186,11 +186,6 @@ class SenderRuleRepository extends BaseRepository
         return $senderRules;
     }
 
-    /**
-     * @phpstan-type WbRule 'accept'|'block'|'allow'|'enabled'|'none'
-     *
-     *
-     */
     public function getRuleByRecipient(string $senderEmail, string $recipientEmail): bool
     {
         $recipientAddresses = Email::getAddressLookups($recipientEmail);

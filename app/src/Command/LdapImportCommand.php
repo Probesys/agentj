@@ -344,8 +344,6 @@ class LdapImportCommand extends Command
 
         foreach ($targetGroups as $group) {
             $user->addGroup($group);
-            $group->addUser($user);
-            // TODO: reprocess pending emails status
         }
 
         $this->em->persist($user);
@@ -411,10 +409,9 @@ class LdapImportCommand extends Command
                 'existing_group_ids' => $existingGroupIds,
             ];
 
-            // $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', $result));
             $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', [
-                'nb_groups_created' => $result['nb_groups_created'],
-                'nb_groups_updated' => $result['nb_groups_updated'],
+                'nb_groups_created' => $nbGroupCreated,
+                'nb_groups_updated' => $nbGroupUpdated,
             ]));
 
             $this->em->flush();
