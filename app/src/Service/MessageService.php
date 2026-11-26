@@ -766,20 +766,16 @@ class MessageService
                 }
 
                 if ($rule === 'allow') {
-                    // if ($this->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
-                        $this->reprocessAuthorizationsForSenderEmailForUser(
-                            $user,
-                            $senderEmail,
-                            false,
-                        );
-                    // }
+                    $this->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                        false,
+                    );
                 } elseif ($rule === 'accept') {
-                    // if ($this->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
-                        $this->reprocessAuthorizationsForSenderEmailForUser(
-                            $user,
-                            $senderEmail,
-                        );
-                    // }
+                    $this->reprocessAuthorizationsForSenderEmailForUser(
+                        $user,
+                        $senderEmail,
+                    );
                 } else {
                     $this->reprocessBansForSenderEmailForUser(
                         $user,

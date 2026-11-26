@@ -54,7 +54,6 @@ class ImportControllerTest extends WebTestCase
         $recipient2 = UserFactory::new()->user($domain)->create([
             'email' => 'group@' . $domain,
         ]);
-        // $recipient2->addGroup($group);
         $admin = UserFactory::new()->admin([$domain])->create();
         // Add a GroupRule to block sender
         $senderRuleAddress = RuleAddressFactory::findOrCreate([
@@ -142,7 +141,6 @@ class ImportControllerTest extends WebTestCase
         $recipient2 = UserFactory::new()->user($domain)->create([
             'email' => 'group@' . $domain,
         ]);
-        // $recipient2->addGroup($group);
         $admin = UserFactory::new()->admin([$domain])->create();
         // Add a GroupRule to block sender
         $senderRuleAddress = RuleAddressFactory::findOrCreate([
@@ -229,7 +227,6 @@ class ImportControllerTest extends WebTestCase
         $recipient2 = UserFactory::new()->user($domain)->create([
             'email' => 'group@' . $domain,
         ]);
-        // $recipient2->addGroup($group);
         $admin = UserFactory::new()->admin([$domain])->create();
         // Add a GroupRule to block sender
         $senderRuleAddress = RuleAddressFactory::findOrCreate([
@@ -303,6 +300,105 @@ class ImportControllerTest extends WebTestCase
         self::assertNotFalse($messageRecipient2);
         self::assertSame(MessageStatus::AUTHORIZED, $message2->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+    }
+
+    public function testImportUsersInGroupShouldNotReprocessPendingEmailsWhenMorePriorizedRuleExists(): void
+    {
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user($domain)->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $group = GroupFactory::createOne([
+            'domain' => $domain,
+        ]);
+        $recipient2 = UserFactory::new()->user($domain)->create([
+            'email' => 'group@' . $domain,
+        ]);
+        $admin = UserFactory::new()->admin([$domain])->create();
+        // Add a SenderRule to block sender for $recipient2
+        $senderRuleAddress = RuleAddressFactory::findOrCreate([
+            'priority' => 6,
+            'email' => $sender->getEmail(),
+        ]);
+        SenderRuleFactory::createOne([
+            'user' => $recipient2,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => 'block',
+            'priority' => SenderRule::PRIORITY_USER,
+        ]);
+        // Create a GroupRule that accept emails for group's member
+        GroupRuleFactory::createOne([
+            'group' => $group,
+            'ruleAddress' => $senderRuleAddress,
+            'wb' => 'accept',
+        ]);
+        $this->client->loginUser($admin);
+        // Send an email to recipient
+        [$addrSender, $addrRecipient] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail($addrSender, [$addrRecipient], status: MessageStatus::UNTREATED);
+        $messageRecipient = $message->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient);
+        // Send an email to recipient2
+        $recipientAddress2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($domain),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $message2 = $this->setupMail($addrSender, [$recipientAddress2], status: MessageStatus::UNTREATED);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+        $message2->setStatus(MessageStatus::BANNED);
+        $this->save($message2);
+        $messageRecipient2->setStatus(MessageStatus::BANNED);
+        $this->save($message2);
+        // Get the page to retrieve CSRF token
+        $crawler = $this->client->request(Request::METHOD_GET, '/admin/import/users');
+        self::assertResponseIsSuccessful();
+        $initialSenderRuleCount = SenderRuleFactory::count();
+        $initialUserCount = UserFactory::count();
+
+        $path = sys_get_temp_dir() . '/importUsers_' . uniqid() . '.csv';
+        file_put_contents(
+            $path,
+            implode(PHP_EOL, [
+                $this->createCsvLine('test', $domain),
+                $this->createCsvLine('group', $domain, $group),
+            ])
+        );
+        $form = $crawler->filter('form[name="import"]')->form();
+        $values = $form->getPhpValues(); // includes the CSRF token and domain
+        $files = [
+            'import' => [
+                'attachment' => new UploadedFile($path, 'importUsers.csv', 'text/csv', null, true),
+            ],
+        ];
+        $this->client->request($form->getMethod(), $form->getUri(), $values, $files);
+
+        self::assertResponseRedirects();
+        self::assertSame($initialUserCount + 1, UserFactory::count());
+        self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
+        // Check that a SenderRule has been added to imported user with group
+        $createdGroupUser = UserFactory::findBy(['email' => 'group@' . $domain])[0];
+        SenderRuleFactory::assert()->count(1, [
+            'user' => $createdGroupUser,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => '',
+            'type' => SenderRule::TYPE_GROUP,
+            'priority' => SenderRule::PRIORITY_GROUP + $group->getPriority(),
+        ]);
+        // MessageRecipientRepository broke the Doctrine cache when we call
+        // findSentToGroupMembersByEmail method. That's why we have to query
+        // message again.
+        $message2 = MessageFactory::findBy([
+            'partitionTag' => $messageRecipient2->getPartitionTag(),
+            'mailId' => $messageRecipient2->getMailId(),
+        ])[0];
+        self::assertNotFalse($message2);
+        $messageRecipient2 = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($messageRecipient2);
+        // Status is not updated as $recipient2 has User level block rule
+        // that preveil over GroupRule (accept).
+        self::assertSame(MessageStatus::BANNED, $message2->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
     }
 
     private function createCsvLine(string $name, Domain $domain, ?Group $group = null): string

@@ -289,9 +289,7 @@ class ImportController extends AbstractController
         $batchSize = 20;
 
         $em = $this->em;
-        $groups = [];
         $emails = [];
-        $groupWbUpdate = [];
         $domains = [];
         try {
             if (($handle = fopen($pathfile, "r")) !== false) {
