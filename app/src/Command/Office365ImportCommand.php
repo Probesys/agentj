@@ -195,6 +195,10 @@ class Office365ImportCommand extends Command
             $user->setPolicy($domain->getPolicy());
             $user->setOriginConnector($this->connector);
             $user->setPriority(RuleAddressService::computePriority($graphUser->getMail()));
+            // Persist and flush to be sure User exist before adding an alias
+            $this->em->persist($user);
+            $this->em->flush();
+
             if (count($graphUser->getProxyAddresses()) > 1) {
                 $aliases = $this->addAliases($user, $graphUser->getProxyAddresses());
                 $nbAliasCreated += count($aliases);
