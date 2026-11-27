@@ -5,12 +5,14 @@ namespace App\Tests\Command;
 use App\Amavis\MessageStatus;
 use App\Entity\Address;
 use App\Tests\CommandHelper;
+use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\DomainFactory;
 use App\Tests\Factory\MessageListMetadataFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\FactoryHelper;
 use App\Tests\MessageHelper;
 use App\Tests\SessionHelper;
+use App\Util\Url;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Mime\Email;
@@ -34,6 +36,38 @@ class SendReportMailCommandTest extends KernelTestCase
         'list-unsubscribe-post' => 'List-Unsubscribe=One-Click',
     ];
 
+    public function testReportMailIsSentOnlyToUsersThatHadActivatedReports(): void
+    {
+        [$addrSender, $addrRecipient1] = $this->setupTest();
+        $recipient2 = UserFactory::new()->user()->create([
+            'report' => false,
+        ]);
+        $addrRecipient2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $this->setupMail(
+            $addrSender,
+            [$addrRecipient1, $addrRecipient2],
+            status: MessageStatus::UNTREATED,
+        );
+
+        $applicationTester = self::executeCommand('agentj:send-report-mail');
+
+        $applicationTester->assertCommandIsSuccessful();
+        // Only 1 report email is sent to recipient1 that activated reports
+        self::assertEmailCount(1);
+        $message = self::getMailerMessage();
+        self::assertInstanceOf(Message::class, $message);
+        self::assertEmailAddressContains($message, 'To', $addrRecipient1->getEmail());
+        $mail = MessageConverter::toEmail($message);
+        $this->assertOccurencesCount($mail, 'all', $addrSender->getEmail(), 1);
+        $this->assertOccurencesCount($mail, 'standard', $addrSender->getEmail(), 1);
+        $this->assertOccurencesCount($mail, 'list', $addrSender->getEmail(), 0);
+        $this->assertOccurencesCount($mail, 'spam', $addrSender->getEmail(), 0);
+    }
+
     public function testReportMailIsNotSentIfNoMessageAtAll(): void
     {
         $this->setupTest();
@@ -44,10 +78,35 @@ class SendReportMailCommandTest extends KernelTestCase
         self::assertEmailCount(0);
     }
 
+    public function testReportMailIsNotSentToAliasesOfUserThatActivatedReport(): void
+    {
+        $domain = DomainFactory::createOne();
+        $recipient1 = UserFactory::new()->user($domain)->create();
+        $recipient2 = UserFactory::new()->alias($recipient1)->create();
+        $sender = UserFactory::new()->user($domain)->create();
+        [$addrS, $addrR] = $this->setupAddresses($sender, $recipient1);
+        $addrR2 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'partitionTag' => 0,
+            'email' => $recipient2->getEmail(),
+        ]);
+        $this->setupMail($addrS, [$addrR], status: MessageStatus::UNTREATED);
+        $this->setupMail($addrS, [$addrR2], status: MessageStatus::UNTREATED);
+
+        $applicationTester = self::executeCommand('agentj:send-report-mail');
+
+        $applicationTester->assertCommandIsSuccessful();
+        // Only 1 mail sent to recipient1.
+        // Recipient2 is an alias, so report is not sent to him.
+        self::assertEmailCount(1);
+        $mail = self::getMailerMessage();
+        self::assertEmailAddressContains($mail, 'To', $addrR->getEmail());
+    }
+
     public function testReportMailIsSentAndTagsAreReplaced(): void
     {
         [$addrS, $addrR] = $this->setupTest(reportType: 'full');
-        $message = $this->setupMail(
+        $this->setupMail(
             $addrS,
             [$addrR],
             status: MessageStatus::UNTREATED,
