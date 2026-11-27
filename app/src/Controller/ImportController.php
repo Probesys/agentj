@@ -203,7 +203,7 @@ class ImportController extends AbstractController
 
                 $this->groupService->updateSenderRules();
 
-                $this->messageService->reprocessForGroup($groupWbUpdate);
+                $this->messageService->reprocessPendingMessagesForGroups($groupWbUpdate);
             }
         } catch (\Exception $e) {
             $dangerMessage = $translator->trans('Generics.flash.ImportError', ['ERROR_MESSAGE' => $e->getMessage()]);

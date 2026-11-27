@@ -116,29 +116,7 @@ class GroupRuleController extends AbstractController
 
             $groupService->updateSenderRules();
 
-            foreach ($group->getUsers() as $user) {
-                if ($data['wbRule'] === 'allow') {
-                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
-                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
-                            $user,
-                            $senderEmail,
-                            false,
-                        );
-                    }
-                } elseif ($data['wbRule'] === 'accept') {
-                    if ($this->messageService->isSenderAuthorizedByRecipient($senderEmail, $user->getEmail())) {
-                        $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
-                            $user,
-                            $senderEmail,
-                        );
-                    }
-                } else {
-                    $this->messageService->reprocessBansForSenderEmailForUser(
-                        $user,
-                        $senderEmail,
-                    );
-                }
-            }
+            $this->messageService->reprocessPendingMessagesForGroups([$group->getId()]);
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         }
@@ -195,25 +173,7 @@ class GroupRuleController extends AbstractController
 
             $groupService->updateSenderRules();
 
-            foreach ($group->getUsers() as $user) {
-                if ($data['wbRule'] === 'allow') {
-                    $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
-                        $user,
-                        $senderEmail,
-                        false,
-                    );
-                } elseif ($data['wbRule'] === 'accept') {
-                    $this->messageService->reprocessAuthorizationsForSenderEmailForUser(
-                        $user,
-                        $senderEmail,
-                    );
-                } else {
-                    $this->messageService->reprocessBansForSenderEmailForUser(
-                        $user,
-                        $senderEmail,
-                    );
-                }
-            }
+            $this->messageService->reprocessPendingMessagesForGroups([$group->getId()]);
 
             return $this->redirectToRoute('groups_rules_index', ['groupId' => $groupId]);
         } else {

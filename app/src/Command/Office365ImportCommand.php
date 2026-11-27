@@ -117,7 +117,7 @@ class Office365ImportCommand extends Command
         $groupIds = array_merge($groupIds, $tagetGroupIds);
 
         if (count($groupIds) > 0) {
-            $this->messageService->reprocessForGroup($groupIds);
+            $this->messageService->reprocessPendingMessagesForGroups($groupIds);
         }
 
         $this->connector->finishImportWithSuccess([

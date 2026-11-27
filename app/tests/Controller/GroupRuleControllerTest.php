@@ -108,6 +108,60 @@ class GroupRuleControllerTest extends WebTestCase
         self::assertNotEmpty($updatedSenderRule);
     }
 
+    public function testCreateGroupRuleShouldNotApplyOnPendingMessagesWhenGroupNotActive(): void
+    {
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $this->client->loginUser($superAdmin);
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $group = GroupFactory::createOne([
+            'active' => false,
+            'domain' => $domain,
+            'priority' => 10,
+        ]);
+        $group->addUser($recipient);
+        $this->save($group);
+        [$senderAddress, $recipientAddress1] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $senderAddress,
+            [$recipientAddress1],
+            status: MessageStatus::UNTREATED,
+        );
+        $messageRecipient1 = $this->getMessageRecipient($message, 1);
+        $initialGroupRulesCount = GroupRuleFactory::count();
+
+        $token = $this->generateCsrfToken($this->client, 'group-sender-rule-create');
+        $payload = [
+            "group_rule" => [
+                "email" => $sender->getEmail(),
+                "wbRule" => "block",
+                "_token" => $token,
+            ],
+        ];
+        $url = '/groups/' . $group->getId() . '/rules/new';
+        $this->client->request('POST', $url, $payload);
+
+        self::assertSame($initialGroupRulesCount + 1, GroupRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        // Message and MessageRecipient status unchanged as group is not active
+        self::assertSame(MessageStatus::UNTREATED, $message->getStatus());
+        self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
+        $senderRuleAddress = RuleAddressFactory::findOrCreate([
+            'priority' => 6,
+            'email' => $sender->getEmail(),
+        ]);
+        $updatedSenderRule = SenderRuleFactory::findBy([
+            'user' => $recipient,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => 'B',
+            'type' => SenderRule::TYPE_GROUP,
+            'priority' => SenderRule::PRIORITY_GROUP + $group->getPriority(),
+        ]);
+        self::assertEmpty($updatedSenderRule);
+    }
+
     public function testCreateGroupRuleShouldNotApplyOnPendingMessagesWhenPriorityIsNotHighest(): void
     {
         $superAdmin = UserFactory::new()->superAdmin()->create();
@@ -474,6 +528,70 @@ class GroupRuleControllerTest extends WebTestCase
             'priority' => SenderRule::PRIORITY_GROUP + $group1->getPriority(),
         ]);
         self::assertNotEmpty($updatedSenderRule);
+    }
+
+    public function testUpdateGroupRuleShouldNotApplyOnPendingMessagesWhenGroupNotActive(): void
+    {
+        $superAdmin = UserFactory::new()->superAdmin()->create();
+        $this->client->loginUser($superAdmin);
+        $domain = DomainFactory::createOne();
+        $sender = UserFactory::new()->user()->create();
+        $recipient = UserFactory::new()->user($domain)->create();
+        $group = GroupFactory::createOne([
+            'active' => false,
+            'domain' => $domain,
+            'priority' => 10,
+        ]);
+        $group->addUser($recipient);
+        $this->save($group);
+        [$senderAddress, $recipientAddress] = $this->setupAddresses($sender, $recipient);
+        $message = $this->setupMail(
+            $senderAddress,
+            [$recipientAddress],
+            status: MessageStatus::UNTREATED,
+        );
+        $messageRecipient1 = $this->getMessageRecipient($message, 1);
+        // Create initial state with a GroupRule that ban $sender as sender for group1.
+        // Also set status to MessageRecipient accordingly.
+        $senderRuleAddress = RuleAddressFactory::findOrCreate([
+            'priority' => 6,
+            'email' => $sender->getEmail(),
+        ]);
+        GroupRuleFactory::createOne([
+            'group' => $group,
+            'ruleAddress' => $senderRuleAddress,
+            'wb' => 'block',
+        ]);
+        $message->setStatus(MessageStatus::BANNED);
+        $this->save($message);
+        $messageRecipient1->setStatus(MessageStatus::BANNED);
+        $this->save($messageRecipient1);
+        $initialGroupRulesCount = GroupRuleFactory::count();
+
+        $token = $this->generateCsrfToken($this->client, 'group-sender-rule-edit');
+        $payload = [
+            "group_rule" => [
+                "email" => $sender->getEmail(),
+                "wbRule" => "allow",
+                "_token" => $token,
+            ],
+        ];
+        $url = '/groups/' . $group->getId() . '/rules/' . $senderRuleAddress->getId() . '/edit';
+        $this->client->request('POST', $url, $payload);
+
+        self::assertSame($initialGroupRulesCount, GroupRuleFactory::count());
+        $this->refresh($message);
+        $this->refresh($messageRecipient1);
+        self::assertSame(MessageStatus::BANNED, $message->getStatus());
+        self::assertSame(MessageStatus::BANNED, $messageRecipient1->getStatus());
+        $updatedSenderRule = SenderRuleFactory::findBy([
+            'user' => $recipient,
+            'senderRuleAddress' => $senderRuleAddress,
+            'wb' => 'W',
+            'type' => SenderRule::TYPE_GROUP,
+            'priority' => SenderRule::PRIORITY_GROUP + $group->getPriority(),
+        ]);
+        self::assertEmpty($updatedSenderRule);
     }
 
     private function getMessageRecipient(Message $message, int $rseqnum): MessageRecipient

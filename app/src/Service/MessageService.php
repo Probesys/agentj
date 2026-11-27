@@ -741,10 +741,13 @@ class MessageService
     /**
      * @param array<int> $groupIds
      */
-    public function reprocessForGroup(array $groupIds): void
+    public function reprocessPendingMessagesForGroups(array $groupIds): void
     {
         foreach ($groupIds as $groupId) {
             $group = $this->groupRepository->findOneBy(['id' => $groupId]);
+            if (!$group->getActive()) {
+                continue;
+            }
 
             $messageRecipients = $this->messageRecipientRepository->findSentToGroupMembersByEmail($group);
             foreach ($messageRecipients as $messageRecipient) {
