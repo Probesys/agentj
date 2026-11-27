@@ -467,6 +467,8 @@ class MessageControllerTest extends WebTestCase
         $initialMessageCount = MessageFactory::count();
         $initialMessageRecipientCount = MessageRecipientFactory::count();
         $messageRecipient = $message->getMessageRecipients()->first();
+        $quarantineChunks = $message->getQuarantineChunks();
+        self::assertCount(1, $quarantineChunks);
         self::assertNotFalse($messageRecipient);
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient->getRseqnum() . '/delete/';
@@ -482,6 +484,9 @@ class MessageControllerTest extends WebTestCase
         $this->refresh($messageRecipient);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::DELETED, $messageRecipient->getStatus());
+        // There is a cascade on Message deletion, but since message is not deleted but
+        // MessageRecipient status updated to DELETED, OutQuarantine remains unchanged.
+        self::assertCount(1, $quarantineChunks);
         LogFactory::assert()->exists([
             'action' => LogAction::Delete->value,
             'domain' => $domain,

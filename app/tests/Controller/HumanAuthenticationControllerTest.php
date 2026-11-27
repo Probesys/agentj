@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use AltchaOrg\Altcha\Solution;
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\EventSubscriber\SecurityHeadersSubscriber;
 use App\Service\AltchaService;
 use App\Service\CryptEncryptService;

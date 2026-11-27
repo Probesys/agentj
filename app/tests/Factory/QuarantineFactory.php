@@ -3,19 +3,15 @@
 namespace App\Tests\Factory;
 
 use App\Entity\Quarantine;
+use App\Tests\MessageHelper;
 use DateTime;
 use Zenstruck\Foundry\Object\Instantiator;
-use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentObjectFactory<Quarantine>
+ * @extends BaseQuarantineFactory<Quarantine>
  */
-final class QuarantineFactory extends PersistentObjectFactory
+final class QuarantineFactory extends BaseQuarantineFactory
 {
-    public function __construct()
-    {
-    }
-
     #[\Override]
     public static function class(): string
     {

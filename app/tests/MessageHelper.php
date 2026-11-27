@@ -5,11 +5,16 @@ namespace App\Tests;
 use App\Entity\Address;
 use App\Entity\Message;
 use App\Entity\MessageRecipient;
+use App\Entity\OutMessage;
+use App\Entity\OutMessageRecipient;
 use App\Entity\SenderRule;
 use App\Entity\User;
 use App\Tests\Factory\AddressFactory;
 use App\Tests\Factory\MessageFactory;
 use App\Tests\Factory\MessageRecipientFactory;
+use App\Tests\Factory\OutMessageFactory;
+use App\Tests\Factory\OutMessageRecipientFactory;
+use App\Tests\Factory\OutQuarantineFactory;
 use App\Tests\Factory\QuarantineFactory;
 use App\Tests\Factory\RuleAddressFactory;
 use App\Tests\Factory\SenderRuleFactory;
@@ -41,13 +46,16 @@ trait MessageHelper
 
     /**
      * @param array<int, Address> $recipients
+     * @param 'incoming'|'outgoing' $direction
      * @param array<mixed> $messageAttributes
+     * @return ($direction is 'incoming' ? Message : OutMessage)
      * @param array<mixed> $messageRecipientAttributes
      * @param array<string, string> $headers
      */
     private function setupMail(
         Address $sender,
         array $recipients,
+        string $direction = 'incoming',
         ?string $fromAddr = null,
         ?string $subject = 'test',
         ?string $body = null,
@@ -56,10 +64,11 @@ trait MessageHelper
         ?array $messageRecipientAttributes = [],
         ?array $headers = [],
         ?string $contentType = null,
-    ): Message {
+    ): Message|OutMessage {
         $mailId = bin2hex(random_bytes(8));
 
-        $message = MessageFactory::new()->create(array_merge([
+        $messageFactory = $direction === 'incoming' ? MessageFactory::class : OutMessageFactory::class;
+        $message = $messageFactory::new()->create(array_merge([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'senderAddress' => $sender,
@@ -87,8 +96,8 @@ trait MessageHelper
             'headers' => $headers,
             'contentType' => $contentType,
         ]);
-
-        QuarantineFactory::new()->create([
+        $quarantineFactory = $direction === 'incoming' ? QuarantineFactory::class : OutQuarantineFactory::class;
+        $quarantineFactory::new()->create([
             'partitionTag' => 0,
             'mailId' => $mailId,
             'message' => $message,
@@ -103,13 +112,17 @@ trait MessageHelper
      * @param array<mixed> $messageRecipientAttributes
      */
     private function setupMailRecipient(
-        Message $message,
+        Message|OutMessage $message,
         Address $recipient,
         int $rseqnum,
         ?int $status = null,
         ?array $messageRecipientAttributes = [],
-    ): MessageRecipient {
-        return MessageRecipientFactory::new()->create(array_merge([
+    ): MessageRecipient|OutMessageRecipient {
+        $messageRecipientFactory = $message instanceof Message ?
+            MessageRecipientFactory::class :
+            OutMessageRecipientFactory::class;
+
+        return $messageRecipientFactory::new()->create(array_merge([
             'message' => $message,
             'partitionTag' => $message->getPartitionTag(),
             'mailId' => $message->getMailId(),

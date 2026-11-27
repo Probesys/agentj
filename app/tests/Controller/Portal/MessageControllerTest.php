@@ -3,6 +3,7 @@
 namespace App\Tests\Controller\Portal;
 
 use App\Amavis\MessageStatus;
+use App\Entity\Message;
 use App\Model\LogAction;
 use App\Repository\UnsubscribeRequestRepository;
 use App\Service\MessageService;
