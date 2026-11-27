@@ -22,6 +22,7 @@ class GroupFixture extends Fixture
     {
         $group = new Group();
         $group->setName('group1');
+        $group->setActive(true);
         $domain = $this->em->getRepository(Domain::class)->findOneBy(['domain' => 'blocnormal.fr']);
         $group->setDomain($domain);
         $normalPolicy = $this->em->getRepository(Policy::class)->findOneBy(['policyName' => 'Normale']);
