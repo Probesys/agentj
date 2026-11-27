@@ -71,3 +71,19 @@ userPassword: secret
 alias: daragua@example.com
 objectClass: inetOrgPerson
 objectClass: customObject
+
+dn: ou=groups,dc=example,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=sales,ou=groups,dc=example,dc=com
+objectClass: groupOfNames
+cn: sales
+member: cn=alix,ou=users,dc=example,dc=com
+member: cn=benedict,ou=users,dc=example,dc=com
+
+dn: cn=support,ou=groups,dc=example,dc=com
+objectClass: groupOfNames
+cn: support
+member: cn=charlie,ou=users,dc=example,dc=com
+member: cn=dominique,ou=users,dc=example,dc=com

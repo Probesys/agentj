@@ -110,7 +110,7 @@ class RecoverAuthorizedSpamCommand extends Command
                     $recipientUser = $recipientUser->getOriginalUser() ?? $recipientUser;
                     $senderIsAuthorized = $this->senderRuleRepository->isSenderAuthorizedByRecipient(
                         $senderEmail,
-                        $messageRecipient->getAddress(),
+                        $messageRecipient->getAddress()->getEmail(),
                     );
                     $isSpamForAuthorizedSender = $messageRecipient->isSpamAtLevel(
                         $recipientUser->getDomain()->getAuthorizedSendersSpamLevel(),

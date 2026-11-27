@@ -24,9 +24,6 @@ class SenderRuleRepositoryTest extends KernelTestCase
         self::bootKernel();
         $domain = DomainFactory::createOne();
         $recipient = UserFactory::new()->user($domain)->create();
-        $recipientAddress = AddressFactory::createOne([
-            'email' => $recipient->getEmail(),
-        ]);
         $ruleAddress = RuleAddressFactory::createOne([
             'email' => 'sender@example.org',
             'priority' => 6,
@@ -40,7 +37,7 @@ class SenderRuleRepositoryTest extends KernelTestCase
 
         $repository = static::getContainer()->get(SenderRuleRepository::class);
 
-        self::assertTrue($repository->isSenderAuthorizedByRecipient('Sender@Example.ORG', $recipientAddress));
+        self::assertTrue($repository->isSenderAuthorizedByRecipient('Sender@Example.ORG', $recipient->getEmail()));
     }
 
     public function testIsSenderAuthorizedByRecipientUsesTheSameRulePriorityAsTheRegularLookup(): void
@@ -81,10 +78,12 @@ class SenderRuleRepositoryTest extends KernelTestCase
         self::assertNotEmpty($rules);
         self::assertSame(
             $rules[0]->isWbRuleAuthorized(),
-            $repository->isSenderAuthorizedByRecipient($sender, $recipientAddress),
+            $repository->isSenderAuthorizedByRecipient($sender, $recipientAddress->getEmail()),
         );
-        self::assertFalse($repository->isSenderAuthorizedByRecipient($sender, $recipientAddress));
-
-        self::assertTrue($repository->isSenderAuthorizedByRecipient('someone@example.org', $recipientAddress));
+        self::assertFalse($repository->isSenderAuthorizedByRecipient($sender, $recipientAddress->getEmail()));
+        self::assertTrue($repository->isSenderAuthorizedByRecipient(
+            'someone@example.org',
+            $recipientAddress->getEmail(),
+        ));
     }
 }

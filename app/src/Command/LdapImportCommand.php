@@ -8,6 +8,7 @@ use App\Entity\LdapConnector;
 use App\Entity\User as User;
 use App\Service\GroupService;
 use App\Service\LdapService;
+use App\Service\MessageService;
 use App\Service\RuleAddressService;
 use App\Service\UserService;
 use App\Util\Email;
@@ -48,6 +49,7 @@ class LdapImportCommand extends Command
         private LdapService $ldapService,
         private UserService $userService,
         private GroupService $groupService,
+        private MessageService $messageService,
     ) {
         parent::__construct();
     }
@@ -110,9 +112,28 @@ class LdapImportCommand extends Command
 
         $this->groupService->updateSenderRules();
 
+        $groupIds = $groupsResult['existing_group_ids'] ?? [];
+        $tagetGroupIds = array_reduce(
+            $connector->getTargetGroups()->toArray(),
+            function (array $carry, $group) {
+                $id = $group->getId();
+                $carry[$id] = $id;
+                return $carry;
+            },
+            [],
+        );
+        $groupIds = array_merge($groupIds, $tagetGroupIds);
+
+        if (count($groupIds) > 0) {
+            $this->messageService->reprocessPendingMessagesForGroups($groupIds);
+        }
+
         $this->connector->finishImportWithSuccess([
             'users' => $usersResult,
-            'groups' => $groupsResult,
+            'groups' => [
+                'nb_groups_created' => $groupsResult['nb_groups_created'] ?? 0,
+                'nb_groups_updated' => $groupsResult['nb_groups_updated'] ?? 0,
+            ],
         ]);
         $this->em->persist($this->connector);
         $this->em->flush();
@@ -329,9 +350,13 @@ class LdapImportCommand extends Command
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, int>|null
-     */
+   /**
+    * @return array{
+    *     nb_groups_created: int,
+    *     nb_groups_updated: int,
+    *     existing_group_ids: array<int, int>
+    * }
+    */
     private function importGroups(): ?array
     {
         $realNameAttribute = $this->connector->getLdapGroupNameField();
@@ -347,6 +372,7 @@ class LdapImportCommand extends Command
             $results = $query->execute();
             $nbGroupUpdated = 0;
             $nbGroupCreated = 0;
+            $existingGroupIds = [];
             $results = $this->ldapService->filterGroupResultWihtoutMembers($results, $groupMemberAttribute);
 
             foreach ($results as $ldapGroup) {
@@ -371,15 +397,22 @@ class LdapImportCommand extends Command
                 $this->em->persist($group);
                 $nbGroupUpdated = $isNew ? $nbGroupUpdated : $nbGroupUpdated = $nbGroupUpdated + 1;
                 $nbGroupCreated = $isNew ? $nbGroupCreated = $nbGroupCreated + 1 : $nbGroupCreated;
+                if (!$isNew) {
+                    $existingGroupIds[(int)$group->getId()] = (int)$group->getId();
+                }
                 $this->addMembersToLdapGroup($ldapGroup, $group);
             }
 
             $result = [
                 'nb_groups_created' => $nbGroupCreated,
                 'nb_groups_updated' => $nbGroupUpdated,
+                'existing_group_ids' => $existingGroupIds,
             ];
 
-            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', $result));
+            $this->io->writeln($this->translator->trans('Message.Connector.resultImportGroups', [
+                'nb_groups_created' => $nbGroupCreated,
+                'nb_groups_updated' => $nbGroupUpdated,
+            ]));
 
             $this->em->flush();
 

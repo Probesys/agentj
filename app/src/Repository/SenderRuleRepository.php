@@ -186,18 +186,47 @@ class SenderRuleRepository extends BaseRepository
         return $senderRules;
     }
 
+    public function getRuleByRecipient(string $senderEmail, string $recipientEmail): bool
+    {
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
+        $senderAddresses = Email::getAddressLookups($senderEmail);
+
+        if (!$recipientAddresses || !$senderAddresses) {
+            return false;
+        }
+
+        $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
+            SELECT w.wb
+            FROM users u
+            INNER JOIN wblist w ON w.rid = u.id
+            INNER JOIN mailaddr s ON s.id = w.sid
+            WHERE u.email IN (:recipientAddresses)
+            AND s.email IN (:senderAddresses)
+            ORDER BY u.priority DESC, w.priority DESC, s.priority DESC
+            LIMIT 1
+        SQL, [
+            'recipientAddresses' => $recipientAddresses,
+            'senderAddresses' => $senderAddresses,
+        ], [
+            'recipientAddresses' => DBAL\ArrayParameterType::STRING,
+            'senderAddresses' => DBAL\ArrayParameterType::STRING,
+        ])->fetchOne();
+
+        return $wb !== false && $wb;
+    }
+
     /**
      * Only fetch the authorization decision, without hydrating rules.
      * Preserve the Amavis order: recipient specificity (users.priority), then
      * rule priority, then sender address specificity.
      *
      * @param string $senderEmail Sender address to match against the rules.
-     * @param Address $recipient Recipient address to match against the rules.
+     * @param string $recipientEmail Recipient address to match against the rules.
      * @return bool
      */
-    public function isSenderAuthorizedByRecipient(string $senderEmail, Address $recipient): bool
+    public function isSenderAuthorizedByRecipient(string $senderEmail, string $recipientEmail): bool
     {
-        $recipientAddresses = Email::getAddressLookups($recipient->getEmail());
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
         $senderAddresses = Email::getAddressLookups($senderEmail);
 
         if (!$recipientAddresses || !$senderAddresses) {
@@ -222,6 +251,58 @@ class SenderRuleRepository extends BaseRepository
         ])->fetchOne();
 
         return $wb !== false && !in_array($wb, ['B', 'N', '0', ''], true);
+    }
+
+    /**
+     * Only fetch the applicable SenderRule for the recipient, without hydrating rules.
+     * Preserve the Amavis order: recipient specificity (users.priority), then
+     * rule priority, then sender address specificity.
+     *
+     * @param string $senderEmail Sender address to match against the rules.
+     * @param string $recipientEmail Recipient address to match against the rules.
+     * @return ?string
+     */
+    public function getApplicableSenderRule(string $senderEmail, string $recipientEmail): ?string
+    {
+        $recipientAddresses = Email::getAddressLookups($recipientEmail);
+        $senderAddresses = Email::getAddressLookups($senderEmail);
+
+        if (!$recipientAddresses || !$senderAddresses) {
+            return null;
+        }
+
+        $wb = $this->getEntityManager()->getConnection()->executeQuery(<<<SQL
+            SELECT w.wb
+            FROM wblist w
+            INNER JOIN users u ON u.id = w.rid
+            INNER JOIN mailaddr s ON s.id = w.sid
+            WHERE u.email IN (:recipientAddresses)
+            AND s.email IN (:senderAddresses)
+            ORDER BY u.priority DESC, w.priority DESC, s.priority DESC
+            LIMIT 1
+        SQL, [
+            'recipientAddresses' => $recipientAddresses,
+            'senderAddresses' => $senderAddresses,
+        ], [
+            'recipientAddresses' => DBAL\ArrayParameterType::STRING,
+            'senderAddresses' => DBAL\ArrayParameterType::STRING,
+        ])->fetchOne();
+
+        if ($wb === false) {
+            $wb = null;
+        }
+        return $this->mapWb($wb);
+    }
+
+    private function mapWb(?string $wb): string
+    {
+        return match ($wb) {
+            'W', 'Y' => 'allow',
+            'B', 'N' => 'block',
+            '0' => 'enabled',
+            '' => 'none',
+            default => 'accept',
+        };
     }
 
     public function isSenderInRecipientList(string $senderEmail, Address $recipient): bool

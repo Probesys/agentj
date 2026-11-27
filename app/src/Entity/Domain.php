@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinTable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -61,6 +62,12 @@ class Domain
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: 'App\Entity\User', mappedBy: 'domains')]
+    private Collection $admins;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: 'App\Entity\User', mappedBy: 'domain')]
     private Collection $users;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -127,6 +134,7 @@ class Domain
 
     public function __construct()
     {
+        $this->admins = new ArrayCollection();
         $this->users = new ArrayCollection();
         $this->datemod = new \DateTime();
         $this->groups = new ArrayCollection();
@@ -258,29 +266,41 @@ class Domain
     /**
      * @return Collection<int, User>
      */
-    public function getUsers(): Collection
+    public function getAdmins(): Collection
     {
-        return $this->users;
+        return $this->admins;
     }
 
-    public function addUser(User $user): self
+    public function addAdmin(User $user): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
+        if (!$this->admins->contains($user)) {
+            $this->admins[] = $user;
             $user->addDomain($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeAdmin(User $user): self
     {
-        if ($this->users->contains($user)) {
-            $this->users->removeElement($user);
+        if ($this->admins->contains($user)) {
+            $this->admins->removeElement($user);
             $user->removeDomain($this);
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users->filter(
+            fn (User $user) =>
+                !empty($user->getRoles()) &&
+                !str_starts_with($user->getEmail(), '@'),
+        );
     }
 
     public function getConfirmCaptchaMessage(): ?string

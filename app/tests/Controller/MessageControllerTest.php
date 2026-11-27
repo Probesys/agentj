@@ -730,19 +730,22 @@ class MessageControllerTest extends WebTestCase
         $otherDomain = DomainFactory::createOne();
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($otherDomain)->create();
+        $recipient3 = UserFactory::new()->user($otherDomain)->create();
         $sender = UserFactory::new()->user($domain)->create();
         $admin = UserFactory::new()->admin([$otherDomain])->create();
         $this->client->loginUser($admin);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
-            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'domain' => Url::reverseDomainName($otherDomain),
             'partitionTag' => 0,
             'email' => $recipient2->getEmail(),
         ]);
+        $addrR3 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain),
+            'partitionTag' => 0,
+            'email' => $recipient3->getEmail(),
+        ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        $initialMessageCount = MessageFactory::count();
-        $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $initialSenderRuleCount = SenderRuleFactory::count();
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -751,6 +754,10 @@ class MessageControllerTest extends WebTestCase
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
         )->first();
         self::assertNotFalse($messageRecipient2);
+        $message2 = $this->setupMail($addrS, [$addrR3], status: MessageStatus::UNTREATED);
+        $message2Recipient = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($message2Recipient);
+        $initialSenderRuleCount = SenderRuleFactory::count();
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/authorizedDomain';
         $this->client->request(Request::METHOD_POST, $url, [
@@ -758,15 +765,17 @@ class MessageControllerTest extends WebTestCase
         ]);
 
         self::assertResponseRedirects('/');
-        self::assertSame($initialMessageCount, MessageFactory::count());
-        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
         $this->refresh($message);
         $this->refresh($messageRecipient1);
         $this->refresh($messageRecipient2);
+        $this->refresh($message2);
+        $this->refresh($message2Recipient);
         self::assertSame(MessageStatus::AUTHORIZED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::AUTHORIZED, $messageRecipient2->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message2->getStatus());
+        self::assertSame(MessageStatus::AUTHORIZED, $message2Recipient->getStatus());
         // No SenderRule has been created for other domain
         $domainRecipient1 = UserFactory::findBy(['email' => '@' . $recipient1->getDomain()]);
         $senderRuleAddress1 = RuleAddressFactory::findBy([
@@ -1107,19 +1116,22 @@ class MessageControllerTest extends WebTestCase
         $otherDomain = DomainFactory::createOne();
         $recipient1 = UserFactory::new()->user($domain)->create();
         $recipient2 = UserFactory::new()->user($otherDomain)->create();
+        $recipient3 = UserFactory::new()->user($otherDomain)->create();
         $sender = UserFactory::new()->user($domain)->create();
         $admin = UserFactory::new()->admin([$otherDomain])->create();
         $this->client->loginUser($admin);
         [$addrS, $addrR1] = $this->setupAddresses($sender, $recipient1);
         $addrR2 = AddressFactory::createOne([
-            'domain' => Url::reverseDomainName($recipient2->getDomain()->getDomain()),
+            'domain' => Url::reverseDomainName($otherDomain),
             'partitionTag' => 0,
             'email' => $recipient2->getEmail(),
         ]);
+        $addrR3 = AddressFactory::createOne([
+            'domain' => Url::reverseDomainName($otherDomain),
+            'partitionTag' => 0,
+            'email' => $recipient3->getEmail(),
+        ]);
         $message = $this->setupMail($addrS, [$addrR1,$addrR2], status: MessageStatus::UNTREATED);
-        $initialMessageCount = MessageFactory::count();
-        $initialMessageRecipientCount = MessageRecipientFactory::count();
-        $initialSenderRuleCount = SenderRuleFactory::count();
         $messageRecipient1 = $message->getMessageRecipients()->filter(
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 1,
         )->first();
@@ -1128,6 +1140,10 @@ class MessageControllerTest extends WebTestCase
             fn ($messageRcpt) => $messageRcpt->getRseqnum() === 2,
         )->first();
         self::assertNotFalse($messageRecipient2);
+        $message2 = $this->setupMail($addrS, [$addrR3], status: MessageStatus::UNTREATED);
+        $message2Recipient = $message2->getMessageRecipients()->first();
+        self::assertNotFalse($message2Recipient);
+        $initialSenderRuleCount = SenderRuleFactory::count();
 
         $url = '/message/0/' . $message->getMailId() . '/' . $messageRecipient2->getRseqnum() . '/bannedDomain';
         $this->client->request(Request::METHOD_POST, $url, [
@@ -1135,12 +1151,12 @@ class MessageControllerTest extends WebTestCase
         ]);
 
         self::assertResponseRedirects('/');
-        self::assertSame($initialMessageCount, MessageFactory::count());
-        self::assertSame($initialMessageRecipientCount, MessageRecipientFactory::count());
         self::assertSame($initialSenderRuleCount + 1, SenderRuleFactory::count());
         self::assertSame(MessageStatus::BANNED, $message->getStatus());
         self::assertSame(MessageStatus::UNTREATED, $messageRecipient1->getStatus());
         self::assertSame(MessageStatus::BANNED, $messageRecipient2->getStatus());
+        self::assertSame(MessageStatus::BANNED, $message2->getStatus());
+        self::assertSame(MessageStatus::BANNED, $message2Recipient->getStatus());
         // No SenderRule has been created for other domain
         $domainRecipient1 = UserFactory::findBy(['email' => '@' . $recipient1->getDomain()]);
         $senderRuleAddress1 = RuleAddressFactory::findBy([

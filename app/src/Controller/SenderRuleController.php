@@ -14,6 +14,7 @@ use App\Repository\RuleAddressRepository;
 use App\Repository\SenderRuleRepository;
 use App\Repository\UserRepository;
 use App\Service\LogService;
+use App\Service\MessageService;
 use App\Service\Referrer;
 use App\Service\SenderRuleService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,6 +39,7 @@ class SenderRuleController extends AbstractController
         private SenderRuleRepository $senderRuleRepository,
         private UserRepository $userRepository,
         private SenderRuleService $senderRuleService,
+        private MessageService $messageService,
     ) {
     }
 
@@ -140,9 +142,10 @@ class SenderRuleController extends AbstractController
 
         /** @var array{email: string} $data */
         $data = $form->getData();
+        $senderEmail = $data['email'];
 
         $created = $this->senderRuleService->createOrUpdateForUserAndAliases(
-            $data['email'],
+            $senderEmail,
             $user,
             $type === 'W' ? 'accept' : 'block',
             SenderRule::TYPE_USER,
@@ -154,6 +157,10 @@ class SenderRuleController extends AbstractController
                 'message' => $this->translator->trans('Generics.flash.genericFormError'),
             ]);
         }
+
+        $type === 'W' ?
+            $this->messageService->reprocessAuthorizations($user, $senderEmail) :
+            $this->messageService->reprocessBans($user, $senderEmail);
 
         return new JsonResponse([
             'status' => 'success',
